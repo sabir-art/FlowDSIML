@@ -785,6 +785,15 @@ fieldset.stg-row {
 .sr-c-warn {
   color: var(--fd-color-warning);
 }
+/* Modale des liens non conformes : la liste puis « et n autres » à 8 px */
+.sr-c-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sr-c-body > .stg-help {
+  margin: 0;
+}
 
 /* Bandeau d'information en tête de page (réglages « Bientôt ») */
 .stg-banner {
@@ -832,4 +841,32 @@ fieldset.stg-row {
 }
 .stg-empty__acts {
   margin-top: 8px;
+}
+
+/* Assistance IA : réglage de l'espace */
+.ai-error {
+  margin: 16px 0 0;
+}
+.ai-settings .stg-meter > span,
+.ai-audio .stg-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fd-color-primary);
+}
+.stg-opt.is-soon {
+  cursor: default;
+  color: var(--fd-color-text-muted);
+}
+.ai-renews {
+  padding-top: 4px;
+}
+.ai-consent {
+  display: grid;
+  gap: 16px;
+}
+.ai-consent p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fd-color-text-muted);
 }

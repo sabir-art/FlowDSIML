@@ -4535,7 +4535,7 @@
     },
     "settings": {
       "sub": "Propositions de textes, traductions et suggestions dans l’éditeur. Rien n’est appliqué sans votre validation.",
-      "switch": "Activer l’Assistance IA pour cet espace",
+      "switch": "Activer l’Assistance IA",
       "on": "Activée.",
       "off": "Désactivée.",
       "readOnly": "Seuls les propriétaires et les administrateurs peuvent modifier ce réglage.",

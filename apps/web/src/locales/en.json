@@ -4535,7 +4535,7 @@
     },
     "settings": {
       "sub": "Text proposals, translations and suggestions in the editor. Nothing is applied without your approval.",
-      "switch": "Turn on AI Assist for this workspace",
+      "switch": "Turn on AI Assist",
       "on": "On.",
       "off": "Off.",
       "readOnly": "Only owners and admins can change this setting.",

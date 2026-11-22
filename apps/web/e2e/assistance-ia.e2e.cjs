@@ -76,7 +76,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     .locator('.st-nav__item')
     .allTextContents();
   ok(labels.at(-1) === 'Assistance IA', 'L48-A : rubrique dans « Contenu », après Glossaire et Étiquettes');
-  const sw = page.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' });
+  const sw = page.getByRole('switch', { name: 'Activer l’Assistance IA' });
   ok(!(await sw.isChecked()), 'L30-01 : désactivée par défaut');
   ok(
     /envoyés au fournisseur d’IA de TutoClick \(Anthropic\)/.test(
@@ -117,7 +117,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await shot('l30-01-active');
 
   // ---- L30-10 : voix et sous-titres, consentement séparé
-  const audio = page.locator('fieldset.ai-audio');
+  const audio = page.locator('.ai-audio');
   ok(
     !(await audio.getByRole('checkbox', { name: 'Voix de synthèse' }).isChecked()) &&
       !(await audio.getByRole('checkbox', { name: 'Sous-titres automatiques' }).isChecked()),

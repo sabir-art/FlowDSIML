@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ImagePlus, Shield, X } from 'lucide-react';
+import { CircleAlert, Shield } from 'lucide-react';
+import { Button, Modal } from '@flowdsiml/ui';
 import { SettingsShell } from './SettingsShell';
 import { supabase } from '../../lib/supabase';
 import {
@@ -17,8 +17,8 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import '../../components/ai/ai.css';
 
-/** Fonctions à venir, listées sous les cases (§2) : toujours désactivées, badge « Bientôt ». */
-const SOON = [{ k: 'images', icon: <ImagePlus aria-hidden="true" /> }] as const;
+/** Fonctions à venir, listées sous les cases (§2) : toujours désactivées, mention « Bientôt ». */
+const SOON = [{ k: 'images' }] as const;
 
 /** L30-01 : Paramètres › Assistance IA (opt-in de l'espace, quota du mois, fonctions activables). */
 export function AiSettings() {
@@ -65,25 +65,49 @@ export function AiSettings() {
       ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(iso))
       : '';
 
+  const meter = (labelId: string, used: number, quota: number) => (
+    <div
+      className="stg-meter"
+      role="progressbar"
+      aria-labelledby={labelId}
+      aria-valuemin={0}
+      aria-valuemax={quota}
+      aria-valuenow={Math.min(used, quota)}
+    >
+      <span style={{ width: `${Math.min(100, (used / Math.max(1, quota)) * 100)}%` }} />
+    </div>
+  );
+  const renews = status?.renewsOn ? (
+    <div className="stg-help">{t('ai.settings.renews', { date: date(status.renewsOn) })}</div>
+  ) : null;
+
   return (
-    <SettingsShell>
-      <section className="soon-page ai-settings" aria-labelledby="st-title">
-        <p className="muted">{t('ai.settings.sub')}</p>
+    <SettingsShell legacy={false}>
+      <section className="stg-sec ai-settings" aria-labelledby="ai-title">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="ai-title">{t('ai.name')}</h2>
+            <p>{t('ai.settings.sub')}</p>
+          </div>
+        </div>
         {error && (
-          <p className="alert alert-danger" role="alert">
+          <p className="stg-error ai-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
             {t('ai.settings.loadError')}
           </p>
         )}
-        <div className="card card-pad">
-          <div className="setting">
-            <div>
-              <b id="ai-sw">{t('ai.settings.switch')}</b>
-              <p className="t-caption muted" id="ai-sw-help">
-                {status?.enabled ? t('ai.settings.on') : t('ai.settings.off')}
-                {!manage && status && <> {t('ai.settings.readOnly')}</>}
-              </p>
+        <div className="stg-row stg-row--inline">
+          <div className="stg-text" data-gap-exempt="">
+            <div className="stg-lab" id="ai-sw">
+              {t('ai.settings.switch')}
             </div>
-            <span className="switch">
+            <div className="stg-help ai-notice" id="ai-sw-help">
+              {t('ai.settings.notice')}
+              {!manage && status && <> {t('ai.settings.readOnly')}</>}
+            </div>
+          </div>
+          <div className="stg-ctl">
+            <label className="fd-switch">
               <input
                 type="checkbox"
                 role="switch"
@@ -93,47 +117,41 @@ export function AiSettings() {
                 disabled={!manage || busy || !status}
                 onChange={(e) => void onSwitch(e.target.checked)}
               />
-              <span aria-hidden="true" />
-            </span>
+              <span className="fd-switch__track" aria-hidden="true" />
+            </label>
           </div>
-          <Notice />
-          {failed && (
-            <p className="alert alert-danger" role="alert">
-              {t('ai.settings.saveError')}
-            </p>
-          )}
-          {status?.enabled && (
-            <>
-              <div className="ai-quota">
-                <b id="ai-q">
+        </div>
+        {failed && (
+          <p className="stg-error ai-error" role="alert">
+            <CircleAlert size={16} aria-hidden="true" />
+            {t('ai.settings.saveError')}
+          </p>
+        )}
+        {status?.enabled && (
+          <>
+            <div className="stg-row">
+              <div className="stg-text ai-quota" data-gap-exempt="">
+                <div className="stg-lab" id="ai-q">
                   {status.quota != null
                     ? t('ai.settings.quota', { used: status.used, quota: status.quota })
                     : t('ai.settings.quotaNone', { count: status.used })}
-                </b>
-                {status.quota != null && (
-                  <div
-                    className="ai-bar"
-                    role="progressbar"
-                    aria-labelledby="ai-q"
-                    aria-valuemin={0}
-                    aria-valuemax={status.quota}
-                    aria-valuenow={Math.min(status.used, status.quota)}
-                  >
-                    <span
-                      style={{ width: `${Math.min(100, (status.used / Math.max(1, status.quota)) * 100)}%` }}
-                    />
-                  </div>
-                )}
-                {status.renewsOn && (
-                  <p className="t-caption muted">
-                    {t('ai.settings.renews', { date: date(status.renewsOn) })}
-                  </p>
-                )}
+                </div>
+                {renews}
               </div>
-              <fieldset className="ai-features">
-                <legend>{t('ai.settings.features')}</legend>
+              <div className="stg-ctl">
+                {status.quota != null && meter('ai-q', status.used, status.quota)}
+              </div>
+            </div>
+            <fieldset className="stg-row stg-fieldset ai-features">
+              <legend className="sr-only">{t('ai.settings.features')}</legend>
+              <div className="stg-text">
+                <div className="stg-lab" aria-hidden="true">
+                  {t('ai.settings.features')}
+                </div>
+              </div>
+              <div className="stg-ctl stg-opts">
                 {AI_FEATURES.filter((f) => !AUDIO_FEATURES.includes(f)).map((f) => (
-                  <label key={f} className="check">
+                  <label key={f} className="stg-opt">
                     <input
                       type="checkbox"
                       checked={local[f] ?? status.features[f]}
@@ -143,73 +161,72 @@ export function AiSettings() {
                         void save(true, { [f]: e.target.checked });
                       }}
                     />
-                    {t(`ai.feature.${f}`)}
+                    <span>{t(`ai.feature.${f}`)}</span>
                   </label>
                 ))}
-              </fieldset>
-              {/* L30b §2 : voix et sous-titres, consentement séparé (ElevenLabs, audio) */}
-              <fieldset className="ai-features ai-audio">
-                <legend>{t('ai.audioSettings.title')}</legend>
-                <Notice k="ai.audioSettings.notice" />
-                {AUDIO_FEATURES.map((f) => {
-                  const used = (f === 'voice' ? status.ttsUsed : status.sttUsed) ?? 0;
-                  const quota = f === 'voice' ? status.ttsQuota : status.sttQuota;
-                  return (
-                    <div key={f} className="ai-audio-row">
-                      <label className="check">
-                        <input
-                          type="checkbox"
-                          checked={local[f] ?? status.features[f]}
-                          disabled={!manage || busy}
-                          onChange={(e) => {
-                            if (e.target.checked) return setAskingAudio(f as 'voice' | 'captions');
-                            setLocal((l) => ({ ...l, [f]: false }));
-                            void save(true, { [f]: false });
-                          }}
-                        />
-                        {t(`ai.feature.${f}`)}
-                      </label>
-                      <p className="t-caption" id={`ai-q-${f}`}>
-                        {quota != null
-                          ? t(`ai.audioSettings.quota_${f}`, {
-                              used: formatSeconds(used),
-                              quota: formatSeconds(quota),
-                            })
-                          : t(`ai.audioSettings.used_${f}`, { used: formatSeconds(used) })}
-                      </p>
-                      {quota != null && (
-                        <div
-                          className="ai-bar"
-                          role="progressbar"
-                          aria-labelledby={`ai-q-${f}`}
-                          aria-valuemin={0}
-                          aria-valuemax={quota}
-                          aria-valuenow={Math.min(used, quota)}
-                        >
-                          <span style={{ width: `${Math.min(100, (used / Math.max(1, quota)) * 100)}%` }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                {status.renewsOn && (
-                  <p className="t-caption muted">
-                    {t('ai.settings.renews', { date: date(status.renewsOn) })}
-                  </p>
-                )}
                 {SOON.map((s) => (
-                  <label key={s.k} className="check is-soon">
-                    <input type="checkbox" disabled aria-describedby={`ai-soon-${s.k}`} />
-                    {s.icon}
-                    {t(`ai.soon.${s.k}`)}
-                    <span className="soon-text">{t('shell.soon')}</span>
+                  <label key={s.k} className="stg-opt is-soon">
+                    <input type="checkbox" disabled />
+                    <span>
+                      <span>
+                        {t(`ai.soon.${s.k}`)} <span className="stg-soon">{t('shell.soon')}</span>
+                      </span>
+                    </span>
                   </label>
                 ))}
-              </fieldset>
-            </>
-          )}
-        </div>
+              </div>
+            </fieldset>
+          </>
+        )}
       </section>
+      {status?.enabled && (
+        /* L30b §2 : voix et sous-titres, consentement séparé (ElevenLabs, audio) */
+        <section className="stg-sec ai-features ai-audio" aria-labelledby="ai-audio-title">
+          <div className="stg-sec__head">
+            <div>
+              <h2 id="ai-audio-title">{t('ai.audioSettings.title')}</h2>
+              <p>{t('ai.audioSettings.notice')}</p>
+            </div>
+          </div>
+          {AUDIO_FEATURES.map((f) => {
+            const used = (f === 'voice' ? status.ttsUsed : status.sttUsed) ?? 0;
+            const quota = f === 'voice' ? status.ttsQuota : status.sttQuota;
+            return (
+              <div key={f} className="stg-row">
+                <div className="stg-text" data-gap-exempt="">
+                  <label className="stg-opt">
+                    <input
+                      type="checkbox"
+                      checked={local[f] ?? status.features[f]}
+                      disabled={!manage || busy}
+                      onChange={(e) => {
+                        if (e.target.checked) return setAskingAudio(f as 'voice' | 'captions');
+                        setLocal((l) => ({ ...l, [f]: false }));
+                        void save(true, { [f]: false });
+                      }}
+                    />
+                    <span>
+                      <b>{t(`ai.feature.${f}`)}</b>
+                    </span>
+                  </label>
+                </div>
+                <div className="stg-ctl">
+                  {quota != null && meter(`ai-q-${f}`, used, quota)}
+                  <span className="stg-help" id={`ai-q-${f}`}>
+                    {quota != null
+                      ? t(`ai.audioSettings.quota_${f}`, {
+                          used: formatSeconds(used),
+                          quota: formatSeconds(quota),
+                        })
+                      : t(`ai.audioSettings.used_${f}`, { used: formatSeconds(used) })}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+          {renews && <div className="ai-renews">{renews}</div>}
+        </section>
+      )}
       {confirmNode}
       {askingAudio && (
         <EnableDialog
@@ -242,17 +259,6 @@ export function AiSettings() {
   );
 }
 
-/** Bandeau de confidentialité (texte de la spec, vérifié contre la configuration réelle). */
-function Notice({ k = 'ai.settings.notice' }: { k?: string }) {
-  const { t } = useTranslation();
-  return (
-    <div className="alert ai-notice">
-      <Shield aria-hidden="true" />
-      <p>{t(k)}</p>
-    </div>
-  );
-}
-
 function EnableDialog({
   onClose,
   onConfirm,
@@ -267,46 +273,30 @@ function EnableDialog({
 }) {
   const { t } = useTranslation();
   const [read, setRead] = useState(false);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  return createPortal(
-    <div className="mk">
-      <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ai-on-t">
-          <div className="modal-head">
-            <h2 id="ai-on-t">
-              {audio ? t(`ai.audioSettings.enableTitle_${audio}`) : t('ai.settings.enableTitle')}
-            </h2>
-            <button
-              type="button"
-              className="btn btn-ghost btn-icon btn-sm"
-              aria-label={t('common.close')}
-              onClick={onClose}
-            >
-              <X aria-hidden="true" />
-            </button>
-          </div>
-          <div className="modal-body">
-            <Notice k={audio ? 'ai.audioSettings.notice' : undefined} />
-            <label className="check">
-              <input type="checkbox" checked={read} onChange={(e) => setRead(e.target.checked)} autoFocus />
-              {t('ai.settings.read')}
-            </label>
-          </div>
-          <div className="modal-foot">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-            <button type="button" className="btn btn-primary" disabled={!read || busy} onClick={onConfirm}>
-              {t('ai.settings.enable')}
-            </button>
-          </div>
-        </div>
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      icon={<Shield />}
+      title={audio ? t(`ai.audioSettings.enableTitle_${audio}`) : t('ai.settings.enableTitle')}
+      closeLabel={t('common.close')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" disabled={!read || busy} onClick={onConfirm}>
+            {t('ai.settings.enable')}
+          </Button>
+        </>
+      }
+    >
+      {/* Texte de confidentialité de la spec, vérifié contre la configuration réelle */}
+      <div className="ai-consent">
+        <p>{t(audio ? 'ai.audioSettings.notice' : 'ai.settings.notice')}</p>
+        <label className="stg-opt">
+          <input type="checkbox" checked={read} onChange={(e) => setRead(e.target.checked)} autoFocus />
+          <span>{t('ai.settings.read')}</span>
+        </label>
       </div>
-    </div>,
-    document.body,
+    </Modal>
   );
 }

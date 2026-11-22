@@ -165,11 +165,11 @@ const MB = 1024 * 1024;
     }
     // Retour client : au moins 16 px entre les blocs du corps de modale (Assistance IA)
     await page.goto(`${APP}/#/settings/ai`);
-    await page.getByRole('switch', { name: 'Activer l’Assistance IA pour cet espace' }).click();
+    await page.getByRole('switch', { name: 'Activer l’Assistance IA' }).click();
     const ai = page.getByRole('dialog', { name: 'Activer l’Assistance IA ?' });
     await ai.waitFor();
     {
-      const gap = await ai.locator('.modal-body').evaluate((el) => {
+      const gap = await ai.locator('.ai-consent').evaluate((el) => {
         const k = [...el.children].filter((c) => c.getBoundingClientRect().height > 0);
         let min = Infinity;
         for (let i = 1; i < k.length; i++)

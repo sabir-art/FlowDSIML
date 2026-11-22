@@ -36,6 +36,7 @@ const REFAITES = [
   'brand/page',
   'glossary',
   'tags',
+  'ai',
 ];
 
 const ok = (c, l) => {
