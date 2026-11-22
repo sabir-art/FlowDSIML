@@ -544,9 +544,6 @@
   font: 700 14px / 21px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
-.nd-chosen {
-  margin: 0;
-}
 .new-demo-dialog .fd-modal__foot > .nd-back {
   margin-right: auto;
 }
