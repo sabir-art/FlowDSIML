@@ -128,3 +128,14 @@ Popover de 360 px ancré sur la pastille.
 - Paramètres > Variables : création, modification, suppression, comptage.
 - Clair et sombre, 1 440 px et panneau de l'éditeur à 360 px.
 - Lecteur d'écran : la pastille est lue « Variable : Prénom du visiteur, si inconnu : vous ».
+
+
+## Ordre des valeurs (décision du chef, 22/11)
+
+Pour chaque variable, dans cet ordre :
+1. la **valeur connue** : celle du visiteur (lien, CSV, formulaire) ou la **valeur fixe** de l'espace (Paramètres > Variables) ;
+2. le **repli de la pastille** (`{{clé|repli}}`), écrit par l'auteur pour cette phrase ;
+3. le **défaut de l'espace** (repli général de la variable) ;
+4. rien : la variable disparaît avec l'espace qui la précède.
+
+C'est la même logique partout : éditeur (aperçu « Exemples » et « Valeurs de repli »), lecteur, SCORM, exports (PDF, GIF, vidéo, version accessible), liens personnalisés (`applyUrlVariables`) et voix de synthèse. Un test unitaire dans `packages/core` la vérifie : « Bienvenue chez {{company|vous}} » avec le défaut d'espace « votre entreprise » donne « Bienvenue chez vous » sans valeur, et « Bienvenue chez Acme » avec la valeur Acme.
