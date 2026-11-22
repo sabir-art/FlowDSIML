@@ -66,12 +66,16 @@
   min-height: 24px;
   cursor: pointer;
 }
+/* La case réelle couvre tout l'interrupteur (invisible) : le clic l'atteint toujours, souris ou tactile */
 .fd-switch input {
   position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
   margin: 0;
+  opacity: 0;
+  cursor: inherit;
 }
 .fd-switch__track {
   /* COMP-01 §7 : 36 × 20 px, piste border-field, primary une fois activé, bouton rond de 16 px */

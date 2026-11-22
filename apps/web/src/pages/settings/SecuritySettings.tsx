@@ -1,47 +1,81 @@
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Lock } from 'lucide-react';
+import { Button } from '@flowdsiml/ui';
 import { HtmlCaptureCard } from './security/HtmlCaptureCard';
 import { ShareRulesCard } from './security/ShareRulesCard';
+import { useSaveParts } from './security/saveParts';
 import { SettingsShell } from './SettingsShell';
-import { SoonCard } from '../../components/soon/SoonCard';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
-/** VB-03 : carte SSO (aussi dans Paramètres › Sécurité). */
-export function SsoCard({ headingLevel = 2 }: { headingLevel?: 2 | 3 }) {
+/** Connexion unique : annoncée « Bientôt » (champ désactivé), en attendant les liens d'invitation. */
+function SsoSection() {
   const { t } = useTranslation();
-  const { can } = useWorkspace();
   return (
-    <SoonCard
-      k="sso"
-      icon={<Lock />}
-      headingLevel={headingLevel}
-      control={
-        <div className="field soon-field">
-          <label htmlFor="soon-sso-url">{t('soon.sso.field')}</label>
-          <input id="soon-sso-url" className="input" disabled placeholder="https://" />
+    <section className="stg-sec" aria-labelledby="sso-title">
+      <div className="stg-sec__head">
+        <div>
+          <h2 id="sso-title">{t('soon.sso.title')}</h2>
+          <p>{t('soon.sso.sub')}</p>
         </div>
-      }
-      after={
-        can('members.invite') ? <Link to="/settings/members">{t('soon.inviteMembers')}</Link> : undefined
-      }
-    />
+      </div>
+      <div className="stg-row">
+        <div className="stg-text" data-gap-exempt="">
+          <label className="stg-lab" htmlFor="soon-sso-url">
+            {t('soon.sso.field')} <span className="stg-soon">{t('shell.soon')}</span>
+          </label>
+          <div id="soon-sso-help" className="stg-help">
+            {t('soon.sso.wait')}
+          </div>
+        </div>
+        <div className="stg-ctl">
+          <input
+            id="soon-sso-url"
+            className="fd-input"
+            disabled
+            placeholder="https://"
+            aria-describedby="soon-sso-help"
+          />
+        </div>
+      </div>
+    </section>
   );
 }
 
-/** VB-03 : Paramètres › Sécurité (connexion unique à venir). */
+/**
+ * Paramètres › Sécurité, maquette lot1-parametres/securite : Captures HTML, Règles de partage et Connexion
+ * unique en sections du gabarit, avec un seul « Annuler / Enregistrer » dans la barre de page pour les
+ * deux réglages (chaque section garde son brouillon et son enregistrement).
+ */
 export function SecuritySettings() {
   const { t } = useTranslation();
+  const { can } = useWorkspace();
+  const parts = useSaveParts();
+  const { Provider } = parts;
   return (
-    <SettingsShell>
-      <section className="soon-page" aria-labelledby="st-title">
-        <p className="muted">{t('soon.securitySub')}</p>
-        {/* L49 P1 : captures HTML en première section, puis les règles de partage (L27-06) et la connexion unique */}
+    <SettingsShell
+      legacy={false}
+      actions={
+        can('workspace.settings') ? (
+          <>
+            {/* Inactifs sans changement : rien à annuler ni à enregistrer */}
+            <Button onClick={parts.resetAll} disabled={parts.busy || !parts.dirty}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => void parts.saveAll()}
+              disabled={parts.busy || !parts.dirty || parts.invalid}
+            >
+              {t('common.save')}
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
+      <Provider>
         <HtmlCaptureCard />
-        {/* L27-06 : règles de partage, au-dessus de la connexion unique (« Bientôt », VB-03) */}
         <ShareRulesCard />
-        <SsoCard headingLevel={3} />
-      </section>
+        <SsoSection />
+      </Provider>
     </SettingsShell>
   );
 }

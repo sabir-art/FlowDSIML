@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { CircleAlert, X } from 'lucide-react';
+import { Button } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
 import { errorMessage } from '../../../lib/errors';
@@ -16,6 +17,7 @@ import {
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useToast } from '../../../components/Toast';
 import { HtmlCaptureNotice } from '../../../components/HtmlCaptureNotice';
+import { useSavePart } from './saveParts';
 
 const MODES: HtmlCaptureMode[] = ['allowed', 'domains', 'disabled'];
 
@@ -75,44 +77,63 @@ export function HtmlCaptureCard() {
 
   const off = locked ? { 'aria-disabled': true as const, 'aria-describedby': `${id}-ro` } : {};
 
+  useSavePart('html', {
+    dirty,
+    busy,
+    invalid: noDomain,
+    save,
+    reset: () => {
+      setDraft(saved);
+      setInput('');
+      setInputErr(null);
+      setError(null);
+    },
+  });
+
   return (
-    <section className="card sr-card hc-card" aria-labelledby={`${id}-t`}>
-      <div className="sr-head">
-        <h3 className="t-h3" id={`${id}-t`}>
-          {t('htmlCapture.title')}
-        </h3>
-      </div>
-      <fieldset className="sr-row sr-fieldset" aria-describedby={`${id}-h`}>
-        <legend className="sr-only">{t('htmlCapture.legend')}</legend>
+    <section className="stg-sec hc-card" aria-labelledby={`${id}-t`}>
+      <div className="stg-sec__head">
         <div>
-          <b aria-hidden="true">{t('htmlCapture.legend')}</b>
-          <p className="t-caption muted" id={`${id}-h`}>
-            {t('htmlCapture.help')}
-          </p>
+          <h2 id={`${id}-t`}>{t('htmlCapture.title')}</h2>
+          <p>{t('htmlCapture.help')}</p>
+        </div>
+      </div>
+      <fieldset className="stg-row stg-fieldset" aria-describedby={`${id}-h`}>
+        <legend className="sr-only">{t('htmlCapture.legend')}</legend>
+        <div className="stg-text" data-gap-exempt="">
+          <div className="stg-lab" aria-hidden="true">
+            {t('htmlCapture.legend')}
+          </div>
+          <div className="stg-help" id={`${id}-h`}>
+            {t('htmlCapture.applied')}
+          </div>
           {locked && (
-            <p className="hc-ro" id={`${id}-ro`}>
+            <div className="stg-help hc-ro" id={`${id}-ro`}>
               {t('htmlCapture.readOnly')}
-            </p>
+            </div>
           )}
         </div>
-        <div className="sr-ctl hc-modes">
-          {MODES.map((m) => (
-            <label key={m} className="hc-mode">
-              <input
-                type="radio"
-                name={`${id}-mode`}
-                value={m}
-                checked={draft.mode === m}
-                {...off}
-                onChange={() => !locked && setDraft((x) => ({ ...x, mode: m }))}
-                onClick={(e) => locked && e.preventDefault()}
-              />
-              <span>
-                <b>{t(`htmlCapture.${m}`)}</b>
-                <small>{t(`htmlCapture.${m}Help`)}</small>
-              </span>
-            </label>
-          ))}
+        <div className="stg-ctl stg-ctl--wide hc-modes">
+          {/* §18.6 : options d'un même groupe, 6 px de padding vertical chacune (maquette) */}
+          <div className="stg-opts" data-gap-exempt="">
+            {MODES.map((m) => (
+              <label key={m} className="stg-opt hc-mode">
+                <input
+                  type="radio"
+                  name={`${id}-mode`}
+                  value={m}
+                  checked={draft.mode === m}
+                  {...off}
+                  onChange={() => !locked && setDraft((x) => ({ ...x, mode: m }))}
+                  onClick={(e) => locked && e.preventDefault()}
+                />
+                <span>
+                  <b>{t(`htmlCapture.${m}`)}</b>
+                  <span className="stg-help">{t(`htmlCapture.${m}Help`)}</span>
+                </span>
+              </label>
+            ))}
+          </div>
           {draft.mode === 'domains' && (
             <div className="hc-domains">
               {draft.domains.length > 0 && (
@@ -123,13 +144,13 @@ export function HtmlCaptureCard() {
                       {!locked && (
                         <button
                           type="button"
-                          className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                          className="hc-chip__remove"
                           aria-label={t('htmlCapture.removeDomain', { domain: d })}
                           onClick={() =>
                             setDraft((x) => ({ ...x, domains: x.domains.filter((y) => y !== d) }))
                           }
                         >
-                          <X aria-hidden="true" />
+                          <X size={16} aria-hidden="true" />
                         </button>
                       )}
                     </li>
@@ -137,13 +158,14 @@ export function HtmlCaptureCard() {
                 </ul>
               )}
               {!locked && (
-                <div className="field">
+                <div className="fd-modal__field">
                   <label htmlFor={`${id}-d`}>{t('htmlCapture.domainLabel')}</label>
-                  <div className="row hc-add">
+                  <div className="hc-add">
                     <input
                       id={`${id}-d`}
-                      className="input t-mono"
+                      className="fd-input t-mono"
                       placeholder="app.example.com"
+                      autoComplete="off"
                       value={input}
                       aria-invalid={inputErr ? true : undefined}
                       aria-describedby={inputErr ? `${id}-de` : undefined}
@@ -158,12 +180,11 @@ export function HtmlCaptureCard() {
                         }
                       }}
                     />
-                    <button type="button" className="fd-btn" onClick={add}>
-                      {t('htmlCapture.add')}
-                    </button>
+                    <Button onClick={add}>{t('htmlCapture.add')}</Button>
                   </div>
                   {inputErr && (
-                    <p className="field-error" id={`${id}-de`} role="alert">
+                    <p className="stg-error" id={`${id}-de`} role="alert">
+                      <CircleAlert size={16} aria-hidden="true" />
                       {inputErr}
                     </p>
                   )}
@@ -172,26 +193,14 @@ export function HtmlCaptureCard() {
             </div>
           )}
           <HtmlCaptureNotice />
+          {error && (
+            <p className="stg-error" role="alert">
+              <CircleAlert size={16} aria-hidden="true" />
+              {error}
+            </p>
+          )}
         </div>
       </fieldset>
-      {error && (
-        <p className="field-error" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="sr-foot hc-foot">
-        <p className="hc-applied">{t('htmlCapture.applied')}</p>
-        {!locked && (
-          <button
-            type="button"
-            className="fd-btn fd-btn--primary"
-            disabled={!dirty || busy || noDomain}
-            onClick={() => void save()}
-          >
-            {t('common.save')}
-          </button>
-        )}
-      </div>
     </section>
   );
 }

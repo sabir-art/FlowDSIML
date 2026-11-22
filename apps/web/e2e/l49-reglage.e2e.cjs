@@ -39,15 +39,15 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   const p = await open(s, '/settings/security');
   const card = p.locator('.hc-card');
   await card.waitFor();
-  ok((await card.locator('h3').innerText()) === 'Captures HTML', 'section « Captures HTML »');
+  ok((await card.locator('h2').innerText()) === 'Captures HTML', 'section « Captures HTML »');
   ok(
-    (await p.locator('.st-wrap section.card').first().getAttribute('class')).includes('hc-card'),
+    (await p.locator('.st-wrap section').first().getAttribute('class')).includes('hc-card'),
     'première section de Sécurité',
   );
   const radio = (name) => card.getByRole('radio', { name: new RegExp(`^${name}`) });
   ok(await radio('Autorisées').isChecked(), 'par défaut : Autorisées');
   ok(
-    await card.getByRole('button', { name: 'Enregistrer' }).isDisabled(),
+    await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).isDisabled(),
     '« Enregistrer » désactivé sans changement',
   );
   ok((await card.locator('.hc-notice').innerText()).includes(NOTICE), 'mention d’autorisation, sans encadré');
@@ -84,8 +84,10 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   );
   await card.getByRole('button', { name: 'Retirer vieux.example.org' }).click();
   ok((await card.locator('.hc-chip').count()) === 2, '« Retirer vieux.example.org »');
-  await card.getByRole('button', { name: 'Enregistrer' }).click();
-  await p.waitForFunction(() => document.querySelector('.hc-card .fd-btn--primary')?.disabled === true);
+  await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
+  await p.waitForFunction(
+    () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
+  );
   ok(
     JSON.stringify(ws.settings.htmlCapture) ===
       JSON.stringify({ mode: 'domains', domains: ['app.example.com', '*.outils.example'] }),
@@ -116,8 +118,10 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await p.goto(`${APP}/#/settings/security`);
   await card.waitFor();
   await radio('Désactivées').check();
-  await card.getByRole('button', { name: 'Enregistrer' }).click();
-  await p.waitForFunction(() => document.querySelector('.hc-card .fd-btn--primary')?.disabled === true);
+  await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
+  await p.waitForFunction(
+    () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
+  );
   ok(ws.settings.htmlCapture.mode === 'disabled', 'désactivées : enregistré');
   await p.goto(`${APP}/#/`);
   await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();

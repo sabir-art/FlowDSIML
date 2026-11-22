@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { CircleAlert, Link2 } from 'lucide-react';
+import { Button, Modal, Select } from '@flowdsiml/ui';
 import { APP_NAME } from '@flowdsiml/core';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
@@ -8,7 +9,7 @@ import { errorMessage } from '../../../lib/errors';
 import { LINK_DAYS, shareRulesChanged, useShareRules, type ShareRules } from '../../../lib/shareRules';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useToast } from '../../../components/Toast';
-import './security.css';
+import { useSavePart } from './saveParts';
 
 type Preview = {
   count: number;
@@ -88,144 +89,141 @@ export function ShareRulesCard() {
   const setModes = (m: string, on: boolean) =>
     setDraft((d) => ({ ...d, modes: on ? [...new Set([...d.modes, m])] : d.modes.filter((x) => x !== m) }));
 
-  const row = (label: string, help: string, control: ReactNode, labelId?: string) => (
-    <div className="sr-row">
-      <div>
-        <b id={labelId}>{label}</b>
-        <p className="t-caption muted">{help}</p>
+  useSavePart('rules', {
+    dirty,
+    busy,
+    invalid: modesEmpty,
+    save: () => save(null),
+    reset: () => {
+      setDraft(saved);
+      setError(null);
+    },
+  });
+
+  const text = (label: string, help: string, labelId?: string, helpId?: string) => (
+    <div className="stg-text" data-gap-exempt="">
+      <div className="stg-lab" id={labelId}>
+        {label}
       </div>
-      <div className="sr-ctl">{control}</div>
+      <div className="stg-help" id={helpId}>
+        {help}
+      </div>
     </div>
   );
 
   return (
-    <section className="card sr-card" aria-labelledby={`${id}-t`}>
-      <div className="sr-head">
-        <h3 className="t-h3" id={`${id}-t`}>
-          {t('rules.title')}
-        </h3>
+    <section className="stg-sec sr-card" aria-labelledby={`${id}-t`}>
+      <div className="stg-sec__head">
+        <div>
+          <h2 id={`${id}-t`}>{t('rules.title')}</h2>
+          <p>{t('rules.sub')}</p>
+        </div>
       </div>
       {!isAdmin && (
-        <p className="t-caption muted" id={`${id}-role`}>
+        <p className="stg-help sr-role" id={`${id}-role`}>
           {t('rules.roleNote')}
         </p>
       )}
+      {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */}
+      <div data-gap-exempt="">
+        <fieldset
+          className="stg-row stg-fieldset"
+          aria-describedby={[`${id}-modes-h`, modesEmpty ? `${id}-modes-err` : ''].filter(Boolean).join(' ')}
+        >
+          <legend className="sr-only">{t('rules.modes')}</legend>
+          {text(t('rules.modes'), t('rules.modesHelp'), undefined, `${id}-modes-h`)}
+          <div className="stg-ctl sr-checks">
+            <div className="stg-opts" data-gap-exempt="">
+              {(['link', 'password', 'invite', 'domain'] as const).map((m) => (
+                <label key={m} className="stg-opt stg-opt--check">
+                  <input
+                    type="checkbox"
+                    checked={draft.modes.includes(m)}
+                    aria-invalid={modesEmpty || undefined}
+                    {...off()}
+                    onChange={(e) => !locked && setModes(m, e.target.checked)}
+                    onClick={(e) => locked && e.preventDefault()}
+                  />
+                  {t(`access.mode.${m}`)}
+                </label>
+              ))}
+            </div>
+            {modesEmpty && (
+              <p className="stg-error" id={`${id}-modes-err`} role="alert">
+                <CircleAlert size={16} aria-hidden="true" />
+                {t('rules.modesEmpty')}
+              </p>
+            )}
+          </div>
+        </fieldset>
 
-      <fieldset
-        className="sr-row sr-fieldset"
-        aria-describedby={[`${id}-modes-h`, modesEmpty ? `${id}-modes-err` : ''].filter(Boolean).join(' ')}
-      >
-        <legend className="sr-only">{t('rules.modes')}</legend>
-        <div>
-          <b aria-hidden="true">{t('rules.modes')}</b>
-          <p className="t-caption muted" id={`${id}-modes-h`}>
-            {t('rules.modesHelp')}
-          </p>
+        <div className="stg-row">
+          {text(t('rules.maxDays'), t('rules.maxDaysHelp'), `${id}-days`, `${id}-days-h`)}
+          <div className="stg-ctl">
+            <Select
+              className="stg-short"
+              aria-labelledby={`${id}-days`}
+              aria-describedby={locked ? `${why} ${id}-days-h` : `${id}-days-h`}
+              disabled={locked}
+              value={draft.max_link_days === null ? '' : String(draft.max_link_days)}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, max_link_days: e.target.value ? Number(e.target.value) : null }))
+              }
+              options={[
+                { value: '', label: t('rules.noLimit') },
+                ...LINK_DAYS.map((n) => ({ value: String(n), label: t('rules.days', { count: n }) })),
+              ]}
+            />
+          </div>
         </div>
-        <div className="sr-ctl sr-checks">
-          {(['link', 'password', 'invite', 'domain'] as const).map((m) => (
-            <label key={m} className="check">
+
+        <fieldset className="stg-row stg-fieldset" aria-describedby={`${id}-pub-h`}>
+          <legend className="sr-only">{t('rules.publish')}</legend>
+          {text(t('rules.publish'), t('rules.publishHelp'), undefined, `${id}-pub-h`)}
+          <div className="stg-ctl sr-checks">
+            <div className="stg-opts" data-gap-exempt="">
+              {(['editor', 'admin'] as const).map((r) => (
+                <label key={r} className="stg-opt">
+                  <input
+                    type="radio"
+                    name={`${id}-pub`}
+                    checked={draft.publish_role === r}
+                    {...off()}
+                    onChange={guard(() => setDraft((d) => ({ ...d, publish_role: r })))}
+                    onClick={(e) => locked && e.preventDefault()}
+                  />
+                  <span>
+                    <b>{t(`rules.publish_${r}`)}</b>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </fieldset>
+
+        <div className="stg-row stg-row--inline">
+          {text(t('rules.exports', { app: APP_NAME }), t('rules.exportsHelp'), `${id}-exp`, `${id}-exp-h`)}
+          <div className="stg-ctl">
+            <label className="fd-switch">
               <input
                 type="checkbox"
-                checked={draft.modes.includes(m)}
-                {...off()}
-                onChange={(e) => !locked && setModes(m, e.target.checked)}
+                role="switch"
+                aria-labelledby={`${id}-exp`}
+                checked={draft.exports_allowed}
+                {...off(`${id}-exp-h`)}
+                onChange={(e) => !locked && setDraft((d) => ({ ...d, exports_allowed: e.target.checked }))}
                 onClick={(e) => locked && e.preventDefault()}
               />
-              {t(`access.mode.${m}`)}
+              <span className="fd-switch__track" aria-hidden="true" />
             </label>
-          ))}
-          {modesEmpty && (
-            <p className="field-error" id={`${id}-modes-err`} role="alert">
-              {t('rules.modesEmpty')}
-            </p>
-          )}
+          </div>
         </div>
-      </fieldset>
-
-      {row(
-        t('rules.maxDays'),
-        t('rules.maxDaysHelp'),
-        <select
-          className="select input-sm"
-          aria-labelledby={`${id}-days`}
-          value={draft.max_link_days ?? ''}
-          {...off()}
-          onChange={(e) =>
-            !locked &&
-            setDraft((d) => ({ ...d, max_link_days: e.target.value ? Number(e.target.value) : null }))
-          }
-        >
-          <option value="">{t('rules.noLimit')}</option>
-          {LINK_DAYS.map((n) => (
-            <option key={n} value={n}>
-              {t('rules.days', { count: n })}
-            </option>
-          ))}
-        </select>,
-        `${id}-days`,
-      )}
-
-      <fieldset className="sr-row sr-fieldset" aria-describedby={`${id}-pub-h`}>
-        <legend className="sr-only">{t('rules.publish')}</legend>
-        <div>
-          <b aria-hidden="true">{t('rules.publish')}</b>
-          <p className="t-caption muted" id={`${id}-pub-h`}>
-            {t('rules.publishHelp')}
-          </p>
-        </div>
-        <div className="sr-ctl sr-checks">
-          {(['editor', 'admin'] as const).map((r) => (
-            <label key={r} className="check">
-              <input
-                type="radio"
-                name={`${id}-pub`}
-                checked={draft.publish_role === r}
-                {...off()}
-                onChange={guard(() => setDraft((d) => ({ ...d, publish_role: r })))}
-                onClick={(e) => locked && e.preventDefault()}
-              />
-              {t(`rules.publish_${r}`)}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      {row(
-        t('rules.exports'),
-        t('rules.exportsHelp'),
-        <label className="sr-switch">
-          <span>{t('rules.exportsLabel', { app: APP_NAME })}</span>
-          <span className="switch">
-            <input
-              type="checkbox"
-              checked={draft.exports_allowed}
-              {...off()}
-              onChange={(e) => !locked && setDraft((d) => ({ ...d, exports_allowed: e.target.checked }))}
-              onClick={(e) => locked && e.preventDefault()}
-            />
-            <span />
-          </span>
-        </label>,
-      )}
-
-      <p className="t-caption muted sr-foot">{t('rules.footer')}</p>
+      </div>
       {error && (
-        <p className="field-error" role="alert">
+        <p className="stg-error" role="alert">
+          <CircleAlert size={16} aria-hidden="true" />
           {error}
         </p>
-      )}
-      {!locked && (
-        <div>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            disabled={!dirty || modesEmpty || busy}
-            onClick={() => void save(null)}
-          >
-            {t('rules.save')}
-          </button>
-        </div>
       )}
       {conflicts && (
         <ConflictsDialog
@@ -252,68 +250,60 @@ function ConflictsDialog({
   onConfirm: (fix: boolean) => void;
 }) {
   const { t } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
   const [fix, setFix] = useState(true);
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
   const more = preview.count - preview.items.length;
   return (
-    <dialog ref={ref} className="mk sr-dialog" aria-labelledby="sr-c-t" onClose={onClose}>
-      <div className="modal-head">
-        <h2 id="sr-c-t">{t('rules.conflictsTitle', { count: preview.count })}</h2>
-        <button
-          type="button"
-          className="btn btn-ghost btn-icon btn-sm"
-          aria-label={t('common.close')}
-          onClick={() => ref.current?.close()}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
-      <div className="modal-body sr-c-body">
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      icon={<Link2 />}
+      title={t('rules.conflictsTitle', { count: preview.count })}
+      closeLabel={t('common.close')}
+      className="sr-dialog"
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" aria-disabled={busy || undefined} onClick={() => !busy && onConfirm(fix)}>
+            {t('rules.save')}
+          </Button>
+        </>
+      }
+    >
+      <div className="sr-c-body">
         <ul className="sr-c-list">
           {preview.items.map((x, i) => (
             <li key={i}>
               <b>{x.title}</b>{' '}
-              <span className="muted">
+              <span className="stg-muted">
                 · {x.kind === 'mode' ? t(`access.mode.${x.mode ?? 'link'}`) : t(`rules.kind_${x.kind}`)}
               </span>
             </li>
           ))}
         </ul>
-        {more > 0 && <p className="t-caption muted">{t('rules.andMore', { count: more })}</p>}
-        <fieldset className="sr-fieldset sr-c-choices">
-          <legend className="sr-only">{t('rules.conflictsChoice')}</legend>
-          <label className="check sr-c-opt">
+        {more > 0 && <p className="stg-help">{t('rules.andMore', { count: more })}</p>}
+      </div>
+      <fieldset className="stg-fieldset sr-c-choices">
+        <legend className="sr-only">{t('rules.conflictsChoice')}</legend>
+        <div className="stg-opts" data-gap-exempt="">
+          <label className="stg-opt sr-c-opt">
             <input type="radio" name="sr-fix" checked={fix} onChange={() => setFix(true)} />
             <span>
               <b>{t('rules.fixNow')}</b>
-              <span className="t-caption muted">{t('rules.fixNowHelp')}</span>
+              <span className="stg-help">{t('rules.fixNowHelp')}</span>
               {preview.locked > 0 && (
-                <span className="t-caption sr-c-warn">
-                  {t('rules.lockedWarn', { count: preview.locked })}
-                </span>
+                <span className="stg-help sr-c-warn">{t('rules.lockedWarn', { count: preview.locked })}</span>
               )}
             </span>
           </label>
-          <label className="check sr-c-opt">
+          <label className="stg-opt sr-c-opt">
             <input type="radio" name="sr-fix" checked={!fix} onChange={() => setFix(false)} />
             <span>
               <b>{t('rules.keep')}</b>
             </span>
           </label>
-        </fieldset>
-      </div>
-      <div className="modal-foot">
-        <button type="button" className="btn btn-secondary" onClick={() => ref.current?.close()}>
-          {t('common.cancel')}
-        </button>
-        <button type="button" className="btn btn-primary" disabled={busy} onClick={() => onConfirm(fix)}>
-          {t('rules.save')}
-        </button>
-      </div>
-    </dialog>
+        </div>
+      </fieldset>
+    </Modal>
   );
 }

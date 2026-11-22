@@ -4390,7 +4390,9 @@
         "Mandatory SSO sign-in"
       ],
       "field": "Identity provider metadata URL",
-      "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains."
+      "why": "Requires a SAML-compatible hosting plan. Meanwhile: invitation links and allowed domains.",
+      "sub": "Sign in with your organisation account.",
+      "wait": "Meanwhile: invitation link and allowed domains."
     },
     "inviteMembers": "Invite members",
     "security": "Security",
@@ -4423,7 +4425,7 @@
     "publishHelp": "“Distribute” covers the SCORM package, intranet embedding, the public page and HTML and MP4 exports.",
     "publish_editor": "Editors, admins and owners",
     "publish_admin": "Admins and owners only",
-    "exports": "Export downloads",
+    "exports": "Exports outside {{app}}",
     "exportsLabel": "Allow exports outside {{app}} (SCORM, HTML, MP4, PDF)",
     "exportsHelp": "When off, these exports are disabled in the app for every role. Existing distributions stay online.",
     "footer": "These rules apply to the whole workspace. Admins and owners see them here; editors see them in Share.",
@@ -4449,7 +4451,8 @@
     "maxFixed": "Maximum duration set by the workspace: {{n}} days.",
     "accessToFix": "Access to fix",
     "accessToFixHelp": "Demo not accessible: the workspace rules require a password.",
-    "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules."
+    "keptMode": "Kept for this link. This mode is no longer offered: disabled by the workspace rules.",
+    "sub": "They apply to the whole workspace. Editors see them in Share."
   },
   "folderAccess": {
     "menu": "Access",

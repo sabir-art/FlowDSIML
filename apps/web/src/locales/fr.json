@@ -4390,7 +4390,9 @@
         "Connexion obligatoire par SSO"
       ],
       "field": "URL des métadonnées du fournisseur",
-      "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : lien d’invitation et domaines autorisés."
+      "why": "Nécessite une offre d'hébergement compatible SAML. En attendant : lien d’invitation et domaines autorisés.",
+      "sub": "Se connecter avec le compte de votre organisation.",
+      "wait": "En attendant : lien d’invitation et domaines autorisés."
     },
     "inviteMembers": "Inviter des membres",
     "security": "Sécurité",
@@ -4415,17 +4417,17 @@
     "modesHelp": "Les modes que les membres peuvent choisir dans Partager.",
     "modesEmpty": "Gardez au moins un mode d’accès.",
     "maxDays": "Durée maximale des liens",
-    "maxDaysHelp": "Avec une limite, tout nouveau lien ou lien personnalisé reçoit une expiration au plus égale à cette durée.",
+    "maxDaysHelp": "Tout nouveau lien reçoit une expiration au plus égale à cette durée.",
     "noLimit": "Aucune limite",
     "days_one": "{{count}} jour",
     "days_other": "{{count}} jours",
     "publish": "Qui peut publier et diffuser",
-    "publishHelp": "« Diffuser » regroupe le paquet SCORM, l’intégration dans l’intranet, la page publique et les exports HTML et MP4.",
+    "publishHelp": "« Diffuser » regroupe le SCORM, l’intranet, la page publique et les exports.",
     "publish_editor": "Éditeurs, administrateurs et propriétaires",
     "publish_admin": "Administrateurs et propriétaires seulement",
-    "exports": "Téléchargement des exports",
+    "exports": "Exports hors de {{app}}",
     "exportsLabel": "Autoriser les exports hors de {{app}} (SCORM, HTML, MP4, PDF)",
-    "exportsHelp": "Désactivé, il désactive ces exports dans l’app pour tous les rôles. Les diffusions existantes restent en ligne.",
+    "exportsHelp": "SCORM, HTML, MP4, PDF. Désactivé : ces exports sont retirés pour tous les rôles.",
     "footer": "Ces règles s’appliquent à tout l’espace. Les administrateurs et propriétaires les voient ici ; les éditeurs les voient dans Partager.",
     "save": "Enregistrer les règles",
     "saved": "Règles de partage enregistrées.",
@@ -4449,7 +4451,8 @@
     "maxFixed": "Durée maximale fixée par l’espace : {{n}} jours.",
     "accessToFix": "Accès à régler",
     "accessToFixHelp": "Démo inaccessible : les règles de l’espace exigent un mot de passe.",
-    "keptMode": "Conservé pour ce lien. Ce mode n’est plus proposé : désactivé par les règles de l’espace."
+    "keptMode": "Conservé pour ce lien. Ce mode n’est plus proposé : désactivé par les règles de l’espace.",
+    "sub": "Elles s’appliquent à tout l’espace. Les éditeurs les voient dans Partager."
   },
   "folderAccess": {
     "menu": "Accès",
@@ -5384,7 +5387,7 @@
     "domains": "Seulement sur ces domaines",
     "domainsHelp": "Ailleurs, l’extension propose les captures d’écran uniquement.",
     "disabled": "Désactivées",
-    "disabledHelp": "Captures d’écran uniquement. Les démos HTML et les Sandbox existants restent lisibles, sans nouvelle page.",
+    "disabledHelp": "Captures d’écran uniquement.",
     "domainLabel": "Ajouter un domaine",
     "domainInvalid": "Saisissez un nom de domaine, sans « https:// » ni chemin (exemple : app.example.com).",
     "domainMax": "50 domaines au plus.",
