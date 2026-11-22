@@ -288,6 +288,26 @@
   background: var(--fd-color-surface-sunken);
   font-size: 14px;
 }
+/* §18.7 : le titre ne déborde jamais sur la colonne voisine (min-width implicite d'un enfant de grille) */
+.vis li > span:not([class]) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+/* Sous 480 px, cinq colonnes ne tiennent pas : le nombre d'apprenants passe sous le titre */
+@media (max-width: 479px) {
+  .vis li {
+    grid-template-columns: 24px 20px minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+  .vis li > .fd-help {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  .vis li > .vis-move {
+    grid-column: 4;
+    grid-row: 1 / span 2;
+  }
+}
 .vis li small {
   display: block;
   color: var(--fd-color-text-muted);
