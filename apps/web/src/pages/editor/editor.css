@@ -3797,14 +3797,15 @@
   color: var(--fd-color-text);
 }
 
-/* ---- Lot 3 : colonne Étapes (264 px, fond de navigation). En-tête de 32 px, « Ajouter une étape »
+/* ---- Lot 3 : colonne Étapes (264 px, fond du contenu avec un filet, COL-01 §15). En-tête de 32 px, « Ajouter une étape »
    en bouton pleine largeur, cartes d'étape, « Ajouter un quiz » en pied ---- */
 .mk.ed {
   --fd-layout-editor-rail-width: 264px;
 }
 .mk .ed-body > .rail {
   padding: 12px 0 0;
-  background: var(--fd-color-nav-bg);
+  /* COL-01 : rien n'est teinté dans l'éditeur, la colonne est séparée par son filet */
+  background: var(--fd-color-content-bg);
 }
 .mk .rail-head {
   height: 32px;
