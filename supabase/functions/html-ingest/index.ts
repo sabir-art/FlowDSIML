@@ -94,7 +94,8 @@ Deno.serve(async (req) => {
   if (!UUID.test(ws) || !UUID.test(demo) || typeof body.html !== 'string' || !body.html)
     return json(400, { error: 'BAD_REQUEST' });
   if (new TextEncoder().encode(body.html).length > MAX_BYTES) return json(413, { error: 'TOO_BIG' });
-  if (!(await editorOf(req, ws))) return json(403, { error: 'FORBIDDEN' });
+  const uid = await editorOf(req, ws);
+  if (!uid) return json(403, { error: 'FORBIDDEN' });
   const { data: d } = await admin
     .from('demos')
     .select('id')
@@ -103,6 +104,9 @@ Deno.serve(async (req) => {
     .is('deleted_at', null)
     .maybeSingle();
   if (!d) return json(404, { error: 'DEMO_NOT_FOUND' });
+  // Dossier restreint : même réponse que pour une démo inconnue
+  const { data: visible } = await admin.rpc('demo_visible_to', { p_demo: demo, p_user: uid });
+  if (visible !== true) return json(404, { error: 'DEMO_NOT_FOUND' });
   const verdict = await captureVerdict(body.url, async (host) => {
     const r = await admin.rpc('html_capture_allows', { p_ws: ws, p_host: host });
     // En cas d'erreur de lecture du réglage : refus (jamais d'acceptation par défaut)

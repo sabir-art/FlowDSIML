@@ -55,6 +55,9 @@ Deno.serve(async (req) => {
     .eq('user_id', u.user.id)
     .maybeSingle();
   if (!m || (RANK[m.role as string] ?? 0) < RANK.editor!) return json(403, { error: 'FORBIDDEN' });
+  // Dossier restreint : même réponse que pour une démo inconnue
+  const { data: visible } = await admin.rpc('demo_visible_to', { p_demo: demo, p_user: u.user.id });
+  if (visible !== true) return json(404, { error: 'DEMO_NOT_FOUND' });
 
   const { data: rows } = await admin
     .from('steps')

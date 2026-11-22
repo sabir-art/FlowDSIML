@@ -3,7 +3,7 @@
 -- l'insertion et à la modification. Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(24);
+select plan(28);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000091a1', 'admin-garde@example.com'),
@@ -131,6 +131,19 @@ select lives_ok($$ insert into public.steps (demo_id, workspace_id, position, im
 select lives_ok($$ insert into public.demos (workspace_id, folder_id, title)
                    values ((select ws from ctx), '00000000-0000-0000-0000-0000000091f1', 'Légitime') $$,
   'éditrice autorisée : crée une démo dans le dossier');
+
+-- ===== 4. Rôle de service (Edge Functions html-ingest, html-recheck) : visibilité par membre =====
+reset role;
+select ok(has_function_privilege('service_role', 'public.demo_visible_to(uuid, uuid)', 'execute'),
+  'service : demo_visible_to est appelable');
+select ok(not has_function_privilege('authenticated', 'public.demo_visible_to(uuid, uuid)', 'execute'),
+  'membre : demo_visible_to reste fermée');
+set local role service_role;
+select is(public.demo_visible_to('00000000-0000-0000-0000-0000000091d1', '00000000-0000-0000-0000-0000000091a3'), false,
+  'éditeur exclu : la démo du dossier restreint ne lui est pas visible');
+select is(public.demo_visible_to('00000000-0000-0000-0000-0000000091d1', '00000000-0000-0000-0000-0000000091a2'), true,
+  'éditrice autorisée : la démo lui est visible');
+reset role;
 
 select * from finish();
 rollback;
