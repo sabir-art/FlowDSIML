@@ -4065,3 +4065,93 @@
   border-radius: 8px;
   color: var(--fd-color-text-muted);
 }
+
+/* ---- Lot 3 : rail d'outils de 48 px et panneau de 320 px (fond du contenu, filets) ---- */
+.mk .ed-rail {
+  flex-basis: 48px;
+  background: var(--fd-color-content-bg);
+}
+.mk .ed-rail__grp + .ed-rail__grp::before {
+  width: 20px;
+  /* 8 px de chaque côté du filet, l'écart du groupe compris */
+  margin: 8px auto 4px;
+  background: var(--fd-color-border);
+}
+.mk .ed-rail__btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+.mk .ed-rail__btn:hover {
+  background: var(--fd-color-nav-hover);
+}
+/* Outil actif : nav-active et filet intérieur de 1 px */
+.mk .ed-rail__btn.is-active {
+  background: var(--fd-color-nav-active);
+  box-shadow: inset 0 0 0 1px var(--fd-color-border);
+}
+.mk .ed-rail__btn.is-active:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .ed-tool {
+  flex-basis: 320px;
+  width: 320px;
+  background: var(--fd-color-content-bg);
+}
+.mk .ed-tool__head {
+  height: 52px;
+}
+.mk .ed-tool__head h2 {
+  font: 600 15px var(--fd-font-sans);
+}
+/* Sections d'un bord à l'autre, séparées par un filet ; titres de 12 px en majuscules */
+.mk .ed-tool .sec {
+  margin: 0 -16px;
+  padding: 16px;
+  border-top: 0;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .ed-tool .sec:first-child,
+.mk .ed-tool .hs-head + .sec {
+  margin-top: -16px;
+  padding-top: 16px;
+}
+/* Panneau Étape : sa première section suit une modale fermée, on remonte le panneau lui-même */
+.mk .ed-tool .sp-panel {
+  margin-top: -16px;
+}
+.mk .ed-tool .sec-title {
+  font: 600 12px var(--fd-font-sans);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+/* « Supprimer l'étape » : bouton ghost danger en pied, sans filet */
+.mk .ed-tool .sp-foot {
+  padding: 16px 0 0;
+  border-top: 0;
+}
+@media (max-width: 1279px) {
+  .mk .ed-body > .ed-tool {
+    right: 48px;
+  }
+}
+.mk .ed-tool .sp-panel > .sec,
+.mk .ed-tool .sp-panel > :first-child:not(.sec) + .sec {
+  padding-top: 16px;
+}
+.mk .ed-tool .sp-foot .fd-btn {
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+}
+/* Panneau de 320 px : Réenregistrer, Remplacer et Supprimer restent sur une ligne */
+.mk .ed-tool .voice-sec .voice-actions {
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.mk .ed-tool .voice-sec .voice-actions .btn-sm:not(.btn-icon) {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding-inline: 8px;
+  font-size: 13px;
+}

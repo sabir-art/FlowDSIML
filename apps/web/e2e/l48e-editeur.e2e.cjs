@@ -187,10 +187,21 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   {
     const act = rail.locator('.ed-rail__btn.is-active').first();
     await p.mouse.click(5, 5);
-    const sh = await act.evaluate(
-      (el) => getComputedStyle(el).boxShadow + '|' + getComputedStyle(el).outlineStyle,
+    // Lot 3 : outil actif sur nav-active avec un filet intérieur de 1 px (couleur de bordure) ; le trait
+    // de focus de 2 px n'apparaît qu'au clavier
+    const sh = await act.evaluate((el) => {
+      const probe = document.createElement('i');
+      probe.style.color = 'var(--fd-color-border)';
+      el.append(probe);
+      const border = getComputedStyle(probe).color;
+      probe.remove();
+      const c = getComputedStyle(el);
+      return { shadow: c.boxShadow, outline: c.outlineStyle, border };
+    });
+    ok(
+      sh.outline === 'none' && sh.shadow === `${sh.border} 0px 0px 0px 1px inset`,
+      `E1 : outil actif avec un filet de 1 px, sans trait de focus hors clavier (${sh.shadow})`,
     );
-    ok(sh === 'none|none', `E1 : outil actif sans contour hors focus clavier (${sh})`);
   }
 
   // ===== Flou en modale =====
