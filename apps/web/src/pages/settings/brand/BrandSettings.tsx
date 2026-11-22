@@ -171,7 +171,11 @@ function LogoSection({
     <input
       ref={input}
       type="file"
-      hidden
+      /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié au bouton */
+      id="br-logo-file"
+      className="sr-only"
+      tabIndex={-1}
+      aria-hidden="true"
       accept="image/png,image/jpeg,image/webp,image/svg+xml"
       onChange={(e) => {
         const f = e.target.files?.[0];
@@ -214,6 +218,7 @@ function LogoSection({
                     <Button
                       disabled={busy}
                       aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
+                      aria-controls="br-logo-file"
                       onClick={() => input.current?.click()}
                     >
                       {t('brand.logoReplace')}
@@ -243,6 +248,7 @@ function LogoSection({
                 <Button
                   disabled={busy}
                   aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
+                  aria-controls="br-logo-file"
                   onClick={() => input.current?.click()}
                 >
                   {t('brand.logoPick')}

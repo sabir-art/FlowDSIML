@@ -112,6 +112,8 @@ async function png(page, w, h) {
   });
   const dlg = page.getByRole('dialog', { name: 'Recadrer la photo' });
   await dlg.waitFor();
+  // Les mesures attendent la fin de l'animation d'ouverture (échelle) de la modale
+  await dlg.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
   ok((await page.getByRole('alert').count()) === 0, 'image valide : plus d’erreur');
   const box = await dlg.locator('.pf-crop__box').boundingBox();
   const prev = await dlg.locator('.pf-crop__preview').evaluate((el) => ({
@@ -126,7 +128,9 @@ async function png(page, w, h) {
   ok(Math.abs(ratio - 800 / 600) < 0.01, `image non déformée, couvre la zone (rapport ${ratio.toFixed(3)})`);
   const zoom = dlg.getByRole('slider', { name: /Zoom/ });
   ok(
-    (await zoom.getAttribute('min')) === '100' && (await zoom.getAttribute('max')) === '300',
+    (await zoom.getAttribute('aria-valuemin')) === '100' &&
+      (await zoom.getAttribute('aria-valuemax')) === '300' &&
+      (await zoom.getAttribute('aria-valuetext')) === '100 %',
     'zoom de 100 à 300 %',
   );
   const tx = () => dlg.locator('.pf-crop__box .pf-crop__img').evaluate((el) => el.style.transform);
@@ -136,8 +140,18 @@ async function png(page, w, h) {
   const t1 = await tx();
   const dx = (s) => Number(/translate\((-?[\d.]+)px/.exec(s)[1]);
   ok(Math.abs(dx(t0) - dx(t1) - 8) < 0.01, `flèche : 8 px (${t0} → ${t1})`);
-  await zoom.fill('200');
-  ok((await dlg.locator('.pf-crop__zoom .muted').innerText()) === '200 %', 'zoom à 200 %');
+  // COMP-01 §6 : curseur maison au clavier (Page haut = 10 pas, Fin et Début = bornes)
+  await zoom.focus();
+  await page.keyboard.press('End');
+  ok((await zoom.getAttribute('aria-valuenow')) === '300', 'curseur : Fin va à la borne haute');
+  await page.keyboard.press('Home');
+  for (let i = 0; i < 10; i++) await page.keyboard.press('PageUp');
+  ok(
+    (await dlg.locator('.pf-crop__zoom .muted').innerText()) === '200 %' &&
+      (await zoom.getAttribute('aria-valuetext')) === '200 %',
+    'zoom à 200 % (Début puis 10 × Page haut)',
+  );
+  ok((await dlg.locator('input[type=range]').count()) === 0, 'aucun curseur natif');
   await dlg.getByRole('button', { name: 'Enregistrer la photo' }).click();
   await dlg.waitFor({ state: 'hidden' });
   await page.waitForTimeout(500);

@@ -10,3 +10,4 @@ export type { ComposerProps, ComposerInputProps } from './composer';
 export { PageHeader, Breadcrumb, BackButton } from './navigation';
 export type { Crumb, NavLinkComponent } from './navigation';
 export { Modal } from './modal';
+export { Slider } from './slider';

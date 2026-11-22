@@ -9,8 +9,8 @@
  */
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, ImagePlus } from 'lucide-react';
-import { Button } from '@flowdsiml/ui';
+import { CircleAlert, Crop, ImagePlus } from 'lucide-react';
+import { Button, Modal, Slider } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
 import { useAuth } from '../../auth/AuthProvider';
@@ -92,6 +92,7 @@ export function ProfilePhoto() {
           <Button
             icon={<ImagePlus aria-hidden="true" />}
             aria-describedby="pf-photo-help"
+            aria-controls="pf-photo-file"
             onClick={() => input.current?.click()}
             disabled={busy}
           >
@@ -114,8 +115,11 @@ export function ProfilePhoto() {
         ref={input}
         type="file"
         accept={TYPES.join(',')}
-        hidden
-        aria-label={t('profile.photo.choose')}
+        /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié au bouton */
+        id="pf-photo-file"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(e) => {
           pick(e.target.files?.[0]);
           e.target.value = '';
@@ -158,17 +162,12 @@ function CropDialog({
 }) {
   const { t } = useTranslation();
   const id = useId();
-  const ref = useRef<HTMLDialogElement>(null);
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   const [view, setView] = useState<View>({ x: 0, y: 0, zoom: 1 });
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const drag = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
   useEffect(() => {
     const url = URL.createObjectURL(file);
     const im = new Image();
@@ -261,14 +260,29 @@ function CropDialog({
       />
     );
 
+  const pct = Math.round(view.zoom * 100);
   return (
-    <dialog ref={ref} className="dialog pf-crop" onClose={onClose} aria-labelledby={`${id}-t`}>
-      <div className="dialog-head">
-        <h2 id={`${id}-t`}>{t('profile.photo.cropTitle')}</h2>
-      </div>
-      <div className="dialog-body">
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      icon={<Crop />}
+      title={t('profile.photo.cropTitle')}
+      closeLabel={t('common.close')}
+      className="pf-crop"
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" onClick={() => void save()} disabled={!img || busy}>
+            {t('profile.photo.save')}
+          </Button>
+        </>
+      }
+    >
+      <div className="pf-crop__body">
         {failed ? (
-          <p role="alert" className="pf-photo__error">
+          <p role="alert" className="stg-error">
+            <CircleAlert size={16} aria-hidden="true" />
             {t('profile.photo.badType')}
           </p>
         ) : (
@@ -296,35 +310,30 @@ function CropDialog({
               >
                 {layer(PREVIEW)}
               </span>
-              <span className="help">{t('profile.photo.preview')}</span>
+              <span className="stg-help">{t('profile.photo.preview')}</span>
             </div>
           </div>
         )}
-        <p id={`${id}-h`} className="help">
+        <p id={`${id}-h`} className="stg-help pf-crop__help">
           {t('profile.photo.cropHelp')}
         </p>
-        <label className="fd-field pf-crop__zoom">
-          <span className="fd-label">
-            {t('profile.photo.zoom')} <span className="muted">{Math.round(view.zoom * 100)} %</span>
+        <div className="fd-modal__field pf-crop__zoom">
+          <span className="fd-modal__label pf-crop__zoom-l">
+            <span id={`${id}-z`}>{t('profile.photo.zoom')}</span>
+            <span className="muted">{pct} %</span>
           </span>
-          <input
-            type="range"
+          <Slider
             min={100}
             max={300}
             step={1}
-            value={Math.round(view.zoom * 100)}
-            aria-valuetext={`${Math.round(view.zoom * 100)} %`}
+            value={pct}
+            valueText={`${pct} %`}
+            aria-labelledby={`${id}-z`}
             disabled={!img}
-            onChange={(e) => setZoom(Number(e.target.value) / 100)}
+            onChange={(v) => setZoom(v / 100)}
           />
-        </label>
+        </div>
       </div>
-      <div className="dialog-actions">
-        <Button onClick={() => ref.current?.close()}>{t('common.cancel')}</Button>
-        <Button variant="primary" onClick={() => void save()} disabled={!img || busy}>
-          {t('profile.photo.save')}
-        </Button>
-      </div>
-    </dialog>
+    </Modal>
   );
 }

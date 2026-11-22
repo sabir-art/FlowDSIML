@@ -870,3 +870,45 @@ fieldset.stg-row {
   font-size: 14px;
   color: var(--fd-color-text-muted);
 }
+
+/* Profil › Mes données : modale de suppression du compte (MODAL-01) */
+.st-mydata-body {
+  display: grid;
+  gap: 16px;
+}
+.st-mydata-body > p {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.st-mydata-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.st-mydata-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.st-mydata-body > .st-mydata-warn,
+.st-mydata-reauth .st-mydata-warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
+.st-mydata-warn > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}
+.st-mydata-reauth {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}

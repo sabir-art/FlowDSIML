@@ -2034,8 +2034,18 @@ button.fd-nav__item:hover {
   align-items: center;
   gap: var(--fd-space-2);
 }
-.pf-crop__zoom input[type='range'] {
-  width: 100%;
+.pf-crop__body {
+  display: grid;
+  gap: 16px;
+}
+.pf-crop__help {
+  margin: 0;
+}
+.pf-crop__zoom-l {
+  justify-content: space-between;
+}
+.pf-crop__zoom-l .muted {
+  font-weight: 400;
 }
 
 /* ---- §18.6 (retours client 21/11) : écarts relevés par espacements.e2e ---- */

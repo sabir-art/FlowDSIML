@@ -94,7 +94,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.mouse.move(0, 0);
     await blocked.screenshot({ path: `${SHOTS}/l28-08-bloque${sfx}.png` });
   }
-  await blocked.getByRole('button', { name: 'Fermer' }).click();
+  await blocked.locator('.fd-modal__foot').getByRole('button', { name: 'Fermer' }).click();
 
   // Seule membre : l'espace est supprimé avec le compte
   t.members.splice(

@@ -299,6 +299,8 @@
 .fd-filter {
   gap: 6px;
   padding: 0 var(--fd-space-3) 0 14px;
+  /* Filtre de barre de liste : 13 px (les boutons secondaires sont à 14 px), pour tenir sur une ligne */
+  font-size: var(--fd-text-label-size);
 }
 .fd-filter svg {
   flex: none;
@@ -415,4 +417,52 @@
 }
 .fd-empty--compact .fd-empty__actions {
   margin: 0;
+}
+
+/* COMP-01 §6 : curseur. Piste de 4 px, remplie en primary ; poignée de 20 px, bordure primary de 2 px */
+.fd-slider {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+.fd-slider__track {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--fd-color-border);
+}
+.fd-slider__fill {
+  display: block;
+  width: calc(10px + (100% - 20px) * var(--fd-slider-pct-n, 0));
+  height: 100%;
+  background: var(--fd-color-primary);
+}
+.fd-slider__thumb {
+  position: absolute;
+  top: 2px;
+  left: calc((100% - 20px) * var(--fd-slider-pct-n, 0));
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--fd-color-primary);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.16);
+}
+/* Focus clavier (FIELD-01 §11.4) : anneau intérieur de 2 px, sans contour extérieur */
+.fd-slider__thumb:focus-visible {
+  outline: none;
+  border-color: var(--fd-color-focus);
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-slider[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
