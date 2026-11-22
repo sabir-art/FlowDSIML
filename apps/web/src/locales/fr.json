@@ -3939,6 +3939,10 @@
     }
   },
   "present": {
+    "backEditor": "Éditeur",
+    "backEditorLabel": "Retour à l’éditeur",
+    "barStep": "Présentation · étape {{n}} sur {{total}}",
+    "closeScreen": "Fermer",
     "button": "Présenter",
     "title": "Présenter « {{title}} »",
     "display": "Affichage",

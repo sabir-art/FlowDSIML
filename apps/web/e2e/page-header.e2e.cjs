@@ -34,6 +34,7 @@ const EDITORS = [
   ['Éditeur de quiz', `/demos/${DEMO}/quiz`],
   // §16.2 : hors coque, même variante (la Console demande un rôle d'équipe)
   ['Console', '/console', 'admin'],
+  ['Présentateur', `/demos/${DEMO}/present`],
 ];
 const OUTSIDE = [
   ['Connexion', '/login'],

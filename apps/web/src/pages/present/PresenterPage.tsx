@@ -4,8 +4,9 @@
  * L26-09 : notes de la démo (onglets Étape / Démo) et modification en direct ; L26-10 / 11 :
  * télécommande sur téléphone (touche R) ; L26-12 : bilan de fin (30 jours, pour la seule présentatrice).
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { BackButton } from '@flowdsiml/ui';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Check, EyeOff, Eye, Pencil, Smartphone } from 'lucide-react';
 import { useDemoEditor } from '../editor/useDemoEditor';
@@ -36,6 +37,10 @@ interface RemoteState {
   paired: boolean;
   codeExpiresAt: number;
 }
+
+const CrumbLink = (p: { to: string; className?: string; title?: string; children?: ReactNode }) => (
+  <Link {...p} />
+);
 
 export function PresenterPage() {
   const { demoId = '' } = useParams();
@@ -405,14 +410,48 @@ export function PresenterPage() {
 
   return (
     <main className={`presenter${opts.mode === 'one' && !notesOn ? ' presenter--solo' : ''}`} id="main">
-      <h1 className="sr-only">{t('present.pageTitle', { title })}</h1>
-      <div className="main-s">
-        <div className="pr-head">
+      {/* PAGE-01 §16.2 : variante éditeur de la barre commune, toujours sombre. Retour, titre (h1) et étape à
+          gauche ; état de l'écran public au centre ; téléphone et « Terminer » à droite. */}
+      <header
+        className="fd-page-header fd-page-header--editor pr-top"
+        data-theme="dark"
+        data-tip-side="bottom"
+      >
+        <div className="pr-top__l">
+          <BackButton
+            to={`/demos/${demoId}/edit`}
+            label={t('present.backEditor')}
+            ariaLabel={t('present.backEditorLabel')}
+            className="pr-top__back"
+            as={CrumbLink}
+          />
+          <BackButton
+            to={`/demos/${demoId}/edit`}
+            label=""
+            iconOnly
+            ariaLabel={t('present.backEditorLabel')}
+            className="pr-top__back-m"
+            as={CrumbLink}
+          />
+          <span className="pr-top__sep" aria-hidden="true" />
+          <div className="pr-top__tt">
+            <h1>{title}</h1>
+            <span className="pr-top__sub">{t('present.barStep', { n: index + 1, total })}</span>
+          </div>
+        </div>
+        <div className="pr-top__c">
           {opts.mode === 'two' &&
             (screenOpen ? (
               <span className="live">
                 <i aria-hidden="true" />
                 {t('present.screenOpen')}
+                <button
+                  type="button"
+                  className="pr-reopen"
+                  onClick={() => window.open('', `fd-present-${demoId}`)?.close()}
+                >
+                  {t('present.closeScreen')}
+                </button>
               </span>
             ) : (
               <span className="live live--off">
@@ -435,17 +474,24 @@ export function PresenterPage() {
               {t('present.phoneOn')}
             </span>
           )}
-          <span className="pr-title">{title}</span>
+        </div>
+        <div className="pr-top__r">
           <button
             type="button"
-            className="pr-ghost pr-phone-btn"
+            className="fd-btn pr-phone-btn"
             aria-keyshortcuts="R"
+            aria-label={t('present.phone')}
             onClick={() => (remote ? setRemoteOpen(true) : void startRemote())}
           >
             <Smartphone aria-hidden="true" />
-            {t('present.phone')}
+            <span className="pr-phone-btn__t">{t('present.phone')}</span>
+          </button>
+          <button type="button" className="fd-btn" aria-keyshortcuts="Escape" onClick={finish}>
+            {t('present.finish')}
           </button>
         </div>
+      </header>
+      <div className="main-s">
         <div className="stage pr-stage">
           <PlayerFrame
             manifest={manifest}
@@ -490,9 +536,6 @@ export function PresenterPage() {
             <button type="button" aria-keyshortcuts="B" aria-pressed={black} onClick={() => setBlack(!black)}>
               <EyeOff aria-hidden="true" />
               {t('present.black')}
-            </button>
-            <button type="button" aria-keyshortcuts="Escape" onClick={finish}>
-              {t('present.finish')}
             </button>
           </span>
         </div>
