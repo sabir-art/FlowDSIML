@@ -12,6 +12,16 @@
 <li>Modale « Depuis une autre démo » : 720 px, liste des démos à gauche (lecture seule grisée), vignettes à cocher, pied avec le compte et les actions.</li>
 <li>Mobile : barre avec retour, titre et Partager ; bandeau « L'éditeur s'utilise sur ordinateur », Voir la démo, étapes avec leurs commentaires.</li>
 </ul>
+<h2>Recette du 22/11 : colonne Étapes, menu ⋯ et rail (dev-mvp 45d745f)</h2>
+<ul>
+<li><b>Conformes</b>, en clair et en sombre. Au survol, au focus et sur l’étape choisie : « Lire depuis ici » et ⋯ (28 px), la poignée <code>GripVertical</code> à la place du numéro, la carte reste à 64 px. Menu ⋯ de 240 px (aussi au clic droit) avec Modifier, Copier, Coller après, Couper, Dupliquer, Monter, Descendre, Masquer l’étape · Bientôt, puis Supprimer en danger, chaque entrée avec son raccourci. Rail replié de 48 px : pastilles de 32 px, l’étape choisie en prune, nom accessible « Étape n : titre ». Quiz en <code>ListChecks</code>.</li>
+<li><b>M1</b> : « Coller après », quand rien n’est copié, passe en <code>aria-disabled="true"</code> et reste atteignable aux flèches (APG). Aujourd’hui, il est grisé mais pas annoncé comme désactivé.</li>
+<li><b>1. Bascule</b> : à gauche de « Étapes », comme la colonne Dossiers. Elle est à x 8 et y 68, dépliée comme repliée, donc à la même place. La maquette est corrigée (captures refaites, seul l’en-tête de la colonne change).</li>
+<li><b>2.</b> « Remplacer la capture… » et « Télécharger la capture » : à ajouter ensuite, ils font partie de P1-1. Télécharger exporte la capture avec les flous appliqués.</li>
+<li><b>3. Rail</b> : les étapes seulement, d’accord. Si la démo a un quiz, une pastille <code>ListChecks</code> de 32 px s’ajoute après la dernière étape, avant le bouton Plus.</li>
+<li><b>4.</b> D’accord : le raccourci de « Masquer l’étape » s’affichera avec la fonction.</li>
+<li><b>5.</b> La section « Étapes » de la fenêtre des raccourcis (« ? ») vient avec la fin de P1-1 : mêmes libellés et mêmes touches que le menu ⋯.</li>
+</ul>
 <h2>Recette du 22/11 : colonne Étapes et « Publier » (dev-mvp a00f232)</h2>
 <ul>
 <li><b>H1 : conforme.</b> « Publier » est en prune uni (97,8 × 36 px). En sombre, c’est le jeton <code>--fd-color-primary</code> (#CF86A9) qui fait foi. Le #D9619A cité plus haut venait de la palette des graphiques : il est corrigé.</li>
