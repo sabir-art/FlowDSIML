@@ -597,6 +597,26 @@ input[type='checkbox']:disabled {
 .fd-status--brand {
   --fd-status-dot: var(--fd-color-primary);
 }
+/* Badge de statut à côté d'un titre (PAGE-01 §16.1) : pastille de 24 px, texte de 12 px */
+.fd-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef0f3;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  white-space: nowrap;
+}
+[data-theme='dark'] .fd-pill {
+  background: #252b33;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .fd-pill {
+    background: #252b33;
+  }
+}
 .fd-table {
   width: 100%;
   border-collapse: collapse;

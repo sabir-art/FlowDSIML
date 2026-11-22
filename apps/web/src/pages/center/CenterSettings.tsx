@@ -20,7 +20,7 @@ import {
   Upload,
 } from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
-import { Alert, Button, Select, ColorSwatch, Status } from '@flowdsiml/ui';
+import { Alert, Button, Select, ColorSwatch } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { contrastRatio } from '../../lib/contrast';
@@ -286,19 +286,15 @@ export function CenterSettings() {
       after={
         row?.published ? (
           <>
-            <Status size="sm" tone="success">
-              {t('center.statusPublished')}
-            </Status>
+            <span className="fd-pill">{t('center.statusPublished')}</span>
             <a href={url} target="_blank" rel="noopener noreferrer">
               {url.replace(/^https?:\/\//, '')}
             </a>
             {pending ? <span>{t('center.pending', { count: pending })}</span> : null}
           </>
         ) : (
-          <span data-tip={t('center.statusDraft')}>
-            <Status size="sm" tone="neutral">
-              {t('center.statusDraftShort')}
-            </Status>
+          <span className="fd-pill" data-tip={t('center.statusDraft')} tabIndex={0}>
+            {t('center.statusDraftShort')}
           </span>
         )
       }

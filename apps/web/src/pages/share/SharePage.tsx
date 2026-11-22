@@ -302,7 +302,7 @@ export function SharePage() {
             {t('export.menu')}
           </button>
           {editable && editor.demo && (!published || pending) && (
-            <span className="sh-publish tc-cta-grad">
+            <span className="sh-publish">
               <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
             </span>
           )}
