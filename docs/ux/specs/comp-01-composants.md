@@ -553,6 +553,10 @@ La zone jugée « très mal travaillée » mélangeait texte et boutons sur deux
 - Dans une ligne de réglage, la zone passe **sous le libellé** et prend toute la largeur de la ligne, jusqu'à la fin du filet (ALIGN-01). Sous 768 px, les boutons passent sous le texte, en pleine largeur.
 - Maquette : planche `media-01`, section « Zone de dépôt », et Thème et couleurs.
 
+**Décisions du 22/11 (questions du dev, 24c93d5)** :
+- **Envoi** : le stockage ne donne pas d'avancement. La zone affiche donc « Envoi en cours… » avec une **barre indéterminée** de 6 px (fond `border`, segment prune de 30 % qui glisse de gauche à droite en 1,2 s, en boucle). Si `prefers-reduced-motion`, le segment reste fixe. Pas de pourcentage ni de bouton « Annuler » tant que l'envoi n'est pas annulable. La barre porte `role="progressbar"` sans `aria-valuenow`, avec le nom « Envoi du logo ».
+- **Rempli** : le titre est « Logo de {espace} » et l'aide donne le format du fichier (SVG, PNG…). Le nom d'origine, le poids et la date ne sont pas gardés en base : on ne les affiche pas.
+
 ### 18.2 Relevé des zones d'envoi de fichier de l'app (dev-mvp du 22/11)
 
 Toutes utilisent MEDIA-01, sous l'un de ses trois formats : **vignette** (72 px, image d'identité), **zone** (pleine largeur) ou **bouton compact** (bouton secondaire à icône dans une barre d'outils ou un panneau ; l'hôte accepte aussi le dépôt).
