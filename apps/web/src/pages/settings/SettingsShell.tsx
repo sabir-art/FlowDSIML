@@ -228,7 +228,8 @@ export function SettingsHome() {
                         <Icon size={20} aria-hidden="true" />
                         <span className="st-home__label">{t(label)}</span>
                         {(soon || !to) && <span className="stg-soon">{t('shell.soon')}</span>}
-                        <ChevronRight size={16} aria-hidden="true" />
+                        {/* Entrée sans page : ni chevron ni survol (décision UX du 22/11) */}
+                        {to && <ChevronRight size={16} aria-hidden="true" />}
                       </>
                     );
                     return (

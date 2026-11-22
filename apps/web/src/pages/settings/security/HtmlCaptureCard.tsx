@@ -1,6 +1,6 @@
-import { useEffect, useId, useState } from 'react';
+import { Fragment, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, X } from 'lucide-react';
+import { CircleAlert, X, Plus } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
@@ -117,81 +117,90 @@ export function HtmlCaptureCard() {
           {/* §18.6 : options d'un même groupe, 6 px de padding vertical chacune (maquette) */}
           <div className="stg-opts" data-gap-exempt="">
             {MODES.map((m) => (
-              <label key={m} className="stg-opt hc-mode">
-                <input
-                  type="radio"
-                  name={`${id}-mode`}
-                  value={m}
-                  checked={draft.mode === m}
-                  {...off}
-                  onChange={() => !locked && setDraft((x) => ({ ...x, mode: m }))}
-                  onClick={(e) => locked && e.preventDefault()}
-                />
-                <span>
-                  <b>{t(`htmlCapture.${m}`)}</b>
-                  <span className="stg-help">{t(`htmlCapture.${m}Help`)}</span>
-                </span>
-              </label>
+              <Fragment key={m}>
+                <label className="stg-opt hc-mode">
+                  <input
+                    type="radio"
+                    name={`${id}-mode`}
+                    value={m}
+                    checked={draft.mode === m}
+                    {...off}
+                    onChange={() => !locked && setDraft((x) => ({ ...x, mode: m }))}
+                    onClick={(e) => locked && e.preventDefault()}
+                  />
+                  <span>
+                    <b>{t(`htmlCapture.${m}`)}</b>
+                    <span className="stg-help">{t(`htmlCapture.${m}Help`)}</span>
+                  </span>
+                </label>
+                {m === 'domains' && draft.mode === 'domains' && (
+                  /* Décision UX du 22/11 (securite-domaines) : sous le choix coché, en retrait de 28 px */
+                  <div className="hc-domains">
+                    {draft.domains.length > 0 && (
+                      <ul className="hc-chips" aria-label={t('htmlCapture.domainsList')}>
+                        {draft.domains.map((d) => (
+                          <li key={d} className="hc-chip">
+                            <span className="hc-chip__name">{d}</span>
+                            {!locked && (
+                              <button
+                                type="button"
+                                className="hc-chip__remove"
+                                aria-label={t('htmlCapture.removeDomain', { domain: d })}
+                                onClick={() =>
+                                  setDraft((x) => ({ ...x, domains: x.domains.filter((y) => y !== d) }))
+                                }
+                              >
+                                <X size={14} aria-hidden="true" />
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {!locked && (
+                      <>
+                        <div className="hc-add">
+                          <input
+                            id={`${id}-d`}
+                            className="fd-input"
+                            placeholder={t('htmlCapture.domainPlaceholder')}
+                            autoComplete="off"
+                            spellCheck={false}
+                            value={input}
+                            aria-label={t('htmlCapture.domainLabel')}
+                            aria-invalid={inputErr ? true : undefined}
+                            aria-describedby={inputErr ? `${id}-de ${id}-dh` : `${id}-dh`}
+                            onChange={(e) => {
+                              setInput(e.target.value);
+                              setInputErr(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                add();
+                              }
+                            }}
+                          />
+                          <Button icon={<Plus size={16} />} onClick={add}>
+                            {t('htmlCapture.addDomain')}
+                          </Button>
+                        </div>
+                        {inputErr && (
+                          <p className="stg-error" id={`${id}-de`} role="alert">
+                            <CircleAlert size={16} aria-hidden="true" />
+                            {inputErr}
+                          </p>
+                        )}
+                        <span className="stg-help" id={`${id}-dh`}>
+                          {t('htmlCapture.domainHelp')}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </Fragment>
             ))}
           </div>
-          {draft.mode === 'domains' && (
-            <div className="hc-domains">
-              {draft.domains.length > 0 && (
-                <ul className="hc-chips" aria-label={t('htmlCapture.domainsList')}>
-                  {draft.domains.map((d) => (
-                    <li key={d} className="hc-chip">
-                      <span className="t-mono">{d}</span>
-                      {!locked && (
-                        <button
-                          type="button"
-                          className="hc-chip__remove"
-                          aria-label={t('htmlCapture.removeDomain', { domain: d })}
-                          onClick={() =>
-                            setDraft((x) => ({ ...x, domains: x.domains.filter((y) => y !== d) }))
-                          }
-                        >
-                          <X size={16} aria-hidden="true" />
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {!locked && (
-                <div className="fd-modal__field">
-                  <label htmlFor={`${id}-d`}>{t('htmlCapture.domainLabel')}</label>
-                  <div className="hc-add">
-                    <input
-                      id={`${id}-d`}
-                      className="fd-input t-mono"
-                      placeholder="app.example.com"
-                      autoComplete="off"
-                      value={input}
-                      aria-invalid={inputErr ? true : undefined}
-                      aria-describedby={inputErr ? `${id}-de` : undefined}
-                      onChange={(e) => {
-                        setInput(e.target.value);
-                        setInputErr(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          add();
-                        }
-                      }}
-                    />
-                    <Button onClick={add}>{t('htmlCapture.add')}</Button>
-                  </div>
-                  {inputErr && (
-                    <p className="stg-error" id={`${id}-de`} role="alert">
-                      <CircleAlert size={16} aria-hidden="true" />
-                      {inputErr}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
           <HtmlCaptureNotice />
           {error && (
             <p className="stg-error" role="alert">

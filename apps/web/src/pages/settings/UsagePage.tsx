@@ -75,7 +75,6 @@ export function UsagePage() {
   // L48-03 : voix de synthèse et sous-titres, deux quotas distincts (secondes, affichées en minutes)
   const audio = (key: 'tts' | 'stt', used = 0, quota: number | null = null): Row => ({
     key,
-    note: reset,
     used,
     limit: quota,
     value:
@@ -89,7 +88,6 @@ export function UsagePage() {
   const rows: Row[] = [
     {
       key: 'ai',
-      note: reset,
       used: ai?.used ?? 0,
       limit: ai?.quota ?? null,
       value:
@@ -150,6 +148,7 @@ export function UsagePage() {
       ? [
           {
             key: 'emails',
+            note: t('usage.resetDaily'),
             used: emails.sent,
             limit: emails.cap,
             value: t('usage.ratio', { used: num(emails.sent), limit: num(emails.cap) }),
@@ -170,12 +169,70 @@ export function UsagePage() {
       </a>
     ) : null;
 
+  const byKey = (keys: string[]) =>
+    keys.map((k) => rows.find((r) => r.key === k)).filter((r): r is Row => !!r);
+  const list = (items: Row[]) => (
+    /* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */
+    <div data-gap-exempt="">
+      {items.map((r) => {
+        const pct = r.limit ? Math.min(100, Math.round((r.used / r.limit) * 100)) : null;
+        const state = pct === null || r.key === 'emails' ? '' : pct >= 100 ? 'full' : pct >= 80 ? 'warn' : '';
+        const name = t(`usage.rows.${r.key}`);
+        return (
+          <div
+            key={r.key}
+            className={`stg-row us-row${state ? ` us-row--${state}` : ''}${r.key === 'emails' ? ' us-emails' : ''}`}
+          >
+            <div className="stg-text" data-gap-exempt="">
+              <div className="stg-lab">{name}</div>
+              {r.note && <div className="stg-help">{r.note}</div>}
+            </div>
+            <div className="stg-ctl">
+              {pct !== null && !r.noMeter && (
+                <div
+                  className="stg-meter"
+                  role="meter"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={pct}
+                  aria-label={t('usage.meter', { name, pct })}
+                >
+                  <span style={{ width: `${pct}%` }} />
+                </div>
+              )}
+              {r.noMeter ? (
+                // Valeur sans jauge (durée) : texte de 14 px en 600
+                <b className="pv-value us-val">{r.value}</b>
+              ) : (
+                <span className="stg-help us-val">
+                  {r.value}
+                  {state && (
+                    <span className={`us-state us-state--${state}`}>
+                      <TriangleAlert size={16} aria-hidden="true" />
+                      {t(state === 'full' ? 'usage.full' : 'usage.near')}
+                    </span>
+                  )}
+                </span>
+              )}
+              {state === 'full' && (
+                <p className="stg-help us-blocked">
+                  {r.blocked} {askLink('us-ask', t('usage.askMore'))}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <SettingsShell legacy={false}>
+      {/* Décision UX du 22/11 : toutes les lignes réelles, en deux sections */}
       <section className="stg-sec us-page" aria-labelledby="us-title">
         <div className="stg-sec__head">
           <div>
-            <h2 id="us-title">{t('usage.title')}</h2>
+            <h2 id="us-title">{t('usage.contentTitle')}</h2>
             <p>{t('usage.sub', { workspace: current.name })}</p>
           </div>
           <div className="stg-sec__acts">
@@ -194,54 +251,16 @@ export function UsagePage() {
             )}
           </div>
         </div>
-        {/* §18.6 : rangées à filets, l'écart est porté par leur padding de 20 px */}
-        <div data-gap-exempt="">
-          {rows.map((r) => {
-            const pct = r.limit ? Math.min(100, Math.round((r.used / r.limit) * 100)) : null;
-            const state =
-              pct === null || r.key === 'emails' ? '' : pct >= 100 ? 'full' : pct >= 80 ? 'warn' : '';
-            const name = t(`usage.rows.${r.key}`);
-            return (
-              <div
-                key={r.key}
-                className={`stg-row us-row${state ? ` us-row--${state}` : ''}${r.key === 'emails' ? ' us-emails' : ''}`}
-              >
-                <div className="stg-text" data-gap-exempt="">
-                  <div className="stg-lab">{name}</div>
-                  {r.note && <div className="stg-help">{r.note}</div>}
-                </div>
-                <div className="stg-ctl">
-                  {pct !== null && !r.noMeter && (
-                    <div
-                      className="stg-meter"
-                      role="meter"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={pct}
-                      aria-label={t('usage.meter', { name, pct })}
-                    >
-                      <span style={{ width: `${pct}%` }} />
-                    </div>
-                  )}
-                  <span className="stg-help us-val">
-                    {r.value}
-                    {state && (
-                      <span className={`us-state us-state--${state}`}>
-                        <TriangleAlert size={16} aria-hidden="true" />
-                        {t(state === 'full' ? 'usage.full' : 'usage.near')}
-                      </span>
-                    )}
-                  </span>
-                  {state === 'full' && (
-                    <p className="stg-help us-blocked">
-                      {r.blocked} {askLink('us-ask', t('usage.askMore'))}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        {list(byKey(['published', 'members', 'storage', 'retention']))}
+      </section>
+      <section className="stg-sec us-page" aria-labelledby="us-month">
+        <div className="stg-sec__head">
+          <div>
+            <h2 id="us-month">{t('usage.monthTitle')}</h2>
+            {reset && <p>{reset}.</p>}
+          </div>
         </div>
+        {list(byKey(['ai', 'tts', 'stt', 'emails']))}
       </section>
     </SettingsShell>
   );

@@ -108,14 +108,25 @@ const SHOTS = process.env.SHOTS_DIR;
     'rôle en texte simple',
   );
   await page.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
-  await page.getByRole('menuitem', { name: 'Lecteur' }).click();
+  ok(
+    (await page.getByRole('menuitemradio').allInnerTexts()).join('|') === 'Admin|Éditeur|Lecteur' &&
+      (await page.locator('[role="menuitemradio"][aria-checked="true"]').count()) === 1,
+    'menu « ⋯ » : Admin, Éditeur, Lecteur en choix exclusifs, rôle courant coché',
+  );
+  // Nina est Lecteur : on la passe Admin (un vrai changement), le toast le confirme
+  ok(
+    (await page.getByRole('menuitemradio', { name: 'Lecteur' }).getAttribute('aria-checked')) === 'true',
+    'menu « ⋯ » : le rôle courant est coché',
+  );
+  await page.getByRole('menuitemradio', { name: 'Admin' }).click();
+  await page.getByText(/Rôle de Nina Roux\s?: Admin\./).waitFor();
   await page.waitForFunction(() =>
     [...document.querySelectorAll('.stg-table tbody tr')].some(
-      (r) => r.textContent.includes('Nina Roux') && r.children[2].textContent.trim() === 'Lecteur',
+      (r) => r.textContent.includes('Nina Roux') && r.children[2].textContent.trim() === 'Admin',
     ),
   );
   ok(
-    state.tables.members.find((m) => m.user_id === 'u-5')?.role === 'viewer',
+    state.tables.members.find((m) => m.user_id === 'u-5')?.role === 'admin',
     'menu « ⋯ » › Modifier le rôle : rôle enregistré',
   );
 

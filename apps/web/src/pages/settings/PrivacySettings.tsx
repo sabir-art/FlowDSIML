@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Select } from '@flowdsiml/ui';
+import { Button } from '@flowdsiml/ui';
 import { SettingsShell } from './SettingsShell';
 import { MeasureDialog } from '../analytics/returning';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -34,30 +34,14 @@ export function PrivacySettings() {
               <Button onClick={() => setOpen(true)}>{t('privacy.edit')}</Button>
             </div>
           </div>
-          <div className="stg-row">
+          <div className="stg-row stg-row--inline">
             <div className="stg-text" data-gap-exempt="">
-              <label className="stg-lab" htmlFor="pv-leads">
-                {t('privacy.leadsTitle')}
-              </label>
-              <div id="pv-leads-help" className="stg-help">
-                {t('privacy.leadsRetention', { count: analyticsRetentionDays })}
-              </div>
+              <div className="stg-lab">{t('privacy.leadsTitle')}</div>
+              <div className="stg-help">{t('privacy.leadsRetention', { count: analyticsRetentionDays })}</div>
             </div>
             <div className="stg-ctl">
-              {/* La durée suit les limites de l'espace : elle n'est pas réglable ici */}
-              <Select
-                id="pv-leads"
-                className="stg-short"
-                disabled
-                aria-describedby="pv-leads-help"
-                value={String(analyticsRetentionDays)}
-                options={[
-                  {
-                    value: String(analyticsRetentionDays),
-                    label: t('privacy.days', { count: analyticsRetentionDays }),
-                  },
-                ]}
-              />
+              {/* La durée suit les limites de l'espace : valeur en texte, non modifiable (décision UX du 22/11) */}
+              <b className="pv-value">{t('privacy.days', { count: analyticsRetentionDays })}</b>
             </div>
           </div>
         </div>
