@@ -22,13 +22,13 @@ insert into public.demos (id, workspace_id, title, created_by) values
 
 reset role;
 insert into public.events (workspace_id, demo_id, visitor_id, session_id, type, embed_origin, occurred_at) values
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'demo_view', null, now() - interval '2 days'),
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'demo_complete', null, now() - interval '2 days' + interval '1 minute'),
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'cta_click', null, now() - interval '2 days' + interval '1 minute'),
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v2', 's2', 'demo_view', 'site.example', now() - interval '1 day'),
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d2', 'v3', 's3', 'demo_view', null, now() - interval '1 day');
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'demo_view', null, date_trunc('day', now()) - interval '2 days' + interval '12 hours'),
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'demo_complete', null, date_trunc('day', now()) - interval '2 days' + interval '12 hours' + interval '1 minute'),
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v1', 's1', 'cta_click', null, date_trunc('day', now()) - interval '2 days' + interval '12 hours' + interval '1 minute'),
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v2', 's2', 'demo_view', 'site.example', date_trunc('day', now()) - interval '1 day' + interval '12 hours'),
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d2', 'v3', 's3', 'demo_view', null, date_trunc('day', now()) - interval '1 day' + interval '12 hours');
 insert into public.leads (workspace_id, demo_id, visitor_id, email, created_at) values
-  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v2', 'lea@example.com', now() - interval '1 day' + interval '1 minute');
+  ((select ws from ctx), '00000000-0000-0000-0000-00000000b0d1', 'v2', 'lea@example.com', date_trunc('day', now()) - interval '1 day' + interval '12 hours' + interval '1 minute');
 
 select pg_temp.login('00000000-0000-0000-0000-0000000000b1');
 create temp table a as select public.analytics_series((select ws from ctx), now() - interval '30 days') as j;
