@@ -2071,6 +2071,10 @@ button.onb-row:focus-visible {
   container: dsec / inline-size;
 }
 @container dsec (max-width: 639px) {
+  /* Maquette onb-b : 12 px entre la ligne du statut et celle des filtres */
+  .demos-section > .list-toolbar {
+    row-gap: 12px;
+  }
   /* Le groupe « Filtres » laisse ses contrôles se placer dans la barre : filtre principal sur la
      ligne 1, « Filtres · n » à gauche de la ligne 2, tri et affichage à droite */
   .list-toolbar > .fd-toolbar__group:first-child {

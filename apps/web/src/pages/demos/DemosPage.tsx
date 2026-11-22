@@ -346,7 +346,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   }, [load]);
   const sk = useSkeleton(!demos || !onb.ready);
   // ONB-01 : panneau de prise en main à droite, ouvert ou fermé selon le dernier choix de la personne
-  const [onbOpen, setOnbOpen, onbResumed] = useOnboardingOpen(ws.id);
+  const onbAdmin = ws.role === 'owner' || ws.role === 'admin';
+  const onbProgress = onboardingProgress(onb.state, onbAdmin, can('demo.edit'));
+  // Espace tout neuf (aucune étape faite) : ouvert à la première visite du propriétaire ou d'un admin
+  const [onbOpen, setOnbOpen, onbResumed] = useOnboardingOpen(ws.id, onbAdmin && onbProgress?.n === 0);
   const closeOnb = useCallback(() => setOnbOpen(false), [setOnbOpen]);
   useMainBusy((!demos || !onb.ready || sk.phase !== 'content') && !loadError);
   const retry = () => {
@@ -674,11 +677,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
 
   // ONB-01 : le panneau ne concerne que « Toutes les démos »
   // Quand tout est fait, le bouton a disparu : le panneau ne revient que par « Reprendre » dans l'aide
-  const onbProgress = onboardingProgress(
-    onb.state,
-    ws.role === 'owner' || ws.role === 'admin',
-    can('demo.edit'),
-  );
   const onbShown =
     onbOpen && !sandbox && scope === 'all' && !!onbProgress && (!onbProgress.complete || onbResumed);
 

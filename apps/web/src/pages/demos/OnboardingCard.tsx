@@ -91,24 +91,46 @@ export function useOnboarding({ deferred = false }: { deferred?: boolean } = {})
 }
 export type Onboarding = ReturnType<typeof useOnboarding>;
 
-/** Étapes visibles pour la personne, et avancement ; null si la prise en main ne la concerne pas. */
+/** §18.4 : extension pas encore publiée, l'étape est en « Bientôt » (ni action, ni compte). */
+const isSoon = (s: Step) => s === 'extension' && !EXTENSION_URL;
+
+/**
+ * Étapes visibles pour la personne, et avancement ; null si la prise en main ne la concerne pas.
+ * Une étape « Bientôt » reste affichée mais sort du total : n/6 tant que l'extension n'est pas disponible.
+ */
 export function onboardingProgress(state: State | null, admin: boolean, editor: boolean) {
   if (!state || !editor) return null;
   const visible: Step[] = admin ? [...STEPS] : EDITOR_STEPS;
-  const done = visible.filter((s) => state.steps[s]);
-  return { visible, done, n: done.length, total: visible.length, complete: done.length === visible.length };
+  const counted = visible.filter((s) => !isSoon(s));
+  const done = counted.filter((s) => state.steps[s]);
+  return { visible, done, n: done.length, total: counted.length, complete: done.length === counted.length };
 }
 
-/** Préférence « panneau ouvert », gardée par personne et par espace. */
-export function useOnboardingOpen(wsId: string) {
+/**
+ * Préférence « panneau ouvert », gardée par personne et par espace. Sans choix encore fait, le panneau
+ * s'ouvre si `defaultOpen` (première visite d'un espace tout neuf par son propriétaire ou un admin).
+ */
+export function useOnboardingOpen(wsId: string, defaultOpen: boolean) {
   const key = `fd.onb.open.${wsId}`;
-  const [open, setOpenState] = useState(() => {
+  const [choice, setOpenState] = useState<boolean | null>(() => {
     try {
-      return localStorage.getItem(key) === '1';
+      const v = localStorage.getItem(key);
+      return v === null ? null : v === '1';
     } catch {
-      return false;
+      return null;
     }
   });
+  const open = choice ?? defaultOpen;
+  // La première ouverture par défaut devient le choix gardé
+  useEffect(() => {
+    if (choice !== null || !defaultOpen) return;
+    setOpenState(true);
+    try {
+      localStorage.setItem(key, '1');
+    } catch {
+      /* préférence non gardée */
+    }
+  }, [choice, defaultOpen, key]);
   const setOpen = useCallback(
     (v: boolean) => {
       setOpenState(v);
@@ -286,12 +308,11 @@ export function OnboardingPanel({
       }
     }
   };
-  /** §18.4 : extension pas encore publiée, « Bientôt » à la place de l'action. */
-  const soon = (s: Step) => s === 'extension' && !EXTENSION_URL;
-  const todo = p.visible.filter((s) => !state.steps[s]);
-  // La prochaine étape conseillée est la première qui a une action
-  const next = todo.find((s) => !soon(s)) ?? null;
-  const later = todo.filter((s) => s !== next);
+  const soon = isSoon;
+  // Une étape « Bientôt » n'est jamais cochée ni proposée : elle vient en dernier, en gris
+  const todo = p.visible.filter((s) => !soon(s) && !state.steps[s]);
+  const next = todo[0] ?? null;
+  const later = [...todo.slice(1), ...p.visible.filter(soon)];
   const NextIcon = next ? ICONS[next] : null;
   const nextAction = next ? action(next) : null;
 

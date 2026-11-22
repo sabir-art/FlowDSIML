@@ -42,20 +42,20 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== ONB-01 : bouton d'entrée, panneau fermé par défaut =====
   await page.goto(`${BASE}/#/`);
-  const toggle = page.getByRole('button', { name: /^Prise en main 3\/7/ });
+  const toggle = page.getByRole('button', { name: /^Prise en main 2\/6/ });
   await toggle.waitFor();
   const card = page.getByRole('complementary', { name: 'Prise en main' });
   ok(
     (await toggle.getAttribute('aria-expanded')) === 'false' && (await card.count()) === 0,
-    'bouton « Prise en main 3/7 » dans le PageHeader, panneau fermé par défaut',
+    'bouton « Prise en main 2/6 » dans le PageHeader (l’extension en « Bientôt » sort du total), panneau fermé par défaut',
   );
   ok(
     sp(await toggle.innerText())
       .replace(/\s+/g, ' ')
-      .startsWith('Prise en main 3/7') &&
+      .startsWith('Prise en main 2/6') &&
       (await toggle.locator('svg.onb-ring').count()) === 1 &&
       (await toggle.evaluate((el) => !!el.closest('.fd-page-header__actions'))),
-    'libellé « Prise en main 3/7 » avec l’anneau de progression',
+    'libellé « Prise en main 2/6 » avec l’anneau de progression',
   );
   ok((await page.locator('.onb-card').count()) === 0, 'plus de carte dans le flux de la page');
   const gridBefore = await page.locator('.demos-wrap').boundingBox();
@@ -81,9 +81,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       (await card.getAttribute('role')) === null,
     'filet à gauche, ni modale ni dialogue',
   );
-  ok(/3 étapes sur\s7\. Elles se cochent seules/.test(sp(await card.innerText())), '« 3 étapes sur 7 »');
+  ok(/2 étapes sur\s6\. Elles se cochent seules/.test(sp(await card.innerText())), '« 2 étapes sur 6 »');
   const bar = card.getByRole('progressbar');
-  ok(sp(await bar.getAttribute('aria-valuetext')) === '3 étapes sur 7', 'progression : aria-valuetext');
+  ok(sp(await bar.getAttribute('aria-valuetext')) === '2 étapes sur 6', 'progression : aria-valuetext');
   const next = card.locator('.onb-next');
   ok(
     /Prochaine étape/i.test(await next.innerText()) &&
@@ -97,21 +97,28 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok((await next.locator('.fd-btn--primary', { hasText: 'Voir comment' }).count()) === 1, 'bouton principal');
   ok((await card.locator('.fd-btn--primary').count()) === 1, 'une seule action principale dans le panneau');
   ok(
-    /À faire ensuite\s*3/.test(sp(await card.locator('.onb-h3').innerText())) &&
-      (await card.locator('.onb-rows:not(.onb-rows--done) li').count()) === 3,
-    '« À faire ensuite 3 » en lignes compactes',
+    /À faire ensuite\s*4/.test(sp(await card.locator('.onb-h3').innerText())) &&
+      (await card.locator('.onb-rows:not(.onb-rows--done) li').count()) === 4,
+    '« À faire ensuite 4 » en lignes compactes',
+  );
+  const lastRow = card.locator('.onb-rows:not(.onb-rows--done) li').last();
+  ok(
+    /Installer l’extension/.test(await lastRow.innerText()) &&
+      (await lastRow.locator('.onb-soon', { hasText: 'Bientôt' }).count()) === 1 &&
+      (await lastRow.locator('button').count()) === 0,
+    'l’étape « Bientôt » vient en dernier, en gris, sans action',
   );
   const doneBtn = card.getByRole('button', { name: /^Terminées/ });
   ok(
     (await doneBtn.getAttribute('aria-expanded')) === 'false' &&
       (await card.locator('.onb-rows--done').count()) === 0,
-    '« Terminées 3 » replié',
+    '« Terminées 2 » replié',
   );
   await doneBtn.click();
   ok(
-    (await card.locator('.onb-rows--done li').count()) === 3 &&
-      (await card.locator('.onb-rows--done .sr-only', { hasText: 'Fait' }).count()) === 3,
-    'déplié : 3 étapes faites, « Fait » pour les lecteurs d’écran',
+    (await card.locator('.onb-rows--done li').count()) === 2 &&
+      (await card.locator('.onb-rows--done .sr-only', { hasText: 'Fait' }).count()) === 2,
+    'déplié : 2 étapes faites (l’extension en « Bientôt » n’est pas cochée), « Fait » pour les lecteurs d’écran',
   );
   await doneBtn.click();
   ok((await page.locator('.gs-banner').count()) === 0, 'remplace « Premiers pas »');
@@ -236,6 +243,38 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     '7 sur 7 : l’aide rouvre le panneau, « Votre espace est prêt »',
   );
 
+  // ===== Espace tout neuf : panneau ouvert à la première visite du propriétaire =====
+  {
+    const nctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+    const n = await nctx.newPage();
+    n.on('pageerror', (e) => errors.push(e.message));
+    const ns = seed();
+    // Aucune étape faite : l'espace vient d'être créé
+    ns.onboarding = {
+      brand: false,
+      extension: false,
+      capture: false,
+      pii: false,
+      publish: false,
+      invite: false,
+      distribute: false,
+    };
+    await install(n, ns);
+    await n.goto(`${BASE}/#/`);
+    const np = n.getByRole('complementary', { name: 'Prise en main' });
+    await np.waitFor();
+    ok(
+      (await n.locator('#onb-toggle').getAttribute('aria-expanded')) === 'true' &&
+        /^Prise en main\s*0\/6/.test(await n.locator('#onb-toggle').textContent()),
+      'espace neuf (0/6) : panneau ouvert à la première visite du propriétaire',
+    );
+    await np.getByRole('button', { name: 'Masquer la prise en main' }).click();
+    await n.reload();
+    await n.locator('#onb-toggle').waitFor();
+    ok((await np.count()) === 0, 'espace neuf : une fois fermé, il reste fermé (choix gardé)');
+    await nctx.close();
+  }
+
   // ===== Sous 1 024 px : anneau seul de 44 px, tiroir modal par la droite =====
   {
     const mctx = await themedContext(b, { viewport: { width: 390, height: 844 } });
@@ -251,7 +290,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     ok(
       Math.round(rb.width) === 44 &&
         Math.round(rb.height) === 44 &&
-        /^Prise en main\s*3\/7/.test(await ring.textContent()),
+        /^Prise en main\s*2\/6/.test(await ring.textContent()),
       `390 px : bouton réduit à l’anneau de 44 px, nom accessible gardé (${Math.round(rb.width)} × ${Math.round(rb.height)})`,
     );
     await ring.click();
