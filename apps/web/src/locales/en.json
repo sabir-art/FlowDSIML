@@ -5088,6 +5088,8 @@
     "tabs": {
       "newCount_one": "{{count}} new",
       "newCount_other": "{{count}} new",
+      "triageCount_one": "{{count}} to triage",
+      "triageCount_other": "{{count}} to triage",
       "overview": "Overview",
       "feedback": "Feedback",
       "feedbackN_one": "Feedback · {{count}} new",

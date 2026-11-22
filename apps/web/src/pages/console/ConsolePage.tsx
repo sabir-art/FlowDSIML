@@ -67,13 +67,18 @@ function ConsoleFrame() {
   }, []);
   const tabs = [
     { to: '/console', end: true, label: t('console.tabs.overview') },
-    // Compteur des retours nouveaux en pastille ; le libellé complet reste le nom accessible
-    { to: '/console/retours', label: t('console.tabs.feedback'), count: counts?.newComments || 0 },
+    // Compteurs (retours nouveaux, éléments à trier) en pastille ; le nom accessible les dit en clair
+    {
+      to: '/console/retours',
+      label: t('console.tabs.feedback'),
+      count: counts?.newComments || 0,
+      hint: 'console.tabs.newCount',
+    },
     {
       to: '/console/backlog',
-      label: counts?.triage
-        ? t('console.tabs.backlogN', { count: counts.triage })
-        : t('console.tabs.backlog'),
+      label: t('console.tabs.backlog'),
+      count: counts?.triage || 0,
+      hint: 'console.tabs.triageCount',
     },
     { to: '/console/nouveautes', label: t('console.tabs.news') },
     { to: '/console/equipe', label: t('console.tabs.team') },
@@ -88,7 +93,7 @@ function ConsoleFrame() {
               <span className="console-tab__n" aria-hidden="true">
                 {x.count}
               </span>
-              <span className="sr-only">{t('console.tabs.newCount', { count: x.count })}</span>
+              <span className="sr-only">{t(x.hint!, { count: x.count })}</span>
             </>
           ) : null}
         </NavLink>

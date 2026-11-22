@@ -5088,6 +5088,8 @@
     "tabs": {
       "newCount_one": "{{count}} nouveau",
       "newCount_other": "{{count}} nouveaux",
+      "triageCount_one": "{{count}} à trier",
+      "triageCount_other": "{{count}} à trier",
       "overview": "Vue d’ensemble",
       "feedback": "Retours",
       "feedbackN_one": "Retours · {{count}} nouveau",

@@ -452,10 +452,11 @@
   .console-col {
     scroll-snap-align: start;
   }
+  /* PAGE-01 §16.2 (maquette console-390) : les 4 indicateurs restent en 2 × 2 */
   .console-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .console-stat + .console-stat {
+  .console-stat:nth-child(odd) {
     border-left: 0;
   }
 }
