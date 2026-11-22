@@ -4403,7 +4403,10 @@
     "edit": "Edit",
     "leadsTitle": "Lead retention",
     "leadsRetention_one": "Leads are deleted after {{count}} day.",
-    "leadsRetention_other": "Leads are deleted after {{count}} days."
+    "leadsRetention_other": "Leads are deleted after {{count}} days.",
+    "returningTitle": "Returning visitors",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
   },
   "rules": {
     "title": "Sharing rules",

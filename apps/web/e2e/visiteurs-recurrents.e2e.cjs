@@ -168,12 +168,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.goto(`${APP}/#/settings/privacy`);
   await page.getByRole('heading', { level: 1, name: 'Confidentialité' }).waitFor();
   ok(
-    sp(await page.locator('.setting').first().innerText()).includes('nouvelle visite après 30 minutes'),
+    sp(await page.locator('.stg-row').first().innerText()).includes('nouvelle visite après 30 minutes'),
     'Confidentialité : état',
   );
   // 171 : durée de conservation des leads, celle du plan (Pro : 365 jours)
   ok(
-    sp(await page.locator('.setting').nth(1).innerText()).includes(
+    sp(await page.locator('.stg-row').nth(1).innerText()).includes(
       'Les leads sont supprimés après 365 jours.',
     ),
     'Confidentialité : conservation des leads',

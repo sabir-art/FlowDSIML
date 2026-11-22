@@ -4403,7 +4403,10 @@
     "edit": "Modifier",
     "leadsTitle": "Conservation des leads",
     "leadsRetention_one": "Les leads sont supprimés après {{count}} jour.",
-    "leadsRetention_other": "Les leads sont supprimés après {{count}} jours."
+    "leadsRetention_other": "Les leads sont supprimés après {{count}} jours.",
+    "returningTitle": "Visiteurs qui reviennent",
+    "days_one": "{{count}} jour",
+    "days_other": "{{count}} jours"
   },
   "rules": {
     "title": "Règles de partage",
