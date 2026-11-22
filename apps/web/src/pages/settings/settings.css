@@ -355,3 +355,11 @@
   border: 0;
   box-shadow: none;
 }
+/* FIELD-01 : le champ verrouillé et le segmenté gardent leur indicateur de focus (trait prune de 2 px) */
+.st-wrap--plain .fd-input.stg-input--locked:focus {
+  border-color: var(--fd-color-primary);
+}
+.st-wrap--plain .segmented.stg-seg button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
