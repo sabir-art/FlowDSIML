@@ -23,47 +23,163 @@
   /* FIELD-01 : même grille d'états que tous les champs (border-field, 3,07:1 ; sans ombre) */
 }
 
-/* L40 : titre de section sur sa ligne, barre de liste (16 px au-dessus et au-dessous), puis la liste */
+/* Lot 2 : titre de section (16 px en 600) et compteur, 12 px, barre de liste, 20 px, liste */
 .demos-section {
   display: flex;
   flex-direction: column;
-  gap: var(--fd-space-4);
-  margin-top: var(--fd-space-4);
+}
+.demos-list-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 .demos-list-title {
   margin: 0;
-  font-size: var(--fd-text-h2-size);
+  font: 600 16px / 21px var(--fd-font-sans);
+}
+.demos-list-count {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.demos-section > .list-toolbar {
+  gap: 8px;
+  margin-bottom: 20px;
+}
+/* Barre de liste du lot 2 : contrôles de 36 px, filtres à coins de 10 px (COMP-01) */
+.demos-section .list-toolbar .fd-btn {
+  height: 36px;
+}
+.demos-section .fd-toolbar .fd-segmented {
+  padding: 3px;
+  border: 0;
+}
+.demos-section .fd-toolbar .fd-segmented > button {
+  height: 30px;
+  min-height: 30px;
+  padding: 0 12px;
+  font: 500 13px var(--fd-font-sans);
+}
+.demos-section .fd-toolbar .fd-segmented > button:is([aria-pressed='true'], [aria-checked='true']) {
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+}
+.demos-section .fd-toolbar .fd-segmented--icons > button {
+  width: 32px;
+  padding: 0;
+}
+.demos-section .fd-toolbar .fd-segmented--icons svg {
+  width: 16px;
+  height: 16px;
+}
+.demos-section .fd-filter {
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  box-shadow: none;
+  font: 500 13px var(--fd-font-sans);
+}
+.demos-section .fd-filter:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+/* Filtre au repos : son nom seul ; actif : la valeur choisie, en 600 */
+.demos-section .fd-filter:not(.fd-filter--sort) .fd-filter__icon {
+  display: none;
+}
+/* Masqués à l'œil seulement : le nom accessible reste « Créé par : Tous » */
+.demos-section .fd-filter .fd-filter__colon,
+.demos-section .fd-filter:not(.fd-filter--active, .fd-filter--sort, .list-toolbar__more) .fd-filter__value {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) {
+  width: auto;
+  padding: 0 10px;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__label {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+}
+.demos-section .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__chev {
+  display: inline;
+}
+.demos-section .fd-filter--active {
+  background: var(--fd-color-surface);
+  border-color: var(--fd-color-border-field);
+}
+.demos-section .fd-filter--active .fd-filter__value {
+  color: var(--fd-color-text);
+}
+/* Tri : icône seule, carré de 36 px */
+.demos-section .list-toolbar .fd-filter--sort {
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+.demos-section .list-toolbar .fd-filter--sort :is(.fd-filter__label, .fd-filter__value) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.demos-section .list-toolbar .fd-filter--sort .fd-filter__chev {
+  display: none;
+}
+.demos-section .fd-toolbar__reset {
+  width: 36px;
+  border-radius: 10px;
 }
 
-/* Grille de cartes de démo */
+/* Grille de cartes de démo : colonnes de 240 px au moins, 24 px d'écart (16 px sous 768 px) */
 .demo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--fd-space-5);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
+@media (max-width: 767px) {
+  .demo-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+/* Carte : filet, rayon de 16 px, sans ombre ; vignette pleine largeur */
 .demo-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: var(--fd-space-3);
-  transition: box-shadow var(--fd-motion-duration-fast, 120ms);
+  padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+  box-shadow: none;
+  transition: border-color var(--fd-motion-duration-fast, 120ms);
 }
 .demo-card:hover {
-  box-shadow: var(--fd-shadow-md);
+  border-color: var(--fd-color-border-field);
 }
 .demo-card:focus-within {
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
-/* Vignette arrondie dans un fond sunken, toujours claire (.fd-player-scope) */
+/* Vignette toujours claire (.fd-player-scope), filet en bas */
 .demo-cover {
   display: grid;
   place-items: center;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  border-radius: var(--fd-radius-xl);
+  border-radius: 15px 15px 0 0;
+  border-bottom: 1px solid var(--fd-color-border);
   background: var(--fd-color-surface-sunken);
   color: var(--fd-color-text-subtle);
 }
@@ -73,24 +189,31 @@
   object-fit: cover;
   object-position: top left;
 }
+.demo-card > .ct-badge--cover {
+  top: 10px;
+  left: 10px;
+  height: 24px;
+}
+.demo-card > .ct-badge--cover svg {
+  width: 16px;
+  height: 16px;
+}
 .demo-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--fd-space-2);
-  padding: var(--fd-space-4) var(--fd-space-2) var(--fd-space-1);
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px 14px;
 }
 .demo-head {
   display: flex;
-  align-items: flex-start;
-  gap: var(--fd-space-2);
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
 }
 .demo-head h3 {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.35;
+  font: 600 15px / 19px var(--fd-font-sans);
 }
 .demo-link {
   color: inherit;
@@ -112,42 +235,62 @@
 .demo-head .menu {
   position: relative;
   z-index: var(--fd-z-raised);
+  margin-right: -8px;
+}
+.demo-head .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.demo-head .menu-trigger[aria-expanded='true'] {
+  background: var(--fd-color-nav-active);
+  color: var(--fd-color-text);
 }
 .demo-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--fd-space-2);
-  font-size: var(--fd-text-caption-size);
+  gap: 4px 8px;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--fd-color-text-muted);
 }
-
-/* Carte « Nouvelle démo » : bordure pointillée, bouton rond au centre */
-.demo-new {
-  display: flex;
-}
-.demo-new__btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--fd-space-2);
-  min-height: 260px;
-  padding: var(--fd-space-6);
-  border: 2px dashed var(--fd-color-border-strong);
-  border-radius: var(--fd-radius-2xl);
-  background: transparent;
+/* Statut : point de 7 px et libellé de 12 px en 500 */
+.demo-meta .fd-status {
+  gap: 6px;
+  font: 500 12px / 15px var(--fd-font-sans);
   color: var(--fd-color-text);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
 }
-.demo-new__btn:hover {
-  background: var(--fd-color-surface-hover);
+.demo-meta .fd-status::before {
+  width: 7px;
+  height: 7px;
 }
-.demo-new__btn .fd-btn--round {
-  margin-bottom: var(--fd-space-2);
+/* Ligne des étiquettes : toujours 24 px, même vide */
+.demo-body > .tg-row {
+  min-height: 24px;
+  margin-top: 0;
+  gap: 6px;
+  align-items: center;
+}
+.demo-body .tg-line {
+  gap: 6px;
+}
+.demo-body .tg-add {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px dashed var(--fd-color-border-field);
+  border-radius: 999px;
+  color: var(--fd-color-text-muted);
+  font: 500 12px var(--fd-font-sans);
+  box-sizing: border-box;
+}
+.demo-body .tg-add:hover {
+  text-decoration: none;
+  color: var(--fd-color-text);
+  border-color: var(--fd-color-border-field-hover);
 }
 
 .card-title {
@@ -168,26 +311,28 @@
 }
 .demo-cover-empty .fake {
   position: absolute;
-  inset: 12px;
-  border-radius: var(--fd-radius-md);
+  inset: 14% 10% 0;
+  border-radius: 8px 8px 0 0;
   background: var(--fd-color-surface);
-  box-shadow: var(--fd-shadow-xs);
+  box-shadow: 0 4px 12px rgb(8 10 14 / 0.08);
 }
 .demo-cover-empty .fake::before {
   content: '';
   position: absolute;
-  inset: 0 0 auto;
-  height: 14px;
-  border-radius: var(--fd-radius-md) var(--fd-radius-md) 0 0;
+  top: 10px;
+  left: calc(26% + 12px);
+  width: 40%;
+  height: 8px;
+  border-radius: 4px;
   background: var(--fd-color-border);
 }
 .demo-cover-empty .dot {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--fd-color-hotspot);
-  box-shadow: 0 0 0 4px var(--fd-color-surface);
+  background: var(--fd-color-primary);
+  box-shadow: 0 0 0 2px #fff;
 }
 
 @media (max-width: 640px) {
@@ -196,9 +341,14 @@
   }
 }
 /* DSH-02 : vue liste */
+/* Lot 2 : tableau à filets sur le fond de la page (pas de carte), lignes de 56 px */
 .demo-table-wrap {
   padding: 0;
   overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
 }
 .demo-table td.nowrap {
   /* Complétion et Modifiée sur une ligne (les étiquettes passent à la ligne dans la colonne Nom) */
@@ -211,19 +361,35 @@
 }
 .demo-table th {
   text-align: left;
-  font: 600 var(--fd-text-caption-size) / 1.3 var(--fd-font-sans);
+  font: 500 12px / 1.5 var(--fd-font-sans);
   color: var(--fd-color-text-muted);
-  padding: 12px 16px;
+  padding: 12px;
   border-bottom: 1px solid var(--fd-color-border);
   white-space: nowrap;
 }
 .demo-table td {
-  padding: 10px 16px;
+  height: 56px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--fd-color-border);
   vertical-align: middle;
 }
-.demo-table tr:last-child td {
-  border-bottom: 0;
+.demo-table td:last-child,
+.demo-table th:last-child {
+  width: 48px;
+}
+.demo-table .menu-trigger {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 767px) {
+  .demo-table thead {
+    display: none;
+  }
+  .demo-table td {
+    padding: 0 6px;
+  }
 }
 .demo-table .r {
   text-align: right;
@@ -246,8 +412,8 @@
 }
 .dt-thumb {
   flex: none;
-  width: 56px;
-  height: 35px;
+  width: 40px;
+  height: 26px;
   border-radius: 6px;
   overflow: hidden;
   background: var(--fd-color-surface-sunken);
@@ -278,21 +444,8 @@
   background: var(--fd-color-text);
   border-radius: inherit;
 }
-/* DSH-06 : modale « Nouvelle démo » */
-.new-demo-dialog {
-  width: min(880px, calc(100vw - 32px));
-}
-/* L48-G §3 : étape 1, type de contenu (3 cartes radio illustrées) */
-.nd-titles h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.nd-step {
-  margin: 4px 0 0;
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-muted);
-}
+/* DSH-06, lot 2 : modale « Nouvelle démo » au gabarit MODAL-01 (560 px) */
+/* Étape 1 : un choix par ligne (tuile de 40 px, nom et phrase, bouton radio de 18 px) */
 .nd-types {
   border: 0;
   margin: 0;
@@ -301,125 +454,98 @@
 }
 .nd-legend {
   padding: 0;
-  margin-bottom: var(--fd-space-3);
-  font-weight: 600;
+  margin-bottom: 6px;
+  font: 500 14px / 18px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
 }
 .nd-types__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--fd-space-3);
+  gap: 12px;
 }
 .nd-type {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid var(--fd-color-border);
-  border-radius: var(--fd-radius-lg);
-  background: var(--fd-color-surface);
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 18px;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 12px;
   cursor: pointer;
 }
-.nd-type.is-selected {
-  /* L48-G écart 1 : contour de 2 px couleur texte, ni fond ni bordure primaire */
-  border-color: transparent;
-  outline: 2px solid var(--fd-color-text);
-  outline-offset: -1px;
+.nd-type:hover {
+  border-color: var(--fd-color-border-field-hover);
 }
+.nd-type.is-selected {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-tint);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.nd-type__tile {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+}
+.nd-type__tile > svg {
+  width: 18px;
+  height: 18px;
+}
+/* Bouton radio maison (COMP-01) : anneau de 18 px, point de 8 px */
 .nd-type input {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
   margin: 0;
-  accent-color: var(--fd-color-primary);
+  border: 1.5px solid var(--fd-color-border-field);
+  border-radius: 50%;
+  background: none;
+  cursor: inherit;
+}
+.nd-type input:checked {
+  border-color: var(--fd-color-primary);
+}
+.nd-type input:checked::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+}
+.nd-type input:focus-visible {
+  outline: none;
 }
 .nd-type:has(input:focus-visible) {
-  outline: none;
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
-}
-.nd-art {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: block;
-}
-.nd-art__bg {
-  fill: var(--fd-color-surface-sunken);
-}
-.nd-art__card {
-  fill: var(--fd-color-surface);
-  stroke: var(--fd-color-border);
-}
-.nd-art__card--on {
-  stroke: var(--fd-color-primary);
-  stroke-width: 2;
-}
-.nd-art__line {
-  fill: var(--fd-color-border);
-}
-.nd-art__dash {
-  fill: none;
-  stroke: var(--fd-color-primary);
-  stroke-dasharray: 3 2;
-}
-.nd-art__stroke {
-  fill: none;
-  stroke: var(--fd-color-text-muted);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.nd-art__dot {
-  fill: var(--fd-color-primary);
-}
-.nd-art__bubble {
-  fill: var(--fd-color-text);
-}
-.nd-art__on {
-  fill: var(--fd-color-surface);
 }
 .nd-type__txt {
   display: grid;
-  gap: 6px;
-  font-size: var(--fd-text-caption-size);
+  min-width: 0;
+  font-size: 13px;
+  line-height: 19.5px;
   color: var(--fd-color-text-muted);
 }
 .nd-type__txt b {
-  font-size: 16px;
-  font-weight: 700;
+  font: 700 14px / 21px var(--fd-font-sans);
   color: var(--fd-color-text);
 }
-.nd-next {
+.nd-chosen {
   margin: 0;
-  font-size: var(--fd-text-caption-size);
-  color: var(--fd-color-text-muted);
 }
-@media (max-width: 720px) {
-  .nd-types__grid {
-    grid-template-columns: 1fr;
-  }
-  .nd-type {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .nd-art {
-    width: 96px;
-    flex: none;
-  }
-  .nd-next {
-    display: none;
-  }
+.new-demo-dialog .fd-modal__foot > .nd-back {
+  margin-right: auto;
 }
-.nd-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* §18.6 : titre et bouton Fermer à 8 px au moins (390 px) */
-  gap: var(--fd-space-2);
-  margin-bottom: var(--fd-space-4);
+.new-demo-dialog .fd-modal__foot > .nd-back + .nd-empty {
+  margin-left: -4px;
 }
-.nd-head h2 {
-  margin: 0;
-  font-size: 1.25rem;
+@media (max-width: 479px) {
+  .new-demo-dialog .fd-modal__foot {
+    flex-wrap: wrap;
+  }
 }
 /* L48-G écart 2 : sources en liste (icône, nom, phrase, chevron) */
 .nd-sources {
@@ -488,7 +614,7 @@ button.nd-src:focus-visible {
   color: var(--fd-color-text-muted);
 }
 .nd-folder {
-  margin-top: var(--fd-space-4);
+  margin: 0;
 }
 /* L38-13 : lien « Ouvrir le réglage » sous la ligne IA (empilés, pas sur la même ligne) */
 .nd-ai {
@@ -501,9 +627,6 @@ button.nd-src:focus-visible {
 .nd-ai > a {
   display: block;
   padding: 0 16px 12px 48px;
-}
-.nd-actions .grow {
-  flex: 1;
 }
 /* DSH-03 : bandeau « Premiers pas » (fond rosé, jauge couleur marque) */
 .gs-banner {
@@ -928,22 +1051,14 @@ button.nd-src:focus-visible {
   .onb-bar {
     display: none;
   }
-  .onb-list li {
-    grid-template-columns: 20px minmax(0, 1fr) auto;
-  }
 }
-/* Petits écrans : « Masquer la prise en main » passe sous le texte (pas de colonne étroite) */
-@media (max-width: 600px) {
-  .onb-foot {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: start;
-    row-gap: 8px;
-  }
-  .onb-foot > .fd-btn {
-    grid-column: 2;
-    justify-self: start;
-    margin: 0 0 0 -8px;
+/* Sous 768 px : le pied garde l'icône d'information et le bouton ; la phrase reste lue */
+@media (max-width: 767px) {
+  .onb-foot > .onb-grow {
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 /* Lot 2 : indicateurs en bandeau sans ombre (rayon de 16 px, filets pleine hauteur) */
@@ -1161,7 +1276,8 @@ button.nd-src:focus-visible {
   font: 500 12px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
 }
-.ph-narrow {
+.ph-narrow,
+.fd-btn.ph-search-btn {
   display: none;
 }
 @media (max-width: 767px) {
@@ -1171,9 +1287,33 @@ button.nd-src:focus-visible {
   .ph-narrow {
     display: inline;
   }
-  .ph-search {
+  /* Recherche repliée en bouton d'icône de 36 px ; ouverte, le champ prend la place du titre */
+  .fd-btn.ph-search-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    color: var(--fd-color-text);
+  }
+  .fd-btn.ph-search-btn > svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.1;
+  }
+  .ph-search:not(.is-open) {
+    display: none;
+  }
+  .ph-search.is-open {
     flex: 1;
     width: auto;
+    min-width: 0;
+  }
+  .fd-page-header:has(.ph-search.is-open) :is(.fd-page-header__title, .ph-search-btn) {
+    display: none;
+  }
+  .fd-page-header:has(.ph-search.is-open) .fd-page-header__actions {
+    flex: 1;
     min-width: 0;
   }
   .ph-search kbd {
@@ -1440,7 +1580,7 @@ button.nd-src:focus-visible {
 .nd-type.is-off {
   cursor: not-allowed;
 }
-.nd-type.is-off .nd-art {
+.nd-type.is-off .nd-type__tile {
   opacity: 0.55;
 }
 .nd-type__off {
@@ -1455,4 +1595,7 @@ button.nd-src:focus-visible {
 .sb-dead-count {
   color: var(--fd-color-danger);
   font-weight: 600;
+}
+.demo-table .tg-row--list {
+  margin: 2px 0 6px 52px;
 }

@@ -5335,7 +5335,8 @@
     "author": "Créé par",
     "me": "Moi",
     "access": "Accès au dossier",
-    "backTo": "Retour à {{page}}"
+    "backTo": "Retour à {{page}}",
+    "visibleAll": "Tout l’espace peut voir ce dossier."
   },
   "empty": {
     "searchBody_zero": "Vérifiez l’orthographe, ou essayez un autre mot.",
@@ -5376,15 +5377,15 @@
       "sandbox": "Sandbox"
     },
     "line": {
-      "captures": "Un parcours guidé, une capture d'écran par étape, avec une bulle à chaque clic.",
-      "html": "Un parcours guidé sur de vraies pages HTML : textes et données modifiables, net sur tous les écrans.",
-      "sandbox": "Des pages HTML reliées entre elles : le visiteur explore librement, sans étapes imposées."
+      "captures": "Un parcours guidé, une capture par étape, avec une bulle à chaque clic.",
+      "html": "De vraies pages HTML : textes et données modifiables, nettes sur tous les écrans.",
+      "sandbox": "Des pages reliées : le visiteur explore librement, sans étapes imposées."
     },
     "question": "Que voulez-vous créer ?",
     "stepOf": "Étape {{n}} sur {{total}}",
     "step1": "Type de contenu",
     "step2": "Source",
-    "nextHint": "Étape suivante : la source (extension, images, modèle…)",
+    "nextHint": "Ensuite : la source (extension, images, modèle…)",
     "newTitle": {
       "captures": "Nouvelle démo par captures",
       "html": "Nouvelle démo HTML",

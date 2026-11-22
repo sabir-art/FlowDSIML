@@ -61,7 +61,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: /^Brouillons · 1/ }).click();
   ok((await page.locator('.demo-card').count()) === 1, 'filtre par statut (segmenté)');
   await page.getByRole('button', { name: /^Toutes · 2/ }).click();
-  ok((await page.locator('.demo-new__btn').count()) === 1, 'carte « Nouvelle démo » en fin de grille');
+  ok(
+    (await page.locator('.demo-new__btn').count()) === 0,
+    'lot 2 : pas de carte « Nouvelle démo » en fin de grille (bouton du PageHeader)',
+  );
 
   // L48-A : colonne Dossiers (au-dessus de 1 024 px)
   ok((await page.locator('.folder-pills').count()) === 0, 'pas de rangée de dossiers');

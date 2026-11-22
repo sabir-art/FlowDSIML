@@ -60,7 +60,7 @@ export function FilterContent({ icon, label, value }: { icon: ReactNode; label: 
       </span>
       <span className="fd-filter__label">
         {label}
-        {NNBSP}:{' '}
+        <span className="fd-filter__colon">{NNBSP}: </span>
       </span>
       <span className="fd-filter__value" title={value}>
         {value}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, ImagePlus, LayoutTemplate, Puzzle, WandSparkles, X } from 'lucide-react';
+import { ChevronRight, ImagePlus, LayoutTemplate, Plus, Puzzle, WandSparkles } from 'lucide-react';
 import type { ContentType } from '@flowdsiml/core';
 import { CONTENT_TYPES } from '@flowdsiml/core';
 import { aiBlock, useAiStatus } from '../../lib/ai';
@@ -10,11 +10,11 @@ import type { Tables } from '@flowdsiml/supabase-types';
 import { IMAGE_ACCEPT } from './importImages';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
-import { TypeBadge } from '../../components/TypeBadge';
+import { TypeBadge, TYPE_ICON } from '../../components/TypeBadge';
 import { EXTENSION_URL } from '../../lib/env';
 import { useHtmlCapture } from '../../lib/htmlCapture';
 import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
-import { Select } from '@flowdsiml/ui';
+import { Modal, Select } from '@flowdsiml/ui';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -57,7 +57,6 @@ export function NewDemoDialog({
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const extSoon = !EXTENSION_URL && !profile?.extension_seen_at;
-  const ref = useRef<HTMLDialogElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const cards = useRef<HTMLDivElement>(null);
   const last = user?.user_metadata?.content_type as unknown;
@@ -83,14 +82,10 @@ export function NewDemoDialog({
   const aiDisabled = aiOff === 'disabled' || aiOff === 'role';
 
   useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) {
-      setFolder(defaultFolder ?? '');
-      setType(firstType());
-      setStep(initialType && usable(initialType) ? 2 : 1);
-      d.showModal();
-    } else if (!open && d.open) d.close();
+    if (!open) return;
+    setFolder(defaultFolder ?? '');
+    setType(firstType());
+    setStep(initialType && usable(initialType) ? 2 : 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- à l'ouverture seulement
   }, [open, defaultFolder]);
 
@@ -118,38 +113,85 @@ export function NewDemoDialog({
     cards.current?.querySelector<HTMLInputElement>(`input[value="${n}"]`)?.focus();
   };
 
+  const emptyBtn = type === 'captures' && (
+    <button
+      type="button"
+      className="fd-btn fd-btn--ghost nd-empty"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          await onEmpty(folder || null);
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      {t('demos.newEmpty')}
+    </button>
+  );
   return (
-    <dialog ref={ref} className="dialog new-demo-dialog" onClose={onClose} aria-labelledby="nd-title nd-step">
-      <div className="nd-head">
-        <div className="nd-titles">
-          <h2 id="nd-title">
-            {step === 1 ? t('demos.newTitle') : t(`ctype.newTitle.${type}`)}
-            {step === 2 && <TypeBadge type={type} />}
-          </h2>
-          <p id="nd-step" className="nd-step">
-            {t('ctype.stepOf', { n: step, total: 2 })} · {step === 1 ? t('ctype.step1') : t('ctype.step2')}
-          </p>
-        </div>
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost fd-btn--sm fd-btn--icon"
-          aria-label={t('common.close')}
-          onClick={onClose}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
-
-      {step === 1 ? (
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="md"
+      className="new-demo-dialog"
+      icon={<Plus />}
+      title={step === 1 ? t('demos.newTitle') : t(`ctype.newTitle.${type}`)}
+      subtitle={
         <>
-          <fieldset className="nd-types">
-            <legend className="nd-legend">{t('ctype.question')}</legend>
-            <div ref={cards} className="nd-types__grid">
-              {CONTENT_TYPES.map((k) => (
+          {t('ctype.stepOf', { n: step, total: 2 })} · {step === 1 ? t('ctype.step1') : t('ctype.step2')}
+        </>
+      }
+      closeLabel={t('common.close')}
+      footerLead={step === 1 ? t('ctype.nextHint') : undefined}
+      footer={
+        step === 1 ? (
+          <>
+            <button type="button" className="fd-btn" onClick={onClose}>
+              {t('common.cancel')}
+            </button>
+            <button type="button" className="fd-btn fd-btn--primary" onClick={next}>
+              {t('common.continue')}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="fd-btn nd-back" onClick={() => setStep(1)}>
+              {t('common.back')}
+            </button>
+            {emptyBtn}
+            <button type="button" className="fd-btn" onClick={onClose}>
+              {t('common.cancel')}
+            </button>
+          </>
+        )
+      }
+    >
+      {step === 1 ? (
+        <fieldset className="nd-types">
+          <legend className="nd-legend">{t('ctype.question')}</legend>
+          {/* MODAL-01 : un choix par ligne (tuile, nom, phrase, bouton radio) ; l'écart est porté par la grille */}
+          <div ref={cards} className="nd-types__grid" data-gap-exempt="">
+            {CONTENT_TYPES.map((k) => {
+              const Icon = TYPE_ICON[k];
+              return (
                 <label
                   key={k}
                   className={`nd-type${type === k ? ' is-selected' : ''}${usable(k) ? '' : ' is-off'}`}
                 >
+                  <span className="nd-type__tile" aria-hidden="true">
+                    <Icon />
+                  </span>
+                  <span className="nd-type__txt">
+                    <b>{t(`ctype.name.${k}`)}</b>
+                    <span>{t(`ctype.line.${k}`)}</span>
+                    {!usable(k) && (
+                      <span className="nd-type__off" id={`nd-off-${k}`}>
+                        {t('htmlCapture.blockedByAdmin')}
+                      </span>
+                    )}
+                  </span>
                   <input
                     type="radio"
                     name="nd-type"
@@ -160,33 +202,17 @@ export function NewDemoDialog({
                     onChange={() => setType(k)}
                     onKeyDown={onCardKey}
                   />
-                  <TypeArt type={k} />
-                  <span className="nd-type__txt">
-                    <b>{t(`ctype.name.${k}`)}</b>
-                    <span>{t(`ctype.line.${k}`)}</span>
-                    {!usable(k) && (
-                      <span className="nd-type__off" id={`nd-off-${k}`}>
-                        {t('htmlCapture.blockedByAdmin')}
-                      </span>
-                    )}
-                  </span>
                 </label>
-              ))}
-            </div>
-          </fieldset>
-          <div className="dialog-actions nd-actions">
-            <p className="nd-next">{t('ctype.nextHint')}</p>
-            <span className="grow" />
-            <button type="button" className="fd-btn" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-            <button type="button" className="fd-btn fd-btn--primary" onClick={next}>
-              {t('common.continue')}
-            </button>
+              );
+            })}
           </div>
-        </>
+        </fieldset>
       ) : (
         <>
+          {/* Étape 2 : rappel du type choisi, puis les sources */}
+          <p className="nd-chosen">
+            <TypeBadge type={type} />
+          </p>
           <ul className="nd-sources" aria-label={t('ctype.step2')}>
             <li>
               {extSoon ? (
@@ -317,74 +343,8 @@ export function NewDemoDialog({
               ))}
             </Select>
           </label>
-          <div className="dialog-actions nd-actions">
-            <button type="button" className="fd-btn" onClick={() => setStep(1)}>
-              {t('common.back')}
-            </button>
-            {type === 'captures' && (
-              <button
-                type="button"
-                className="fd-btn fd-btn--ghost nd-empty"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    await onEmpty(folder || null);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                {t('demos.newEmpty')}
-              </button>
-            )}
-            <span className="grow" />
-            <button type="button" className="fd-btn" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-          </div>
         </>
       )}
-    </dialog>
-  );
-}
-
-/** Illustration schématique 16:9 (tokens, aucune capture réelle), décorative. */
-function TypeArt({ type }: { type: ContentType }) {
-  return (
-    <svg className="nd-art" viewBox="0 0 160 90" aria-hidden="true" focusable="false">
-      <rect x="1" y="1" width="158" height="88" rx="8" className="nd-art__bg" />
-      {type === 'captures' && (
-        <>
-          <rect x="14" y="14" width="96" height="62" rx="4" className="nd-art__card" />
-          <rect x="22" y="22" width="40" height="6" rx="3" className="nd-art__line" />
-          <rect x="22" y="34" width="70" height="4" rx="2" className="nd-art__line" />
-          <rect x="22" y="42" width="56" height="4" rx="2" className="nd-art__line" />
-          <circle cx="86" cy="58" r="6" className="nd-art__dot" />
-          <rect x="96" y="44" width="52" height="22" rx="5" className="nd-art__bubble" />
-          <rect x="102" y="51" width="38" height="3" rx="1.5" className="nd-art__on" />
-          <rect x="102" y="57" width="26" height="3" rx="1.5" className="nd-art__on" />
-        </>
-      )}
-      {type === 'html' && (
-        <>
-          <rect x="14" y="14" width="132" height="62" rx="4" className="nd-art__card" />
-          <rect x="14" y="14" width="132" height="10" rx="4" className="nd-art__line" />
-          <path d="M30 42 l-8 8 l8 8 M50 42 l8 8 l-8 8" className="nd-art__stroke" />
-          <rect x="70" y="40" width="60" height="5" rx="2.5" className="nd-art__line" />
-          <rect x="70" y="50" width="44" height="5" rx="2.5" className="nd-art__dash" />
-          <rect x="70" y="60" width="52" height="5" rx="2.5" className="nd-art__line" />
-        </>
-      )}
-      {type === 'sandbox' && (
-        <>
-          <path d="M44 30 L80 52 M116 30 L80 52 M44 30 L116 30 M80 52 L80 66" className="nd-art__stroke" />
-          <rect x="22" y="18" width="44" height="24" rx="4" className="nd-art__card" />
-          <rect x="94" y="18" width="44" height="24" rx="4" className="nd-art__card" />
-          <rect x="58" y="48" width="44" height="26" rx="4" className="nd-art__card nd-art__card--on" />
-          <circle cx="80" cy="61" r="4" className="nd-art__dot" />
-        </>
-      )}
-    </svg>
+    </Modal>
   );
 }

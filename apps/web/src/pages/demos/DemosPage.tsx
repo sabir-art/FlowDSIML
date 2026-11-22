@@ -427,6 +427,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const openNew = () => setNewOpen(true);
   // NAV-03 : ⌘K (ou Ctrl K) place le focus dans la recherche du PageHeader
   const searchRef = useRef<HTMLInputElement>(null);
+  /** Sous 768 px, la recherche est un bouton d'icône qui ouvre le champ à la place du titre. */
+  const [searchOpen, setSearchOpen] = useState(false);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -552,7 +554,22 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         actions={
           <>
             {!scopeName && (
-              <label className="ph-search">
+              <button
+                type="button"
+                className="fd-btn fd-btn--ghost fd-btn--icon ph-search-btn"
+                aria-label={searchLabel}
+                aria-expanded={searchOpen}
+                onClick={() => {
+                  setSearchOpen(true);
+                  // Le champ apparaît au rendu suivant : le focus y va dès qu'il est affiché
+                  requestAnimationFrame(() => searchRef.current?.focus());
+                }}
+              >
+                <Search aria-hidden="true" />
+              </button>
+            )}
+            {!scopeName && (
+              <label className={`ph-search${searchOpen || q ? ' is-open' : ''}`}>
                 <span className="sr-only">{searchLabel}</span>
                 <Search size={16} aria-hidden="true" />
                 <input
@@ -564,6 +581,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   aria-disabled={loading || undefined}
                   readOnly={loading}
                   onChange={(e) => setQ(e.target.value)}
+                  onBlur={() => setSearchOpen(false)}
                 />
                 <kbd aria-hidden="true">{IS_MAC ? '⌘K' : 'Ctrl K'}</kbd>
               </label>
@@ -604,7 +622,13 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             )}
             {/* L48-B : liste vide, une seule action principale (au centre de l'état vide) */}
             {editable && !(demos && demos.length === 0) && (
-              <Button variant="primary" icon={<Plus />} onClick={openNew}>
+              <Button
+                variant="primary"
+                icon={<Plus />}
+                /* Sous 768 px le libellé visible est court ; le nom accessible reste complet */
+                aria-label={sandbox ? t('sandboxPage.new') : t('demos.new')}
+                onClick={openNew}
+              >
                 <span className="ph-wide">{sandbox ? t('sandboxPage.new') : t('demos.new')}</span>
                 <span className="ph-narrow">{t(sandbox ? 'sandboxPage.newShort' : 'demos.newShort')}</span>
               </Button>
@@ -733,6 +757,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           },
         }
       : {};
+  const openFolder = folders.find((f) => f.id === scope) ?? null;
   const sortLabels: Record<Sort, string> = {
     updated: t('demos.sortUpdated'),
     created: t('demos.sortCreated'),
@@ -779,7 +804,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           {error && <Alert kind="error">{error}</Alert>}
 
           {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
-          {kpis && anyPublished && !sandbox && (
+          {kpis && anyPublished && !sandbox && scope === 'all' && (
             <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
               {(
                 [
@@ -832,7 +857,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           )}
 
           {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
-          {!sandbox && (
+          {!sandbox && scope === 'all' && (
             <OnboardingCard
               onb={onb}
               onCapture={openNew}
@@ -843,9 +868,30 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           )}
 
           <section aria-labelledby="demos-list-title" className="demos-section">
-            <h2 id="demos-list-title" className="demos-list-title">
-              {sandbox ? t('sandboxPage.all') : t('demos.allDemos')}
-            </h2>
+            <div className="demos-list-head">
+              {/* Lot 2 : dans un dossier, le titre est le nombre de démos, suivi de qui voit le dossier */}
+              <h2 id="demos-list-title" className="demos-list-title">
+                {scopeName
+                  ? t('demos.resultCount', { count: visible.length })
+                  : sandbox
+                    ? t('sandboxPage.all')
+                    : t('demos.allDemos')}
+              </h2>
+              {openFolder ? (
+                <span className="demos-list-count">
+                  {openFolder.restricted
+                    ? t('folderAccess.visibleBy', { count: memberCount - (hidden[openFolder.id] ?? 0) })
+                    : t('folders.visibleAll')}
+                </span>
+              ) : (
+                !scopeName &&
+                demos.length > 0 && (
+                  <span className="demos-list-count" aria-hidden="true">
+                    {t('demos.resultCount', { count: visible.length })}
+                  </span>
+                )
+              )}
+            </div>
             {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
             {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
             {demos.length > 0 && (
@@ -1320,18 +1366,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                     </li>
                   );
                 })}
-                {/* L48-G écart 5 : pas de carte « Nouvelle démo » sur la page Sandbox (bouton de l'en-tête) */}
-                {editable && !sandbox && (
-                  <li className="demo-new">
-                    <button type="button" className="demo-new__btn" onClick={openNew}>
-                      <span className="fd-btn fd-btn--round" aria-hidden="true">
-                        <Plus />
-                      </span>
-                      <strong>{t('demos.new')}</strong>
-                      <span className="fd-muted">{t('demos.newHint')}</span>
-                    </button>
-                  </li>
-                )}
               </ul>
             )}
           </section>

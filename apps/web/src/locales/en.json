@@ -5335,7 +5335,8 @@
     "author": "Created by",
     "me": "Me",
     "access": "Folder access",
-    "backTo": "Back to {{page}}"
+    "backTo": "Back to {{page}}",
+    "visibleAll": "Everyone in the workspace can see this folder."
   },
   "empty": {
     "searchBody_zero": "Check the spelling, or try another word.",
