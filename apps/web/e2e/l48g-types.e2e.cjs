@@ -66,6 +66,8 @@ function data() {
     return page;
   };
   const axe = async (page, label) => {
+    // Menu refermé et animations terminées avant de mesurer : le contraste est faussé pendant un fondu (CI chargée)
+    await page.waitForFunction(() => document.getAnimations().every((x) => x.playState !== 'running'));
     const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
     const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     ok(bad.length === 0, `axe ${label} : ${bad.map((v) => v.id).join(', ') || '0 violation grave'}`);
