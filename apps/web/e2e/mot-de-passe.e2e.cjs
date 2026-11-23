@@ -20,7 +20,7 @@ const axe = async (page, label) => {
 };
 // Mots de passe fictifs des tests
 const SANS_CHIFFRE = 'Acmedemo';
-const VALIDE = 'Acmedemo2026';
+const VALIDE = 'Acmedemo2026!';
 
 (async () => {
   const b = await chromium.launch();
@@ -46,8 +46,16 @@ const VALIDE = 'Acmedemo2026';
     const rules = page.locator('#password-rules li');
     ok(
       (await rules.allInnerTexts()).map(sp).join(' | ') ===
-        'Au moins 8 caractères : non respectée | Au moins une lettre : non respectée | Au moins un chiffre : non respectée',
-      `${tag} : trois règles de la politique dès le focus, état lisible sans la couleur`,
+        [
+          'Au moins 8 caractères',
+          'Au moins une minuscule',
+          'Au moins une majuscule',
+          'Au moins un chiffre',
+          'Au moins un caractère spécial (par ex. ! ? # @)',
+        ]
+          .map((r) => `${r} : non respectée`)
+          .join(' | '),
+      `${tag} : les cinq règles de la politique dès le focus, état lisible sans la couleur`,
     );
     ok(
       (await pw.getAttribute('aria-describedby')) === 'password-rules',
@@ -57,18 +65,18 @@ const VALIDE = 'Acmedemo2026';
     // Saisie : règles cochées en direct, jauge, annonce
     await pw.pressSequentially(SANS_CHIFFRE);
     ok(
-      (await page.locator('#password-rules li.is-ok').count()) === 2 &&
-        (await page.locator('#password-rules li.is-ok svg.lucide-circle-check').count()) === 2 &&
-        (await page.locator('#password-rules li.is-todo svg.lucide-circle').count()) === 1,
-      `${tag} : deux règles cochées (icône CircleCheck), une en attente (Circle)`,
+      (await page.locator('#password-rules li.is-ok').count()) === 3 &&
+        (await page.locator('#password-rules li.is-ok svg.lucide-circle-check').count()) === 3 &&
+        (await page.locator('#password-rules li.is-todo svg.lucide-circle').count()) === 2,
+      `${tag} : trois règles cochées (icône CircleCheck), deux en attente (Circle)`,
     );
     ok(
       sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Moyen' &&
         (await page.locator('.fd-pw-meter__bar .is-on').count()) === 2,
       `${tag} : jauge « Moyen », 2 segments sur 4`,
     );
-    await page.getByRole('status').filter({ hasText: 'règles sur 3 respectées' }).waitFor();
-    ok(true, `${tag} : « 2 règles sur 3 respectées » annoncé après la frappe`);
+    await page.getByRole('status').filter({ hasText: 'règles sur 5 respectées' }).waitFor();
+    ok(true, `${tag} : « 3 règles sur 5 respectées » annoncé après la frappe`);
 
     // Œil : affiche, garde le focus et le curseur ; indépendant de l'autre champ
     await pw.evaluate((e) => e.setSelectionRange(3, 3));
@@ -121,10 +129,11 @@ const VALIDE = 'Acmedemo2026';
     const err = page.locator('#password-error');
     await err.waitFor();
     ok(
-      sp(await err.innerText()) === 'Ajoutez au moins un chiffre.' &&
+      sp(await err.innerText()) ===
+        'Ajoutez au moins un chiffre et un caractère spécial (par ex. ! ? # @).' &&
         (await err.getAttribute('role')) === 'alert' &&
         (await err.locator('svg.lucide-circle-alert').count()) === 1,
-      `${tag} : « Ajoutez au moins un chiffre. » sous le champ (alerte, icône)`,
+      `${tag} : une phrase reprend les règles manquantes, sous le champ (alerte, icône)`,
     );
     ok(
       (await pw.getAttribute('aria-invalid')) === 'true' &&
@@ -133,8 +142,8 @@ const VALIDE = 'Acmedemo2026';
       `${tag} : champ invalide, décrit par l’erreur, focus rendu au champ`,
     );
     ok(
-      (await page.locator('#password-rules li.is-failed svg.lucide-circle-x').count()) === 1,
-      `${tag} : la règle manquante passe en erreur (CircleX)`,
+      (await page.locator('#password-rules li.is-failed svg.lucide-circle-x').count()) === 2,
+      `${tag} : les règles manquantes passent en erreur (CircleX)`,
     );
     ok(
       (await pw.getAttribute('type')) === 'password' && (state.passwordUpdates ?? 0) === 0,
@@ -218,21 +227,21 @@ const VALIDE = 'Acmedemo2026';
     await pw.waitFor();
     await pw.pressSequentially('abc');
     ok(
-      (await page.locator('#password-rules li').count()) === 3 &&
+      (await page.locator('#password-rules li').count()) === 5 &&
         sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Faible' &&
         (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 1,
-      'Inscription : œil, jauge « Faible » et trois règles',
+      'Inscription : œil, jauge « Faible » et cinq règles',
     );
     await page.locator('form button[type=submit]').click();
     await page.locator('#password-error').waitFor();
     ok(
       sp(await page.locator('#password-error').innerText()) ===
-        'Utilisez au moins 8 caractères. Ajoutez au moins un chiffre.',
+        'Utilisez au moins 8 caractères. Ajoutez au moins une majuscule, un chiffre et un caractère spécial (par ex. ! ? # @).',
       'Inscription : l’erreur reprend toutes les règles manquantes',
     );
     ok(
-      (await page.locator('#password-rules li.is-failed').count()) === 2,
-      'Inscription : deux règles en erreur',
+      (await page.locator('#password-rules li.is-failed').count()) === 4,
+      'Inscription : quatre règles en erreur',
     );
     await axe(page, 'Inscription, erreur de mot de passe');
     await page.close();
@@ -249,7 +258,7 @@ const VALIDE = 'Acmedemo2026';
     await np.waitFor();
     await np.focus();
     ok(
-      (await page.locator('#np-rules li').count()) === 3 &&
+      (await page.locator('#np-rules li').count()) === 5 &&
         (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 2,
       'Profil : œil sur les deux champs, règles dès le focus',
     );

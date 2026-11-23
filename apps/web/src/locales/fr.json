@@ -482,8 +482,10 @@
     },
     "rule": {
       "length": "Au moins {{min}} caractères",
-      "letter": "Au moins une lettre",
-      "digit": "Au moins un chiffre"
+      "lower": "Au moins une minuscule",
+      "upper": "Au moins une majuscule",
+      "digit": "Au moins un chiffre",
+      "symbol": "Au moins un caractère spécial (par ex. ! ? # @)"
     },
     "match": "Les deux mots de passe sont identiques",
     "mismatch": "Les deux mots de passe ne sont pas identiques.",

@@ -1,15 +1,9 @@
 import type { TFunction } from 'i18next';
-import { PASSWORD_POLICY, passwordRules } from './passwordPolicy';
+import { PASSWORD_CHARS, PASSWORD_POLICY, passwordRules } from './passwordPolicy';
 
 /** Catégories de caractères qu'une politique Supabase Auth peut exiger. */
 type CharKind = 'letter' | 'lower' | 'upper' | 'digit' | 'symbol';
-const HAS: Record<CharKind, RegExp> = {
-  letter: /\p{L}/u,
-  lower: /\p{Ll}/u,
-  upper: /\p{Lu}/u,
-  digit: /\d/,
-  symbol: /[^\p{L}\d\s]/u,
-};
+const HAS: Record<CharKind, RegExp> = { letter: /[A-Za-z]/, ...PASSWORD_CHARS };
 
 /**
  * Mot de passe refusé par Supabase Auth. Le serveur donne un code (« same_password », « weak_password »
@@ -45,8 +39,7 @@ export function passwordErrorMessage(t: TFunction, err: unknown, password?: stri
     if (sets.includes('0123456789')) kinds.push('digit');
     if (/[!@#$%^&*]/.test(sets)) kinds.push('symbol');
   } else if (reasons.includes('characters')) {
-    if (PASSWORD_POLICY.letter) kinds.push('letter');
-    if (PASSWORD_POLICY.digit) kinds.push('digit');
+    for (const k of ['lower', 'upper', 'digit', 'symbol'] as const) if (PASSWORD_POLICY[k]) kinds.push(k);
   }
   if (password !== undefined) {
     const missing = kinds.filter((k) => !HAS[k].test(password));

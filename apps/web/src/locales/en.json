@@ -482,8 +482,10 @@
     },
     "rule": {
       "length": "At least {{min}} characters",
-      "letter": "At least one letter",
-      "digit": "At least one digit"
+      "lower": "At least one lowercase letter",
+      "upper": "At least one uppercase letter",
+      "digit": "At least one digit",
+      "symbol": "At least one special character (e.g. ! ? # @)"
     },
     "match": "Both passwords match",
     "mismatch": "The two passwords do not match.",

@@ -45,9 +45,12 @@ describe('errorMessage', () => {
       ).toBe(
         'Ajoutez au moins une minuscule, une majuscule, un chiffre et un caractère spécial (par ex. ! ? # @).',
       );
-      // Sans détail du serveur : la politique de l'app (lettres et chiffres)
+      // Sans détail du serveur : les catégories de la politique de l'app
       expect(await msg({ code: 'weak_password', message: 'x', reasons: ['characters'] })).toBe(
-        'Ajoutez au moins une lettre et un chiffre.',
+        'Ajoutez au moins une minuscule, une majuscule, un chiffre et un caractère spécial (par ex. ! ? # @).',
+      );
+      expect(await msg({ code: 'weak_password', message: 'x', reasons: ['characters'] }, 'Acmedemo')).toBe(
+        'Ajoutez au moins un chiffre et un caractère spécial (par ex. ! ? # @).',
       );
     });
     it('caractères exigés : seulement ce qui manque au mot de passe saisi', async () => {
