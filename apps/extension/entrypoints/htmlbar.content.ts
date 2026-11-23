@@ -8,9 +8,16 @@ import { strings } from '@/lib/i18n';
 
 /**
  * A8 (L20) : barre de la capture HTML. Chaque page est copiée (DOM assaini, données remplacées) au
- * chargement après un clic qui navigue, ou avec « Capturer cette page » (Alt + Maj + M) pour les
- * applications à page unique. Le clic qui mène à la page suivante devient un lien proposé.
+ * chargement après un clic qui navigue. Dans une application à page unique (routeur côté client, sans
+ * rechargement), la page est copiée dès que l'adresse change après un clic et que l'affichage s'est
+ * stabilisé. « Capturer cette page » (Alt + Maj + M) reste disponible pour un état sans changement
+ * d'adresse (menu ouvert, onglet). Le clic qui mène à la page suivante devient un lien proposé.
  */
+/** Après un clic : durée pendant laquelle un changement d'adresse sans rechargement est guetté. */
+const WATCH_MS = 8000;
+/** Affichage stable : aucune modification du DOM pendant ce délai (au plus SETTLE_MAX_MS d'attente). */
+const SETTLE_MS = 500;
+const SETTLE_MAX_MS = 5000;
 export default defineContentScript({
   matches: ['<all_urls>'],
   registration: 'runtime',
@@ -95,6 +102,45 @@ export default defineContentScript({
       }
     }
     capBtn.onclick = () => void capture();
+
+    // Application à page unique : l'adresse change sans rechargement (history.pushState, ancre). Le script
+    // de contenu ne voit pas les appels de la page : l'adresse est relue après chaque clic.
+    const settled = () =>
+      new Promise<void>((resolve) => {
+        let quiet = setTimeout(done, SETTLE_MS);
+        const max = setTimeout(done, SETTLE_MAX_MS);
+        const mo = new MutationObserver((list) => {
+          // Les changements de notre barre ne comptent pas
+          if (list.every((m) => host.contains(m.target))) return;
+          clearTimeout(quiet);
+          quiet = setTimeout(done, SETTLE_MS);
+        });
+        function done() {
+          clearTimeout(quiet);
+          clearTimeout(max);
+          mo.disconnect();
+          resolve();
+        }
+        mo.observe(document.documentElement, {
+          subtree: true,
+          childList: true,
+          characterData: true,
+          attributes: true,
+        });
+      });
+    let initial = false;
+    let watch: ReturnType<typeof setInterval> | undefined;
+    function watchNavigation() {
+      const from = location.href;
+      const until = Date.now() + WATCH_MS;
+      clearInterval(watch);
+      watch = setInterval(() => {
+        if (location.href !== from) {
+          clearInterval(watch);
+          if (!initial) void settled().then(() => capture());
+        } else if (Date.now() > until) clearInterval(watch);
+      }, 150);
+    }
     $<HTMLButtonElement>('.stop').onclick = () => void send({ type: 'fd:html-stop' });
 
     // Clic sur un élément de la page : lien proposé vers la page suivante
@@ -113,6 +159,7 @@ export default defineContentScript({
         alt: el.getAttribute('alt'),
       });
       void send({ type: 'fd:html-click', sel: stableSelector(el), label });
+      watchNavigation();
     }
     document.addEventListener('click', onClick, true);
 
@@ -121,6 +168,7 @@ export default defineContentScript({
       if (type === 'fd:html-capture') void capture();
       if (type === 'fd:recorder-stop') {
         document.removeEventListener('click', onClick, true);
+        clearInterval(watch);
         browser.runtime.onMessage.removeListener(onMsg);
         host.remove();
         w.__fdHtmlBar = false;
@@ -135,7 +183,14 @@ export default defineContentScript({
         notice.hidden = false;
         setTimeout(() => (notice.hidden = true), 10000);
       }
-      if (r?.capture) setTimeout(() => void capture(), 600);
+      if (r?.capture) {
+        // Capture de départ en attente : un clic fait entre-temps ne doit pas produire un doublon
+        initial = true;
+        setTimeout(() => {
+          initial = false;
+          void capture();
+        }, 600);
+      }
     });
   },
 });

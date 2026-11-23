@@ -126,6 +126,46 @@ http
         return send(200, { Key: req.url, Id: 'x' });
       }
       if (req.url.startsWith('/rest/v1/')) return send(201, null);
+      // A8 : application à page unique fictive (routeur côté client, sans rechargement), riche en scripts :
+      // scripts en ligne, script de suivi externe, cadre intégré, menu déroulant. Données inventées.
+      if (req.url.startsWith('/spa-suivi.js')) {
+        res.writeHead(200, { 'content-type': 'text/javascript' });
+        return res.end('window.__suivi = (window.__suivi || 0) + 1;');
+      }
+      if (req.url.startsWith('/spa-cadre')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end('<html><body><p>Cadre intégré fictif</p></body></html>');
+      }
+      if (req.url.startsWith('/spa')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        const inline = Array.from({ length: 24 }, (_, i) => `<script>window.__m${i} = ${i};</script>`).join(
+          '',
+        );
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Appli fictive</title>' +
+            '<style>body{font-family:sans-serif;margin:0}nav{display:flex;gap:12px;padding:12px;background:#eef}' +
+            '#liste{position:absolute;background:#fff;border:1px solid #ccd;padding:8px}main{padding:24px}</style>' +
+            inline +
+            '<script src="/spa-suivi.js"></script></head><body>' +
+            '<nav id="nav"><a href="/spa" data-route>Accueil</a><a href="/spa/clients" data-route>Clients</a>' +
+            '<button id="plus" type="button" aria-expanded="false">Plus</button></nav>' +
+            '<div id="liste" hidden><a href="/spa/rapports" data-route>Rapports</a></div>' +
+            '<main id="vue"></main><iframe src="/spa-cadre" title="Cadre fictif" width="200" height="60"></iframe>' +
+            '<script>(function(){' +
+            'var vues={"/spa":"<h1>Accueil</h1><p>Bienvenue dans l’appli fictive.</p>",' +
+            '"/spa/clients":"<h1>Clients</h1><ul><li>Société Exemple</li><li>Mairie de Testville</li></ul>",' +
+            '"/spa/rapports":"<h1>Rapports</h1><p>Rapport mensuel fictif.</p>"};' +
+            'function rendre(){var v=document.getElementById("vue");v.innerHTML="<p>Chargement…</p>";' +
+            // Rendu en deux temps, comme une appli qui attend ses données
+            'setTimeout(function(){v.innerHTML=vues[location.pathname]||"<h1>Introuvable</h1>";},250);}' +
+            'document.addEventListener("click",function(e){var a=e.target.closest("a[data-route]");if(!a)return;' +
+            'e.preventDefault();history.pushState({}, "", a.getAttribute("href"));' +
+            'document.getElementById("liste").hidden=true;rendre();});' +
+            'document.getElementById("plus").addEventListener("click",function(){var l=document.getElementById("liste");' +
+            'l.hidden=!l.hidden;this.setAttribute("aria-expanded",String(!l.hidden));});' +
+            'window.addEventListener("popstate",rendre);rendre();})();</script></body></html>',
+        );
+      }
       // A8 : seconde page (script, gestionnaire, mot de passe rempli, données fictives) et ingestion
       if (req.url.startsWith('/page2')) {
         res.writeHead(200, { 'content-type': 'text/html' });

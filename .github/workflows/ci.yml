@@ -363,3 +363,42 @@ jobs:
         run: |
           cd apps/web && node e2e/acces-email.e2e.cjs | tee /tmp/e2e-acces.log
           ! grep -q '^NOT OK' /tmp/e2e-acces.log
+
+  # Extension : capture HTML d'une appli à page unique (routeur côté client). L'extension est construite
+  # pour les tests (faux Supabase local, accès aux sites accordé : Playwright ne répond pas aux fenêtres
+  # d'autorisation) et chargée dans Chromium.
+  extension-e2e:
+    name: E2E extension (capture HTML, appli à page unique)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Navigateur Chromium (Playwright)
+        run: pnpm --filter @flowdsiml/web exec playwright install --with-deps chromium
+      - name: Extension construite pour les tests et faux Supabase
+        env:
+          WXT_E2E: '1'
+          WXT_DEBUGGER: '1'
+          WXT_SUPABASE_URL: http://localhost:54400
+          # Valeur factice : le faux Supabase n'en vérifie aucune
+          WXT_SUPABASE_ANON_KEY: anon
+        run: |
+          cd apps/extension && pnpm build
+          (nohup node e2e/mock-supabase.cjs > /tmp/mock.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:54400/page >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/mock.log; exit 1
+      - name: Capture HTML d'une appli à page unique (pages capturées au changement d'adresse, Sandbox relié)
+        env:
+          # Playwright est une dépendance de l'app web
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/html-spa.e2e.cjs | tee /tmp/e2e-ext.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext.log
