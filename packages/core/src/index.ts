@@ -10,6 +10,7 @@ export * from './glossary';
 export * from './videoTimeline';
 export * from './htmlOps';
 export * from './htmlSanitize';
+export * from './htmlReview';
 export * from './pii';
 export * from './dataset';
 export * from './trend';

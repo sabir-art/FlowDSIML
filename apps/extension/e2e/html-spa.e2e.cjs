@@ -196,6 +196,18 @@ const WS = '11111111-1111-1111-1111-111111111111';
     `rapport : scripts et cadre comptés (${pages[0]?.security.scripts} scripts, ${pages[0]?.security.frames} cadre)`,
   );
 
+  // EXT-02 §2 : liste détaillée de ce qui est retiré, classée par raison (données de l'écran de vérification)
+  const groups = (p) => p.removed.reduce((o, r) => ({ ...o, [r.group]: (o[r.group] ?? 0) + 1 }), {});
+  const g0 = groups(pages[0]);
+  ok(
+    g0.pageScripts === 26 && g0.trackingScripts === 1 && g0.frames === 1,
+    `éléments retirés classés : ${g0.pageScripts} scripts de la page, ${g0.trackingScripts} de suivi, ${g0.frames} cadre`,
+  );
+  ok(
+    pages[0].removed.every((r) => r.group === 'pii' || !r.keepable) &&
+      pages[0].removed.some((r) => r.reason === 'frameThirdParty' && r.source === 'localhost'),
+    'scripts et cadre tiers non gardables, source indiquée',
+  );
   // Envoi en Sandbox : les pages sont reliées dans l'ordre des clics
   await review.click('input[value=sandbox]');
   await review.click('#send');

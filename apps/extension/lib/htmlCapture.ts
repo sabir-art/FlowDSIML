@@ -1,6 +1,9 @@
 import {
+  type HtmlRemovedItem,
   type HtmlSecurityCounts,
   HTML_MAX_BYTES,
+  collectRemoved,
+  piiItem,
   neutralText,
   neutralizeText,
   sanitizeCss,
@@ -29,6 +32,11 @@ export interface HtmlCapture {
   canvases: number;
   /** L49 §3 : rapport d'analyse (ce qui a été retiré ou neutralisé sur la page d'origine). */
   security: HtmlSecurityCounts;
+  /**
+   * EXT-02 §2 : éléments retirés ou remplacés, un par un, classés par raison (écran de vérification).
+   * Absent des pages capturées avant la version 0.2.
+   */
+  removed?: HtmlRemovedItem[];
 }
 
 /** Récupère une ressource (image → data: WebP, police → data:, CSS → texte) par le service. */
@@ -122,12 +130,16 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
   // Données repérées : texte remplacé dans la source et flou
   const blurredEls = new Set<Element>();
   let piiReplaced = 0;
+  // Valeurs déjà masquées (« Xxxxxx Xxxxxx »), pour la liste de vérification : jamais la valeur réelle
+  const piiMasked: string[] = [];
   for (const d of detections) {
     if (d.node && d.start !== undefined && d.end !== undefined) {
       const t = map.get(d.node) as Text | undefined;
       if (t) {
-        t.data = t.data.slice(0, d.start) + neutralText(t.data.slice(d.start, d.end)) + t.data.slice(d.end);
+        const masked = neutralText(t.data.slice(d.start, d.end));
+        t.data = t.data.slice(0, d.start) + masked + t.data.slice(d.end);
         piiReplaced++;
+        piiMasked.push(masked);
       }
     }
     const el = map.get(d.el) as HTMLElement | undefined;
@@ -135,6 +147,7 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     if (!d.node) {
       neutralizeText(el);
       piiReplaced++;
+      piiMasked.push(el.textContent ?? '');
     }
     // Le nom de colonne ou la libellé ne sont pas floutés : seulement l'élément porteur
     el.setAttribute('style', `${el.getAttribute('style') ?? ''};${BLUR}`);
@@ -217,6 +230,8 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     a.removeAttribute('target');
   }
 
+  // Liste détaillée, relevée avant l'assainissement (qui retire ces éléments de la copie)
+  const removed = [...collectRemoved(clone, location.href), ...piiMasked.map((m, i) => piiItem(i, m))];
   const security = { ...sanitizeDom(clone, location.href), piiReplaced };
   const html = `<!doctype html>\n${clone.outerHTML}`;
   const bytes = new TextEncoder().encode(html).length;
@@ -231,5 +246,6 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     blurred: blurredEls.size,
     canvases,
     security,
+    removed,
   };
 }

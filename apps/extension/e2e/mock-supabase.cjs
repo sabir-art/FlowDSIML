@@ -146,7 +146,10 @@ http
             '<style>body{font-family:sans-serif;margin:0}nav{display:flex;gap:12px;padding:12px;background:#eef}' +
             '#liste{position:absolute;background:#fff;border:1px solid #ccd;padding:8px}main{padding:24px}</style>' +
             inline +
-            '<script src="/spa-suivi.js"></script></head><body>' +
+            '<script src="/spa-suivi.js"></script>' +
+            // Script de suivi fictif (aucun envoi : la fonction ne fait qu'empiler)
+            '<script>window.dataLayer=[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());</script>' +
+            '</head><body>' +
             '<nav id="nav"><a href="/spa" data-route>Accueil</a><a href="/spa/clients" data-route>Clients</a>' +
             '<button id="reglages" type="button">Réglages</button><button id="aide" type="button">Aide</button>' +
             '<button id="plus" type="button" aria-expanded="false">Plus</button></nav>' +
