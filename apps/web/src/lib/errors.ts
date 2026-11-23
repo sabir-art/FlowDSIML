@@ -1,39 +1,76 @@
 import type { TFunction } from 'i18next';
+import { PASSWORD_POLICY } from './passwordPolicy';
+
+/** Catégories de caractères qu'une politique Supabase Auth peut exiger. */
+type CharKind = 'letter' | 'lower' | 'upper' | 'digit' | 'symbol';
+const HAS: Record<CharKind, RegExp> = {
+  letter: /\p{L}/u,
+  lower: /\p{Ll}/u,
+  upper: /\p{Lu}/u,
+  digit: /\d/,
+  symbol: /[^\p{L}\d\s]/u,
+};
 
 /**
- * Mot de passe refusé par Supabase Auth : le serveur ne cite que les règles qui ont échoué (longueur,
- * caractères exigés, mot de passe connu dans des fuites). Le message reprend ces règles, sans supposer
- * la politique en vigueur.
+ * Mot de passe refusé par Supabase Auth. Le serveur donne un code (« same_password », « weak_password »
+ * avec ses raisons : length, characters, pwned) et un texte qui ne cite que les règles en échec. Le code
+ * prime, le texte sert de secours ; quand le serveur ne précise pas une valeur, la politique de l'app
+ * (lib/passwordPolicy.ts) la donne. Si le mot de passe saisi est connu, seules les catégories qui lui
+ * manquent sont citées. Renvoie null si l'erreur ne concerne pas le mot de passe.
  */
-export function weakPasswordMessage(t: TFunction, msg: string, locale = 'fr'): string {
+export function passwordErrorMessage(t: TFunction, err: unknown, password?: string): string | null {
+  const o = (typeof err === 'object' && err ? err : {}) as Record<string, unknown>;
+  const msg = 'message' in o ? String(o.message) : String(err);
+  const code = typeof o.code === 'string' ? o.code : '';
+  if (code === 'same_password' || /different from the old password/i.test(msg)) return t('errors.pwSame');
+  const weak = (o.weak_password as { reasons?: unknown } | undefined)?.reasons ?? o.reasons;
+  const reasons = Array.isArray(weak) ? weak.map(String) : [];
+  const textual = /Password should (be at least|contain)|known to be weak|easy to guess/i.test(msg);
+  if (code !== 'weak_password' && !reasons.length && !textual) return null;
+
   const parts: string[] = [];
   const len = /at least (\d+) characters/i.exec(msg);
-  if (len) parts.push(t('errors.pwLength', { min: Number(len[1]) }));
+  if (len || reasons.includes('length'))
+    parts.push(t('errors.pwLength', { min: len ? Number(len[1]) : PASSWORD_POLICY.minLength }));
+
   const sets = /at least one character of each:\s*(.+)$/i.exec(msg)?.[1] ?? '';
+  let kinds: CharKind[] = [];
   if (sets) {
-    const kinds: string[] = [];
-    const lower = sets.includes('abcdefghijklmnopqrstuvwxyz');
-    const upper = sets.includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
     // « Lettres et chiffres » : minuscules et majuscules forment un seul jeu
-    if (sets.includes('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'))
-      kinds.push(t('errors.pwLetter'));
+    if (sets.includes('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')) kinds.push('letter');
     else {
-      if (lower) kinds.push(t('errors.pwLower'));
-      if (upper) kinds.push(t('errors.pwUpper'));
+      if (sets.includes('abcdefghijklmnopqrstuvwxyz')) kinds.push('lower');
+      if (sets.includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ')) kinds.push('upper');
     }
-    if (sets.includes('0123456789')) kinds.push(t('errors.pwDigit'));
-    if (/[!@#$%^&*]/.test(sets)) kinds.push(t('errors.pwSymbol'));
-    if (kinds.length)
-      parts.push(
-        t('errors.pwChars', { list: new Intl.ListFormat(locale, { type: 'conjunction' }).format(kinds) }),
-      );
+    if (sets.includes('0123456789')) kinds.push('digit');
+    if (/[!@#$%^&*]/.test(sets)) kinds.push('symbol');
+  } else if (reasons.includes('characters')) {
+    if (PASSWORD_POLICY.letter) kinds.push('letter');
+    if (PASSWORD_POLICY.digit) kinds.push('digit');
   }
-  if (/known to be weak|easy to guess|pwned/i.test(msg)) parts.push(t('errors.pwPwned'));
+  if (password !== undefined) {
+    const missing = kinds.filter((k) => !HAS[k].test(password));
+    // Le serveur a refusé : si rien ne semble manquer, toutes les catégories exigées sont rappelées
+    if (missing.length) kinds = missing;
+  }
+  if (kinds.length)
+    parts.push(
+      t('errors.pwChars', {
+        list: new Intl.ListFormat(t('errors.listLocale'), { type: 'conjunction' }).format(
+          kinds.map((k) => t(`errors.pwKind.${k}`)),
+        ),
+      }),
+    );
+  if (reasons.includes('pwned') || /known to be weak|easy to guess/i.test(msg))
+    parts.push(t('errors.pwPwned'));
   return parts.length ? parts.join(' ') : t('errors.weakPassword');
 }
 
 /** Traduit une erreur Supabase / RPC en message utilisateur. */
-export function errorMessage(t: TFunction, err: unknown): string {
+/**
+ * @param opts.password mot de passe saisi (jamais gardé ni journalisé) : précise les catégories manquantes
+ */
+export function errorMessage(t: TFunction, err: unknown, opts?: { password?: string }): string {
   const msg =
     typeof err === 'object' && err && 'message' in err
       ? String((err as { message: unknown }).message)
@@ -95,9 +132,8 @@ export function errorMessage(t: TFunction, err: unknown): string {
   if (/TEMPLATE_NOT_FOUND/.test(msg)) return t('templates.notFound');
   const exp = /RULE_EXPIRY:(\d+)/.exec(msg);
   if (exp) return t('rules.errExpiry', { n: Number(exp[1]) });
-  const code = typeof err === 'object' && err && 'code' in err ? String((err as { code: unknown }).code) : '';
-  if (code === 'weak_password' || /Password should|known to be weak/i.test(msg))
-    return weakPasswordMessage(t, msg, t('errors.listLocale'));
+  const pw = passwordErrorMessage(t, err, opts?.password);
+  if (pw) return pw;
   for (const [re, key] of known) if (re.test(msg)) return t(key);
   return t('errors.generic', { message: msg });
 }

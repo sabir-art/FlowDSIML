@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 import type { DemoEditor } from './useDemoEditor';
-import type { FormRow } from './types';
+import { asFields, type FormRow } from './types';
 
 type Ask = (o: { title: string; body?: string; confirmLabel: string; danger?: boolean }) => Promise<boolean>;
 type Toast = (text: string, action?: { label: string; durationMs?: number; onClick: () => void }) => void;
@@ -20,8 +20,10 @@ export async function deleteFormWithUndo(
 ): Promise<boolean> {
   const yes = await ask({
     title: t('editor.confirmDeleteForm'),
-    body: t('editor.confirmDeleteFormBody'),
-    confirmLabel: t('common.delete'),
+    // Les réponses ne sont pas liées au formulaire (elles restent dans Leads) ; l'annulation se fait
+    // depuis la notification qui suit, pas avec Ctrl + Z : le texte ne promet que cela
+    body: t('editor.confirmDeleteFormBody', { count: asFields(form.fields).length }),
+    confirmLabel: t('editor.deleteForm'),
     danger: true,
   });
   if (!yes) return false;

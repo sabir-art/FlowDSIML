@@ -187,10 +187,12 @@ const SHOTS = process.env.SHOTS_DIR;
   const delForm = page.getByRole('dialog', { name: 'Supprimer ce formulaire ?' });
   await delForm.waitFor();
   ok(
-    (await delForm.innerText()).includes(
-      'Le formulaire, ses champs et son texte de consentement sont retirés de la démo. Les réponses déjà reçues restent dans Leads. Vous pourrez annuler juste après la suppression.',
-    ),
-    'formulaire : la fenêtre de suppression dit ce qui est retiré',
+    /Le formulaire et (son champ|ses \d+\schamps) sont retirés de la démo\. Les réponses déjà reçues restent dans Leads\. Vous pourrez annuler juste après, depuis la notification\./.test(
+      await delForm.innerText(),
+    ) &&
+      (await delForm.getByRole('button', { name: 'Supprimer le formulaire' }).count()) === 1 &&
+      (await page.evaluate(() => document.activeElement?.textContent?.trim())) === 'Annuler',
+    'formulaire : la fenêtre dit ce qui est retiré, « Supprimer le formulaire », focus sur « Annuler »',
   );
   await delForm.getByRole('button', { name: 'Annuler' }).click();
   ok(state.tables.forms.length === 1, 'formulaire : « Annuler » ne supprime rien');
@@ -198,7 +200,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.locator('.rail-li--form').hover();
   await page.getByRole('button', { name: 'Actions du formulaire' }).click();
   await page.getByRole('menuitem', { name: 'Supprimer' }).click();
-  await delForm.getByRole('button', { name: 'Supprimer' }).click();
+  await delForm.getByRole('button', { name: 'Supprimer le formulaire' }).click();
   await page.locator('.rail-li--form').waitFor({ state: 'detached' });
   // (La base réelle détache l'étape par sa clé étrangère ; la fausse base ne rejoue pas cette règle.)
   ok(
