@@ -609,6 +609,8 @@ Le client voyait un doublon : la même icône panneau pour replier la barre lat�
 - **Mobile (< 1 024 px)** : pas de poignée. La colonne Dossiers reste un tiroir ouvert par la bascule « Dossiers » de la barre mobile (§ lot 2).
 - La colonne des Paramètres ne se replie pas : pas de poignée.
 
+**Largeurs intermédiaires (décision du 22/11, question du dev)** : la colonne à poignée vaut **dès 1 024 px**, comme à 1 440 : elle pousse le contenu, il n'y a plus ni rail de 48 px ni tiroir par-dessus entre 1 024 et 1 279 px. Sous 1 280 px, elle est **repliée par défaut** tant que la personne n'a rien choisi ; le choix est ensuite mémorisé (par largeur de fenêtre : un seul réglage par colonne). Contenu : la grille passe à 1 ou 2 colonnes par requête de conteneur. **Sous 1 024 px**, pas de poignée : tiroir ouvert par la bascule de la barre mobile, dont l'icône est **`FolderOpen`** (nom « Dossiers »), et non l'icône panneau, réservée à la barre latérale. Maquette 390 mise à jour.
+
 ### 19.2 Variante B (proposée, non retenue par défaut)
 
 Même séparateur, mais la pastille (ronde, 24 px) n'apparaît qu'au survol ou au focus du bord. Plus discrète, mais moins découvrable ; à l'état replié, la demi-pastille reste toujours visible. Maquette `dossiers-poignee-b` (survol).

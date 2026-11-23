@@ -262,6 +262,24 @@ body:not(.mob) .ctl .doms { width: calc(100% - 28px); box-sizing: border-box; }
 .mob .dz { flex-wrap: wrap; } .mob .dzt { flex-basis: calc(100% - 72px); } .mob .dza { width: 100%; flex-wrap: wrap; } .mob .dza .btn { flex: 1; justify-content: center; }
 .row:has(.dz) { grid-template-columns: 1fr; gap: 12px; }
 .mob .dza .ib { flex: none; }
+/* NAV-04 §14 bis : rail replié, logo en tête qui laisse place au bouton « Déplier » au survol et au focus */
+.shell:has(.side.rail) { grid-template-columns: 64px 232px minmax(0, 1fr); }
+.side.rail { padding: 16px 0; align-items: center; gap: 4px; }
+.rail .rh { position: relative; display: flex; justify-content: center; width: 100%; height: 77px; padding-top: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--fd-color-border); box-sizing: border-box; }
+.rlogo { position: relative; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: none; cursor: pointer; }
+.rlogo .sym { position: absolute; inset: 0; width: 32px; height: 32px; transition: opacity 150ms ease-out; }
+.rlogo .rx { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 8px; background: #A3195B; color: #FFFFFF; opacity: 0; transition: opacity 150ms ease-out; }
+.rlogo.survol .sym, .rlogo.focus .sym { opacity: 0; }
+.rlogo.survol .rx, .rlogo.focus .rx { opacity: 1; }
+.rlogo.survol .rx { background: #85164B; }
+.rlogo.focus { box-shadow: 0 0 0 2px var(--nav-bg), 0 0 0 4px var(--fd-color-focus, var(--fd-color-primary)); }
+.rail .tip { position: absolute; left: 56px; top: 18px; z-index: 5; padding: 4px 8px; border-radius: 6px; background: var(--fd-color-text); color: var(--fd-color-surface); font: 500 12px var(--fd-font-sans); white-space: nowrap; }
+.rail .cur { position: absolute; left: 36px; top: 40px; width: 12px; height: 18px; z-index: 6; background: #111; clip-path: polygon(0 0, 0 100%, 30% 75%, 55% 100%, 70% 92%, 45% 68%, 100% 68%); outline: none; }
+[data-theme='dark'] .rail .cur { background: #FFFFFF; }
+.wsr { display: grid; place-items: center; width: 44px; height: 48px; margin-bottom: 12px; border: 1px solid var(--fd-color-border); border-radius: 10px; background: var(--content-bg); padding: 0; }
+.wsr .av.sm { width: 32px; height: 32px; }
+.side.rail a { width: 40px; height: 40px; padding: 0; justify-content: center; }
+.mer { padding-top: 12px; }
 /* Lot 2 : Démos et Dossiers */
 .wrap.wide { max-width: 1200px; }
 .ph .pt { padding: 0; font: 600 16px var(--fd-font-sans); }
