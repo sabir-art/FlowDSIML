@@ -33,6 +33,26 @@ const POSTCODE_CITY = /\b(?:0[1-9]|[1-8]\d|9[0-8])\d{3}[ ]+[A-ZÉÈ][A-Za-zÀ-ÿ
 const DATE = /\b(?:0?[1-9]|[12]\d|3[01])[/.-](?:0?[1-9]|1[0-2])[/.-](?:19|20)\d{2}\b/g;
 /** Prénom + NOM (nom en capitales), ex. « Camille DURAND ». */
 const FIRST_LAST = /\b[A-ZÉÈ][a-zà-ÿ]+(?:-[A-ZÉÈ][a-zà-ÿ]+)?[ ]+[A-ZÉÈ]{2,}(?:[- ][A-ZÉÈ]{2,})*\b/g;
+/**
+ * Faux noms : un mot courant d'interface suivi d'un sigle (« Assistant IA », « Export PDF », « Mode API »)
+ * a la forme « Prénom NOM » sans en être un. Un sigle connu ou un premier mot d'interface écarte la
+ * correspondance ; un vrai nom reste repéré par son libellé de champ ou sa colonne.
+ */
+const ACRONYMS = new Set(
+  'IA AI RH UX UI IT QR TV OK ID PC BI PDF API CRM CSV SQL FAQ RGPD SSO URL HTML CSS XML JSON IBAN RIB TVA SMS KPI ERP SAV DSI DSIML PME RSE CDI CDD USA GPS USB VPN SEO PNG JPG SVG ZIP MFA OTP RSS HTTP HTTPS FTP DNS LLM GPT'.split(
+    ' ',
+  ),
+);
+const UI_WORDS = new Set(
+  'assistant assistance export exporter import importer format fichier rapport mode version code module service espace page compte statut type option lien menu bouton clé plan offre projet dossier document modèle tableau liste champ zone outil nouveau nouvelle ouvrir voir mon ma mes votre notre le la les un une des en via avec sans par pour copilote agent aide support connexion accès intégration extension paramètres réglages recherche générer créer'.split(
+    ' ',
+  ),
+);
+const notAName = (m: RegExpExecArray) => {
+  const [first = '', ...rest] = m[0].split(/\s+/);
+  const caps = rest.join(' ');
+  return !UI_WORDS.has(first.toLowerCase()) && !caps.split(/[- ]/).every((w) => ACRONYMS.has(w));
+};
 const BIRTH_CONTEXT = /(naissance|né\(e\)|née?\s+le|birth|date of birth|dob)/i;
 
 /** Libellé de champ → type (nom de champ, aria-label, placeholder, en-tête de colonne, `autocomplete`…). */
@@ -94,7 +114,7 @@ export function matchText(text: string, context = ''): TextMatch[] {
     'birthdate',
     (m) => BIRTH_CONTEXT.test(context) || BIRTH_CONTEXT.test(text.slice(Math.max(0, m.index - 30), m.index)),
   );
-  add(FIRST_LAST, 'name');
+  add(FIRST_LAST, 'name', notAName);
   return out.sort((a, b) => a.start - b.start);
 }
 

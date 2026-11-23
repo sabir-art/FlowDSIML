@@ -1,7 +1,7 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { elementLabel } from '@/lib/geometry';
-import { scanPage } from '@/lib/scan';
+import { scanNodes } from '@/lib/scan';
 import type { RecordingStatus, VideoBarRequest } from '@/lib/messages';
 import { MAX_MS, WARN_MS, elapsed, timer } from '@/lib/video';
 import { lang, strings } from '@/lib/i18n';
@@ -10,8 +10,9 @@ import { lang, strings } from '@/lib/i18n';
  * F7 (L21-02) : barre d'enregistrement vidéo dans l'onglet (shadow DOM, toujours au-dessus,
  * déplaçable). Chronomètre role=timer, Pause / Reprendre, Marquer une étape, Terminer ; raccourcis
  * Alt + Maj + P, M, S rappelés au survol ; « Plus qu'une minute » à 9 min, arrêt à 10 min.
- * Vérification des données (F1) pendant l'enregistrement : les zones repérées sont floutées DANS LA
- * PAGE avant d'être filmées (flou incrusté). Les clics sont horodatés (pauses-étapes proposées).
+ * Vérification des données (F1) pendant l'enregistrement : les données repérées sont masquées DANS LA
+ * PAGE avant d'être filmées (flou porté par l'élément, ou surlignage de la portion de texte), sur tout
+ * le document. Les clics sont horodatés (pauses-étapes proposées).
  */
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -23,48 +24,91 @@ export default defineContentScript({
     const s = strings;
     const send = (m: VideoBarRequest) => browser.runtime.sendMessage(m).catch(() => null);
 
-    // ===== Flou incrusté des données repérées =====
-    const veil = document.createElement('div');
-    veil.setAttribute('data-fd-ui', '');
-    veil.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483646';
-    document.documentElement.appendChild(veil);
+    // ===== Masquage des données repérées, dans la page elle-même =====
+    // Les données ne sont plus recouvertes par des rectangles posés au-dessus de la fenêtre : ceux-ci
+    // suivaient le défilement avec une image de retard (la donnée apparaissait un instant) et
+    // recouvraient tout panneau ouvert par-dessus. Le masque est porté par le contenu : l'élément est
+    // flouté par un attribut, ou la portion de texte est couverte par un surlignage CSS. Il défile donc
+    // avec son contenu, sans retard, et passe sous ce qui s'ouvre au-dessus. Tout le document est
+    // analysé, pas seulement la fenêtre : ce qui arrive à l'écran en défilant est déjà masqué.
+    const MASK = 'data-fd-masked';
+    const maskStyle = document.createElement('style');
+    maskStyle.setAttribute('data-fd-ui', '');
+    maskStyle.textContent =
+      `[${MASK}]{filter:blur(8px)!important}` +
+      '::highlight(fd-mask){color:transparent;background-color:#8f8f8f;text-shadow:none}';
+    document.documentElement.appendChild(maskStyle);
+    const highlight =
+      typeof Highlight !== 'undefined' && typeof CSS !== 'undefined' && CSS.highlights
+        ? new Highlight()
+        : null;
+    if (highlight) CSS.highlights.set('fd-mask', highlight);
+    let masked = new Set<Element>();
     let maxZones = 0;
-    // L21-01 : zones floutées à l'écran (relatives à la fenêtre), jointes à chaque repère
+    // L21-01 : zones masquées à l'écran (relatives à la fenêtre), jointes à chaque repère
     let shown: Array<{ x: number; y: number; w: number; h: number }> = [];
-    function blurNow() {
-      const zones = scanPage();
+    function maskNow() {
+      const next = new Set<Element>();
+      const ranges: Range[] = [];
+      for (const d of scanNodes(document.body)) {
+        if (d.el.closest('[data-fd-ui]')) continue;
+        if (highlight && d.node && d.start !== undefined && d.end !== undefined) {
+          // Une donnée au milieu d'un texte plus long : seule sa portion est couverte
+          const total = (d.el.textContent ?? '').trim().length || 1;
+          if ((d.end - d.start) / total < 0.6) {
+            const r = document.createRange();
+            r.setStart(d.node, d.start);
+            r.setEnd(d.node, d.end);
+            ranges.push(r);
+            continue;
+          }
+        }
+        next.add(d.el);
+      }
+      for (const el of masked) if (!next.has(el)) el.removeAttribute(MASK);
+      for (const el of next) if (!el.hasAttribute(MASK)) el.setAttribute(MASK, '');
+      masked = next;
+      if (highlight) {
+        highlight.clear();
+        for (const r of ranges) highlight.add(r);
+      }
       const W = innerWidth || 1;
       const H = innerHeight || 1;
-      shown = zones
-        .map((d) => ({
-          x: Math.max(0, (d.rect.left - 2) / W),
-          y: Math.max(0, (d.rect.top - 2) / H),
-          w: Math.min(1, (d.rect.width + 4) / W),
-          h: Math.min(1, (d.rect.height + 4) / H),
+      const rects = [
+        ...[...next].map((el) => el.getBoundingClientRect()),
+        ...ranges.flatMap((r) => [...r.getClientRects()]),
+      ];
+      shown = rects
+        .filter((r) => r.width > 1 && r.height > 1 && r.bottom > 0 && r.right > 0 && r.top < H && r.left < W)
+        .map((r) => ({
+          x: Math.max(0, (r.left - 2) / W),
+          y: Math.max(0, (r.top - 2) / H),
+          w: Math.min(1, (r.width + 4) / W),
+          h: Math.min(1, (r.height + 4) / H),
         }))
-        .filter((z) => z.x < 1 && z.y < 1 && z.w > 0 && z.h > 0)
         .slice(0, 40);
-      veil.replaceChildren(
-        ...zones.map((d) => {
-          const b = document.createElement('div');
-          b.setAttribute('data-fd-blur', '');
-          b.style.cssText =
-            `position:fixed;left:${d.rect.left - 2}px;top:${d.rect.top - 2}px;` +
-            `width:${d.rect.width + 4}px;height:${d.rect.height + 4}px;border-radius:4px;` +
-            'backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(120,120,120,.35)';
-          return b;
-        }),
-      );
-      if (zones.length > maxZones) {
-        maxZones = zones.length;
+      const count = next.size + ranges.length;
+      if (count > maxZones) {
+        maxZones = count;
         void send({ type: 'fd:video-blurs', count: maxZones });
       }
     }
-    blurNow();
-    const scanTimer = setInterval(blurNow, 700);
-    const mo = new MutationObserver(() => requestAnimationFrame(blurNow));
+    maskNow();
+    const scanTimer = setInterval(maskNow, 1500);
+    // Le contenu change (liste chargée, onglet, saisie) : nouvelle analyse à l'image suivante
+    let pending = 0;
+    const mo = new MutationObserver((list) => {
+      if (pending || list.every((m) => m.target instanceof Element && m.target.closest('[data-fd-ui]')))
+        return;
+      pending = requestAnimationFrame(() => {
+        pending = 0;
+        maskNow();
+      });
+    });
     mo.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
-    addEventListener('scroll', blurNow, { passive: true, capture: true });
+    // Saisie dans un champ : la valeur vient d'apparaître
+    const onInput = () => maskNow();
+    document.addEventListener('input', onInput, true);
 
     // ===== Barre =====
     const host = document.createElement('div');
@@ -203,8 +247,13 @@ export default defineContentScript({
         clearInterval(scanTimer);
         mo.disconnect();
         document.removeEventListener('pointerdown', onPointerDown, true);
+        document.removeEventListener('input', onInput, true);
+        cancelAnimationFrame(pending);
+        for (const el of masked) el.removeAttribute(MASK);
+        masked.clear();
+        if (highlight) CSS.highlights.delete('fd-mask');
+        maskStyle.remove();
         host.remove();
-        veil.remove();
         w.__fdVideoBar = false;
       }
     });

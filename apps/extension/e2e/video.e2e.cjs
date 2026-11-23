@@ -131,7 +131,9 @@ const WS = '11111111-1111-1111-1111-111111111111';
       buttons: [...(r?.querySelectorAll('button') ?? [])].map(
         (b) => b.getAttribute('title') ?? b.textContent,
       ),
-      blurred: document.querySelectorAll('[data-fd-blur]').length,
+      // Masque porté par le contenu : éléments floutés et portions de texte couvertes
+      blurred:
+        document.querySelectorAll('[data-fd-masked]').length + (CSS.highlights.get('fd-mask')?.size ?? 0),
     };
   });
   ok(bar.timer, 'chronomètre role=timer');

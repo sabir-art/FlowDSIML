@@ -23,6 +23,14 @@ describe('détection de données personnelles', () => {
     expect(types('Née le 14/02/2007')).toEqual([['birthdate', '14/02/2007']]);
     expect(types('14/02/2007', 'Date de naissance')).toEqual([['birthdate', '14/02/2007']]);
   });
+  it('faux noms : mot d’interface ou sigle (« Assistant IA », « Export PDF »)', () => {
+    for (const t of ['Assistant IA', 'Assistance IA', 'Export PDF', 'Mode API', 'Format CSV', 'Camille RH'])
+      expect(types(`Ouvrir ${t}`)).toEqual([]);
+    // Un vrai nom reste repéré, même près d'un sigle, et même court
+    expect(types('Assistant IA de Camille DURAND')).toEqual([['name', 'Camille DURAND']]);
+    expect(types('Suivi par Minh LE')).toEqual([['name', 'Minh LE']]);
+    expect(types('Jean-Marc DUPONT-MOREL')).toEqual([['name', 'Jean-Marc DUPONT-MOREL']]);
+  });
   it('nom : Prénom + NOM', () => {
     expect(types('Suivi par Camille DURAND')).toEqual([['name', 'Camille DURAND']]);
     expect(types('Tableau de bord')).toEqual([]);

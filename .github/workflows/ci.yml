@@ -374,7 +374,7 @@ jobs:
   # pour les tests (faux Supabase local, accès aux sites accordé : Playwright ne répond pas aux fenêtres
   # d'autorisation) et chargée dans Chromium.
   extension-e2e:
-    name: E2E extension (capture HTML, appli à page unique)
+    name: E2E extension (capture HTML, masquage vidéo)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -408,3 +408,10 @@ jobs:
         run: |
           cd apps/extension && node e2e/html-spa.e2e.cjs | tee /tmp/e2e-ext.log
           ! grep -q '^NOT OK' /tmp/e2e-ext.log
+      - name: Vidéo, masquage en direct (suit le défilement, passe sous un panneau, « Assistant IA » non masqué)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/video-masque.e2e.cjs | tee /tmp/e2e-ext-masque.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-masque.log

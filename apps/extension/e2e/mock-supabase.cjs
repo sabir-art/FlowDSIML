@@ -126,6 +126,25 @@ http
         return send(200, { Key: req.url, Id: 'x' });
       }
       if (req.url.startsWith('/rest/v1/')) return send(201, null);
+      // Vidéo : page fictive pour le masquage en direct. Fiche au-dessus et très en dessous de la ligne de
+      // flottaison, nom au milieu d'un long paragraphe, faux nom « Assistant IA », panneau qui s'ouvre
+      // par-dessus une donnée masquée. Données inventées (domaine .example).
+      if (req.url.startsWith('/masque')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Fiches fictives</title><style>body{font-family:sans-serif;margin:0;padding:24px}' +
+            '#panneau{position:fixed;top:40px;left:16px;width:420px;height:260px;background:#fff;border:1px solid #99a;z-index:50;padding:16px}' +
+            '.bloc{height:1400px}</style></head><body>' +
+            '<h1>Fiches</h1><button id="assistant" type="button">Assistant IA</button> <button id="ouvrir" type="button">Ouvrir le panneau</button>' +
+            '<p id="haut">Contact : camille.martin@exemple.example</p>' +
+            '<p id="long">Ce dossier, ouvert en mars et relu deux fois par le service, est suivi par Camille MARTIN depuis la réunion de lancement du projet fictif.</p>' +
+            '<div class="bloc"></div>' +
+            '<p id="bas">Tél. 06 12 34 56 78</p>' +
+            '<div class="bloc"></div><p id="fin">Contact : alex.durand@exemple.example</p>' +
+            '<script>document.getElementById("ouvrir").addEventListener("click",function(){var d=document.createElement("div");' +
+            'd.id="panneau";d.textContent="Panneau ouvert par-dessus la page";document.body.appendChild(d);});</script></body></html>',
+        );
+      }
       // A8 : application à page unique fictive (routeur côté client, sans rechargement), riche en scripts :
       // scripts en ligne, script de suivi externe, cadre intégré, menu déroulant. Données inventées.
       if (req.url.startsWith('/spa-suivi.js')) {
