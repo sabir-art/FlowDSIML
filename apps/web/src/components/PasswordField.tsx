@@ -76,7 +76,9 @@ export function PasswordMeter({ password }: { password: string }) {
   const { t } = useTranslation();
   // EXT-02 §7.3 : la jauge apparaît au premier caractère, quand elle a quelque chose à dire
   if (!password) return null;
-  const level = passwordStrength(password);
+  // Tant qu'une règle de la politique manque, la jauge s'arrête à « Faible » : elle ne dit jamais
+  // « Moyen » d'un mot de passe que le serveur refuse
+  const level = passwordRules(password).every((r) => r.ok) ? Math.max(1, passwordStrength(password)) : 0;
   return (
     <div className="fd-pw-meter" data-level={level < 0 ? undefined : LEVELS[level]}>
       {/* §18.6 : segments d'une même jauge, accolés à 4 px */}

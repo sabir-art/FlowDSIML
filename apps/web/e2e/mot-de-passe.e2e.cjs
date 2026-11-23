@@ -40,6 +40,10 @@ const VALIDE = 'Acmedemo2026!';
     const eyes = page.getByRole('button', { name: 'Afficher le mot de passe' });
     ok((await eyes.count()) === 2, `${tag} : un œil par champ, nom fixe « Afficher le mot de passe »`);
     ok((await page.locator('#password-rules').count()) === 0, `${tag} : règles masquées avant le focus`);
+    ok(
+      (await page.locator('.fd-pw-meter').count()) === 0,
+      `${tag} : pas de jauge tant que le champ est vide`,
+    );
 
     // Règles visibles dès le focus
     await pw.focus();
@@ -71,9 +75,9 @@ const VALIDE = 'Acmedemo2026!';
       `${tag} : trois règles cochées (icône CircleCheck), deux en attente (Circle)`,
     );
     ok(
-      sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Moyen' &&
-        (await page.locator('.fd-pw-meter__bar .is-on').count()) === 2,
-      `${tag} : jauge « Moyen », 2 segments sur 4`,
+      sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Faible' &&
+        (await page.locator('.fd-pw-meter__bar .is-on').count()) === 1,
+      `${tag} : une règle manque, la jauge reste à « Faible » (1 segment)`,
     );
     await page.getByRole('status').filter({ hasText: 'règles sur 5 respectées' }).waitFor();
     ok(true, `${tag} : « 3 règles sur 5 respectées » annoncé après la frappe`);
@@ -169,6 +173,12 @@ const VALIDE = 'Acmedemo2026!';
 
     // Confirmation différente
     await pw.fill(VALIDE);
+    ok(
+      /^Force du mot de passe : (Moyen|Bon|Fort)$/.test(
+        sp(await page.locator('.fd-pw-meter__label').innerText()),
+      ) && (await page.locator('.fd-pw-meter__bar .is-on').count()) >= 2,
+      `${tag} : toutes les règles respectées, la jauge dépasse « Faible »`,
+    );
     ok((await err.count()) === 0, `${tag} : l’erreur disparaît à la correction`);
     await submit.click();
     await page.locator('#confirm-error').waitFor();
