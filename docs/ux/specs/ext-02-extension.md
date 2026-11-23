@@ -130,4 +130,24 @@ Capture centrée en colonne, pastilles de 20 px, contrôles sur deux lignes si b
 - **4. Vidéo et masquage** : catégorie « Vidéo » (badge, filtre Type, création en deux étapes) ; « Masquer en direct : Oui / Non » ; revue après enregistrement avec démasquage ; suivi du défilement à toute vitesse ; masque qui ne couvre pas un panneau ouvert au-dessus ; « Pourquoi masqué ? » par zone ; faux positif « Assistant IA ».
 - **5. Captures** : étude de l’option à chaque clic (page, zone, élément).
 - **6. Idées de l’éditeur de référence, à adapter** : fenêtre modale image + texte, flou personnalisable, spotlight libre, bloc Voix off dans le panneau de 320 px (réponse au dev sur « Voix » et « Sous-titres » du §18.2).
-- **7. Corrections** : œil afficher/masquer et règles de mot de passe en direct, menu ⋯ et fenêtre « Supprimer ce formulaire ? » de l’étape Formulaire.
+
+
+## 7. Mot de passe et étape Formulaire
+
+Maquettes : `mdp-saisie-*` et `mdp-erreur-*` (clair, sombre, 1440, 390). Écrans concernés : Inscription, Nouveau mot de passe, Profil (avec « Mot de passe actuel »). Les règles affichées en maquette (8 caractères, une majuscule, un chiffre) sont des exemples : la liste réelle est celle du serveur, valeurs données par le chef.
+
+### 7.1 Œil afficher / masquer
+Bouton intégré au champ (FIELD-01 §11.3), 32 px, icône 16 px en `currentColor`, à droite. Masqué : Eye ; affiché : EyeOff. Nom accessible fixe « Afficher le mot de passe » + `aria-pressed`. Un œil par champ, indépendant. Le clic garde le focus et le curseur ; à l’envoi, tous les champs repassent en masqué.
+
+### 7.2 Règles en direct
+Liste sous le champ, visible dès le focus, une ligne par règle du serveur, 13 px, écart 4 px, icône 16 px. Non respectée : Circle, `text-muted`. Respectée : CircleCheck `success`, texte `text`. Après un envoi refusé : CircleX `danger`. `aria-describedby` du champ vers la liste ; texte masqué « respectée » / « non respectée » par ligne ; région polie « 2 règles sur 3 respectées », 1 s après la dernière frappe, seulement si le nombre change. Confirmation : règle unique « Les deux mots de passe sont identiques ».
+
+### 7.3 Force
+Jauge à 4 segments (maquette auth) entre le champ et la liste, libellé à droite (12 px, 600) : Faible (1, danger), Moyen (2, warning), Bon (3, success), Fort (4, success). Indicative : le bouton d’envoi n’est jamais désactivé pour la force.
+
+### 7.4 Erreurs du serveur
+Sous le champ : CircleAlert 16 px `danger` et une phrase d’action. « Utilisez au moins {n} caractères. », « Ajoutez au moins un chiffre. », « Ajoutez au moins une majuscule. », « Ajoutez au moins un caractère spécial (par ex. ! ? # @). », « Ce mot de passe est trop courant. Choisissez-en un autre. », « Les deux mots de passe ne sont pas identiques. », « Le mot de passe actuel est incorrect. » Plusieurs règles : une phrase qui les reprend (« Ajoutez au moins un chiffre et une majuscule. »). Bord `danger`, `aria-invalid`, focus sur le premier champ en erreur. Le message « 8 caractères minimum » seul est supprimé.
+
+### 7.5 Étape « Formulaire » de l’éditeur
+- Menu ⋯ identique aux autres étapes, sans « Remplacer la capture… » ni « Télécharger la capture » : Dupliquer, Insérer une étape avant, Insérer une étape après, Déplacer…, séparateur, Supprimer (danger) ; seulement les entrées qui existent ailleurs.
+- Fenêtre MODAL-01 : « Supprimer ce formulaire ? » ; corps « Le formulaire et ses {n} champs sont retirés de la démo. Les réponses déjà reçues restent dans Leads. » (si les réponses sont supprimées : « Les {n} réponses déjà reçues sont aussi supprimées. ») ; « Vous pouvez annuler avec Ctrl + Z. » seulement si l’annulation existe. Boutons « Annuler » (focus par défaut) et « Supprimer le formulaire » (danger).
