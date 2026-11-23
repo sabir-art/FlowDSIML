@@ -14,6 +14,7 @@
  * `registerHtmlClassifier` : c'est le point d'extension où une IA pourra plus tard dire « malveillant ou non ».
  */
 import { isExternalLink, siteOf } from './htmlSanitize';
+import type { PiiType } from './pii';
 
 export const HTML_REVIEW_GROUPS = [
   'pageScripts',
@@ -51,6 +52,11 @@ export interface HtmlRemovedItem extends HtmlClassification {
   name: string;
   /** Domaine d'origine, ou chaîne vide pour « dans la page ». */
   source: string;
+  /** Lien externe : sélecteur stable sur la page et adresse absolue (pour le garder, opération « extlink »). */
+  sel?: string;
+  href?: string;
+  /** Donnée personnelle : son type (« E-mail », « Téléphone »…). */
+  piiType?: PiiType;
 }
 
 /** Au-delà, la liste est tronquée (les compteurs du rapport restent exacts). */
@@ -202,20 +208,26 @@ function describe(el: Element, pageUrl: string | undefined): { name: string; sou
  * AVANT sanitizeDom, sur la copie (jamais sur la page vivante). Les données personnelles sont ajoutées par
  * l'appelant, qui seul connaît les détections (`piiItem`).
  */
-export function collectRemoved(root: Element, pageUrl?: string): HtmlRemovedItem[] {
+export function collectRemoved(
+  root: Element,
+  pageUrl?: string,
+  /** Sélecteur et adresse d'un lien de la copie, connus de l'appelant (calculés sur la page vivante). */
+  linkOf?: (el: Element) => { sel: string; href: string } | undefined,
+): HtmlRemovedItem[] {
   const out: HtmlRemovedItem[] = [];
   for (const el of root.querySelectorAll('script,iframe,frame,object,embed,form,a[href]')) {
     if (out.length >= HTML_REVIEW_MAX_ITEMS) break;
     if (el.closest('[data-fd-ui]')) continue;
     const c = classifyRemoved(el, pageUrl);
     if (!c) continue;
-    out.push({ id: `r${out.length + 1}`, ...c, ...describe(el, pageUrl) });
+    const link = c.group === 'externalLinks' ? linkOf?.(el) : undefined;
+    out.push({ id: `r${out.length + 1}`, ...c, ...describe(el, pageUrl), ...(link ?? {}) });
   }
   return out;
 }
 
-/** Donnée personnelle remplacée : `name` est la valeur déjà masquée (« Xxxxxx Xxxxxx »), jamais l'originale. */
-export function piiItem(index: number, masked: string): HtmlRemovedItem {
+/** Donnée personnelle remplacée : `name` est la valeur déjà masquée (« j••••@••••.fr »), jamais l'originale. */
+export function piiItem(index: number, masked: string, piiType?: PiiType): HtmlRemovedItem {
   return {
     id: `p${index + 1}`,
     group: 'pii',
@@ -223,6 +235,7 @@ export function piiItem(index: number, masked: string): HtmlRemovedItem {
     keepable: true,
     name: clip(masked, 60),
     source: '',
+    ...(piiType ? { piiType } : {}),
   };
 }
 

@@ -131,7 +131,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const review = await reviewP;
   await review.setViewportSize({ width: 1280, height: 900 });
   review.on('pageerror', (e) => console.log('# pageerror', e.message));
-  await review.waitForSelector('#pages li');
+  await review.waitForSelector('section.grp');
   const pages = await review.evaluate(
     () =>
       new Promise((res) => {
@@ -166,37 +166,33 @@ const WS = '11111111-1111-1111-1111-111111111111';
     pages[1].links.some((l) => l.sel === '#menu > a:nth-of-type(1)' && /\/page$/.test(l.href)),
     'liens repérés avec sélecteur stable',
   );
+  // EXT-02 §2 : écran « Vérifier avant l'envoi » (détail dans html-verification.e2e.cjs)
+  const pagesGroup = review.getByRole('region', { name: 'Pages copiées', exact: true });
+  await pagesGroup.getByRole('button', { name: 'Voir : Pages copiées' }).click();
   ok(
-    await review.$$eval('#pages iframe', (f) => f.every((x) => x.getAttribute('sandbox') === '' && x.title)),
-    'aperçus en iframe sandbox vide, nommés',
+    await pagesGroup
+      .locator('.pth iframe')
+      .evaluateAll((f) => f.length === 3 && f.every((x) => x.getAttribute('sandbox') === '')),
+    'vignettes en iframe sandbox vide',
   );
   ok(
     /Xxxxxxx/.test(
-      (await review.frameLocator('#pages li:nth-child(2) iframe').locator('body').textContent()) ?? '',
+      (await pagesGroup.frameLocator('li:nth-child(2) iframe').locator('body').textContent()) ?? '',
     ),
-    'aperçu fidèle',
+    'vignette fidèle à la copie',
   );
-  // L49 §3 : rapport cumulé, statut par page, « Envoyer 3 pages »
-  const sec = review.getByRole('group', { name: 'Analyse de sécurité' });
-  ok(await sec.isVisible(), 'L49 : rapport cumulé en tête');
   ok(
-    /^(Page sûre|Éléments retirés)$/.test(await sec.locator('.sec-status strong').textContent()) &&
-      /^3 pages nettoyées\u202f: \d+ éléments actifs retirés\. .*(Les pages sont publiables\.|Rien d’actif à retirer sur ces pages\.)$/.test(
-        await review.textContent('#sec-sum'),
-      ) &&
-      (await sec.locator('.sec-status').getByRole('button', { name: 'Détail' }).count()) === 1,
-    `L49 : statut et résumé (${await review.textContent('#sec-sum')})`,
+    (await review.locator('#sumbar dd').first().textContent()) === '3' &&
+      (await review.getByRole('region', { name: 'Données personnelles remplacées' }).count()) === 1,
+    'bilan : 3 pages copiées, données remplacées listées',
   );
-  await sec.getByRole('button', { name: 'Détail' }).click();
   ok(
-    (await sec.getByRole('list').locator('li').count()) >= 6 &&
-      (await sec.getByRole('button', { name: 'Détail' }).getAttribute('aria-expanded')) === 'true',
-    'L49 : « Détail » déplie les compteurs',
+    (await review.textContent('#server')) === 'Le serveur applique les mêmes règles à l’envoi.',
+    'note : le serveur applique les mêmes règles',
   );
-  ok((await review.locator('#pages .sec-status').count()) === 3, 'L49 : statut de chaque page');
-  ok((await review.textContent('#send')) === 'Envoyer 3 pages', '« Envoyer 3 pages »');
+  ok((await review.textContent('#send')) === 'Envoyer', '« Envoyer »');
   await shot(review, 'l20-00-verification', true);
-  await review.click('input[value=sandbox]');
+  await review.getByRole('radio', { name: 'Sandbox' }).click();
   await review.click('#send');
   await review
     .waitForURL(/22222222/, { timeout: 15000 })

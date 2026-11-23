@@ -11,6 +11,14 @@ import type { PendingHtmlPage } from './htmlStore';
  */
 export type HtmlDemoKind = 'guided' | 'sandbox';
 
+/** Page à envoyer, avec les liens externes que la personne garde (EXT-02 §2.3). */
+export type SendPage = PendingHtmlPage & { keepLinks?: Array<{ sel: string; href: string; label: string }> };
+/** Lien gardé que le serveur a refusé (adresse signalée) : dit sur l'écran de fin d'envoi (§2.4). */
+export interface DroppedLink {
+  label: string;
+  host: string;
+}
+
 async function ingest(
   token: string,
   workspaceId: string,
@@ -18,7 +26,7 @@ async function ingest(
   html: string,
   url: string,
   security: unknown,
-): Promise<string> {
+): Promise<{ path: string; blocked: string[] }> {
   const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/html-ingest`, {
     method: 'POST',
     headers: {
@@ -30,21 +38,27 @@ async function ingest(
     // les compteurs de la page d'origine complètent ceux que le serveur recalcule (rapport, L49 §3)
     body: JSON.stringify({ workspaceId, demoId, html, url, security }),
   });
-  const body = (await res.json().catch(() => ({}))) as { path?: string; error?: string };
+  const body = (await res.json().catch(() => ({}))) as {
+    path?: string;
+    error?: string;
+    security?: { blocked?: unknown };
+  };
   if (!res.ok || !body.path) throw new Error(body.error ?? `HTTP ${res.status}`);
-  return body.path;
+  const blocked = Array.isArray(body.security?.blocked) ? body.security.blocked.map(String) : [];
+  return { path: body.path, blocked };
 }
 
 export async function sendHtml(
-  pages: PendingHtmlPage[],
+  pages: SendPage[],
   target: { workspaceId: string; title: string; kind: HtmlDemoKind; appendTo?: string },
   onProgress: (done: number) => void,
-): Promise<string> {
+): Promise<{ demoId: string; dropped: DroppedLink[] }> {
   const { data: s } = await supabase.auth.getSession();
   const user = s.session?.user;
   if (!user || !s.session) throw new Error('Non connecté');
   const ordered = [...pages].sort((a, b) => a.order - b.order).filter((p) => !p.tooBig);
   const stepIds = ordered.map(() => crypto.randomUUID());
+  const dropped: DroppedLink[] = [];
   let demoId: string;
   let first = 0;
   if (target.appendTo) {
@@ -78,11 +92,31 @@ export async function sendHtml(
     demoId = demo.data.id;
   }
   for (const [i, p] of ordered.entries()) {
-    const path = await ingest(s.session.access_token, target.workspaceId, demoId, p.html, p.url, p.security);
+    const { path, blocked } = await ingest(
+      s.session.access_token,
+      target.workspaceId,
+      demoId,
+      p.html,
+      p.url,
+      p.security,
+    );
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
     if (p.clickSel && next)
       ops.push({ id: `l${i + 1}`, sel: p.clickSel, op: 'link', value: next, scope: 'step' });
+    // Liens externes gardés : réactivés par une opération « extlink » (le lecteur affiche d'abord
+    // « Vous quittez la démo »). Une adresse que le serveur a signalée reste désactivée.
+    for (const [k, l] of (p.keepLinks ?? []).entries()) {
+      if (blocked.includes(l.href)) {
+        let host = '';
+        try {
+          host = new URL(l.href).host;
+        } catch {
+          /* adresse illisible */
+        }
+        dropped.push({ label: l.label, host });
+      } else ops.push({ id: `x${i + 1}-${k + 1}`, sel: l.sel, op: 'extlink', value: l.href, scope: 'step' });
+    }
     const ins = await supabase.from('steps').insert({
       id: stepIds[i],
       demo_id: demoId,
@@ -106,5 +140,5 @@ export async function sendHtml(
     if (ins.error) throw ins.error;
     onProgress(i + 1);
   }
-  return demoId;
+  return { demoId, dropped };
 }

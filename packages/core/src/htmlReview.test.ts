@@ -109,4 +109,23 @@ describe('classement des éléments retirés (EXT-02 §2)', () => {
     off();
     expect(classifyRemoved(el, PAGE)?.group).toBe('pageScripts');
   });
+
+  it('lien externe : sélecteur et adresse fournis par l’appelant ; donnée : type gardé', () => {
+    const root = document.createElement('div');
+    root.innerHTML =
+      '<a id="cg" href="https://legal.example.com/cg">Conditions</a><script src="/a.js"></script>';
+    const a = root.querySelector('a')!;
+    const items = collectRemoved(root, PAGE, (el) =>
+      el === a ? { sel: '#cg', href: 'https://legal.example.com/cg' } : undefined,
+    );
+    const link = items.find((i) => i.group === 'externalLinks')!;
+    expect([link.sel, link.href]).toEqual(['#cg', 'https://legal.example.com/cg']);
+    expect(items.find((i) => i.group === 'pageScripts')!.sel).toBeUndefined();
+    expect(piiItem(2, 'j••••@••••.fr', 'email')).toMatchObject({
+      id: 'p3',
+      piiType: 'email',
+      keepable: true,
+    });
+    expect('piiType' in piiItem(0, 'Xxxx')).toBe(false);
+  });
 });

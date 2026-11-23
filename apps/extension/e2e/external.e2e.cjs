@@ -117,8 +117,10 @@ const WS = '11111111-1111-4111-8111-111111111111';
   const review = await reviewP;
   await review.waitForSelector('#send:not([disabled])');
   ok(
-    (await review.isVisible('#attach')) && !(await review.isVisible('fieldset.kinds')),
-    'revue : « ajoutées au Sandbox », sans choix du type',
+    /^Pages (ajoutées au|added to the) Sandbox/.test(await review.textContent('#kline')) &&
+      !(await review.isVisible('#kind')) &&
+      !(await review.isVisible('#vt')),
+    'revue : « Pages ajoutées au Sandbox », sans titre ni choix du type',
   );
   await review.click('#send');
   await review.waitForURL((u) => u.href.includes(`/demos/${DEMO}/edit`), { timeout: 15000 }).catch(() => {});

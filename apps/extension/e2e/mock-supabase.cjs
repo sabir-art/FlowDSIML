@@ -3,6 +3,8 @@ const http = require('http');
 const log = [];
 let htmlCapture = { mode: 'allowed', domains: [] };
 let tusOffset = 0;
+// EXT-02 §2.4 : adresses que le faux serveur signale (liens gardés qu'il refuse)
+let blocked = [];
 const user = {
   id: '00000000-0000-0000-0000-0000000000aa',
   email: 'a@b.c',
@@ -43,6 +45,10 @@ http
       if (req.url === '/__html-capture') {
         htmlCapture = JSON.parse(buf.toString() || '{}');
         return send(200, htmlCapture);
+      }
+      if (req.url === '/__blocked') {
+        blocked = JSON.parse(buf.toString() || '[]');
+        return send(200, blocked);
       }
       if (req.url.startsWith('/rest/v1/workspaces') && req.method === 'GET')
         return send(200, { settings: { htmlCapture } });
@@ -202,6 +208,31 @@ http
         );
       }
       // A8 : seconde page (script, gestionnaire, mot de passe rempli, données fictives) et ingestion
+      // EXT-02 §2 : pages fictives pour l'écran « Vérifier avant l'envoi » (scripts, suivi, cadre,
+      // formulaire, données inventées, liens externes en https et en http)
+      if (req.url.startsWith('/verif2')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Agenda</title><script>window.__v2=1</script></head>' +
+            '<body style="font-family:sans-serif"><h1>Agenda</h1><p>Tél. 06 12 34 56 78</p>' +
+            '<a href="/verif">Retour</a></body></html>',
+        );
+      }
+      if (req.url.startsWith('/verif')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Fiche client</title><script>window.__v=1</script>' +
+            '<script>function gtag(){} gtag("config","fictif")</script><script src="/spa-suivi.js"></script></head>' +
+            '<body style="font-family:sans-serif"><h1>Fiche client</h1><p id="suivi">Suivi par Camille MARTIN</p>' +
+            '<p id="mail">Contact : camille.martin@exemple.example</p>' +
+            '<form action="/envoi" method="post" aria-label="Recherche"><input name="q"><button type="button">Chercher</button></form>' +
+            '<iframe src="/spa-cadre" title="Cadre fictif" width="200" height="60"></iframe>' +
+            '<p><a id="aide" href="https://aide.example.com/guide">Aide en ligne</a> ' +
+            '<a id="cg" href="https://legal.example.com/cg">Conditions générales</a> ' +
+            '<a id="vieux" href="http://ancien.example.com/">Ancien site</a></p>' +
+            '<a id="suite" href="/verif2">Suite</a></body></html>',
+        );
+      }
       if (req.url.startsWith('/page2')) {
         res.writeHead(200, { 'content-type': 'text/html' });
         return res.end(
@@ -233,7 +264,10 @@ http
           security: b.security,
         });
         log[log.length - 1].html = b.html;
-        return send(200, { path: `${b.workspaceId}/${b.demoId}/${require('crypto').randomUUID()}.html` });
+        return send(200, {
+          path: `${b.workspaceId}/${b.demoId}/${require('crypto').randomUUID()}.html`,
+          security: { blocked },
+        });
       }
       // L25-01 : page haute (capture pleine page) qui ouvre l'aide dans un nouvel onglet
       if (req.url.startsWith('/tabs')) {

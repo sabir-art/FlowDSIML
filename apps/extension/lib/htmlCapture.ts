@@ -3,6 +3,7 @@ import {
   type HtmlSecurityCounts,
   HTML_MAX_BYTES,
   collectRemoved,
+  maskExcerpt,
   piiItem,
   neutralText,
   neutralizeText,
@@ -10,6 +11,7 @@ import {
   sanitizeDom,
   stableSelector,
 } from '@flowdsiml/core';
+import { PII_ATTR, type PiiOriginal } from './htmlKeep';
 import { scanNodes } from './scan';
 
 /**
@@ -37,6 +39,11 @@ export interface HtmlCapture {
    * Absent des pages capturées avant la version 0.2.
    */
   removed?: HtmlRemovedItem[];
+  /**
+   * EXT-02 §2.3 : texte d'origine des données remplacées, par identifiant de `removed`. Gardé dans le
+   * navigateur pour « Garder » ; jamais affiché, jamais envoyé avec la page.
+   */
+  piiOriginals?: Record<string, PiiOriginal>;
 }
 
 /** Récupère une ressource (image → data: WebP, police → data:, CSS → texte) par le service. */
@@ -130,24 +137,44 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
   // Données repérées : texte remplacé dans la source et flou
   const blurredEls = new Set<Element>();
   let piiReplaced = 0;
-  // Valeurs déjà masquées (« Xxxxxx Xxxxxx »), pour la liste de vérification : jamais la valeur réelle
-  const piiMasked: string[] = [];
+  // Liste de vérification : valeur masquée et type, jamais la valeur réelle. Le texte d'origine est mis
+  // de côté (piiOriginals) pour « Garder », et l'élément porteur est marqué
+  const piiList: Array<{ masked: string; type: (typeof detections)[number]['type'] }> = [];
+  const piiOriginals: Record<string, PiiOriginal> = {};
+  const mark = (el: Element, id: string) =>
+    el.setAttribute(PII_ATTR, `${el.getAttribute(PII_ATTR) ?? ''} ${id}`.trim());
   for (const d of detections) {
+    const el = map.get(d.el) as HTMLElement | undefined;
     if (d.node && d.start !== undefined && d.end !== undefined) {
       const t = map.get(d.node) as Text | undefined;
       if (t) {
-        const masked = neutralText(t.data.slice(d.start, d.end));
+        const original = t.data.slice(d.start, d.end);
+        const masked = neutralText(original);
         t.data = t.data.slice(0, d.start) + masked + t.data.slice(d.end);
         piiReplaced++;
-        piiMasked.push(masked);
+        const id = `p${piiList.push({ masked: maskExcerpt(d.type, original), type: d.type })}`;
+        const host = el ?? t.parentElement;
+        if (host) {
+          // Place de l'extrait : rang de son nœud texte dans l'élément, et position dans ce nœud
+          let node = -1;
+          const w = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+          for (let n = w.nextNode(), k = 0; n; n = w.nextNode(), k++) if (n === t) node = k;
+          piiOriginals[id] = { masked, original, node, start: d.start };
+          mark(host, id);
+        }
       }
     }
-    const el = map.get(d.el) as HTMLElement | undefined;
     if (!el) continue;
     if (!d.node) {
+      const texts: string[] = [];
+      const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) texts.push(n.nodeValue ?? '');
+      const value = el.getAttribute('value') ?? undefined;
       neutralizeText(el);
       piiReplaced++;
-      piiMasked.push(el.textContent ?? '');
+      const id = `p${piiList.push({ masked: (el.textContent ?? '').replace(/\s+/g, ' ').trim(), type: d.type })}`;
+      piiOriginals[id] = { texts, value };
+      mark(el, id);
     }
     // Le nom de colonne ou la libellé ne sont pas floutés : seulement l'élément porteur
     el.setAttribute('style', `${el.getAttribute('style') ?? ''};${BLUR}`);
@@ -161,10 +188,15 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
 
   // Liens de la page : sélecteur calculé sur la page, libellé lu dans la copie (déjà neutralisée)
   const links: HtmlCapture['links'] = [];
+  // Lien de la copie → son sélecteur sur la page (pour « Garder » un lien externe)
+  const linkOf = new Map<Element, { sel: string; href: string }>();
   for (const a of [...document.querySelectorAll<HTMLAnchorElement>('a[href]')]) {
     if (a.closest('[data-fd-ui]') || !/^https?:/.test(a.href)) continue;
     const label = ((map.get(a) as Element | undefined)?.textContent ?? '').replace(/\s+/g, ' ').trim();
-    links.push({ sel: stableSelector(a), href: a.href, label: label.slice(0, 120) });
+    const sel = stableSelector(a);
+    links.push({ sel, href: a.href, label: label.slice(0, 120) });
+    const copy = map.get(a) as Element | undefined;
+    if (copy) linkOf.set(copy, { sel, href: a.href });
   }
 
   // Interface de l'extension retirée
@@ -231,7 +263,10 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
   }
 
   // Liste détaillée, relevée avant l'assainissement (qui retire ces éléments de la copie)
-  const removed = [...collectRemoved(clone, location.href), ...piiMasked.map((m, i) => piiItem(i, m))];
+  const removed = [
+    ...collectRemoved(clone, location.href, (el) => linkOf.get(el)),
+    ...piiList.map((p, i) => piiItem(i, p.masked, p.type)),
+  ];
   const security = { ...sanitizeDom(clone, location.href), piiReplaced };
   const html = `<!doctype html>\n${clone.outerHTML}`;
   const bytes = new TextEncoder().encode(html).length;
@@ -247,5 +282,6 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     canvases,
     security,
     removed,
+    piiOriginals,
   };
 }

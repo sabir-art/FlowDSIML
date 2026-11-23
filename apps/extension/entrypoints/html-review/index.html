@@ -3,58 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vérification de la capture HTML</title>
+    <title>Vérifier avant l’envoi</title>
   </head>
   <body>
-    <main id="main" tabindex="-1">
-      <header class="vr-head">
-        <img class="logo" src="/symbole-tutoclick.svg" width="36" height="36" alt="TutoClick" />
-        <div>
-          <h1 data-i18n="hrTitle"></h1>
-          <p class="muted" data-i18n="hrHelp"></p>
-        </div>
-      </header>
+    <header class="top">
+      <picture>
+        <source srcset="/logo-tutoclick-compact-sombre.svg" media="(prefers-color-scheme: dark)" />
+        <img src="/logo-tutoclick-compact.svg" height="28" alt="TutoClick" />
+      </picture>
+      <span class="t" id="top-title" aria-hidden="true"></span>
+    </header>
+    <main id="main" class="vw" tabindex="-1">
+      <div id="srv" class="srv" role="status" hidden></div>
       <div id="alert" class="alert" role="alert" hidden></div>
-      <p id="attach" class="muted" data-i18n="hrAttach" hidden></p>
-      <fieldset class="kinds">
-        <legend data-i18n="hrType"></legend>
-        <label class="kind"
-          ><input type="radio" name="kind" value="guided" checked /><span
-            ><b data-i18n="hrGuided"></b><small data-i18n="hrGuidedHelp"></small></span
-        ></label>
-        <label class="kind"
-          ><input type="radio" name="kind" value="sandbox" /><span
-            ><b data-i18n="hrSandbox"></b><small data-i18n="hrSandboxHelp"></small></span
-        ></label>
-      </fieldset>
-      <section id="sec" class="sec" role="group" aria-labelledby="sec-h" hidden>
-        <h2 id="sec-h" data-i18n="secGroup"></h2>
-        <p class="sec-status">
-          <span id="sec-dot" class="dot" aria-hidden="true"></span><strong id="sec-st"></strong>
-          <button
-            id="sec-more"
-            type="button"
-            class="link"
-            aria-expanded="false"
-            aria-controls="sec-list"
-            data-i18n="secDetail"
-          ></button>
-        </p>
-        <p id="sec-sum" class="muted"></p>
-        <ul id="sec-list" class="sec-list" hidden></ul>
-        <p class="muted small" data-i18n="secServerNote"></p>
-      </section>
-      <section aria-labelledby="pages-h">
-        <h2 id="pages-h" data-i18n="hrPages"></h2>
-        <ol id="pages" class="pages"></ol>
-      </section>
-      <div class="vr-actions">
-        <button id="delete" class="btn btn-ghost-danger" data-i18n="hrDelete"></button>
-        <span class="grow"></span>
-        <span id="progress" class="muted" role="status"></span>
-        <button id="send" class="btn btn-primary" data-i18n="hrSend"></button>
+      <div>
+        <h1 id="h1"></h1>
+        <p class="mu intro" id="intro"></p>
       </div>
+      <div class="vhead" id="vhead">
+        <div class="fld2" id="name-field">
+          <label class="fl2" for="vt" id="vt-label"></label>
+          <input class="inp" id="vt" type="text" maxlength="160" autocomplete="off" />
+          <p class="ferr" id="vt-err" hidden></p>
+        </div>
+        <div class="fld2">
+          <span class="fl2" id="vk"></span>
+          <div class="fd-segmented" id="kind" role="radiogroup" aria-labelledby="vk"></div>
+          <p class="kline" id="kline" hidden></p>
+        </div>
+      </div>
+      <dl class="sumbar" id="sumbar"></dl>
+      <div class="note" id="note" hidden></div>
+      <div id="groups" class="groups"></div>
+      <p class="mu server" id="server"></p>
     </main>
+    <div class="bar">
+      <div>
+        <button type="button" class="bt dg" id="delete"></button>
+        <span class="sp"></span>
+        <span id="progress" class="mu" role="status"></span>
+        <button type="button" class="bt pr send" id="send" disabled></button>
+      </div>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <dialog id="dlg" class="dlg" aria-labelledby="dlg-t" aria-describedby="dlg-b">
+      <h2 id="dlg-t"></h2>
+      <p id="dlg-b"></p>
+      <div class="ac">
+        <button type="button" class="bt" id="dlg-no"></button>
+        <button type="button" class="bt pr" id="dlg-ok"></button>
+      </div>
+    </dialog>
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

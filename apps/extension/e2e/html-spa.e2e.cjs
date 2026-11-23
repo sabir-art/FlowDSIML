@@ -141,7 +141,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/html-review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
   const review = await reviewP;
-  await review.waitForSelector('#pages li');
+  await review.waitForSelector('section.grp');
   const pages = await review.evaluate(
     () =>
       new Promise((res) => {
@@ -209,7 +209,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
     'scripts et cadre tiers non gardables, source indiquée',
   );
   // Envoi en Sandbox : les pages sont reliées dans l'ordre des clics
-  await review.click('input[value=sandbox]');
+  await review.getByRole('radio', { name: 'Sandbox' }).click();
   await review.click('#send');
   await review.waitForURL(/22222222/, { timeout: 15000 }).catch(() => undefined);
   const log = await getLog();

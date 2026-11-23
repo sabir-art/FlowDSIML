@@ -408,6 +408,13 @@ jobs:
         run: |
           cd apps/extension && node e2e/html-spa.e2e.cjs | tee /tmp/e2e-ext.log
           ! grep -q '^NOT OK' /tmp/e2e-ext.log
+      - name: Vérifier avant l'envoi (titre, type, pages, six groupes, « Garder » une donnée ou un lien, lien refusé)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/html-verification.e2e.cjs | tee /tmp/e2e-ext-verif.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-verif.log
       - name: Vidéo, masquage en direct (suit le défilement, passe sous un panneau, « Assistant IA » non masqué)
         if: always()
         env:
