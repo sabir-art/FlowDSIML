@@ -4402,6 +4402,7 @@
     "importTitle": "Import a CSV",
     "importHelp": "Columns nouveau, ancien, definition, formes; UTF-8; comma or semicolon separator. An existing term is updated, never duplicated.",
     "importFile": "CSV file",
+    "importBadType": "“{{name}}” is not a CSV file. Choose a .csv file or start from the template.",
     "importAdd_one": "{{count}} term to add",
     "importAdd_other": "{{count}} terms to add",
     "importUpdate_one": "{{count}} to update",

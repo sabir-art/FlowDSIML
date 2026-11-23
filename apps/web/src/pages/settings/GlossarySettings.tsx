@@ -460,12 +460,18 @@ function ImportDialog({
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [readErr, setReadErr] = useState(false);
   const [fileName, setFileName] = useState('');
+  /** Fichier refusé (pas un CSV) : nom affiché dans l'erreur de la zone, rien n'est importé. */
+  const [badType, setBadType] = useState('');
   const { busy, error, run } = useAction();
 
   async function pick(file: File | undefined) {
     setPreview(null);
     setReadErr(false);
+    setBadType('');
+    setFileName('');
     if (!file) return;
+    if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') return setBadType(file.name);
+    setFileName(file.name);
     try {
       setPreview(previewImport(await file.text(), terms));
     } catch {
@@ -522,10 +528,8 @@ function ImportDialog({
           icon={<FileUp />}
           inputId="gl-file"
           file={fileName ? { name: fileName, meta: t('dropzone.csvHint') } : null}
-          onFiles={(files) => {
-            setFileName(files[0]?.name ?? '');
-            void pick(files[0]);
-          }}
+          error={badType ? t('glossary.importBadType', { name: badType }) : undefined}
+          onFiles={(files) => void pick(files[0])}
         />
         {readErr && (
           <p className="stg-error" role="alert">

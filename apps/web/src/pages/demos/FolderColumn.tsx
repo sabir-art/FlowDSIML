@@ -21,9 +21,9 @@ import {
   Plus,
   Trash2,
   User,
+  X,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { PanneauIcon } from '../../components/PanneauIcon';
 import { Menu, type MenuItem } from '../../components/Menu';
 
 type FolderRow = Tables<'folders'>;
@@ -233,7 +233,8 @@ export function FolderColumn({
       aria-expanded
       onClick={onToggle}
     >
-      <PanneauIcon />
+      {/* L'icône panneau est réservée à la barre latérale (COL-02) */}
+      <X aria-hidden="true" />
     </button>
   );
   return (

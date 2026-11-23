@@ -4402,6 +4402,7 @@
     "importTitle": "Importer un CSV",
     "importHelp": "Colonnes nouveau, ancien, definition, formes ; encodage UTF-8 ; séparateur virgule ou point-virgule. Un terme déjà présent est mis à jour, jamais dupliqué.",
     "importFile": "Fichier CSV",
+    "importBadType": "« {{name}} » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.",
     "importAdd_one": "{{count}} terme à ajouter",
     "importAdd_other": "{{count}} termes à ajouter",
     "importUpdate_one": "{{count}} à mettre à jour",

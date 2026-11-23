@@ -97,6 +97,18 @@ const SHOTS = process.env.SHOTS_DIR;
   fs.writeFileSync(file, csv);
   await page.getByRole('button', { name: 'Importer un CSV' }).click();
   const imp = page.getByRole('dialog', { name: 'Importer un CSV' });
+  // Recette UX du 23/11 : un fichier qui n'est pas un CSV est refusé dans la zone, rien n'est importé
+  const zone = imp.getByRole('group', { name: 'Fichier CSV' });
+  await zone
+    .locator('input[type=file]')
+    .setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from('pas un csv') });
+  ok(
+    (await zone.getByRole('alert').innerText()) ===
+      '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
+      (await imp.getByRole('status').count()) === 0 &&
+      (await imp.getByRole('button', { name: 'Importer', exact: true }).isDisabled()),
+    'Import : fichier non CSV refusé dans la zone, aucun aperçu, « Importer » désactivé',
+  );
   // MEDIA-01 : le champ fichier est dans la zone de dépôt « Fichier CSV »
   await imp.getByRole('group', { name: 'Fichier CSV' }).locator('input[type=file]').setInputFiles(file);
   const prev = imp.getByRole('status');
