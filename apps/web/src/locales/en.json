@@ -2903,6 +2903,7 @@
     "logoRemove": "Remove the logo",
     "logoFormats": "PNG, JPEG, WebP or SVG, 2 MB max.",
     "logoFile": "{{name}} logo",
+    "logoSending": "Uploading the logo",
     "logoFormat": "This format is not accepted. Choose a PNG, JPEG, WebP or SVG file.",
     "logoSize": "The file is larger than 2 MB.",
     "colorsTitle": "Brand colors",
@@ -3484,6 +3485,9 @@
     }
   },
   "center": {
+    "logoChange": "Change the centre logo",
+    "logoOptions": "Options for the centre logo",
+    "logoSet": "Centre logo",
     "title": "Training center",
     "forbidden": "Training center settings are limited to workspace owners and admins.",
     "statusPublished": "Published",

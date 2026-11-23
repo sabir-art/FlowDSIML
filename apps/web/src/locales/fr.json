@@ -2903,6 +2903,7 @@
     "logoRemove": "Retirer le logo",
     "logoFormats": "PNG, JPEG, WebP ou SVG, 2 Mo au plus.",
     "logoFile": "Logo de {{name}}",
+    "logoSending": "Envoi du logo",
     "logoFormat": "Ce format n’est pas accepté. Choisissez un fichier PNG, JPEG, WebP ou SVG.",
     "logoSize": "Le fichier dépasse 2 Mo.",
     "colorsTitle": "Couleurs de la marque",
@@ -3484,6 +3485,9 @@
     }
   },
   "center": {
+    "logoChange": "Changer le logo du centre",
+    "logoOptions": "Options pour le logo du centre",
+    "logoSet": "Logo du centre",
     "title": "Centre de formation",
     "forbidden": "Les réglages du centre de formation sont réservés aux propriétaires et admins de l’espace.",
     "statusPublished": "Publié",

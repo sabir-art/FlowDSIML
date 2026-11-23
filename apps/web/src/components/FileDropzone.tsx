@@ -17,6 +17,7 @@ export function FileDropzone({
   hint,
   file,
   busy = false,
+  busyLabel,
   error,
   readOnly = false,
   describedBy,
@@ -35,6 +36,8 @@ export function FileDropzone({
   /** Fichier en place : son nom, ses détails (type, poids, date) et son aperçu. */
   file?: { name: string; meta?: string; preview?: ReactNode } | null;
   busy?: boolean;
+  /** Nom de la barre d'envoi (« Envoi du logo »). */
+  busyLabel?: string;
   /** Raison de l'échec du dernier envoi (l'ancien fichier reste en place). */
   error?: string | null;
   /** Lecture seule : ni dépôt, ni choix de fichier, ni retrait (la Médiathèque reste ouverte). */
@@ -70,6 +73,13 @@ export function FileDropzone({
   ]
     .filter(Boolean)
     .join(' ');
+
+  // Envoi : barre indéterminée (le stockage ne donne pas d'avancement), ni pourcentage ni « Annuler »
+  const bar = (
+    <span className="fd-dz__bar" role="progressbar" aria-label={busyLabel ?? t('dropzone.sending')}>
+      <span />
+    </span>
+  );
 
   return (
     <div
@@ -125,11 +135,13 @@ export function FileDropzone({
         ) : file ? (
           <>
             <b>{file.name}</b>
+            {busy && bar}
             <span>{busy ? t('dropzone.sending') : (file.meta ?? hint)}</span>
           </>
         ) : (
           <>
             <b>{busy ? t('dropzone.sending') : t(readOnly ? 'dropzone.none' : 'dropzone.title')}</b>
+            {busy && bar}
             <span>{hint}</span>
           </>
         )}

@@ -17,7 +17,6 @@ import {
   Settings2,
   ShieldCheck,
   TriangleAlert,
-  Upload,
 } from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
 import { Alert, Button, Select, ColorSwatch } from '@flowdsiml/ui';
@@ -44,6 +43,7 @@ import {
 } from './centerDraft';
 import './center.css';
 import { AppPage } from '../../components/AppPage';
+import { MediaThumb } from '../../components/MediaThumb';
 
 const ICON = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const;
 const MAX_LOGO = 512 * 1024;
@@ -225,7 +225,17 @@ export function CenterSettings() {
     update({ brand: value.toUpperCase() });
   }
 
+  // Envoi du logo : le voile de la vignette ne suit que cet envoi, pas les autres actions de la page
+  const [logoBusy, setLogoBusy] = useState(false);
   async function uploadLogo(file: File) {
+    setLogoBusy(true);
+    try {
+      await sendLogo(file);
+    } finally {
+      setLogoBusy(false);
+    }
+  }
+  async function sendLogo(file: File) {
     await run(async () => {
       const ext =
         file.type === 'image/png'
@@ -453,38 +463,33 @@ export function CenterSettings() {
                 {t('center.logo')}
               </span>
               <div className="logo-f" role="group" aria-labelledby="c-logo-l">
-                {logoUrl ? (
-                  <img className="ctr-logo" src={logoUrl} alt="" />
-                ) : (
-                  <span className="ctr-logo" aria-hidden="true" style={{ background: brand }}>
-                    {initials(current?.name ?? '')}
-                  </span>
-                )}
-                <span className="tx">
-                  <b>{draft.logoPath ? draft.logoPath.split('/').pop() : t('center.logoNone')}</b>
+                {/* MEDIA-01 : vignette carrée, l'image est le bouton ; « Remplacer… » et « Retirer » dans ⋯ */}
+                <MediaThumb
+                  shape="square"
+                  image={logoUrl ? <img src={logoUrl} alt="" /> : null}
+                  fallback={
+                    <span
+                      className="fd-mt__ini"
+                      data-ini={initials(current?.name ?? '')}
+                      style={{ background: brand, color: '#ffffff' }}
+                    />
+                  }
+                  accept="image/png,image/svg+xml,image/webp"
+                  inputId="c-logo-file"
+                  describedBy="c-logo-h"
+                  labels={{
+                    change: t('center.logoChange'),
+                    add: t('center.logoChange'),
+                    options: t('center.logoOptions'),
+                  }}
+                  busy={logoBusy}
+                  onFile={(f) => void uploadLogo(f)}
+                  onRemove={draft.logoPath ? () => update({ logoPath: null }) : undefined}
+                />
+                <span className="tx" id="c-logo-h">
+                  <b>{draft.logoPath ? t('center.logoSet') : t('center.logoNone')}</b>
                   {t('center.logoHelp')}
                 </span>
-                <label className="fd-btn fd-btn--sm">
-                  <span className="fd-btn__icon" aria-hidden="true">
-                    <Upload />
-                  </span>
-                  {draft.logoPath ? t('center.logoReplace') : t('center.logoAdd')}
-                  <input
-                    type="file"
-                    className="sr-only"
-                    accept="image/png,image/svg+xml,image/webp"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = '';
-                      if (f) void uploadLogo(f);
-                    }}
-                  />
-                </label>
-                {draft.logoPath && (
-                  <Button size="sm" variant="ghost" onClick={() => update({ logoPath: null })}>
-                    {t('center.logoRemove')}
-                  </Button>
-                )}
               </div>
             </div>
             <div className="two">

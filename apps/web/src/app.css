@@ -2309,6 +2309,35 @@ button.fd-nav__item:hover {
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
+/* Envoi : barre indéterminée de 6 px, segment de 30 % qui glisse en 1,2 s (fixe si animations réduites) */
+.fd-dz__bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--fd-color-border);
+}
+.fd-dz__bar > span {
+  display: block;
+  width: 30%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fd-color-primary);
+  animation: fd-dz-slide 1.2s ease-in-out infinite;
+}
+@keyframes fd-dz-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(334%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-dz__bar > span {
+    animation: none;
+  }
+}
 .fd-dz__acts {
   display: flex;
   flex: none;
@@ -2529,4 +2558,9 @@ button.fd-nav__item:hover {
   .fd-mt__err {
     text-align: left;
   }
+}
+
+/* Vignette dans une carte de formulaire (logo du Centre) : calée à gauche, avec son aide à côté */
+.logo-f .fd-mt-wrap {
+  justify-items: start;
 }

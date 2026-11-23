@@ -161,6 +161,7 @@ function LogoSection({
             describedBy="br-logo-formats"
             readOnly={!isAdmin}
             busy={busy}
+            busyLabel={t('brand.logoSending')}
             error={err}
             file={
               url && ws.logo_path
