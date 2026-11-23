@@ -1736,8 +1736,8 @@
       "replace": "Replace",
       "none": "No dataset. A fictional or aggregated CSV file can feed elements, charts and variables.",
       "summary": "{{rows}} rows · {{cols}} columns · {{bound}} published",
-      "fileInfo": "{{rows}} rows · {{cols}} columns · {{sep}} separator, {{enc}}",
-      "fileSaved": "{{rows}} rows · {{cols}} columns · saved",
+      "fileInfo": "{{rows}} · {{cols}} · {{sep}} separator, {{enc}}",
+      "fileSaved": "{{rows}} · {{cols}} · saved",
       "sepSemi": "semicolon",
       "sepComma": "comma",
       "preview": "File preview (first 3 rows)",
@@ -1766,7 +1766,12 @@
       "err_tooBig": "The file exceeds 500 KB.",
       "err_tooManyRows": "The file exceeds 1,000 rows.",
       "err_tooManyColumns": "The file exceeds 20 columns.",
-      "err_header": "Every column needs a header of 60 characters at most."
+      "err_header": "Every column needs a header of 60 characters at most.",
+      "rowsN_one": "{{count}} row",
+      "rowsN_other": "{{count}} rows",
+      "colsN_one": "{{count}} column",
+      "colsN_other": "{{count}} columns",
+      "err_notCsv": "“{{name}}” is not a CSV file. Choose a .csv file or generate sample data."
     },
     "toCapture": {
       "badge": "To capture",
@@ -2334,7 +2339,8 @@
       "exportFile": "learner-links.csv",
       "demoLink": "Demo link",
       "choose": "Choose a file",
-      "noFile": "No file chosen"
+      "noFile": "No file chosen",
+      "notCsv": "“{{name}}” is not a CSV file. Choose a .csv file or start from the template."
     },
     "training": {
       "title": "Training",

@@ -311,7 +311,7 @@ export function HtmlStep({
           <div class="p-html-nozone" role="status">
             <Info aria-hidden="true" />
             <div class="p-html-nozone-tx">
-              <b>{ht.noZoneTitle}</b>
+              <b>{sandbox ? ht.noZoneTitleSandbox : ht.noZoneTitle}</b>
               <p>{sandbox ? ht.noZoneSandbox : ht.noZoneGuided}</p>
               <div class="p-html-nozone-acts">
                 <button type="button" class="p-btn p-btn-primary" onClick={onAddZone}>

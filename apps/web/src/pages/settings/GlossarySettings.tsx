@@ -25,7 +25,7 @@ import {
 import './glossary.css';
 import { Button, Modal } from '@flowdsiml/ui';
 import { FileUp } from 'lucide-react';
-import { FileDropzone } from '../../components/FileDropzone';
+import { FileDropzone, isCsvFile } from '../../components/FileDropzone';
 
 type Term = Tables<'glossary_terms'>;
 
@@ -470,7 +470,7 @@ function ImportDialog({
     setBadType('');
     setFileName('');
     if (!file) return;
-    if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') return setBadType(file.name);
+    if (!isCsvFile(file)) return setBadType(file.name);
     setFileName(file.name);
     try {
       setPreview(previewImport(await file.text(), terms));

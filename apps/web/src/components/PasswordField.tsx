@@ -74,7 +74,9 @@ const LEVELS: readonly string[] = ['weak', 'medium', 'good', 'strong'];
 /** Jauge de force : Faible (1 segment), Moyen (2), Bon (3), Fort (4). Elle informe, elle ne bloque pas. */
 export function PasswordMeter({ password }: { password: string }) {
   const { t } = useTranslation();
-  const level = password ? passwordStrength(password) : -1;
+  // EXT-02 §7.3 : la jauge apparaît au premier caractère, quand elle a quelque chose à dire
+  if (!password) return null;
+  const level = passwordStrength(password);
   return (
     <div className="fd-pw-meter" data-level={level < 0 ? undefined : LEVELS[level]}>
       {/* §18.6 : segments d'une même jauge, accolés à 4 px */}

@@ -232,11 +232,14 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       mimeType: 'text/csv',
       buffer: Buffer.from('equipe;contact\nAntenne Nord;nord@acme.example\n'),
     });
-    await p.waitForTimeout(300);
+    // Recette UX du 23/11 : un fichier refusé se lit dans la zone de dépôt (état d'erreur)
+    const zone = dlg.getByRole('group', { name: 'Importer un fichier CSV' });
+    await zone.getByRole('alert').waitFor();
     ok(
-      (await dlg.getByRole('alert').textContent()) ===
-        'La colonne « contact » contient des données personnelles : retirez-la du fichier.',
-      'colonne personnelle refusée à l’import',
+      (await zone.getByRole('alert').textContent()) ===
+        'La colonne « contact » contient des données personnelles : retirez-la du fichier.' &&
+        (await zone.evaluate((e) => e.classList.contains('is-error'))),
+      'colonne personnelle refusée à l’import, dans la zone en erreur',
     );
     ok((await dlg.getByRole('button', { name: 'Fermer' }).count()) === 1, 'bouton × dans l’en-tête');
     await shot('l25-09-refus');
@@ -249,8 +252,8 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     });
     await p.waitForTimeout(300);
     ok(
-      (await dlg.locator('.fd-dz__txt').textContent()).includes(
-        '4 lignes · 4 colonnes · séparateur point-virgule, UTF-8',
+      /4\slignes · 4\scolonnes · séparateur point-virgule, UTF-8/.test(
+        await dlg.locator('.fd-dz__txt').textContent(),
       ),
       'fichier : lignes, colonnes, séparateur et encodage détectés',
     );
@@ -258,6 +261,45 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       (await dlg.locator('.ds-table').first().locator('tbody tr').count()) === 3,
       'aperçu des 3 premières lignes',
     );
+    // Un fichier qui n'est pas un CSV, après un bon : erreur dans la zone, ancien aperçu retiré, « Relier » inactif
+    await input.setInputFiles({
+      name: 'photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('pas un csv'),
+    });
+    await zone.getByRole('alert').waitFor();
+    ok(
+      (await zone.getByRole('alert').textContent()) ===
+        '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou générez des données fictives.' &&
+        !(await zone.textContent()).includes('equipes-acme.csv'),
+      'fichier non CSV : message juste dans la zone, l’ancien fichier n’y figure plus',
+    );
+    ok(
+      (await dlg.locator('.ds-table').count()) === 0 &&
+        (await dlg.locator('.ds-mode').count()) === 0 &&
+        (await dlg.getByRole('button', { name: 'Relier', exact: true }).isDisabled()) &&
+        (await dlg.locator('.fd-alert--info [role=alert], .fd-alert--danger').count()) === 0,
+      'fichier non CSV : aperçu et liaisons retirés, « Relier » désactivé, pas d’autre alerte',
+    );
+    // Pluriels : une ligne, une colonne
+    await input.setInputFiles({
+      name: 'une.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('equipe\nAntenne Nord\n'),
+    });
+    await dlg.locator('.ds-table').first().waitFor();
+    ok(
+      /^une\.csv1\sligne · 1\scolonne · /.test(await dlg.locator('.fd-dz__txt').textContent()),
+      `pluriels : « 1 ligne · 1 colonne » (${await dlg.locator('.fd-dz__txt').textContent()})`,
+    );
+    await input.setInputFiles({
+      name: 'equipes-acme.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from(
+        '\uFEFFequipe;rapports;vues;responsable\nAntenne Nord;1 248;86;Équipe Nord\nAntenne Sud;932;64;Équipe Sud\nAntenne Est;611;40;Équipe Est\nAntenne Ouest;402;31;Équipe Ouest\n',
+      ),
+    });
+    await dlg.locator('.ds-table').first().locator('tbody tr').nth(2).waitFor();
     await pick(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }), { index: 1 });
     const chosen = await pickedLabel(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }));
     ok(chosen.startsWith('Élément b.value'), `colonne reliée à un élément (${chosen})`);

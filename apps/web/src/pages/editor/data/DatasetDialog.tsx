@@ -12,7 +12,7 @@ import { AiDataset } from '../../../components/ai/AiDataset';
 import { asSettings } from '../types';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { FileUp } from 'lucide-react';
-import { FileDropzone } from '../../../components/FileDropzone';
+import { FileDropzone, isCsvFile } from '../../../components/FileDropzone';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -55,6 +55,8 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
   const [binds, setBinds] = useState<Record<string, string>>({});
   const [rowMode, setRowMode] = useState<'link' | 'first'>('first');
   const [error, setError] = useState<string | null>(null);
+  /** Dernier fichier choisi refusé : erreur de la zone ; tant qu'elle est là, rien ne peut être relié. */
+  const [fileError, setFileError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // L30-06 : génération de données fictives (Assistance IA)
   const [generating, setGenerating] = useState(false);
@@ -167,9 +169,12 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
 
   async function onFile(f: File) {
     setError(null);
+    setFileError(null);
+    // Recette UX du 23/11 : un fichier refusé se lit dans la zone ; l'aperçu de l'ancien fichier se retire
+    if (!isCsvFile(f)) return setFileError(t('editor.dataset.err_notCsv', { name: f.name }));
     const r = readDataset(new Uint8Array(await f.arrayBuffer()));
     if (!r.ok) {
-      setError(errorText(r.error));
+      setFileError(errorText(r.error));
       return;
     }
     setDraft({ name: f.name.slice(0, 120), ...r.data });
@@ -234,15 +239,19 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
                   name: draft.name,
                   meta: draft.separator
                     ? t('editor.dataset.fileInfo', {
-                        rows: draft.rows.length,
-                        cols: draft.columns.length,
+                        rows: t('editor.dataset.rowsN', { count: draft.rows.length }),
+                        cols: t('editor.dataset.colsN', { count: draft.columns.length }),
                         sep: sepLabel,
                         enc: draft.encoding,
                       })
-                    : t('editor.dataset.fileSaved', { rows: draft.rows.length, cols: draft.columns.length }),
+                    : t('editor.dataset.fileSaved', {
+                        rows: t('editor.dataset.rowsN', { count: draft.rows.length }),
+                        cols: t('editor.dataset.colsN', { count: draft.columns.length }),
+                      }),
                 }
               : null
           }
+          error={fileError}
           onFiles={(files) => files[0] && void onFile(files[0])}
           extra={
             ws && !readOnly && !generating ? (
@@ -260,6 +269,7 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
             onUse={(d) => {
               setGenerating(false);
               setError(null);
+              setFileError(null);
               setDraft({
                 name: t('ai.dataset.name'),
                 columns: d.columns,
@@ -277,7 +287,7 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
             <div>{error}</div>
           </div>
         )}
-        {draft && (
+        {draft && !fileError && (
           <>
             <table className="ds-table">
               <caption>{t('editor.dataset.preview')}</caption>
@@ -381,7 +391,11 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
           </Button>
         )}
         <Button onClick={() => setOpen(false)}>{t('editor.dataset.cancel')}</Button>
-        <Button variant="primary" disabled={readOnly || !draft || busy} onClick={() => void save()}>
+        <Button
+          variant="primary"
+          disabled={readOnly || !draft || !!fileError || busy}
+          onClick={() => void save()}
+        >
           {t('editor.dataset.save')}
         </Button>
       </div>

@@ -120,6 +120,33 @@ const GROUP = 'Session du 12 novembre';
     (await read(tpl)).startsWith('prénom;nom;e-mail;groupe'),
     'n° 2 : modèle prénom ; nom ; e-mail ; groupe',
   );
+  // Recette UX du 23/11 : l'erreur du fichier se lit dans la zone, comme au glossaire
+  const zone = dlg.getByRole('group', { name: /Fichier/ });
+  await dlg
+    .locator('input[type=file]')
+    .setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from('pas un csv') });
+  await zone.getByRole('alert').waitFor();
+  ok(
+    (await zone.getByRole('alert').textContent()) ===
+      '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
+      !(await zone.textContent()).includes('séparé par des virgules') &&
+      (await dlg.getByRole('alert').count()) === 1 &&
+      (await dlg.locator('.sh-import-preview').count()) === 0,
+    'fichier non CSV : refusé dans la zone, sans la description CSV, aucun aperçu',
+  );
+  await dlg.locator('input[type=file]').setInputFiles({
+    name: 'incomplet.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('Prénom;Groupe\nCamille;Accueil\n'),
+  });
+  await zone.getByRole('alert').filter({ hasText: 'Colonnes introuvables' }).waitFor();
+  const manque = (await zone.getByRole('alert').textContent()).replace(/\s/g, ' ');
+  ok(
+    /^Colonnes introuvables dans « incomplet\.csv » : .*E-mail.*\. Partez du modèle\.$/.test(manque) &&
+      (await dlg.getByRole('alert').count()) === 1 &&
+      (await dlg.locator('.sh-import-preview').count()) === 0,
+    `colonnes manquantes : dites dans la zone, une seule alerte (${manque})`,
+  );
   // Fichier : 2 lignes valides, 3 en erreur
   const csv = [
     'Prénom;Nom;E-mail;Groupe',

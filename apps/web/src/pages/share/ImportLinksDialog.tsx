@@ -5,11 +5,11 @@
  */
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, Download, FileUp, Upload, X } from 'lucide-react';
+import { Download, FileUp, Upload, X } from 'lucide-react';
 import { downloadText } from '../../lib/download';
 import { COHORT_MAX, previewImport, TEMPLATE, type ImportPreview, type ImportRow } from './linksCsv';
 import { Status } from '@flowdsiml/ui';
-import { FileDropzone } from '../../components/FileDropzone';
+import { FileDropzone, isCsvFile } from '../../components/FileDropzone';
 
 export function ImportLinksDialog({
   existing,
@@ -32,6 +32,8 @@ export function ImportLinksDialog({
   const ids = useId();
   const [text, setText] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
+  /** Fichier refusé (pas un CSV) : nom repris dans l'erreur de la zone, rien n'est lu. */
+  const [badType, setBadType] = useState('');
   const [cohort, setCohort] = useState('');
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<string[] | null>(null);
@@ -115,9 +117,24 @@ export function ImportLinksDialog({
                 icon={<FileUp />}
                 inputId={`${ids}-f`}
                 file={fileName ? { name: fileName, meta: t('dropzone.csvHint') } : null}
+                // Recette UX du 23/11 : l'erreur du fichier se lit dans la zone, comme au glossaire
+                error={
+                  badType
+                    ? t('share.import.notCsv', { name: badType })
+                    : preview && preview.missing.length > 0
+                      ? t('share.import.missing', {
+                          file: fileName,
+                          columns: preview.missing.map((m) => t(`share.import.col.${m}`)).join(', '),
+                        })
+                      : undefined
+                }
                 onFiles={(files) => {
                   const f = files[0];
                   if (!f) return;
+                  setBadType('');
+                  setText(null);
+                  setFileName('');
+                  if (!isCsvFile(f)) return setBadType(f.name);
                   setFileName(f.name);
                   void f.text().then(setText);
                 }}
@@ -144,15 +161,6 @@ export function ImportLinksDialog({
                   {t('share.import.cohortHelp')}
                 </span>
               </div>
-              {preview && preview.missing.length > 0 && (
-                <p className="error-msg" role="alert">
-                  <CircleAlert aria-hidden="true" />
-                  {t('share.import.missing', {
-                    file: fileName,
-                    columns: preview.missing.map((m) => t(`share.import.col.${m}`)).join(', '),
-                  })}
-                </p>
-              )}
               {preview && !preview.missing.length && (
                 <div className="sh-import-preview">
                   <p role="status">

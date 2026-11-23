@@ -94,7 +94,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await shot('l30-06-apercu');
   await dlg.getByRole('button', { name: 'Utiliser ce jeu de données' }).click();
   ok(
-    /20 lignes/.test(await dlg.locator('.fd-dz__txt').textContent()),
+    /20\slignes/.test(await dlg.locator('.fd-dz__txt').textContent()),
     'Jeu de données repris dans la modale (20 lignes)',
   );
   // Garde-fou après génération : noms de personnes dans les valeurs

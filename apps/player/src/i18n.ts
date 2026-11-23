@@ -320,6 +320,7 @@ const dict = {
       zonesMany: 'Cette étape a {{n}}\u00a0zones cliquables.',
       showZones: 'Voir les zones',
       noZoneTitle: 'Aucune zone cliquable sur cette étape',
+      noZoneTitleSandbox: 'Aucune zone cliquable sur cette page',
       noZoneGuided:
         'Les visiteurs ne peuvent que passer à l’étape suivante. Ajoutez une zone pour relier un élément de la page à une autre étape.',
       noZoneSandbox:
@@ -726,6 +727,7 @@ const dict = {
       zonesMany: 'This step has {{n}}\u00a0clickable areas.',
       showZones: 'Show areas',
       noZoneTitle: 'No clickable area on this step',
+      noZoneTitleSandbox: 'No clickable area on this page',
       noZoneGuided:
         'Visitors can only move to the next step. Add an area to link an element of the page to another step.',
       noZoneSandbox:

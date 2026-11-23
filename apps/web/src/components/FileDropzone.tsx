@@ -10,6 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { CircleAlert, ImageUp, Images, Trash2, Upload } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 
+/** Fichier CSV d'après son nom ou son type (les navigateurs ne donnent pas toujours le type). */
+export const isCsvFile = (f: File) => /\.csv$/i.test(f.name) || f.type === 'text/csv';
+
 export function FileDropzone({
   label,
   accept,

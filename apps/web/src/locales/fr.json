@@ -1736,8 +1736,8 @@
       "replace": "Remplacer",
       "none": "Aucun jeu de données. Un fichier CSV fictif ou agrégé peut alimenter des éléments, des graphiques et des variables.",
       "summary": "{{rows}} lignes · {{cols}} colonnes · {{bound}} publiées",
-      "fileInfo": "{{rows}} lignes · {{cols}} colonnes · séparateur {{sep}}, {{enc}}",
-      "fileSaved": "{{rows}} lignes · {{cols}} colonnes · enregistré",
+      "fileInfo": "{{rows}} · {{cols}} · séparateur {{sep}}, {{enc}}",
+      "fileSaved": "{{rows}} · {{cols}} · enregistré",
       "sepSemi": "point-virgule",
       "sepComma": "virgule",
       "preview": "Aperçu du fichier (3 premières lignes)",
@@ -1766,7 +1766,12 @@
       "err_tooBig": "Le fichier dépasse 500 Ko.",
       "err_tooManyRows": "Le fichier dépasse 1 000 lignes.",
       "err_tooManyColumns": "Le fichier dépasse 20 colonnes.",
-      "err_header": "Chaque colonne doit avoir un en-tête de 60 caractères au plus."
+      "err_header": "Chaque colonne doit avoir un en-tête de 60 caractères au plus.",
+      "rowsN_one": "{{count}} ligne",
+      "rowsN_other": "{{count}} lignes",
+      "colsN_one": "{{count}} colonne",
+      "colsN_other": "{{count}} colonnes",
+      "err_notCsv": "« {{name}} » n’est pas un fichier CSV. Choisissez un fichier .csv ou générez des données fictives."
     },
     "toCapture": {
       "badge": "À capturer",
@@ -2334,7 +2339,8 @@
       "exportFile": "liens-apprenants.csv",
       "demoLink": "Lien de la démo",
       "choose": "Choisir un fichier",
-      "noFile": "Aucun fichier choisi"
+      "noFile": "Aucun fichier choisi",
+      "notCsv": "« {{name}} » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle."
     },
     "training": {
       "title": "Formation",
