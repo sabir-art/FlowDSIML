@@ -105,7 +105,9 @@ Si le serveur retire un élément gardé (il renvoie ses compteurs), un bandeau 
 
 Dans l’aperçu, un bouton à bascule « Zones cliquables » (icône MousePointerClick, compteur) en bas, à côté de Précédent et Suivant. Raccourci : touche H. Activé, chaque zone cliquable est entourée d’un cadre bleu de 2 px (rayon 8 px), rempli bleu à 16 % (`--blue` #2F6FED en clair, #7FA8FF en sombre), avec une pastille numérotée en haut à gauche. Au clavier, Tab parcourt les zones dans l’ordre des pastilles. Désactivé par défaut ; mémorisé par personne. L’état actif est annoncé (`aria-pressed`).
 
-Les zones apparaissent aussi 1,2 s à l’arrivée sur une étape si la personne a cliqué à côté (aide au bon endroit).
+Les zones s’illuminent aussi 1,2 s au moment d’un clic à côté (aide au bon endroit).
+
+Placement dans le lecteur (validé sur 8c24679) : le lecteur garde sa propre barre de progression. La bascule, en pilule de 36 px, se place sur la ligne sous la page : à droite du titre de l’étape et avant « Suivant » en démo guidée ; à droite de « Pages clés vues » en Sandbox. La barre « Précédent / Zones / Suivant » de la maquette d’aperçu ne vaut que pour l’aperçu de l’éditeur.
 
 ### 3.2 Clic à côté d’une zone
 
