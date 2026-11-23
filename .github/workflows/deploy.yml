@@ -69,6 +69,10 @@ jobs:
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       VITE_SUPPORT_EMAIL: ${{ vars.VITE_SUPPORT_EMAIL }}
+      # Extension « TutoClick Capture » publiée (Chrome Web Store, non répertoriée). Valeurs publiques :
+      # l'adresse active le bouton « Installer l'extension », l'identifiant relie l'app à l'extension (EXT-CONNECT).
+      VITE_EXTENSION_URL: ${{ vars.VITE_EXTENSION_URL || 'https://chromewebstore.google.com/detail/ffcicmbpigdbhkhaidngefnmphodkfld' }}
+      VITE_EXTENSION_ID: ${{ vars.VITE_EXTENSION_ID || 'ffcicmbpigdbhkhaidngefnmphodkfld' }}
     steps:
       - uses: actions/checkout@v4
         with:

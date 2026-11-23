@@ -51,7 +51,7 @@ Attendu : `"name": "TutoClick Capture"`, pas de `debugger` dans `permissions`, p
 ## 4. Après la publication
 
 1. Copiez l’adresse de l’article (`https://chromewebstore.google.com/detail/<id>`).
-2. Donnez-la à l’équipe : elle devient `VITE_EXTENSION_URL` dans les variables du dépôt. Tant qu’elle est vide, l’app affiche « Extension TutoClick · Bientôt disponible » partout où l’installation est proposée.
+2. L’adresse de l’article et l’identifiant de l’extension sont dans `deploy.yml` (`VITE_EXTENSION_URL`, `VITE_EXTENSION_ID`, surchargeables par les variables du dépôt). Tant qu’elle est vide, l’app affiche « Extension TutoClick · Bientôt disponible » partout où l’installation est proposée.
 3. Pour une nouvelle version : augmentez `version` dans `apps/extension/package.json`, reconstruisez (étape 2) et téléversez l’archive sur le même article (**Package › Importer un nouveau package**).
 
 ## 5. Avant l’envoi : à confirmer
