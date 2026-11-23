@@ -619,6 +619,9 @@ Même séparateur, mais la pastille (ronde, 24 px) n'apparaît qu'au survol ou a
 
 `lot2-demos/dossiers-poignee` (dépliée, format A), `dossiers-redim` (glissement à 300 px), `dossiers-replie` (repliée), `dossiers-poignee-b` (variante B au survol) ; 1440, clair et sombre. L'en-tête de la colonne n'a plus que « Dossiers » et « Nouveau dossier ».
 
+**Colonne Étapes de l’éditeur (maquettes `lot3-editeur/edition-*` et `etapes-repliee-*`, 23/11).** En-tête « Étapes 3 » seul, sans icône. Dépliée : la même pastille 20 × 40 à cheval sur le filet entre la colonne et le canevas, centrée dans la hauteur visible ; séparateur 232 à 360 px, 264 par défaut. Repliée : rail de 48 px, en haut le bouton icône « Ajouter une étape » (Plus, 32 px, nom accessible et infobulle), un filet de 24 px, les numéros d’étape en boutons de 32 px (l’étape courante en primary-soft avec bord primary, `aria-current="step"`, nom « Étape 1 : Écran 1 ») ; en bas le bouton icône « Ajouter un quiz » (ListChecks). La demi-pastille 18 × 40 se pose contre le bord droit du rail (x 48), plate à gauche, comme celle des Dossiers contre le contenu. Sous 1 024 px, la vue étroite de l’éditeur ne change pas.
+
+
 ## 20. SPLIT-01 : tableau et panneau de détail côte à côte (retour client du 22/11, page d'un webhook)
 
 Le client a relevé, sur la page de détail d'un webhook, des chevauchements et des textes collés. **La maquette du lot 1 portait elle-même ces défauts** : elle est corrigée (`lot1-parametres/webhook-*`, avec des captures à 1280 et 1024 px). La règle vaut pour tout tableau qui ouvre un panneau de détail à côté de lui.
