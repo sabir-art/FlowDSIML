@@ -192,12 +192,64 @@ const manifests = {
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/l20-04-sandbox${sfx}.png` });
   // Clic non relié
   await p.frameLocator('.p-html-frame iframe').locator('#menu a', { hasText: 'Statistiques' }).click();
-  await p.waitForTimeout(200);
+  // EXT-02 §3.2 : « Aucun lien à cet endroit », nombre de zones, « Voir les zones »
+  const miss = p.locator('.p-html-miss');
+  await miss.getByRole('button', { name: 'Voir les zones' }).waitFor();
+  const nZones = Number(await p.locator('.p-html-zones-n').innerText());
   ok(
-    (await p.locator('.p-html-toast').innerText()) === 'Cette partie n’est pas disponible dans la démo',
-    '« non disponible » annoncé (role=status)',
+    (await miss.locator('b').innerText()) === 'Aucun lien à cet endroit' &&
+      (await miss.locator('span').innerText()).replace(/\s/g, ' ') ===
+        `Cette étape a ${nZones} zones cliquables.` &&
+      nZones >= 2,
+    `clic à côté : « Aucun lien à cet endroit », ${nZones} zones annoncées`,
   );
-  ok((await p.locator('.p-html-toast').getAttribute('role')) === 'status', 'toast role=status');
+  ok((await miss.getAttribute('role')) === 'status', 'message role=status');
+  if (SHOTS) await p.screenshot({ path: `${SHOTS}/ext02-aucun-lien${sfx}.png` });
+  ok(
+    (await p.frameLocator('.p-html-frame iframe').locator('[data-fd-zones] > div').count()) === nZones,
+    'clic à côté : les zones s’illuminent un instant',
+  );
+  await p
+    .frameLocator('.p-html-frame iframe')
+    .locator('[data-fd-zones]')
+    .waitFor({ state: 'detached', timeout: 5000 });
+  ok(true, 'l’illumination s’éteint seule');
+  // Bascule « Zones cliquables » : cadres numérotés, aria-pressed, touche H, choix gardé
+  const tog = p.getByRole('button', { name: /^Zones cliquables/ });
+  ok((await tog.getAttribute('aria-pressed')) === 'false', 'bascule éteinte par défaut');
+  await miss.getByRole('button', { name: 'Voir les zones' }).click();
+  // Le calque n'a pas de taille propre (ses cadres sont posés en absolu) : présence dans la page
+  await p.frameLocator('.p-html-frame iframe').locator('[data-fd-zones]').waitFor({ state: 'attached' });
+  const zone = await p
+    .frameLocator('.p-html-frame iframe')
+    .locator('[data-fd-zones] > div')
+    .first()
+    .evaluate((e) => {
+      const cs = getComputedStyle(e);
+      return {
+        bw: cs.borderTopWidth,
+        r: cs.borderTopLeftRadius,
+        nb: e.firstElementChild.textContent,
+        pe: getComputedStyle(e.parentElement).pointerEvents,
+      };
+    });
+  ok(
+    (await tog.getAttribute('aria-pressed')) === 'true' &&
+      zone.bw === '2px' &&
+      zone.r === '8px' &&
+      zone.nb === '1' &&
+      zone.pe === 'none',
+    '« Voir les zones » : bascule active, cadre de 2 px, rayon 8, pastille 1, clics non interceptés',
+  );
+  ok((await miss.innerText()).trim() === '', 'le message disparaît');
+  if (SHOTS) await p.screenshot({ path: `${SHOTS}/ext02-zones${sfx}.png` });
+  await p.keyboard.press('h');
+  await p.frameLocator('.p-html-frame iframe').locator('[data-fd-zones]').waitFor({ state: 'detached' });
+  ok((await tog.getAttribute('aria-pressed')) === 'false', 'touche H : bascule');
+  ok(
+    (await p.evaluate(() => localStorage.getItem('tc.player.zones'))) === '0',
+    'choix gardé dans le navigateur',
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/l20-04-non-disponible${sfx}.png` });
   // Lien automatique (même adresse) au clavier
   await p.frameLocator('.p-html-frame iframe').locator('#menu a', { hasText: 'Agenda' }).focus();
@@ -226,7 +278,10 @@ const manifests = {
     .waitFor({ timeout: 5000 })
     .catch(() => {});
   ok(/Statistiques/.test(await frameText(p)), 'lien vers une étape (Lier à une étape)');
-  ok((await p.locator('.p-html-bar').count()) === 0, 'Sandbox : pas de bouton Suivant');
+  ok(
+    (await p.locator('.p-html-bar').getByRole('button', { name: 'Suivant', exact: true }).count()) === 0,
+    'Sandbox : pas de bouton Suivant',
+  );
 
   // ===== Démo guidée =====
   const g = await open(GUID, { width: 1024, height: 800 });
@@ -237,8 +292,11 @@ const manifests = {
     'démo guidée : bouton Suivant',
   );
   await g.frameLocator('.p-html-frame iframe').locator('#menu a', { hasText: 'Agenda' }).click();
-  await g.waitForTimeout(200);
-  ok((await g.locator('.p-html-toast').innerText()) !== '', 'démo guidée : lien non relié annoncé');
+  await g.locator('.p-html-miss b').waitFor();
+  ok(
+    (await g.locator('.p-html-miss b').innerText()) === 'Aucun lien à cet endroit',
+    'démo guidée : lien non relié annoncé',
+  );
   if (SHOTS) await g.screenshot({ path: `${SHOTS}/l20-04-guidee${sfx}.png` });
   await g.getByRole('button', { name: 'Suivant', exact: true }).click();
   await g.frameLocator('.p-html-frame iframe').locator('h1', { hasText: 'Agenda' }).waitFor();

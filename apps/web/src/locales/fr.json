@@ -1422,7 +1422,7 @@
       "autoLink": "Lier automatiquement les liens identiques",
       "autoLinkHelp": "Un lien « Usagers » du menu mène à la même page sur toutes les pages.",
       "unlinked": "Clic sur un élément non relié",
-      "unlinkedToast": "Afficher « Cette partie n’est pas disponible dans la démo »",
+      "unlinkedToast": "Afficher « Aucun lien à cet endroit » et les zones cliquables",
       "unlinkedNone": "Ne rien faire",
       "unlinkedHighlight": "Mettre en évidence les zones cliquables",
       "guide": "Guide optionnel",
@@ -1444,7 +1444,7 @@
       "ghost": "Page non capturée",
       "deadTitle": "Liens sans page",
       "deadHelp": {
-        "toast": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit « Cette partie n’est pas disponible dans la démo ».",
+        "toast": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit « Aucun lien à cet endroit » et les zones cliquables de la page.",
         "none": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, rien ne se passe pour le visiteur.",
         "highlight": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit les zones cliquables mises en évidence."
       },

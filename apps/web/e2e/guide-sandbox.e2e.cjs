@@ -264,8 +264,9 @@ const manifests = {
   await p.waitForFunction(() => /Guide terminé/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   await p.waitForTimeout(300);
   ok(
-    (await p.locator('.p-html-toast').innerText()).trim() === '',
-    'clic qui fait avancer le guide (élément non relié) : pas de « non disponible »',
+    (await p.locator('.p-html-toast').innerText()).trim() === '' &&
+      (await p.locator('.p-html-miss').innerText()).trim() === '',
+    'clic qui fait avancer le guide (élément non relié) : pas de « Aucun lien à cet endroit »',
   );
   ok(
     (await bubble(p).innerText()).includes('Guide terminé. Continuez à explorer librement.'),
