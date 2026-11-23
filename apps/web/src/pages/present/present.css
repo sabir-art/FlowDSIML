@@ -879,8 +879,9 @@ html[data-remote] body {
   text-decoration: none;
 }
 .presenter .pr-top .pr-reopen:focus-visible {
-  outline: 2px solid var(--fd-color-focus);
-  outline-offset: 1px;
+  /* FIELD-01 : trait intérieur, jamais d'outline */
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .presenter .pr-top .pr-phone-btn {
   margin-left: 0;
