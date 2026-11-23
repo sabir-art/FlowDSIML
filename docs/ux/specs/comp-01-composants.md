@@ -559,6 +559,13 @@ La zone jugée « très mal travaillée » mélangeait texte et boutons sur deux
 
 **Focus de la vignette (décision du 22/11, 05c2ab7)** : l'image est un bouton, donc elle suit **FIELD-01 §11.4** : un seul indicateur de focus, **intérieur**. Pas d'anneau extérieur, ce qui remplace la phrase « anneau de 2 px à 2 px du bord » de §18. Le dev l'a fait : bordure et trait intérieur de 2 px en couleur `focus`, avec le voile « Changer » visible. Ce cas ne demande donc aucune exception dans le test `boutons-focus`. (L'exception de §6 reste réservée à la poignée du curseur.)
 
+**Zones d'envoi dans un panneau étroit (décision du 22/11, question du dev)** : la zone de dépôt visible (§18.1) vaut pour les pages et les fenêtres. Dans un panneau de 360 px au plus (outils de l'éditeur : Voix, Sous-titres, Remplacer la capture), elle prendrait trop de hauteur à côté des autres actions. Règle :
+- **Un bouton « Importer… »** (secondaire, 32 px, icône `Upload`) à la place de la zone, rangé avec les autres actions ; l'aide de format (« MP3, M4A, WAV ou WebM, 5 Mo au plus ») reste en 13 px `text-muted` dessous.
+- **Le dépôt marche sur tout le bloc** : au survol avec un fichier, le bloc prend le pointillé `primary` de 2 px et le fond à 7 % (état « glisser » de §18.1), avec l'indication « Déposer le fichier ici » au centre. Si le fichier est refusé, message d'erreur `role="alert"` sous le bouton, comme la zone.
+- **Envoi** : le bouton passe en « Envoi… » avec la barre indéterminée de 6 px dessous.
+- **Remplacer la capture** : entrée « Remplacer la capture… » du menu ⋯ de l'étape, et dépôt d'une image sur la carte de l'étape ou sur le canevas ; pas de zone visible.
+- **Fond des initiales (avatar, vignette)** : le jeton `--fd-color-primary-soft` (#FBF0F5 en clair, #35101F en sombre) fait foi, comme pour les autres avatars ; la valeur #F3D3E2 de mes maquettes est corrigée (jeton du dépôt, comme pour « Publier »).
+
 ### 18.2 Relevé des zones d'envoi de fichier de l'app (dev-mvp du 22/11)
 
 Toutes utilisent MEDIA-01, sous l'un de ses trois formats : **vignette** (72 px, image d'identité), **zone** (pleine largeur) ou **bouton compact** (bouton secondaire à icône dans une barre d'outils ou un panneau ; l'hôte accepte aussi le dépôt).
