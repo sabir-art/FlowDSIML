@@ -1,7 +1,9 @@
 /**
  * A8 : capture HTML d'une application à page unique (routeur côté client, sans rechargement), riche en
  * scripts. Chaque changement d'adresse qui suit un clic est capturé tout seul, une fois l'affichage
- * stabilisé ; le dernier clic avant la page suivante devient le lien proposé ; le Sandbox se remplit.
+ * stabilisé, ainsi qu'un changement d'écran sans changement d'adresse ; un menu ou une fenêtre ouverts
+ * ne sont pas des pages ; le dernier clic avant la page suivante devient le lien proposé (l'ouverture du
+ * menu si son entrée n'existe pas dans la copie) ; le Sandbox se remplit.
  * Site fictif de mock-supabase.cjs (/spa). Usage : comme html.e2e.cjs.
  */
 const { chromium } = require('playwright');
@@ -110,12 +112,31 @@ const WS = '11111111-1111-1111-1111-111111111111';
 
   // 2. Menu déroulant : son ouverture ne capture rien, l'entrée choisie navigue
   await page.getByRole('button', { name: 'Plus' }).click();
-  await page.getByRole('link', { name: 'Rapports' }).waitFor();
+  await page.getByRole('menuitem', { name: 'Rapports' }).waitFor();
   ok((await steps()) === 2, 'ouvrir un menu ne capture pas de page');
-  await page.getByRole('link', { name: 'Rapports' }).click();
+  await page.getByRole('menuitem', { name: 'Rapports' }).click();
   await page.getByRole('heading', { name: 'Rapports' }).waitFor();
   ok(await waitSteps(3), 'entrée du menu : page capturée');
   await dump('rapports');
+
+  // 3. Fenêtre par-dessus la page : état passager, pas une page
+  await page.getByRole('button', { name: 'Aide' }).click();
+  await page.getByRole('dialog', { name: 'Aide' }).waitFor();
+  // La barre examine le clic jusqu'à ce que l'affichage soit stable : on attend la fin de l'examen,
+  // fenêtre encore ouverte
+  await page.waitForFunction(
+    () =>
+      !document.querySelector('[data-fd-ui][data-fd-watching]') && !!document.querySelector('[role=dialog]'),
+  );
+  ok((await steps()) === 3, 'fenêtre ouverte par-dessus la page : pas de capture');
+  await page.getByRole('dialog', { name: 'Aide' }).getByRole('button', { name: 'Fermer' }).click();
+  await page.getByRole('dialog', { name: 'Aide' }).waitFor({ state: 'detached' });
+
+  // 4. L'écran change sans changement d'adresse
+  await page.getByRole('button', { name: 'Réglages' }).click();
+  await page.getByRole('heading', { name: 'Réglages' }).waitFor();
+  ok(await waitSteps(4), 'écran changé sans changement d’adresse : page capturée');
+  ok((await steps()) === 4, 'la fenêtre « Aide » n’a pas été capturée comme une page');
 
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/html-review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
@@ -134,22 +155,37 @@ const WS = '11111111-1111-1111-1111-111111111111';
   if (process.env.DEBUG)
     console.log('#', JSON.stringify(pages.map((p) => [p.order, p.url, p.clickLabel, p.title])));
   ok(
-    pages.length === 3 &&
+    pages.length === 4 &&
       /\/spa$/.test(pages[0].url) &&
       /\/spa\/clients$/.test(pages[1].url) &&
-      /\/spa\/rapports$/.test(pages[2].url),
-    `3 pages, une par adresse (${pages.map((p) => new URL(p.url).pathname).join(', ')})`,
+      /\/spa\/rapports$/.test(pages[2].url) &&
+      /\/spa\/rapports$/.test(pages[3].url),
+    `4 pages dans l’ordre du parcours (${pages.map((p) => new URL(p.url).pathname).join(', ')})`,
   );
   ok(
     /<h1>Clients<\/h1>/.test(pages[1]?.html ?? '') &&
       !/Chargement/.test(pages[1]?.html ?? '') &&
-      /<h1>Rapports<\/h1>/.test(pages[2]?.html ?? ''),
+      /<h1>Rapports<\/h1>/.test(pages[2]?.html ?? '') &&
+      /<h1>Réglages<\/h1>/.test(pages[3]?.html ?? ''),
     'chaque page est copiée une fois son contenu affiché (pas l’état « Chargement »)',
   );
   ok(pages[0]?.clickLabel === 'Clients', `lien proposé de la page 1 : « ${pages[0]?.clickLabel} »`);
   ok(
-    pages[1]?.clickLabel === 'Rapports',
-    `lien proposé de la page 2 : le dernier clic, pas l’ouverture du menu (« ${pages[1]?.clickLabel} »)`,
+    pages[1]?.clickLabel === 'Plus',
+    `lien proposé de la page 2 : l’ouverture du menu, son entrée n’existe pas dans la copie (« ${pages[1]?.clickLabel} »)`,
+  );
+  ok(pages[2]?.clickLabel === 'Réglages', `lien proposé de la page 3 : « ${pages[2]?.clickLabel} »`);
+  // Chaque lien proposé retrouve un élément, et un seul, dans la page copiée
+  const found = [];
+  for (const p of pages.slice(0, 3)) {
+    const probe = await ctx.newPage();
+    await probe.setContent(p.html);
+    found.push(await probe.locator(p.clickSel).count());
+    await probe.close();
+  }
+  ok(
+    found.every((n) => n === 1),
+    `chaque lien proposé désigne un élément de la copie (${found.join(', ')})`,
   );
   ok(
     pages.every((p) => !/<script|<iframe/i.test(p.html)),
@@ -168,11 +204,11 @@ const WS = '11111111-1111-1111-1111-111111111111';
   const sent = log
     .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps'))
     .map((l) => JSON.parse(l.body));
-  ok(sent.length === 3 && sent.every((s) => s.kind === 'html'), 'Sandbox : 3 pages créées');
+  ok(sent.length === 4 && sent.every((s) => s.kind === 'html'), 'Sandbox : 4 pages créées');
   const link = (i) => sent[i]?.html_ops?.find((o) => o.op === 'link');
   ok(
-    link(0)?.value === sent[1]?.id && link(1)?.value === sent[2]?.id,
-    'Sandbox : page 1 reliée à la page 2, page 2 reliée à la page 3',
+    link(0)?.value === sent[1]?.id && link(1)?.value === sent[2]?.id && link(2)?.value === sent[3]?.id,
+    'Sandbox : pages reliées dans l’ordre du parcours (1 → 2 → 3 → 4)',
   );
   await ctx.close();
   for (const [c, l] of results) console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);

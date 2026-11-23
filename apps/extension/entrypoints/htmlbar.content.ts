@@ -3,15 +3,17 @@ import { browser } from 'wxt/browser';
 import { stableSelector } from '@flowdsiml/core';
 import { elementLabel } from '@/lib/geometry';
 import { captureHtml } from '@/lib/htmlCapture';
+import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
 import type { HtmlBarRequest } from '@/lib/messages';
 import { strings } from '@/lib/i18n';
 
 /**
  * A8 (L20) : barre de la capture HTML. Chaque page est copiée (DOM assaini, données remplacées) au
  * chargement après un clic qui navigue. Dans une application à page unique (routeur côté client, sans
- * rechargement), la page est copiée dès que l'adresse change après un clic et que l'affichage s'est
- * stabilisé. « Capturer cette page » (Alt + Maj + M) reste disponible pour un état sans changement
- * d'adresse (menu ouvert, onglet). Le clic qui mène à la page suivante devient un lien proposé.
+ * rechargement), la page est copiée dès que l'adresse change après un clic, ou que l'écran change sans
+ * changement d'adresse (lib/screenChange.ts), une fois l'affichage stabilisé. « Capturer cette page »
+ * (Alt + Maj + M) reste disponible pour un état passager (menu ouvert, fenêtre). Le clic qui mène à la
+ * page suivante devient un lien proposé.
  */
 /** Après un clic : durée pendant laquelle un changement d'adresse sans rechargement est guetté. */
 const WATCH_MS = 8000;
@@ -93,6 +95,7 @@ export default defineContentScript({
         if (c.tooBig) return flash(s.htmlTooBig, true);
         const st = await send<{ steps: number }>({ type: 'fd:html-page', capture: c });
         setCount(st?.steps ?? 0);
+        remember();
         flash(s.htmlCaptured);
       } catch {
         flash(s.htmlFailed, true);
@@ -128,11 +131,24 @@ export default defineContentScript({
           attributes: true,
         });
       });
+    // Éléments visibles dans la dernière copie : un clic sur un élément apparu depuis (entrée d'un menu
+    // ouvert après coup) ne peut pas servir de lien, il n'existe pas dans la page copiée
+    let seen: WeakSet<Element> | null = null;
+    function remember() {
+      seen = new WeakSet();
+      for (const el of document.body.querySelectorAll('*')) if (isVisible(el)) seen.add(el);
+    }
+
     let initial = false;
     let watch: ReturnType<typeof setInterval> | undefined;
-    function watchNavigation() {
+    let clickNo = 0;
+    function watchClick(el: Element) {
+      const no = ++clickNo;
       const from = location.href;
+      const heading = mainHeading(document);
+      const expanded = el.getAttribute('aria-expanded');
       const until = Date.now() + WATCH_MS;
+      // 1. L'adresse change sans rechargement
       clearInterval(watch);
       watch = setInterval(() => {
         if (location.href !== from) {
@@ -140,6 +156,36 @@ export default defineContentScript({
           if (!initial) void settled().then(() => capture());
         } else if (Date.now() > until) clearInterval(watch);
       }, 150);
+      // 2. L'écran change sans changement d'adresse : éléments ajoutés ou rendus visibles depuis le clic
+      const appeared = new Set<Element>();
+      const mo = new MutationObserver((list) => {
+        for (const m of list) {
+          if (host.contains(m.target)) continue;
+          if (m.type === 'childList') {
+            for (const n of m.addedNodes) if (n instanceof Element) appeared.add(n);
+          } else if (m.target instanceof Element && !seen?.has(m.target)) appeared.add(m.target);
+        }
+      });
+      mo.observe(document.documentElement, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['hidden', 'class', 'style', 'aria-hidden'],
+      });
+      // État lisible de l'extérieur (tests) : un clic est en cours d'examen
+      host.setAttribute('data-fd-watching', '');
+      void settled().then(() => {
+        mo.disconnect();
+        if (no === clickNo) host.removeAttribute('data-fd-watching');
+        // Un clic plus récent a pris le relais ; ou l'adresse a changé (cas 1) ; ou capture de départ en attente
+        if (no !== clickNo || location.href !== from || initial) return;
+        // Le clic a ouvert ou fermé un menu, une liste, un volet : état passager de la même page
+        if (el.isConnected && el.getAttribute('aria-expanded') !== expanded) return;
+        if (isScreenChange(document, appeared, heading, { w: innerWidth, h: innerHeight })) {
+          clearInterval(watch);
+          void capture();
+        }
+      });
     }
     $<HTMLButtonElement>('.stop').onclick = () => void send({ type: 'fd:html-stop' });
 
@@ -158,8 +204,13 @@ export default defineContentScript({
         title: el.getAttribute('title'),
         alt: el.getAttribute('alt'),
       });
-      void send({ type: 'fd:html-click', sel: stableSelector(el), label });
-      watchNavigation();
+      void send({
+        type: 'fd:html-click',
+        sel: stableSelector(el),
+        label,
+        transient: !!seen && !seen.has(el),
+      });
+      watchClick(el);
     }
     document.addEventListener('click', onClick, true);
 
