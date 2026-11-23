@@ -3,12 +3,13 @@
  * ligne avant toute création ; seules les lignes sans erreur deviennent des liens. Après la création, les
  * liens s'exportent en CSV pour un publipostage. Aucun e-mail n'est envoyé par TutoClick.
  */
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, Download, Upload, X } from 'lucide-react';
+import { CircleAlert, Download, FileUp, Upload, X } from 'lucide-react';
 import { downloadText } from '../../lib/download';
 import { COHORT_MAX, previewImport, TEMPLATE, type ImportPreview, type ImportRow } from './linksCsv';
 import { Status } from '@flowdsiml/ui';
+import { FileDropzone } from '../../components/FileDropzone';
 
 export function ImportLinksDialog({
   existing,
@@ -31,7 +32,6 @@ export function ImportLinksDialog({
   const ids = useId();
   const [text, setText] = useState<string | null>(null);
   const [fileName, setFileName] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
   const [cohort, setCohort] = useState('');
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<string[] | null>(null);
@@ -107,48 +107,21 @@ export function ImportLinksDialog({
                   {t('share.import.template')}
                 </button>
               </p>
-              <div className="field">
-                <label htmlFor={`${ids}-f`} id={`${ids}-fl`}>
-                  {t('share.import.file')}
-                </label>
-                {/* Champ natif masqué (libellé « Choose File » non traduisible) : bouton du design system */}
-                <input
-                  ref={fileRef}
-                  id={`${ids}-f`}
-                  type="file"
-                  accept=".csv,text/csv"
-                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-                  className="sr-only"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (!f) return;
-                    setFileName(f.name);
-                    void f.text().then(setText);
-                  }}
-                />
-                <div className="sh-file">
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-sm"
-                    aria-labelledby={`${ids}-fl ${ids}-fb`}
-                    aria-describedby={`${ids}-fn`}
-                    aria-controls={`${ids}-f`}
-                    onClick={() => fileRef.current?.click()}
-                  >
-                    <Upload aria-hidden="true" />
-                    <span id={`${ids}-fb`}>{t('share.import.choose')}</span>
-                  </button>
-                  <span
-                    className={`sh-file-name${fileName ? '' : ' muted'}`}
-                    id={`${ids}-fn`}
-                    title={fileName}
-                  >
-                    {fileName || t('share.import.noFile')}
-                  </span>
-                </div>
-              </div>
+              {/* MEDIA-01 §18.2 : zone de dépôt sans Médiathèque */}
+              <FileDropzone
+                label={t('share.import.file')}
+                accept=".csv,text/csv"
+                hint={t('dropzone.csvHint')}
+                icon={<FileUp />}
+                inputId={`${ids}-f`}
+                file={fileName ? { name: fileName, meta: t('dropzone.csvHint') } : null}
+                onFiles={(files) => {
+                  const f = files[0];
+                  if (!f) return;
+                  setFileName(f.name);
+                  void f.text().then(setText);
+                }}
+              />
               <div className="field">
                 <label htmlFor={`${ids}-g`}>
                   {t('share.cohort')} <span className="opt">{t('plans.optional')}</span>

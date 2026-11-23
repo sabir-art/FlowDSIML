@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BookA, CircleAlert, Download, Pencil, Plus, Search, Trash2, Upload } from 'lucide-react';
 import type { Json, Tables } from '@flowdsiml/supabase-types';
@@ -24,6 +24,8 @@ import {
 } from './glossaryCsv';
 import './glossary.css';
 import { Button, Modal } from '@flowdsiml/ui';
+import { FileUp } from 'lucide-react';
+import { FileDropzone } from '../../components/FileDropzone';
 
 type Term = Tables<'glossary_terms'>;
 
@@ -458,7 +460,6 @@ function ImportDialog({
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [readErr, setReadErr] = useState(false);
   const [fileName, setFileName] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
   const { busy, error, run } = useAction();
 
   async function pick(file: File | undefined) {
@@ -513,29 +514,19 @@ function ImportDialog({
           </p>
         )}
         <p className="stg-help gl-imp-help">{t('glossary.importHelp')}</p>
-        <div className="fd-modal__field">
-          <label htmlFor="gl-file">{t('glossary.importFile')}</label>
-          {/* Sélecteur natif masqué (son libellé suit la langue du navigateur) : bouton traduit */}
-          <input
-            id="gl-file"
-            ref={fileRef}
-            type="file"
-            accept=".csv,text/csv"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              setFileName(f?.name ?? '');
-              void pick(f);
-            }}
-          />
-          <div className="gl-file">
-            <Button icon={<Upload size={16} />} onClick={() => fileRef.current?.click()}>
-              {t('glossary.chooseFile')}
-            </Button>
-            <span className={fileName ? undefined : 'stg-muted'}>{fileName || t('glossary.noFile')}</span>
-          </div>
-        </div>
+        {/* MEDIA-01 §18.2 : zone de dépôt sans Médiathèque */}
+        <FileDropzone
+          label={t('glossary.importFile')}
+          accept=".csv,text/csv"
+          hint={t('dropzone.csvHint')}
+          icon={<FileUp />}
+          inputId="gl-file"
+          file={fileName ? { name: fileName, meta: t('dropzone.csvHint') } : null}
+          onFiles={(files) => {
+            setFileName(files[0]?.name ?? '');
+            void pick(files[0]);
+          }}
+        />
         {readErr && (
           <p className="stg-error" role="alert">
             <CircleAlert size={16} aria-hidden="true" />

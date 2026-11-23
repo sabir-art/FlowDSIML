@@ -6,6 +6,7 @@
     "remove": "Retirer"
   },
   "dropzone": {
+    "csvHint": "Fichier CSV, séparé par des virgules ou des points-virgules.",
     "title": "Glissez un fichier ici",
     "none": "Aucun fichier",
     "dropHere": "Déposez le fichier pour l’importer",

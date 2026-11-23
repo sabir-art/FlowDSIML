@@ -107,7 +107,8 @@ const GROUP = 'Session du 12 novembre';
           (el) =>
             el.classList.contains('sr-only') && getComputedStyle(el).clip === 'rect(0px, 0px, 0px, 0px)',
         )) &&
-      (await dlg.locator('.sh-file-name').textContent()) === 'Aucun fichier choisi',
+      // MEDIA-01 : zone de dépôt, vide tant qu'aucun fichier n'est choisi
+      /Glissez un fichier ici/.test(await dlg.locator('.fd-dz__txt').textContent()),
     'Lead UX : bouton « Choisir un fichier » (champ natif masqué)',
   );
   // Modèle
@@ -133,7 +134,7 @@ const GROUP = 'Session du 12 novembre';
     .setInputFiles({ name: 'groupe.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
   await dlg.getByLabel(/^Groupe/).fill(GROUP);
   await dlg.locator('.sh-import-preview table').waitFor();
-  ok((await dlg.locator('.sh-file-name').textContent()) === 'groupe.csv', 'Lead UX : nom du fichier affiché');
+  ok((await dlg.locator('.fd-dz__txt b').textContent()) === 'groupe.csv', 'Lead UX : nom du fichier affiché');
   const cellCss = await dlg
     .locator('.sh-import-preview tbody tr')
     .first()

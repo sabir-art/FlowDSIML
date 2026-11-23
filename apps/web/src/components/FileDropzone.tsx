@@ -15,6 +15,7 @@ export function FileDropzone({
   accept,
   multiple = false,
   hint,
+  icon,
   file,
   busy = false,
   busyLabel,
@@ -33,6 +34,8 @@ export function FileDropzone({
   multiple?: boolean;
   /** Ligne d'aide de l'état vide : formats et taille. */
   hint: string;
+  /** Icône de la tuile à vide (par défaut une image ; FileUp pour un CSV, un son, des sous-titres). */
+  icon?: ReactNode;
   /** Fichier en place : son nom, ses détails (type, poids, date) et son aperçu. */
   file?: { name: string; meta?: string; preview?: ReactNode } | null;
   busy?: boolean;
@@ -118,7 +121,7 @@ export function FileDropzone({
         className={`fd-dz__pre${file?.preview && !drag && !error ? ' fd-dz__pre--img' : ''}`}
         aria-hidden="true"
       >
-        {drag ? <Upload /> : error ? <CircleAlert /> : (file?.preview ?? <ImageUp />)}
+        {drag ? <Upload /> : error ? <CircleAlert /> : (file?.preview ?? icon ?? <ImageUp />)}
       </span>
       {/* §18.6 : titre et ligne d'aide, 4 px (typographie) */}
       <div className="fd-dz__txt" data-gap-exempt="">

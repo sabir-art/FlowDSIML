@@ -97,7 +97,8 @@ const SHOTS = process.env.SHOTS_DIR;
   fs.writeFileSync(file, csv);
   await page.getByRole('button', { name: 'Importer un CSV' }).click();
   const imp = page.getByRole('dialog', { name: 'Importer un CSV' });
-  await imp.getByLabel('Fichier CSV').setInputFiles(file);
+  // MEDIA-01 : le champ fichier est dans la zone de dépôt « Fichier CSV »
+  await imp.getByRole('group', { name: 'Fichier CSV' }).locator('input[type=file]').setInputFiles(file);
   const prev = imp.getByRole('status');
   await prev.waitFor();
   const txt = await prev.textContent();

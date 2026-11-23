@@ -6,6 +6,7 @@
     "remove": "Remove"
   },
   "dropzone": {
+    "csvHint": "CSV file, separated by commas or semicolons.",
     "title": "Drag a file here",
     "none": "No file",
     "dropHere": "Drop the file to import it",
