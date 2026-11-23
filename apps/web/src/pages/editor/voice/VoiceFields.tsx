@@ -1,3 +1,4 @@
+import { DropBlock, UploadBar } from '../../../components/DropBlock';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Mic, Pause, Play, Square, Trash2, Upload } from 'lucide-react';
@@ -37,6 +38,8 @@ export function VoiceFields({
   const [rec, setRec] = useState<Rec | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** MEDIA-01 §18.2 : envoi d'un fichier importé (bouton « Envoi… » et barre). */
+  const [sending, setSending] = useState(false);
   const [announce, setAnnounce] = useState('');
   const toast = useToast();
   // Les « Annuler » des toasts agissent après d'autres rendus : toujours l'éditeur courant
@@ -170,7 +173,12 @@ export function VoiceFields({
       a.src = URL.createObjectURL(f);
     });
     if (!Number.isFinite(ms)) return setErr(t('editor.voice.badType'));
-    await store(f, ms);
+    setSending(true);
+    try {
+      await store(f, ms);
+    } finally {
+      setSending(false);
+    }
   }
 
   async function remove() {
@@ -242,7 +250,12 @@ export function VoiceFields({
   const has = !!step.voice_path;
   const missing = has && !step.voice_transcript?.trim();
   return (
-    <div className="sec voice-sec">
+    // MEDIA-01 §18.2 : un fichier audio déposé n'importe où sur le bloc est importé
+    <DropBlock
+      className="sec voice-sec"
+      disabled={readOnly || busy || !!rec}
+      onFile={(f) => void importFile(f)}
+    >
       {dialog}
       <div className="sec-title">{t('editor.voice.title')}</div>
       <span className="sr-only" aria-live="polite">
@@ -295,7 +308,7 @@ export function VoiceFields({
                 onClick={() => file.current?.click()}
               >
                 <Upload aria-hidden="true" />
-                {t('editor.voice.replace')}
+                {sending ? t('dropzone.sendingShort') : t('editor.voice.replace')}
               </button>
               {/* L38 : « Supprimer » en bouton ghost (icône) aligné avec Réenregistrer et Remplacer */}
               <button
@@ -310,6 +323,7 @@ export function VoiceFields({
               </button>
             </div>
           )}
+          {sending && <UploadBar label={t('editor.voice.sending')} />}
           {!readOnly && aiVoice}
           <label className="check voice-auto">
             <input
@@ -394,9 +408,10 @@ export function VoiceFields({
                 onClick={() => file.current?.click()}
               >
                 <Upload aria-hidden="true" />
-                {t('editor.voice.import')}
+                {sending ? t('dropzone.sendingShort') : t('dropzone.import')}
               </button>
             </div>
+            {sending && <UploadBar label={t('editor.voice.sending')} />}
             {aiVoice}
             <p className="help">{t('editor.voice.help')}</p>
           </>
@@ -426,13 +441,13 @@ export function VoiceFields({
         tabIndex={-1}
         aria-hidden="true"
         accept={VOICE_ACCEPT}
-        aria-label={t('editor.voice.import')}
+        aria-label={t('dropzone.import')}
         onChange={(e) => {
           const f = e.target.files?.[0];
           e.target.value = '';
           if (f) void importFile(f);
         }}
       />
-    </div>
+    </DropBlock>
   );
 }

@@ -14,7 +14,10 @@
     "sending": "Envoi en cours…",
     "pick": "Choisir un fichier",
     "replace": "Remplacer…",
-    "remove": "Retirer le fichier"
+    "remove": "Retirer le fichier",
+    "dropBlock": "Déposer le fichier ici",
+    "sendingShort": "Envoi…",
+    "import": "Importer…"
   },
   "app": {
     "name": "{{app}}"
@@ -1356,7 +1359,6 @@
       "deleteCut": "Retirer la coupe de {{from}} à {{to}}",
       "captions": "Sous-titres",
       "editCaptions": "Modifier ({{count}})",
-      "importVtt": "Importer .vtt",
       "captionsDefault": "Afficher les sous-titres par défaut",
       "playback": "Lecture",
       "autoplayMuted": "Lecture automatique, sans son au départ",
@@ -1381,7 +1383,8 @@
       "addCaption": "Ajouter un sous-titre",
       "captionInvalid": "Sous-titre {{n}} : temps ou texte invalide (format 1:02.5).",
       "pauseInCut": "Dans une coupe : ignorée à la lecture.",
-      "deleteCutShort": "Supprimer la coupe"
+      "deleteCutShort": "Supprimer la coupe",
+      "vttFormat": "Fichier de sous-titres .vtt (WebVTT)."
     },
     "html": {
       "kind": "Étape HTML",
@@ -1816,7 +1819,6 @@
     "voice": {
       "title": "Voix off",
       "record": "Enregistrer",
-      "import": "Importer un fichier",
       "help": "Une piste par étape, 2 minutes au plus. MP3, M4A, WAV ou WebM, 5 Mo au plus.",
       "micBlocked": "Le micro est bloqué. Autorisez-le dans les réglages du navigateur, ou importez un fichier.",
       "recording": "Enregistrement en cours",
@@ -1843,7 +1845,8 @@
       "railIcon": "Voix off",
       "railIconAi": "Voix off générée par l’IA",
       "nextStep": "Étape suivante",
-      "removeLabel": "Supprimer la voix off"
+      "removeLabel": "Supprimer la voix off",
+      "sending": "Envoi de la voix off"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",

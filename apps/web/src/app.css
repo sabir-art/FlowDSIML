@@ -2824,3 +2824,31 @@ button.fd-nav__item:hover {
 .stg-ctl.pf-pw > :is(.fd-pw-meter, .fd-pw-rules, .fd-pw-error) {
   margin-top: 0;
 }
+
+/* ---- MEDIA-01 §18.2 : dépôt sur tout un bloc du panneau (Voix, Sous-titres) ---- */
+.fd-drop {
+  position: relative;
+}
+.fd-drop__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--fd-color-primary);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface));
+  color: var(--fd-color-text);
+  font: 600 14px var(--fd-font-sans);
+  pointer-events: none;
+}
+.fd-drop__veil > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--fd-color-primary);
+}
+.fd-drop__bar {
+  margin-top: 8px;
+}

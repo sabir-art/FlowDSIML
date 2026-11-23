@@ -88,6 +88,32 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await page.locator('.vd-cut').count()) === 1, 'coupe en hachures sur la piste');
   ok((await page.getByText(/après coupe 00:10/).count()) === 1, 'durée après coupe mise à jour');
 
+  // MEDIA-01 §18.2 : « Importer… », dépôt sur tout le bloc, fichier refusé en alerte sous le bouton
+  const cap = page.locator('.fd-drop', { hasText: 'Sous-titres' }).first();
+  ok(
+    (await cap.getByRole('button', { name: 'Importer…' }).count()) === 1 &&
+      (await cap.getByText('Fichier de sous-titres .vtt (WebVTT).').count()) === 1,
+    'sous-titres : bouton « Importer… » et aide de format',
+  );
+  const faux = await page.evaluateHandle(() => {
+    const d = new DataTransfer();
+    d.items.add(new File(['pas un sous-titre'], 'notes.vtt', { type: 'text/vtt' }));
+    return d;
+  });
+  await cap.dispatchEvent('dragenter', { dataTransfer: faux });
+  await cap.locator('.fd-drop__veil').waitFor();
+  ok(
+    (await cap.locator('.fd-drop__veil').innerText()).trim() === 'Déposer le fichier ici',
+    'sous-titres : « Déposer le fichier ici » au survol avec un fichier',
+  );
+  await cap.dispatchEvent('drop', { dataTransfer: faux });
+  await cap.getByRole('alert').waitFor();
+  ok(
+    (await cap.getByRole('alert').innerText()).trim() ===
+      'Ce fichier n’est pas un sous-titre WebVTT valide.' && v().captions.length === 0,
+    'sous-titres : fichier invalide refusé sous le bouton, rien n’est importé',
+  );
+
   // Sous-titres : import .vtt puis modification
   await page.locator('input[type=file][accept*=".vtt"]').setInputFiles({
     name: 'sous-titres.vtt',
@@ -97,6 +123,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ),
   });
   await page.getByText('2 sous-titres importés.').waitFor();
+  ok((await cap.getByRole('alert').count()) === 0, 'sous-titres : l’erreur disparaît après un import valide');
   await page.waitForTimeout(1200);
   ok(
     v().captions.length === 2 && v().captionsDefault === true,

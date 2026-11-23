@@ -70,8 +70,8 @@ function wav(sec) {
   ok(/Voix off/i.test(await sec.innerText()), 'section « Voix off » dans l’onglet Étape');
   ok(
     (await sec.getByRole('button', { name: 'Enregistrer' }).count()) === 1 &&
-      (await sec.getByRole('button', { name: 'Importer un fichier' }).count()) === 1,
-    'section vide : Enregistrer et Importer un fichier',
+      (await sec.getByRole('button', { name: 'Importer…' }).count()) === 1,
+    'section vide : Enregistrer et « Importer… »',
   );
   const gen = sec.locator('.ai-entry', { hasText: 'Générer à partir du texte' });
   ok(
@@ -89,11 +89,64 @@ function wav(sec) {
     await sec.screenshot({ path: `${SHOTS}/l28-02-voix-vide${sfx}.png` });
   }
 
-  // Import d'un fichier
+  // MEDIA-01 §18.2 : le dépôt marche sur tout le bloc (pointillé et « Déposer le fichier ici »)
+  const drag = (name, type, bytes) =>
+    page.evaluateHandle(
+      ([n, ty, by]) => {
+        const d = new DataTransfer();
+        d.items.add(new File([new Uint8Array(by)], n, { type: ty }));
+        return d;
+      },
+      [name, type, bytes],
+    );
+  const texte = await drag('notes.txt', 'text/plain', [...Buffer.from('pas un son')]);
+  await sec.dispatchEvent('dragenter', { dataTransfer: texte });
+  const veil = sec.locator('.fd-drop__veil');
+  await veil.waitFor();
+  const vs = await veil.evaluate((e) => {
+    const cs = getComputedStyle(e);
+    const r = e.getBoundingClientRect();
+    const b = e.parentElement.getBoundingClientRect();
+    return {
+      text: e.textContent.trim(),
+      border: `${cs.borderTopWidth} ${cs.borderTopStyle}`,
+      full: Math.abs(r.width - b.width) <= 1 && Math.abs(r.height - b.height) <= 1,
+    };
+  });
+  ok(
+    vs.text === 'Déposer le fichier ici' && vs.border === '2px dashed' && vs.full,
+    `dépôt : tout le bloc en pointillé de 2 px, « Déposer le fichier ici » (${vs.text}, ${vs.border})`,
+  );
+  await sec.dispatchEvent('drop', { dataTransfer: texte });
+  await sec.getByRole('alert').waitFor();
+  ok(
+    (await veil.count()) === 0 && !s1()?.voice_path,
+    `dépôt d’un fichier qui n’est pas un son : refusé en alerte sous les boutons (${sp(await sec.getByRole('alert').innerText())})`,
+  );
+
+  // Import d'un fichier, envoi retenu le temps de voir « Envoi… » et la barre indéterminée (MEDIA-01 §18.2)
+  let release;
+  const held = new Promise((r) => (release = r));
+  const slow = async (route) => {
+    await held;
+    await route.fallback();
+  };
+  await page.route('**/storage/v1/object/voices/**', slow);
   await sec
     .locator('input[type=file]')
     .setInputFiles({ name: 'voix.wav', mimeType: 'audio/wav', buffer: wav(2) });
+  const bar = sec.getByRole('progressbar', { name: 'Envoi de la voix off' });
+  await bar.waitFor();
+  ok(
+    (await sec.getByRole('button', { name: 'Envoi…' }).isDisabled()) &&
+      (await bar.evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 6 &&
+      (await sec.getByRole('alert').count()) === 0,
+    'envoi en cours : bouton « Envoi… » désactivé, barre de 6 px, l’erreur précédente a disparu',
+  );
+  release();
   await sec.locator('audio').waitFor();
+  await page.unroute('**/storage/v1/object/voices/**', slow);
+  ok((await bar.count()) === 0, 'envoi terminé : la barre disparaît');
   ok(await until(() => /\.wav$/.test(s1()?.voice_path || '')), 'piste importée enregistrée sur l’étape');
   ok(
     s1().voice_duration_ms >= 1900 && s1().voice_duration_ms <= 2100,

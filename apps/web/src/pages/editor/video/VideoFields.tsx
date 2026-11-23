@@ -1,3 +1,4 @@
+import { DropBlock } from '../../../components/DropBlock';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layers, Pencil, Plus, Sparkles, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
@@ -72,9 +73,12 @@ export function VideoFields({
     }
   };
 
+  /** MEDIA-01 §18.2 : fichier refusé, dit sous le bouton (role=alert). */
+  const [vttError, setVttError] = useState('');
   async function importVtt(f: File) {
+    setVttError('');
     const cues = parseVtt(await f.text());
-    if (!cues) return toast(t('editor.video.vttInvalid'));
+    if (!cues) return setVttError(t('editor.video.vttInvalid'));
     save({ captions: cues.slice(0, MAX_CAPTIONS), captionsDefault: v.captionsDefault || cues.length > 0 });
     toast(t('editor.video.vttImported', { count: cues.length }));
   }
@@ -208,7 +212,8 @@ export function VideoFields({
           </ul>
         </div>
       )}
-      <div className="sec">
+      {/* MEDIA-01 §18.2 : un fichier .vtt déposé n'importe où sur le bloc est importé */}
+      <DropBlock className="sec" disabled={readOnly} onFile={(f) => void importVtt(f)}>
         <div className="sec-title">{t('editor.video.captions')}</div>
         <div className="row vd-pnav">
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
@@ -223,7 +228,7 @@ export function VideoFields({
               onClick={() => file.current?.click()}
             >
               <Upload aria-hidden="true" />
-              {t('editor.video.importVtt')}
+              {t('dropzone.import')}
             </button>
           )}
           <input
@@ -242,6 +247,12 @@ export function VideoFields({
             }}
           />
         </div>
+        {!readOnly && <p className="help">{t('editor.video.vttFormat')}</p>}
+        {vttError && (
+          <p className="field-error" role="alert">
+            {vttError}
+          </p>
+        )}
         {/* 066 : sous-titres automatiques (ElevenLabs), remplace l'entrée « Bientôt » */}
         {!readOnly && ws && step.video_path && (
           <AiCaptions
@@ -271,7 +282,7 @@ export function VideoFields({
             <span />
           </span>
         </div>
-      </div>
+      </DropBlock>
       <div className="sec">
         <div className="sec-title">{t('editor.video.playback')}</div>
         <div className="setting">

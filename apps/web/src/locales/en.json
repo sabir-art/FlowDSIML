@@ -14,7 +14,10 @@
     "sending": "Uploading…",
     "pick": "Choose a file",
     "replace": "Replace…",
-    "remove": "Remove the file"
+    "remove": "Remove the file",
+    "dropBlock": "Drop the file here",
+    "sendingShort": "Sending…",
+    "import": "Import…"
   },
   "app": {
     "name": "{{app}}"
@@ -1356,7 +1359,6 @@
       "deleteCut": "Remove the cut from {{from}} to {{to}}",
       "captions": "Captions",
       "editCaptions": "Edit ({{count}})",
-      "importVtt": "Import .vtt",
       "captionsDefault": "Show captions by default",
       "playback": "Playback",
       "autoplayMuted": "Autoplay, muted at first",
@@ -1381,7 +1383,8 @@
       "addCaption": "Add a caption",
       "captionInvalid": "Caption {{n}}: invalid time or text (format 1:02.5).",
       "pauseInCut": "Inside a cut: skipped during playback.",
-      "deleteCutShort": "Delete the cut"
+      "deleteCutShort": "Delete the cut",
+      "vttFormat": "Subtitle file in .vtt format (WebVTT)."
     },
     "html": {
       "kind": "HTML step",
@@ -1816,7 +1819,6 @@
     "voice": {
       "title": "Voice-over",
       "record": "Record",
-      "import": "Import a file",
       "help": "One track per step, 2 minutes max. MP3, M4A, WAV or WebM, 5 MB max.",
       "micBlocked": "The microphone is blocked. Allow it in the browser settings, or import a file.",
       "recording": "Recording",
@@ -1843,7 +1845,8 @@
       "railIcon": "Voice-over",
       "railIconAi": "AI-generated voice-over",
       "nextStep": "Next step",
-      "removeLabel": "Delete the voice-over"
+      "removeLabel": "Delete the voice-over",
+      "sending": "Sending the voice-over"
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
