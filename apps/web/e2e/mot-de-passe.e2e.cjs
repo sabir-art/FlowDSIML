@@ -81,6 +81,8 @@ const VALIDE = 'Acmedemo2026!';
     // Œil : affiche, garde le focus et le curseur ; indépendant de l'autre champ
     await pw.evaluate((e) => e.setSelectionRange(3, 3));
     await eyes.first().click();
+    // La bascule du type peut déplacer le curseur après le rendu : contrôle une image plus tard
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     ok(
       (await pw.getAttribute('type')) === 'text' &&
         (await eyes.first().getAttribute('aria-pressed')) === 'true' &&
@@ -88,6 +90,16 @@ const VALIDE = 'Acmedemo2026!';
         (await pw.evaluate((e) => e.selectionStart)) === 3,
       `${tag} : l’œil affiche le mot de passe, focus et curseur gardés`,
     );
+    // Une sélection est gardée aussi, et le retour au masquage ne déplace rien
+    await pw.evaluate((e) => e.setSelectionRange(2, 5));
+    await eyes.first().click();
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    ok(
+      (await pw.getAttribute('type')) === 'password' &&
+        (await pw.evaluate((e) => `${e.selectionStart}-${e.selectionEnd}`)) === '2-5',
+      `${tag} : sélection gardée quand on remasque`,
+    );
+    await eyes.first().click();
     ok(
       (await cf.getAttribute('type')) === 'password' &&
         (await eyes.nth(1).getAttribute('aria-pressed')) === 'false',
@@ -252,15 +264,27 @@ const VALIDE = 'Acmedemo2026!';
     // axe demande un contexte créé à la main
     const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
     const state = seed();
+    const ACTUEL = 'Ancien-2025!';
+    state.currentPassword = ACTUEL;
     await install(page, state);
     await page.goto(`${APP}/#/settings/profile`);
     const np = page.locator('#np');
-    await np.waitFor();
+    const cp = page.locator('#cp');
+    await cp.waitFor();
     await np.focus();
     ok(
       (await page.locator('#np-rules li').count()) === 5 &&
-        (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 2,
-      'Profil : œil sur les deux champs, règles dès le focus',
+        (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 3,
+      'Profil : « Mot de passe actuel », œil sur les trois champs, règles dès le focus',
+    );
+    // L'œil garde le curseur ici aussi
+    await np.pressSequentially(VALIDE);
+    await np.evaluate((e) => e.setSelectionRange(4, 4));
+    await page.getByRole('button', { name: 'Afficher le mot de passe' }).nth(1).click();
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    ok(
+      (await np.getAttribute('type')) === 'text' && (await np.evaluate((e) => e.selectionStart)) === 4,
+      'Profil : l’œil garde le curseur',
     );
     // ALIGN-01 : les champs finissent sur le filet de la ligne
     const al = await np.evaluate((e) => {
@@ -269,25 +293,83 @@ const VALIDE = 'Acmedemo2026!';
       return Math.abs(g.right - r.right);
     });
     ok(al <= 1, `Profil : champ calé sur la fin de la ligne (${al})`);
-    await np.pressSequentially(VALIDE);
     await page.locator('#np2').pressSequentially(VALIDE);
+    const save = page.getByRole('button', { name: 'Mettre à jour le mot de passe' });
+
+    // Mot de passe actuel : vide, puis incorrect ; rien n'est changé
+    await save.click();
+    await page.locator('#cp-error').waitFor();
+    ok(
+      sp(await page.locator('#cp-error').innerText()) === 'Saisissez votre mot de passe actuel.' &&
+        (await page.evaluate(() => document.activeElement?.id)) === 'cp' &&
+        (await cp.getAttribute('aria-invalid')) === 'true',
+      'Profil : mot de passe actuel exigé, focus sur le champ',
+    );
+    await cp.pressSequentially('Faux-2025!');
+    ok((await page.locator('#cp-error').count()) === 0, 'Profil : l’erreur disparaît à la saisie');
+    await save.click();
+    await page.locator('#cp-error').waitFor();
+    ok(
+      sp(await page.locator('#cp-error').innerText()) === 'Le mot de passe actuel est incorrect.' &&
+        (state.passwordUpdates ?? 0) === 0,
+      'Profil : mot de passe actuel incorrect, le mot de passe n’est pas changé',
+    );
+    await axe(page, 'Profil, mot de passe actuel incorrect');
+
+    // Mot de passe actuel correct : la demande part avec lui ; refus du serveur sous le bon champ
+    await cp.fill(ACTUEL);
     state.passwordRefusal = {
       error_code: 'same_password',
       msg: 'New password should be different from the old password.',
     };
-    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
+    await save.click();
     await page.locator('#np-error').waitFor();
     ok(
       sp(await page.locator('#np-error').innerText()) ===
         'Choisissez un mot de passe différent de l’actuel.' &&
-        (await page.evaluate(() => document.activeElement?.id)) === 'np',
-      'Profil : refus « identique à l’actuel » sous le champ, focus rendu',
+        (await page.evaluate(() => document.activeElement?.id)) === 'np' &&
+        state.lastUpdateHadCurrent === true,
+      'Profil : refus « identique à l’actuel » sous le nouveau mot de passe ; l’actuel accompagne la demande',
     );
     await axe(page, 'Profil, erreur de mot de passe');
     state.passwordRefusal = null;
-    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
+    await save.click();
     await page.getByText('Mot de passe mis à jour').first().waitFor();
-    ok((await np.inputValue()) === '', 'Profil : mot de passe mis à jour, champs vidés');
+    ok(
+      (await np.inputValue()) === '' && (await cp.inputValue()) === '',
+      'Profil : mot de passe mis à jour, champs vidés',
+    );
+    await page.close();
+  }
+
+  // ===== Profil d'un compte sans mot de passe (créé avec Google ou par lien e-mail) =====
+  {
+    const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    const state = seed();
+    state.hasPassword = false;
+    await install(page, state);
+    await page.goto(`${APP}/#/settings/profile`);
+    const set = page.getByRole('button', { name: 'Définir un mot de passe' });
+    await set.waitFor();
+    ok(
+      (await page.locator('#cp').count()) === 0 &&
+        (await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).count()) === 0,
+      'Compte sans mot de passe : « Définir un mot de passe », sans « Mot de passe actuel »',
+    );
+    await page.locator('#np').pressSequentially(VALIDE);
+    await page.locator('#np2').pressSequentially(VALIDE);
+    await set.click();
+    await page.getByText('Mot de passe mis à jour').first().waitFor();
+    ok(
+      state.passwordUpdates === 1 && state.lastUpdateHadCurrent === false,
+      'Compte sans mot de passe : mot de passe défini, aucun mot de passe actuel demandé',
+    );
+    // Le compte a maintenant un mot de passe : le champ apparaît pour la prochaine fois
+    await page.locator('#cp').waitFor();
+    ok(
+      (await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).count()) === 1,
+      'Compte sans mot de passe : une fois défini, « Mot de passe actuel » est demandé',
+    );
     await page.close();
   }
   await b.close();

@@ -169,10 +169,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.getByRole('button', { name: 'Actions du formulaire' }).click();
   ok(
     (await page.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
-      'Modifier | Placer avant l’étape précédente | Placer avant l’étape suivante | Supprimer',
-    'formulaire : menu ⋯ (Modifier, déplacer, Supprimer)',
+      'Modifier | Monter | Descendre | Supprimer',
+    'formulaire : menu ⋯ (Modifier, Monter, Descendre, Supprimer)',
   );
-  await page.getByRole('menuitem', { name: 'Placer avant l’étape suivante' }).click();
+  await page.getByRole('menuitem', { name: 'Descendre' }).click();
   // Attente sur l'état réel : la valeur choisie de « Avant l'étape » (10 s au plus)
   for (const end = Date.now() + 10000; Date.now() < end && (await picked(page.locator('#f-gate'))) !== '2';)
     await new Promise((r) => setTimeout(r, 100));

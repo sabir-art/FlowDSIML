@@ -37,6 +37,25 @@ export function Profile() {
   const [pwError, setPwError] = useState('');
   const [pwFailed, setPwFailed] = useState(false);
   const [pwTouched, setPwTouched] = useState(false);
+  /**
+   * « Mot de passe actuel » (décision du chef, 23/11) : demandé seulement si le compte a déjà un mot de
+   * passe. Un compte créé avec Google ou par lien e-mail en définit un, sans ce champ. null : pas encore su.
+   */
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null);
+  const [current, setCurrent] = useState('');
+  const [currentError, setCurrentError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    void supabase.rpc('account_deletion_check').then(({ data, error }) => {
+      if (!alive) return;
+      const known = !error && typeof (data as { hasPassword?: unknown } | null)?.hasPassword === 'boolean';
+      // Sans réponse : le champ est demandé (le serveur reste juge)
+      setHasPassword(known ? (data as { hasPassword: boolean }).hasPassword : true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [user?.id]);
   const info = useAction();
   const pwd = useAction();
   const soon = <span className="stg-soon">{t('shell.soon')}</span>;
@@ -66,6 +85,11 @@ export function Profile() {
   };
   async function savePassword(e: FormEvent) {
     e.preventDefault();
+    const refuseCurrent = (message: string) => {
+      setCurrentError(message);
+      document.getElementById('cp')?.focus();
+    };
+    if (hasPassword && !current) return refuseCurrent(t('profile.passwordCurrentRequired'));
     const local = localPasswordError(t, password);
     if (local) return refusePassword(local);
     if (password !== confirm) {
@@ -74,13 +98,28 @@ export function Profile() {
       return;
     }
     await pwd.run(async () => {
-      const res = await supabase.auth.updateUser({ password });
+      if (hasPassword) {
+        // Le mot de passe actuel est vérifié par une connexion, puis transmis avec la demande : le serveur
+        // le revérifie quand « exiger le mot de passe actuel » est activé
+        const check2 = await supabase.auth.signInWithPassword({
+          email: user?.email ?? '',
+          password: current,
+        });
+        if (check2.error) return refuseCurrent(t('profile.passwordCurrentWrong'));
+      }
+      const res = await supabase.auth.updateUser(
+        hasPassword ? { password, current_password: current } : { password },
+      );
+      if (res.error && /current password/i.test(res.error.message))
+        return refuseCurrent(t('profile.passwordCurrentWrong'));
       // Refus du serveur (trop court, caractères manquants, identique à l'actuel…) : sous le champ
       const refused = res.error && passwordErrorMessage(t, res.error, password);
       if (refused) return refusePassword(refused);
       check(res);
       setPassword('');
       setConfirm('');
+      setCurrent('');
+      setHasPassword(true);
       setPwTouched(false);
       toast(t('profile.passwordUpdated'));
     });
@@ -225,6 +264,8 @@ export function Profile() {
       <form
         id="pf-pwd-form"
         className="stg-sec st-pf-pwd"
+        // Pas de bulle native du navigateur (COMP-01) : les erreurs s'affichent sous les champs
+        noValidate
         onSubmit={savePassword}
         aria-labelledby="pf-sec-pwd"
       >
@@ -236,13 +277,38 @@ export function Profile() {
           </div>
           <div className="stg-sec__acts">
             <Button type="submit" disabled={pwd.busy}>
-              {t('auth.updatePassword')}
+              {t(hasPassword === false ? 'profile.setPassword' : 'auth.updatePassword')}
             </Button>
           </div>
         </div>
         {pwd.error && (
           <div className="alert alert-danger" role="alert">
             {pwd.error}
+          </div>
+        )}
+        {hasPassword && (
+          <div className="stg-row">
+            <div className="stg-text" data-gap-exempt="">
+              <label className="stg-lab" htmlFor="cp">
+                {t('profile.passwordCurrent')}
+              </label>
+            </div>
+            <div className="stg-ctl pf-pw">
+              <PasswordInput
+                id="cp"
+                autoComplete="current-password"
+                name="current-password"
+                required
+                value={current}
+                aria-invalid={currentError ? true : undefined}
+                aria-describedby={currentError ? 'cp-error' : undefined}
+                onChange={(e) => {
+                  setCurrent(e.target.value);
+                  setCurrentError('');
+                }}
+              />
+              <PasswordError id="cp-error">{currentError}</PasswordError>
+            </div>
           </div>
         )}
         {/* EXT-02 §7 : œil, jauge de force, règles de la politique ; erreurs sous le champ */}

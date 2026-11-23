@@ -25,13 +25,19 @@ export function PasswordInput({ className, ...input }: Omit<InputHTMLAttributes<
   const [shown, setShown] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
   const caret = useRef<[number | null, number | null] | null>(null);
-  // Changer le type du champ peut déplacer le curseur : il est remis à sa place
+  // Changer le type du champ remet la sélection à zéro dans Chromium, parfois après le rendu : le
+  // curseur est remis à sa place tout de suite, puis de nouveau à l'image suivante
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || !caret.current) return;
-    const [a, b] = caret.current;
+    const saved = caret.current;
     caret.current = null;
-    if (document.activeElement === el && a !== null) el.setSelectionRange(a, b ?? a);
+    if (!el || !saved || saved[0] === null) return;
+    const restore = () => {
+      if (document.activeElement === el) el.setSelectionRange(saved[0], saved[1] ?? saved[0]);
+    };
+    restore();
+    const frame = requestAnimationFrame(restore);
+    return () => cancelAnimationFrame(frame);
   }, [shown]);
   useEffect(() => {
     const form = ref.current?.form;

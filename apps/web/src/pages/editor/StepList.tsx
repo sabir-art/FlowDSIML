@@ -507,14 +507,14 @@ export function StepList({
                             onSelect: () => onSelectForm?.(i, form.id),
                           },
                           {
-                            label: t('editor.form.moveUp'),
+                            label: t('editor.moveUp'),
                             icon: <ArrowUp />,
                             disabled: i === 0,
                             onSelect: () =>
                               void placeForm(form.id, i - 1).then(() => onSelectForm?.(i - 1, form.id)),
                           },
                           {
-                            label: t('editor.form.moveDown'),
+                            label: t('editor.moveDown'),
                             icon: <ArrowDown />,
                             disabled: i === editor.steps.length - 1,
                             onSelect: () =>

@@ -702,8 +702,17 @@ async function install(page, state = seed()) {
       state.events.push(...(batch.events || []));
       return json(route, 200, { inserted: (batch.events || []).length });
     }
+    // Mot de passe actuel connu du test (state.currentPassword) : une connexion par mot de passe n'aboutit
+    // qu'avec lui
+    if (
+      state.currentPassword !== undefined &&
+      p.startsWith('/auth/v1/token') &&
+      body?.password !== undefined &&
+      body.password !== state.currentPassword
+    )
+      return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
     // L28-08 : nouvelle connexion par mot de passe juste avant une action sensible (option du test)
-    if (state.passwordSession && p.startsWith('/auth/v1/token'))
+    if ((state.passwordSession || state.currentPassword !== undefined) && p.startsWith('/auth/v1/token'))
       return json(route, 200, {
         access_token: 'fake-token',
         token_type: 'bearer',
@@ -719,6 +728,9 @@ async function install(page, state = seed()) {
       // (ex. { error_code: 'same_password', msg: '…' }), au format de l'API
       if (method === 'PUT' && body?.password) {
         state.passwordUpdates = (state.passwordUpdates ?? 0) + 1;
+        // Le mot de passe actuel accompagne-t-il la demande ? (jamais gardé : seulement sa présence)
+        state.lastUpdateHadCurrent =
+          typeof body.current_password === 'string' && body.current_password !== '';
         if (state.passwordRefusal) return json(route, 422, { code: 422, ...state.passwordRefusal });
       }
       if (method === 'PUT' && body?.data)
