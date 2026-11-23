@@ -1944,8 +1944,9 @@
       "deleted": "Step {{n}} deleted",
       "deletedToast": "Step deleted"
     },
-    "hideSteps": "Hide steps",
-    "showSteps": "Show steps",
+    "collapseSteps": "Collapse steps",
+    "expandSteps": "Expand steps",
+    "stepsWidth": "Steps width",
     "stepPill": "Step {{n}}: {{title}}"
   },
   "status": {

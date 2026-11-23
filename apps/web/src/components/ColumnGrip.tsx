@@ -124,11 +124,14 @@ export function ColumnGrip({
     else if (e.key === 'End') next = bounds.max;
     else if (e.key === 'Enter') {
       e.preventDefault();
+      e.stopPropagation();
       onClosed(!closed);
       return;
     }
     if (next === null) return;
+    // Ces touches règlent la colonne : elles ne déclenchent pas les raccourcis de la page (éditeur)
     e.preventDefault();
+    e.stopPropagation();
     onWidth(next);
   };
 

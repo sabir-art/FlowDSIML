@@ -49,7 +49,6 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { deleteFormWithUndo } from './formDelete';
-import { PanneauIcon } from '../../components/PanneauIcon';
 import { copyStepToClipboard, readStepClipboard, useStepClipboard, type StepClip } from './stepClipboard';
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -69,11 +68,9 @@ export function StepList({
   onPlayFrom,
   onEdit,
   collapsed = false,
-  onToggle,
 }: {
   /** Lot 3 : colonne repliée en rail de 48 px (pastilles numérotées, « Ajouter une étape » en icône). */
   collapsed?: boolean;
-  onToggle?: () => void;
   /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape. */
   onPlayFrom?: (i: number) => void;
   /** P1-1 : « Modifier » choisit l'étape et ouvre le panneau Étape. */
@@ -387,22 +384,15 @@ export function StepList({
             {t('editor.steps')} <span className="subtle">{editor.steps.length}</span>
           </b>
         )}
-        {onToggle && (
-          <button
-            type="button"
-            className="rail-toggle"
-            aria-label={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
-            title={t(collapsed ? 'editor.showSteps' : 'editor.hideSteps')}
-            aria-expanded={!collapsed}
-            onClick={onToggle}
-          >
-            <PanneauIcon />
-          </button>
-        )}
       </div>
       {collapsed && (
         <>
-          {/* Rail : une pastille par étape (son numéro, son titre en infobulle), l'étape choisie en prune */}
+          {/* COL-02 : rail de 48 px. « Ajouter une étape » en haut, un filet, puis une pastille par étape */}
+          {!readOnly && (
+            <div className="rail-pills__add">
+              <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />
+            </div>
+          )}
           <ol className="rail-pills" aria-label={t('editor.steps')}>
             {editor.steps.map((s, i) => (
               <li key={s.id}>
@@ -420,11 +410,6 @@ export function StepList({
               </li>
             ))}
           </ol>
-          {!readOnly && (
-            <div className="rail-pills__add">
-              <Menu label={t('editor.addStep')} align="start" icon={<Plus />} items={addItems} />
-            </div>
-          )}
         </>
       )}
       {!readOnly && (
@@ -691,6 +676,15 @@ export function StepList({
         <Link
           className={`rail-quiz${editor.questions.length ? '' : ' rail-quiz--add'}`}
           to={`/demos/${editor.demo.id}/quiz`}
+          // Rail replié : le lien est une icône, son texte reste son nom (infobulle à droite)
+          data-tip={
+            collapsed
+              ? editor.questions.length
+                ? t('editor.quiz.title')
+                : t('editor.railQuizAdd')
+              : undefined
+          }
+          data-tip-side={collapsed ? 'right' : undefined}
         >
           <ListChecks aria-hidden="true" />
           <span>

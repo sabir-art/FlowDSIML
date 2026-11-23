@@ -27,7 +27,16 @@ import { BlurModal } from './BlurModal';
 import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 import { useToast } from '../../components/Toast';
 import { activityOf, type EditTable, type PresencePayload } from './presence/presence';
 import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
@@ -61,6 +70,17 @@ import type { Selection } from './types';
 import { PublishButton } from './PublishButton';
 import { useShareRules } from '../../lib/shareRules';
 import { PreviewDialog } from './PreviewDialog';
+import { ColumnGrip, useColumn, type ColumnBounds } from '../../components/ColumnGrip';
+
+const STEPS_BOUNDS: ColumnBounds = { min: 232, max: 360, def: 264 };
+/** Ancienne préférence (bouton de l'en-tête) : « 0 » voulait dire replié. */
+function stepsClosedBefore() {
+  try {
+    return localStorage.getItem('fd.editor.steps') === '0';
+  } catch {
+    return false;
+  }
+}
 import { PresentDialog } from '../present/PresentDialog';
 import { FindBar } from './FindBar';
 import { ShortcutsDialog, isMac } from './ShortcutsDialog';
@@ -258,23 +278,13 @@ export function EditorPage() {
   const readOnly = !can('demo.edit');
   const narrow = useNarrow(1024);
   const [previewManifest, setPreviewManifest] = useState<Manifest | null>(null);
-  /** Lot 3 : colonne Étapes repliée en rail de 48 px ; le choix est gardé sur ce navigateur. */
-  const [stepsCollapsed, setStepsCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem('fd.editor.steps') === '0';
-    } catch {
-      return false;
-    }
-  });
-  const toggleSteps = () =>
-    setStepsCollapsed((c) => {
-      try {
-        localStorage.setItem('fd.editor.steps', c ? '1' : '0');
-      } catch {
-        /* préférence non gardée */
-      }
-      return !c;
-    });
+  /**
+   * COL-02 (COMP-01 §19) : colonne Étapes de 232 à 360 px (264 par défaut), repliée en rail de 48 px par la
+   * poignée de son bord ; largeur et repli gardés sur ce navigateur (ancien choix « replié » repris).
+   */
+  const stepsCol = useColumn('fd.editor.stepscol', STEPS_BOUNDS, stepsClosedBefore());
+  const [stepsDrag, setStepsDrag] = useState(false);
+  const stepsCollapsed = stepsCol.closed;
   /** P1-1 : « Lire depuis ici » : étape de départ de l'aperçu. */
   const [previewStart, setPreviewStart] = useState<number | undefined>(undefined);
   // L12 : rechercher-remplacer (pastilles du rail) et modale des raccourcis
@@ -1039,11 +1049,17 @@ export function EditorPage() {
           </div>
         </div>
       )}
-      <div className="ed-body">
-        <nav className={`rail${stepsCollapsed ? ' rail--collapsed' : ''}`} aria-label={t('editor.steps')}>
+      <div
+        className={`ed-body${stepsDrag ? ' is-col-drag' : ''}`}
+        style={{ '--rail-w': `${stepsCol.width}px` } as CSSProperties}
+      >
+        <nav
+          id="etapes"
+          className={`rail${stepsCollapsed ? ' rail--collapsed' : ''}`}
+          aria-label={t('editor.steps')}
+        >
           <StepList
             collapsed={stepsCollapsed}
-            onToggle={toggleSteps}
             editor={editor}
             current={index}
             onSelect={(i) => {
@@ -1068,6 +1084,20 @@ export function EditorPage() {
             }}
           />
         </nav>
+        <ColumnGrip
+          controls="etapes"
+          width={stepsCol.width}
+          closed={stepsCollapsed}
+          bounds={STEPS_BOUNDS}
+          labels={{
+            collapse: t('editor.collapseSteps'),
+            expand: t('editor.expandSteps'),
+            width: t('editor.stepsWidth'),
+          }}
+          onWidth={stepsCol.setWidth}
+          onClosed={stepsCol.setClosed}
+          onDragging={setStepsDrag}
+        />
         <section className="stage" aria-label={t('editor.canvas')} id="canvas">
           <div className="row stage-head">
             <span className="t-caption muted">

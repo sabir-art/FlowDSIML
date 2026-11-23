@@ -176,9 +176,13 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
 
   // ===== Colonne repliée : rail de 48 px, pastilles numérotées =====
   const total = await cards.count();
-  await page.getByRole('button', { name: 'Masquer les étapes' }).click();
-  const show = page.getByRole('button', { name: 'Afficher les étapes' });
+  await page.getByRole('button', { name: 'Replier les étapes' }).click();
+  const show = page.getByRole('button', { name: 'Déplier les étapes' });
   await show.waitFor();
+  // Le repli est animé (200 ms) : on attend la largeur du rail
+  await page.waitForFunction(
+    () => Math.round(document.querySelector('.rail').getBoundingClientRect().width) === 48,
+  );
   ok(
     Math.round((await page.locator('.rail').boundingBox()).width) === 48 &&
       (await page.locator('.rail-pill').count()) === total,
@@ -187,7 +191,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   ok(
     (await show.getAttribute('aria-expanded')) === 'false' &&
       (await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))) ===
-        'Afficher les étapes',
+        'Déplier les étapes',
     'bascule : aria-expanded à jour, focus gardé',
   );
   await page.locator('.rail-pill').nth(1).click();

@@ -4001,39 +4001,63 @@
 }
 
 /* ---- Lot 3 : bascule de la colonne Étapes et rail de 48 px (pastilles numérotées de 32 px) ---- */
-.mk .rail-toggle {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  color: var(--fd-color-text-muted);
-  cursor: pointer;
+/* COL-02 (COMP-01 §19) : la colonne Étapes prend la largeur choisie à la poignée de son bord */
+.mk .ed-body > .rail {
+  flex: 0 0 var(--rail-w, 264px);
+  width: var(--rail-w, 264px);
+  transition:
+    flex-basis 200ms ease-out,
+    width 200ms ease-out;
 }
-.mk .rail-toggle:hover {
-  background: var(--fd-color-nav-hover);
-  color: var(--fd-color-text);
+.mk .ed-body.is-col-drag > .rail {
+  transition: none;
 }
-.mk .rail-toggle:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+@media (prefers-reduced-motion: reduce) {
+  .mk .ed-body > .rail {
+    transition: none;
+  }
+}
+/* Poignée : à cheval sur le filet de la colonne ; repliée, demi-pastille contre le bord droit du rail */
+.mk .ed-body > .fd-cgrip {
+  inset-inline-end: auto;
+  left: calc(var(--rail-w, 264px) - 6px);
+}
+.mk .ed-body > .fd-cgrip.is-closed {
+  left: 48px;
 }
 .mk .ed-body > .rail.rail--collapsed {
   flex-basis: 48px;
   width: 48px;
 }
+/* Repliée : pas d'en-tête (le nom de la colonne est celui de sa poignée et de sa liste) */
 .mk .rail--collapsed .rail-head {
-  justify-content: center;
-  padding: 0 8px;
+  display: none;
 }
 /* Le champ fichier de « Ajouter une étape » reste dans la page (masqué) ; son bouton est dans le rail */
-.mk .rail--collapsed :is(.rail-list, .rail-quiz),
+.mk .rail--collapsed .rail-list,
 .mk .rail--collapsed .rail-foot > :not(input) {
   display: none;
+}
+/* Repliée : « Ajouter un quiz » (ou le quiz) est une icône de 32 px en bas du rail */
+.mk .rail--collapsed .rail-quiz {
+  align-self: flex-start;
+  width: 32px;
+  height: 32px;
+  margin: 8px;
+  padding: 0;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+}
+.mk .rail--collapsed .rail-quiz::before {
+  display: none;
+}
+.mk .rail--collapsed .rail-quiz > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 .mk .rail--collapsed .rail-foot {
   padding: 0;
@@ -4043,10 +4067,10 @@
   flex: 1;
   align-content: start;
   justify-items: center;
-  gap: 6px;
+  gap: 4px;
   min-height: 0;
   margin: 0;
-  padding: 4px 8px 12px;
+  padding: 0 8px 12px;
   overflow-y: auto;
   list-style: none;
 }
@@ -4056,32 +4080,44 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+  background: var(--fd-color-surface);
   color: var(--fd-color-text-muted);
-  font: 500 12px var(--fd-font-sans);
+  font: 500 13px var(--fd-font-sans);
   cursor: pointer;
 }
 .mk .rail-pill:hover {
   background: var(--fd-color-nav-hover);
   color: var(--fd-color-text);
 }
-/* Étape choisie : pastille prune */
+/* Étape choisie : primary-soft, bord primary */
 .mk .rail-pill[aria-current='step'] {
-  background: var(--fd-color-primary);
-  color: var(--fd-color-on-primary);
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
   font-weight: 600;
 }
 .mk .rail-pill:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
+/* « Ajouter une étape » en haut du rail, puis un filet de 24 px */
 .mk .rail-pills__add {
+  position: relative;
   display: grid;
   flex: none;
-  place-items: center;
-  padding: 12px 8px;
+  align-items: center;
+  justify-items: start;
+  margin-top: -4px;
+  padding: 0 8px 17px;
+}
+.mk .rail-pills__add::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  width: 24px;
   border-top: 1px solid var(--fd-color-border);
 }
 .mk .rail-pills__add .menu-trigger {

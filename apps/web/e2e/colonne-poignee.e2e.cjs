@@ -3,7 +3,8 @@
  * pastille de 20 × 40 px à cheval sur le filet (bouton « Replier les dossiers », aria-expanded) ; le
  * filet est un séparateur redimensionnable (souris, ← → Début Fin, Entrée), de 200 à 360 px ; repliée,
  * la colonne disparaît et une demi-pastille de 18 × 40 px reste au bord du contenu ; largeur et repli
- * gardés ; pas de poignée sous 1 024 px. Faux Supabase, données de la maquette.
+ * gardés ; pas de poignée sous 1 024 px. Même poignée pour la colonne Étapes de l'éditeur (232 à
+ * 360 px, rail de 48 px une fois repliée). Faux Supabase, données de la maquette.
  */
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
@@ -163,6 +164,128 @@ const slotIs = (page, w) =>
     const axeOpen = await new AxeBuilder({ page }).exclude('.demo-cover').analyze();
     const badOpen = axeOpen.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
     ok(badOpen.length === 0, `${tag} : axe, colonne dépliée (${badOpen.map((v) => v.id).join(', ')})`);
+    await ctx.close();
+  }
+
+  // ===== Colonne Étapes de l'éditeur : même poignée, rail de 48 px une fois repliée =====
+  for (const theme of ['light', 'dark']) {
+    const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+    await ctx.addInitScript((t) => localStorage.setItem('fd.theme', t), theme);
+    const page = await ctx.newPage();
+    const state = seedMaquette();
+    await install(page, state);
+    await page.goto(`${APP}/#/demos/${state.tables.demos[0].id}/edit`);
+    await page.locator('.ed-title:not(.ed-title--sk)').waitFor();
+    const tag = `Étapes, ${theme === 'light' ? 'clair' : 'sombre'}`;
+    const rail = page.locator('#etapes');
+    const btn = page.locator('.ed-body > .fd-cgrip .fd-cgrip__btn');
+    const sep = page.getByRole('separator', { name: 'Largeur des étapes' });
+    const railIs = (w) =>
+      page.waitForFunction(
+        (w) => Math.round(document.querySelector('#etapes').getBoundingClientRect().width) === w,
+        w,
+      );
+    await railIs(264);
+    const r0 = await box(rail);
+    const b0 = await box(btn);
+    ok(
+      (await rail.locator('.rail-head button').count()) === 0,
+      `${tag} : en-tête « Étapes » seul, sans icône`,
+    );
+    ok(
+      b0.w === 20 && b0.h === 40 && Math.abs(b0.x + b0.w / 2 - (r0.x + r0.w)) <= 1,
+      `${tag} : pastille de 20 × 40 px à cheval sur le filet (${b0.w} × ${b0.h})`,
+    );
+    ok(
+      Math.abs(b0.y + b0.h / 2 - (r0.y + r0.h / 2)) <= 1,
+      `${tag} : pastille centrée dans la hauteur visible`,
+    );
+    ok(
+      (await btn.getAttribute('aria-label')) === 'Replier les étapes' &&
+        (await btn.getAttribute('aria-expanded')) === 'true' &&
+        (await btn.getAttribute('aria-controls')) === 'etapes',
+      `${tag} : bouton « Replier les étapes », aria-expanded, aria-controls`,
+    );
+    ok(
+      (await sep.getAttribute('aria-valuemin')) === '232' &&
+        (await sep.getAttribute('aria-valuemax')) === '360' &&
+        (await sep.getAttribute('aria-valuenow')) === '264',
+      `${tag} : séparateur de 232 à 360 px, valeur 264`,
+    );
+    await sep.focus();
+    await page.keyboard.press('ArrowRight');
+    await railIs(280);
+    await page.keyboard.press('Home');
+    await railIs(232);
+    await page.keyboard.press('End');
+    await railIs(360);
+    ok(true, `${tag} : → 280 px, Début 232 px, Fin 360 px`);
+    ok(
+      (await page.locator('.rail-list .step[aria-current="step"] .n').innerText()).trim() === '1',
+      `${tag} : ces touches ne changent pas d’étape (raccourcis de l’éditeur)`,
+    );
+    const g = await box(sep);
+    await page.mouse.move(g.x + 6, 300);
+    await page.mouse.down();
+    await page.mouse.move(g.x + 6 - 60, 300, { steps: 4 });
+    ok(
+      Math.round((await box(rail)).w) === 300 &&
+        (await rail.evaluate((e) => getComputedStyle(e).transitionDuration.split(',')[0])) === '0s',
+      `${tag} : glissement à 300 px, sans animation`,
+    );
+    await page.mouse.up();
+
+    // ----- Repliée -----
+    await btn.click();
+    await railIs(48);
+    const b1 = await box(btn);
+    ok(
+      b1.w === 18 && b1.h === 40 && Math.round(b1.x) === 48,
+      `${tag} : demi-pastille de 18 × 40 px contre le bord droit du rail (x ${b1.x})`,
+    );
+    ok(
+      (await btn.getAttribute('aria-label')) === 'Déplier les étapes' &&
+        (await btn.getAttribute('aria-expanded')) === 'false',
+      `${tag} : « Déplier les étapes », aria-expanded à faux`,
+    );
+    const add = await box(rail.getByRole('button', { name: 'Ajouter une étape' }));
+    const pills = rail.locator('.rail-pill');
+    const p0 = await box(pills.first());
+    const quiz = await box(rail.locator('.rail-quiz'));
+    ok(
+      add.w === 32 &&
+        add.h === 32 &&
+        add.x === 8 &&
+        p0.x === 8 &&
+        quiz.x === 8 &&
+        p0.w === 32 &&
+        p0.h === 32 &&
+        p0.y > add.y + add.h,
+      `${tag} : « Ajouter une étape » de 32 px en haut, puis les numéros en boutons de 32 px`,
+    );
+    ok(
+      (await pills.first().getAttribute('aria-current')) === 'step' &&
+        /^Étape 1\s: /.test(await pills.first().getAttribute('aria-label')),
+      `${tag} : étape courante marquée, nom « Étape 1 : … »`,
+    );
+    ok(
+      quiz.w === 32 &&
+        quiz.h === 32 &&
+        Math.round(quiz.y + quiz.h) === 892 &&
+        /quiz/i.test(await rail.locator('.rail-quiz').innerText()),
+      `${tag} : « Ajouter un quiz » en icône de 32 px en bas du rail, nom gardé`,
+    );
+    const axe = await new AxeBuilder({ page }).include('#etapes').include('.fd-cgrip').analyze();
+    const bad = axe.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
+    ok(bad.length === 0, `${tag} : axe, rail replié (${bad.map((v) => v.id).join(', ')})`);
+
+    // ----- Mémoire -----
+    await page.reload();
+    await page.locator('.ed-title:not(.ed-title--sk)').waitFor();
+    ok(Math.round((await box(rail)).w) === 48, `${tag} : repli gardé après rechargement`);
+    await btn.click();
+    await railIs(300);
+    ok(true, `${tag} : dépliée à la largeur gardée (300 px)`);
     await ctx.close();
   }
 

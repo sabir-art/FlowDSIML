@@ -1944,8 +1944,9 @@
       "deleted": "Étape {{n}} supprimée",
       "deletedToast": "Étape supprimée"
     },
-    "hideSteps": "Masquer les étapes",
-    "showSteps": "Afficher les étapes",
+    "collapseSteps": "Replier les étapes",
+    "expandSteps": "Déplier les étapes",
+    "stepsWidth": "Largeur des étapes",
     "stepPill": "Étape {{n}} : {{title}}"
   },
   "status": {
