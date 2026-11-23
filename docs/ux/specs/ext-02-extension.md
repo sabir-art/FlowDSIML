@@ -1,79 +1,56 @@
 # EXT-02 · Extension : popup, vérification, aperçu
 
-Statut : lot 1 (popup, vérification après capture, aperçu) prêt pour recette. Les points 4 (vidéo et masquage), 6 (idées de l’éditeur de référence, voix off) et 7 (mot de passe, étape Formulaire) suivent, voir « À venir ». Maquettes : `maquettes/refonte/ext02/` (index, captures clair/sombre ; popup en 360 px, écrans pleins à 1440 et 390 px). Données fictives (acme, example.com). Icônes Lucide, aucun emoji, aucun dégradé, aucune barre de couleur sur un bord.
+Statut : lot 1 (popup, vérification après capture, aperçu) révisé le 23/11 après le retour du client : deux variantes du popup à choisir. Les points 4 (vidéo et masquage), 6 (idées de l’éditeur de référence, voix off) et 7 (mot de passe, étape Formulaire) suivent, voir « À venir ». Maquettes : `maquettes/refonte/ext02/` (index, captures clair/sombre ; popup en 360 px, variantes `popup-a-*` et `popup-b-*` ; écrans pleins à 1440 et 390 px). Données fictives (acme, example.com). Icônes Lucide, aucun emoji, aucun dégradé, aucune barre de couleur sur un bord.
 
-Principe : le popup ne montre que ce qu’il faut pour lancer une capture. Toute explication passe dans une infobulle « ? ». Aucune phrase d’aide permanente.
+Principe : le popup ne montre que ce qu’il faut pour lancer une capture, avec nos composants (COMP-01 : listes, lignes de réglage ALIGN-01, listes déroulantes, interrupteurs, bouton primaire prune). On ne reprend pas la forme de l’éditeur de référence : il a seulement servi à exprimer le besoin (moins de texte, mieux rangé). Le popup ne propose que ce que l’extension fait vraiment.
 
-## 1. Popup de l’extension
+## 1. Popup de l’extension (révision du 23/11, deux variantes)
 
-Largeur 360 px, marge intérieure 16 px, écart vertical 16 px. Jetons du dépôt (surface, bordure, primary). Un seul bouton plein.
+Contraintes communes :
+- largeur 360 px, hauteur au plus 600 px (limite de Chrome) ; en-tête et pied fixes, le corps défile seulement si besoin ;
+- **en-tête (NAV-04, PAGE-01)** : logo compact à gauche ; à droite, « ? » (aide dans un nouvel onglet) et ⋯ (Ouvrir TutoClick, Réglages de l’extension, Se déconnecter). Hauteur 56 px, filet dessous ;
+- **types réels** : Captures, HTML guidée, Sandbox, Vidéo, et Format mobile en **Bientôt** (grisé, jamais masqué, `aria-disabled="true"`, pastille « Bientôt ») ;
+- **titre de la démo** (champ, exemple en indication) et **espace** restent dans le popup ;
+- **réglages réels** : pour Captures, HTML et Sandbox, « Taille de l’onglet » (Actuelle, 1 280 × 720, 1 440 × 900, 1 920 × 1 080, Personnalisée…) et « Suivre les nouveaux onglets » ; pour Vidéo, « Ma voix », « Webcam dans un coin » et « Masquer en direct » (nouveau, voir point 4) ;
+- **aide** : le « ? » d’une ligne déplie une phrase sous la ligne (`aria-expanded`), dans le flux, sans rien recouvrir. Une seule aide ouverte à la fois ; en ouvrir une ferme l’autre. Plus d’infobulle flottante dans le popup ;
+- **bouton** « Démarrer », primaire **prune** (`--fd-color-primary`, texte `on-primary`), 40 px, calé à droite dans le pied, icône Play en `currentColor` ;
+- pas de « Copilote IA » : ce n’est pas une fonction du produit.
 
-### 1.1 Composition, de haut en bas
+### 1.1 Variante A : liste
 
-| Zone | Contenu | Règle |
-|---|---|---|
-| En-tête | Logo compact (clair ou sombre selon le thème), puis à droite « ? » (Aide) et ⋯ (Plus d’options) | Boutons 32 px, icône 20 px, trait 2,1. « ? » ouvre l’aide de l’extension dans un nouvel onglet. |
-| Type de capture | Quatre onglets compacts : **Captures**, **HTML**, **Vidéo**, **Mobile** | Un seul actif. Fond de la barre `surface-sunken`, onglet actif `surface` avec bordure et texte primary. Hauteur 60 px, icône 20 px au-dessus du libellé 13 px/600. |
-| Copilote IA | Ligne : icône Sparkles, libellé, « ? », bascule | Bascule 40×24, éteinte par défaut, mémorisée. |
-| Dossier | Libellé « Dossier », sélecteur avec icône FolderOpen | Une seule liste : « Espace · Dossier », groupée par espace. Remplace le sélecteur d’espace et le champ Titre. |
-| Taille de la page | Libellé + « ? », cinq icônes d’appareil, puis largeur × hauteur | Voir 1.3. Masquée pour Vidéo. |
-| Bouton | « Démarrer la capture », 48 px, plein, couleur accent, icône du type | Pleine largeur. Un seul bouton plein dans le popup. |
+- Champ « Titre de la démo ».
+- Types en **liste à choix unique** (une carte, lignes de 36 px séparées par un filet, icône 16 px, libellé, rond de sélection à droite). Ligne choisie sur `primary-soft`, texte `primary-soft-text`. Format mobile : fond `surface-sunken`, pastille « Bientôt » à la place du rond, même colonne.
+- Réglages du type en **lignes ALIGN-01** dans une carte : libellé à gauche, « ? » puis contrôle calé à droite (liste de 120 px ou interrupteur).
+- Pied : à gauche, l’espace en sélecteur discret (icône Building2, « Acme », chevron) ; à droite, « Démarrer ».
+- Hauteurs mesurées : 521 px au repos, 560 px en vidéo, 599 px avec l’erreur.
 
-Ce qui disparaît du popup, et où cela va :
-- Titre de la démo : saisi sur l’écran de vérification (valeur par défaut « Capture du {date} »).
-- « Suivre les changements d’onglet » : entrée à cocher du menu ⋯.
-- « Vérifier les données personnelles » (toujours actif) : plus de ligne. L’explication est dans l’aide « ? » de l’en-tête et le résultat sur l’écran de vérification.
-- Phrases sous « Capture HTML », paragraphe sur les scripts, explication du format mobile : supprimés. Le texte utile passe en infobulle.
-- Déconnexion et changement d’espace : menu ⋯.
+### 1.2 Variante B : formulaire court
 
-### 1.2 Types de capture
+- Champ « Titre de la démo ».
+- « Type de capture » en **liste déroulante décrite** : le bouton affiche l’icône, le nom et une ligne de description. Ouverte, chaque option a sa description ; Format mobile y figure, grisé, avec « Bientôt ».
+- « Espace » en liste déroulante.
+- « Options » en **section repliable** : repliée, une ligne résume les réglages (« Taille actuelle, nouveaux onglets suivis ») ; dépliée, les mêmes lignes ALIGN-01 que la variante A.
+- Pied : « Données vérifiées » (ShieldCheck, 12 px) à gauche, « Démarrer » à droite.
+- Hauteurs : 438 px au repos, 583 px avec les options ouvertes et l’aide.
 
-| Onglet | Icône | Comportement |
-|---|---|---|
-| Captures | MousePointerClick | Une image par clic. |
-| HTML | Code | Capture de la page. « Guidée » ou « Bac à sable » se choisit à la vérification, pas ici. |
-| Vidéo | Video | Enregistrement. Affiche à la place de la taille : Micro (bascule) et « Masquer en direct » (Oui / Non), voir « À venir ». |
-| Mobile | Smartphone | **Bientôt** : onglet grisé, jamais masqué, `aria-disabled="true"`, mention « Bientôt » sous le libellé (12 px). Au survol et au focus : infobulle « Format mobile · Bientôt ». Il ne prend pas le focus de sélection et n’a pas d’action. |
-
-Navigation au clavier : flèches gauche/droite entre les onglets (rôle `tablist`), Tab entre les lignes. Le focus est visible (anneau `--fd-shadow-focus`).
-
-### 1.3 Taille de la page
-
-Cinq boutons radio, icônes Lucide, 40 px de haut, dans l’ordre : Ordinateur (Monitor), Tablette (Tablet), Mobile (Smartphone), Plein écran (Maximize), Personnalisé (SlidersHorizontal). Libellé en `aria-label` et en infobulle.
-
-| Choix | Largeur × hauteur | État |
-|---|---|---|
-| Ordinateur | 1 440 × 900 | actif |
-| Tablette | 1 024 × 768 | actif |
-| Mobile | 390 × 844 | **Bientôt** : grisé, `aria-disabled`, infobulle « Mobile · Bientôt » (le navigateur ne peut pas réduire une fenêtre sous environ 500 px ; l’émulation viendra avec le format mobile) |
-| Plein écran | « Fenêtre actuelle » | actif, champs en lecture seule |
-| Personnalisé | champs modifiables | actif ; bornes 800 à 2 560 (limite actuelle), message d’erreur sous les champs si hors bornes |
-
-Largeur × hauteur : deux champs de 40 px avec « × » entre. Lecture seule (fond `surface-sunken`) sauf pour Personnalisé. Nombres avec espace insécable fine (NUM-01).
-
-### 1.4 États
+### 1.3 États (les deux variantes)
 
 | État | Ce qu’on voit |
 |---|---|
-| Repos | Captures sélectionné, Copilote éteint, Dossier « Acme · Aucun dossier », Ordinateur sélectionné. |
-| Type sélectionné | HTML : mêmes lignes, bouton avec l’icône Code. Vidéo : taille remplacée par Micro et « Masquer en direct ». |
-| Désactivé (Bientôt) | Onglet Mobile et icône Mobile grisés avec infobulle. Le bouton Démarrer reste actif pour les autres choix. |
-| Aide ouverte | Infobulle d’une ligne, 224 px de large, fond `text`, ouverte au survol et au focus, fermée par Échap (WCAG 1.4.13). |
-| Menu ⋯ | Suivre les changements d’onglet (case à cocher), Changer d’espace…, Ouvrir TutoClick, Se déconnecter. |
-| Erreur | Bandeau en haut, sous l’en-tête : icône TriangleAlert, titre en gras, une phrase, lien « Réessayer ». Fond `danger-soft`, bordure `danger`. Bouton Démarrer désactivé (grisé, pas masqué). |
+| Repos | Captures choisi, titre vide, espace Acme. |
+| Type sélectionné | Vidéo : les réglages deviennent Ma voix, Webcam dans un coin, Masquer en direct. |
+| Bientôt | A : ligne Format mobile au focus (anneau intérieur prune), non sélectionnable, pastille lisible. B : liste ouverte, option grisée avec « Bientôt ». Aucune infobulle. |
+| Aide ouverte | Phrase sous la ligne « Taille de l’onglet », bouton « ? » actif. |
+| Menu ⋯ | Trois entrées, sous les actions de l’en-tête. |
+| Erreur | Bandeau sous l’en-tête : icône, « Cette page ne peut pas être capturée », « Ouvrez la page à capturer. Réessayer ». « Démarrer » désactivé, pas masqué. |
 
-Erreurs à prévoir : page non capturable (chrome://, magasin d’extensions), autorisation refusée, session expirée (bouton « Se connecter »), hors ligne, espace sans droit d’écriture. Chaque erreur dit ce qui s’est passé et ce qu’on peut faire, en une phrase.
+Erreurs à prévoir avec la même forme : autorisation refusée, session expirée (« Se connecter »), hors ligne, espace sans droit d’écriture.
 
-Textes des infobulles :
-- Copilote IA : « Rédige un titre et une description pour chaque étape. Vous relisez tout avant l’envoi. »
-- Taille de la page : « Taille de la fenêtre pendant la capture. Elle fixe le rendu de la démo. »
-- Masquer en direct : « Floute les données personnelles pendant l’enregistrement. Vous pourrez les démasquer ensuite. »
+### 1.4 Revue faite avant envoi
 
-Question au dev : le Copilote IA doit exister côté produit. S’il n’est pas prêt, la ligne s’affiche grisée avec « Bientôt », comme Mobile.
+**Icônes de bouton** : toujours `currentColor`, la couleur du texte du bouton. Le « + » bleu sur « Ajouter une zone » venait de la maquette d’aperçu (règle `.empty svg` qui colorait aussi l’icône du bouton) ; corrigé en ne colorant que l’icône de l’encart (`.empty > svg`). Dans l’app, aucun bouton concerné sur les 29 pages parcourues (clair et sombre), mais la même règle latente existe : `apps/web/src/styles/maquette.css`, `.mk .alert svg { color: info }` colorerait l’icône d’un bouton placé dans une alerte ; à restreindre à `.mk .alert > svg`.
 
-### 1.5 Mesures de recette (e2e)
-
-Largeur du popup 360 px ; aucune phrase d’aide visible hors infobulle ; un seul bouton plein ; hauteur du bouton 48 px ; onglet Mobile `aria-disabled="true"` et visible ; contraste des textes grisés au moins 4,5:1 (pour les composants désactivés, la règle des contrôles inactifs s’applique, mais le libellé « Bientôt » reste lisible).
+Sur les 24 captures du popup et les écrans de vérification et d’aperçu : contraste AA (axe, aucune violation), icône de chaque bouton de la couleur de son texte, aucun texte qui déborde, au plus une aide ouverte, popup ≤ 600 px.
 
 ## 2. Vérification après capture, avant l’envoi
 
@@ -91,11 +68,12 @@ But : la personne comprend ce qui a été retiré ou remplacé, et garde la main
 
 Icône, titre, état en dessous (« Retirés », « Remplacées par des valeurs fictives », « Navigation désactivée »), **nombre** à droite, « Pourquoi ? » et « Voir ». « Pourquoi ? » déplie un encart d’explication en langage simple (fond `info-soft`, icône Info), sans quitter la page. « Voir » déplie la liste.
 
-Liste d’un groupe :
-- recherche « Filtrer… » et « Tout garder » ;
-- une ligne par élément : nom (monospace), source (domaine ou « dans la page »), « Pourquoi ? », état (« Retiré » / « Gardé » en warning), bouton « Garder » ou « Retirer » ;
-- 20 lignes à la fois, « Afficher 20 de plus » ; compteur « 5 sur 155 » ; la liste est virtualisée (1 800 éléments sans ralentir) ;
-- « Tout garder » demande confirmation avec le nombre.
+Liste d’un groupe, en **colonnes fixes** (ALIGN-01, SPLIT-01), les mêmes pour l’en-tête du groupe et pour chaque ligne : icône 36 px · nom et source (le reste) · statut 88 px · « Pourquoi ? » 104 px · action 96 px calée à droite. Écart de 12 px entre colonnes.
+- au-dessus de la liste, la recherche « Filtrer par nom ou par source » en pleine largeur (40 px, sur une ligne) ;
+- une ligne par élément : nom (monospace, coupé par « … »), source (domaine ou « dans la page »), statut « Retiré » ou « Gardé » (warning) dans une pastille de largeur fixe, « Pourquoi ? », puis « Garder » ou « Retirer » dans un bouton de 96 px ;
+- l’en-tête du groupe aligne son nombre sur la colonne statut, et « Pourquoi ? » et « Voir » sur les deux dernières colonnes ;
+- 20 lignes à la fois ; pied de liste : « 5 sur 155 », « Tout garder » (avec confirmation et le nombre), « Afficher 20 de plus » ; la liste est virtualisée (1 800 éléments sans ralentir).
+- À 390 px : première ligne icône · nom · statut (96 px) ; deuxième ligne « Pourquoi ? » à gauche et l’action de 96 px à droite.
 
 ### 2.3 Garder
 
@@ -108,7 +86,7 @@ Liste d’un groupe :
 
 ### 2.4 À 390 px
 
-Bilan sur deux colonnes. Dans une carte, l’icône, le titre et le nombre sur la première ligne, « Pourquoi ? » et « Voir » dessous, décalés de 48 px. Barre fixe : les deux boutons sur une ligne, à largeur égale.
+Bilan sur deux colonnes. Colonnes comme en 2.2. Barre fixe : les deux boutons sur une ligne, à largeur égale.
 
 ### 2.5 Avec le dev (point A : le filtre bloque la navigation)
 

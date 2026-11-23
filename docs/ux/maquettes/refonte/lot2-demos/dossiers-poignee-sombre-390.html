@@ -434,7 +434,7 @@ main.withp { display: flex; flex-direction: column; min-width: 0; }
 .csep { position: absolute; inset: 0; cursor: col-resize; outline: none; }
 .csep::after { content: ''; position: absolute; top: 0; bottom: 0; left: 5px; width: 2px; background: transparent; }
 .cgrip.hov .csep::after, .cgrip.drag .csep::after { background: var(--fd-color-primary); }
-.cbtn { position: relative; width: 20px; height: 40px; padding: 0; border-radius: 999px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text-muted); display: grid; place-items: center; box-shadow: 0 1px 3px rgb(8 10 14 / .10); cursor: pointer; }
+.cbtn { position: relative; flex: none; width: 20px; height: 40px; padding: 0; border-radius: 999px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text-muted); display: grid; place-items: center; box-shadow: 0 1px 3px rgb(8 10 14 / .10); cursor: pointer; }
 .cgrip.drag .cbtn { border-color: var(--fd-color-primary); color: var(--fd-color-primary); }
 .cgrip.closed { right: auto; left: -4px; }
 .cgrip.closed .cbtn { border-radius: 0 999px 999px 0; width: 18px; border-left: 0; }
