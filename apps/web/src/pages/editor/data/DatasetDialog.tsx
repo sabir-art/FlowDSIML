@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Database, Info, TriangleAlert, Upload, WandSparkles, X } from 'lucide-react';
+import { Database, Info, TriangleAlert, WandSparkles, X } from 'lucide-react';
 import { readDataset, type CsvEncoding, type CsvSeparator, type DatasetError } from '@flowdsiml/core';
 import type { DatasetBinding } from '@flowdsiml/manifest';
 import { Button, Select } from '@flowdsiml/ui';
@@ -11,6 +11,8 @@ import { removeDataset, saveDataset, useDataset } from './datasetStore';
 import { AiDataset } from '../../../components/ai/AiDataset';
 import { asSettings } from '../types';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
+import { FileUp } from 'lucide-react';
+import { FileDropzone } from '../../../components/FileDropzone';
 
 const ICON = { size: 16, 'aria-hidden': true } as const;
 
@@ -45,7 +47,6 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
   const { t } = useTranslation();
   const id = useId();
   const ref = useRef<HTMLDialogElement>(null);
-  const file = useRef<HTMLInputElement>(null);
   const demo = editor.demo;
   const { dataset } = useDataset(demo?.id);
   const [open, setOpen] = useState(false);
@@ -219,69 +220,38 @@ export function DatasetDialog({ editor, readOnly }: { editor: DemoEditor; readOn
         </button>
       </div>
       <div className="dialog-body stack">
-        <input
-          ref={file}
-          type="file"
+        {/* MEDIA-01 §18.2 : zone de dépôt du fichier CSV, sans Médiathèque ; l'IA est une autre source */}
+        <FileDropzone
+          label={t('editor.dataset.import')}
           accept=".csv,text/csv"
-          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-          id="datasetdialog-file"
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden="true"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) void onFile(f);
-            e.target.value = '';
-          }}
-        />
-        {draft ? (
-          <div className="ds-file">
-            <div>
-              <b>{draft.name}</b>
-              <span className="muted">
-                {draft.separator
-                  ? t('editor.dataset.fileInfo', {
-                      rows: draft.rows.length,
-                      cols: draft.columns.length,
-                      sep: sepLabel,
-                      enc: draft.encoding,
-                    })
-                  : t('editor.dataset.fileSaved', { rows: draft.rows.length, cols: draft.columns.length })}
-              </span>
-            </div>
-            <div className="ds-start">
-              <Button
-                size="sm"
-                disabled={readOnly}
-                aria-controls="datasetdialog-file"
-                onClick={() => file.current?.click()}
-              >
-                {t('editor.dataset.replace')}
-              </Button>
-              {ws && !readOnly && !generating && (
-                <Button size="sm" icon={<WandSparkles />} onClick={() => setGenerating(true)}>
-                  {t('ai.dataset.open')}
-                </Button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="ds-start">
-            <Button
-              icon={<Upload />}
-              disabled={readOnly}
-              aria-controls="datasetdialog-file"
-              onClick={() => file.current?.click()}
-            >
-              {t('editor.dataset.import')}
-            </Button>
-            {ws && !readOnly && !generating && (
+          hint={t('dropzone.csvHint')}
+          icon={<FileUp />}
+          inputId="datasetdialog-file"
+          readOnly={readOnly}
+          file={
+            draft
+              ? {
+                  name: draft.name,
+                  meta: draft.separator
+                    ? t('editor.dataset.fileInfo', {
+                        rows: draft.rows.length,
+                        cols: draft.columns.length,
+                        sep: sepLabel,
+                        enc: draft.encoding,
+                      })
+                    : t('editor.dataset.fileSaved', { rows: draft.rows.length, cols: draft.columns.length }),
+                }
+              : null
+          }
+          onFiles={(files) => files[0] && void onFile(files[0])}
+          extra={
+            ws && !readOnly && !generating ? (
               <Button icon={<WandSparkles />} onClick={() => setGenerating(true)}>
                 {t('ai.dataset.open')}
               </Button>
-            )}
-          </div>
-        )}
+            ) : undefined
+          }
+        />
         {generating && ws && (
           <AiDataset
             ws={ws.id}

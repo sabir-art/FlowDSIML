@@ -249,7 +249,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     });
     await p.waitForTimeout(300);
     ok(
-      (await dlg.locator('.ds-file').textContent()).includes(
+      (await dlg.locator('.fd-dz__txt').textContent()).includes(
         '4 lignes · 4 colonnes · séparateur point-virgule, UTF-8',
       ),
       'fichier : lignes, colonnes, séparateur et encodage détectés',

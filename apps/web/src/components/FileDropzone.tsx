@@ -25,6 +25,7 @@ export function FileDropzone({
   inputId,
   onFiles,
   onLibrary,
+  extra,
   onRemove,
   removeLabel,
 }: {
@@ -49,6 +50,8 @@ export function FileDropzone({
   inputId?: string;
   onFiles: (files: File[]) => void;
   onLibrary?: () => void;
+  /** Autre source, en bouton à la suite (ex. « Générer avec l'IA »). */
+  extra?: ReactNode;
   onRemove?: () => void;
   removeLabel?: string;
 }) {
@@ -167,6 +170,7 @@ export function FileDropzone({
               {t('media.open')}
             </Button>
           )}
+          {extra}
           {file && onRemove && !readOnly && (
             <button
               type="button"

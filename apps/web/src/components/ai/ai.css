@@ -370,11 +370,6 @@
   margin: 0;
   font-size: 14px;
 }
-.ds-start {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
 .ai-ds-table td,
 .ai-ds-table th {
   font-size: 13px;
