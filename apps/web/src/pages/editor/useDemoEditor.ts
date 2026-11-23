@@ -719,6 +719,24 @@ export function useDemoEditor(demoId: string) {
           setSteps((l) => l.map((s) => (s.gate_form_id === id ? { ...s, gate_form_id: null } : s)));
         }),
 
+      /**
+       * Annule la suppression d'un formulaire : la ligne est recréée telle quelle (même identifiant) et
+       * replacée avant l'étape qu'elle précédait, si cette étape existe encore.
+       */
+      restoreForm: (form: FormRow, stepId: string | null) =>
+        run(async () => {
+          const { data, error } = await supabase.from('forms').insert(form).select().single();
+          if (error) throw error;
+          setForms((l) => (l.some((f) => f.id === data.id) ? l : [...l, data]));
+          if (!stepId) return;
+          const { error: e2 } = await supabase
+            .from('steps')
+            .update({ gate_form_id: data.id })
+            .eq('id', stepId);
+          if (e2) throw e2;
+          setSteps((l) => l.map((s) => (s.id === stepId ? { ...s, gate_form_id: data.id } : s)));
+        }),
+
       addVariable: (key: string) =>
         run(async () => {
           const { data, error } = await supabase

@@ -164,13 +164,55 @@ const SHOTS = process.env.SHOTS_DIR;
     (await page.locator('.rail-list .step--form[aria-current="step"]').count()) === 1,
     'EDT-08 : formulaire sélectionné dans le rail',
   );
+  // Retour client du 23/11 : la carte du formulaire a le même menu ⋯ que les étapes
   await page.locator('.rail-li--form').hover();
-  await page.getByRole('button', { name: 'Placer avant l’étape suivante' }).click();
-  await page.waitForTimeout(900);
+  await page.getByRole('button', { name: 'Actions du formulaire' }).click();
+  ok(
+    (await page.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
+      'Modifier | Placer avant l’étape précédente | Placer avant l’étape suivante | Supprimer',
+    'formulaire : menu ⋯ (Modifier, déplacer, Supprimer)',
+  );
+  await page.getByRole('menuitem', { name: 'Placer avant l’étape suivante' }).click();
+  // Attente sur l'état réel : la valeur choisie de « Avant l'étape » (10 s au plus)
+  for (const end = Date.now() + 10000; Date.now() < end && (await picked(page.locator('#f-gate'))) !== '2';)
+    await new Promise((r) => setTimeout(r, 100));
   ok(
     (await picked(page.locator('#f-gate'))) === '2',
     'EDT-08 : déplacer le formulaire dans le rail change l’étape déclencheuse',
   );
+  // « Supprimer ce formulaire ? » : le corps dit ce qui est retiré ; « Annuler » ne supprime rien
+  await page.locator('.rail-li--form').hover();
+  await page.getByRole('button', { name: 'Actions du formulaire' }).click();
+  await page.getByRole('menuitem', { name: 'Supprimer' }).click();
+  const delForm = page.getByRole('dialog', { name: 'Supprimer ce formulaire ?' });
+  await delForm.waitFor();
+  ok(
+    (await delForm.innerText()).includes(
+      'Le formulaire, ses champs et son texte de consentement sont retirés de la démo. Les réponses déjà reçues restent dans Leads. Vous pourrez annuler juste après la suppression.',
+    ),
+    'formulaire : la fenêtre de suppression dit ce qui est retiré',
+  );
+  await delForm.getByRole('button', { name: 'Annuler' }).click();
+  ok(state.tables.forms.length === 1, 'formulaire : « Annuler » ne supprime rien');
+  // Suppression, puis « Annuler » dans la notification : le formulaire revient à sa place
+  await page.locator('.rail-li--form').hover();
+  await page.getByRole('button', { name: 'Actions du formulaire' }).click();
+  await page.getByRole('menuitem', { name: 'Supprimer' }).click();
+  await delForm.getByRole('button', { name: 'Supprimer' }).click();
+  await page.locator('.rail-li--form').waitFor({ state: 'detached' });
+  // (La base réelle détache l'étape par sa clé étrangère ; la fausse base ne rejoue pas cette règle.)
+  ok(
+    state.tables.forms.length === 0 && (await page.locator('.canvas-form-preview').count()) === 0,
+    'formulaire supprimé : plus de carte dans la liste ni d’aperçu sur le canevas',
+  );
+  await page.locator('.toasts .toast').getByRole('button', { name: 'Annuler' }).click();
+  await page.locator('.rail-li--form').waitFor();
+  ok(
+    state.tables.forms.length === 1 && state.tables.steps[1].gate_form_id === state.tables.forms[0].id,
+    'formulaire : « Annuler » le rétablit avant la même étape',
+  );
+  await page.locator('.rail-li--form .step--form').click();
+  await page.locator('#f-gate').waitFor();
   await tool('Réglages de la démo');
   ok((await page.locator('text={{company}}').count()) > 0, 'variables du workspace listées');
   await tool('Étape');

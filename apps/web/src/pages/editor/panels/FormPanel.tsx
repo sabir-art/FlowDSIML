@@ -1,4 +1,6 @@
 import { useConfirm } from '../../../components/ConfirmDialog';
+import { useToast } from '../../../components/Toast';
+import { deleteFormWithUndo } from '../formDelete';
 import { Menu } from '../../../components/Menu';
 import { ArrowDown, ArrowUp, ChevronLeft, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -39,6 +41,7 @@ export function FormPanel({
   const catalog = useVarCatalog(editor.variables);
   const { current: ws } = useWorkspace();
   const [dialog, ask] = useConfirm();
+  const toast = useToast();
   const [dragKey, setDragKey] = useState<string | null>(null);
   const gateIndex = editor.steps.findIndex((s) => s.gate_form_id === form.id);
 
@@ -87,16 +90,7 @@ export function FormPanel({
             aria-label={t('editor.deleteForm')}
             title={t('editor.deleteForm')}
             onClick={() =>
-              void ask({
-                title: t('editor.confirmDeleteForm'),
-                confirmLabel: t('common.delete'),
-                danger: true,
-              }).then((yes) => {
-                if (yes) {
-                  void editor.deleteForm(form.id);
-                  onBack();
-                }
-              })
+              void deleteFormWithUndo(editor, form, ask, toast, t).then((done) => done && onBack())
             }
           >
             <Trash2 aria-hidden="true" />

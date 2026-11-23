@@ -1,5 +1,37 @@
 import type { TFunction } from 'i18next';
 
+/**
+ * Mot de passe refusé par Supabase Auth : le serveur ne cite que les règles qui ont échoué (longueur,
+ * caractères exigés, mot de passe connu dans des fuites). Le message reprend ces règles, sans supposer
+ * la politique en vigueur.
+ */
+export function weakPasswordMessage(t: TFunction, msg: string, locale = 'fr'): string {
+  const parts: string[] = [];
+  const len = /at least (\d+) characters/i.exec(msg);
+  if (len) parts.push(t('errors.pwLength', { min: Number(len[1]) }));
+  const sets = /at least one character of each:\s*(.+)$/i.exec(msg)?.[1] ?? '';
+  if (sets) {
+    const kinds: string[] = [];
+    const lower = sets.includes('abcdefghijklmnopqrstuvwxyz');
+    const upper = sets.includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+    // « Lettres et chiffres » : minuscules et majuscules forment un seul jeu
+    if (sets.includes('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'))
+      kinds.push(t('errors.pwLetter'));
+    else {
+      if (lower) kinds.push(t('errors.pwLower'));
+      if (upper) kinds.push(t('errors.pwUpper'));
+    }
+    if (sets.includes('0123456789')) kinds.push(t('errors.pwDigit'));
+    if (/[!@#$%^&*]/.test(sets)) kinds.push(t('errors.pwSymbol'));
+    if (kinds.length)
+      parts.push(
+        t('errors.pwChars', { list: new Intl.ListFormat(locale, { type: 'conjunction' }).format(kinds) }),
+      );
+  }
+  if (/known to be weak|easy to guess|pwned/i.test(msg)) parts.push(t('errors.pwPwned'));
+  return parts.length ? parts.join(' ') : t('errors.weakPassword');
+}
+
 /** Traduit une erreur Supabase / RPC en message utilisateur. */
 export function errorMessage(t: TFunction, err: unknown): string {
   const msg =
@@ -50,7 +82,6 @@ export function errorMessage(t: TFunction, err: unknown): string {
     [/Invalid login credentials/i, 'errors.badCredentials'],
     [/Email not confirmed/i, 'errors.emailNotConfirmed'],
     [/User already registered/i, 'errors.alreadyRegistered'],
-    [/Password should be/i, 'errors.weakPassword'],
     [/rate limit|too many/i, 'errors.rateLimited'],
     [/owner/i, 'errors.ownerRule'],
     [/permission denied|Accès refusé|42501|row-level security/i, 'errors.forbidden'],
@@ -64,6 +95,9 @@ export function errorMessage(t: TFunction, err: unknown): string {
   if (/TEMPLATE_NOT_FOUND/.test(msg)) return t('templates.notFound');
   const exp = /RULE_EXPIRY:(\d+)/.exec(msg);
   if (exp) return t('rules.errExpiry', { n: Number(exp[1]) });
+  const code = typeof err === 'object' && err && 'code' in err ? String((err as { code: unknown }).code) : '';
+  if (code === 'weak_password' || /Password should|known to be weak/i.test(msg))
+    return weakPasswordMessage(t, msg, t('errors.listLocale'));
   for (const [re, key] of known) if (re.test(msg)) return t(key);
   return t('errors.generic', { message: msg });
 }

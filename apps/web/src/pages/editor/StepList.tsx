@@ -47,6 +47,8 @@ import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
+import { useConfirm } from '../../components/ConfirmDialog';
+import { deleteFormWithUndo } from './formDelete';
 import { PanneauIcon } from '../../components/PanneauIcon';
 import { copyStepToClipboard, readStepClipboard, useStepClipboard, type StepClip } from './stepClipboard';
 
@@ -93,6 +95,7 @@ export function StepList({
 }) {
   const toast = useToast();
   const { t } = useTranslation();
+  const [confirmDialog, ask] = useConfirm();
   /** L25-10 : destination d'une règle de suite dans le rail. */
   const railDest = (a: ChoiceAction, from: number) => {
     if (missingDest(a)) return '?';
@@ -376,6 +379,7 @@ export function StepList({
 
   return (
     <>
+      {confirmDialog}
       {/* Lot 3 : en-tête (nom et nombre), puis « Ajouter une étape » en bouton pleine largeur */}
       <div className="rail-head">
         {!collapsed && (
@@ -490,28 +494,44 @@ export function StepList({
                       <span className="icons">{t('editor.form.beforeStep', { n: i + 1 })}</span>
                     </span>
                   </button>
+                  {/* Même menu ⋯ que les étapes, avec les entrées qui valent pour un formulaire */}
                   {!readOnly && (
-                    <span className="rail-move">
-                      <button
-                        type="button"
-                        aria-label={t('editor.form.moveUp')}
-                        disabled={i === 0}
-                        onClick={() =>
-                          void placeForm(form.id, i - 1).then(() => onSelectForm?.(i - 1, form.id))
-                        }
-                      >
-                        <ArrowUp aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={t('editor.form.moveDown')}
-                        disabled={i === editor.steps.length - 1}
-                        onClick={() =>
-                          void placeForm(form.id, i + 1).then(() => onSelectForm?.(i + 1, form.id))
-                        }
-                      >
-                        <ArrowDown aria-hidden="true" />
-                      </button>
+                    <span className="rail-acts">
+                      <Menu
+                        wide
+                        label={t('editor.form.actions')}
+                        items={[
+                          {
+                            label: t('editor.stepMenu.edit'),
+                            icon: <Pencil />,
+                            onSelect: () => onSelectForm?.(i, form.id),
+                          },
+                          {
+                            label: t('editor.form.moveUp'),
+                            icon: <ArrowUp />,
+                            disabled: i === 0,
+                            onSelect: () =>
+                              void placeForm(form.id, i - 1).then(() => onSelectForm?.(i - 1, form.id)),
+                          },
+                          {
+                            label: t('editor.form.moveDown'),
+                            icon: <ArrowDown />,
+                            disabled: i === editor.steps.length - 1,
+                            onSelect: () =>
+                              void placeForm(form.id, i + 1).then(() => onSelectForm?.(i + 1, form.id)),
+                          },
+                          'separator',
+                          {
+                            label: t('common.delete'),
+                            icon: <Trash2 />,
+                            danger: true,
+                            onSelect: () =>
+                              void deleteFormWithUndo(live.current, form, ask, toast, t).then(
+                                (done) => done && onSelect(i),
+                              ),
+                          },
+                        ]}
+                      />
                     </span>
                   )}
                 </li>

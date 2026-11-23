@@ -1164,37 +1164,6 @@
   font-weight: 600;
   color: var(--fd-color-primary);
 }
-.mk .rail-move {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  display: none;
-  gap: 2px;
-}
-.mk .rail-li:hover .rail-move,
-.mk .rail-li:focus-within .rail-move {
-  display: inline-flex;
-}
-.mk .rail-move button {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  border: 1px solid var(--fd-color-border);
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text-muted);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  padding: 0;
-}
-.mk .rail-move button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.mk .rail-move svg {
-  width: 12px;
-  height: 12px;
-}
 /* Audit L50 X5 : titre de section en casse normale */
 .mk .rail-chapter {
   font: 600 12px var(--fd-font-sans);
@@ -1876,10 +1845,6 @@
   translate: -50% -50%;
   background: var(--fd-color-hotspot, #d60b52);
   box-shadow: 0 0 0 2px #fff;
-}
-.mk .rail-move {
-  top: auto;
-  bottom: 6px;
 }
 .mk .step.is-grabbed {
   border-color: var(--fd-color-primary);
