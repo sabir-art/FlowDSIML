@@ -2242,6 +2242,7 @@ button.fd-nav__item:hover {
 /* ---- MEDIA-01 §18.1 : zone de dépôt (une rangée : aperçu, texte, une source par bouton) ---- */
 .fd-dz {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   min-height: 88px;
@@ -2296,7 +2297,8 @@ button.fd-nav__item:hover {
 }
 .fd-dz__txt {
   display: grid;
-  flex: 1;
+  /* Zone étroite (fenêtre de 480 px) : le texte garde 220 px, les actions passent dessous */
+  flex: 1 1 220px;
   gap: 4px;
   min-width: 0;
 }
