@@ -1363,29 +1363,42 @@ button.nd-src:focus-visible {
   /* sticky crée un contexte d'empilement : le z-index du tiroir n'a d'effet qu'ici, au-dessus du contenu */
   z-index: var(--fd-z-sticky);
 }
-.fcol-slot--rail {
-  width: 48px;
+/* COL-02 (COMP-01 §19) : largeur choisie à la poignée ; repliée, la colonne disparaît (largeur 0) */
+.fcol-slot {
+  width: var(--fcol-w, 232px);
+  transition: width 200ms ease-out;
+}
+.fcol-slot.is-closed {
+  width: 0;
+}
+.fcol-slot.is-drag {
+  transition: none;
+}
+.fcol-clip {
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+}
+.fcol-slot.is-closed .fcol-clip {
+  /* Hors de l'ordre de tabulation et de l'arbre d'accessibilité une fois repliée */
+  visibility: hidden;
+  transition: visibility 0s 200ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fcol-slot,
+  .fcol-slot.is-closed .fcol-clip {
+    transition: none;
+  }
 }
 .fcol {
   display: flex;
   flex-direction: column;
-  width: 232px;
+  width: var(--fcol-w, 232px);
   height: 100%;
   /* COL-01 (COMP-01 §15) : colonne sur le blanc de la page, séparée par un filet ; 12 px de marge, 24 en bas */
   padding: 12px 12px 24px;
   background: var(--fd-color-surface);
   border-right: 1px solid var(--fd-color-border);
-}
-/* §7 : rail de 48 px, bouton de bascule au même endroit que dans la colonne dépliée */
-.fcol--rail {
-  width: 48px;
-  align-items: flex-start;
-  gap: var(--fd-space-3);
-  /* La bascule reste à 12 px du bord, au même endroit que dans la colonne dépliée */
-  padding-right: 4px;
-}
-.fcol--rail .fcol__head {
-  margin-bottom: 0;
 }
 .fcol .fcol__switch {
   flex: none;
@@ -1398,21 +1411,7 @@ button.nd-src:focus-visible {
   height: 20px;
   stroke-width: 2.1;
 }
-.fcol__railcount {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  width: 32px;
-  color: var(--fd-color-text-muted);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-.fcol__railcount svg {
-  width: 18px;
-  height: 18px;
-}
-/* 1 024 à 1 279 px : tiroir de 280 px par-dessus le contenu, sans le pousser */
+/* Sous 1 024 px : tiroir par-dessus le contenu (voir .fcol-sheet) */
 .fcol--drawer {
   position: absolute;
   top: 0;

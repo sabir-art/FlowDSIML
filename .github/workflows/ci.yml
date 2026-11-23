@@ -156,9 +156,12 @@ jobs:
       - name: Colonne Dossiers L48-A (sélection, compteurs, sous-dossiers, glisser-déposer, repli)
         if: always()
         run: cd apps/web && node e2e/l48a-dossiers.e2e.cjs
-      - name: Colonne Dossiers pleine hauteur, rail et tiroir (retours client 2 et 7)
+      - name: Colonne Dossiers pleine hauteur, repliée par défaut sous 1 280 px (retours client 2 et 7)
         if: always()
         run: cd apps/web && node e2e/colonne-dossiers.e2e.cjs
+      - name: Poignée de bord des colonnes secondaires (COL-02)
+        if: always()
+        run: cd apps/web && node e2e/colonne-poignee.e2e.cjs
       - name: Barre latérale repliable en rail (retour client 6)
         if: always()
         run: cd apps/web && node e2e/barre-laterale-rail.e2e.cjs

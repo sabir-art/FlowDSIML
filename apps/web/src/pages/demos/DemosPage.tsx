@@ -2,6 +2,7 @@ import {
   lazy,
   Suspense,
   useCallback,
+  type CSSProperties,
   useEffect,
   useMemo,
   useRef,
@@ -73,6 +74,19 @@ import { FilterMenu, ListToolbar } from '../../components/toolbar/ListToolbar';
 import { CardTags, TagFilter, TagsDialog, useWorkspaceTags } from '../../components/Tags';
 import './demos.css';
 import { DEMO_DRAG, FolderColumn, type Scope } from './FolderColumn';
+import { ColumnGrip, useColumn, type ColumnBounds } from '../../components/ColumnGrip';
+
+/** COL-02 : colonne Dossiers de 200 à 360 px, 232 par défaut */
+const FOLDERS_BOUNDS: ColumnBounds = { min: 200, max: 360, def: 232 };
+/** Sans choix gardé : repliée sous 1 280 px, ou si la personne l'avait masquée (ancienne préférence) */
+function colClosedByDefault(userId: string | undefined) {
+  try {
+    if (localStorage.getItem(`fd.folders.hidden.${userId ?? ''}`) === '1') return true;
+  } catch {
+    /* pas d'ancienne préférence lisible */
+  }
+  return !window.matchMedia('(min-width: 1280px)').matches;
+}
 import { PanneauIcon } from '../../components/PanneauIcon';
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
@@ -186,36 +200,14 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const byAuthor = (d: Demo) => author === 'all' || d.created_by === (author === 'me' ? user?.id : author);
   // L48-A §2 : colonne Dossiers au-dessus de 1 024 px ; repli gardé pour la personne
   const wide = useMediaQuery('(min-width: 1024px)');
-  const colKey = `fd.folders.hidden.${user?.id ?? ''}`;
-  const [colHidden, setColHidden] = useState(() => {
-    try {
-      return localStorage.getItem(colKey) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const hideCol = (h: boolean) => {
-    setColHidden(h);
-    try {
-      localStorage.setItem(colKey, h ? '1' : '0');
-    } catch {
-      /* préférence non gardée */
-    }
-  };
-  // Retours client 21/11 §2 : ≥ 1 280 px, colonne ou rail selon le choix gardé ; 1 024 à 1 279 px, rail
-  // par défaut et tiroir de 280 px par-dessus le contenu (choix non gardé)
-  const xl = useMediaQuery('(min-width: 1280px)');
+  // COL-02 (COMP-01 §19) : largeur et repli gardés pour la personne ; repliée par défaut sous 1 280 px
+  const col = useColumn(`fd.folders.col.${user?.id ?? ''}`, FOLDERS_BOUNDS, colClosedByDefault(user?.id));
+  const [colDrag, setColDrag] = useState(false);
   const [drawer, setDrawer] = useState(false);
-  const colCollapsed = xl ? colHidden : !drawer;
   // Lot 2 : sous 1 024 px, la bascule « Dossiers » est dans la barre mobile et ouvre un tiroir
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   useEffect(() => setSlot(document.getElementById('topbar-slot')), []);
   const foldersBtn = useRef<HTMLButtonElement>(null);
-  const toggleCol = useCallback(() => {
-    if (xl) hideCol(!colHidden);
-    else setDrawer((o) => !o);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- hideCol ne change qu'avec colKey
-  }, [xl, colHidden]);
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
   const [extension, setExtension] = useState(false);
   const [q, setQ] = useState('');
@@ -837,7 +829,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
               setFolder(s);
               setDrawer(false);
             }}
-            collapsed={false}
             overlay
             onToggle={() => {
               setDrawer(false);
@@ -866,29 +857,44 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         </div>
       )}
       {wide && (
-        <div className={`fcol-slot${colCollapsed || !xl ? ' fcol-slot--rail' : ''}`}>
-          <FolderColumn
-            folders={folders}
-            scope={scope}
-            count={colCount}
-            editable={editable}
-            canManageAccess={can('workspace.settings')}
-            onSelect={(s) => {
-              setFolder(s);
-              if (!xl) setDrawer(false);
+        <div
+          className={`fcol-slot${col.closed ? ' is-closed' : ''}${colDrag ? ' is-drag' : ''}`}
+          style={{ '--fcol-w': `${col.width}px` } as CSSProperties}
+        >
+          <div className="fcol-clip">
+            <FolderColumn
+              id="fcol-dossiers"
+              folders={folders}
+              scope={scope}
+              count={colCount}
+              editable={editable}
+              canManageAccess={can('workspace.settings')}
+              onSelect={setFolder}
+              onToggle={() => col.setClosed(true)}
+              onNew={(parent) => {
+                setNewFolderParent(parent);
+                setNewFolder('');
+              }}
+              onRename={(f) => setRenaming({ id: f.id, name: f.name })}
+              onAccess={setFolderAccess}
+              onDelete={setFolderToDelete}
+              onDropDemo={requestMove}
+              sandbox={sandbox}
+            />
+          </div>
+          <ColumnGrip
+            controls="fcol-dossiers"
+            width={col.width}
+            closed={col.closed}
+            bounds={FOLDERS_BOUNDS}
+            labels={{
+              collapse: t('folders.collapseColumn'),
+              expand: t('folders.expandColumn'),
+              width: t('folders.width'),
             }}
-            collapsed={colCollapsed}
-            overlay={!xl}
-            onToggle={toggleCol}
-            onNew={(parent) => {
-              setNewFolderParent(parent);
-              setNewFolder('');
-            }}
-            onRename={(f) => setRenaming({ id: f.id, name: f.name })}
-            onAccess={setFolderAccess}
-            onDelete={setFolderToDelete}
-            onDropDemo={requestMove}
-            sandbox={sandbox}
+            onWidth={col.setWidth}
+            onClosed={col.setClosed}
+            onDragging={setColDrag}
           />
         </div>
       )}

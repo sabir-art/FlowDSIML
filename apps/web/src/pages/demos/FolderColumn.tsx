@@ -3,10 +3,10 @@
  * dossiers de l'espace (sous-dossiers en retrait, un niveau affiché, puis un chevron), « Nouveau
  * dossier », Archivées. L'entrée choisie est dans l'adresse ; une carte de démo glissée sur un dossier
  * l'y range. Le menu « … » d'un dossier (ou clic droit) regroupe ses actions.
- * Retours client 21/11 §2 et §7 : repliée, la colonne devient un rail de 48 px au même endroit ; le
- * bouton de bascule garde sa position (top et left) dans les deux états. La liste défile à l'intérieur,
- * « Nouveau dossier » et « Archivées » restent en bas. De 1 024 à 1 279 px, la colonne dépliée s'ouvre en
- * tiroir de 280 px par-dessus le contenu (overlay).
+ * La liste défile à l'intérieur, « Nouveau dossier » et « Archivées » restent en bas.
+ * COL-02 (COMP-01 §19) : plus de bouton de bascule dans l'en-tête ; la colonne est repliée, dépliée et
+ * redimensionnée par la poignée de son bord (ColumnGrip, posée par la page). Sous 1 024 px, elle s'ouvre
+ * en tiroir (overlay) depuis la barre mobile et garde son bouton « Masquer les dossiers ».
  */
 import { useEffect, useLayoutEffect, useRef, useState, type DragEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +38,7 @@ export function FolderColumn({
   editable,
   canManageAccess,
   onSelect,
-  collapsed,
+  id,
   overlay = false,
   onToggle,
   onNew,
@@ -55,9 +55,8 @@ export function FolderColumn({
   editable: boolean;
   canManageAccess: boolean;
   onSelect: (s: Scope) => void;
-  /** Rail de 48 px (repliée). */
-  collapsed: boolean;
-  /** Dépliée par-dessus le contenu (tiroir, 1 024 à 1 279 px). */
+  id?: string;
+  /** Tiroir par-dessus le contenu (sous 1 024 px). */
   overlay?: boolean;
   onToggle: () => void;
   /** Nouveau dossier (parent : sous-dossier). */
@@ -196,7 +195,7 @@ export function FolderColumn({
 
   // Tiroir : Échap et un clic dehors le ferment (le focus revient au bouton de bascule)
   const nav = useRef<HTMLElement>(null);
-  const drawer = overlay && !collapsed;
+  const drawer = overlay;
   // Tiroir : à l'ouverture, focus sur « Masquer les dossiers » ; fermé par Échap, focus sur « Afficher
   // les dossiers » (même bouton, jamais remonté). Explicite : Safari ne donne pas le focus au clic.
   const switchRef = useRef<HTMLButtonElement>(null);
@@ -229,26 +228,20 @@ export function FolderColumn({
       ref={switchRef}
       type="button"
       className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fcol__switch"
-      aria-label={t(collapsed ? 'folders.showColumn' : 'folders.hide')}
-      title={t(collapsed ? 'folders.showColumn' : 'folders.hide')}
-      aria-expanded={!collapsed}
+      aria-label={t('folders.hide')}
+      title={t('folders.hide')}
+      aria-expanded
       onClick={onToggle}
     >
       <PanneauIcon />
     </button>
   );
-  // Un seul arbre pour le rail et la colonne : le bouton de bascule n'est jamais remonté (il garde le
-  // focus au clic, et aucune nouvelle infobulle n'apparaît sous le pointeur pour absorber Échap)
   return (
-    <nav
-      ref={nav}
-      className={collapsed ? 'fcol fcol--rail' : `fcol${drawer ? ' fcol--drawer' : ''}`}
-      aria-label={t('folders.title')}
-    >
+    <nav ref={nav} id={id} className={`fcol${drawer ? ' fcol--drawer' : ''}`} aria-label={t('folders.title')}>
       <div className="fcol__head">
-        {toggle}
-        {!collapsed && <h2 className="fcol__title">{t('folders.title')}</h2>}
-        {!collapsed && editable && (
+        {drawer && toggle}
+        <h2 className="fcol__title">{t('folders.title')}</h2>
+        {editable && (
           <button
             type="button"
             className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
@@ -259,35 +252,26 @@ export function FolderColumn({
           </button>
         )}
       </div>
-      {collapsed ? (
-        <span className="fcol__railcount" title={t('folders.title')}>
-          <Folder aria-hidden="true" />
-          <span>{folders.length}</span>
-        </span>
-      ) : (
-        <>
-          {/* La liste défile seule ; le bas de colonne reste visible */}
-          <div className="fcol__scroll">
-            <ul className="fcol__list" role="list">
-              {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
-              {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
-            </ul>
-            <p className="fcol__section">{t('folders.space')}</p>
-            {tree(null, 0)}
-            {editable && (
-              <button type="button" className="fcol__new" onClick={() => onNew(null)}>
-                <FolderPlus aria-hidden="true" />
-                {t('demos.newFolder')}
-              </button>
-            )}
-          </div>
-          <div className="fcol__foot">
-            <ul className="fcol__list" role="list">
-              {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
-            </ul>
-          </div>
-        </>
-      )}
+      {/* La liste défile seule ; le bas de colonne reste visible */}
+      <div className="fcol__scroll">
+        <ul className="fcol__list" role="list">
+          {entry('all', <Layers aria-hidden="true" />, t(sandbox ? 'sandboxPage.all' : 'folders.all'))}
+          {entry('mine', <User aria-hidden="true" />, t(sandbox ? 'sandboxPage.mine' : 'folders.mine'))}
+        </ul>
+        <p className="fcol__section">{t('folders.space')}</p>
+        {tree(null, 0)}
+        {editable && (
+          <button type="button" className="fcol__new" onClick={() => onNew(null)}>
+            <FolderPlus aria-hidden="true" />
+            {t('demos.newFolder')}
+          </button>
+        )}
+      </div>
+      <div className="fcol__foot">
+        <ul className="fcol__list" role="list">
+          {entry('archived', <Archive aria-hidden="true" />, t('folders.archived'))}
+        </ul>
+      </div>
     </nav>
   );
 }

@@ -5393,12 +5393,14 @@
     "soon": "Coming soon"
   },
   "folders": {
+    "collapseColumn": "Collapse folders",
+    "expandColumn": "Expand folders",
+    "width": "Folders width",
     "title": "Folders",
     "all": "All demos",
     "mine": "My demos",
     "space": "Workspace folders",
     "archived": "Archived",
-    "showColumn": "Show folders",
     "hide": "Hide folders",
     "newSub": "New subfolder",
     "actions": "Actions for folder {{name}}",

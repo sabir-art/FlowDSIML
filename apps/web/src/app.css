@@ -2573,3 +2573,100 @@ button.fd-nav__item:hover {
 .logo-f .fd-mt-wrap {
   justify-items: start;
 }
+
+/* COL-02 (COMP-01 §19) : poignée de bord d'une colonne secondaire. La pastille replie et déplie ; tout le
+   filet est un séparateur redimensionnable (zone de prise de 12 px). */
+.fd-cgrip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: -6px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+}
+.fd-cgrip__sep {
+  position: absolute;
+  inset: 0;
+  cursor: col-resize;
+  outline: none;
+  touch-action: none;
+}
+.fd-cgrip__sep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 5px;
+  width: 2px;
+  background: transparent;
+}
+.fd-cgrip__sep:hover::after,
+.fd-cgrip__sep:focus-visible::after,
+.fd-cgrip.is-drag .fd-cgrip__sep::after {
+  background: var(--fd-color-primary);
+}
+.fd-cgrip__btn {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 999px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text-muted);
+  box-shadow: 0 1px 3px rgb(8 10 14 / 0.1);
+  cursor: pointer;
+}
+.fd-cgrip__btn > svg {
+  width: 14px;
+  height: 14px;
+}
+.fd-cgrip__btn:hover {
+  color: var(--fd-color-text);
+  background: var(--fd-color-surface-hover, var(--fd-color-surface));
+}
+/* FIELD-01 §11.4 : un seul indicateur de focus, à l'intérieur (bord et trait de 2 px) */
+.fd-cgrip__btn:focus-visible,
+.fd-cgrip.is-drag .fd-cgrip__btn {
+  outline: none;
+  border-color: var(--fd-color-primary);
+  color: var(--fd-color-primary);
+}
+.fd-cgrip__btn:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+/* Repliée : demi-pastille de 18 × 40 px collée au bord gauche du contenu */
+.fd-cgrip.is-closed {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+  justify-content: flex-start;
+}
+.fd-cgrip.is-closed .fd-cgrip__btn {
+  width: 18px;
+  border-inline-start: 0;
+  border-radius: 0 999px 999px 0;
+}
+.fd-cgrip__width {
+  position: absolute;
+  inset-inline-start: 18px;
+  top: calc(50% - 40px);
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--fd-color-text);
+  color: var(--fd-color-surface);
+  font: 600 12px var(--fd-font-sans);
+  white-space: nowrap;
+  pointer-events: none;
+}
+/* Sous 1 024 px : pas de poignée (la colonne est un tiroir ouvert depuis la barre mobile) */
+@media (max-width: 1023.98px) {
+  .fd-cgrip {
+    display: none;
+  }
+}

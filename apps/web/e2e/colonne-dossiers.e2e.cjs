@@ -1,8 +1,8 @@
 /**
  * Retours client 21/11 §2 et §7 (recettes 7 et 14) : colonne Dossiers de Démos et du Sandbox, du haut
  * au bas de la fenêtre, liste qui défile à l'intérieur avec 30 dossiers, « Nouveau dossier » et
- * « Archivées » toujours visibles ; rail de 48 px et tiroir de 280 px par-dessus le contenu de 1 024 à
- * 1 279 px ; aucune colonne sous 1 024 px. Faux Supabase, données de la maquette.
+ * « Archivées » toujours visibles ; de 1 024 à 1 279 px, colonne repliée par défaut, dépliée par sa
+ * poignée (COL-02) ; aucune colonne sous 1 024 px. Faux Supabase, données de la maquette.
  */
 const { chromium } = require('playwright');
 const { install } = require('./fake-supabase.cjs');
@@ -39,59 +39,23 @@ function seed() {
         continue;
       }
       if (width === 1024) {
-        const rail = await page.locator('.fcol').boundingBox();
-        ok(
-          rail.width === 48 && rail.y === 0 && rail.y + rail.height === 900,
-          `${tag} : rail de 48 px, pleine hauteur`,
-        );
+        // COL-02 : sous 1 280 px, la colonne est repliée tant que la personne n'a rien choisi ; la
+        // demi-pastille la déplie et elle pousse le contenu (plus de rail ni de tiroir par-dessus)
+        const slot = page.locator('.fcol-slot');
+        ok((await slot.boundingBox()).width === 0, `${tag} : colonne repliée par défaut`);
         const left = (await page.locator('.demos-main').boundingBox()).x;
-        await page.getByRole('button', { name: 'Afficher les dossiers' }).click();
-        const drawer = await page.locator('.fcol--drawer').boundingBox();
-        ok(
-          drawer.width === 280 && (await page.locator('.demos-main').boundingBox()).x === left,
-          `${tag} : tiroir de 280 px par-dessus, le contenu ne bouge pas`,
+        await page.getByRole('button', { name: 'Déplier les dossiers' }).click();
+        await page.waitForFunction(
+          () => document.querySelector('.fcol-slot').getBoundingClientRect().width === 232,
         );
-        // Recette UX : le tiroir passe au-dessus de tout le contenu (indicateurs, recherche, cloche)
-        const covered = await page.evaluate(() => {
-          const r = document.querySelector('.fcol--drawer').getBoundingClientRect();
-          const out = [];
-          for (let y = 8; y < r.bottom; y += 24)
-            for (const x of [r.left + 60, r.left + 140, r.right - 8]) {
-              const e = document.elementFromPoint(x, y);
-              if (e && !e.closest('.fcol--drawer'))
-                out.push(`${e.tagName.toLowerCase()}.${e.className} (${x}, ${y})`);
-            }
-          return out;
-        });
         ok(
-          covered.length === 0,
-          `${tag} : tiroir au-dessus du contenu${covered.length ? ` (${covered.slice(0, 3).join(' ; ')})` : ''}`,
+          (await page.locator('.demos-main').boundingBox()).x === left + 232,
+          `${tag} : dépliée, la colonne de 232 px pousse le contenu`,
         );
-        await page.keyboard.press('Escape');
-        ok((await page.locator('.fcol--drawer').count()) === 0, `${tag} : Échap ferme le tiroir`);
-        // Recette UX (scénario exact) : clic souris, puis Échap aussitôt, sans placer le focus
-        await page.waitForTimeout(100);
-        await page.getByRole('button', { name: 'Afficher les dossiers' }).click();
-        const onOpen = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
         ok(
-          onOpen === 'Masquer les dossiers',
-          `${tag} : à l’ouverture, focus sur « Masquer les dossiers » (${onOpen})`,
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+          `${tag} : pas de défilement horizontal`,
         );
-        await page.waitForTimeout(800); // délai d'ouverture des infobulles dépassé, pointeur toujours dessus
-        ok(
-          (await page.locator('.fd-tooltip').count()) === 0,
-          `${tag} : pas d’infobulle sur le bouton cliqué`,
-        );
-        await page.keyboard.press('Escape');
-        ok((await page.locator('.fcol--drawer').count()) === 0, `${tag} : un seul Échap ferme le tiroir`);
-        await page.waitForTimeout(100);
-        const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
-        ok(
-          focused === 'Afficher les dossiers',
-          `${tag} : focus rendu à « Afficher les dossiers » (${focused})`,
-        );
-        await page.close();
-        continue;
       }
       // Recette UX : tri naturel (Dossier 2 avant Dossier 10)
       // Les dossiers arrivent après la colonne : on attend le dernier avant de lire l'ordre

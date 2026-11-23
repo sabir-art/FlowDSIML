@@ -5393,12 +5393,14 @@
     "soon": "Bientôt disponible"
   },
   "folders": {
+    "collapseColumn": "Replier les dossiers",
+    "expandColumn": "Déplier les dossiers",
+    "width": "Largeur des dossiers",
     "title": "Dossiers",
     "all": "Toutes les démos",
     "mine": "Mes démos",
     "space": "Dossiers de l’espace",
     "archived": "Archivées",
-    "showColumn": "Afficher les dossiers",
     "hide": "Masquer les dossiers",
     "newSub": "Nouveau sous-dossier",
     "actions": "Actions du dossier {{name}}",
