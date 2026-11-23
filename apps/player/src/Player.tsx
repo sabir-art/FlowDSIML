@@ -1,3 +1,4 @@
+import { APP_ORIGIN } from './config';
 import { openExternal } from './openExternal';
 import { ModalBox } from './modalFocus';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
@@ -1023,6 +1024,16 @@ export function Player({
                       },
                     }
                   : null
+              }
+              onAddZone={
+                preview
+                  ? () =>
+                      // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent) : l'éditeur ouvre l'étape
+                      (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
+                        { type: 'fd:preview-add-zone', stepId: step.id },
+                        APP_ORIGIN,
+                      )
+                  : undefined
               }
               onHit={() => {
                 if (gBubble?.advance === 'click') guideNext();

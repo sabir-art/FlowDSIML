@@ -217,7 +217,14 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
     (await p.getByRole('button', { name: /Annuler la modification du texte/ }).count()) >= 1,
     'modification de texte annulable (bouton nommé)',
   );
-  if (SHOTS) {
+  // Capture seulement : le titre du bloc a pu changer, la capture est alors sautée
+  if (
+    SHOTS &&
+    (await p
+      .locator('.panel')
+      .getByText(/Modifications de l’étape/)
+      .count())
+  ) {
     await p
       .locator('.panel')
       .getByText(/Modifications de l’étape/)
@@ -229,6 +236,38 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
     await p.waitForTimeout(300);
     await p.screenshot({ path: `${SHOTS}/l20-01-modifications${sfx}.png` });
   }
+  // EXT-02 §3.3 : dans l'aperçu, une page sans zone cliquable le dit et propose d'en ajouter une
+  await p.locator('.rail-list .step').nth(2).hover();
+  await p.getByRole('button', { name: 'Lire depuis l’étape 3' }).click();
+  const pv = p.frameLocator('iframe.preview-frame');
+  const nozone = pv.locator('.p-html-nozone');
+  await nozone.waitFor({ timeout: 15000 });
+  ok(
+    (await nozone.locator('b').innerText()) === 'Aucune zone cliquable sur cette étape' &&
+      (await nozone.getAttribute('role')) === 'status' &&
+      (await pv.getByRole('button', { name: /^Zones cliquables/ }).isDisabled()) &&
+      (await pv.locator('.p-html-zones-n').innerText()) === '0',
+    'aperçu : encart « Aucune zone cliquable sur cette étape », bascule à 0 désactivée',
+  );
+  ok(
+    (await nozone.getByRole('button').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
+      'Ajouter une zone | Continuer sans zone',
+    'aperçu : « Ajouter une zone » et « Continuer sans zone »',
+  );
+  if (SHOTS) await p.screenshot({ path: `${SHOTS}/ext02-aucune-zone${sfx}.png` });
+  await nozone.getByRole('button', { name: 'Continuer sans zone' }).click();
+  ok((await nozone.count()) === 0, 'aperçu : « Continuer sans zone » referme l’encart');
+  // « Ajouter une zone » : l'aperçu se ferme sur l'étape, prête à recevoir un lien
+  await p.locator('dialog.preview-dialog').getByRole('button', { name: 'Fermer' }).click();
+  await p.locator('.rail-list .step').nth(2).hover();
+  await p.getByRole('button', { name: 'Lire depuis l’étape 3' }).click();
+  await pv.locator('.p-html-nozone').getByRole('button', { name: 'Ajouter une zone' }).click();
+  await p.locator('dialog.preview-dialog').waitFor({ state: 'hidden' });
+  ok(
+    (await p.locator('.rail-list .step[aria-current="step"]').innerText()).includes('Équipe') &&
+      (await p.getByText('Sélectionnez un élément de la page, puis « Lier à une étape ».').count()) === 1,
+    'aperçu : « Ajouter une zone » ferme l’aperçu sur l’étape, avec l’indication',
+  );
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

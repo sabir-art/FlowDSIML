@@ -1449,7 +1449,8 @@
       "modMask": "Image masquée",
       "undo_mask": "Annuler le masquage de l’image de {{sel}}",
       "guideBubble": "Bulle du guide",
-      "bubbles": "Bulle de l’étape"
+      "bubbles": "Bulle de l’étape",
+      "addZoneHint": "Sélectionnez un élément de la page, puis « Lier à une étape »."
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",

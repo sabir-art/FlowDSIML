@@ -2732,6 +2732,48 @@ h1.p-title {
   white-space: nowrap;
   cursor: pointer;
 }
+/* EXT-02 §3.3 : encart « Aucune zone cliquable » (aperçu de l'éditeur seulement) */
+.p-html-nozone {
+  position: absolute;
+  right: 0;
+  bottom: 16px;
+  left: 0;
+  display: flex;
+  gap: 12px;
+  width: min(92%, 480px);
+  margin: auto;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  background: #fff;
+  color: #141311;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.p-html-nozone > svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: #1f6fb5;
+}
+.p-html-nozone-tx {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+}
+.p-html-nozone-tx > p {
+  margin: 4px 0 8px;
+  color: #57534e;
+}
+.p-html-nozone-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.p-html-nozone-acts .p-btn > svg {
+  width: 16px;
+  height: 16px;
+}
 @media (max-width: 480px) {
   .p-html-miss:not(:empty) {
     flex-wrap: wrap;

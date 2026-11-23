@@ -1,7 +1,7 @@
 import { openExternal } from './openExternal';
 import { mediaPublicUrl } from './config';
 import type { ComponentChildren } from 'preact';
-import { MousePointerClick } from 'lucide-preact';
+import { Info, MousePointerClick, Plus } from 'lucide-preact';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Rect, SandboxSettings, Step } from '@flowdsiml/manifest';
 import {
@@ -45,6 +45,7 @@ export function HtmlStep({
   target = null,
   onHit,
   overlay,
+  onAddZone,
 }: {
   step: Step;
   t: Dict;
@@ -65,6 +66,11 @@ export function HtmlStep({
    * située) et found (false : sélecteur introuvable, la zone est le rect de secours).
    */
   overlay?: (box: Rect | null, found: boolean) => ComponentChildren;
+  /**
+   * EXT-02 §3.3, aperçu de l'éditeur seulement : « Ajouter une zone » quand la page n'a aucune zone
+   * cliquable. Absent dans le lecteur public (l'encart n'y apparaît jamais).
+   */
+  onAddZone?: () => void;
 }) {
   const h = step.html!;
   const ht = t.html;
@@ -78,6 +84,8 @@ export function HtmlStep({
   const [zonesOn, setZonesOn] = useState(readZones);
   const [miss, setMiss] = useState(false);
   const missTimer = useRef(0);
+  /** EXT-02 §3.3 : « Continuer sans zone » referme l'encart pour cette étape. */
+  const [noZoneClosed, setNoZoneClosed] = useState(false);
   const toggleZones = useCallback((on?: boolean) => {
     setZonesOn((cur) => {
       const next = on ?? !cur;
@@ -299,6 +307,24 @@ export function HtmlStep({
         <div class="p-html-toast" role="status" aria-live="polite">
           {toast ?? ''}
         </div>
+        {onAddZone && ready && zones === 0 && !noZoneClosed && (
+          <div class="p-html-nozone" role="status">
+            <Info aria-hidden="true" />
+            <div class="p-html-nozone-tx">
+              <b>{ht.noZoneTitle}</b>
+              <p>{sandbox ? ht.noZoneSandbox : ht.noZoneGuided}</p>
+              <div class="p-html-nozone-acts">
+                <button type="button" class="p-btn p-btn-primary" onClick={onAddZone}>
+                  <Plus aria-hidden="true" />
+                  {ht.addZone}
+                </button>
+                <button type="button" class="p-btn p-btn-secondary" onClick={() => setNoZoneClosed(true)}>
+                  {ht.continueNoZone}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div class="p-html-miss" role="status" aria-live="polite">
           {miss && (
             <>

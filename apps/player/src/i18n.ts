@@ -319,6 +319,13 @@ const dict = {
       zonesOne: 'Cette étape a 1\u00a0zone cliquable.',
       zonesMany: 'Cette étape a {{n}}\u00a0zones cliquables.',
       showZones: 'Voir les zones',
+      noZoneTitle: 'Aucune zone cliquable sur cette étape',
+      noZoneGuided:
+        'Les visiteurs ne peuvent que passer à l’étape suivante. Ajoutez une zone pour relier un élément de la page à une autre étape.',
+      noZoneSandbox:
+        'Aucun lien ne part de cette page\u202f: les visiteurs ne peuvent pas aller plus loin. Ajoutez une zone pour relier un élément de la page à une autre page.',
+      addZone: 'Ajouter une zone',
+      continueNoZone: 'Continuer sans zone',
       loading: 'Chargement de la page…',
       error: 'La page n’a pas pu être chargée.',
       pageOf: 'Page {{n}} sur {{total}}',
@@ -718,6 +725,13 @@ const dict = {
       zonesOne: 'This step has 1\u00a0clickable area.',
       zonesMany: 'This step has {{n}}\u00a0clickable areas.',
       showZones: 'Show areas',
+      noZoneTitle: 'No clickable area on this step',
+      noZoneGuided:
+        'Visitors can only move to the next step. Add an area to link an element of the page to another step.',
+      noZoneSandbox:
+        'No link leaves this page: visitors cannot go any further. Add an area to link an element of the page to another page.',
+      addZone: 'Add an area',
+      continueNoZone: 'Continue without an area',
       loading: 'Loading the page…',
       error: 'The page could not be loaded.',
       pageOf: 'Page {{n}} of {{total}}',

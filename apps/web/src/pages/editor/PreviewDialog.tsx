@@ -14,6 +14,7 @@ export function PreviewDialog({
   onClose,
   startQuiz = false,
   startStep,
+  onAddZone,
 }: {
   /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape (index à partir de 0). */
   startStep?: number;
@@ -21,6 +22,8 @@ export function PreviewDialog({
   onClose: () => void;
   /** F2 : « Tester le quiz » ouvre l'aperçu directement sur le quiz (tentatives non comptées). */
   startQuiz?: boolean;
+  /** EXT-02 §3.3 : l'aperçu demande d'ouvrir une étape pour y ajouter une zone cliquable. */
+  onAddZone?: (stepId: string) => void;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -48,6 +51,9 @@ export function PreviewDialog({
         );
         setStatus('ready');
       }
+      // EXT-02 §3.3 : « Ajouter une zone » depuis l'encart « Aucune zone cliquable » de l'aperçu
+      const d = e.data as { type?: string; stepId?: unknown };
+      if (d?.type === 'fd:preview-add-zone' && typeof d.stepId === 'string') onAddZone?.(d.stepId);
     };
     addEventListener('message', onMsg);
     const timer = setTimeout(() => setStatus((s) => (s === 'loading' ? 'timeout' : s)), 8000);
@@ -55,7 +61,7 @@ export function PreviewDialog({
       removeEventListener('message', onMsg);
       clearTimeout(timer);
     };
-  }, [manifest, origin, device, startQuiz, startStep]);
+  }, [manifest, origin, device, startQuiz, startStep, onAddZone]);
 
   return (
     <dialog ref={ref} className="preview-dialog" onClose={onClose} aria-label={t('editor.preview')}>

@@ -1449,7 +1449,8 @@
       "modMask": "Image hidden",
       "undo_mask": "Undo hiding the image of {{sel}}",
       "guideBubble": "Guide bubble",
-      "bubbles": "Step bubble"
+      "bubbles": "Step bubble",
+      "addZoneHint": "Select an element of the page, then “Link to a step”."
     },
     "sandbox": {
       "planTitle": "Sandbox · {{title}}",

@@ -1286,6 +1286,17 @@ export function EditorPage() {
           setPreviewManifest(null);
           setPreviewStart(undefined);
         }}
+        // EXT-02 §3.3 : l'aperçu se ferme sur l'étape sans zone, prête à recevoir un lien
+        onAddZone={(stepId) => {
+          const i = editor.steps.findIndex((s) => s.id === stepId);
+          setPreviewManifest(null);
+          setPreviewStart(undefined);
+          if (i < 0) return;
+          setIndex(i);
+          setSelection({ kind: 'step' });
+          setPanel('step');
+          toast(t('editor.html.addZoneHint'));
+        }}
       />
     </main>
   );
