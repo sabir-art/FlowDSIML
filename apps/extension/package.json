@@ -9,7 +9,7 @@
     "zip": "wxt zip",
     "postinstall": "wxt prepare",
     "lint": "eslint entrypoints lib",
-    "e2e": "node e2e/capture.e2e.cjs && node e2e/video.e2e.cjs && node e2e/html.e2e.cjs && node e2e/guided.e2e.cjs",
+    "e2e": "node e2e/capture.e2e.cjs && node e2e/video.e2e.cjs && node e2e/html.e2e.cjs && node e2e/html-spa.e2e.cjs && node e2e/guided.e2e.cjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
     "zip:prod": "node scripts/zip-prod.mjs"

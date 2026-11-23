@@ -485,7 +485,8 @@ async function onHtmlBar(m: HtmlBarRequest): Promise<unknown> {
   }
   if (m.type === 'fd:html-click') {
     const last = await htmlStore.last();
-    if (last && !last.clickSel) await htmlStore.put({ ...last, clickSel: m.sel, clickLabel: m.label });
+    // Le dernier clic avant la page suivante est le lien proposé (un menu ouvert, puis son entrée)
+    if (last) await htmlStore.put({ ...last, clickSel: m.sel, clickLabel: m.label });
     // Une navigation suit peut-être : la page suivante sera capturée à son chargement
     return setState({ htmlAwait: true });
   }
