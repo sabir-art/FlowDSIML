@@ -148,11 +148,12 @@ http
             inline +
             '<script src="/spa-suivi.js"></script></head><body>' +
             '<nav id="nav"><a href="/spa" data-route>Accueil</a><a href="/spa/clients" data-route>Clients</a>' +
+            '<button id="reglages" type="button">Réglages</button><button id="aide" type="button">Aide</button>' +
             '<button id="plus" type="button" aria-expanded="false">Plus</button></nav>' +
-            '<div id="liste" hidden><a href="/spa/rapports" data-route>Rapports</a></div>' +
+            '<div id="liste" role="menu" hidden></div>' +
             '<main id="vue"></main><iframe src="/spa-cadre" title="Cadre fictif" width="200" height="60"></iframe>' +
             '<script>(function(){' +
-            'var vues={"/spa":"<h1>Accueil</h1><p>Bienvenue dans l’appli fictive.</p>",' +
+            'var vues={"/spa":"<h1>Accueil</h1><p>Bienvenue dans l\u2019appli fictive.</p>",' +
             '"/spa/clients":"<h1>Clients</h1><ul><li>Société Exemple</li><li>Mairie de Testville</li></ul>",' +
             '"/spa/rapports":"<h1>Rapports</h1><p>Rapport mensuel fictif.</p>"};' +
             'function rendre(){var v=document.getElementById("vue");v.innerHTML="<p>Chargement…</p>";' +
@@ -160,9 +161,21 @@ http
             'setTimeout(function(){v.innerHTML=vues[location.pathname]||"<h1>Introuvable</h1>";},250);}' +
             'document.addEventListener("click",function(e){var a=e.target.closest("a[data-route]");if(!a)return;' +
             'e.preventDefault();history.pushState({}, "", a.getAttribute("href"));' +
-            'document.getElementById("liste").hidden=true;rendre();});' +
+            'var l=document.getElementById("liste");l.hidden=true;l.innerHTML="";' +
+            'document.getElementById("plus").setAttribute("aria-expanded","false");rendre();});' +
+            // Menu : ses entrées n'existent dans la page qu'une fois ouvert
             'document.getElementById("plus").addEventListener("click",function(){var l=document.getElementById("liste");' +
-            'l.hidden=!l.hidden;this.setAttribute("aria-expanded",String(!l.hidden));});' +
+            'l.hidden=!l.hidden;l.innerHTML=l.hidden?"":"<a href=\\"/spa/rapports\\" role=\\"menuitem\\" data-route>Rapports</a>";' +
+            'this.setAttribute("aria-expanded",String(!l.hidden));});' +
+            // Écran qui change sans changement d'adresse
+            'document.getElementById("reglages").addEventListener("click",function(){' +
+            'document.getElementById("vue").innerHTML="<h1>Réglages</h1><p>Langue : français. Thème : clair.</p>";});' +
+            // Fenêtre par-dessus la page : état passager, jamais une nouvelle page
+            'document.getElementById("aide").addEventListener("click",function(){var d=document.createElement("div");' +
+            'd.setAttribute("role","dialog");d.setAttribute("aria-label","Aide");' +
+            'd.style.cssText="position:fixed;inset:5%;background:#fff;border:1px solid #ccd;padding:24px";' +
+            'd.innerHTML="<h1>Aide</h1><p>Texte d\u2019aide fictif.</p><button type=\\"button\\">Fermer</button>";' +
+            'd.querySelector("button").addEventListener("click",function(){d.remove();});document.body.appendChild(d);});' +
             'window.addEventListener("popstate",rendre);rendre();})();</script></body></html>',
         );
       }

@@ -88,7 +88,8 @@ export type VideoBarRequest =
 export type HtmlBarRequest =
   | { type: 'fd:html-ready' }
   | { type: 'fd:html-page'; capture: HtmlCapture }
-  | { type: 'fd:html-click'; sel: string; label: string }
+  /** transient : l'élément cliqué n'était pas visible dans la dernière page copiée (entrée d'un menu). */
+  | { type: 'fd:html-click'; sel: string; label: string; transient?: boolean }
   | { type: 'fd:html-stop' }
   | { type: 'fd:fetch-asset'; url: string; kind: 'image' | 'font' | 'css' };
 
