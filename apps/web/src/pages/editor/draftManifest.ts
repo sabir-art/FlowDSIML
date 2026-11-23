@@ -199,13 +199,25 @@ function draftQuiz(ed: DemoEditor, settings: ReturnType<typeof asSettings>) {
 }
 
 type PageMeta = { url?: string; links?: Array<{ sel: string; href: string; label?: string }> };
-/** Adresse comparable (sans ancre ni barre finale) : même règle que publish_demo. */
-export const normUrl = (u: string) => u.replace(/#.*$/, '').replace(/\/$/, '');
+/**
+ * Adresse comparable : même règle que publish_demo (html_link_key, migration 20261130090500). Une ancre
+ * qui est une route (« #/clients », « #!/clients ») fait partie de l'adresse ; toute autre ancre et la
+ * barre finale sont ignorées.
+ */
+export const normUrl = (u: string) => {
+  const i = u.indexOf('#');
+  const base = (i < 0 ? u : u.slice(0, i)).replace(/\/$/, '');
+  const frag = i < 0 ? '' : u.slice(i);
+  return base + (/^#[/!]./.test(frag) ? frag.replace(/\/$/, '') : '');
+};
 /** Liens d'une page vers une autre page de la démo (même adresse) : même règle que publish_demo. */
 export function resolveLinks(s: StepRow, steps: StepRow[]) {
   const links = ((s.html_meta as PageMeta | null)?.links ?? []).slice(0, 300);
+  const own = normUrl((s.html_meta as PageMeta | null)?.url ?? '');
   const out: Array<{ sel: string; step: string }> = [];
   for (const l of links) {
+    // Un lien vers l'adresse de sa propre page n'est pas relié à une autre page de même adresse
+    if (normUrl(l.href) === own) continue;
     const target = steps.find(
       (t) =>
         t.kind === 'html' &&
