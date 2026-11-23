@@ -199,6 +199,18 @@ button{font:inherit;color:inherit;cursor:pointer}
 .ferr{display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:13px;color:var(--fd-color-danger)}.ferr svg{flex:none;margin-top:1px}
 .acard .fd-btn{height:44px;width:100%}
 .auth{grid-template-columns:minmax(0,440px);justify-content:center}.acard{width:100%}
+.vhead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+.mob .vhead{grid-template-columns:1fr}
+.vhead .inp{height:40px}.inp.er{border-color:var(--fd-color-danger)}
+.kline{margin:0;height:40px;display:flex;align-items:center;gap:8px;color:var(--fd-color-text-muted)}
+.pgr{grid-template-columns:64px minmax(0,1fr) 88px 104px 96px}
+.pth{width:64px;height:40px;border-radius:6px;border:1px solid var(--fd-color-border);border-top-width:10px;border-top-color:var(--fd-color-surface-sunken);background:var(--fd-color-surface)}
+.mob .pgr{grid-template-columns:64px minmax(0,1fr) 96px}
+.gr{grid-template-columns:36px minmax(0,1fr) 100px 104px 96px}.pgr{grid-template-columns:64px minmax(0,1fr) 100px 104px 96px}.st2{width:100px}
+.mob .gr{grid-template-columns:36px minmax(0,1fr) 100px}.mob .pgr{grid-template-columns:64px minmax(0,1fr) 100px}.mob .gr .ac2{width:100px}
+.fd-segmented{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:var(--fd-color-surface-sunken);border:1px solid var(--fd-color-border)}
+.fd-segmented>button{height:30px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--fd-color-text-muted);font:600 13px var(--fd-font-sans)}
+.fd-segmented>button[aria-checked=true]{background:var(--fd-color-surface);color:var(--fd-color-text);box-shadow:var(--fd-shadow-xs)}
 </style></head><body class="mob"><div class="auth"><form class="acard" novalidate><div><h1>Nouveau mot de passe</h1><p class="mu" style="margin:6px 0 0">Pour le compte alice@example.com.</p></div>
   <div class="pf"><label>Mot de passe</label><div class="pw fo"><span class="clear">Acmedemo</span><button class="eye" aria-label="Afficher le mot de passe" aria-pressed="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path><path d="m2 2 20 20"></path></svg></button></div>
    <div class="gauge" aria-hidden="true"><span class="sg"><i style="background:var(--fd-color-warning)"></i><i style="background:var(--fd-color-warning)"></i><i></i><i></i></span><b style="color:var(--fd-color-warning)">Moyen</b></div>

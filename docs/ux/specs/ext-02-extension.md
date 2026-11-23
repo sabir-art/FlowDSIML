@@ -59,7 +59,10 @@ Le blocage du client venait de la capture des applis à page unique (corrigé pa
 ### 2.1 Structure (page pleine, pas dans le shell)
 
 1. En-tête : logo, titre « Vérifier avant l’envoi », une phrase : « Votre démo est une copie fixe des pages, et la navigation est rejouée à partir de vos clics. Voici ce que TutoClick n’a pas copié ou a protégé. Vous n’avez rien à faire, sauf si vous voulez garder un élément. »
-2. **Bilan** : Pages copiées, Scripts non copiés, Protégés (cadres, formulaires, données, liens externes), Gardés par vous.
+2. **Titre et type**, sur une ligne à 1 440 (colonne sous 768) :
+   - « Titre de la démo », champ obligatoire, prérempli « Capture du {date} » (ex. « Capture du 23 nov. 2026 »), modifiable ; vide à l’envoi : « Donnez un titre à la démo. » sous le champ, bord danger, focus rendu ;
+   - « Type » : segmenté COMP-01 « Démo guidée » / « Sandbox », prérempli depuis le popup, modifiable ici. Si la capture complète un Sandbox existant (« Ajouter des pages » depuis l’app), le segmenté est remplacé par une ligne « Pages ajoutées au Sandbox « {nom} » » (icône Box), sans choix.
+3. **Bilan** : Pages copiées, Scripts non copiés, Protégés (cadres, formulaires, données, liens externes), Gardés par vous.
 3. **Encart d’information** (`info-soft`) : « 155 scripts ne sont pas copiés (140 de la page, 15 de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics. »
 4. **Six groupes**, dans cet ordre ; un groupe vide n’apparaît pas :
 
@@ -73,6 +76,10 @@ Le blocage du client venait de la capture des applis à page unique (corrigé pa
 | Liens externes | Désactivés | oui ; le lien gardé ouvre d’abord « Vous quittez la démo » |
 
 Les liens vers une autre page de la même démo ne figurent pas ici : ils sont reliés automatiquement (zones cliquables du Sandbox), rien à faire.
+
+4 bis. **Pages copiées** (entre l’encart et les groupes, repliée par défaut ; dépliée d’office si une page est trop lourde) : une ligne par page, colonnes vignette 64 × 40 (copie inerte) · numéro, titre, adresse et poids · statut (« Prête », ou « Trop lourde » en warning) · « Pourquoi ? » · « Retirer » (96 px). Retirer une page la sort de la démo et des compteurs ; annulable par la notification. Le « Pourquoi ? » d’une page trop lourde donne la limite et quoi faire (« au-delà des 5 Mo permis par page ; retirez-la ou recapturez-la avec moins de contenu affiché » : limite réelle du serveur à reprendre).
+
+Compteurs des groupes : calculés sur toutes les pages (un script présent sur 6 pages compte 6 fois) ; la colonne « source » de chaque ligne donne la page d’origine. « Pourquoi ? » d’une ligne déplie le même encart info sous la ligne. « Gardés par vous » compte données + liens + cadres gardés. L’encart sur les scripts disparaît s’il n’y en a aucun. La barre fixe reste en bas à toutes les largeurs. Les cadres de la liste blanche n’ont pas de « Garder » tant que le serveur et le lecteur ne les acceptent pas : ils restent « Retirés » avec leur « Pourquoi ? ».
 
 5. Note : « Le serveur applique les mêmes règles à l’envoi. »
 6. Barre fixe : « Supprimer la capture » (secondaire, danger), « Envoyer » (primaire prune).
