@@ -87,7 +87,6 @@ function colClosedByDefault(userId: string | undefined) {
   }
   return !window.matchMedia('(min-width: 1280px)').matches;
 }
-import { PanneauIcon } from '../../components/PanneauIcon';
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
 
@@ -789,7 +788,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             aria-expanded={drawer}
             onClick={() => setDrawer(true)}
           >
-            <PanneauIcon />
+            <FolderOpen aria-hidden="true" />
           </button>,
           slot,
         )}

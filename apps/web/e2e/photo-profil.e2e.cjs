@@ -86,8 +86,8 @@ async function png(page, w, h) {
   );
   ok(
     (await thumb.locator('.fd-mt__ini').evaluate((e) => getComputedStyle(e).backgroundColor)) ===
-      'rgb(243, 211, 226)',
-    'initiales : fond prune 100 de la maquette',
+      'rgb(251, 240, 245)',
+    'initiales : fond du jeton primary-soft',
   );
   ok(
     await page
