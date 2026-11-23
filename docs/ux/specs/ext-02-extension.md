@@ -117,6 +117,8 @@ Le message « Cette partie n’est pas disponible dans la démo » est supprimé
 
 Si l’étape n’a aucune zone : le compteur affiche 0, la bascule est désactivée, et un encart explique « Aucune zone cliquable sur cette étape. Les visiteurs ne peuvent que passer à l’étape suivante. » avec « Ajouter une zone » (dans l’éditeur) et « Continuer sans zone ».
 
+En Sandbox (pas d’étape suivante) : titre « Aucune zone cliquable sur cette page », texte « Aucun lien ne part de cette page : les visiteurs ne peuvent pas aller plus loin. Ajoutez une zone pour relier un élément de la page à une autre page. ». « Ajouter une zone » ferme l’aperçu sur l’étape, panneau Étape ouvert, avec la notification « Sélectionnez un élément de la page, puis « Lier à une étape ». » ; « Continuer sans zone » referme l’encart pour cette étape.
+
 ### 3.3 bis Lecteur public
 
 La bascule « Zones cliquables » (et la touche H) et le message « Aucun lien à cet endroit » valent aussi dans le lecteur public. L’encart « Aucune zone cliquable » et « Ajouter une zone » n’y apparaissent pas : la bascule affiche 0, désactivée, et seul « Suivant » reste.
@@ -143,7 +145,7 @@ Bouton intégré au champ (FIELD-01 §11.3), 32 px, icône 16 px en `currentColo
 Liste sous le champ, visible dès le focus, une ligne par règle du serveur, 13 px, écart 4 px, icône 16 px. Non respectée : Circle, `text-muted`. Respectée : CircleCheck `success`, texte `text`. Après un envoi refusé : CircleX `danger`. `aria-describedby` du champ vers la liste ; texte masqué « respectée » / « non respectée » par ligne ; région polie « 2 règles sur 3 respectées », 1 s après la dernière frappe, seulement si le nombre change. Confirmation : règle unique « Les deux mots de passe sont identiques ».
 
 ### 7.3 Force
-Jauge à 4 segments (maquette auth) entre le champ et la liste, libellé à droite (12 px, 600) : Faible (1, danger), Moyen (2, warning), Bon (3, success), Fort (4, success). Indicative : le bouton d’envoi n’est jamais désactivé pour la force.
+Jauge à 4 segments (maquette auth) entre le champ et la liste, libellé à droite (12 px, 600) : Faible (1, danger), Moyen (2, warning), Bon (3, success), Fort (4, success). Indicative : le bouton d’envoi n’est jamais désactivé pour la force. La jauge apparaît au premier caractère (vide, elle ne dit rien).
 
 ### 7.4 Erreurs du serveur
 Sous le champ : CircleAlert 16 px `danger` et une phrase d’action. « Utilisez au moins {n} caractères. », « Ajoutez au moins un chiffre. », « Ajoutez au moins une majuscule. », « Ajoutez au moins un caractère spécial (par ex. ! ? # @). », « Ce mot de passe est trop courant. Choisissez-en un autre. », « Les deux mots de passe ne sont pas identiques. », « Le mot de passe actuel est incorrect. », « Choisissez un mot de passe différent de l’actuel. » Plusieurs règles : la longueur a sa phrase, les caractères manquants sont regroupés (« Utilisez au moins 8 caractères. Ajoutez au moins une lettre et un chiffre. »). Bord `danger`, `aria-invalid`, focus sur le premier champ en erreur. Le message « 8 caractères minimum » seul est supprimé.
