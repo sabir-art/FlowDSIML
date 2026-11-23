@@ -258,7 +258,7 @@
       "label": "Photo",
       "choose": "Choose a photo",
       "remove": "Remove",
-      "help": "JPG, PNG or WebP, 2 MB max.",
+      "help": "JPG, PNG or WebP, 2 MB max. Click the image or drop a file.",
       "badType": "This file is not a JPG, PNG or WebP image.",
       "tooBig": "This image is larger than 2 MB.",
       "failed": "The photo could not be saved. Try again.",

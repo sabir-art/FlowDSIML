@@ -80,8 +80,14 @@ async function png(page, w, h) {
     'l’image est le bouton ; pas de bouton ⋯ sans photo, plus de « Choisir une photo » à côté',
   );
   ok(
-    (await row.locator('.stg-help').innerText()) === 'JPG, PNG ou WebP, 2\u00a0Mo au plus.',
+    (await row.locator('.stg-help').innerText()) ===
+      'JPG, PNG ou WebP, 2\u00a0Mo au plus. Cliquez sur l’image ou déposez un fichier.',
     'aide sous le libellé « Photo »',
+  );
+  ok(
+    (await thumb.locator('.fd-mt__ini').evaluate((e) => getComputedStyle(e).backgroundColor)) ===
+      'rgb(243, 211, 226)',
+    'initiales : fond prune 100 de la maquette',
   );
   ok(
     await page

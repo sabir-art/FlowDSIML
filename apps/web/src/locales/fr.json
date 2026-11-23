@@ -258,7 +258,7 @@
       "label": "Photo",
       "choose": "Choisir une photo",
       "remove": "Retirer",
-      "help": "JPG, PNG ou WebP, 2 Mo au plus.",
+      "help": "JPG, PNG ou WebP, 2 Mo au plus. Cliquez sur l’image ou déposez un fichier.",
       "badType": "Ce fichier n’est pas une image JPG, PNG ou WebP.",
       "tooBig": "Cette image dépasse 2 Mo.",
       "failed": "La photo n’a pas pu être enregistrée. Réessayez.",
