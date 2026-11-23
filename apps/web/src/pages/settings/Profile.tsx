@@ -3,9 +3,16 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
+import { localPasswordError, passwordErrorMessage } from '../../lib/errors';
+import {
+  PasswordError,
+  PasswordInput,
+  PasswordMatch,
+  PasswordMeter,
+  PasswordRules,
+} from '../../components/PasswordField';
 import { useAuth } from '../../auth/AuthProvider';
 import { setLocale } from '../../i18n';
-import { CircleAlert } from 'lucide-react';
 import { Button, Select } from '@flowdsiml/ui';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
@@ -27,6 +34,9 @@ export function Profile() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [mismatch, setMismatch] = useState(false);
+  const [pwError, setPwError] = useState('');
+  const [pwFailed, setPwFailed] = useState(false);
+  const [pwTouched, setPwTouched] = useState(false);
   const info = useAction();
   const pwd = useAction();
   const soon = <span className="stg-soon">{t('shell.soon')}</span>;
@@ -49,17 +59,29 @@ export function Profile() {
     });
   }
 
+  const refusePassword = (message: string) => {
+    setPwError(message);
+    setPwFailed(true);
+    document.getElementById('np')?.focus();
+  };
   async function savePassword(e: FormEvent) {
     e.preventDefault();
+    const local = localPasswordError(t, password);
+    if (local) return refusePassword(local);
     if (password !== confirm) {
       setMismatch(true);
       document.getElementById('np2')?.focus();
       return;
     }
     await pwd.run(async () => {
-      check(await supabase.auth.updateUser({ password }));
+      const res = await supabase.auth.updateUser({ password });
+      // Refus du serveur (trop court, caractères manquants, identique à l'actuel…) : sous le champ
+      const refused = res.error && passwordErrorMessage(t, res.error, password);
+      if (refused) return refusePassword(refused);
+      check(res);
       setPassword('');
       setConfirm('');
+      setPwTouched(false);
       toast(t('profile.passwordUpdated'));
     });
   }
@@ -223,57 +245,57 @@ export function Profile() {
             {pwd.error}
           </div>
         )}
+        {/* EXT-02 §7 : œil, jauge de force, règles de la politique ; erreurs sous le champ */}
         <div className="stg-row">
           <div className="stg-text" data-gap-exempt="">
             <label className="stg-lab" htmlFor="np">
               {t('profile.passwordNew')}
             </label>
-            <div id="np-help" className="stg-help">
-              {t('profile.passwordHelp')}
-            </div>
           </div>
-          <div className="stg-ctl">
-            <div className="stg-two">
-              <input
-                id="np"
-                className="fd-input"
-                type="password"
-                autoComplete="new-password"
-                name="new-password"
-                minLength={8}
-                required
-                aria-describedby="np-help"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setMismatch(false);
-                }}
-              />
-              <input
-                id="np2"
-                className="fd-input"
-                type="password"
-                autoComplete="new-password"
-                name="new-password-confirm"
-                minLength={8}
-                required
-                placeholder={t('profile.passwordConfirm')}
-                aria-label={t('profile.passwordConfirm')}
-                aria-invalid={mismatch || undefined}
-                aria-describedby={mismatch ? 'np2-error' : undefined}
-                value={confirm}
-                onChange={(e) => {
-                  setConfirm(e.target.value);
-                  setMismatch(false);
-                }}
-              />
-            </div>
-            {mismatch && (
-              <p id="np2-error" className="stg-error">
-                <CircleAlert size={16} aria-hidden="true" />
-                {t('profile.passwordMismatch')}
-              </p>
-            )}
+          <div className="stg-ctl pf-pw">
+            <PasswordInput
+              id="np"
+              autoComplete="new-password"
+              name="new-password"
+              required
+              value={password}
+              aria-invalid={pwError ? true : undefined}
+              aria-describedby={pwError ? 'np-error np-rules' : 'np-rules'}
+              onFocus={() => setPwTouched(true)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setMismatch(false);
+                setPwError('');
+                setPwFailed(false);
+              }}
+            />
+            <PasswordMeter password={password} />
+            <PasswordError id="np-error">{pwError}</PasswordError>
+            {(pwTouched || password) && <PasswordRules id="np-rules" password={password} failed={pwFailed} />}
+          </div>
+        </div>
+        <div className="stg-row">
+          <div className="stg-text" data-gap-exempt="">
+            <label className="stg-lab" htmlFor="np2">
+              {t('password.confirmLabel')}
+            </label>
+          </div>
+          <div className="stg-ctl pf-pw">
+            <PasswordInput
+              id="np2"
+              autoComplete="new-password"
+              name="new-password-confirm"
+              required
+              value={confirm}
+              aria-invalid={mismatch || undefined}
+              aria-describedby={mismatch ? 'np2-error' : confirm ? 'np2-rule' : undefined}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                setMismatch(false);
+              }}
+            />
+            <PasswordError id="np2-error">{mismatch ? t('password.mismatch') : ''}</PasswordError>
+            {!mismatch && <PasswordMatch id="np2-rule" password={password} confirm={confirm} />}
           </div>
         </div>
       </form>

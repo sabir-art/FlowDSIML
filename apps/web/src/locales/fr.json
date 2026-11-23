@@ -471,6 +471,28 @@
     "htmlMissingAny": "Une étape HTML n’a pas de page : capturez-la à nouveau ou supprimez l’étape.",
     "noVisibleDemo": "Aucune démo ouverte à afficher : publiez une démo avec un lien public."
   },
+  "password": {
+    "show": "Afficher le mot de passe",
+    "strength": "Force du mot de passe :",
+    "level": {
+      "weak": "Faible",
+      "medium": "Moyen",
+      "good": "Bon",
+      "strong": "Fort"
+    },
+    "rule": {
+      "length": "Au moins {{min}} caractères",
+      "letter": "Au moins une lettre",
+      "digit": "Au moins un chiffre"
+    },
+    "match": "Les deux mots de passe sont identiques",
+    "mismatch": "Les deux mots de passe ne sont pas identiques.",
+    "met": "respectée",
+    "unmet": "non respectée",
+    "count_one": "{{count}} règle sur {{total}} respectée",
+    "count_other": "{{count}} règles sur {{total}} respectées",
+    "confirmLabel": "Confirmer le mot de passe"
+  },
   "editor": {
     "steps": "Étapes",
     "untitled": "Sans titre",

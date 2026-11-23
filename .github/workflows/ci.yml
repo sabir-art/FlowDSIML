@@ -168,6 +168,9 @@ jobs:
       - name: Photo de profil (retour client 4)
         if: always()
         run: cd apps/web && node e2e/photo-profil.e2e.cjs
+      - name: Mot de passe (EXT-02 §7, œil, règles en direct, erreurs qui nomment la règle)
+        if: always()
+        run: cd apps/web && node e2e/mot-de-passe.e2e.cjs
       - name: Boutons des pages d'authentification lisibles (libellé, contraste au repos, au survol, au focus)
         if: always()
         run: cd apps/web && node e2e/boutons-auth.e2e.cjs

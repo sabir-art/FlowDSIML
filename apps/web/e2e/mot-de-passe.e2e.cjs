@@ -1,0 +1,288 @@
+/**
+ * EXT-02 §7 : mot de passe sur Nouveau mot de passe, Inscription et Profil. Œil afficher / masquer intégré
+ * au champ, jauge de force, règles de la politique cochées en direct, erreur sous le champ qui dit quoi
+ * faire (règle manquante avant l'envoi, refus du serveur ensuite), confirmation. Faux Supabase.
+ */
+const { chromium } = require('playwright');
+const { AxeBuilder } = require('@axe-core/playwright');
+const { install, seed } = require('./fake-supabase.cjs');
+const APP = process.env.APP_URL || 'http://localhost:5173';
+
+const ok = (c, l) => {
+  console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
+  if (!c) process.exitCode = 1;
+};
+const sp = (s) => s.replace(/\s/g, ' ').trim();
+const axe = async (page, label) => {
+  const r = await new AxeBuilder({ page }).analyze();
+  const bad = r.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
+  ok(bad.length === 0, `axe : ${label} (${bad.map((v) => v.id).join(', ')})`);
+};
+// Mots de passe fictifs des tests
+const SANS_CHIFFRE = 'Acmedemo';
+const VALIDE = 'Acmedemo2026';
+
+(async () => {
+  const b = await chromium.launch();
+
+  // ===== Nouveau mot de passe =====
+  for (const theme of ['light', 'dark']) {
+    const tag = `Nouveau mot de passe (${theme === 'light' ? 'clair' : 'sombre'})`;
+    const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+    await ctx.addInitScript((t) => localStorage.setItem('fd.theme', t), theme);
+    const page = await ctx.newPage();
+    const state = seed();
+    await install(page, state);
+    await page.goto(`${APP}/#/reset-password`);
+    const pw = page.locator('#password');
+    const cf = page.locator('#confirm');
+    await pw.waitFor();
+    const eyes = page.getByRole('button', { name: 'Afficher le mot de passe' });
+    ok((await eyes.count()) === 2, `${tag} : un œil par champ, nom fixe « Afficher le mot de passe »`);
+    ok((await page.locator('#password-rules').count()) === 0, `${tag} : règles masquées avant le focus`);
+
+    // Règles visibles dès le focus
+    await pw.focus();
+    const rules = page.locator('#password-rules li');
+    ok(
+      (await rules.allInnerTexts()).map(sp).join(' | ') ===
+        'Au moins 8 caractères : non respectée | Au moins une lettre : non respectée | Au moins un chiffre : non respectée',
+      `${tag} : trois règles de la politique dès le focus, état lisible sans la couleur`,
+    );
+    ok(
+      (await pw.getAttribute('aria-describedby')) === 'password-rules',
+      `${tag} : le champ est décrit par la liste`,
+    );
+
+    // Saisie : règles cochées en direct, jauge, annonce
+    await pw.pressSequentially(SANS_CHIFFRE);
+    ok(
+      (await page.locator('#password-rules li.is-ok').count()) === 2 &&
+        (await page.locator('#password-rules li.is-ok svg.lucide-circle-check').count()) === 2 &&
+        (await page.locator('#password-rules li.is-todo svg.lucide-circle').count()) === 1,
+      `${tag} : deux règles cochées (icône CircleCheck), une en attente (Circle)`,
+    );
+    ok(
+      sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Moyen' &&
+        (await page.locator('.fd-pw-meter__bar .is-on').count()) === 2,
+      `${tag} : jauge « Moyen », 2 segments sur 4`,
+    );
+    await page.getByRole('status').filter({ hasText: 'règles sur 3 respectées' }).waitFor();
+    ok(true, `${tag} : « 2 règles sur 3 respectées » annoncé après la frappe`);
+
+    // Œil : affiche, garde le focus et le curseur ; indépendant de l'autre champ
+    await pw.evaluate((e) => e.setSelectionRange(3, 3));
+    await eyes.first().click();
+    ok(
+      (await pw.getAttribute('type')) === 'text' &&
+        (await eyes.first().getAttribute('aria-pressed')) === 'true' &&
+        (await page.evaluate(() => document.activeElement?.id)) === 'password' &&
+        (await pw.evaluate((e) => e.selectionStart)) === 3,
+      `${tag} : l’œil affiche le mot de passe, focus et curseur gardés`,
+    );
+    ok(
+      (await cf.getAttribute('type')) === 'password' &&
+        (await eyes.nth(1).getAttribute('aria-pressed')) === 'false',
+      `${tag} : l’œil de la confirmation est indépendant`,
+    );
+    const eye = await eyes.first().evaluate((e) => {
+      const r = e.getBoundingClientRect();
+      const g = e.parentElement.getBoundingClientRect();
+      const i = e.querySelector('svg').getBoundingClientRect();
+      return { w: r.width, h: r.height, icon: i.width, inside: r.right <= g.right && r.left >= g.left };
+    });
+    ok(
+      eye.w === 32 && eye.h === 32 && eye.icon === 16 && eye.inside,
+      `${tag} : bouton de 32 px, icône de 16 px, dans le champ`,
+    );
+
+    // Confirmation : sa règle apparaît à la frappe
+    ok(
+      (await page.locator('#confirm-rule').count()) === 0,
+      `${tag} : règle de confirmation masquée au départ`,
+    );
+    await cf.pressSequentially('Acme');
+    ok(
+      sp(await page.locator('#confirm-rule li').innerText()) ===
+        'Les deux mots de passe sont identiques : non respectée',
+      `${tag} : « Les deux mots de passe sont identiques », en attente`,
+    );
+    await cf.fill(SANS_CHIFFRE);
+    ok(
+      (await page.locator('#confirm-rule li.is-ok').count()) === 1,
+      `${tag} : confirmation identique : cochée`,
+    );
+    if (theme === 'light') await axe(page, 'Nouveau mot de passe, saisie');
+
+    // Envoi avec une règle manquante : rien n'est envoyé, l'erreur dit quoi faire
+    const submit = page.getByRole('button', { name: 'Mettre à jour le mot de passe' });
+    ok(!(await submit.isDisabled()), `${tag} : le bouton d’envoi n’est jamais désactivé`);
+    await submit.click();
+    const err = page.locator('#password-error');
+    await err.waitFor();
+    ok(
+      sp(await err.innerText()) === 'Ajoutez au moins un chiffre.' &&
+        (await err.getAttribute('role')) === 'alert' &&
+        (await err.locator('svg.lucide-circle-alert').count()) === 1,
+      `${tag} : « Ajoutez au moins un chiffre. » sous le champ (alerte, icône)`,
+    );
+    ok(
+      (await pw.getAttribute('aria-invalid')) === 'true' &&
+        (await pw.getAttribute('aria-describedby')) === 'password-error password-rules' &&
+        (await page.evaluate(() => document.activeElement?.id)) === 'password',
+      `${tag} : champ invalide, décrit par l’erreur, focus rendu au champ`,
+    );
+    ok(
+      (await page.locator('#password-rules li.is-failed svg.lucide-circle-x').count()) === 1,
+      `${tag} : la règle manquante passe en erreur (CircleX)`,
+    );
+    ok(
+      (await pw.getAttribute('type')) === 'password' && (state.passwordUpdates ?? 0) === 0,
+      `${tag} : à l’envoi le champ est remasqué ; rien n’a été envoyé au serveur`,
+    );
+    ok(
+      (await page.getByText(/8 caractères minimum|trop faible/).count()) === 0,
+      `${tag} : plus de message « 8 caractères minimum »`,
+    );
+    if (theme === 'light') await axe(page, 'Nouveau mot de passe, erreur');
+
+    // Confirmation différente
+    await pw.fill(VALIDE);
+    ok((await err.count()) === 0, `${tag} : l’erreur disparaît à la correction`);
+    await submit.click();
+    await page.locator('#confirm-error').waitFor();
+    ok(
+      sp(await page.locator('#confirm-error').innerText()) ===
+        'Les deux mots de passe ne sont pas identiques.' &&
+        (await page.evaluate(() => document.activeElement?.id)) === 'confirm' &&
+        (state.passwordUpdates ?? 0) === 0,
+      `${tag} : confirmation différente, focus sur la confirmation, rien d’envoyé`,
+    );
+
+    // Refus du serveur : identique à l'actuel (cas du client), puis mot de passe trop courant
+    await cf.fill(VALIDE);
+    state.passwordRefusal = {
+      error_code: 'same_password',
+      msg: 'New password should be different from the old password.',
+    };
+    await submit.click();
+    await err.waitFor();
+    ok(
+      sp(await err.innerText()) === 'Choisissez un mot de passe différent de l’actuel.' &&
+        state.passwordUpdates === 1,
+      `${tag} : refus « identique à l’actuel » dit tel quel, pas « trop faible »`,
+    );
+    state.passwordRefusal = {
+      error_code: 'weak_password',
+      msg: 'Password is known to be weak and easy to guess, please choose a different one.',
+      weak_password: { reasons: ['pwned'] },
+    };
+    await submit.click();
+    await page.locator('#password-error', { hasText: 'trop courant' }).waitFor();
+    ok(
+      sp(await err.innerText()) === 'Ce mot de passe est trop courant. Choisissez-en un autre.',
+      `${tag} : refus « mot de passe trop courant »`,
+    );
+    // Accepté : retour à l'app
+    state.passwordRefusal = null;
+    await submit.click();
+    await page.waitForURL((u) => !u.hash.includes('reset-password'));
+    ok(state.passwordUpdates === 3, `${tag} : mot de passe accepté, retour à l’app`);
+    await ctx.close();
+  }
+
+  // ===== 390 px : rien ne déborde =====
+  {
+    const page = await b.newPage({ viewport: { width: 390, height: 844 } });
+    await install(page, seed());
+    await page.goto(`${APP}/#/reset-password`);
+    await page.locator('#password').pressSequentially(SANS_CHIFFRE);
+    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
+    await page.locator('#password-error').waitFor();
+    ok(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      '390 px : pas de défilement horizontal (saisie et erreur)',
+    );
+    await page.close();
+  }
+
+  // ===== Inscription =====
+  {
+    // axe demande un contexte créé à la main
+    const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    const s = seed();
+    s.signedOut = true;
+    await install(page, s);
+    await page.goto(`${APP}/#/signup`);
+    const pw = page.locator('#password');
+    await pw.waitFor();
+    await pw.pressSequentially('abc');
+    ok(
+      (await page.locator('#password-rules li').count()) === 3 &&
+        sp(await page.locator('.fd-pw-meter__label').innerText()) === 'Force du mot de passe : Faible' &&
+        (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 1,
+      'Inscription : œil, jauge « Faible » et trois règles',
+    );
+    await page.locator('form button[type=submit]').click();
+    await page.locator('#password-error').waitFor();
+    ok(
+      sp(await page.locator('#password-error').innerText()) ===
+        'Utilisez au moins 8 caractères. Ajoutez au moins un chiffre.',
+      'Inscription : l’erreur reprend toutes les règles manquantes',
+    );
+    ok(
+      (await page.locator('#password-rules li.is-failed').count()) === 2,
+      'Inscription : deux règles en erreur',
+    );
+    await axe(page, 'Inscription, erreur de mot de passe');
+    await page.close();
+  }
+
+  // ===== Profil =====
+  {
+    // axe demande un contexte créé à la main
+    const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    const state = seed();
+    await install(page, state);
+    await page.goto(`${APP}/#/settings/profile`);
+    const np = page.locator('#np');
+    await np.waitFor();
+    await np.focus();
+    ok(
+      (await page.locator('#np-rules li').count()) === 3 &&
+        (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 2,
+      'Profil : œil sur les deux champs, règles dès le focus',
+    );
+    // ALIGN-01 : les champs finissent sur le filet de la ligne
+    const al = await np.evaluate((e) => {
+      const g = e.closest('.fd-pw').getBoundingClientRect();
+      const r = e.closest('.stg-row').getBoundingClientRect();
+      return Math.abs(g.right - r.right);
+    });
+    ok(al <= 1, `Profil : champ calé sur la fin de la ligne (${al})`);
+    await np.pressSequentially(VALIDE);
+    await page.locator('#np2').pressSequentially(VALIDE);
+    state.passwordRefusal = {
+      error_code: 'same_password',
+      msg: 'New password should be different from the old password.',
+    };
+    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
+    await page.locator('#np-error').waitFor();
+    ok(
+      sp(await page.locator('#np-error').innerText()) ===
+        'Choisissez un mot de passe différent de l’actuel.' &&
+        (await page.evaluate(() => document.activeElement?.id)) === 'np',
+      'Profil : refus « identique à l’actuel » sous le champ, focus rendu',
+    );
+    await axe(page, 'Profil, erreur de mot de passe');
+    state.passwordRefusal = null;
+    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
+    await page.getByText('Mot de passe mis à jour').first().waitFor();
+    ok((await np.inputValue()) === '', 'Profil : mot de passe mis à jour, champs vidés');
+    await page.close();
+  }
+  await b.close();
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

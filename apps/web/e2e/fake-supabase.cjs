@@ -715,6 +715,12 @@ async function install(page, state = seed()) {
     if (state.signedOut && p.startsWith('/auth/v1/token'))
       return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
     if (p.startsWith('/auth/v1/user')) {
+      // Changement de mot de passe : compté ; state.passwordRefusal simule un refus de Supabase Auth
+      // (ex. { error_code: 'same_password', msg: '…' }), au format de l'API
+      if (method === 'PUT' && body?.password) {
+        state.passwordUpdates = (state.passwordUpdates ?? 0) + 1;
+        if (state.passwordRefusal) return json(route, 422, { code: 422, ...state.passwordRefusal });
+      }
       if (method === 'PUT' && body?.data)
         state.user.user_metadata = { ...state.user.user_metadata, ...body.data };
       return json(route, 200, state.user);

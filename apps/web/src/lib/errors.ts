@@ -1,5 +1,5 @@
 import type { TFunction } from 'i18next';
-import { PASSWORD_POLICY } from './passwordPolicy';
+import { PASSWORD_POLICY, passwordRules } from './passwordPolicy';
 
 /** Catégories de caractères qu'une politique Supabase Auth peut exiger. */
 type CharKind = 'letter' | 'lower' | 'upper' | 'digit' | 'symbol';
@@ -67,6 +67,29 @@ export function passwordErrorMessage(t: TFunction, err: unknown, password?: stri
 }
 
 /** Traduit une erreur Supabase / RPC en message utilisateur. */
+/**
+ * Avant l'envoi : ce qui manque au mot de passe selon la politique de l'app, dans les mêmes phrases que
+ * les refus du serveur. Renvoie null si toutes les règles sont respectées.
+ */
+export function localPasswordError(t: TFunction, password: string): string | null {
+  const missing = passwordRules(password)
+    .filter((r) => !r.ok)
+    .map((r) => r.rule);
+  if (!missing.length) return null;
+  const parts: string[] = [];
+  if (missing.includes('length')) parts.push(t('errors.pwLength', { min: PASSWORD_POLICY.minLength }));
+  const kinds = missing.filter((r) => r !== 'length');
+  if (kinds.length)
+    parts.push(
+      t('errors.pwChars', {
+        list: new Intl.ListFormat(t('errors.listLocale'), { type: 'conjunction' }).format(
+          kinds.map((k) => t(`errors.pwKind.${k}`)),
+        ),
+      }),
+    );
+  return parts.join(' ');
+}
+
 /**
  * @param opts.password mot de passe saisi (jamais gardé ni journalisé) : précise les catégories manquantes
  */

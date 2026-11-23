@@ -471,6 +471,28 @@
     "htmlMissingAny": "An HTML step has no page: capture it again or delete the step.",
     "noVisibleDemo": "No open demo to show: publish a demo with a public link."
   },
+  "password": {
+    "show": "Show password",
+    "strength": "Password strength:",
+    "level": {
+      "weak": "Weak",
+      "medium": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "rule": {
+      "length": "At least {{min}} characters",
+      "letter": "At least one letter",
+      "digit": "At least one digit"
+    },
+    "match": "Both passwords match",
+    "mismatch": "The two passwords do not match.",
+    "met": "met",
+    "unmet": "not met",
+    "count_one": "{{count}} rule out of {{total}} met",
+    "count_other": "{{count}} rules out of {{total}} met",
+    "confirmLabel": "Confirm password"
+  },
   "editor": {
     "steps": "Steps",
     "untitled": "Untitled",

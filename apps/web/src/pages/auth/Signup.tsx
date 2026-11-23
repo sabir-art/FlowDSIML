@@ -4,13 +4,9 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { authRedirect, supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
-import {
-  fieldA11y,
-  focusFirstError,
-  passwordStrength,
-  validateForm,
-  type FieldErrors,
-} from '../../lib/validation';
+import { fieldA11y, focusFirstError, validateForm, type FieldErrors } from '../../lib/validation';
+import { localPasswordError, passwordErrorMessage } from '../../lib/errors';
+import { PasswordError, PasswordInput, PasswordMeter, PasswordRules } from '../../components/PasswordField';
 import { useAuth } from '../../auth/AuthProvider';
 import { AuthLayout, GoogleMark, MkFieldError, StepsAside } from './AuthLayout';
 
@@ -28,9 +24,8 @@ export function Signup() {
   const [sentTo, setSentTo] = useState('');
   const { busy, error, run } = useAction();
   const resend = useAction();
-  const strength = passwordStrength(password);
-  // Jauge à 4 segments de la maquette : 1 segment sous 8 caractères, puis 2 à 4 selon la robustesse
-  const segments = password ? strength + 1 : 0;
+  const [pwTouched, setPwTouched] = useState(false);
+  const [pwFailed, setPwFailed] = useState(false);
 
   if (user) return <Navigate to={redirect} replace />;
 
@@ -38,28 +33,33 @@ export function Signup() {
     e.preventDefault();
     const form = e.currentTarget;
     const errs = validateForm(form, t);
+    // Mot de passe : les règles de la politique, dans les mêmes phrases que les refus du serveur
+    const local = password ? localPasswordError(t, password) : null;
+    if (local) errs.password = local;
     setErrors(errs);
+    setPwFailed(!!errs.password);
     if (focusFirstError(form, errs)) return;
-    const r = await run(async () =>
-      check(
-        await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: authRedirect(redirect),
-            data: { full_name: fullName, locale: i18n.language === 'en' ? 'en' : 'fr' },
-          },
-        }),
-      ),
-    );
-    if (r !== undefined) setSentTo(email);
+    const r = await run(async () => {
+      const res = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: authRedirect(redirect),
+          data: { full_name: fullName, locale: i18n.language === 'en' ? 'en' : 'fr' },
+        },
+      });
+      const refused = res.error && passwordErrorMessage(t, res.error, password);
+      if (refused) {
+        setErrors({ password: refused });
+        setPwFailed(true);
+        document.getElementById('password')?.focus();
+        return false;
+      }
+      check(res);
+      return true;
+    });
+    if (r) setSentTo(email);
   }
-
-  const help = password
-    ? strength === 0
-      ? t('auth.passwordHelpWeak', { min: 8 })
-      : t('auth.passwordHelp', { min: 8, level: t(`auth.strength_${strength}`) })
-    : t('auth.passwordMinShort', { min: 8 });
 
   return (
     <AuthLayout
@@ -183,35 +183,27 @@ export function Signup() {
             </div>
             <div className="field">
               <label htmlFor="password">{t('auth.password')}</label>
-              <input
+              {/* EXT-02 §7 : œil, jauge de force, règles de la politique cochées en direct */}
+              <PasswordInput
                 id="password"
-                className="input"
-                type="password"
                 autoComplete="new-password"
                 name="new-password"
                 required
-                minLength={8}
                 value={password}
+                onFocus={() => setPwTouched(true)}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   setErrors((x) => ({ ...x, password: '' }));
+                  setPwFailed(false);
                 }}
-                aria-describedby={errors.password ? 'password-error pwd-help' : 'pwd-help'}
+                aria-describedby={errors.password ? 'password-error password-rules' : 'password-rules'}
                 aria-invalid={errors.password ? true : undefined}
               />
-              <div
-                className="pwd-meter"
-                aria-hidden="true"
-                /* §18.6 : jauge de robustesse, segments accolés */ data-gap-exempt=""
-              >
-                {[0, 1, 2, 3].map((i) => (
-                  <span key={i} className={i < segments ? 'on' : undefined} />
-                ))}
-              </div>
-              <MkFieldError id="password" errors={errors} />
-              <span className="help" id="pwd-help" aria-live="polite">
-                {help}
-              </span>
+              <PasswordMeter password={password} />
+              <PasswordError id="password-error">{errors.password}</PasswordError>
+              {(pwTouched || password) && (
+                <PasswordRules id="password-rules" password={password} failed={pwFailed} />
+              )}
             </div>
             <label className="check auth-consent">
               <input

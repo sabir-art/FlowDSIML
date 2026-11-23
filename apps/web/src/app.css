@@ -2664,3 +2664,163 @@ button.fd-nav__item:hover {
     display: none;
   }
 }
+
+/* ---- EXT-02 §7 : champ de mot de passe (œil intégré, jauge de force, règles en direct) ---- */
+/* Champ composé (FIELD-01 §11.3) : le groupe porte la bordure et le trait de focus */
+.fd-pw {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: var(--fd-layout-control-height-md, 40px);
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: var(--fd-radius-md, 10px);
+  background: var(--fd-color-surface);
+  transition:
+    border-color var(--fd-motion-duration-fast),
+    box-shadow var(--fd-motion-duration-fast);
+}
+.fd-pw:hover {
+  border-color: var(--fd-color-border-field-hover);
+}
+.fd-pw:has(.fd-pw__input:focus) {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.fd-pw:has(.fd-pw__input[aria-invalid='true']) {
+  border-color: var(--fd-color-danger);
+}
+.fd-pw:has(.fd-pw__input[aria-invalid='true']:focus) {
+  box-shadow: inset 0 0 0 1px var(--fd-color-danger);
+}
+.fd-pw .fd-pw__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 var(--fd-space-3, 12px);
+  border: 0;
+  border-radius: inherit;
+  outline: none;
+  box-shadow: none;
+  background: none;
+  color: var(--fd-color-text);
+  font: inherit;
+}
+.fd-pw__eye {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-inline-end: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text-muted);
+  cursor: pointer;
+}
+.fd-pw__eye > svg {
+  width: 16px;
+  height: 16px;
+}
+.fd-pw__eye:hover {
+  background: var(--fd-color-surface-hover);
+  color: var(--fd-color-text);
+}
+.fd-pw__eye:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.fd-pw-meter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  --fd-pw-level: var(--fd-color-danger);
+}
+.fd-pw-meter[data-level='medium'] {
+  --fd-pw-level: var(--fd-color-warning);
+}
+.fd-pw-meter:is([data-level='good'], [data-level='strong']) {
+  --fd-pw-level: var(--fd-color-success);
+}
+.fd-pw-meter__bar {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.fd-pw-meter__bar > span {
+  height: 4px;
+  border-radius: 4px;
+  background: var(--fd-color-border);
+}
+.fd-pw-meter__bar > span.is-on {
+  background: var(--fd-pw-level);
+}
+.fd-pw-meter__label {
+  flex: none;
+  min-width: 40px;
+  color: var(--fd-pw-level);
+  font: 600 12px/16px var(--fd-font-sans);
+  text-align: end;
+}
+.fd-pw-rules {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.fd-pw-rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+.fd-pw-rule > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+.fd-pw-rule.is-ok {
+  color: var(--fd-color-text);
+}
+.fd-pw-rule.is-ok > svg {
+  color: var(--fd-color-success);
+}
+.fd-pw-rule.is-failed {
+  color: var(--fd-color-text);
+}
+.fd-pw-rule.is-failed > svg {
+  color: var(--fd-color-danger);
+}
+.fd-pw-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: var(--fd-color-danger-text, var(--fd-color-danger));
+  font-size: 13px;
+  line-height: 18px;
+}
+.fd-pw-error > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--fd-color-danger);
+}
+@media (prefers-reduced-motion: reduce) {
+  .fd-pw {
+    transition: none;
+  }
+}
+/* Dans une ligne de réglage, la colonne espace déjà ses éléments de 8 px */
+.stg-ctl.pf-pw > :is(.fd-pw-meter, .fd-pw-rules, .fd-pw-error) {
+  margin-top: 0;
+}

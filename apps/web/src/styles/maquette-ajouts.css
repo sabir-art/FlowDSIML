@@ -185,19 +185,6 @@
 .mk .aside-list li:last-child .n {
   background: var(--fd-ember-500);
 }
-.mk .pwd-meter {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-}
-.mk .pwd-meter span {
-  height: 4px;
-  border-radius: 4px;
-  background: var(--fd-color-surface-sunken);
-}
-.mk .pwd-meter span.on {
-  background: var(--fd-color-success);
-}
 .mk .auth-aside--steps {
   justify-content: center;
 }
