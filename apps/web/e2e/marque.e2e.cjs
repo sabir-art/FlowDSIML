@@ -91,12 +91,23 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       'Logo|Couleurs de la marque|Styles des démos',
     'trois sections dans l’ordre',
   );
+  // MEDIA-01 §18.1 : zone de dépôt sur une rangée, une source par bouton, jamais de bouton dans une phrase
+  const zone = logo.getByRole('group', { name: 'Logo' });
   ok(
-    /Déposez un logo ou\s*Choisir un fichier\s*ou\s*Médiathèque/.test(
-      sp(await logo.locator('.br-drop').innerText()),
-    ),
-    'logo : zone de dépôt (état vide)',
+    /Glissez un fichier ici/.test(sp(await zone.innerText())) &&
+      (await zone.getByRole('button', { name: 'Choisir un fichier' }).count()) === 1 &&
+      (await zone.getByRole('button', { name: 'Médiathèque' }).count()) === 1 &&
+      (await zone.locator('.fd-dz__txt button').count()) === 0,
+    'logo : zone de dépôt (état vide), « Choisir un fichier » et « Médiathèque » en boutons',
   );
+  {
+    const zb = await zone.boundingBox();
+    const rb = await logo.locator('.stg-row').boundingBox();
+    ok(
+      Math.abs(zb.x - rb.x) <= 1 && Math.abs(zb.x + zb.width - (rb.x + rb.width)) <= 1,
+      'logo : la zone prend toute la largeur de la ligne, jusqu’à la fin du filet',
+    );
+  }
   ok(
     await header.getByRole('button', { name: 'Enregistrer' }).isDisabled(),
     '« Enregistrer » désactivé sans changement',
@@ -115,11 +126,18 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   });
   ok(sp(await logo.getByRole('alert').innerText()) === 'Le fichier dépasse 2 Mo.', 'logo : 2 Mo au plus');
   await file.setInputFiles(path.join(__dirname, 'fixture.png'));
-  await logo.getByRole('img', { name: /sur fond sombre/ }).waitFor();
-  ok((await logo.getByRole('img').count()) === 2, 'logo : aperçu sur fond clair et sombre');
+  await zone.locator('.fd-dz__pre--img img').waitFor();
+  ok(
+    (await zone.evaluate((el) => el.classList.contains('is-filled'))) &&
+      /Logo de /.test(sp(await zone.innerText())),
+    'logo : état rempli, aperçu et nom dans la zone',
+  );
   ok(/^ws-1\/logo-.+\.png$/.test(t.workspaces[0].logo_path || ''), 'logo enregistré dans branding/<espace>/');
-  ok((await logo.getByRole('button', { name: 'Remplacer' }).count()) === 1, 'Remplacer');
-  ok((await logo.getByRole('button', { name: 'Retirer' }).count()) === 1, 'Retirer');
+  ok((await logo.getByRole('button', { name: 'Remplacer…' }).count()) === 1, 'Remplacer…');
+  ok(
+    (await logo.getByRole('button', { name: 'Retirer le logo' }).count()) === 1,
+    'Retirer le logo (bouton icône)',
+  );
 
   // Couleurs de la marque
   const colors = page.getByRole('region', { name: 'Couleurs de la marque' });

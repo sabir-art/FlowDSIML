@@ -78,7 +78,7 @@ export function Team() {
   return (
     <div className="console-stack">
       {dialog}
-      <h1 className="sr-only">{t('console.tabs.team')}</h1>
+      <h2 className="sr-only">{t('console.tabs.team')}</h2>
       <section className="fd-card" aria-labelledby="tm-t">
         <div className="console-card-head">
           <h2 id="tm-t" className="console-h2">

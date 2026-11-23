@@ -1,4 +1,14 @@
 {
+  "dropzone": {
+    "title": "Glissez un fichier ici",
+    "none": "Aucun fichier",
+    "dropHere": "Déposez le fichier pour l’importer",
+    "failed": "Ce fichier n’a pas été importé",
+    "sending": "Envoi en cours…",
+    "pick": "Choisir un fichier",
+    "replace": "Remplacer…",
+    "remove": "Retirer le fichier"
+  },
   "app": {
     "name": "{{app}}"
   },
@@ -2882,8 +2892,9 @@
     "logoNone": "Aucun logo. Le nom de l’espace est affiché à la place.",
     "logoAdd": "Importer un logo",
     "logoReplace": "Remplacer",
-    "logoRemove": "Retirer",
+    "logoRemove": "Retirer le logo",
     "logoFormats": "PNG, JPEG, WebP ou SVG, 2 Mo au plus.",
+    "logoFile": "Logo de {{name}}",
     "logoFormat": "Ce format n’est pas accepté. Choisissez un fichier PNG, JPEG, WebP ou SVG.",
     "logoSize": "Le fichier dépasse 2 Mo.",
     "colorsTitle": "Couleurs de la marque",
@@ -3743,6 +3754,14 @@
     "bubblesLocked": "Sans captures, pas de bulles"
   },
   "onb": {
+    "panelTitle": "Prise en main",
+    "button": "Prise en main",
+    "buttonHint_one": "({{count}} étape sur {{total}})",
+    "buttonHint_other": "({{count}} étapes sur {{total}})",
+    "nextKicker": "Prochaine étape",
+    "todo": "À faire ensuite",
+    "doneList": "Terminées",
+    "footShort": "Visible par les propriétaires et administrateurs.",
     "title": "Prise en main de votre espace",
     "sub_one": "{{count}} étape sur {{total}}. Elles se cochent seules quand vous les faites.",
     "sub_other": "{{count}} étapes sur {{total}}. Elles se cochent seules quand vous les faites.",
@@ -3931,6 +3950,10 @@
     }
   },
   "present": {
+    "backEditor": "Éditeur",
+    "backEditorLabel": "Retour à l’éditeur",
+    "barStep": "Présentation · étape {{n}} sur {{total}}",
+    "closeScreen": "Fermer",
     "button": "Présenter",
     "title": "Présenter « {{title}} »",
     "display": "Affichage",
@@ -5048,6 +5071,8 @@
     "team": "Équipe TutoClick",
     "sub": "Équipe TutoClick · tous les espaces",
     "back": "Retour à l’app",
+    "backApp": "Application",
+    "backLabel": "Retour à l’application",
     "tabsLabel": "Sections de la console",
     "export": "Exporter",
     "undo": "Annuler",
@@ -5061,6 +5086,10 @@
       "read_only": "Lecture seule"
     },
     "tabs": {
+      "newCount_one": "{{count}} nouveau",
+      "newCount_other": "{{count}} nouveaux",
+      "triageCount_one": "{{count}} à trier",
+      "triageCount_other": "{{count}} à trier",
       "overview": "Vue d’ensemble",
       "feedback": "Retours",
       "feedbackN_one": "Retours · {{count}} nouveau",

@@ -56,7 +56,7 @@ export function Feedback() {
   };
   return (
     <div className="console-stack">
-      <h1 className="sr-only">{t('console.tabs.feedback')}</h1>
+      <h2 className="sr-only">{t('console.tabs.feedback')}</h2>
       <div className="console-bar-row">
         <div className="fd-segmented" role="group" aria-label={t('console.fb.view')}>
           <button type="button" aria-pressed={view === 'articles'} onClick={() => set('vue', null)}>

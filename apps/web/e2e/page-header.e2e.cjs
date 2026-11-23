@@ -32,6 +32,9 @@ const SHELL = [
 const EDITORS = [
   ['Éditeur', `/demos/${DEMO}/edit`],
   ['Éditeur de quiz', `/demos/${DEMO}/quiz`],
+  // §16.2 : hors coque, même variante (la Console demande un rôle d'équipe)
+  ['Console', '/console', 'admin'],
+  ['Présentateur', `/demos/${DEMO}/present`],
 ];
 const OUTSIDE = [
   ['Connexion', '/login'],
@@ -62,13 +65,13 @@ function measure() {
     console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
     if (!c) process.exitCode = 1;
   };
-  const open = async (route, width, signedOut) => {
+  const open = async (route, width, signedOut, platformRole) => {
     const ctx = await b.newContext({
       viewport: { width, height: width === 390 ? 844 : 900 },
       locale: 'fr-FR',
     });
     const p = await ctx.newPage();
-    await install(p, { ...seedMaquette(), signedOut });
+    await install(p, { ...seedMaquette(), signedOut, ...(platformRole ? { platformRole } : {}) });
     await p.goto(`${APP}/#${route}`);
     // Le titre de la page est rendu (dans la barre, ou seul hors coque)
     await p.locator('h1').first().waitFor({ state: 'attached' });
@@ -96,8 +99,8 @@ function measure() {
       );
       await p.context().close();
     }
-  for (const [name, route] of EDITORS) {
-    const p = await open(route, 1440, false);
+  for (const [name, route, platformRole] of EDITORS) {
+    const p = await open(route, 1440, false, platformRole);
     await p
       .locator('.fd-page-header--editor')
       .waitFor({ timeout: 10000 })

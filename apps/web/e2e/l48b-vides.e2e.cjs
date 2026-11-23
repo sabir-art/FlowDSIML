@@ -1,6 +1,6 @@
 /**
  * Recette L48-B (spec docs/ux/specs/l48b-etats-vides.md §4 et §6). Données fictives.
- *  - espace neuf : pas d'indicateurs, prise en main repliée, pas de barre ; état vide avec une seule action
+ *  - espace neuf : pas d'indicateurs, prise en main fermée (bouton du PageHeader), pas de barre ; état vide avec une seule action
  *    principale (« Nouvelle démo » au centre, pas dans l'en-tête), sans tuiles, « Voir un exemple » désactivé ;
  *  - recherche « zzz » avec 2 filtres : variante search annoncée, « Réinitialiser les filtres ».
  * Usage : node e2e/l48b-vides.e2e.cjs
@@ -37,8 +37,9 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   ok((await p.locator('.kpi-short').count()) === 0, 'pas d’indicateurs avant la première publication');
   ok((await p.locator('.demos-section .list-toolbar').count()) === 0, 'pas de barre de liste sans démo');
   ok(
-    (await p.getByRole('button', { name: 'Afficher la prise en main' }).count()) === 1,
-    'prise en main repliée au-dessus de l’état vide',
+    (await p.locator('#onb-toggle').getAttribute('aria-expanded')) === 'false' &&
+      (await p.locator('#onb-panel, .onb-card').count()) === 0,
+    'ONB-01 : prise en main hors du flux (bouton du PageHeader, panneau fermé) au-dessus de l’état vide',
   );
   ok(
     (await empty.getByRole('heading', { level: 2 }).textContent()) === 'Créez votre première démo',

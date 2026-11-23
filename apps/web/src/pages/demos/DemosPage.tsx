@@ -59,7 +59,13 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { createDemoFromImages } from './importImages';
-import { OnboardingCard, useOnboarding } from './OnboardingCard';
+import {
+  OnboardingButton,
+  OnboardingPanel,
+  onboardingProgress,
+  useOnboarding,
+  useOnboardingOpen,
+} from './OnboardingCard';
 import { loadHome, type Stats } from './home';
 import { useShareRules } from '../../lib/shareRules';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -339,24 +345,12 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     void load();
   }, [load]);
   const sk = useSkeleton(!demos || !onb.ready);
-  // L32 : hauteur de la prise en main à la dernière visite (place réservée dans le squelette)
-  const onbKey = `fd.onb.h.${ws.id}`;
-  const onbHeight = useMemo(() => {
-    try {
-      return Number(localStorage.getItem(onbKey)) || 0;
-    } catch {
-      return 0;
-    }
-  }, [onbKey]);
-  useEffect(() => {
-    if (sk.phase !== 'content') return;
-    const h = Math.round(document.querySelector('.onb-card')?.getBoundingClientRect().height ?? 0);
-    try {
-      localStorage.setItem(onbKey, String(h));
-    } catch {
-      /* stockage indisponible : pas de place réservée */
-    }
-  }, [sk.phase, onbKey, onb.state]);
+  // ONB-01 : panneau de prise en main à droite, ouvert ou fermé selon le dernier choix de la personne
+  const onbAdmin = ws.role === 'owner' || ws.role === 'admin';
+  const onbProgress = onboardingProgress(onb.state, onbAdmin, can('demo.edit'));
+  // Espace tout neuf (aucune étape faite) : ouvert à la première visite du propriétaire ou d'un admin
+  const [onbOpen, setOnbOpen, onbResumed] = useOnboardingOpen(ws.id, onbAdmin && onbProgress?.n === 0);
+  const closeOnb = useCallback(() => setOnbOpen(false), [setOnbOpen]);
   useMainBusy((!demos || !onb.ready || sk.phase !== 'content') && !loadError);
   const retry = () => {
     setLoadError(false);
@@ -639,6 +633,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                 ]}
               />
             )}
+            {/* ONB-01 : point d'entrée de la prise en main (page Démos, toutes les démos) */}
+            {!sandbox && !scopeName && !loading && (
+              <OnboardingButton onb={onb} open={onbOpen} onToggle={() => setOnbOpen(!onbOpen)} />
+            )}
             {/* L48-B : liste vide, une seule action principale (au centre de l'état vide) */}
             {editable && !(demos && demos.length === 0) && (
               <Button
@@ -672,10 +670,15 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     return frame(
       <>
         <LoadStatus loading busy={t('loading.demos')} done="" longLoad={false} />
-        {sk.phase === 'skeleton' && <DemosSkeleton onboardingHeight={onbHeight} />}
+        {sk.phase === 'skeleton' && <DemosSkeleton />}
         {sk.slow && <SlowLine onRetry={retry} />}
       </>,
     );
+
+  // ONB-01 : le panneau ne concerne que « Toutes les démos »
+  // Quand tout est fait, le bouton a disparu : le panneau ne revient que par « Reprendre » dans l'aide
+  const onbShown =
+    onbOpen && !sandbox && scope === 'all' && !!onbProgress && (!onbProgress.complete || onbResumed);
 
   /** DSH-10 : publiée puis modifiée (changements non publiés). */
   const isModified = (d: Demo) =>
@@ -889,358 +892,430 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           />
         </div>
       )}
-      <div className="demos-main">
+      <div className={`demos-main${onbShown ? ' demos-main--onb' : ''}`}>
         {pageHead(false)}
-        <div className={`stack page-wide demos-wrap${scopeName ? ' demos-wrap--scoped' : ''}`}>
-          <Suspense fallback={null}>
-            {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
-            {distributing && <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />}
-          </Suspense>
-          <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
-          {error && <Alert kind="error">{error}</Alert>}
+        <div className="demos-row">
+          <div className={`stack page-wide demos-wrap${scopeName ? ' demos-wrap--scoped' : ''}`}>
+            <Suspense fallback={null}>
+              {exporting && <ExportDialog demoId={exporting} onClose={() => setExporting(null)} />}
+              {distributing && (
+                <DistributeDialog demoId={distributing} onClose={() => setDistributing(null)} />
+              )}
+            </Suspense>
+            <LoadStatus loading={false} longLoad={sk.longLoad} busy="" done={t('loading.demosDone')} />
+            {error && <Alert kind="error">{error}</Alert>}
 
-          <section aria-labelledby="demos-list-title" className="demos-section">
-            {/* PAGE-01 (COMP-01 §16) : le contenu ne répète pas le titre de la page ; le titre de la liste reste
+            <section aria-labelledby="demos-list-title" className="demos-section">
+              {/* PAGE-01 (COMP-01 §16) : le contenu ne répète pas le titre de la page ; le titre de la liste reste
                 pour les lecteurs d'écran, le nombre est dans le segmenté (« Toutes · 4 ») */}
-            <h2 id="demos-list-title" className="sr-only">
-              {scopeName
-                ? t('demos.resultCount', { count: visible.length })
-                : sandbox
-                  ? t('sandboxPage.all')
-                  : t('demos.allDemos')}
-            </h2>
-            {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
-            {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
-            {demos.length > 0 && (
-              <ListToolbar
-                className="list-toolbar--cq"
-                activeCount={
-                  (status !== 'all' ? 1 : 0) +
-                  (ctype !== 'all' ? 1 : 0) +
-                  (author !== 'all' ? 1 : 0) +
-                  (tagFilter.length ? 1 : 0)
-                }
-                onReset={() => {
-                  setStatus('all');
-                  setCtype('all');
-                  setAuthor('all');
-                  setTagFilter([]);
-                }}
-                status={t('demos.resultCount', { count: visible.length })}
-                lead={
-                  <>
-                    <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
-                      {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
-                        <button
-                          key={k}
-                          type="button"
-                          aria-pressed={status === k}
-                          onClick={() => setStatus(k)}
-                        >
-                          {t(`demos.filter_${k}`)} · {counts[k]}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                }
-                filters={
-                  <>
-                    {/* L48-G §4 : Type (pas sur la page Sandbox), en menu : la barre reste sur une ligne */}
-                    {!sandbox && (
+              <h2 id="demos-list-title" className="sr-only">
+                {scopeName
+                  ? t('demos.resultCount', { count: visible.length })
+                  : sandbox
+                    ? t('sandboxPage.all')
+                    : t('demos.allDemos')}
+              </h2>
+              {/* L40 : Statut, Dossier, Étiquettes et Réinitialiser à gauche ; tri et affichage à droite */}
+              {/* L48-B §4 : pas de barre de liste tant qu'il n'y a aucune démo */}
+              {demos.length > 0 && (
+                <ListToolbar
+                  className="list-toolbar--cq"
+                  activeCount={
+                    (status !== 'all' ? 1 : 0) +
+                    (ctype !== 'all' ? 1 : 0) +
+                    (author !== 'all' ? 1 : 0) +
+                    (tagFilter.length ? 1 : 0)
+                  }
+                  onReset={() => {
+                    setStatus('all');
+                    setCtype('all');
+                    setAuthor('all');
+                    setTagFilter([]);
+                  }}
+                  status={t('demos.resultCount', { count: visible.length })}
+                  lead={
+                    <>
+                      <div className="fd-segmented" role="group" aria-label={t('demos.status')}>
+                        {(['all', 'published', 'draft'] as StatusFilter[]).map((k) => (
+                          <button
+                            key={k}
+                            type="button"
+                            aria-pressed={status === k}
+                            onClick={() => setStatus(k)}
+                          >
+                            {t(`demos.filter_${k}`)} · {counts[k]}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  }
+                  filters={
+                    <>
+                      {/* L48-G §4 : Type (pas sur la page Sandbox), en menu : la barre reste sur une ligne */}
+                      {!sandbox && (
+                        <FilterMenu
+                          icon={<Shapes />}
+                          compact
+                          label={t('ctype.filter')}
+                          value={ctype === 'all' ? t('ctype.all') : t(`ctype.short.${ctype}`)}
+                          active={ctype !== 'all'}
+                          items={(['all', 'captures', 'html'] as TypeFilter[]).map((k) => ({
+                            label: k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`),
+                            icon: ctype === k ? <Check /> : <span />,
+                            onSelect: () => setCtype(k),
+                          }))}
+                        />
+                      )}
                       <FilterMenu
-                        icon={<Shapes />}
-                        compact
-                        label={t('ctype.filter')}
-                        value={ctype === 'all' ? t('ctype.all') : t(`ctype.short.${ctype}`)}
-                        active={ctype !== 'all'}
-                        items={(['all', 'captures', 'html'] as TypeFilter[]).map((k) => ({
-                          label: k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`),
-                          icon: ctype === k ? <Check /> : <span />,
-                          onSelect: () => setCtype(k),
+                        icon={<Users />}
+                        label={t('folders.author')}
+                        value={
+                          author === 'all'
+                            ? t('toolbar.all')
+                            : author === 'me'
+                              ? t('folders.me')
+                              : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
+                        }
+                        active={author !== 'all'}
+                        items={[
+                          {
+                            label: t('toolbar.all'),
+                            icon: author === 'all' ? <Check /> : <span />,
+                            onSelect: () => setAuthor('all'),
+                          },
+                          {
+                            label: t('folders.me'),
+                            icon: author === 'me' ? <Check /> : <span />,
+                            onSelect: () => setAuthor('me'),
+                          },
+                          ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
+                          ...people
+                            .filter((p) => p.user_id !== user?.id)
+                            .map((p) => ({
+                              label: p.full_name || p.email,
+                              icon: author === p.user_id ? <Check /> : <span />,
+                              onSelect: () => setAuthor(p.user_id),
+                            })),
+                        ]}
+                      />
+                      <TagFilter
+                        store={tagStore}
+                        selected={tagFilter}
+                        setSelected={setTagFilter}
+                        mode={tagMode}
+                        setMode={setTagMode}
+                        manage={editable}
+                      />
+                    </>
+                  }
+                  end={
+                    <>
+                      <FilterMenu
+                        sort
+                        align="end"
+                        icon={<ArrowUpDown />}
+                        label={t('demos.sortLabel')}
+                        value={sortLabels[sort]}
+                        items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
+                          label: sortLabels[k],
+                          icon: sort === k ? <Check /> : <span />,
+                          onSelect: () => setSort(k),
                         }))}
                       />
-                    )}
-                    <FilterMenu
-                      icon={<Users />}
-                      label={t('folders.author')}
-                      value={
-                        author === 'all'
-                          ? t('toolbar.all')
-                          : author === 'me'
-                            ? t('folders.me')
-                            : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
-                      }
-                      active={author !== 'all'}
-                      items={[
-                        {
-                          label: t('toolbar.all'),
-                          icon: author === 'all' ? <Check /> : <span />,
-                          onSelect: () => setAuthor('all'),
-                        },
-                        {
-                          label: t('folders.me'),
-                          icon: author === 'me' ? <Check /> : <span />,
-                          onSelect: () => setAuthor('me'),
-                        },
-                        ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
-                        ...people
-                          .filter((p) => p.user_id !== user?.id)
-                          .map((p) => ({
-                            label: p.full_name || p.email,
-                            icon: author === p.user_id ? <Check /> : <span />,
-                            onSelect: () => setAuthor(p.user_id),
-                          })),
-                      ]}
-                    />
-                    <TagFilter
-                      store={tagStore}
-                      selected={tagFilter}
-                      setSelected={setTagFilter}
-                      mode={tagMode}
-                      setMode={setTagMode}
-                      manage={editable}
-                    />
-                  </>
-                }
-                end={
-                  <>
-                    <FilterMenu
-                      sort
-                      align="end"
-                      icon={<ArrowUpDown />}
-                      label={t('demos.sortLabel')}
-                      value={sortLabels[sort]}
-                      items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
-                        label: sortLabels[k],
-                        icon: sort === k ? <Check /> : <span />,
-                        onSelect: () => setSort(k),
-                      }))}
-                    />
-                    <div
-                      className="fd-segmented fd-segmented--icons"
-                      role="radiogroup"
-                      aria-label={t('demos.view')}
-                    >
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={view === 'grid'}
-                        aria-label={t('demos.viewGrid')}
-                        title={t('demos.viewGrid')}
-                        onClick={() => chooseView('grid')}
+                      <div
+                        className="fd-segmented fd-segmented--icons"
+                        role="radiogroup"
+                        aria-label={t('demos.view')}
                       >
-                        <LayoutGrid aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
-                        role="radio"
-                        aria-checked={view === 'list'}
-                        aria-label={t('demos.viewList')}
-                        title={t('demos.viewList')}
-                        onClick={() => chooseView('list')}
-                      >
-                        <List aria-hidden="true" />
-                      </button>
-                    </div>
-                  </>
-                }
-              />
-            )}
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={view === 'grid'}
+                          aria-label={t('demos.viewGrid')}
+                          title={t('demos.viewGrid')}
+                          onClick={() => chooseView('grid')}
+                        >
+                          <LayoutGrid aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={view === 'list'}
+                          aria-label={t('demos.viewList')}
+                          title={t('demos.viewList')}
+                          onClick={() => chooseView('list')}
+                        >
+                          <List aria-hidden="true" />
+                        </button>
+                      </div>
+                    </>
+                  }
+                />
+              )}
 
-            {/* PAGE-01 : la barre de filtres est la première ligne, les indicateurs viennent ensuite */}
-            {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
-            {kpis && anyPublished && !sandbox && scope === 'all' && (
-              <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
-                {(
-                  [
+              {/* PAGE-01 : la barre de filtres est la première ligne, les indicateurs viennent ensuite */}
+              {/* L48-B §4 : indicateurs masqués tant qu'aucune démo n'est publiée */}
+              {kpis && anyPublished && !sandbox && scope === 'all' && (
+                <nav className="kpi-short" aria-label={t('kpi.shortcuts')}>
+                  {(
                     [
-                      'views',
-                      t('kpi.views'),
-                      formatNumber(kpis.cur.views),
-                      countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
-                    ],
-                    [
-                      'visitors',
-                      t('kpi.visitorsUnique'),
-                      formatNumber(kpis.cur.visitors),
-                      countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
-                    ],
-                    [
-                      'completion',
-                      t('kpi.completion'),
-                      `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)}\u00a0%`,
-                      rateTrend(
-                        completionRate(kpis.cur.visitors, kpis.cur.completions),
-                        kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
-                        kpis.prev?.visitors ?? 0,
-                      ),
-                    ],
-                    [
-                      'leads',
-                      t('kpi.leads'),
-                      formatNumber(kpis.cur.leads),
-                      countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
-                    ],
-                  ] as const
-                ).map(([k, label, value, trend]) => (
-                  // Indicateur : écarts internes de 4 px (maquette du lot 2)
-                  <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`} data-gap-exempt="">
-                    <span className="kpi-tab__l">{label}</span>
-                    <span className="kpi-tab__v">{value}</span>
-                    {kpis.prev ? (
-                      <TrendBadge trend={trend} days={30} />
-                    ) : (
-                      <span className="kpi-trend">{'\u00a0'}</span>
-                    )}
-                    <span className="kpi-sc__go" aria-hidden="true">
-                      <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
-                      <ArrowRight />
-                    </span>
-                    <span className="sr-only">{t('kpi.seeAnalytics')}</span>
-                  </Link>
-                ))}
-              </nav>
-            )}
-
-            {/* L26-01 : « Prise en main de votre espace », après les indicateurs (L32 §2) */}
-            {!sandbox && scope === 'all' && (
-              <OnboardingCard
-                onb={onb}
-                onCapture={openNew}
-                latestDemoId={demos[0]?.id ?? null}
-                publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
-                collapsedByDefault={demos.length === 0}
-              />
-            )}
-
-            {demos.length === 0 && sandbox ? (
-              <Empty
-                icon={<MapIcon />}
-                title={t('sandboxPage.emptyTitle')}
-                body={t('sandboxPage.emptyBody')}
-                action={
-                  editable ? (
-                    <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                      {t('sandboxPage.new')}
-                    </Button>
-                  ) : undefined
-                }
-              />
-            ) : demos.length === 0 ? (
-              // L48-B : une seule action au centre, « Nouvelle démo », et « Voir un exemple » (pas encore de
-              // démo d'exemple : lien désactivé, « Bientôt » en texte)
-              <Empty
-                icon={<LayoutGrid />}
-                title={editable ? t('demos.empty.title') : t('demos.empty.titleViewer')}
-                body={editable ? t('demos.empty.body') : t('demos.empty.bodyViewer')}
-                action={
-                  editable ? (
-                    <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                      {t('demos.new')}
-                    </Button>
-                  ) : undefined
-                }
-                secondary={
-                  editable ? (
-                    <span className="demos-example">
-                      <span className="link-button" role="link" aria-disabled="true">
-                        {t('demos.empty.example')}
-                      </span>{' '}
-                      <span className="soon-text">{t('shell.soon')}</span>
-                    </span>
-                  ) : undefined
-                }
-              />
-            ) : visible.length === 0 && inView.length === 0 && scope === 'archived' ? (
-              <Empty
-                icon={<Archive />}
-                title={t('demos.empty.archivedTitle')}
-                body={t('demos.empty.archivedBody')}
-              />
-            ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
-              <Empty
-                icon={<FolderOpen />}
-                title={t('demos.empty.folderTitle')}
-                body={t('demos.empty.folderBody', { folder: scopeName ?? '' })}
-                action={
-                  editable ? (
-                    <Button variant="primary" icon={<Plus />} onClick={openNew}>
-                      {t('demos.empty.folderAction')}
-                    </Button>
-                  ) : undefined
-                }
-              />
-            ) : visible.length === 0 ? (
-              <NoMatch
-                what="demo"
-                query={q}
-                filters={
-                  (status !== 'all' ? 1 : 0) +
-                  (ctype !== 'all' ? 1 : 0) +
-                  (author !== 'all' ? 1 : 0) +
-                  (tagFilter.length ? 1 : 0) +
-                  (scope !== 'all' && !wide ? 1 : 0)
-                }
-                onReset={() => {
-                  setQ('');
-                  setStatus('all');
-                  setCtype('all');
-                  setAuthor('all');
-                  setTagFilter([]);
-                }}
-              />
-            ) : view === 'list' ? (
-              <div className="fd-card demo-table-wrap">
-                <table className="demo-table">
-                  <caption className="sr-only">{t('demos.listCaption')}</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">{t('demos.colName')}</th>
-                      {!sandbox && (
-                        <th scope="col" className="dt-md">
-                          {t('ctype.col')}
-                        </th>
+                      [
+                        'views',
+                        t('kpi.views'),
+                        formatNumber(kpis.cur.views),
+                        countTrend(kpis.cur.views, kpis.prev?.views ?? 0),
+                      ],
+                      [
+                        'visitors',
+                        t('kpi.visitorsUnique'),
+                        formatNumber(kpis.cur.visitors),
+                        countTrend(kpis.cur.visitors, kpis.prev?.visitors ?? 0),
+                      ],
+                      [
+                        'completion',
+                        t('kpi.completion'),
+                        `${Math.round(completionRate(kpis.cur.visitors, kpis.cur.completions) * 100)}\u00a0%`,
+                        rateTrend(
+                          completionRate(kpis.cur.visitors, kpis.cur.completions),
+                          kpis.prev ? completionRate(kpis.prev.visitors, kpis.prev.completions) : 0,
+                          kpis.prev?.visitors ?? 0,
+                        ),
+                      ],
+                      [
+                        'leads',
+                        t('kpi.leads'),
+                        formatNumber(kpis.cur.leads),
+                        countTrend(kpis.cur.leads, kpis.prev?.leads ?? 0),
+                      ],
+                    ] as const
+                  ).map(([k, label, value, trend]) => (
+                    // Indicateur : écarts internes de 4 px (maquette du lot 2)
+                    <Link key={k} className="kpi-sc" to={`/analytics?indicateur=${k}`} data-gap-exempt="">
+                      <span className="kpi-tab__l">{label}</span>
+                      <span className="kpi-tab__v">{value}</span>
+                      {kpis.prev ? (
+                        <TrendBadge trend={trend} days={30} />
+                      ) : (
+                        <span className="kpi-trend">{'\u00a0'}</span>
                       )}
-                      <th scope="col" className="dt-md">
-                        {t('demos.colStatus')}
-                      </th>
-                      {/* Décision UX du 22/11 : Dossier et Complétion masquées sous 1 280 px */}
-                      <th scope="col" className="dt-xl">
-                        {t('demos.colFolder')}
-                      </th>
-                      <th scope="col">{t('tags.title')}</th>
-                      <th scope="col" className="r dt-md">
-                        {t('demos.colViews')}
-                      </th>
-                      <th scope="col" className="r dt-xl">
-                        {t('demos.colCompletion')}
-                      </th>
-                      <th scope="col">{t('demos.colUpdated')}</th>
-                      <th scope="col">
-                        <span className="sr-only">{t('demos.colActions')}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {visible.map((d) => {
-                      const s = stats[d.id];
-                      const rate = s ? Math.round(completionRate(s.visitors, s.completions) * 100) : 0;
-                      return (
-                        <tr key={d.id} {...demoDrag(d)}>
-                          <td>
-                            <span className="dt-name">
-                              <span className="dt-thumb" aria-hidden="true">
-                                {covers[d.id] ? <img src={covers[d.id]} alt="" loading="lazy" /> : null}
+                      <span className="kpi-sc__go" aria-hidden="true">
+                        <span className="kpi-sc__go-t">{t('kpi.analytics')}</span>
+                        <ArrowRight />
+                      </span>
+                      <span className="sr-only">{t('kpi.seeAnalytics')}</span>
+                    </Link>
+                  ))}
+                </nav>
+              )}
+
+              {demos.length === 0 && sandbox ? (
+                <Empty
+                  icon={<MapIcon />}
+                  title={t('sandboxPage.emptyTitle')}
+                  body={t('sandboxPage.emptyBody')}
+                  action={
+                    editable ? (
+                      <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                        {t('sandboxPage.new')}
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              ) : demos.length === 0 ? (
+                // L48-B : une seule action au centre, « Nouvelle démo », et « Voir un exemple » (pas encore de
+                // démo d'exemple : lien désactivé, « Bientôt » en texte)
+                <Empty
+                  icon={<LayoutGrid />}
+                  title={editable ? t('demos.empty.title') : t('demos.empty.titleViewer')}
+                  body={editable ? t('demos.empty.body') : t('demos.empty.bodyViewer')}
+                  action={
+                    editable ? (
+                      <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                        {t('demos.new')}
+                      </Button>
+                    ) : undefined
+                  }
+                  secondary={
+                    editable ? (
+                      <span className="demos-example">
+                        <span className="link-button" role="link" aria-disabled="true">
+                          {t('demos.empty.example')}
+                        </span>{' '}
+                        <span className="soon-text">{t('shell.soon')}</span>
+                      </span>
+                    ) : undefined
+                  }
+                />
+              ) : visible.length === 0 && inView.length === 0 && scope === 'archived' ? (
+                <Empty
+                  icon={<Archive />}
+                  title={t('demos.empty.archivedTitle')}
+                  body={t('demos.empty.archivedBody')}
+                />
+              ) : visible.length === 0 && inView.length === 0 && folder !== 'all' ? (
+                <Empty
+                  icon={<FolderOpen />}
+                  title={t('demos.empty.folderTitle')}
+                  body={t('demos.empty.folderBody', { folder: scopeName ?? '' })}
+                  action={
+                    editable ? (
+                      <Button variant="primary" icon={<Plus />} onClick={openNew}>
+                        {t('demos.empty.folderAction')}
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              ) : visible.length === 0 ? (
+                <NoMatch
+                  what="demo"
+                  query={q}
+                  filters={
+                    (status !== 'all' ? 1 : 0) +
+                    (ctype !== 'all' ? 1 : 0) +
+                    (author !== 'all' ? 1 : 0) +
+                    (tagFilter.length ? 1 : 0) +
+                    (scope !== 'all' && !wide ? 1 : 0)
+                  }
+                  onReset={() => {
+                    setQ('');
+                    setStatus('all');
+                    setCtype('all');
+                    setAuthor('all');
+                    setTagFilter([]);
+                  }}
+                />
+              ) : view === 'list' ? (
+                <div className="fd-card demo-table-wrap">
+                  <table className="demo-table">
+                    <caption className="sr-only">{t('demos.listCaption')}</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">{t('demos.colName')}</th>
+                        {!sandbox && (
+                          <th scope="col" className="dt-md">
+                            {t('ctype.col')}
+                          </th>
+                        )}
+                        <th scope="col" className="dt-md">
+                          {t('demos.colStatus')}
+                        </th>
+                        {/* Décision UX du 22/11 : Dossier et Complétion masquées sous 1 280 px */}
+                        <th scope="col" className="dt-xl">
+                          {t('demos.colFolder')}
+                        </th>
+                        <th scope="col">{t('tags.title')}</th>
+                        <th scope="col" className="r dt-md">
+                          {t('demos.colViews')}
+                        </th>
+                        <th scope="col" className="r dt-xl">
+                          {t('demos.colCompletion')}
+                        </th>
+                        <th scope="col">{t('demos.colUpdated')}</th>
+                        <th scope="col">
+                          <span className="sr-only">{t('demos.colActions')}</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visible.map((d) => {
+                        const s = stats[d.id];
+                        const rate = s ? Math.round(completionRate(s.visitors, s.completions) * 100) : 0;
+                        return (
+                          <tr key={d.id} {...demoDrag(d)}>
+                            <td>
+                              <span className="dt-name">
+                                <span className="dt-thumb" aria-hidden="true">
+                                  {covers[d.id] ? <img src={covers[d.id]} alt="" loading="lazy" /> : null}
+                                </span>
+                                <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
                               </span>
-                              <Link to={`/demos/${d.id}/edit`}>{d.title}</Link>
-                            </span>
-                          </td>
-                          {!sandbox && (
-                            <td className="dt-md">
-                              <TypeBadge type={typeOf(d)} />
                             </td>
+                            {!sandbox && (
+                              <td className="dt-md">
+                                <TypeBadge type={typeOf(d)} />
+                              </td>
+                            )}
+                            <td className="dt-md">
+                              <Status size="sm" tone={toneOf(d)}>
+                                {t(`status.${statusOf(d)}`)}
+                              </Status>
+                              {lockedIds.has(d.id) && (
+                                <Status size="sm" tone="warning" title={t('rules.accessToFixHelp')}>
+                                  {t('rules.accessToFix')}
+                                </Status>
+                              )}
+                            </td>
+                            <td className="fd-muted dt-xl">
+                              {folders.find((f) => f.id === d.folder_id)?.name ?? '—'}
+                            </td>
+                            <td>
+                              <CardTags demo={d} store={tagStore} editable={editable} list />
+                            </td>
+                            <td className="r num dt-md">{formatNumber(s?.views ?? 0)}</td>
+                            <td className="r nowrap dt-xl">
+                              <span className="dt-rate">
+                                <span className="dt-bar" aria-hidden="true">
+                                  <span style={{ width: `${rate}%` }} />
+                                </span>
+                                <span className="num">{`${rate}\u00a0%`}</span>
+                              </span>
+                            </td>
+                            <td className="fd-muted nowrap">
+                              <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                                {formatRelativeShort(d.updated_at)}
+                              </time>
+                            </td>
+                            <td className="r">
+                              <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <ul className="demo-grid">
+                  {visible.map((d) => {
+                    const s = stats[d.id];
+                    return (
+                      <li
+                        key={d.id}
+                        {...demoDrag(d)}
+                        className="fd-card demo-card"
+                        onKeyDown={(e) => {
+                          // DSH-05 : ⌘D / Ctrl+D duplique la démo dont la carte a le focus
+                          if (editable && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+                            e.preventDefault();
+                            duplicate(d);
+                          }
+                        }}
+                      >
+                        {!sandbox && <TypeBadge type={typeOf(d)} cover />}
+                        <div
+                          className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`}
+                          aria-hidden="true"
+                        >
+                          {covers[d.id] ? (
+                            <img src={covers[d.id]} alt="" loading="lazy" />
+                          ) : (
+                            <span className="demo-cover-empty">
+                              <span className="fake fd-player-scope" />
+                              <span className="dot" style={dotPosition(d.id)} />
+                            </span>
                           )}
-                          <td className="dt-md">
+                        </div>
+                        <div className="demo-body">
+                          <div className="demo-head">
+                            <h3>
+                              {/* Lien étendu : toute la carte est cliquable */}
+                              <Link className="demo-link" to={`/demos/${d.id}/edit`}>
+                                {d.title}
+                              </Link>
+                            </h3>
+                            <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                          </div>
+                          <div className="demo-meta">
                             <Status size="sm" tone={toneOf(d)}>
                               {t(`status.${statusOf(d)}`)}
                             </Status>
@@ -1249,300 +1324,232 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                                 {t('rules.accessToFix')}
                               </Status>
                             )}
-                          </td>
-                          <td className="fd-muted dt-xl">
-                            {folders.find((f) => f.id === d.folder_id)?.name ?? '—'}
-                          </td>
-                          <td>
-                            <CardTags demo={d} store={tagStore} editable={editable} list />
-                          </td>
-                          <td className="r num dt-md">{formatNumber(s?.views ?? 0)}</td>
-                          <td className="r nowrap dt-xl">
-                            <span className="dt-rate">
-                              <span className="dt-bar" aria-hidden="true">
-                                <span style={{ width: `${rate}%` }} />
-                              </span>
-                              <span className="num">{`${rate}\u00a0%`}</span>
+                            <span>
+                              {/* L48-G §4 : un Sandbox dit toujours son nombre de pages */}
+                              {sandbox && <>{t('sandboxPage.pages', { count: stepCounts[d.id] ?? 0 })} · </>}
+                              {sandbox && (deadCounts[d.id] ?? 0) > 0 && (
+                                <>
+                                  <span className="sb-dead-count">
+                                    {t('sandboxPage.deadLinks', { count: deadCounts[d.id] })}
+                                  </span>{' '}
+                                  ·{' '}
+                                </>
+                              )}
+                              {d.status === 'published' ? (
+                                <>
+                                  {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })}{' '}
+                                  ·{' '}
+                                  {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}{' '}
+                                  ·{' '}
+                                </>
+                              ) : (
+                                !sandbox && <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
+                              )}
+                              <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
+                                {formatRelativeShort(d.updated_at)}
+                              </time>
                             </span>
-                          </td>
-                          <td className="fd-muted nowrap">
-                            <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
-                              {formatRelativeShort(d.updated_at)}
-                            </time>
-                          </td>
-                          <td className="r">
-                            <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <ul className="demo-grid">
-                {visible.map((d) => {
-                  const s = stats[d.id];
-                  return (
-                    <li
-                      key={d.id}
-                      {...demoDrag(d)}
-                      className="fd-card demo-card"
-                      onKeyDown={(e) => {
-                        // DSH-05 : ⌘D / Ctrl+D duplique la démo dont la carte a le focus
-                        if (editable && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
-                          e.preventDefault();
-                          duplicate(d);
-                        }
-                      }}
-                    >
-                      {!sandbox && <TypeBadge type={typeOf(d)} cover />}
-                      <div
-                        className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`}
-                        aria-hidden="true"
-                      >
-                        {covers[d.id] ? (
-                          <img src={covers[d.id]} alt="" loading="lazy" />
-                        ) : (
-                          <span className="demo-cover-empty">
-                            <span className="fake fd-player-scope" />
-                            <span className="dot" style={dotPosition(d.id)} />
-                          </span>
-                        )}
-                      </div>
-                      <div className="demo-body">
-                        <div className="demo-head">
-                          <h3>
-                            {/* Lien étendu : toute la carte est cliquable */}
-                            <Link className="demo-link" to={`/demos/${d.id}/edit`}>
-                              {d.title}
-                            </Link>
-                          </h3>
-                          <Menu wide label={t('demos.actions', { title: d.title })} items={menuFor(d)} />
+                          </div>
+                          <CardTags demo={d} store={tagStore} editable={editable} />
                         </div>
-                        <div className="demo-meta">
-                          <Status size="sm" tone={toneOf(d)}>
-                            {t(`status.${statusOf(d)}`)}
-                          </Status>
-                          {lockedIds.has(d.id) && (
-                            <Status size="sm" tone="warning" title={t('rules.accessToFixHelp')}>
-                              {t('rules.accessToFix')}
-                            </Status>
-                          )}
-                          <span>
-                            {/* L48-G §4 : un Sandbox dit toujours son nombre de pages */}
-                            {sandbox && <>{t('sandboxPage.pages', { count: stepCounts[d.id] ?? 0 })} · </>}
-                            {sandbox && (deadCounts[d.id] ?? 0) > 0 && (
-                              <>
-                                <span className="sb-dead-count">
-                                  {t('sandboxPage.deadLinks', { count: deadCounts[d.id] })}
-                                </span>{' '}
-                                ·{' '}
-                              </>
-                            )}
-                            {d.status === 'published' ? (
-                              <>
-                                {t('demos.views', { count: s?.views ?? 0, n: formatNumber(s?.views ?? 0) })} ·{' '}
-                                {t('demos.leads', { count: s?.leads ?? 0, n: formatNumber(s?.leads ?? 0) })}{' '}
-                                ·{' '}
-                              </>
-                            ) : (
-                              !sandbox && <>{t('demos.steps', { count: stepCounts[d.id] ?? 0 })} · </>
-                            )}
-                            <time dateTime={d.updated_at} title={formatDateTime(d.updated_at)}>
-                              {formatRelativeShort(d.updated_at)}
-                            </time>
-                          </span>
-                        </div>
-                        <CardTags demo={d} store={tagStore} editable={editable} />
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
 
-          {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
-          <Suspense fallback={null}>
-            {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
-            {generating && (
-              <GenerateDialog
-                ws={ws.id}
-                userId={user!.id}
-                folderId={generating.folder}
-                lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
-                onClose={() => setGenerating(null)}
-              />
-            )}
-            {newMounted && (
-              <NewDemoDialog
-                open={newOpen}
-                folders={folders}
-                defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
-                onClose={() => setNewOpen(false)}
-                initialType={sandbox ? 'sandbox' : undefined}
-                onEmpty={async (f) => {
-                  setNewOpen(false);
-                  await createDemo(f);
-                }}
-                onImport={importImages}
-                ws={ws.id}
-                onGenerate={(f) => {
-                  setNewOpen(false);
-                  setGenerating({ folder: f });
-                }}
-                onTemplate={(f) => {
-                  setNewOpen(false);
-                  setTplFolder(f);
-                }}
-                onExtension={() => {
-                  setNewOpen(false);
-                  setExtension(true);
-                }}
-              />
-            )}
-            {tplMounted && (
-              <TemplatesDialog
-                open={tplFolder !== undefined}
-                workspaceId={ws.id}
-                folderId={tplFolder ?? null}
-                canManage={can('demo.edit')}
-                onClose={() => setTplFolder(undefined)}
-                onCreated={(id) => {
-                  setTplFolder(undefined);
-                  toast(t('templates.created'));
-                  navigate(`/demos/${id}/edit`);
-                }}
-              />
-            )}
-          </Suspense>
-          <ConfirmDialog
-            open={newFolder !== null || renaming !== null}
-            title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
-            body={
-              // REV-11 : pas de formulaire imbriqué : Entrée soumet le formulaire de la modale (onConfirm)
-              <label className="fd-field">
-                <span className="sr-only">{t('demos.folderName')}</span>
-                <input
-                  className="fd-input"
-                  autoFocus
-                  maxLength={80}
-                  placeholder={t('demos.folderName')}
-                  value={renaming ? renaming.name : (newFolder ?? '')}
-                  onChange={(e) =>
-                    renaming
-                      ? setRenaming({ ...renaming, name: e.target.value })
-                      : setNewFolder(e.target.value)
-                  }
-                />
-              </label>
-            }
-            confirmLabel={t('common.save')}
-            onClose={() => {
-              setNewFolder(null);
-              setRenaming(null);
-            }}
-            onConfirm={() => saveFolder()}
-          />
-          <ConfirmDialog
-            open={!!toDelete}
-            title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
-            body={t('demos.confirmDelete', { title: toDelete?.title ?? '' })}
-            confirmLabel={t('demos.deleteDemo')}
-            danger
-            onClose={() => setToDelete(null)}
-            onConfirm={() =>
-              run(async () => {
-                const d = toDelete!;
-                if (d.status === 'published') check(await supabase.rpc('unpublish_demo', { p_demo: d.id }));
-                check(
-                  await supabase
-                    .from('demos')
-                    .update({ deleted_at: new Date().toISOString() })
-                    .eq('id', d.id),
-                );
-                await supabase.storage.from('published').remove([`${d.id}/latest.json`]);
-                await load();
-                toast(t('toast.demoDeleted'));
-              }).then(() => undefined)
-            }
-          />
-          <ConfirmDialog
-            open={!!folderToDelete}
-            title={t('demos.deleteFolder', { name: folderToDelete?.name ?? '' })}
-            body={t(sandbox ? 'sandboxPage.confirmDeleteFolder' : 'demos.confirmDeleteFolder', {
-              name: folderToDelete?.name ?? '',
-            })}
-            confirmLabel={t('common.delete')}
-            danger
-            onClose={() => setFolderToDelete(null)}
-            onConfirm={() =>
-              run(async () => {
-                check(await supabase.from('folders').delete().eq('id', folderToDelete!.id));
-                if (folder === folderToDelete!.id) setFolder('all');
-                await load();
-                toast(t('toast.folderDeleted'));
-              }).then(() => undefined)
-            }
-          />
-          {folderAccess && (
+            {tagging && <TagsDialog demo={tagging} store={tagStore} onClose={() => setTagging(null)} />}
             <Suspense fallback={null}>
-              <FolderAccessDialog
-                folder={folderAccess}
-                onClose={() => setFolderAccess(null)}
-                onSaved={() => {
-                  toast(t('folderAccess.saved'));
-                  void load();
-                }}
-              />
-            </Suspense>
-          )}
-          {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
-          <ConfirmDialog
-            open={!!pendingMove}
-            title={t('demos.moveTo')}
-            body={pendingMove ? t('folderAccess.moveWarn', { count: pendingMove.n }) : ''}
-            confirmLabel={t('folderAccess.moveConfirm')}
-            onClose={() => setPendingMove(null)}
-            onConfirm={async () => {
-              const m = pendingMove!;
-              setPendingMove(null);
-              await moveDemo(m.demoId, m.folderId);
-            }}
-          />
-          <ConfirmDialog
-            open={!!moving}
-            title={t('demos.moveTo')}
-            body={
-              moving && (
-                <Select
-                  aria-label={t('demos.moveTo')}
-                  defaultValue={moving.folder_id ?? ''}
-                  onChange={(e) => {
-                    const target = e.target.value;
-                    // L27-09 : confirmation avant de déplacer une démo vers un dossier restreint
-                    if (target && (hidden[target] ?? 0) > 0) {
-                      setPendingMove({ demoId: moving.id, folderId: target, n: hidden[target]! });
-                      setMoving(null);
-                      return;
-                    }
-                    void moveDemo(moving.id, target);
+              {/* L30-05 : démo générée depuis un plan texte (langue de l'interface) */}
+              {generating && (
+                <GenerateDialog
+                  ws={ws.id}
+                  userId={user!.id}
+                  folderId={generating.folder}
+                  lang={i18n.language.startsWith('en') ? 'en' : 'fr'}
+                  onClose={() => setGenerating(null)}
+                />
+              )}
+              {newMounted && (
+                <NewDemoDialog
+                  open={newOpen}
+                  folders={folders}
+                  defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
+                  onClose={() => setNewOpen(false)}
+                  initialType={sandbox ? 'sandbox' : undefined}
+                  onEmpty={async (f) => {
+                    setNewOpen(false);
+                    await createDemo(f);
                   }}
-                >
-                  <option value="">{t('demos.noFolder')}</option>
-                  {folders.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </Select>
-              )
-            }
-            confirmLabel={t('common.close')}
-            onClose={() => setMoving(null)}
-            onConfirm={() => undefined}
-          />
+                  onImport={importImages}
+                  ws={ws.id}
+                  onGenerate={(f) => {
+                    setNewOpen(false);
+                    setGenerating({ folder: f });
+                  }}
+                  onTemplate={(f) => {
+                    setNewOpen(false);
+                    setTplFolder(f);
+                  }}
+                  onExtension={() => {
+                    setNewOpen(false);
+                    setExtension(true);
+                  }}
+                />
+              )}
+              {tplMounted && (
+                <TemplatesDialog
+                  open={tplFolder !== undefined}
+                  workspaceId={ws.id}
+                  folderId={tplFolder ?? null}
+                  canManage={can('demo.edit')}
+                  onClose={() => setTplFolder(undefined)}
+                  onCreated={(id) => {
+                    setTplFolder(undefined);
+                    toast(t('templates.created'));
+                    navigate(`/demos/${id}/edit`);
+                  }}
+                />
+              )}
+            </Suspense>
+            <ConfirmDialog
+              open={newFolder !== null || renaming !== null}
+              title={renaming ? t('demos.renameFolder', { name: '' }).trim() : t('demos.newFolder')}
+              body={
+                // REV-11 : pas de formulaire imbriqué : Entrée soumet le formulaire de la modale (onConfirm)
+                <label className="fd-field">
+                  <span className="sr-only">{t('demos.folderName')}</span>
+                  <input
+                    className="fd-input"
+                    autoFocus
+                    maxLength={80}
+                    placeholder={t('demos.folderName')}
+                    value={renaming ? renaming.name : (newFolder ?? '')}
+                    onChange={(e) =>
+                      renaming
+                        ? setRenaming({ ...renaming, name: e.target.value })
+                        : setNewFolder(e.target.value)
+                    }
+                  />
+                </label>
+              }
+              confirmLabel={t('common.save')}
+              onClose={() => {
+                setNewFolder(null);
+                setRenaming(null);
+              }}
+              onConfirm={() => saveFolder()}
+            />
+            <ConfirmDialog
+              open={!!toDelete}
+              title={t('demos.deleteTitle', { title: toDelete?.title ?? '' })}
+              body={t('demos.confirmDelete', { title: toDelete?.title ?? '' })}
+              confirmLabel={t('demos.deleteDemo')}
+              danger
+              onClose={() => setToDelete(null)}
+              onConfirm={() =>
+                run(async () => {
+                  const d = toDelete!;
+                  if (d.status === 'published') check(await supabase.rpc('unpublish_demo', { p_demo: d.id }));
+                  check(
+                    await supabase
+                      .from('demos')
+                      .update({ deleted_at: new Date().toISOString() })
+                      .eq('id', d.id),
+                  );
+                  await supabase.storage.from('published').remove([`${d.id}/latest.json`]);
+                  await load();
+                  toast(t('toast.demoDeleted'));
+                }).then(() => undefined)
+              }
+            />
+            <ConfirmDialog
+              open={!!folderToDelete}
+              title={t('demos.deleteFolder', { name: folderToDelete?.name ?? '' })}
+              body={t(sandbox ? 'sandboxPage.confirmDeleteFolder' : 'demos.confirmDeleteFolder', {
+                name: folderToDelete?.name ?? '',
+              })}
+              confirmLabel={t('common.delete')}
+              danger
+              onClose={() => setFolderToDelete(null)}
+              onConfirm={() =>
+                run(async () => {
+                  check(await supabase.from('folders').delete().eq('id', folderToDelete!.id));
+                  if (folder === folderToDelete!.id) setFolder('all');
+                  await load();
+                  toast(t('toast.folderDeleted'));
+                }).then(() => undefined)
+              }
+            />
+            {folderAccess && (
+              <Suspense fallback={null}>
+                <FolderAccessDialog
+                  folder={folderAccess}
+                  onClose={() => setFolderAccess(null)}
+                  onSaved={() => {
+                    toast(t('folderAccess.saved'));
+                    void load();
+                  }}
+                />
+              </Suspense>
+            )}
+            {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
+            <ConfirmDialog
+              open={!!pendingMove}
+              title={t('demos.moveTo')}
+              body={pendingMove ? t('folderAccess.moveWarn', { count: pendingMove.n }) : ''}
+              confirmLabel={t('folderAccess.moveConfirm')}
+              onClose={() => setPendingMove(null)}
+              onConfirm={async () => {
+                const m = pendingMove!;
+                setPendingMove(null);
+                await moveDemo(m.demoId, m.folderId);
+              }}
+            />
+            <ConfirmDialog
+              open={!!moving}
+              title={t('demos.moveTo')}
+              body={
+                moving && (
+                  <Select
+                    aria-label={t('demos.moveTo')}
+                    defaultValue={moving.folder_id ?? ''}
+                    onChange={(e) => {
+                      const target = e.target.value;
+                      // L27-09 : confirmation avant de déplacer une démo vers un dossier restreint
+                      if (target && (hidden[target] ?? 0) > 0) {
+                        setPendingMove({ demoId: moving.id, folderId: target, n: hidden[target]! });
+                        setMoving(null);
+                        return;
+                      }
+                      void moveDemo(moving.id, target);
+                    }}
+                  >
+                    <option value="">{t('demos.noFolder')}</option>
+                    {folders.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </Select>
+                )
+              }
+              confirmLabel={t('common.close')}
+              onClose={() => setMoving(null)}
+              onConfirm={() => undefined}
+            />
+          </div>
+          {onbShown && (
+            <OnboardingPanel
+              onb={onb}
+              drawer={!wide}
+              onClose={closeOnb}
+              onCapture={openNew}
+              latestDemoId={demos[0]?.id ?? null}
+              publishedDemoId={demos.find((d) => d.status === 'published')?.id ?? null}
+            />
+          )}
         </div>
       </div>
     </div>

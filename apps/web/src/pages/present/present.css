@@ -782,3 +782,142 @@ html[data-remote] body {
 .presenter .pcard h2 .pr-ghost {
   white-space: nowrap;
 }
+
+/* ---- PAGE-01 §16.2 : barre du présentateur (variante éditeur de la barre commune, toujours sombre) ---- */
+/* La barre occupe la première rangée ; la scène et la colonne suivent à 20 px */
+.presenter {
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+.presenter > .pr-top {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 16px;
+  /* La barre va d'un bord à l'autre de la page (qui a 20 px de marge) */
+  margin: -20px -20px 0;
+  padding: 0 16px 0 8px;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: #0b0d10;
+  color: var(--fd-color-text);
+}
+.pr-top__l {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.pr-top__sep {
+  flex: none;
+  width: 1px;
+  height: 24px;
+  background: var(--fd-color-border);
+}
+.pr-top__tt {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 8px;
+}
+.presenter .pr-top__tt h1 {
+  margin: 0;
+  padding: 0;
+  font: 600 14px var(--fd-font-sans);
+  white-space: nowrap;
+}
+.pr-top__sub {
+  overflow: hidden;
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.pr-top__c {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pr-top__r {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.presenter .pr-top .fd-btn {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--fd-color-border-field);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fd-color-text);
+  font: 600 14px var(--fd-font-sans);
+}
+.presenter .pr-top .fd-btn:hover {
+  background: var(--fd-color-surface-hover);
+}
+/* Pastille de l'écran public : 32 px, son action en puce de 24 px */
+.presenter .pr-top .live {
+  height: 32px;
+  padding: 0 4px 0 12px;
+  gap: 8px;
+  font: 600 13px var(--fd-font-sans);
+}
+.presenter .pr-top .live--phone {
+  padding: 0 12px;
+}
+.presenter .pr-top .pr-reopen {
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #ffffff;
+  font: 600 12px var(--fd-font-sans);
+  text-decoration: none;
+}
+.presenter .pr-top .pr-reopen:focus-visible {
+  outline: 2px solid var(--fd-color-focus);
+  outline-offset: 1px;
+}
+.presenter .pr-top .pr-phone-btn {
+  margin-left: 0;
+}
+.presenter .pr-top .pr-phone-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.pr-top .pr-top__back-m {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .presenter > .pr-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0 12px 0 4px;
+  }
+  /* La télécommande est faite pour le téléphone : la pastille de l'écran public est masquée */
+  .pr-top__c {
+    display: none;
+  }
+  .pr-top .pr-top__back {
+    display: none;
+  }
+  .pr-top .pr-top__back-m {
+    display: inline-flex;
+  }
+  .presenter .pr-top .pr-phone-btn {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .pr-phone-btn__t {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

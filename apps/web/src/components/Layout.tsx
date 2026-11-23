@@ -3,7 +3,6 @@ import { useMediaQuery } from '../lib/useMediaQuery';
 import { AvatarPhoto } from './AvatarPhoto';
 import { BrandMark } from './BrandMark';
 import symbol from '../assets/symbole-tutoclick.svg';
-import { APP_NAME } from '@flowdsiml/core';
 import { initials } from '../lib/initials';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -179,9 +178,10 @@ export function Layout() {
           {open ? <X {...ICON} /> : <MenuIcon {...ICON} />}
         </button>
         {/* LOGO-01 : barre mobile, icône seule de 32 px */}
-        <span className="brand">
-          <img src={symbol} alt={APP_NAME} width={32} height={32} className="brand__symbol" />
-        </span>
+        {/* NAV-04 §14 ter : le symbole de la barre mobile ramène à l'accueil */}
+        <Link className="brand" to="/" aria-label={t('nav.homeLogo')}>
+          <img src={symbol} alt="" width={32} height={32} className="brand__symbol" />
+        </Link>
         {/* Lot 1 (UX, 21/11) : sous 1 024 px, Aide et Notifications à droite de la barre mobile */}
         <div className="topbar__tools">
           <LazyNotificationBell topbar />

@@ -8,7 +8,7 @@ import { Sk } from '../../components/Skeleton';
  * L32 §2 : squelette du tableau de bord. Mêmes conteneurs que la page (indicateurs, barre de filtres,
  * grille) ; seuls les contenus sont des blocs. La barre de filtres est réelle et désactivée, sans compteur.
  */
-export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }) {
+export function DemosSkeleton() {
   const { t } = useTranslation();
   return (
     <>
@@ -67,10 +67,6 @@ export function DemosSkeleton({ onboardingHeight }: { onboardingHeight: number }
         </div>
         {/* PAGE-01 : même ordre que la page chargée (filtres, indicateurs, liste) */}
         <KpiSkeletonRow />
-        {/* Prise en main : place réservée à la hauteur de la dernière visite (rien si elle était masquée) */}
-        {onboardingHeight > 0 && (
-          <div className="fd-card sk-reserve" style={{ height: onboardingHeight }} aria-hidden="true" />
-        )}
         <ul className="demo-grid" aria-hidden="true">
           {Array.from({ length: 6 }, (_, i) => (
             <li key={i} className="fd-card demo-card">

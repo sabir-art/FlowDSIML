@@ -138,6 +138,9 @@ jobs:
       - name: 'En-tête de page commun, un seul h1 dans la barre (PAGE-01)'
         if: always()
         run: cd apps/web && node e2e/page-header.e2e.cjs
+      - name: 'Prise en main : bouton du PageHeader, panneau à droite, tiroir mobile (ONB-01)'
+        if: always()
+        run: cd apps/web && node e2e/prise-en-main.e2e.cjs
       - name: Paramètres, 24 px entre les blocs (clair et sombre)
         if: always()
         run: cd apps/web && node e2e/parametres-espacement.e2e.cjs

@@ -80,7 +80,7 @@ export function Overview() {
   );
   return (
     <div className="console-stack">
-      <h1 className="sr-only">{t('console.tabs.overview')}</h1>
+      <h2 className="sr-only">{t('console.tabs.overview')}</h2>
       <section className="fd-card console-stats" aria-label={t('console.ov.stats')}>
         {stat(
           t('console.ov.satisfaction'),

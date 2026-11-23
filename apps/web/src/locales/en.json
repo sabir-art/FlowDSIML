@@ -1,4 +1,14 @@
 {
+  "dropzone": {
+    "title": "Drag a file here",
+    "none": "No file",
+    "dropHere": "Drop the file to import it",
+    "failed": "This file was not imported",
+    "sending": "Uploading…",
+    "pick": "Choose a file",
+    "replace": "Replace…",
+    "remove": "Remove the file"
+  },
   "app": {
     "name": "{{app}}"
   },
@@ -2882,8 +2892,9 @@
     "logoNone": "No logo. The workspace name is shown instead.",
     "logoAdd": "Upload a logo",
     "logoReplace": "Replace",
-    "logoRemove": "Remove",
+    "logoRemove": "Remove the logo",
     "logoFormats": "PNG, JPEG, WebP or SVG, 2 MB max.",
+    "logoFile": "{{name}} logo",
     "logoFormat": "This format is not accepted. Choose a PNG, JPEG, WebP or SVG file.",
     "logoSize": "The file is larger than 2 MB.",
     "colorsTitle": "Brand colors",
@@ -3743,6 +3754,14 @@
     "bubblesLocked": "No screenshots, no bubbles"
   },
   "onb": {
+    "panelTitle": "Getting started",
+    "button": "Getting started",
+    "buttonHint_one": "({{count}} step of {{total}})",
+    "buttonHint_other": "({{count}} steps of {{total}})",
+    "nextKicker": "Next step",
+    "todo": "Up next",
+    "doneList": "Done",
+    "footShort": "Visible to owners and admins.",
     "title": "Getting started with your workspace",
     "sub_one": "{{count}} of {{total}} steps. They check themselves as you do them.",
     "sub_other": "{{count}} of {{total}} steps. They check themselves as you do them.",
@@ -3931,6 +3950,10 @@
     }
   },
   "present": {
+    "backEditor": "Editor",
+    "backEditorLabel": "Back to the editor",
+    "barStep": "Presentation · step {{n}} of {{total}}",
+    "closeScreen": "Close",
     "button": "Present",
     "title": "Present “{{title}}”",
     "display": "Display",
@@ -5048,6 +5071,8 @@
     "team": "TutoClick team",
     "sub": "TutoClick team · all workspaces",
     "back": "Back to the app",
+    "backApp": "Application",
+    "backLabel": "Back to the application",
     "tabsLabel": "Console sections",
     "export": "Export",
     "undo": "Undo",
@@ -5061,6 +5086,10 @@
       "read_only": "Read only"
     },
     "tabs": {
+      "newCount_one": "{{count}} new",
+      "newCount_other": "{{count}} new",
+      "triageCount_one": "{{count}} to triage",
+      "triageCount_other": "{{count}} to triage",
       "overview": "Overview",
       "feedback": "Feedback",
       "feedbackN_one": "Feedback · {{count}} new",

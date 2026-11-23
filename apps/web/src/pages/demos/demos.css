@@ -1801,3 +1801,334 @@ button.nd-src:focus-visible {
     justify-content: center;
   }
 }
+
+/* ---- ONB-01 (COMP-01 §17, variante B) : prise en main hors du flux, dans un panneau à droite ---- */
+/* Bouton d'entrée du PageHeader : anneau de 18 px, « Prise en main », puis le compte */
+.fd-btn.onb-btn {
+  gap: 8px;
+}
+.onb-ring {
+  display: block;
+  flex: none;
+}
+.onb-btn__n {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+}
+.fd-btn.onb-btn.is-open {
+  border-color: color-mix(in srgb, var(--fd-color-primary) 40%, var(--fd-color-border));
+  background: var(--fd-color-tint);
+}
+/* Le contenu et le panneau se partagent la largeur, sous le PageHeader */
+.demos-row {
+  display: flex;
+  align-items: flex-start;
+}
+.demos-row > .demos-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.onb-panel {
+  position: sticky;
+  top: 56px;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 12px;
+  width: 360px;
+  height: calc(100dvh - 56px);
+  padding: 20px 20px 24px;
+  overflow-y: auto;
+  /* COL-01 : sur le blanc de la page, séparé par un filet */
+  background: var(--fd-color-surface);
+  border-left: 1px solid var(--fd-color-border);
+}
+.onb-panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.onb-panel__head h2 {
+  margin: 0;
+  font: 600 16px / 26px var(--fd-font-sans);
+}
+.onb-panel__head .fd-btn {
+  flex: none;
+  margin: -6px -8px 0 0;
+}
+.onb-panel .onb-bar {
+  display: block;
+  flex: none;
+  height: 6px;
+  width: auto;
+  border-radius: 999px;
+  background: var(--fd-color-border);
+}
+.onb-panel__sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* Carte « Prochaine étape » : fond tint, sans bordure */
+.onb-next {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--fd-color-tint);
+}
+.onb-next__k {
+  font: 600 11px var(--fd-font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fd-color-primary);
+}
+.onb-next > b {
+  font: 600 15px var(--fd-font-sans);
+}
+.onb-next__h {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.onb-next > .fd-btn {
+  height: 36px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+.onb-tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+}
+.onb-tile > svg {
+  width: 20px;
+  height: 20px;
+}
+.onb-tile--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+.onb-tile--sm > svg {
+  width: 16px;
+  height: 16px;
+}
+.onb-h3 {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 0;
+  font: 600 13px var(--fd-font-sans);
+}
+.onb-n {
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.onb-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.onb-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 13px var(--fd-font-sans);
+  text-align: left;
+}
+button.onb-row {
+  cursor: pointer;
+}
+button.onb-row:hover {
+  background: var(--fd-color-nav-hover);
+}
+button.onb-row:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.onb-row > b {
+  flex: 1;
+  font-weight: 500;
+}
+.onb-row > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.onb-rows--done .onb-row > svg {
+  color: var(--fd-color-success);
+}
+.onb-soon {
+  font: 400 13px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.onb-done {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text);
+  font: 500 13px var(--fd-font-sans);
+  cursor: pointer;
+}
+.onb-done:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--fd-color-focus);
+}
+.onb-done > svg {
+  width: 16px;
+  height: 16px;
+}
+.onb-panel__foot {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 16px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.onb-panel__foot > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+/* Panneau ouvert : indicateurs en 2 × 2 dans la largeur restante */
+.demos-main--onb .demos-wrap .kpi-short {
+  grid-template-columns: 1fr 1fr;
+}
+.demos-main--onb .demos-wrap .kpi-sc:nth-child(3) {
+  border-left: 0;
+}
+.demos-main--onb .demos-wrap .kpi-sc:nth-child(n + 3) {
+  border-top: 1px solid var(--fd-color-border);
+}
+/* Sous 1 024 px : tiroir par la droite (340 px, voile), bouton d'entrée réduit à son anneau de 44 px */
+.onb-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--fd-z-modal);
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(8 10 14 / 0.45);
+}
+.onb-panel--drawer {
+  position: static;
+  width: 340px;
+  max-width: calc(100% - 48px);
+  height: 100%;
+  border-left: 0;
+  box-shadow: var(--fd-shadow-lg);
+}
+@media (max-width: 1023px) {
+  /* Sous 768 px la barre ne garde que l'action principale : l'anneau de la prise en main reste aussi */
+  .fd-page-header__actions:has(> .fd-btn--primary) > .fd-btn.onb-btn {
+    display: inline-flex;
+  }
+  .fd-btn.onb-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .onb-btn__t,
+  .onb-btn__n {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* Panneau ouvert et place comptée (moins de 640 px pour la liste) : la barre de filtres passe au format
+   compact de la barre mobile (statut sur la 1re ligne, « Filtres » puis tri et affichage sur la 2e).
+   Mêmes règles que sous 768 px (toolbar.css), déclenchées par la largeur de la section. */
+.demos-main--onb .demos-section {
+  container: dsec / inline-size;
+}
+@container dsec (max-width: 639px) {
+  /* Maquette onb-b : 12 px entre la ligne du statut et celle des filtres */
+  .demos-section > .list-toolbar {
+    row-gap: 12px;
+  }
+  /* Le groupe « Filtres » laisse ses contrôles se placer dans la barre : filtre principal sur la
+     ligne 1, « Filtres · n » à gauche de la ligne 2, tri et affichage à droite */
+  .list-toolbar > .fd-toolbar__group:first-child {
+    display: contents;
+  }
+  .list-toolbar {
+    column-gap: var(--fd-space-2);
+  }
+  .list-toolbar__lead {
+    display: flex;
+    flex: 1 1 100%;
+  }
+  .list-toolbar__lead > .fd-segmented {
+    display: flex;
+    width: 100%;
+  }
+  .list-toolbar__lead > .fd-segmented > button {
+    flex: 1;
+  }
+  .list-toolbar__lead > .fd-toolbar__search {
+    width: 100%;
+  }
+  .list-toolbar__filters {
+    display: none;
+  }
+  .list-toolbar__more {
+    display: inline-flex;
+  }
+  .list-toolbar .fd-filter--sort {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__label,
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__value,
+  .list-toolbar .fd-filter--sort .fd-filter__label,
+  .list-toolbar .fd-filter--sort .fd-filter__value {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .list-toolbar .fd-filter--compact:not(.fd-filter--active) .fd-filter__chev,
+  .list-toolbar .fd-filter--sort .fd-filter__chev {
+    display: none;
+  }
+  .list-sheet-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .list-sheet {
+    width: 100%;
+    border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
+  }
+}

@@ -136,10 +136,32 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await o.getByRole('menuitem', { name: 'Console propriétaire' }).click();
   await o.waitForURL(/#\/console$/);
   await o.getByText('Satisfaction').first().waitFor();
-  ok((await o.locator('.console-tab').count()) === 5, '5 onglets');
+  // PAGE-01 §16.2 : variante éditeur de la barre, onglets segmentés au centre (liens, aria-current)
+  const cbar = o.locator('.fd-page-header.fd-page-header--editor');
+  const ctabs = cbar.getByRole('navigation', { name: 'Sections de la console' });
+  ok((await ctabs.locator('.console-tab').count()) === 5, '5 onglets dans la barre');
   ok(
-    /Retours · 3 nouveaux/.test(await o.locator('.console-tabs').innerText()),
-    'onglet « Retours · 3 nouveaux »',
+    (await ctabs.getByRole('link', { name: 'Vue d’ensemble' }).getAttribute('aria-current')) === 'page',
+    'onglet actif en aria-current="page"',
+  );
+  ok(
+    (await ctabs.locator('.console-tab__n').innerText()) === '3' &&
+      (await ctabs.getByRole('link', { name: /^Retours\s*3 nouveaux$/ }).count()) === 1,
+    'onglet « Retours » avec sa pastille « 3 » (nom accessible « Retours 3 nouveaux »)',
+  );
+  ok(
+    (await cbar.getByRole('heading', { level: 1, name: 'Console propriétaire' }).count()) === 1 &&
+      (await o.locator('h1').count()) === 1 &&
+      (await cbar.getByRole('link', { name: 'Retour à l’application' }).getAttribute('href')) === '#/' &&
+      (await cbar.getByRole('button', { name: 'Aide' }).count()) === 1,
+    'barre : retour « Application », seul h1 « Console propriétaire », Aide à droite',
+  );
+  const cb = await cbar.boundingBox();
+  ok(
+    Math.round(cb.y) === 0 &&
+      Math.round(cb.height) === 56 &&
+      (await o.locator('.console-head').count()) === 0,
+    `barre de 56 px en haut, ancien en-tête retiré (${Math.round(cb.height)} px)`,
   );
   ok(
     /1 article à surveiller|articles à surveiller/.test(await o.locator('main').innerText()),

@@ -1,25 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type DragEvent,
-  type KeyboardEvent,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  CircleAlert,
-  Copy,
-  ImageUp,
-  Images,
-  Info,
-  Pencil,
-  Plus,
-  Star,
-  Trash2,
-  TriangleAlert,
-} from 'lucide-react';
+import { CircleAlert, Copy, Info, Pencil, Plus, Star, Trash2, TriangleAlert } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { APP_NAME } from '@flowdsiml/core';
 import { Button, ColorSwatch } from '@flowdsiml/ui';
@@ -38,6 +19,7 @@ import { styleOk } from '../../editor/styles/styleCheck';
 import { STYLE_NAME_MAX, copyName, isHex, logoError, nameTaken } from './brand';
 import { StyleDialog } from './StyleDialog';
 import './brand.css';
+import { FileDropzone } from '../../../components/FileDropzone';
 
 type WsStyle = Tables<'themes'>;
 /** Couleurs de la marque par défaut (charte DSI, valeurs des démos). */
@@ -123,10 +105,8 @@ function LogoSection({
 }) {
   const { t } = useTranslation();
   const { reload } = useWorkspace();
-  const input = useRef<HTMLInputElement>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [over, setOver] = useState(false);
   const url = ws.logo_path
     ? supabase.storage.from('branding').getPublicUrl(ws.logo_path).data.publicUrl
     : null;
@@ -156,35 +136,6 @@ function LogoSection({
     if (old) void supabase.storage.from('branding').remove([old]);
     await reload();
   }
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setOver(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f && !busy) void upload(f);
-  };
-  const library = (
-    <Button variant="ghost" icon={<Images size={16} />} onClick={onLibrary}>
-      {t('media.open')}
-    </Button>
-  );
-  const file = isAdmin && (
-    <input
-      ref={input}
-      type="file"
-      /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié au bouton */
-      id="br-logo-file"
-      className="sr-only"
-      tabIndex={-1}
-      aria-hidden="true"
-      accept="image/png,image/jpeg,image/webp,image/svg+xml"
-      onChange={(e) => {
-        const f = e.target.files?.[0];
-        e.target.value = '';
-        if (f) void upload(f);
-      }}
-    />
-  );
-
   return (
     <section className="stg-sec" aria-labelledby="br-logo-t">
       <div className="stg-sec__head">
@@ -200,87 +151,31 @@ function LogoSection({
             {t('brand.logoFormats')}
           </div>
         </div>
-        <div className="stg-ctl stg-ctl--wide">
-          {url ? (
-            <>
-              <div className="br-logos">
-                <div className="br-logo br-logo--light">
-                  <img src={url} alt={t('brand.logoOnLight', { name: ws.name })} />
-                </div>
-                <div className="br-logo br-logo--dark">
-                  <img src={url} alt={t('brand.logoOnDark', { name: ws.name })} />
-                </div>
-              </div>
-              <div className="br-actions">
-                {isAdmin && (
-                  <>
-                    {file}
-                    <Button
-                      disabled={busy}
-                      aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
-                      aria-controls="br-logo-file"
-                      onClick={() => input.current?.click()}
-                    >
-                      {t('brand.logoReplace')}
-                    </Button>
-                  </>
-                )}
-                <Button icon={<Images size={16} />} onClick={onLibrary}>
-                  {t('media.open')}
-                </Button>
-                {isAdmin && (
-                  <Button
-                    variant="ghost"
-                    className="stg-link-danger"
-                    icon={<Trash2 size={16} />}
-                    onClick={() => void remove()}
-                  >
-                    {t('brand.logoRemove')}
-                  </Button>
-                )}
-              </div>
-            </>
-          ) : isAdmin ? (
-            <div
-              className={over ? 'br-drop is-over' : 'br-drop'}
-              /* ALIGN-01 : la zone de dépôt prend toute la colonne ; l'e2e mesure son cadre */
-              data-align-zone=""
-              onDragOver={(e) => {
-                e.preventDefault();
-                setOver(true);
-              }}
-              onDragLeave={() => setOver(false)}
-              onDrop={onDrop}
-            >
-              {file}
-              <ImageUp size={24} strokeWidth={1.75} aria-hidden="true" />
-              <span>
-                <b>{t('brand.logoDrop')}</b> {t('brand.or')}{' '}
-                <Button
-                  disabled={busy}
-                  aria-describedby={err ? 'br-logo-err' : 'br-logo-formats'}
-                  aria-controls="br-logo-file"
-                  onClick={() => input.current?.click()}
-                >
-                  {t('brand.logoPick')}
-                </Button>
-              </span>
-              <span className="stg-help">
-                {t('brand.or')} {library}
-              </span>
-            </div>
-          ) : (
-            <>
-              <p className="stg-help br-none">{t('brand.logoNone')}</p>
-              <div className="br-actions">{library}</div>
-            </>
-          )}
-          {err && (
-            <p id="br-logo-err" className="stg-error" role="alert">
-              <CircleAlert size={16} aria-hidden="true" />
-              {err}
-            </p>
-          )}
+        <div className="stg-ctl">
+          {/* MEDIA-01 §18.1 : zone de dépôt sur toute la ligne ; une source par bouton */}
+          <FileDropzone
+            label={t('brand.logoTitle')}
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            hint={t('brand.logoFormats')}
+            inputId="br-logo-file"
+            describedBy="br-logo-formats"
+            readOnly={!isAdmin}
+            busy={busy}
+            error={err}
+            file={
+              url && ws.logo_path
+                ? {
+                    name: t('brand.logoFile', { name: ws.name }),
+                    meta: ws.logo_path.split('.').pop()?.toUpperCase(),
+                    preview: <img src={url} alt="" />,
+                  }
+                : null
+            }
+            onFiles={(files) => void upload(files[0]!)}
+            onLibrary={onLibrary}
+            onRemove={() => void remove()}
+            removeLabel={t('brand.logoRemove')}
+          />
         </div>
       </div>
     </section>
