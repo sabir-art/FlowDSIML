@@ -69,7 +69,12 @@ export type ToFrame =
   | { fd: 1; t: 'target'; sel: string | null; rect: { x: number; y: number; w: number; h: number } | null }
   | { fd: 1; t: 'target'; clear: true }
   /** A8 guide, éditeur : vérifie le sélecteur d'une bulle et sélectionne l'élément s'il est unique. */
-  | { fd: 1; t: 'probe'; sel: string };
+  | { fd: 1; t: 'probe'; sel: string }
+  /**
+   * EXT-02 §3 : zones cliquables de la page (liens vers une étape, liens externes autorisés). show : cadres
+   * affichés ou non ; flash : affichés 1,2 s (clic à côté d'une zone) ; dark : couleurs du thème sombre.
+   */
+  | { fd: 1; t: 'zones'; show?: boolean; flash?: true; dark?: boolean };
 
 export interface Selected {
   sel: string;
@@ -92,8 +97,15 @@ export type FromFrame =
   | { fd: 1; t: 'ready'; h: number }
   | { fd: 1; t: 'applied'; notFound: string[]; h: number }
   | { fd: 1; t: 'go'; step: string }
-  /** L49 §4 : clic sur un lien externe ; ext : désactivé (« Ce lien mène hors de la démo. »). */
-  | { fd: 1; t: 'unlinked'; ext?: true }
+  /**
+   * Clic hors d'une zone cliquable. ext : lien externe désactivé (« Ce lien mène hors de la démo. ») ;
+   * empty : clic dans le vide (ni lien ni bouton de la page d'origine).
+   */
+  | { fd: 1; t: 'unlinked'; ext?: true; empty?: true }
+  /** EXT-02 §3 : nombre de zones cliquables de la page, après chaque application des opérations. */
+  | { fd: 1; t: 'zones'; n: number }
+  /** EXT-02 §3.1 : touche H pressée dans la page (bascule « Zones cliquables »). */
+  | { fd: 1; t: 'zones-key' }
   /** L49 §4 : lien externe autorisé ; le lecteur retrouve l'adresse par l'id de l'opération. */
   | { fd: 1; t: 'ext'; id: string }
   | { fd: 1; t: 'select'; el: Selected | null }
@@ -143,7 +155,17 @@ export function parseFromFrame(data: unknown): FromFrame | null {
     case 'go':
       return typeof m.step === 'string' && STEP_RE.test(m.step) ? { fd: 1, t: 'go', step: m.step } : null;
     case 'unlinked':
-      return m.ext === true ? { fd: 1, t: 'unlinked', ext: true } : { fd: 1, t: 'unlinked' };
+      return m.ext === true
+        ? { fd: 1, t: 'unlinked', ext: true }
+        : m.empty === true
+          ? { fd: 1, t: 'unlinked', empty: true }
+          : { fd: 1, t: 'unlinked' };
+    case 'zones-key':
+      return { fd: 1, t: 'zones-key' };
+    case 'zones':
+      return num(m.n) && Number.isInteger(m.n) && (m.n as number) >= 0 && (m.n as number) <= 5000
+        ? { fd: 1, t: 'zones', n: m.n as number }
+        : null;
     case 'ext':
       return typeof m.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(m.id)
         ? { fd: 1, t: 'ext', id: m.id }
@@ -242,9 +264,49 @@ export const FRAME_RUNTIME = `(function () {
   var BLUE = '#2897D5';
   var multi = [], multiBoxes = [];
   var target = null;
+  // EXT-02 §3 : zones cliquables (cadres bleus numérotés par-dessus la page, jamais dans son contenu)
+  var zonesOn = false, zonesDark = false, zoneLayer = null, zoneTimer = 0;
   var HEXRE = /^#[0-9A-Fa-f]{6}$/;
   var SVGNS = 'http://www.w3.org/2000/svg';
   function post(m) { m.fd = 1; parentWin.postMessage(m, '*'); }
+  function zoneEls() {
+    var out = [], all = document.querySelectorAll('[data-fd-link],[data-fd-ext]');
+    for (var i = 0; i < all.length; i++) {
+      var b = all[i].getBoundingClientRect();
+      if (b.width > 0 && b.height > 0 && !all[i].closest('[data-fd-ui]')) out.push(all[i]);
+    }
+    return out;
+  }
+  function drawZones() {
+    if (zoneLayer) { zoneLayer.remove(); zoneLayer = null; }
+    if (mode !== 'player' || (!zonesOn && !zoneTimer)) return;
+    var blue = zonesDark ? '#7FA8FF' : '#2F6FED';
+    var soft = zonesDark ? 'rgba(127,168,255,.20)' : 'rgba(47,111,237,.16)';
+    zoneLayer = document.createElement('div');
+    zoneLayer.setAttribute('data-fd-ui', '');
+    zoneLayer.setAttribute('data-fd-zones', '');
+    zoneLayer.setAttribute('aria-hidden', 'true');
+    zoneLayer.style.cssText = 'position:absolute;top:0;left:0;width:0;height:0;z-index:2147483646;pointer-events:none';
+    var els = zoneEls();
+    for (var i = 0; i < els.length; i++) {
+      var b = els[i].getBoundingClientRect();
+      var z = document.createElement('div');
+      z.style.cssText = 'position:absolute;box-sizing:border-box;border:2px solid ' + blue + ';border-radius:8px;background:' + soft +
+        ';left:' + (b.left + scrollX - 2) + 'px;top:' + (b.top + scrollY - 2) + 'px;width:' + (b.width + 4) + 'px;height:' + (b.height + 4) + 'px';
+      var nb = document.createElement('span');
+      nb.textContent = String(i + 1);
+      nb.style.cssText = 'position:absolute;top:-12px;left:-2px;padding:0 6px;border-radius:6px;background:' + blue + ';color:' +
+        (zonesDark ? '#0b0f14' : '#fff') + ';font:700 12px/20px system-ui,sans-serif';
+      z.appendChild(nb);
+      zoneLayer.appendChild(z);
+    }
+    document.body.appendChild(zoneLayer);
+  }
+  function flashZones() {
+    clearTimeout(zoneTimer);
+    zoneTimer = setTimeout(function () { zoneTimer = 0; drawZones(); }, 1200);
+    drawZones();
+  }
   function height() { return Math.max(document.documentElement.scrollHeight, document.body ? document.body.scrollHeight : 0); }
   function neutral(s) { return s.replace(/\\p{Lu}/gu, 'X').replace(/\\p{Ll}/gu, 'x').replace(/\\p{N}/gu, '0'); }
   function q(sel) { try { return document.querySelector(sel); } catch (e) { return null; } }
@@ -523,6 +585,8 @@ export const FRAME_RUNTIME = `(function () {
         if (a && !a.hasAttribute('data-fd-link')) a.setAttribute('data-fd-link', autoLinks[j].step);
       }
       if (unlinked === 'highlight') document.documentElement.setAttribute('data-fd-highlight', '');
+      post({ t: 'zones', n: zoneEls().length });
+      drawZones();
     }
     if (mode === 'editor' && multi.length) postMulti();
     else if (mode === 'editor' && selected) {
@@ -653,9 +717,21 @@ export const FRAME_RUNTIME = `(function () {
     else if (ext && ext.hasAttribute('data-fd-ext')) post({ t: 'ext', id: ext.getAttribute('data-fd-ext') });
     // L49 §4.1 : lien signalé par Safe Browsing (data-tc-ext="blocked") : rien ne se passe
     else if (ext) { if (ext.getAttribute('data-tc-ext') === 'off' && unlinked !== 'none' && !hit) post({ t: 'unlinked', ext: true }); }
-    else if (actionable && unlinked !== 'none' && !hit) post({ t: 'unlinked' });
+    // EXT-02 §3.2 : clic à côté d'une zone (bouton ou lien non relié, ou dans le vide) : les zones
+    // s'illuminent un instant et le lecteur dit combien la page en compte
+    else if (unlinked !== 'none' && !hit && !t.closest('[data-fd-ui]')) {
+      flashZones();
+      post(actionable ? { t: 'unlinked' } : { t: 'unlinked', empty: true });
+    }
   }, true);
   document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+  // EXT-02 §3.1 : la touche H bascule les zones cliquables, y compris quand le focus est dans la page
+  document.addEventListener('keydown', function (e) {
+    if (mode !== 'player' || e.ctrlKey || e.metaKey || e.altKey || (e.key !== 'h' && e.key !== 'H')) return;
+    var k = e.target;
+    if (k && (k.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(k.tagName))) return;
+    post({ t: 'zones-key' });
+  });
   // A8 guide : la zone visée suit le défilement et la taille de la page
   function targetEl() { return target && target.sel && unique(target.sel) ? q(target.sel) : null; }
   function targetBox() {
@@ -673,7 +749,7 @@ export const FRAME_RUNTIME = `(function () {
     return !!t && e.clientX >= t.r.x && e.clientX <= t.r.x + t.r.w && e.clientY >= t.r.y && e.clientY <= t.r.y + t.r.h;
   }
   addEventListener('scroll', function () { if (target) postTarget(); }, { passive: true });
-  addEventListener('resize', function () { if (target) postTarget(); });
+  addEventListener('resize', function () { if (target) postTarget(); drawZones(); });
 
   addEventListener('message', function (e) {
     if (e.source !== parentWin) return;
@@ -691,6 +767,10 @@ export const FRAME_RUNTIME = `(function () {
         document.head.appendChild(hs);
       }
       apply();
+    } else if (m.t === 'zones' && mode === 'player') {
+      if (typeof m.dark === 'boolean') zonesDark = m.dark;
+      if (typeof m.show === 'boolean') zonesOn = m.show;
+      if (m.flash === true) flashZones(); else drawZones();
     } else if (m.t === 'ops') {
       ops = Array.isArray(m.ops) ? m.ops : [];
       apply();

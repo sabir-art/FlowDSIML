@@ -49,6 +49,16 @@ describe('htmlFrame', () => {
     expect(parseFromFrame({ fd: 1, t: 'ext', id: 'https://evil.example' })).toBeNull();
     expect(parseFromFrame({ fd: 1, t: 'unlinked', ext: true })).toEqual({ fd: 1, t: 'unlinked', ext: true });
     expect(parseFromFrame({ fd: 1, t: 'unlinked', ext: 'x' })).toEqual({ fd: 1, t: 'unlinked' });
+    // EXT-02 §3 : clic dans le vide et nombre de zones cliquables
+    expect(parseFromFrame({ fd: 1, t: 'unlinked', empty: true })).toEqual({
+      fd: 1,
+      t: 'unlinked',
+      empty: true,
+    });
+    expect(parseFromFrame({ fd: 1, t: 'zones', n: 3 })).toEqual({ fd: 1, t: 'zones', n: 3 });
+    expect(parseFromFrame({ fd: 1, t: 'zones', n: -1 })).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'zones', n: '3' })).toBeNull();
+    expect(parseFromFrame({ fd: 1, t: 'zones', n: 1.5 })).toBeNull();
     expect(parseFromFrame({ fd: 1, t: 'html', html: '<img onerror=x>' })).toBeNull();
     expect(parseFromFrame({ t: 'ready', h: 1 })).toBeNull();
     expect(

@@ -1431,7 +1431,7 @@
       "autoLink": "Automatically link identical links",
       "autoLinkHelp": "A “Users” menu link leads to the same page on every page.",
       "unlinked": "Click on an unlinked element",
-      "unlinkedToast": "Show “This part is not available in the demo”",
+      "unlinkedToast": "Show “No link here” and the clickable areas",
       "unlinkedNone": "Do nothing",
       "unlinkedHighlight": "Highlight clickable areas",
       "guide": "Optional guide",
@@ -1453,7 +1453,7 @@
       "ghost": "Page not captured",
       "deadTitle": "Links without a page",
       "deadHelp": {
-        "toast": "These links lead to pages you have not captured. On click, the visitor sees “This part is not available in the demo”.",
+        "toast": "These links lead to pages you have not captured. On click, the visitor sees “No link here” and the page’s clickable areas.",
         "none": "These links lead to pages you have not captured. On click, nothing happens for the visitor.",
         "highlight": "These links lead to pages you have not captured. On click, the visitor sees the clickable areas highlighted."
       },

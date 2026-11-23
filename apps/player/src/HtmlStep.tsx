@@ -1,7 +1,8 @@
 import { openExternal } from './openExternal';
 import { mediaPublicUrl } from './config';
 import type { ComponentChildren } from 'preact';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { MousePointerClick } from 'lucide-preact';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { Rect, SandboxSettings, Step } from '@flowdsiml/manifest';
 import {
   FRAME_SANDBOX,
@@ -19,9 +20,19 @@ const EXTLINK_RE = /^https:\/\/[^\s"'<>]+$/;
  * A8 (L20) : étape HTML. La page capturée est rendue en iframe srcdoc sandbox (origine opaque, CSP
  * stricte, notre seul script) à la taille capturée, mise à l'échelle du lecteur. Elle reste du vrai
  * texte, lisible par un lecteur d'écran ; les éléments masqués sont retirés du rendu.
- * Démo guidée : « Suivant » et liens vers une étape. Sandbox : navigation libre entre les pages
- * reliées ; un clic non relié affiche « Cette partie n'est pas disponible dans la démo ».
+ * Démo guidée : « Suivant » et liens vers une étape. Sandbox : navigation libre entre les pages reliées.
+ * EXT-02 §3 : la bascule « Zones cliquables » (touche H) entoure en bleu les éléments reliés ; un clic à
+ * côté les illumine un instant et affiche « Aucun lien à cet endroit » avec leur nombre.
  */
+/** Choix « Zones cliquables » gardé dans le navigateur (par personne). */
+const ZONES_KEY = 'tc.player.zones';
+const readZones = () => {
+  try {
+    return localStorage.getItem(ZONES_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
 export function HtmlStep({
   step,
   t,
@@ -62,6 +73,23 @@ export function HtmlStep({
   const [doc, setDoc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  /** EXT-02 §3 : nombre de zones cliquables de la page (null : pas encore compté), bascule, message. */
+  const [zones, setZones] = useState<number | null>(null);
+  const [zonesOn, setZonesOn] = useState(readZones);
+  const [miss, setMiss] = useState(false);
+  const missTimer = useRef(0);
+  const toggleZones = useCallback((on?: boolean) => {
+    setZonesOn((cur) => {
+      const next = on ?? !cur;
+      try {
+        localStorage.setItem(ZONES_KEY, next ? '1' : '0');
+      } catch {
+        /* préférence non gardée */
+      }
+      return next;
+    });
+    setMiss(false);
+  }, []);
   /** L49 §4 : lien externe autorisé en attente de confirmation (adresse de l'opération). */
   const [leave, setLeave] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
@@ -77,6 +105,8 @@ export function HtmlStep({
     setDoc(null);
     setReady(false);
     setFailed(false);
+    setZones(null);
+    setMiss(false);
     fetch(h.url)
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
       .then(buildSrcdoc)
@@ -163,9 +193,18 @@ export function HtmlStep({
       } else if (m.t === 'target') setSpot({ rect: m.rect, found: m.found });
       else if (m.t === 'hit') onHit?.();
       else if (m.t === 'go') onGo(m.step);
-      else if (m.t === 'unlinked') {
-        setToast(m.ext ? ht.outside : ht.unavailable);
+      else if (m.t === 'zones') setZones(m.n);
+      else if (m.t === 'zones-key') toggleZones();
+      else if (m.t === 'unlinked' && m.ext) {
+        setMiss(false);
+        setToast(ht.outside);
         window.setTimeout(() => setToast(null), 3000);
+      } else if (m.t === 'unlinked') {
+        // EXT-02 §3.2 : « Aucun lien à cet endroit », 5 s ou jusqu'au clic suivant
+        setToast(null);
+        setMiss(true);
+        window.clearTimeout(missTimer.current);
+        missTimer.current = window.setTimeout(() => setMiss(false), 5000);
       } else if (m.t === 'ext') {
         // L'adresse vient de l'opération publiée, jamais de la page
         const o = ops.find((x) => x.op === 'extlink' && x.id === m.id);
@@ -174,7 +213,37 @@ export function HtmlStep({
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [ops, sandbox, h.links, onGo, ht, onHit]);
+  }, [ops, sandbox, h.links, onGo, ht, onHit, toggleZones]);
+
+  // EXT-02 §3.1 : cadres des zones, aux couleurs du thème du lecteur
+  useEffect(() => {
+    const win = frame.current?.contentWindow;
+    if (!win || !ready) return;
+    const dark = !!box.current?.closest('.is-dark');
+    const msg: ToFrame = { fd: 1, t: 'zones', show: zonesOn && (zones ?? 0) > 0, dark };
+    win.postMessage(msg, '*');
+  }, [ready, zonesOn, zones]);
+  // Touche H (hors champ de saisie) ; dans la page capturée, la touche est relayée par le cadre
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key.toLowerCase() !== 'h' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      if ((zones ?? 0) > 0) toggleZones();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [zones, toggleZones]);
+  // Le message disparaît au clic suivant, où qu'il soit
+  useEffect(() => {
+    if (!miss) return;
+    const off = (e: MouseEvent) => {
+      if (!(e.target as Element | null)?.closest?.('.p-html-miss')) setMiss(false);
+    };
+    window.addEventListener('click', off);
+    return () => window.removeEventListener('click', off);
+  }, [miss]);
+  useEffect(() => () => window.clearTimeout(missTimer.current), []);
 
   // A8 guide : la page suit la zone visée et renvoie sa position (défilement, taille)
   const targetKey = target ? JSON.stringify(target) : '';
@@ -230,21 +299,57 @@ export function HtmlStep({
         <div class="p-html-toast" role="status" aria-live="polite">
           {toast ?? ''}
         </div>
+        <div class="p-html-miss" role="status" aria-live="polite">
+          {miss && (
+            <>
+              <MousePointerClick aria-hidden="true" />
+              <p class="p-html-miss-tx">
+                <b>{ht.noLink}</b>
+                <span>
+                  {(zones ?? 0) === 0
+                    ? ht.zonesNone
+                    : zones === 1
+                      ? ht.zonesOne
+                      : fmt(ht as unknown as Record<string, string>, 'zonesMany', { n: String(zones) })}
+                </span>
+              </p>
+              {(zones ?? 0) > 0 && !zonesOn && (
+                <button type="button" class="p-html-miss-bt" onClick={() => toggleZones(true)}>
+                  {ht.showZones}
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
       {leave && <LeaveDialog url={leave} ht={ht} onClose={() => setLeave(null)} />}
-      {status && (
-        <p class="p-html-key" aria-live="polite">
-          {status}
-        </p>
-      )}
-      {!sandbox && (
-        <div class="p-html-bar">
-          <span class="p-html-title">{sub(step.title ?? '')}</span>
+      <div class="p-html-bar">
+        {/* Sandbox : le repère des pages clés tient la place du titre de l'étape */}
+        {status ? (
+          <p class="p-html-key" aria-live="polite">
+            {status}
+          </p>
+        ) : (
+          <span class="p-html-title">{sandbox ? '' : sub(step.title ?? '')}</span>
+        )}
+        <button
+          type="button"
+          class={`p-html-zones${zonesOn && (zones ?? 0) > 0 ? ' is-on' : ''}`}
+          aria-pressed={zonesOn && (zones ?? 0) > 0}
+          aria-keyshortcuts="H"
+          disabled={(zones ?? 0) === 0}
+          onClick={() => toggleZones()}
+        >
+          <MousePointerClick aria-hidden="true" />
+          {ht.zones}
+          <span class="p-html-zones-n">{zones ?? 0}</span>
+        </button>
+        {!sandbox && (
           <button type="button" class="pill pill-p" onClick={onNext}>
             {nextLabel}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

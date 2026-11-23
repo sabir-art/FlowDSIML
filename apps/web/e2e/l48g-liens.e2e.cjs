@@ -122,10 +122,7 @@ const pages = [
     );
   }
   ok(!(await panel.innerText()).includes('autre.example'), 'lien externe non compté');
-  ok(
-    (await panel.innerText()).includes('Cette partie n’est pas disponible dans la démo'),
-    'phrase selon le clic non relié',
-  );
+  ok((await panel.innerText()).includes('Aucun lien à cet endroit'), 'phrase selon le clic non relié');
   const first = items.first();
   const cap = first.getByRole('button', { name: /Capturer cette page/ });
   // EXT-CONNECT : l'action est active ; sans extension dans le navigateur, elle le dit
