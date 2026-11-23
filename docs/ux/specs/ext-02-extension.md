@@ -61,7 +61,7 @@ Le blocage du client venait de la capture des applis à page unique (corrigé pa
 1. En-tête : logo, titre « Vérifier avant l’envoi », une phrase : « Votre démo est une copie fixe des pages, et la navigation est rejouée à partir de vos clics. Voici ce que TutoClick n’a pas copié ou a protégé. Vous n’avez rien à faire, sauf si vous voulez garder un élément. »
 2. **Titre et type**, sur une ligne à 1 440 (colonne sous 768) :
    - « Titre de la démo », champ obligatoire, prérempli « Capture du {date} » (ex. « Capture du 23 nov. 2026 »), modifiable ; vide à l’envoi : « Donnez un titre à la démo. » sous le champ, bord danger, focus rendu ;
-   - « Type » : segmenté COMP-01 « Démo guidée » / « Sandbox », prérempli depuis le popup, modifiable ici. Si la capture complète un Sandbox existant (« Ajouter des pages » depuis l’app), le segmenté est remplacé par une ligne « Pages ajoutées au Sandbox « {nom} » » (icône Box), sans choix.
+   - « Type » : segmenté COMP-01 « Démo guidée » / « Sandbox », prérempli depuis le popup, modifiable ici. Si la capture complète un Sandbox existant (« Ajouter des pages » depuis l’app), le champ Titre disparaît (la démo existe) et le segmenté est remplacé par une ligne « Pages ajoutées au Sandbox « {nom} » » (icône Box), sans choix.
 3. **Bilan** : Pages copiées, Scripts non copiés, Protégés (cadres, formulaires, données, liens externes), Gardés par vous.
 3. **Encart d’information** (`info-soft`) : « 155 scripts ne sont pas copiés (140 de la page, 15 de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics. »
 4. **Six groupes**, dans cet ordre ; un groupe vide n’apparaît pas :
@@ -77,7 +77,7 @@ Le blocage du client venait de la capture des applis à page unique (corrigé pa
 
 Les liens vers une autre page de la même démo ne figurent pas ici : ils sont reliés automatiquement (zones cliquables du Sandbox), rien à faire.
 
-4 bis. **Pages copiées** (entre l’encart et les groupes, repliée par défaut ; dépliée d’office si une page est trop lourde) : une ligne par page, colonnes vignette 64 × 40 (copie inerte) · numéro, titre, adresse et poids · statut (« Prête », ou « Trop lourde » en warning) · « Pourquoi ? » · « Retirer » (96 px). Retirer une page la sort de la démo et des compteurs ; annulable par la notification. Le « Pourquoi ? » d’une page trop lourde donne la limite et quoi faire (« au-delà des 5 Mo permis par page ; retirez-la ou recapturez-la avec moins de contenu affiché » : limite réelle du serveur à reprendre).
+4 bis. **Pages copiées** (entre l’encart et les groupes, repliée par défaut ; dépliée d’office si une page est trop lourde) : une ligne par page, colonnes vignette 64 × 40 (copie inerte) · numéro, titre, adresse et poids · statut (« Prête », ou « Trop lourde » en warning ; état du groupe « Prêtes à l’envoi » quand aucune n’est lourde, sinon « 1 page trop lourde ») · « Pourquoi ? » · « Retirer » (96 px). Retirer une page la sort de la démo et des compteurs ; annulable par la notification. Limite du serveur : 10 Mo par page. Une page trop lourde non retirée n’est pas envoyée ; son « Pourquoi ? » le dit : « « Agenda » pèse 12,4 Mo, au-delà des 10 Mo permis par page : elle ne sera pas envoyée. Retirez-la, ou recapturez-la avec moins de contenu affiché. »
 
 Compteurs des groupes : calculés sur toutes les pages (un script présent sur 6 pages compte 6 fois) ; la colonne « source » de chaque ligne donne la page d’origine. « Pourquoi ? » d’une ligne déplie le même encart info sous la ligne. « Gardés par vous » compte données + liens + cadres gardés. L’encart sur les scripts disparaît s’il n’y en a aucun. La barre fixe reste en bas à toutes les largeurs. Les cadres de la liste blanche n’ont pas de « Garder » tant que le serveur et le lecteur ne les acceptent pas : ils restent « Retirés » avec leur « Pourquoi ? ».
 
@@ -91,6 +91,7 @@ Colonnes fixes (ALIGN-01, SPLIT-01), identiques pour l’en-tête du groupe et c
 - Liste : recherche « Filtrer par nom ou par source » en pleine largeur au-dessus (40 px, une ligne) ; une ligne par élément ; 20 à la fois avec « Afficher 20 de plus » ; liste virtualisée (1 800 éléments).
 - Statuts : « Non copié », « Retiré », « Remplacé », « Désactivé » (gris) ; « Gardé » (warning, icône Check).
 - **« Pourquoi ? » est présent sur chaque ligne et chaque groupe.** Quand l’élément ne peut pas être gardé, la colonne d’action reste vide : rien ne bouge d’une ligne à l’autre.
+- Valeurs masquées au format de la vérification des captures, type devant : « E-mail · j••••@••••.fr ».
 - Noms : fichier en monospace (`app.bundle.js`), autre élément en texte (« Vidéo YouTube », « E-mail · « j***@a***.fr » »). Le dev fournit la sous-raison de chaque élément (`classify(élément) → raison`) ; elle sert de libellé de la ligne et de texte du « Pourquoi ? ».
 - À 390 px : ligne 1 icône · nom · statut (96 px) ; ligne 2 « Pourquoi ? » à gauche, action de 96 px à droite.
 
