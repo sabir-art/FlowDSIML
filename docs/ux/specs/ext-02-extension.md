@@ -10,7 +10,7 @@ Contraintes communes :
 - largeur 360 px, hauteur au plus 600 px (limite de Chrome) ; en-tête et pied fixes, le corps défile seulement si besoin ;
 - **en-tête (NAV-04, PAGE-01)** : logo compact à gauche ; à droite, « ? » (aide dans un nouvel onglet) et ⋯ (Ouvrir TutoClick, Réglages de l’extension, Se déconnecter). Hauteur 56 px, filet dessous ;
 - **types réels** : Captures, HTML guidée, Sandbox, Vidéo, et Format mobile en **Bientôt** (grisé, jamais masqué, `aria-disabled="true"`, pastille « Bientôt ») ;
-- **titre de la démo** (champ, exemple en indication) et **espace** restent dans le popup ;
+- **titre de la démo** (champ facultatif, exemple en indication) et **espace** restent dans le popup ; le choix de l’espace n’apparaît que si la personne en a plusieurs (sinon le nom seul, sans chevron) ;
 - **réglages réels** : pour Captures, HTML et Sandbox, « Taille de l’onglet » (Actuelle, 1 280 × 720, 1 440 × 900, 1 920 × 1 080, Personnalisée…) et « Suivre les nouveaux onglets » ; pour Vidéo, « Ma voix », « Webcam dans un coin » et « Masquer en direct » (nouveau, voir point 4) ;
 - **aide** : le « ? » d’une ligne déplie une phrase sous la ligne (`aria-expanded`), dans le flux, sans rien recouvrir. Une seule aide ouverte à la fois ; en ouvrir une ferme l’autre. Plus d’infobulle flottante dans le popup ;
 - **bouton** « Démarrer », primaire **prune** (`--fd-color-primary`, texte `on-primary`), 40 px, calé à droite dans le pied, icône Play en `currentColor` ;
@@ -52,45 +52,52 @@ Erreurs à prévoir avec la même forme : autorisation refusée, session expiré
 
 Sur les 24 captures du popup et les écrans de vérification et d’aperçu : contraste AA (axe, aucune violation), icône de chaque bouton de la couleur de son texte, aucun texte qui déborde, au plus une aide ouverte, popup ≤ 600 px.
 
-## 2. Vérification après capture, avant l’envoi
+## 2. Vérification après capture, avant l’envoi (décision du chef du 23/11)
 
-But : la personne comprend ce qui a été retiré ou remplacé, et garde la main. Les chiffres bruts (« 155 scripts retirés », « 1 800 ») ne s’affichent plus seuls.
+Le blocage du client venait de la capture des applis à page unique (corrigé par le dev), pas du retrait des scripts. Les pages restent des **copies fixes**, et la navigation est rejouée à partir des clics enregistrés. L’écran rassure : ce qui n’est pas copié n’est pas une perte.
 
 ### 2.1 Structure (page pleine, pas dans le shell)
 
-1. En-tête : logo, titre « Vérifier avant l’envoi », une phrase.
-2. **Bilan** : quatre cases : Éléments modifiés, Retirés ou remplacés, Gardés par vous, Étapes. Les nombres s’actualisent quand on garde ou retire.
-3. **Groupes par raison**, une carte chacun, dans cet ordre : Scripts retirés, Cadres intégrés retirés, Données personnelles remplacées, Liens et formulaires désactivés. Un groupe vide n’apparaît pas.
-4. Note : « Le serveur applique en plus ses propres contrôles à l’envoi. Un élément gardé reste soumis à ces contrôles. » (reprend la note serveur actuelle)
-5. Barre fixe : « Supprimer la capture » (secondaire, danger), « Envoyer » (primaire).
+1. En-tête : logo, titre « Vérifier avant l’envoi », une phrase : « Votre démo est une copie fixe des pages, et la navigation est rejouée à partir de vos clics. Voici ce que TutoClick n’a pas copié ou a protégé. Vous n’avez rien à faire, sauf si vous voulez garder un élément. »
+2. **Bilan** : Pages copiées, Scripts non copiés, Protégés (cadres, formulaires, données, liens externes), Gardés par vous.
+3. **Encart d’information** (`info-soft`) : « 155 scripts ne sont pas copiés (140 de la page, 15 de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics. »
+4. **Six groupes**, dans cet ordre ; un groupe vide n’apparaît pas :
 
-### 2.2 Carte d’un groupe
+| Groupe | État affiché | « Garder » |
+|---|---|---|
+| Scripts de la page | Non copiés : la démo n’en a pas besoin | non |
+| Scripts de suivi | Non copiés : ils mesurent l’audience du site | non |
+| Cadres intégrés | « 1 vidéo gardée, 3 retirés » | seulement les fournisseurs de la liste blanche en https : YouTube, Vimeo, Loom, OpenStreetMap, Google Maps (iframe sandbox) |
+| Formulaires | Affichés, sans envoi | non |
+| Données personnelles remplacées | Remplacées par des valeurs fictives | oui, élément par élément ; le texte d’origine est rétabli ; l’écran ne montre que la valeur masquée |
+| Liens externes | Désactivés | oui ; le lien gardé ouvre d’abord « Vous quittez la démo » |
 
-Icône, titre, état en dessous (« Retirés », « Remplacées par des valeurs fictives », « Navigation désactivée »), **nombre** à droite, « Pourquoi ? » et « Voir ». « Pourquoi ? » déplie un encart d’explication en langage simple (fond `info-soft`, icône Info), sans quitter la page. « Voir » déplie la liste.
+Les liens vers une autre page de la même démo ne figurent pas ici : ils sont reliés automatiquement (zones cliquables du Sandbox), rien à faire.
 
-Liste d’un groupe, en **colonnes fixes** (ALIGN-01, SPLIT-01), les mêmes pour l’en-tête du groupe et pour chaque ligne : icône 36 px · nom et source (le reste) · statut 88 px · « Pourquoi ? » 104 px · action 96 px calée à droite. Écart de 12 px entre colonnes.
-- au-dessus de la liste, la recherche « Filtrer par nom ou par source » en pleine largeur (40 px, sur une ligne) ;
-- une ligne par élément : nom (monospace, coupé par « … »), source (domaine ou « dans la page »), statut « Retiré » ou « Gardé » (warning) dans une pastille de largeur fixe, « Pourquoi ? », puis « Garder » ou « Retirer » dans un bouton de 96 px ;
-- l’en-tête du groupe aligne son nombre sur la colonne statut, et « Pourquoi ? » et « Voir » sur les deux dernières colonnes ;
-- 20 lignes à la fois ; pied de liste : « 5 sur 155 », « Tout garder » (avec confirmation et le nombre), « Afficher 20 de plus » ; la liste est virtualisée (1 800 éléments sans ralentir).
-- À 390 px : première ligne icône · nom · statut (96 px) ; deuxième ligne « Pourquoi ? » à gauche et l’action de 96 px à droite.
+5. Note : « Le serveur applique les mêmes règles à l’envoi. »
+6. Barre fixe : « Supprimer la capture » (secondaire, danger), « Envoyer » (primaire prune).
+
+### 2.2 Carte d’un groupe et liste
+
+Colonnes fixes (ALIGN-01, SPLIT-01), identiques pour l’en-tête du groupe et chaque ligne : icône 36 px · nom et source (le reste) · statut 88 px · « Pourquoi ? » 104 px · action 96 px calée à droite. Écart de 12 px.
+- En-tête du groupe : titre, état, nombre (aligné sur la colonne statut), « Pourquoi ? » (déplie l’explication, `info-soft`), « Voir » / « Masquer ».
+- Liste : recherche « Filtrer par nom ou par source » en pleine largeur au-dessus (40 px, une ligne) ; une ligne par élément ; 20 à la fois avec « Afficher 20 de plus » ; liste virtualisée (1 800 éléments).
+- Statuts : « Non copié », « Retiré », « Remplacé », « Désactivé » (gris) ; « Gardé » (warning, icône Check).
+- **« Pourquoi ? » est présent sur chaque ligne et chaque groupe.** Quand l’élément ne peut pas être gardé, la colonne d’action reste vide : rien ne bouge d’une ligne à l’autre.
+- Noms : fichier en monospace (`app.bundle.js`), autre élément en texte (« Vidéo YouTube », « E-mail · « j***@a***.fr » »). Le dev fournit la sous-raison de chaque élément (`classify(élément) → raison`) ; elle sert de libellé de la ligne et de texte du « Pourquoi ? ».
+- À 390 px : ligne 1 icône · nom · statut (96 px) ; ligne 2 « Pourquoi ? » à gauche, action de 96 px à droite.
 
 ### 2.3 Garder
 
-« Garder » est possible pour chaque élément, avec ces règles :
-- **Scripts et cadres intégrés** : une fenêtre de confirmation dit ce que cela permet (« pourra s’exécuter dans la démo et lire ce que voit l’apprenant ») et propose « Annuler » / « Garder ce script ».
-- **Données personnelles** : confirmation qui montre la valeur masquée (jamais la valeur réelle) et le risque. Aucune donnée réelle dans l’écran ni dans les captures de documentation.
-- **Liens et formulaires** : « Garder » ne s’applique qu’aux liens vers une autre page de la démo. Un lien qui quitte la démo ne peut pas être gardé : le bouton est remplacé par « Navigation désactivée » avec un « Pourquoi ? ».
-- Un élément gardé passe en jaune (« Gardé »), le bilan monte d’un, « Retirer » le remet.
-- Le serveur garde ses contrôles : un élément gardé reste filtré s’il est refusé côté serveur, et un message le dit après l’envoi (point à fixer avec le dev, voir 2.5).
+- **Données personnelles** : « Garder » direct, réversible par « Retirer » ; pas de fenêtre (l’écran ne montre jamais la valeur réelle).
+- **Liens externes** : fenêtre « Garder ce lien externe ? » : « « Conditions générales » mène à legal.example.com. Dans la démo, le visiteur verra d’abord « Vous quittez la démo » et choisira de continuer ou non. » Boutons « Annuler », « Garder le lien ».
+- **Cadres de la liste blanche** : « Garder » direct. Les autres cadres n’ont pas de bouton.
+- Scripts et formulaires : jamais de « Garder ».
+- « Tout garder » n’existe plus.
 
-### 2.4 À 390 px
+### 2.4 Après l’envoi
 
-Bilan sur deux colonnes. Colonnes comme en 2.2. Barre fixe : les deux boutons sur une ligne, à largeur égale.
-
-### 2.5 Avec le dev (point A : le filtre bloque la navigation)
-
-Aujourd’hui le filtre neutralise tous les liens. Règle proposée : un lien vers une autre page capturée de la même démo est conservé et devient une zone cliquable (voir 3) ; tout autre lien est neutralisé et listé dans « Liens et formulaires désactivés ». À confirmer par le dev : comment le serveur répond à un élément gardé, et si le nombre de groupes est fixe (4).
+Si le serveur retire un élément gardé (il renvoie ses compteurs), un bandeau warning en tête de l’écran de fin d’envoi : « Démo envoyée. 1 élément gardé a été retiré par le serveur. » puis la raison par élément (« Cadre « Widget de discussion » (widget.example.com) : fournisseur non autorisé. »), et « Ouvrir la démo ». Annoncé (`role="status"`).
 
 ## 3. Aperçu : zones cliquables
 
@@ -106,7 +113,11 @@ Le message « Cette partie n’est pas disponible dans la démo » est supprimé
 
 ### 3.3 Étape sans zone
 
-Si l’étape n’a aucune zone : le compteur affiche 0, la bascule est désactivée, et un encart explique « Aucune zone cliquable sur cette étape. Les visiteurs ne peuvent que passer à l’étape suivante. » avec « Ajouter une zone » (dans l’éditeur) et « Continuer sans zone ». Dans le lecteur public, l’encart n’apparaît pas : seul Suivant reste.
+Si l’étape n’a aucune zone : le compteur affiche 0, la bascule est désactivée, et un encart explique « Aucune zone cliquable sur cette étape. Les visiteurs ne peuvent que passer à l’étape suivante. » avec « Ajouter une zone » (dans l’éditeur) et « Continuer sans zone ».
+
+### 3.3 bis Lecteur public
+
+La bascule « Zones cliquables » (et la touche H) et le message « Aucun lien à cet endroit » valent aussi dans le lecteur public. L’encart « Aucune zone cliquable » et « Ajouter une zone » n’y apparaissent pas : la bascule affiche 0, désactivée, et seul « Suivant » reste.
 
 ### 3.4 À 390 px
 
