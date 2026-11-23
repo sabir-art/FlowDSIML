@@ -30,6 +30,8 @@ const slotIs = (page, w) =>
   const b = await chromium.launch();
   for (const theme of ['light', 'dark']) {
     const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme });
+    // Le thème de l'app vient de sa préférence gardée, pas du réglage du navigateur
+    await ctx.addInitScript((t) => localStorage.setItem('fd.theme', t), theme);
     const page = await ctx.newPage();
     await install(page, seedMaquette());
     await page.goto(`${APP}/#/`);

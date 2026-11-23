@@ -878,9 +878,10 @@ html[data-remote] body {
   font: 600 12px var(--fd-font-sans);
   text-decoration: none;
 }
+/* FIELD-01 §11.4 : un seul indicateur de focus, à l'intérieur du bouton (ni outline ni ombre extérieure) */
 .presenter .pr-top .pr-reopen:focus-visible {
-  outline: 2px solid var(--fd-color-focus);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .presenter .pr-top .pr-phone-btn {
   margin-left: 0;
