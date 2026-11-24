@@ -4529,3 +4529,103 @@
   margin-top: 2px;
   color: var(--fd-color-info);
 }
+
+/* EXT-02 §6.1 : étape « Fenêtre » dans le canevas (comme le lecteur) et son image dans le panneau */
+.canvas-text--window .canvas-window-bg {
+  filter: brightness(0.55);
+  transform: none;
+}
+.canvas-window {
+  position: relative;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  width: min(680px, 100%);
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: var(--fd-shadow-lg, 0 24px 48px rgb(8 8 8 / 0.28));
+  text-align: left;
+}
+.canvas-window--text {
+  grid-template-columns: minmax(0, 1fr);
+  width: min(480px, 100%);
+}
+.canvas-window__img {
+  position: relative;
+  min-height: 240px;
+  background: var(--fd-color-surface-sunken);
+}
+.canvas-window__img > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.canvas-window__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 28px;
+}
+.canvas-window__body h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+}
+.canvas-window__mu {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.canvas-window__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+.canvas-window__foot > .canvas-window__mu {
+  margin-right: auto;
+}
+.canvas-window__foot .p-btn {
+  min-height: 36px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+.win-img {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.win-img__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.win-img__thumb {
+  flex: none;
+  width: 72px;
+  height: 56px;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+}
+.win-img__thumb > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.win-img__meta {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}

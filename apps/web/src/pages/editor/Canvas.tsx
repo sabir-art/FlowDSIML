@@ -308,11 +308,49 @@ export function Canvas({
     const endText =
       step.kind === 'text' &&
       here === editor.steps.length - 1 &&
-      opts.display !== 'popup' &&
+      opts.display === 'screen' &&
       !editor.questions.length &&
       !opts.choices.length;
     const popup = step.kind === 'text' && (opts.display === 'popup' || endText);
     const stepCta = asCta(step.cta);
+    // EXT-02 §6.1 : étape « Fenêtre », comme dans le lecteur (image à gauche, texte, pied)
+    if (step.kind === 'text' && opts.display === 'window') {
+      const prev = [...editor.steps.slice(0, Math.max(0, here))]
+        .reverse()
+        .find((x) => x.kind === 'image' && x.image_path);
+      const bg = prev ? editor.imageUrls[prev.image_path!] : undefined;
+      const img = step.image_path ? editor.imageUrls[step.image_path] : undefined;
+      return (
+        <div
+          className="canvas-text canvas-text--popup canvas-text--window fd-player-scope"
+          style={themeVars(themeSchema.parse(asSettings(editor.demo?.settings).theme ?? {}))}
+          onPointerDown={() => setSelection({ kind: 'step' })}
+        >
+          {bg && <img className="canvas-popup-bg canvas-window-bg" src={bg} alt="" aria-hidden="true" />}
+          {formChip}
+          <div className={`canvas-window${step.image_path ? '' : ' canvas-window--text'}`}>
+            {step.image_path && (
+              <div className="canvas-window__img">{img && <img src={img} alt={opts.imageAlt} />}</div>
+            )}
+            <div className="canvas-window__body">
+              <span className="canvas-window__mu">
+                {t('editor.window.stepOf', { n: here + 1, total: editor.steps.length })}
+              </span>
+              <h2>{vp.text(step.title) || t('editor.untitled')}</h2>
+              <div dangerouslySetInnerHTML={{ __html: vp.html(step.body) }} />
+              <div className="canvas-window__foot">
+                <span className="canvas-window__mu">{t('editor.window.esc')}</span>
+                {here > 0 && <span className="p-btn p-btn-ghost">{t('editor.window.prev')}</span>}
+                <span className="p-btn p-btn-primary">
+                  {vp.text(opts.buttonLabel) || t('editor.advanced.popup.buttonPlaceholder')}
+                  <ChevronRight size={16} aria-hidden="true" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
     const card = (
       <>
         {popup && !endText && (

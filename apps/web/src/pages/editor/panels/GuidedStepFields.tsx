@@ -1,15 +1,21 @@
-import { AppWindow, GitBranch, Plus, Trash2, TriangleAlert } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { AppWindow, Ellipsis, GitBranch, Plus, Replace, Trash2, TriangleAlert, Upload } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
 import type { ChoiceAction, StepOptions } from '@flowdsiml/manifest';
 import { Button, Field, Select, Switch, ColorSwatch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
+import { DropBlock, UploadBar } from '../../../components/DropBlock';
+import { Menu } from '../../../components/Menu';
+import { useToast } from '../../../components/Toast';
 import { asAction, asStepOptions, type StepRow } from '../types';
 import { loopsWithoutExit, unreachableSteps } from '../reachability';
 import { DestinationSelect } from './DestinationSelect';
 import { answersFromText, branchOf, branchPatch, isDead, remapRules, type BranchView } from '../branch';
+
+const WINDOW_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const WINDOW_IMAGE_MAX = 5 * 1024 * 1024;
 
 /**
  * F1 : réglages « parcours guidé » d'une étape texte (spec a2 §2 et §5) : affichage plein écran ou
@@ -31,6 +37,18 @@ export function GuidedStepFields({
   const opts = asStepOptions(step.options);
   const set = (patch: Partial<StepOptions>) =>
     editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
+
+  // EXT-02 §6.1 : image de la fenêtre (zone étroite §18.2 : bouton « Importer… », dépôt sur le bloc)
+  const toast = useToast();
+  const file = useRef<HTMLInputElement>(null);
+  const [sending, setSending] = useState(false);
+  const importImage = (f: File) => {
+    if (!WINDOW_IMAGE_TYPES.includes(f.type))
+      return toast(t('editor.replaceBadType'), undefined, { tone: 'warning' });
+    if (f.size > WINDOW_IMAGE_MAX) return toast(t('editor.window.tooBig'), undefined, { tone: 'warning' });
+    setSending(true);
+    void editor.captureStep(step.id, f).finally(() => setSending(false));
+  };
 
   const unreachable = useMemo(
     () =>
@@ -107,7 +125,7 @@ export function GuidedStepFields({
           </div>
           <Field label={t('editor.advanced.popup.display')}>
             <div className="fd-segmented" role="group" aria-label={t('editor.advanced.popup.display')}>
-              {(['screen', 'popup'] as const).map((d) => (
+              {(['screen', 'popup', 'window'] as const).map((d) => (
                 <button
                   key={d}
                   type="button"
@@ -118,13 +136,109 @@ export function GuidedStepFields({
                   {t(
                     d === 'screen'
                       ? 'editor.advanced.popup.displayScreen'
-                      : 'editor.advanced.popup.displayPopup',
+                      : d === 'popup'
+                        ? 'editor.advanced.popup.displayPopup'
+                        : 'editor.advanced.popup.displayWindow',
                   )}
                 </button>
               ))}
             </div>
             {opts.display === 'popup' && <p className="fd-help">{t('editor.advanced.popup.displayHelp')}</p>}
+            {opts.display === 'window' && <p className="fd-help">{t('editor.window.displayHelp')}</p>}
           </Field>
+          {opts.display === 'window' && (
+            <>
+              <DropBlock onFile={importImage} disabled={readOnly || sending} className="win-img">
+                <span className="fd-label" id={`gw-img-${step.id}`}>
+                  {t('editor.window.image')}
+                </span>
+                <input
+                  ref={file}
+                  id={`gw-file-${step.id}`}
+                  type="file"
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  aria-label={t('editor.window.image')}
+                  accept={WINDOW_IMAGE_TYPES.join(',')}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = '';
+                    if (f) importImage(f);
+                  }}
+                />
+                {step.image_path ? (
+                  <div className="win-img__row" role="group" aria-labelledby={`gw-img-${step.id}`}>
+                    <span className="win-img__thumb">
+                      {editor.imageUrls[step.image_path] && (
+                        <img src={editor.imageUrls[step.image_path]} alt="" />
+                      )}
+                    </span>
+                    <span className="win-img__meta">
+                      {step.image_width} × {step.image_height} px
+                    </span>
+                    {!readOnly && (
+                      <Menu
+                        label={t('editor.window.imageMore')}
+                        icon={<Ellipsis />}
+                        items={[
+                          {
+                            label: t('editor.window.replace'),
+                            icon: <Replace />,
+                            onSelect: () => file.current?.click(),
+                          },
+                          'separator',
+                          {
+                            label: t('editor.window.remove'),
+                            icon: <Trash2 />,
+                            danger: true,
+                            onSelect: () =>
+                              editor.updateStep(step.id, {
+                                image_path: null,
+                                image_width: null,
+                                image_height: null,
+                              }),
+                          },
+                        ]}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    disabled={readOnly || sending}
+                    aria-controls={`gw-file-${step.id}`}
+                    aria-describedby={`gw-img-h-${step.id}`}
+                    onClick={() => file.current?.click()}
+                  >
+                    <Upload aria-hidden="true" />
+                    {sending ? t('dropzone.sendingShort') : t('dropzone.import')}
+                  </button>
+                )}
+                {sending && <UploadBar label={t('editor.window.sending')} />}
+                <span className="fd-help" id={`gw-img-h-${step.id}`}>
+                  {t('editor.window.imageHelp')}
+                </span>
+              </DropBlock>
+              {step.image_path && (
+                <Field label={t('editor.window.alt')} htmlFor={`gw-alt-${step.id}`}>
+                  <input
+                    id={`gw-alt-${step.id}`}
+                    className="fd-input"
+                    maxLength={200}
+                    disabled={readOnly}
+                    value={opts.imageAlt}
+                    aria-describedby={`gw-alt-h-${step.id}`}
+                    onChange={(e) => set({ imageAlt: e.target.value })}
+                  />
+                  <p className="fd-help" id={`gw-alt-h-${step.id}`}>
+                    {t('editor.window.altHelp')}
+                  </p>
+                </Field>
+              )}
+            </>
+          )}
           {opts.display === 'popup' && (
             <>
               <Field label={t('editor.advanced.popup.variant')} htmlFor="gp-variant">
@@ -184,7 +298,7 @@ export function GuidedStepFields({
             <VarTextField
               singleLine
               id="gp-button"
-              label={t('editor.advanced.popup.button')}
+              label={t(opts.display === 'window' ? 'editor.window.button' : 'editor.advanced.popup.button')}
               maxLength={40}
               catalog={catalog}
               canManage={!readOnly}
@@ -198,7 +312,7 @@ export function GuidedStepFields({
         </section>
       )}
 
-      {step.kind === 'text' && (
+      {step.kind === 'text' && opts.display !== 'window' && (
         <section className="panel-group stack" aria-labelledby={`gc-${step.id}`}>
           <div className="fd-card__head" style={{ margin: 0 }}>
             <span className="fd-icon-chip" aria-hidden="true">

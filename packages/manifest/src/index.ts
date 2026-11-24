@@ -180,8 +180,13 @@ export type Branch = z.infer<typeof branchSchema>;
 /** F1 : options d'affichage d'une étape (pop-up, variante, menu de choix). */
 export const stepOptionsSchema = z
   .object({
-    /** « popup » : carte centrée par-dessus l'écran précédent ; « screen » : écran plein. */
-    display: z.enum(['screen', 'popup']).default('screen').catch('screen'),
+    /**
+     * « popup » : carte centrée par-dessus l'écran précédent ; « screen » : écran plein ; « window » :
+     * fenêtre image + texte sur la capture précédente voilée (EXT-02 §6.1).
+     */
+    display: z.enum(['screen', 'popup', 'window']).default('screen').catch('screen'),
+    /** EXT-02 §6.1 : texte alternatif de l'image d'une étape « Fenêtre » (vide : image décorative). */
+    imageAlt: z.string().max(200).default('').catch(''),
     variant: z.enum(['info', 'instruction']).default('info').catch('info'),
     /** Fond d'une pop-up : capture précédente floutée, ou couleur unie. */
     background: z.enum(['blur', 'color']).default('blur').catch('blur'),
@@ -296,6 +301,7 @@ export const stepOptionsSchema = z
   })
   .default({
     display: 'screen',
+    imageAlt: '',
     variant: 'info',
     background: 'blur',
     bgColor: '#080808',

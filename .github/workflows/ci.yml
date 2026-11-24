@@ -201,6 +201,9 @@ jobs:
       - name: 'Nouvelle démo vidéo : import MP4 ou WebM (envoi avec reprise, erreurs, arrêt)'
         if: always()
         run: cd apps/web && node e2e/nouvelle-video.e2e.cjs
+      - name: 'Étape « Fenêtre » image + texte (éditeur, lecteur, Échap, 390 px) EXT-02 §6.1'
+        if: always()
+        run: cd apps/web && node e2e/fenetre.e2e.cjs
       - name: 'Voix off : panneau en trois sources, lecteur dans la bulle (EXT-02 §6.4)'
         if: always()
         run: cd apps/web && node e2e/voix-off.e2e.cjs

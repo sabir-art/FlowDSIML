@@ -738,7 +738,8 @@
         "survey": "Survey",
         "choice": "Choice menu",
         "text": "Text step",
-        "image": "Uploaded image"
+        "image": "Uploaded image",
+        "window": "Window"
       },
       "popup": {
         "title": "Pop-up step",
@@ -758,7 +759,8 @@
         "variantInfo": "Information",
         "variantInstruction": "Instruction",
         "buttonHelp": "Empty = “Next”.",
-        "buttonPlaceholder": "Next"
+        "buttonPlaceholder": "Next",
+        "displayWindow": "Window"
       },
       "checklist": {
         "title": "Checklist",
@@ -1990,7 +1992,24 @@
     "expandSteps": "Expand steps",
     "stepsWidth": "Steps width",
     "stepPill": "Step {{n}}: {{title}}",
-    "replaceBadType": "Format not accepted: PNG, JPEG or WebP."
+    "replaceBadType": "Format not accepted: PNG, JPEG or WebP.",
+    "window": {
+      "newTitle": "Window",
+      "displayHelp": "A window with an image and text, over the previous screen.",
+      "image": "Image",
+      "imageHelp": "PNG, JPEG or WebP, 5 MB at most. Or drop the file on this block.",
+      "imageMore": "More image actions",
+      "replace": "Replace…",
+      "remove": "Remove",
+      "sending": "Uploading the image",
+      "tooBig": "Image too large: 5 MB at most.",
+      "alt": "Alternative text",
+      "altHelp": "Leave empty if the image is decorative.",
+      "stepOf": "Step {{n}} of {{total}}",
+      "esc": "Esc to close",
+      "prev": "Back",
+      "button": "Button label"
+    }
   },
   "status": {
     "draft": "Draft",

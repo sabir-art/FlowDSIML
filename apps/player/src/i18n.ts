@@ -19,6 +19,10 @@ const dict = {
     processedByUnknown: 'Données traitées par l’organisation qui publie cette démo.',
     next: 'Suivant',
     prev: 'Précédent',
+    /** EXT-02 §6.1 : étape « Fenêtre ». */
+    stepOf: 'Étape {{n}} sur {{total}}',
+    escToClose: 'Échap pour fermer',
+    reopenWindow: 'Rouvrir la fenêtre',
     start: 'Commencer',
     /** L16 : couverture «\u202fDémarrer au clic\u202f» d'une intégration. */
     launch: 'Lancer la démo',
@@ -444,6 +448,9 @@ const dict = {
     processedByUnknown: 'Data processed by the organization publishing this demo.',
     next: 'Next',
     prev: 'Back',
+    stepOf: 'Step {{n}} of {{total}}',
+    escToClose: 'Esc to close',
+    reopenWindow: 'Reopen the window',
     start: 'Start',
     launch: 'Launch the demo',
     restart: 'Restart',

@@ -26,6 +26,7 @@ import {
   type VariableValues,
 } from '@flowdsiml/core';
 import {
+  AppWindow,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -233,6 +234,10 @@ export function Player({
     }
   });
   const [menu, setMenu] = useState(false);
+  // Fenêtre fermée par Échap : la capture n'est plus voilée, « Rouvrir la fenêtre » reste dans la barre
+  const [winClosed, setWinClosed] = useState(false);
+  const winBox = useRef<HTMLDivElement>(null);
+  const winPill = useRef<HTMLButtonElement>(null);
   const completed = useRef(false);
   const touchX = useRef<number | null>(null);
   const step = m.steps[index]!;
@@ -326,10 +331,23 @@ export function Player({
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action, index));
   /** Écran de fin (dernière étape de texte, sans quiz) : carte sur la capture précédente (PY-6, EDT-09). */
-  const endText = !visual && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
+  /** EXT-02 §6.1 : étape « Fenêtre » (image + texte), ouverte sur la capture précédente voilée. */
+  const win = !visual && step.options.display === 'window';
+  // Chaque étape « Fenêtre » s'ouvre à l'arrivée
+  useEffect(() => setWinClosed(false), [index]);
+  // Fenêtre modale : le focus y entre à l'ouverture (bouton principal), même venu de la barre du bas
+  const winOpen = win && !winClosed;
+  useEffect(() => {
+    if (!winOpen) return;
+    const id = requestAnimationFrame(() =>
+      winBox.current?.querySelector<HTMLElement>('.p-win__foot .p-btn-primary')?.focus(),
+    );
+    return () => cancelAnimationFrame(id);
+  }, [winOpen, index]);
+  const endText = !visual && !win && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
   const popup = !visual && (step.options.display === 'popup' || endText);
   const bgBlur = popup && (endText || step.options.background === 'blur');
-  const backdrop = bgBlur ? backdropIndex(m, index) : null;
+  const backdrop = bgBlur || win ? backdropIndex(m, index) : null;
   const [visited, setVisited] = useState<Set<number>>(() => new Set());
   const prevIndex = useRef<number | null>(null);
   const markSeen = (i: number) => setVisited((v) => (v.has(i) ? v : new Set(v).add(i)));
@@ -690,6 +708,13 @@ export function Player({
         e.preventDefault();
         return setMenu(false);
       }
+      // EXT-02 §6.1 : Échap ferme la fenêtre (ne vaut pas « Suivant ») ; le focus va à « Rouvrir la fenêtre »
+      if (win && !winClosed && !gateForm) {
+        e.preventDefault();
+        setWinClosed(true);
+        requestAnimationFrame(() => winPill.current?.focus());
+        return;
+      }
       // Spec a2 §2 : Échap vaut « Suivant » sur une pop-up sans choix
       if (popup && !choices.length && !last && !gateForm) {
         e.preventDefault();
@@ -924,7 +949,7 @@ export function Player({
         <main
           id="p-main"
           tabIndex={-1}
-          class="p-stage-wrap"
+          class={`p-stage-wrap${win ? (winClosed ? ' is-win-closed' : ' is-win-open') : ''}`}
           onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
           onTouchEnd={(e) => {
             const x0 = touchX.current;
@@ -1158,6 +1183,100 @@ export function Player({
                 </button>
               )}
             </>
+          ) : win ? (
+            <>
+              {backdrop !== null ? (
+                <ImageStep
+                  key={`bg-${m.steps[backdrop]!.id}`}
+                  step={m.steps[backdrop]!}
+                  sub={sub}
+                  onHotspot={onHotspot}
+                  onCta={onCta}
+                  dimmed
+                />
+              ) : (
+                <div
+                  class="p-popup-bg p-win-plain"
+                  style={{
+                    background: step.options.background === 'color' ? step.options.bgColor : undefined,
+                  }}
+                  aria-hidden="true"
+                />
+              )}
+              {!winClosed && (
+                <div class="p-win-veil">
+                  <div
+                    ref={winBox}
+                    class={`p-win${step.image ? '' : ' p-win--text'}`}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={`p-step-title-${step.id}`}
+                    onKeyDown={(e) => {
+                      // Focus piégé : Tab boucle dans la fenêtre
+                      if (e.key !== 'Tab') return;
+                      const f = [
+                        ...(winBox.current?.querySelectorAll<HTMLElement>(
+                          'button:not(:disabled), a[href], [tabindex="0"]',
+                        ) ?? []),
+                      ];
+                      if (!f.length) return;
+                      const first = f[0]!;
+                      const lastEl = f[f.length - 1]!;
+                      const at = f.indexOf(document.activeElement as HTMLElement);
+                      if (e.shiftKey && at <= 0) {
+                        e.preventDefault();
+                        lastEl.focus();
+                      } else if (!e.shiftKey && at === f.length - 1) {
+                        e.preventDefault();
+                        first.focus();
+                      }
+                    }}
+                  >
+                    {step.image && (
+                      <div class="p-win__img">
+                        <img
+                          src={step.image.url}
+                          alt={sub(step.options.imageAlt)}
+                          aria-hidden={step.options.imageAlt ? undefined : true}
+                          draggable={false}
+                        />
+                      </div>
+                    )}
+                    <div class="p-win__body">
+                      <span class="p-win__count">
+                        {fmt(t as unknown as Record<string, string>, 'stepOf', {
+                          n: index + 1,
+                          total: m.steps.length,
+                        })}
+                      </span>
+                      <h2 id={`p-step-title-${step.id}`} class="p-step-h" tabIndex={-1}>
+                        {sub(step.title)}
+                      </h2>
+                      {step.body && (
+                        <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />
+                      )}
+                      <VoiceLine />
+                      <div class="p-win__foot">
+                        <span class="p-win__hint">{t.escToClose}</span>
+                        {index > 0 && (
+                          <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
+                            {t.prev}
+                          </button>
+                        )}
+                        <button
+                          class="p-btn p-btn-primary"
+                          onClick={() => (last ? (m.quiz ? openQuiz() : finish()) : next())}
+                          autoFocus
+                        >
+                          {step.options.buttonLabel ? sub(step.options.buttonLabel) : t.next}
+                          <ChevronRight {...ICON} size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <>
               {popup && backdrop !== null && (
@@ -1367,7 +1486,7 @@ export function Player({
         <nav
           class="p-controls"
           aria-label={t.nav}
-          inert={!!gateForm || ended}
+          inert={!!gateForm || ended || winOpen}
           aria-hidden={gateForm ? true : undefined}
         >
           <button
@@ -1401,6 +1520,17 @@ export function Player({
           <span class="p-count" aria-hidden="true">
             {view === 'quiz' ? t.quiz.label : `${index + 1} / ${m.steps.length}`}
           </span>
+          {win && winClosed && (
+            <button
+              ref={winPill}
+              class="p-win-reopen"
+              onClick={() => setWinClosed(false)}
+              aria-label={t.reopenWindow}
+            >
+              <AppWindow {...ICON} size={16} />
+              <span>{t.reopenWindow}</span>
+            </button>
+          )}
           <button
             class="p-icon-btn"
             onClick={() => (last && !m.quiz ? finish() : next())}
