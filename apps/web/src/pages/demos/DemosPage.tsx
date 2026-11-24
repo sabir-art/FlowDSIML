@@ -1292,7 +1292,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                             </td>
                             {!sandbox && (
                               <td className="dt-md">
-                                <TypeBadge type={typeOf(d)} />
+                                <TypeBadge type={typeOf(d)} tone />
                               </td>
                             )}
                             <td className="dt-md">
@@ -1351,7 +1351,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           }
                         }}
                       >
-                        {!sandbox && <TypeBadge type={typeOf(d)} cover />}
+                        {!sandbox && <TypeBadge type={typeOf(d)} cover tone />}
                         <div
                           className={`demo-cover${covers[d.id] ? ' fd-player-scope' : ''}`}
                           aria-hidden="true"

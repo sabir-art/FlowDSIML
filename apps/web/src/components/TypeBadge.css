@@ -24,3 +24,36 @@
   z-index: 2;
   pointer-events: none;
 }
+
+/* Retours client du 24/11 §5 : pastille colorée par type (24 px, rayon 12, icône 16, libellé 12 en 600).
+   Fond opaque : elle reste lisible sur n'importe quelle capture. Jetons --fd-type-*, clair et sombre. */
+.ct-badge--tone {
+  gap: 6px;
+  height: 24px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.ct-badge--tone svg {
+  width: 16px;
+  height: 16px;
+}
+.ct-badge--captures {
+  background: var(--fd-type-captures-bg);
+  border-color: var(--fd-type-captures-border);
+  color: var(--fd-type-captures-fg);
+}
+.ct-badge--video {
+  background: var(--fd-type-video-bg);
+  border-color: var(--fd-type-video-border);
+  color: var(--fd-type-video-fg);
+}
+.ct-badge--html {
+  background: var(--fd-type-html-bg);
+  border-color: var(--fd-type-html-border);
+  color: var(--fd-type-html-fg);
+}
+.ct-badge--sandbox {
+  background: var(--fd-type-sandbox-bg);
+  border-color: var(--fd-type-sandbox-border);
+  color: var(--fd-type-sandbox-fg);
+}

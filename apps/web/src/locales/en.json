@@ -5647,6 +5647,12 @@
       "sandbox": "Sandbox",
       "video": "Video"
     },
+    "tone": {
+      "captures": "Screenshots",
+      "html": "Guided HTML",
+      "sandbox": "Sandbox",
+      "video": "Video"
+    },
     "line": {
       "captures": "A guided tour, one screenshot per step, with a bubble on each click.",
       "html": "A guided tour on real HTML pages: editable text and data, sharp on every screen.",

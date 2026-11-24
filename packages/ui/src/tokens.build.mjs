@@ -14,7 +14,11 @@ const block = (sel, entries, indent = '  ') =>
   `${sel} {\n${entries.map(([k, v]) => `${indent}${k}: ${v};`).join('\n')}\n}`;
 const pfx = (group, obj) => Object.entries(obj).map(([k, v]) => [`--fd-${group}-${k}`, v]);
 
-const themed = (mode) => [...pfx('color', t.colors[mode]), ...pfx('shadow', t.shadow[mode])];
+const themed = (mode) => [
+  ...pfx('color', t.colors[mode]),
+  ...pfx('type', t.type[mode]),
+  ...pfx('shadow', t.shadow[mode]),
+];
 
 const paletteVars = Object.entries(t.palette)
   .filter(([, scale]) => !('fg' in scale))
