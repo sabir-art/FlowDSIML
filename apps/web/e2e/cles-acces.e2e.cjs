@@ -35,7 +35,15 @@ const MOBILE = WIDTH < 768;
   const shot = async (page, name) => {
     if (!SHOTS) return;
     // Captures après la fin des animations (fenêtres, menus)
-    await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
+    await page.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          // Les animations sans fin (indicateurs) ne se terminent jamais : on ne les attend pas
+          .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => {})),
+      ),
+    );
     await page.screenshot({ path: `${SHOTS}/${name}-${WIDTH}${sfx}.png`, fullPage: true });
   };
   const noScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
