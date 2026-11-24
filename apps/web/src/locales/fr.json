@@ -3791,7 +3791,13 @@
       "soon": "Bientôt"
     },
     "moveUp": "Monter « {{title}} »",
-    "moveDown": "Descendre « {{title}} »"
+    "moveDown": "Descendre « {{title}} »",
+    "replacedBy": "Votre centre de formation n’est plus affiché à {{address}}. La page publique des démos l’a remplacé.",
+    "restore": "Remettre le centre de formation",
+    "restoreTitle": "Remettre le centre de formation à cette adresse ?",
+    "restoreBody": "La page publique des démos sera désactivée. Ses réglages sont conservés.",
+    "restoreConfirm": "Remettre le centre",
+    "restored": "Le centre de formation est de nouveau affiché à cette adresse."
   },
   "export": {
     "menu": "Exporter (PDF, GIF)",
@@ -6035,13 +6041,16 @@
     "contact": "Lien de contact",
     "contactHelp": "Facultatif : e-mail ou adresse https.",
     "contactError": "Saisissez une adresse e-mail ou une adresse qui commence par https://.",
-    "madeWith": "Afficher « Fait avec TutoClick »",
+    "madeWith": "Afficher « Créé avec TutoClick »",
     "centreNow": "Cette adresse affiche aujourd’hui votre centre de formation « {{title}} ».",
     "centreNext": "Si vous enregistrez la page publique, elle prend sa place à {{address}}. Le centre de formation et ses parcours restent dans Parcours de formation.",
     "replaceTitle": "Remplacer le centre de formation à cette adresse ?",
     "replaceBody": "{{address}} affichera le catalogue de vos démos au lieu du centre de formation « {{title}} ». Les visiteurs qui ont l’ancien lien verront le catalogue. Vous pourrez remettre le centre de formation depuis Parcours de formation.",
     "replaceConfirm": "Remplacer et enregistrer",
     "savedOn": "Page publique enregistrée. Elle est en ligne.",
-    "savedOff": "Page publique enregistrée. Elle n’est pas visible."
+    "savedOff": "Page publique enregistrée. Elle n’est pas visible.",
+    "leaveTitle": "Quitter sans enregistrer ?",
+    "leaveBody": "Vos modifications de la page publique ne sont pas enregistrées.",
+    "leaveConfirm": "Quitter"
   }
 }

@@ -6,12 +6,37 @@
 .pp-banner > svg {
   margin-top: 2px;
 }
+/* Motif de refus de l'interrupteur : une information, pas une erreur de saisie */
 .pp-refusal {
+  display: flex;
+  gap: 6px;
   align-items: flex-start;
+  color: var(--fd-color-text);
 }
 .pp-refusal > svg {
   flex: none;
   margin-top: 3px;
+  color: var(--fd-color-text-muted);
+}
+/* Bandeau avec une action (Parcours de formation) */
+.pp-banner--act {
+  flex-wrap: wrap;
+}
+.pp-banner--act > span {
+  flex: 1;
+  min-width: 200px;
+}
+/* « Voir la page » sous l'adresse : seulement quand l'en-tête ne la porte pas (sous 768 px) */
+.pp-view-m {
+  display: none;
+  gap: 6px;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 14px;
+}
+.pp-ctl-addr {
+  flex-direction: column;
+  align-items: stretch;
 }
 
 /* Adresse : préfixe en lecture seule, fin d'adresse modifiable, copie dans le champ */
@@ -177,6 +202,9 @@
 @media (max-width: 767px) {
   .pp-pick__type {
     display: none;
+  }
+  .pp-view-m {
+    display: inline-flex;
   }
   /* Logo : l'origine à côté de l'aperçu, les actions dessous */
   .pp-logo__state {

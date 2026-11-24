@@ -3791,7 +3791,13 @@
       "soon": "Soon"
     },
     "moveUp": "Move “{{title}}” up",
-    "moveDown": "Move “{{title}}” down"
+    "moveDown": "Move “{{title}}” down",
+    "replacedBy": "Your training centre is no longer shown at {{address}}. The public page of demos replaced it.",
+    "restore": "Put the training centre back",
+    "restoreTitle": "Put the training centre back at this address?",
+    "restoreBody": "The public page of demos will be turned off. Its settings are kept.",
+    "restoreConfirm": "Put the centre back",
+    "restored": "The training centre is shown at this address again."
   },
   "export": {
     "menu": "Export (PDF, GIF)",
@@ -6042,6 +6048,9 @@
     "replaceBody": "{{address}} will show the catalogue of your demos instead of the training centre “{{title}}”. Visitors with the old link will see the catalogue. You can put the training centre back from Training courses.",
     "replaceConfirm": "Replace and save",
     "savedOn": "Public page saved. It is online.",
-    "savedOff": "Public page saved. It is not visible."
+    "savedOff": "Public page saved. It is not visible.",
+    "leaveTitle": "Leave without saving?",
+    "leaveBody": "Your changes to the public page are not saved.",
+    "leaveConfirm": "Leave"
   }
 }

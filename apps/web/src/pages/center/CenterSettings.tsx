@@ -28,6 +28,7 @@ import { DemoCenterCard } from './DemoCenterCard';
 import { initials } from '../../lib/initials';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
+import { PublicPageNotice } from './PublicPageNotice';
 import { PathsDialog } from '../learners/PathsDialog';
 import { buildRows, learnerCounts, type ProgressData } from '../learners/progress';
 import {
@@ -55,6 +56,9 @@ type Row = {
   published_at: string | null;
   access_mode: string;
   password_changed_at: string | null;
+  /** §6.1 : page publique des démos, affichée à la place du centre quand elle est activée. */
+  public_page?: Json;
+  public_page_enabled?: boolean;
 };
 
 const ratio = (n: number) => n.toFixed(1).replace('.', ',');
@@ -345,6 +349,15 @@ export function CenterSettings() {
       }
     >
       {error && <Alert kind="error">{error}</Alert>}
+      {row?.public_page_enabled && ws && (
+        <PublicPageNotice
+          ws={ws}
+          slug={row.slug}
+          page={row.public_page ?? {}}
+          address={url.replace(/^https?:\/\//, '')}
+          onRestored={() => void load()}
+        />
+      )}
 
       <div className="cfg14">
         <div className="col">
