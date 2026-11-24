@@ -141,8 +141,8 @@ export function AccessKeys() {
               <KeyRound size={20} />
             </span>
             <h3>{t('accessKeys.emptyTitle')}</h3>
+            {/* §3 : « Créer une clé » n'est qu'à un endroit, dans l'en-tête de la page */}
             <p>{t('accessKeys.emptyBody')}</p>
-            <div className="stg-empty__acts">{addButton}</div>
           </div>
         ) : (
           <table className="stg-table ak-table">
