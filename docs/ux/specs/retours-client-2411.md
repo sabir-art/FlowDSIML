@@ -147,11 +147,11 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
 - **Moteur** : c'est le catalogue de démos déjà servi par le lecteur (`/c/{adresse}`, type « Catalogue de démos » du centre). Cette page en est le réglage, pas un deuxième catalogue.
 
 **Précisions (questions du dev, 24/11)**
-- **Une seule adresse par espace** : le catalogue `/c/{adresse}` et le centre de formation sont la même ligne en base, donc l'adresse affiche l'un ou l'autre. Ce choix de cadrage revient au chef ; l'UX ci-dessous suppose « la Page publique peut remplacer le centre ».
+- **Une seule adresse par espace** : le catalogue `/c/{adresse}` et le centre de formation sont la même ligne en base, donc l'adresse affiche l'un ou l'autre. Décision du chef avec le dev (24/11) : une seule adresse par espace, la Page publique peut remplacer le centre (option A), sans question au client.
 - **Centre de formation déjà publié à cette adresse** (maquette `page-publique-centre-*`) :
   - en haut de la page, un bandeau neutre (`role="status"`, icône Info, pas d'aplat de couleur) : « **Cette adresse affiche aujourd'hui votre centre de formation « {titre} ».** Si vous enregistrez la page publique, elle prend sa place à {adresse}. Le centre de formation et ses parcours restent dans Parcours de formation. » ;
   - « Enregistrer » ouvre alors un `alertdialog` (maquette `page-publique-remplacer-*`) : « Remplacer le centre de formation à cette adresse ? », texte de la maquette, boutons « Annuler » et « Remplacer et enregistrer » (primaire, pas danger : rien n'est supprimé).
-  - **Condition** : les réglages du centre (titre, parcours, ordre) sont conservés et le centre peut être remis depuis Parcours de formation. Si ce n'est pas possible techniquement, la phrase « Vous pourrez remettre… » est retirée et le bouton passe en danger ; à confirmer par le chef.
+  - **Condition** : les réglages du centre (titre, parcours, ordre) sont conservés et le centre peut être remis depuis Parcours de formation. Le chef a demandé au dev de le garantir (24/11). Si ce n'est pas possible techniquement, la phrase « Vous pourrez remettre… » est retirée et le bouton passe en danger.
 - **Publication refusée** (maquettes `page-publique-refus-*` et `page-publique-sansdemo-*`) : l'interrupteur reste visible, désactivé, et l'aide de la ligne devient le motif, avec CircleAlert 14 px et un lien vers la correction :
   - liens publics de l'espace coupés : « Impossible de l'activer : les liens publics sont coupés pour l'espace. » + « Ouvrir Sécurité » ;
   - aucune démo publiée en accès ouvert : « Impossible de l'activer : aucune démo n'est publiée en accès ouvert (« Toute personne avec le lien »). » + « Voir les démos ».
