@@ -7,7 +7,7 @@
 import { useId, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Download, FileType, Pencil, Presentation, Search, Trash2 } from 'lucide-react';
+import { Check, Download, FileType, Pencil, Presentation, Search, Trash2 } from 'lucide-react';
 import { Button, Modal } from '@flowdsiml/ui';
 import { foldText } from '@flowdsiml/core';
 import { AppPage } from '../../components/AppPage';
@@ -80,12 +80,13 @@ export function MediaPage() {
         else setUpErr(t(`media.${r.error === 'error' ? 'error' : r.error}`));
         return;
       }
-      const cat = t(`media.filter_${r.file.kind}`);
-      const why =
-        r.reason === 'svg' || r.reason === 'transparentSquare' ? ` ${t(`media.reason.${r.reason}`)}` : '';
       toast(
-        `${t('media.imported', { name: r.file.name, category: cat })}${why}`,
+        t('media.imported', { name: r.file.name, category: t(`media.filter_${r.file.kind}`) }),
         r.file.kind === 'font' ? undefined : { label: t('media.change'), onClick: () => openMenu(r.file.id) },
+        // La raison du classement, quand il a été déduit du fichier
+        r.reason === 'svg' || r.reason === 'transparentSquare'
+          ? { detail: t(`media.reason.${r.reason}`) }
+          : undefined,
       );
     }
   };
@@ -194,7 +195,10 @@ export function MediaPage() {
             </span>
           </div>
           {shown.length === 0 ? (
-            <p className="mp-none">{t('media.noMatch')}</p>
+            <div className="mp-nomatch">
+              <p className="mp-none">{t('media.noMatch')}</p>
+              {q && <Button onClick={() => setQ('')}>{t('media.clearSearch')}</Button>}
+            </div>
           ) : (
             <ul className="mp-grid" aria-label={t('media.files')}>
               {shown.map((f) => (
@@ -221,6 +225,8 @@ export function MediaPage() {
                             ? []
                             : (['logo', 'image'] as const).map((k) => ({
                                 label: t(`media.kind.${k}`),
+                                // Coche de 16 px devant la catégorie actuelle, colonne vide devant l'autre
+                                icon: f.kind === k ? <Check /> : <span className="mp-blank" />,
                                 group: t('media.category'),
                                 radio: true,
                                 current: f.kind === k,

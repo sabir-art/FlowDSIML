@@ -814,6 +814,18 @@
   box-shadow: var(--fd-shadow-md);
   animation: fd-pop var(--fd-motion-duration-base);
 }
+/* Variante à deux lignes : message en 600, précision atténuée dessous ; 400 px au plus */
+.mk .toast--rich {
+  width: 400px;
+}
+.mk .toast--rich .toast-text {
+  font-weight: 600;
+}
+.mk .toast-detail {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
 .mk .toast svg {
   width: 18px;
   height: 18px;

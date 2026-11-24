@@ -4672,7 +4672,7 @@
     "unused": "Non utilisé",
     "dropHere": "Glissez des fichiers ici",
     "pageHint": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
-    "imported": "« {{name}} » importé dans {{category}}.",
+    "imported": "« {{name}} » importé dans {{category}}",
     "change": "Changer",
     "reason": {
       "font": "",
@@ -4725,7 +4725,8 @@
       "demoFont": "Police de la démo « {{title}} »",
       "stepImage": "Image de la page de cette étape",
       "publicPage": "Logo de la page publique"
-    }
+    },
+    "clearSearch": "Effacer la recherche"
   },
   "soon": {
     "badge": "Bientôt disponible",

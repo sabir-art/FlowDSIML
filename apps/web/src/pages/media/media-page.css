@@ -46,6 +46,7 @@
 }
 /* Aperçu de 112 px, sur fond neutre (un logo blanc reste visible) */
 .mp-thumb {
+  position: relative;
   display: grid;
   grid-column: 1 / -1;
   place-items: center;
@@ -57,11 +58,27 @@
 }
 /* L'image entière tient dans l'aperçu, sans rognage ni déformation */
 .mp-thumb img {
+  /* Calée sur la zone (et non sur sa taille propre) : une grande image ne déborde jamais */
+  position: absolute;
+  inset: 0;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 8px;
+  padding: 12px;
   object-fit: contain;
+  object-position: center;
+}
+/* Colonne d'icône vide : Logo et Image s'alignent avec Renommer et Télécharger */
+.mp-blank {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+.mp-nomatch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 .mp-thumb svg {
   width: 32px;

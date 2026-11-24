@@ -4672,7 +4672,7 @@
     "unused": "Not used",
     "dropHere": "Drop files here",
     "pageHint": "PNG, JPG, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
-    "imported": "“{{name}}” imported into {{category}}.",
+    "imported": "“{{name}}” imported into {{category}}",
     "change": "Change",
     "reason": {
       "font": "",
@@ -4725,7 +4725,8 @@
       "demoFont": "Font of the demo “{{title}}”",
       "stepImage": "Image of this step’s page",
       "publicPage": "Logo of the public page"
-    }
+    },
+    "clearSearch": "Clear the search"
   },
   "soon": {
     "badge": "Coming soon",
