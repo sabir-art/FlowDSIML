@@ -476,24 +476,7 @@ export function SharePage() {
                     <Mail aria-hidden="true" />
                     {t('share.email')}
                   </a>
-                  <a
-                    className="btn btn-secondary btn-sm"
-                    href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-disabled={published ? undefined : 'true'}
-                  >
-                    LinkedIn
-                  </a>
-                  <a
-                    className="btn btn-secondary btn-sm"
-                    href={`https://x.com/intent/post?url=${encodeURIComponent(publicUrl)}&text=${encodeURIComponent(demo.title)}`}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    aria-disabled={published ? undefined : 'true'}
-                  >
-                    X
-                  </a>
+                  {/* P1-5 : outil interne, aucun bouton de réseau social */}
                   {/* REV-10 : l'export GIF et vidéo existe (L15, L25) : on l'ouvre sur le GIF */}
                   <button
                     type="button"

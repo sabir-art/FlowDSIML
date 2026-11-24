@@ -49,20 +49,6 @@
   align-items: center;
   gap: 8px;
 }
-.mk .l19-livehead select {
-  max-width: 320px;
-}
-.mk .l19-hero {
-  background: var(--fd-color-primary);
-  color: var(--fd-color-on-primary, #fff);
-}
-.mk .l19-hero .t-caption {
-  color: inherit;
-  opacity: 0.9;
-}
-.mk .l19-hero .live-dot {
-  background: currentColor;
-}
 .mk .l19-gap {
   margin-top: 16px;
 }
@@ -83,13 +69,14 @@
   background: var(--fd-color-surface-sunken);
   box-shadow: inset 0 0 0 1px var(--fd-color-border);
 }
+/* Couleur de la marque seulement : étapes vues en primary, étape en cours cerclée */
 .mk .steps-mini i.on {
-  background: var(--fd-color-chart-1);
+  background: var(--fd-color-primary);
   box-shadow: none;
 }
 .mk .steps-mini i.cur {
-  background: var(--fd-color-text);
-  box-shadow: none;
+  background: var(--fd-color-primary);
+  box-shadow: 0 0 0 2px var(--fd-color-tint);
 }
 .mk .l19-picker {
   margin-bottom: 12px;

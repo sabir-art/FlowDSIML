@@ -155,7 +155,43 @@ const live = (n) => ({
     'onglet Temps réel ouvert depuis l’URL (« Plus » prend son nom, L48-D)',
   );
   ok((await page.locator('.kpis .kpi').count()) === 4, '4 KPI');
-  ok((await page.locator('.l19-hero .value').textContent()) === '7', 'visiteurs en ce moment');
+  ok((await page.locator('.l19-now .value').textContent()) === '7', 'visiteurs en ce moment');
+  // État des lieux UX du 24/11 : un seul sélecteur de démo (celui de la page), tuiles sans aplat,
+  // progression dans la couleur de la marque, « Clics sur le bouton de fin »
+  {
+    const live = page.locator('#an-panel-live');
+    const css = await live.evaluate((el) => {
+      const probe = (v) => {
+        const s = document.createElement('span');
+        s.style.color = `var(${v})`;
+        document.body.append(s);
+        const c = getComputedStyle(s).color;
+        s.remove();
+        return c;
+      };
+      const bg = (q) => [...el.querySelectorAll(q)].map((x) => getComputedStyle(x).backgroundColor);
+      return {
+        primary: probe('--fd-color-primary'),
+        tile: bg('.l19-now')[0],
+        other: bg('.kpi:not(.l19-now)')[0],
+        steps: [...new Set(bg('.steps-mini i.on, .steps-mini i.cur'))],
+      };
+    });
+    ok(
+      (await live.locator('select, [role="combobox"]').count()) === 0,
+      'temps réel : pas de second sélecteur de démo',
+    );
+    ok(css.tile === css.other, `temps réel : première tuile sans aplat (${css.tile})`);
+    ok(
+      css.steps.length === 1 && css.steps[0] === css.primary,
+      `temps réel : progression dans la couleur de la marque (${css.steps.join(', ')})`,
+    );
+    ok(
+      (await live.getByText('Clics sur le bouton de fin aujourd’hui').count()) === 1 &&
+        (await live.getByText(/CTA/).count()) === 0,
+      'temps réel : « Clics sur le bouton de fin aujourd’hui »',
+    );
+  }
   ok((await page.getByText('Léa Martin').count()) === 1, 'identité renvoyée par la base (éditeur)');
   ok(
     (await page.getByText('Apprenant · Équipe Nord').count()) === 1,
@@ -194,7 +230,7 @@ const live = (n) => ({
   state.live = live(0);
   await page.reload();
   await page.getByRole('heading', { name: 'Personne sur la démo en ce moment' }).waitFor();
-  ok((await page.locator('.l19-hero .value').textContent()) === '0', 'vide : KPI à 0');
+  ok((await page.locator('.l19-now .value').textContent()) === '0', 'vide : KPI à 0');
   ok(
     (await page.locator('.kpis .kpi .value').nth(2).textContent()) === '2',
     'vide : clics du jour conservés',

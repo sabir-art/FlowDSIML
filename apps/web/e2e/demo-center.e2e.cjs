@@ -175,11 +175,11 @@ const fixture = (center = {}) => ({
     (await a.getByRole('heading', { name: /Formations visibles|Formations/ }).count()) >= 1,
     'centre de formation : formations visibles',
   );
-  await kinds.getByRole('radio', { name: /Demo Center/ }).check();
+  await kinds.getByRole('radio', { name: /Catalogue de démos/ }).check();
   await a.waitForTimeout(1300);
   const row = () => s.tables.training_centers[0];
   ok(row().draft.kind === 'demo', 'type de centre enregistré');
-  ok((await a.locator('#c-vis').count()) === 0, 'Demo Center : formations masquées');
+  ok((await a.locator('#c-vis').count()) === 0, 'Catalogue de démos : formations masquées');
   ok(
     (await a.getByLabel('Titre du héros', { exact: true }).getAttribute('placeholder')) ===
       'Découvrez nos outils',

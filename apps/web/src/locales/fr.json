@@ -2558,7 +2558,7 @@
         "resume": "Reprendre",
         "now": "Visiteurs en ce moment",
         "views30": "Vues · 30 dernières minutes",
-        "ctaToday": "Clics CTA aujourd’hui",
+        "ctaToday": "Clics sur le bouton de fin aujourd’hui",
         "leadsToday": "Leads aujourd’hui",
         "active": "Visiteurs actifs",
         "count_one": "{{count}} visiteur",
@@ -3748,7 +3748,7 @@
     "demo": {
       "kind": "Type de centre",
       "kind_training": "Centre de formation",
-      "kind_demo": "Demo Center",
+      "kind_demo": "Catalogue de démos",
       "kindHelp_training": "Apprenants, progression, formations et attestation.",
       "kindHelp_demo": "Hub public des démos, sans compte ni progression.",
       "heroTitle": "Titre du héros",
