@@ -820,9 +820,10 @@ async function install(page, state = seed()) {
           );
           const out = {};
           for (const st of (t.steps || []).filter((x) => ids.has(x.demo_id))) {
-            const c = (out[st.demo_id] ||= { n: 0, html: 0 });
+            const c = (out[st.demo_id] ||= { n: 0, html: 0, video: 0 });
             c.n += 1;
             if (st.kind === 'html') c.html += 1;
+            if (st.kind === 'video') c.video += 1;
           }
           return json(route, 200, out);
         }

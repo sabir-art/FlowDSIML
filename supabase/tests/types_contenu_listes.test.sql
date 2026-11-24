@@ -31,8 +31,8 @@ insert into public.steps (id, demo_id, workspace_id, position, kind) values
 
 select pg_temp.login('00000000-0000-0000-0000-0000000095a1');
 create temp table c as select public.demo_step_counts((select ws from ctx)) as j;
-select is((select j -> '00000000-0000-0000-0000-0000000095d2' from c), '{"n": 3, "html": 2}'::jsonb, 'démo HTML : 3 étapes dont 2 html');
-select is((select j -> '00000000-0000-0000-0000-0000000095d1' from c), '{"n": 1, "html": 0}'::jsonb, 'démo par captures : 0 html');
+select is((select j -> '00000000-0000-0000-0000-0000000095d2' from c), '{"n": 3, "html": 2, "video": 0}'::jsonb, 'démo HTML : 3 étapes dont 2 html');
+select is((select j -> '00000000-0000-0000-0000-0000000095d1' from c), '{"n": 1, "html": 0, "video": 0}'::jsonb, 'démo par captures : 0 html');
 select ok(not ((select j from c) ? '00000000-0000-0000-0000-0000000095d3'), 'démo supprimée : absente');
 
 -- Un autre compte, hors de l'espace : rien (RLS)

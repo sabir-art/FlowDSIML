@@ -12,11 +12,11 @@ export async function loadDemoTypes(
 ): Promise<Record<string, ContentType>> {
   const r = await supabase.rpc('demo_step_counts', { p_ws: wsId });
   if (r.error || !r.data) return {};
-  const counts = r.data as Record<string, { n: number; html: number }>;
+  const counts = r.data as Record<string, { n: number; html: number; video?: number }>;
   return Object.fromEntries(
     demos.map((d) => {
       const c = counts[d.id];
-      return [d.id, contentType(d, { total: c?.n ?? 0, html: c?.html ?? 0 })];
+      return [d.id, contentType(d, { total: c?.n ?? 0, html: c?.html ?? 0, video: c?.video ?? 0 })];
     }),
   );
 }

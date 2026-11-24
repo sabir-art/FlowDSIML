@@ -15,6 +15,8 @@ export interface HomeData {
   stepCounts: Record<string, number>;
   /** L48-G : étapes HTML par démo (type de contenu). */
   htmlCounts: Record<string, number>;
+  /** EXT-02 §4.1 : étapes vidéo par démo (type « Vidéo »). */
+  videoCounts: Record<string, number>;
   publishedAt: Record<string, string>;
   /** Chemin (bucket captures) de la première image de chaque démo. */
   covers: Record<string, string>;
@@ -29,11 +31,21 @@ export async function loadHome(ws: { id: string }): Promise<HomeData> {
   if (!one.error && one.data) {
     const h = one.data as unknown as HomeData;
     // Avant la migration L48-G : pas de htmlCounts (toutes les démos guidées comptent comme captures)
-    return { ...h, htmlCounts: h.htmlCounts ?? {} };
+    return { ...h, htmlCounts: h.htmlCounts ?? {}, videoCounts: await loadVideoCounts(ws.id) };
   }
   // Repli seulement si la fonction n'existe pas encore ; toute autre erreur va à l'écran d'erreur (L32 §4)
   if (one.error && !isMissingFunction(one.error)) throw one.error;
   return loadSeparately(ws);
+}
+
+/** EXT-02 §4.1 : étapes vidéo de chaque démo (demo_step_counts). En cas d'erreur : aucune démo « Vidéo ». */
+async function loadVideoCounts(wsId: string): Promise<Record<string, number>> {
+  const r = await supabase.rpc('demo_step_counts', { p_ws: wsId });
+  if (r.error || !r.data) return {};
+  const counts = r.data as Record<string, { video?: number }>;
+  return Object.fromEntries(
+    Object.entries(counts).flatMap(([id, c]) => (c.video ? [[id, c.video] as const] : [])),
+  );
 }
 
 /** PostgREST : fonction absente du schéma (migration L32 pas encore appliquée). */
@@ -87,10 +99,12 @@ async function loadSeparately(ws: { id: string }): Promise<HomeData> {
   ]);
   const stepCounts: Record<string, number> = {};
   const htmlCounts: Record<string, number> = {};
+  const videoCounts: Record<string, number> = {};
   const covers: Record<string, string> = {};
   for (const r of steps.data ?? []) {
     stepCounts[r.demo_id] = (stepCounts[r.demo_id] ?? 0) + 1;
     if (r.kind === 'html') htmlCounts[r.demo_id] = (htmlCounts[r.demo_id] ?? 0) + 1;
+    if (r.kind === 'video') videoCounts[r.demo_id] = (videoCounts[r.demo_id] ?? 0) + 1;
     if (r.image_path && !covers[r.demo_id]) covers[r.demo_id] = r.image_path;
   }
   return {
@@ -105,6 +119,7 @@ async function loadSeparately(ws: { id: string }): Promise<HomeData> {
     hidden: Object.fromEntries(hidden),
     stepCounts,
     htmlCounts,
+    videoCounts,
     publishedAt: Object.fromEntries(
       (v.data ?? []).filter((r) => r.published_at).map((r) => [r.demo_id, r.published_at!]),
     ),

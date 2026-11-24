@@ -29,7 +29,14 @@ function data() {
     title: 'Portail à explorer',
     kind: 'sandbox',
   };
-  s.tables.demos.push(html, sb);
+  // EXT-02 §4.1 : démo vidéo (une étape vidéo)
+  const video = {
+    ...base,
+    id: '0b5c1f0e-0000-4000-8000-0000000000f3',
+    title: 'Visite filmée',
+    kind: 'guided',
+  };
+  s.tables.demos.push(html, sb, video);
   const st = (id, demo, i, kind) => ({
     id,
     demo_id: demo,
@@ -45,6 +52,7 @@ function data() {
     st('st-s1', sb.id, 0, 'html'),
     st('st-s2', sb.id, 1, 'html'),
     st('st-s3', sb.id, 2, 'html'),
+    st('st-v1', video.id, 0, 'video'),
   );
   return s;
 }
@@ -90,9 +98,14 @@ function data() {
   );
   ok((await nd.locator('.fd-modal__sub').innerText()).includes('Étape 1 sur\u00a02'), 'Étape 1 sur 2');
   const radios = nd.getByRole('radio');
-  ok((await radios.count()) === 3, '3 types');
   ok(
-    (await nd.locator('.nd-type .nd-type__tile[aria-hidden="true"] svg').count()) === 3,
+    (await radios.count()) === 4 &&
+      (await nd.locator('.nd-type b').allInnerTexts()).join('|') ===
+        'Démo par captures|Démo HTML|Sandbox|Démo vidéo',
+    '4 types, « Démo vidéo » en dernier (EXT-02 §4.1)',
+  );
+  ok(
+    (await nd.locator('.nd-type .nd-type__tile[aria-hidden="true"] svg').count()) === 4,
     'tuiles d’icône aria-hidden (lot 2 : un choix par ligne, MODAL-01)',
   );
   ok((await nd.locator('.nd-type li').count()) === 0, 'écart 1 : aucun point fort');
@@ -178,6 +191,19 @@ function data() {
   const card = (title) => p.locator('.demo-card', { hasText: title });
   ok((await card('Fiche usager HTML').locator('.ct-badge').innerText()).includes('HTML'), 'badge « HTML »');
   ok((await card('Onboarding').locator('.ct-badge').innerText()).includes('Captures'), 'badge « Captures »');
+  ok(
+    (await card('Visite filmée').locator('.ct-badge').innerText()).includes('Vidéo') &&
+      (await card('Visite filmée').locator('.ct-badge svg.lucide-video').count()) === 1,
+    'badge « Vidéo » avec l’icône Video (EXT-02 §4.1)',
+  );
+  await p.getByRole('button', { name: /^Type\s*:/ }).click();
+  ok(
+    (await p.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join('|') ===
+      'Tous|Captures|HTML|Vidéo',
+    'filtre Type : Tous, Captures, HTML, Vidéo',
+  );
+  await p.getByRole('menuitem', { name: 'Vidéo' }).click();
+  ok(JSON.stringify(await titles()) === JSON.stringify(['Visite filmée']), 'filtre Type : Vidéo');
   await p.getByRole('button', { name: /^Type\s*:/ }).click();
   await p.getByRole('menuitem', { name: 'HTML' }).click();
   ok(JSON.stringify(await titles()) === JSON.stringify(['Fiche usager HTML']), 'filtre Type : HTML');

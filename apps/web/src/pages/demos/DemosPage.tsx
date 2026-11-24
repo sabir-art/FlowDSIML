@@ -130,7 +130,7 @@ type Kpis = Stats;
 type StatusFilter = 'all' | 'draft' | 'published';
 type Sort = 'updated' | 'created' | 'title' | 'views';
 
-type TypeFilter = 'all' | 'captures' | 'html';
+type TypeFilter = 'all' | 'captures' | 'html' | 'video';
 
 /**
  * Page Démos ; L48-G §4 : la même page sert le Sandbox (/sandbox), filtrée sur kind = sandbox, avec ses
@@ -157,9 +157,14 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   /** L48-G : liens sans page de chaque Sandbox (même calcul que le plan, deadLinks). */
   const [deadCounts, setDeadCounts] = useState<Record<string, number>>({});
   const [htmlCounts, setHtmlCounts] = useState<Record<string, number>>({});
+  const [videoCounts, setVideoCounts] = useState<Record<string, number>>({});
   /** L48-G §2 : type de contenu d'une démo de la liste. */
   const typeOf = (d: Demo): ContentType =>
-    contentType(d, { total: stepCounts[d.id] ?? 0, html: htmlCounts[d.id] ?? 0 });
+    contentType(d, {
+      total: stepCounts[d.id] ?? 0,
+      html: htmlCounts[d.id] ?? 0,
+      video: videoCounts[d.id] ?? 0,
+    });
   const [ctype, setCtype] = useState<TypeFilter>('all');
   /** DSH-10 : date de la dernière publication, pour le badge « Modifiée ». */
   const [publishedAt, setPublishedAt] = useState<Record<string, string>>({});
@@ -281,6 +286,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     setStats(Object.fromEntries(h.overview.map((r) => [r.demo_id, r])));
     setStepCounts(h.stepCounts);
     setHtmlCounts(h.htmlCounts);
+    setVideoCounts(h.videoCounts ?? {});
     setPublishedAt(h.publishedAt);
     // L48-G §4 : Démos sans les Sandbox ; Sandbox seulement les Sandbox
     const list = h.demos.filter((d) => (d.kind === 'sandbox') === sandbox);
@@ -378,6 +384,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     status,
     ctype,
     htmlCounts,
+    videoCounts,
     stepCounts,
     q,
     sort,
@@ -964,7 +971,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           label={t('ctype.filter')}
                           value={ctype === 'all' ? t('ctype.all') : t(`ctype.short.${ctype}`)}
                           active={ctype !== 'all'}
-                          items={(['all', 'captures', 'html'] as TypeFilter[]).map((k) => ({
+                          items={(['all', 'captures', 'html', 'video'] as TypeFilter[]).map((k) => ({
                             label: k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`),
                             icon: ctype === k ? <Check /> : <span />,
                             onSelect: () => setCtype(k),

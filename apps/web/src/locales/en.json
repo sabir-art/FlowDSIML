@@ -5500,17 +5500,20 @@
     "name": {
       "captures": "Screenshot demo",
       "html": "HTML demo",
-      "sandbox": "Sandbox"
+      "sandbox": "Sandbox",
+      "video": "Video demo"
     },
     "short": {
       "captures": "Screenshots",
       "html": "HTML",
-      "sandbox": "Sandbox"
+      "sandbox": "Sandbox",
+      "video": "Video"
     },
     "line": {
       "captures": "A guided tour, one screenshot per step, with a bubble on each click.",
       "html": "A guided tour on real HTML pages: editable text and data, sharp on every screen.",
-      "sandbox": "Linked HTML pages: visitors explore freely, with no set steps."
+      "sandbox": "Linked HTML pages: visitors explore freely, with no set steps.",
+      "video": "A recording of your screen, with your markers and your voice."
     },
     "question": "What do you want to create?",
     "stepOf": "Step {{n}} of {{total}}",
@@ -5520,15 +5523,18 @@
     "newTitle": {
       "captures": "New screenshot demo",
       "html": "New HTML demo",
-      "sandbox": "New Sandbox"
+      "sandbox": "New Sandbox",
+      "video": "New video demo"
     },
     "extensionBody": {
       "html": "Capture pages in HTML mode: the “Guided demo” type is preset on review.",
-      "sandbox": "Capture pages in HTML mode: the “Sandbox” type is preset on review."
+      "sandbox": "Capture pages in HTML mode: the “Sandbox” type is preset on review.",
+      "video": "Record your screen as a video: you check the masked data before sending."
     },
     "noTemplate": {
       "html": "No HTML demo template yet.",
-      "sandbox": "No Sandbox template yet."
+      "sandbox": "No Sandbox template yet.",
+      "video": "No video demo template yet."
     }
   },
   "sandboxPage": {

@@ -13,4 +13,9 @@ describe('contentType (L48-G)', () => {
     expect(contentType({ kind: 'guided' }, { total: 0, html: 0 })).toBe('captures');
     expect(contentType({}, { total: 2, html: 0 })).toBe('captures');
   });
+  it('video si plus de la moitié des étapes sont des vidéos (EXT-02 §4.1)', () => {
+    expect(contentType({ kind: 'guided' }, { total: 1, html: 0, video: 1 })).toBe('video');
+    expect(contentType({ kind: 'guided' }, { total: 4, html: 0, video: 2 })).toBe('captures');
+    expect(contentType({ kind: 'sandbox' }, { total: 1, html: 0, video: 1 })).toBe('sandbox');
+  });
 });

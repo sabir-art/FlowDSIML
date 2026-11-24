@@ -5500,17 +5500,20 @@
     "name": {
       "captures": "Démo par captures",
       "html": "Démo HTML",
-      "sandbox": "Sandbox"
+      "sandbox": "Sandbox",
+      "video": "Démo vidéo"
     },
     "short": {
       "captures": "Captures",
       "html": "HTML",
-      "sandbox": "Sandbox"
+      "sandbox": "Sandbox",
+      "video": "Vidéo"
     },
     "line": {
       "captures": "Un parcours guidé, une capture par étape, avec une bulle à chaque clic.",
       "html": "De vraies pages HTML : textes et données modifiables, nettes sur tous les écrans.",
-      "sandbox": "Des pages reliées : le visiteur explore librement, sans étapes imposées."
+      "sandbox": "Des pages reliées : le visiteur explore librement, sans étapes imposées.",
+      "video": "Un enregistrement de votre écran, avec vos repères et votre voix."
     },
     "question": "Que voulez-vous créer ?",
     "stepOf": "Étape {{n}} sur {{total}}",
@@ -5520,15 +5523,18 @@
     "newTitle": {
       "captures": "Nouvelle démo par captures",
       "html": "Nouvelle démo HTML",
-      "sandbox": "Nouveau Sandbox"
+      "sandbox": "Nouveau Sandbox",
+      "video": "Nouvelle démo vidéo"
     },
     "extensionBody": {
       "html": "Capturez les pages en mode HTML : le type « Démo guidée » est prérempli à la vérification.",
-      "sandbox": "Capturez les pages en mode HTML : le type « Sandbox » est prérempli à la vérification."
+      "sandbox": "Capturez les pages en mode HTML : le type « Sandbox » est prérempli à la vérification.",
+      "video": "Enregistrez votre écran en vidéo : vous vérifiez les données masquées avant l’envoi."
     },
     "noTemplate": {
       "html": "Aucun modèle de démo HTML pour l'instant.",
-      "sandbox": "Aucun modèle de Sandbox pour l'instant."
+      "sandbox": "Aucun modèle de Sandbox pour l'instant.",
+      "video": "Aucun modèle de démo vidéo pour l'instant."
     }
   },
   "sandboxPage": {
