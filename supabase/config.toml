@@ -466,6 +466,12 @@ verify_jwt = true
 enabled = true
 verify_jwt = true
 
+# API publique v1 en lecture seule (§6.2.1). Sans JWT : l'appelant est un outil de l'espace, authentifié
+# par une clé d'accès (Authorization: Bearer tc_…) vérifiée en base par son condensé.
+[functions.api]
+enabled = true
+verify_jwt = false
+
 # E-mails P2 : résumé des notifications (API Brevo). Sans JWT : la désinscription à un clic vient d'un
 # client de messagerie ; la tâche planifiée s'authentifie par le secret partagé des tâches.
 [functions.notify-email]
