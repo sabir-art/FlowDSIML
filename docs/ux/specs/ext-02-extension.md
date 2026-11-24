@@ -260,6 +260,13 @@ Proposition :
 
 Hors périmètre : la capture d’un élément qui dépasse de la vue (il faudrait défiler et assembler) ; la vidéo (§4) garde l’onglet entier.
 
+Maquettes (24/11, valeurs par défaut retenues en attendant le client : 48 px, 480 × 300, réglage par personne) : `cadre-element-*`, `cadre-trace-*`, `cadre-zone-*` (1440, clair et sombre : la page capturée garde ses couleurs, la barre est celle de l’extension) et `verification-cadre-*` (1440 et 390).
+- **Barre** : même pilule que la barre vidéo (#141311, 999 px de rayon, centrée en bas, déplaçable) : point rouge immobile, « Capture · n », filet, segmenté « Page / Élément / Zone » (`role="radiogroup"`, nom « Cadre des prochaines captures », choix sur fond blanc), « Redessiner » en mode Zone, « Terminer ». Elle remplace la pastille « ● REC » actuelle, qui ne reçoit pas les clics. **La barre et les repères sont masqués pendant la prise de vue** (aucune trace dans l’image) ; les clics sur la barre ne créent pas d’étape.
+- **Élément** : au survol, un cadre pointillé primary de 2 px montre ce qui sera gardé, avec l’étiquette « Cadre gardé · élément » dans le coin ; le changement de cadre est annoncé (« Cadre des prochaines captures : élément »).
+- **Zone, tracé** : voile à 50 % hors de la zone, contour blanc de 2 px, 8 poignées de 12 px, taille en px sous l’angle bas droit, encart sombre au-dessus de la barre « Tracez la zone à garder », « Annuler » et « Valider la zone ». Au clavier : la zone est un élément focalisable (`role="application"`, nom qui donne la taille et les touches).
+- **Zone gardée** : contour pointillé primary et étiquette « Cadre gardé · zone » tant que le mode Zone est actif.
+- **Vérification** : section « Captures · n » : numéro, vignette avec le cadre en primary, titre de l’étape, nature du cadre (« Page entière », « Élément cliqué et sa marge », « Zone tracée ») ou l’info « Clic hors de la zone : page entière gardée. », segmenté du cadre à droite (icônes seules à 390, nom accessible conservé).
+
 Questions pour le client : la marge et la taille minimale de l’élément conviennent-elles ? Le cadre par défaut doit-il être réglable par l’espace (règle de l’administrateur) ou seulement par la personne ?
 
 ## 7. Mot de passe et étape Formulaire
