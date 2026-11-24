@@ -28,4 +28,6 @@ keywords = ["eyj"]
 description = "Fixtures factices des tests et des maquettes"
 regexes = [
   '''tcsec_(EXEMPLE|exemple|test|fictif|fake)[A-Za-z0-9_-]*''',
+  # Clé d'accès de l'API : exemple affiché à l'écran et dans les maquettes (jamais une vraie clé)
+  '''^tc_votre_cle$''',
 ]
