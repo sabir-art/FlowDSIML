@@ -597,11 +597,13 @@ Les dépôts de `FolderColumn`, `FormPanel`, `GuideList` et `QuizEditorPage` ser
 
 La planche `media-01` et les règles §18.1 (zone large) et §18.2 (panneau étroit) suffisent ; chaque écran prend l’une des deux formes :
 - **Médiathèque** : zone large §18.1 en tête de la fenêtre, pleine largeur, 120 px de haut, au-dessus de la grille ; « Importer… » dans la zone ; dépôt aussi sur toute la grille (voile « Déposer le fichier ici »).
-- **Nouvelle démo**, ligne « Importer des images » : zone large §18.1 dans la carte de choix, plusieurs fichiers acceptés, compteur « 3 images » après dépôt, ordre = ordre de dépôt.
+- **Nouvelle démo**, ligne « Importer des images » : zone large §18.1 dans la carte de choix, plusieurs fichiers acceptés, compteur « 3 images » et liste des noms après dépôt, « Remplacer… » et la corbeille « Retirer les images » ; ordre naturel des noms (ecran-1, ecran-2, ecran-10), comme l’aide l’annonce : une sélection de fichiers arrive dans un ordre que la personne ne maîtrise pas. Images choisies : le pied porte « Créer la démo » (primaire) et « Partir d’une démo vide » disparaît.
 - **Liste des Démos** : pas de zone visible ; un fichier glissé sur la page affiche un voile plein contenu (pointillé primary 2 px, fond à 7 %, « Déposer pour créer une démo à partir des images ») ; au dépôt, la fenêtre Nouvelle démo s’ouvre déjà remplie.
 - **Onboarding**, « Importer à la place » : zone large §18.1 à la place du bloc extension, même texte d’aide que Nouvelle démo.
 - **Avant / Après** : deux zones larges côte à côte (une colonne sous 640 px), titrées « Avant » et « Après », chacune avec son aperçu et ses états ; même hauteur.
 - **Logo du panneau Design** : forme étroite §18.2 (vignette carrée 72 px, « Importer… » en bouton 32 px, dépôt sur tout le bloc, « Remplacer… » et « Retirer » dans ⋯).
+- **Médiathèque vide** : la zone prend le titre « Importer votre premier fichier » ; recherche et filtres (Tout, Logos, Images, Polices) masqués tant qu’il n’y a aucun fichier, ils n’ont rien à filtrer.
+Recette (1db69b3, 4c47f0e, 08ee68f) : conforme, clair et sombre, media.e2e 31 ok et onboarding-import.e2e 46 ok ; une retouche, la recherche et les filtres de la médiathèque vide.
 Partout : formats et poids dans l’aide de 13 px, erreur dans la zone (`role="alert"`), barre indéterminée de 6 px pendant l’envoi.
 
 
