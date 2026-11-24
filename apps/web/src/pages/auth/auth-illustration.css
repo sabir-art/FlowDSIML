@@ -389,3 +389,30 @@
     display: none;
   }
 }
+
+/* Lot 7 : le formulaire est posé sur le fond du contenu (blanc en clair), pas sur le gris de la page */
+.mk .auth {
+  background: var(--fd-color-content-bg);
+}
+/* Lot 7 : encadré d'erreur en haut du formulaire (filet danger, fond de surface, titre et conseil) */
+.mk .auth-form > .alert.auth-alert {
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-color: var(--fd-color-danger);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  font-size: 14px;
+}
+.mk .auth-alert > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.mk .auth-alert > div {
+  display: grid;
+  gap: 2px;
+}
+.mk .auth-alert span {
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+}

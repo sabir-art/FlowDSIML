@@ -1,11 +1,12 @@
 import { CircleAlert } from 'lucide-react';
-import { useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authRedirect, supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { fieldA11y, focusFirstError, validateForm, type FieldErrors } from '../../lib/validation';
 import { useAuth } from '../../auth/AuthProvider';
+import { PasswordInput } from '../../components/PasswordField';
 import { AuthLayout, GoogleMark, MkFieldError } from './AuthLayout';
 
 /** Connexion (CNX-01), à l'identique de la maquette connexion.html. */
@@ -29,7 +30,6 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [badCredentials, setBadCredentials] = useState(false);
-  const pwdRef = useRef<HTMLInputElement>(null);
   const { busy, error, success, run } = useAction();
 
   if (user) return <Navigate to={redirect} replace />;
@@ -44,11 +44,12 @@ export function Login() {
     if (mode === 'password') {
       const r = await run(async () => check(await supabase.auth.signInWithPassword({ email, password })));
       if (r === undefined) {
-        // L2 : erreur sous le mot de passe, seul ce champ marqué invalide (comme la maquette),
-        // mot de passe vidé et focalisé (W20)
-        setPassword('');
+        // Lot 7 : encadré en haut du formulaire, erreur sous le mot de passe (seul champ marqué
+        // invalide) ; la saisie est gardée, le mot de passe est focalisé et sélectionné pour le corriger
         setBadCredentials(true);
-        pwdRef.current?.focus();
+        const pwd = form.querySelector<HTMLInputElement>('#password');
+        pwd?.focus();
+        pwd?.select();
       }
     } else {
       await run(
@@ -102,6 +103,15 @@ export function Login() {
           {success}
         </div>
       )}
+      {badCredentials && mode === 'password' && (
+        <div className="alert alert-danger auth-alert" role="alert">
+          <CircleAlert aria-hidden="true" />
+          <div>
+            <b>{t('auth.badTitle')}</b>
+            <span>{t('auth.badHelp')}</span>
+          </div>
+        </div>
+      )}
       {error && !badCredentials && mode === 'magic' && (
         <div className="alert alert-danger" role="alert">
           <CircleAlert aria-hidden="true" />
@@ -135,26 +145,25 @@ export function Login() {
                 {t('auth.forgot')}
               </Link>
             </div>
-            <input
-              ref={pwdRef}
+            <PasswordInput
               id="password"
-              className="input"
-              type="password"
               autoComplete="current-password"
               name="password"
               required
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
+                setBadCredentials(false);
                 setErrors((x) => ({ ...x, password: '' }));
               }}
               {...(badCredentials ? bad : fieldA11y('password', errors))}
             />
             <MkFieldError id="password" errors={errors} />
+            {/* L'encadré du haut annonce l'erreur d'identifiants ; ce message la rattache au champ */}
             {(badCredentials || (error && mode === 'password')) && (
-              <span className="error-msg" id="login-error" role="alert">
+              <span className="error-msg" id="login-error" role={badCredentials ? undefined : 'alert'}>
                 <CircleAlert aria-hidden="true" />
-                {badCredentials ? t('errors.badCredentials') : error}
+                {badCredentials ? t('auth.badPassword') : error}
               </span>
             )}
           </div>

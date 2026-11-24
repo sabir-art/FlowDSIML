@@ -268,6 +268,54 @@ function measure() {
     await ctx.close();
   }
 
+  // Lot 7 : formulaire sur le fond du contenu ; après une erreur d'identifiants, la saisie est gardée,
+  // un encadré l'annonce en haut, le mot de passe est marqué invalide, focalisé, et a son œil
+  for (const theme of ['light', 'dark']) {
+    const { p, ctx } = await open(PAGES[0], theme, 1440);
+    const bg = await p.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-color-content-bg)';
+      document.body.append(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      return { got: getComputedStyle(document.querySelector('.auth')).backgroundColor, want };
+    });
+    ok(bg.got === bg.want, `connexion (${theme}) : formulaire sur le fond du contenu (${bg.got})`);
+    await p.getByLabel('Adresse e-mail professionnelle').fill('camille.martin@example.com');
+    await p.locator('#password').fill('mot-de-passe-faux');
+    const eye = p.getByRole('button', { name: 'Afficher le mot de passe' });
+    ok((await eye.count()) === 1, `connexion (${theme}) : œil sur le mot de passe`);
+    await p.getByRole('button', { name: 'Se connecter', exact: true }).click();
+    const box = p.locator('.auth-alert');
+    await box.waitFor();
+    ok(
+      (await box.getAttribute('role')) === 'alert' &&
+        (await box.innerText()).replace(/\s+/g, ' ') ===
+          'Adresse e-mail ou mot de passe incorrect. Vérifiez les deux champs, ou recevez un lien de connexion par e-mail.',
+      `connexion (${theme}) : encadré d’erreur en haut du formulaire`,
+    );
+    ok(
+      (await p.locator('#password').inputValue()) === 'mot-de-passe-faux' &&
+        (await p.getByLabel('Adresse e-mail professionnelle').inputValue()) === 'camille.martin@example.com',
+      `connexion (${theme}) : saisie gardée après l’erreur`,
+    );
+    ok(
+      (await p.evaluate(() => document.activeElement?.id)) === 'password' &&
+        (await p.locator('#password').getAttribute('aria-invalid')) === 'true' &&
+        (await p.locator('#password').getAttribute('aria-describedby')) === 'login-error' &&
+        (await p.locator('#login-error').innerText()).trim() === 'Mot de passe incorrect.' &&
+        (await p.getByLabel('Adresse e-mail professionnelle').getAttribute('aria-invalid')) === null,
+      `connexion (${theme}) : mot de passe focalisé, seul champ invalide, « Mot de passe incorrect. »`,
+    );
+    ok((await p.getByRole('alert').count()) === 1, `connexion (${theme}) : une seule annonce d’erreur`);
+    if (SHOTS)
+      await p.screenshot({ path: `${SHOTS}/auth-connexion-erreur${theme === 'dark' ? '-sombre' : ''}.png` });
+    await p.locator('#password').pressSequentially('x');
+    await box.waitFor({ state: 'detached' });
+    ok(true, `connexion (${theme}) : l’encadré disparaît à la correction`);
+    await ctx.close();
+  }
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {
