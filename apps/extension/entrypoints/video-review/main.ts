@@ -21,9 +21,11 @@ import { checkRecording, proposePauses } from '@/lib/video';
 import { burnVideo, coverRect } from '@/lib/videoBurn';
 import {
   clock,
+  MANUAL_MS,
   manualMask,
   rectsAt,
   segments,
+  setManualSpan,
   span,
   toBurn,
   type MaskRect,
@@ -137,6 +139,7 @@ async function main() {
   $('zones-h').textContent = s.zones;
   $('hint').textContent = s.hint;
   $('mask-help').textContent = s.maskHelp;
+  $('span-help').textContent = s.spanHelp;
   $('add').replaceChildren(icon(Plus), s.add);
   $('delete').replaceChildren(icon(Trash2), s.delete);
   $('send').textContent = s.send;
@@ -291,16 +294,76 @@ async function main() {
     const segs: HTMLElement[] = [];
     for (const m of masks)
       for (const [a, b] of segments(m, durationMs)) {
+        const manual = m.type === 'manual';
         const el = h('span', {
-          class: `seg${m.live || m.on ? '' : ' off'}${m.id === selected ? ' sel' : ''}`,
+          class: `seg${m.live || m.on ? '' : ' off'}${m.id === selected ? ' sel' : ''}${manual ? ' manual' : ''}`,
           'data-mask': m.id,
         });
         el.style.left = `${(a / durationMs) * 100}%`;
         el.style.width = `${(Math.max(0, b - a) / durationMs) * 100}%`;
+        if (manual && !busy) spanHandles(el, m);
         segs.push(el);
       }
     tl.replaceChildren(...segs, head);
     tick();
+  }
+  /** Masque ajouté : début et fin réglables sur son segment (poignées ; ← → la fin, Maj + ← → le début). */
+  function spanHandles(el: HTMLElement, m: VideoMask) {
+    const at = () => [m.frames[0]!.t, m.frames[1]!.t] as [number, number];
+    const paint = () => {
+      const [a, b] = at();
+      el.style.left = `${(a / durationMs) * 100}%`;
+      el.style.width = `${((b - a) / durationMs) * 100}%`;
+      el.setAttribute('aria-label', fmt(s.spanLabel, { name: label(m), from: clock(a), to: clock(b) }));
+    };
+    el.tabIndex = 0;
+    el.setAttribute('role', 'group');
+    el.setAttribute('aria-describedby', 'span-help');
+    paint();
+    const change = (from: number, to: number) => {
+      setManualSpan(m, from, to, durationMs);
+      paint();
+      renderList();
+      renderMasks();
+    };
+    for (const side of ['start', 'end'] as const) {
+      const grip = h('span', { class: `hd ${side}`, 'aria-hidden': 'true' });
+      grip.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        el.focus();
+        const box = tl.getBoundingClientRect();
+        grip.setPointerCapture(e.pointerId);
+        const move = (ev: PointerEvent) => {
+          const t = ((ev.clientX - box.left) / box.width) * durationMs;
+          const [a, b] = at();
+          if (side === 'start') change(Math.min(t, b - 500), b);
+          else change(a, Math.max(t, a + 500));
+        };
+        const up = () => {
+          grip.removeEventListener('pointermove', move);
+          grip.removeEventListener('pointerup', up);
+        };
+        grip.addEventListener('pointermove', move);
+        grip.addEventListener('pointerup', up);
+      });
+      el.append(grip);
+    }
+    // Le segment ne déplace pas la tête de lecture : il choisit son masque
+    el.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      if (selected !== m.id) select(m.id, false);
+      tl.querySelector<HTMLElement>(`.seg.manual[data-mask="${m.id}"]`)?.focus();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      e.stopPropagation();
+      const d = e.key === 'ArrowLeft' ? -1000 : 1000;
+      const [a, b] = at();
+      if (e.shiftKey) change(Math.min(a + d, b - 500), b);
+      else change(a, Math.max(b + d, a + 500));
+    });
   }
   function tick() {
     const t = Math.min(durationMs, now());
@@ -469,7 +532,9 @@ async function main() {
   // ---------- Ajouter un masque ----------
   let seq = 0;
   function addMask(rect: MaskRect) {
-    const m = manualMask(`m${++seq}-${Date.now().toString(36)}`, rect, now(), durationMs);
+    // 5 s à partir de l'instant affiché : un masque fixe trop long couvrirait autre chose après un défilement
+    const m = manualMask(`m${++seq}-${Date.now().toString(36)}`, rect, now(), now() + MANUAL_MS);
+    setManualSpan(m, m.frames[0]!.t, m.frames[1]!.t, durationMs);
     masks.push(m);
     selected = m.id;
     renderList();

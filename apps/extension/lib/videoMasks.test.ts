@@ -3,6 +3,7 @@ import {
   addFrame,
   clock,
   manualMask,
+  setManualSpan,
   maskBox,
   rectsAt,
   segments,
@@ -99,6 +100,19 @@ describe('suivi des données repérées en vidéo (EXT-02 §4)', () => {
     expect(segments(m, 10000)).toEqual([[2000, 6000]]);
     expect(rectsAt(m, 3000)).toEqual([R(0.3)]);
     expect(m.on && !m.live && m.type === 'manual').toBe(true);
+  });
+
+  it('passage d’un masque ajouté : début et fin réglables, bornés à la vidéo', () => {
+    const m = manualMask('x1', R(0.3), 2000, 7000);
+    setManualSpan(m, 2000, 9000, 10000);
+    expect(segments(m, 10000)).toEqual([[2000, 9000]]);
+    setManualSpan(m, 8900, 9000, 10000);
+    expect(segments(m, 10000)).toEqual([[8900, 9400]]);
+    setManualSpan(m, -500, 20000, 10000);
+    expect(segments(m, 10000)).toEqual([[0, 10000]]);
+    const auto = mask([{ t: 0, rects: [R(0.1)] }]);
+    setManualSpan(auto, 500, 900, 10000);
+    expect(auto.frames[0]!.t).toBe(0);
   });
 
   it('horloge de la chronologie', () => {

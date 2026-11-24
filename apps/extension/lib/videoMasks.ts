@@ -135,6 +135,21 @@ export function manualMask(id: string, rect: MaskRect, from: number, to: number)
   };
 }
 
+/** Durée par défaut d'un masque ajouté à la main, et durée minimale de son passage. */
+export const MANUAL_MS = 5000;
+export const MANUAL_MIN_MS = 500;
+
+/** Déplace le début ou la fin du passage d'un masque ajouté (bornes : la vidéo, durée minimale). */
+export function setManualSpan(m: VideoMask, from: number, to: number, durationMs: number): void {
+  const a = m.frames[0];
+  const b = m.frames[1];
+  if (m.type !== 'manual' || !a || !b) return;
+  const start = Math.min(Math.max(0, Math.floor(from)), Math.max(0, durationMs - MANUAL_MIN_MS));
+  const end = Math.min(durationMs, Math.max(start + MANUAL_MIN_MS, Math.ceil(to)));
+  a.t = start;
+  b.t = end;
+}
+
 /** « 0:07 » (minutes non complétées, comme la chronologie de la revue). */
 export function clock(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));

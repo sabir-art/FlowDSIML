@@ -269,21 +269,56 @@ const MOCK = 'http://localhost:54400';
 
   // Ajouter un masque : bouton, clavier, puis glisser sur l'image
   await v.getByRole('button', { name: 'Ajouter un masque' }).click();
-  const m1 = v.getByRole('group', { name: 'Masque : Masque ajouté 1' });
+  const m1 = v.getByRole('group', { name: 'Masque : Masque ajouté 1', exact: true });
   ok(
     (await rows.count()) === 4 &&
-      (await row('Masque ajouté 1').locator('.tx .mu').innerText()) === '0:02 – 0:12' &&
+      (await row('Masque ajouté 1').locator('.tx .mu').innerText()) === '0:02 – 0:07' &&
       (await row('Masque ajouté 1').getByRole('button', { name: 'Retirer : Masque ajouté 1' }).count()) ===
         1 &&
       (await v.evaluate(() => document.activeElement?.getAttribute('aria-label'))) ===
         'Masque : Masque ajouté 1',
-    'masque ajouté : ligne « Masque ajouté 1 » de l’instant affiché à la fin, « Retirer », focus sur la zone',
+    'masque ajouté : ligne « Masque ajouté 1 », 5 s à partir de l’instant affiché, « Retirer », focus sur la zone',
   );
   const b0 = await m1.boundingBox();
   await v.keyboard.press('ArrowRight');
   await v.keyboard.press('Shift+ArrowDown');
-  const b1 = await v.getByRole('group', { name: 'Masque : Masque ajouté 1' }).boundingBox();
+  const b1 = await v.getByRole('group', { name: 'Masque : Masque ajouté 1', exact: true }).boundingBox();
   ok(b1.x > b0.x && b1.height > b0.height, 'masque déplacé (→) et agrandi (Maj + ↓) au clavier');
+  // Passage du masque ajouté : poignées sur son segment, et clavier (→ la fin, Maj + ← le début)
+  const span1 = tl.getByRole('group', { name: /^Passage du masque : Masque ajouté 1, 0:02 à 0:07$/ });
+  ok(
+    (await span1.count()) === 1 && (await span1.locator('.hd').count()) === 2,
+    'segment du masque ajouté : deux poignées, passage annoncé',
+  );
+  await span1.focus();
+  await v.keyboard.press('ArrowRight');
+  await v.keyboard.press('ArrowRight');
+  await v.keyboard.press('Shift+ArrowLeft');
+  ok(
+    (await row('Masque ajouté 1').locator('.tx .mu').innerText()) === '0:01 – 0:09' &&
+      (await v.locator('#time').innerText()) === '0:02 / 0:12',
+    `passage réglé au clavier : 0:01 – 0:09, sans déplacer la lecture (${await row('Masque ajouté 1').locator('.tx .mu').innerText()})`,
+  );
+  const endGrip = await tl.locator('.seg.manual .hd.end').boundingBox();
+  const tlBox = await tl.boundingBox();
+  await v.mouse.move(endGrip.x + endGrip.width / 2, endGrip.y + endGrip.height / 2);
+  await v.mouse.down();
+  await v.mouse.move(tlBox.x + tlBox.width * (6 / 12.008), endGrip.y + 4, { steps: 4 });
+  await v.mouse.up();
+  ok(
+    (await row('Masque ajouté 1').locator('.tx .mu').innerText()) === '0:01 – 0:06',
+    `fin déplacée à la poignée (${await row('Masque ajouté 1').locator('.tx .mu').innerText()})`,
+  );
+  await row('Masque ajouté 1')
+    .getByRole('button', { name: /^Pourquoi masqué/ })
+    .click();
+  ok(
+    (await v.locator('#list > li.why').innerText()) === 'Masque ajouté par vous, à cet endroit de l’image.',
+    '« Pourquoi masqué ? » d’un masque ajouté',
+  );
+  await row('Masque ajouté 1')
+    .getByRole('button', { name: /^Pourquoi masqué/ })
+    .click();
   const scr = await v.locator('#screen').boundingBox();
   await v.mouse.move(scr.x + scr.width * 0.1, scr.y + scr.height * 0.7);
   await v.mouse.down();
@@ -293,7 +328,7 @@ const MOCK = 'http://localhost:54400';
     (await rows.count()) === 5 && (await row('Masque ajouté 2').count()) === 1,
     'glisser sur l’image crée « Masque ajouté 2 »',
   );
-  await v.getByRole('group', { name: 'Masque : Masque ajouté 2' }).focus();
+  await v.getByRole('group', { name: 'Masque : Masque ajouté 2', exact: true }).focus();
   await v.keyboard.press('Delete');
   ok((await rows.count()) === 4, 'Suppr retire le masque');
   ok((await v.locator('#count').innerText()) === '3 sur 4', 'compteur : 3 sur 4');

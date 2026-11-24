@@ -159,6 +159,31 @@
   border-color: var(--fd-color-primary);
   background: transparent;
 }
+.vtl .seg.manual {
+  cursor: default;
+}
+.vtl .seg.manual:focus-visible {
+  outline: 2px solid var(--fd-color-primary);
+  outline-offset: 2px;
+}
+/* Poignées de début et de fin d'un masque ajouté */
+.vtl .seg .hd {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 8px;
+  border: 2px solid var(--fd-color-primary);
+  border-radius: 4px;
+  background: var(--fd-color-surface);
+  cursor: ew-resize;
+  touch-action: none;
+}
+.vtl .seg .hd.start {
+  left: -4px;
+}
+.vtl .seg .hd.end {
+  right: -4px;
+}
 .vtl .ph {
   position: absolute;
   top: -4px;
