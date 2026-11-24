@@ -236,7 +236,7 @@ Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur 
 
 ## À venir
 
-- **5. Captures** : étude ci-dessous (§5), à valider par le client avant maquette.
+- **5. Captures** : §5, validé par le client le 24/11.
 
 ## 5. Choisir ce qu’on capture à chaque clic (étude du 24/11)
 
@@ -269,11 +269,11 @@ Maquettes (24/11, valeurs par défaut retenues en attendant le client : 48 px, 4
 - **Zone gardée** : contour pointillé primary et étiquette « Cadre gardé · zone » tant que le mode Zone est actif.
 - **Vérification** : section « Captures · n » : numéro, vignette avec le cadre en primary, titre de l’étape, nature du cadre (« Page entière », « Élément cliqué et sa marge », « Zone tracée ») ou l’info « Clic hors de la zone : page entière gardée. », segmenté du cadre à droite (icônes seules à 390, nom accessible conservé).
 
-Questions pour le client : la marge et la taille minimale de l’élément conviennent-elles ? Le cadre par défaut doit-il être réglable par l’espace (règle de l’administrateur) ou seulement par la personne ?
+**Validé par le client (24/11)** : marge de 48 px, cadre minimal de 480 × 300, cadre par défaut réglé par chaque personne (pas de règle d’espace). La spec est définitive.
 
 ## 7. Mot de passe et étape Formulaire
 
-Maquettes : `mdp-saisie-*` et `mdp-erreur-*` (clair, sombre, 1440, 390). Écrans concernés : Inscription, Nouveau mot de passe, Profil (avec « Mot de passe actuel »). Règles réelles (politique choisie par le client, 772acab), dans cet ordre : « Au moins 8 caractères », « Au moins une minuscule », « Au moins une majuscule », « Au moins un chiffre », « Au moins un caractère spécial (par ex. ! ? # @) ». Toujours une seule colonne, à toutes les largeurs (ordre de lecture identique pour tous, rien à aligner) ; annonce « 3 règles sur 5 respectées ». Écrans réels (validés sur e53476d) : « Nouveau mot de passe » garde la mise en page d’authentification et son bouton « Mettre à jour le mot de passe » ; au Profil, « Nouveau mot de passe » et « Confirmer le mot de passe » ont chacun leur ligne de réglage ; « Mot de passe actuel » (décision du chef) : affiché au Profil seulement si le compte a déjà un mot de passe, en premier, avec son œil ; sinon la section s’intitule « Définir un mot de passe » et n’a que le nouveau mot de passe et sa confirmation.
+Maquettes : `mdp-saisie-*` et `mdp-erreur-*` (clair, sombre, 1440, 390). Écrans concernés : Inscription, Nouveau mot de passe, Profil (avec « Mot de passe actuel »). Règles réelles (politique choisie par le client, 772acab, appliquée par Supabase depuis le 24/11 : 8 caractères et les 4 types), dans cet ordre : « Au moins 8 caractères », « Au moins une minuscule », « Au moins une majuscule », « Au moins un chiffre », « Au moins un caractère spécial (par ex. ! ? # @) ». Toujours une seule colonne, à toutes les largeurs (ordre de lecture identique pour tous, rien à aligner) ; annonce « 3 règles sur 5 respectées ». Écrans réels (validés sur e53476d) : « Nouveau mot de passe » garde la mise en page d’authentification et son bouton « Mettre à jour le mot de passe » ; au Profil, « Nouveau mot de passe » et « Confirmer le mot de passe » ont chacun leur ligne de réglage ; « Mot de passe actuel » (décision du chef) : affiché au Profil seulement si le compte a déjà un mot de passe, en premier, **sans œil** (§7.1, retour du 24/11) ; sinon la section s’intitule « Définir un mot de passe » et n’a que le nouveau mot de passe et sa confirmation.
 
 ### 7.1 Œil afficher / masquer
 Bouton intégré au champ (FIELD-01 §11.3), 32 px, icône 16 px en `currentColor`, à droite. Masqué : Eye ; affiché : EyeOff. Nom accessible fixe « Afficher le mot de passe » + `aria-pressed`. Un œil par champ, indépendant. Le clic garde le focus et le curseur ; à l’envoi, tous les champs repassent en masqué.
