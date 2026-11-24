@@ -1,0 +1,265 @@
+/**
+ * Recette MOTION-01 (docs/ux/specs/motion-01.md §2 et §6) : la scène de l'éditeur suit les panneaux.
+ *  - ouverture d'un panneau : la mise en page change d'un coup, la scène (cadre de navigateur et capture)
+ *    part de son ancien rectangle (pas de saut) et rejoint le nouveau par `transform` seul, 0,32 s,
+ *    cubic-bezier(0.2, 0.8, 0.2, 1) ; à la fin `transform` vaut `none` et `will-change` est retiré ;
+ *  - fermeture : mêmes contrôles en sens inverse ; changement de panneau : la scène ne bouge pas ;
+ *  - les hotspots gardent leur position relative à la scène, à 1 px près ;
+ *  - le panneau entre en glissant (0,32 s) après un geste, jamais au premier affichage ;
+ *  - mouvement réduit : la scène n'a jamais de `transform`, durées à 0 s.
+ * Les mesures se font image par image dans la page (requestAnimationFrame), sans délai fixe.
+ * Faux Supabase, données fictives. Usage : node e2e/mouvement.e2e.cjs
+ */
+const { chromium } = require('playwright');
+const { install, seed } = require('./fake-supabase.cjs');
+const APP = process.env.APP_URL || 'http://localhost:5173';
+const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
+
+const ok = (c, l) => {
+  console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
+  if (!c) process.exitCode = 1;
+};
+
+/** Clique un outil du rail (ou « Fermer »), puis relève la scène à chaque image jusqu'à son repos. */
+function act(target) {
+  const scene = document.querySelector('.stage-inner > .frame');
+  const rect = (el) => {
+    const r = el.getBoundingClientRect();
+    return { left: r.left, top: r.top, width: r.width, height: r.height };
+  };
+  const spot = () => {
+    const h = document.querySelector('.canvas-frame .canvas-hotspot');
+    const f = document.querySelector('.canvas-frame');
+    if (!h || !f) return null;
+    const a = h.getBoundingClientRect();
+    const b = f.getBoundingClientRect();
+    // Position relative à la scène, ramenée à la largeur finale (px)
+    return { x: (a.left + a.width / 2 - b.left) / b.width, y: (a.top + a.height / 2 - b.top) / b.height };
+  };
+  const before = { scene: rect(scene), shot: rect(document.querySelector('.canvas-frame')), spot: spot() };
+  const btn =
+    target === 'close'
+      ? document.querySelector('.ed-tool .ed-tool__head button')
+      : document.querySelector(`.ed-rail button[data-tool="${target}"]`);
+  btn.click();
+  return new Promise((resolve) => {
+    const frames = [];
+    const t0 = performance.now();
+    const tick = () => {
+      const cs = getComputedStyle(scene);
+      const m = cs.transform === 'none' ? null : new DOMMatrixReadOnly(cs.transform);
+      frames.push({
+        t: Math.round(performance.now() - t0),
+        scale: m ? m.a : null,
+        rect: rect(scene),
+        duration: cs.transitionDuration,
+        easing: cs.transitionTimingFunction,
+        property: cs.transitionProperty,
+        willChange: cs.willChange,
+      });
+      const panel = document.querySelector('.ed-tool');
+      const moving = scene.style.transform !== '' || (panel && panel.getAnimations().length > 0);
+      // Au repos depuis deux images, ou 3 s au plus
+      const rest = frames.length > 2 && !moving && frames[frames.length - 2].scale === null;
+      if (rest || performance.now() - t0 > 3000) {
+        const panelCs = panel ? getComputedStyle(panel) : null;
+        resolve({
+          before,
+          frames,
+          after: { scene: rect(scene), shot: rect(document.querySelector('.canvas-frame')), spot: spot() },
+          inline: scene.getAttribute('style') || '',
+          panel: panelCs && {
+            name: panelCs.animationName,
+            duration: panelCs.animationDuration,
+            easing: panelCs.animationTimingFunction,
+          },
+        });
+      } else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+(async () => {
+  const b = await chromium.launch();
+  const errors = [];
+  const open = async (extra = {}) => {
+    const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, locale: 'fr-FR', ...extra });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/demos/${DEMO}/edit`);
+    await page.waitForSelector('.canvas-frame img');
+    await page.waitForSelector('.canvas-frame .canvas-hotspot');
+    return { page, ctx };
+  };
+  const near = (a, b, tol = 1) => Math.abs(a - b) <= tol;
+
+  // ===== Premier affichage : rien ne bouge =====
+  const { page, ctx } = await open();
+  ok(
+    (await page.evaluate(() => {
+      const scene = document.querySelector('.stage-inner > .frame');
+      const panel = document.querySelector('.ed-tool');
+      return getComputedStyle(scene).transform === 'none' && (!panel || panel.getAnimations().length === 0);
+    })) === true,
+    'premier affichage : ni scène ni panneau en mouvement',
+  );
+  // Sans panneau au départ
+  if (await page.locator('.ed-tool').count()) {
+    await page.evaluate(act, 'close');
+    await page.waitForSelector('.ed-tool', { state: 'detached' });
+  }
+
+  // ===== Ouverture de « Bouton d'action » =====
+  const o = await page.evaluate(act, 'cta');
+  const moving = o.frames.filter((f) => f.scale !== null);
+  const start = o.before.scene.width / o.after.scene.width;
+  ok(
+    o.after.shot.width < o.before.shot.width - 50,
+    `ouverture : capture de ${Math.round(o.before.shot.width)} à ${Math.round(o.after.shot.width)} px`,
+  );
+  ok(moving.length >= 2, `ouverture : la scène porte un transform pendant ${moving.length} image(s)`);
+  ok(
+    moving.length > 0 &&
+      near(moving[0].rect.left, o.before.scene.left, 2) &&
+      near(moving[0].rect.width, o.before.scene.width, 2) &&
+      near(moving[0].rect.top, o.before.scene.top, 2),
+    `ouverture : la première image repart de l’ancien rectangle (pas de saut, ${Math.round(moving[0]?.rect.width)} px)`,
+  );
+  ok(
+    moving.every((f) => f.scale <= start + 0.001 && f.scale >= 1 - 0.001) &&
+      moving.some((f) => f.scale < start - 0.005 && f.scale > 1.005),
+    `ouverture : échelle entre ${start.toFixed(3)} et 1 (${moving
+      .map((f) => f.scale.toFixed(2))
+      .slice(0, 6)
+      .join(', ')}…)`,
+  );
+  ok(
+    moving.slice(1).every((f, i) => f.scale <= moving[i].scale + 0.001),
+    'ouverture : l’échelle décroît sans rebond',
+  );
+  const mid = moving.find((f) => f.duration !== '0s');
+  ok(
+    mid &&
+      mid.duration === '0.32s' &&
+      mid.easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)' &&
+      mid.property === 'transform' &&
+      mid.willChange === 'transform',
+    `ouverture : transition de transform seule, ${mid?.duration}, ${mid?.easing}`,
+  );
+  const last = o.frames[o.frames.length - 1];
+  ok(
+    last.scale === null && last.willChange === 'auto' && !/transform|transition|will-change/.test(o.inline),
+    'ouverture : à la fin, transform none, will-change et transition retirés',
+  );
+  ok(
+    o.before.spot &&
+      o.after.spot &&
+      near(o.before.spot.x * o.after.shot.width, o.after.spot.x * o.after.shot.width) &&
+      near(o.before.spot.y * o.after.shot.height, o.after.spot.y * o.after.shot.height),
+    'ouverture : le hotspot garde sa position relative à la scène (1 px)',
+  );
+  ok(
+    o.panel &&
+      o.panel.name === 'ed-tool-in' &&
+      o.panel.duration === '0.32s' &&
+      o.panel.easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    `ouverture : le panneau entre en ${o.panel?.duration}, ${o.panel?.easing}`,
+  );
+
+  // ===== Changement de panneau : la scène ne bouge pas =====
+  const c = await page.evaluate(act, 'step');
+  ok(
+    c.frames.every((f) => f.scale === null) && near(c.after.scene.width, c.before.scene.width, 0.5),
+    'changement de panneau : aucune animation de la scène',
+  );
+
+  // ===== Fermeture =====
+  const f = await page.evaluate(act, 'close');
+  const fm = f.frames.filter((x) => x.scale !== null);
+  const fstart = f.before.scene.width / f.after.scene.width;
+  ok(
+    f.after.shot.width > f.before.shot.width + 50,
+    `fermeture : capture de ${Math.round(f.before.shot.width)} à ${Math.round(f.after.shot.width)} px`,
+  );
+  ok(
+    fm.length >= 2 &&
+      near(fm[0].rect.width, f.before.scene.width, 2) &&
+      near(fm[0].rect.left, f.before.scene.left, 2),
+    'fermeture : la scène repart de l’ancien rectangle',
+  );
+  ok(
+    fm.every((x) => x.scale >= fstart - 0.001 && x.scale <= 1.001) &&
+      fm.slice(1).every((x, i) => x.scale >= fm[i].scale - 0.001),
+    `fermeture : échelle de ${fstart.toFixed(3)} vers 1, sans rebond`,
+  );
+  ok(
+    f.frames[f.frames.length - 1].scale === null && !/transform|will-change/.test(f.inline),
+    'fermeture : à la fin, transform none',
+  );
+  ok(
+    f.before.spot &&
+      f.after.spot &&
+      near(f.before.spot.x * f.after.shot.width, f.after.spot.x * f.after.shot.width) &&
+      near(f.before.spot.y * f.after.shot.height, f.after.spot.y * f.after.shot.height),
+    'fermeture : le hotspot garde sa position relative à la scène (1 px)',
+  );
+
+  // ===== Interruption : rouvrir pendant le mouvement, sans saut =====
+  {
+    const r = await page.evaluate(() => {
+      const scene = document.querySelector('.stage-inner > .frame');
+      const w = () => scene.getBoundingClientRect().width;
+      document.querySelector('.ed-rail button[data-tool="cta"]').click();
+      return new Promise((resolve) => {
+        let n = 0;
+        const tick = () => {
+          n += 1;
+          if (n < 4) return requestAnimationFrame(tick);
+          const seen = w();
+          document.querySelector('.ed-tool .ed-tool__head button').click();
+          requestAnimationFrame(() => resolve({ seen, next: w() }));
+        };
+        requestAnimationFrame(tick);
+      });
+    });
+    ok(
+      Math.abs(r.next - r.seen) < 40,
+      `interruption : la scène repart de son état visible (${Math.round(r.seen)} → ${Math.round(r.next)} px)`,
+    );
+    await page.waitForFunction(() => document.querySelector('.stage-inner > .frame').style.transform === '');
+    ok(true, 'interruption : la scène retrouve son repos');
+  }
+  await ctx.close();
+
+  // ===== Mouvement réduit =====
+  {
+    const { page: p, ctx: c2 } = await open({ reducedMotion: 'reduce' });
+    if (await p.locator('.ed-tool').count()) {
+      await p.evaluate(act, 'close');
+      await p.waitForSelector('.ed-tool', { state: 'detached' });
+    }
+    const r = await p.evaluate(act, 'cta');
+    ok(
+      r.frames.every((x) => x.scale === null),
+      'mouvement réduit : la scène n’a jamais de transform',
+    );
+    ok(
+      r.after.shot.width < r.before.shot.width - 50,
+      'mouvement réduit : la scène prend sa taille finale tout de suite',
+    );
+    // Les jetons de durée tombent à 0 ms ; le garde-fou global du mouvement réduit laisse 0,01 ms
+    ok(
+      r.panel && parseFloat(r.panel.duration) <= 0.001,
+      `mouvement réduit : durée du panneau ${r.panel?.duration}`,
+    );
+    await c2.close();
+  }
+
+  ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
+  await b.close();
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

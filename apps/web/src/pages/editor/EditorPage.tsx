@@ -68,6 +68,7 @@ import { StepList } from './StepList';
 import { useStepComments } from './comments/useStepComments';
 import { CommentsDock, readDock, storeDock, type DockState } from './comments/CommentsDock';
 import { useDockFit, useScrollable } from './comments/useDockFit';
+import { useStageFlip } from './useStageFlip';
 import { useAuth } from '../../auth/AuthProvider';
 import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
@@ -436,6 +437,11 @@ export function EditorPage() {
   );
   const selectedForm =
     selection.kind === 'form' ? editor.forms.find((f) => f.id === selection.id) : undefined;
+  // MOTION-01 §2 : la scène suit l'ouverture et la fermeture des panneaux (après l'ajustement au dock)
+  const panelOpen = !!(selectedForm || (panel && panel !== 'blur'));
+  useStageFlip(stageInner, `${panelOpen ? 1 : 0}|${dock.open ? 1 : 0}|${zoom}`);
+  // Le panneau n'entre en mouvement qu'après un geste : jamais d'animation au premier affichage
+  const [panelMoves, setPanelMoves] = useState(false);
   // L48-E §3 : lien avec le canevas. Un point choisi ouvre « Points d'intérêt » ; une zone floutée
   // ouvre la modale du flou sur cette zone ; le recadrage a son panneau.
   useEffect(() => {
@@ -661,6 +667,7 @@ export function EditorPage() {
     );
   }
   function toggleTool(id: ToolId) {
+    setPanelMoves(true);
     // Retour client P1 du 21/11 : l'Assistant s'ouvre dans l'emplacement des panneaux, comme les autres
     if (id === 'assistant') setSuggesting(false);
     if (id === 'blur') return setBlurOpen({});
@@ -1328,8 +1335,9 @@ export function EditorPage() {
           />
         </section>
         {/* L48-E §3 : panneau de l'outil actif (un seul à la fois), puis le rail d'outils */}
-        {(selectedForm || (panel && panel !== 'blur')) && (
+        {panelOpen && (
           <ToolPanel
+            enter={panelMoves}
             id={selectedForm ? 'form' : panel!}
             title={selectedForm ? t('editor.leadForm') : t(`editor.rail.${panel}`)}
             onClose={closePanel}
