@@ -324,7 +324,7 @@ const MOCK = 'http://localhost:54400';
   await pages.getByRole('button', { name: 'Voir : Pages copiées' }).click();
   ok(
     (await pages.locator('li.el2 .tx b').allInnerTexts()).join('|') === '1. Fiche client|2. Agenda' &&
-      /^localhost:54400\/verif · \d+ Ko$/.test(await pages.locator('li.el2 .tx .mu').first().innerText()) &&
+      /^localhost:54400\/verif ·\s\d+\sKo$/.test(await pages.locator('li.el2 .tx .mu').first().innerText()) &&
       (await pages.locator('li.el2 .st2').allInnerTexts()).every((t) => t === 'Prête'),
     'pages : numéro et titre, adresse et poids, « Prête »',
   );
@@ -335,7 +335,7 @@ const MOCK = 'http://localhost:54400';
   );
   await pages.getByRole('button', { name: /^Pourquoi \? 1\. Fiche client/ }).click();
   ok(
-    /sous la limite de 10 Mo par page/.test(await pages.locator('.row-why').innerText()),
+    /sous la limite de 10\sMo par page/.test(await pages.locator('.row-why').innerText()),
     '« Pourquoi ? » d’une page : limite réelle du serveur',
   );
   await pages.getByRole('button', { name: 'Retirer : Agenda' }).click();

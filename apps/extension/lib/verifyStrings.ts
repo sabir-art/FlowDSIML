@@ -114,13 +114,14 @@ const fr = {
     linkKept:
       'Vous gardez ce lien : dans la démo, le visiteur verra d’abord « Vous quittez la démo » et choisira de continuer ou non.',
     linkLocked:
-      'Lien vers un autre site, désactivé. Il ne peut pas être gardé : seule une adresse en https peut l’être.',
+      'Lien vers un autre site, désactivé. Il ne peut pas être gardé : son adresse n’est pas sécurisée (http). Seuls les liens en https peuvent l’être.',
   },
   pageWhyReady: 'La page est copiée en entier. Elle pèse {{size}}, sous la limite de {{max}} par page.',
   pageWhyHeavy:
     '« {{title}} » pèse {{size}}, au-delà des {{max}} permis par page : elle ne sera pas envoyée. Retirez-la, ou recapturez-la avec moins de contenu affiché.',
-  size: '{{n}} Mo',
-  sizeKb: '{{n}} Ko',
+  // NUM-01 : espace insécable entre le nombre et l'unité
+  size: '{{n}}\u00a0Mo',
+  sizeKb: '{{n}}\u00a0Ko',
   pageN: '{{n}}. {{title}}',
   server: 'Le serveur applique les mêmes règles à l’envoi.',
   delete: 'Supprimer la capture',
@@ -137,7 +138,7 @@ const fr = {
   keepLinkOk: 'Garder le lien',
   deleteTitle: 'Supprimer la capture ?',
   deleteBody: 'Les pages seront effacées de ce navigateur. Rien n’a été envoyé.',
-  deleteOk: 'Supprimer',
+  deleteOk: 'Supprimer la capture',
   pageRemoved: '« {{title}} » est retirée de la démo.',
   undo: 'Annuler',
   srv_one: 'Démo envoyée. 1 élément gardé a été retiré par le serveur.',
@@ -260,13 +261,14 @@ const en: typeof fr = {
       'Link to another site, disabled so the visitor stays in the demo. “Keep” turns it back on: the visitor will first see “You are leaving the demo”.',
     linkKept:
       'You are keeping this link: in the demo, the visitor will first see “You are leaving the demo” and choose whether to continue.',
-    linkLocked: 'Link to another site, disabled. It cannot be kept: only an https address can be.',
+    linkLocked:
+      'Link to another site, disabled. It cannot be kept: its address is not secure (http). Only https links can be.',
   },
   pageWhyReady: 'The page is copied in full. It weighs {{size}}, under the limit of {{max}} per page.',
   pageWhyHeavy:
     '“{{title}}” weighs {{size}}, over the {{max}} allowed per page: it will not be sent. Remove it, or capture it again with less content displayed.',
-  size: '{{n}} MB',
-  sizeKb: '{{n}} KB',
+  size: '{{n}}\u00a0MB',
+  sizeKb: '{{n}}\u00a0KB',
   pageN: '{{n}}. {{title}}',
   server: 'The server applies the same rules when sending.',
   delete: 'Delete the capture',
@@ -283,7 +285,7 @@ const en: typeof fr = {
   keepLinkOk: 'Keep the link',
   deleteTitle: 'Delete the capture?',
   deleteBody: 'The pages will be erased from this browser. Nothing has been sent.',
-  deleteOk: 'Delete',
+  deleteOk: 'Delete the capture',
   pageRemoved: '“{{title}}” is removed from the demo.',
   undo: 'Undo',
   srv_one: 'Demo sent. 1 kept item was removed by the server.',

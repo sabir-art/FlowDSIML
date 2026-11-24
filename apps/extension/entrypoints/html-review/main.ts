@@ -1,4 +1,5 @@
 import '@flowdsiml/ui/tokens.css';
+import '@/lib/fonts.css';
 import './style.css';
 import { browser } from 'wxt/browser';
 import {

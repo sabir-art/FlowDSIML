@@ -374,7 +374,7 @@ jobs:
   # pour les tests (faux Supabase local, accès aux sites accordé : Playwright ne répond pas aux fenêtres
   # d'autorisation) et chargée dans Chromium.
   extension-e2e:
-    name: E2E extension (capture HTML, masquage vidéo)
+    name: E2E extension (manifeste figé, capture HTML, vérification, masquage vidéo, canal de l'app)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -386,6 +386,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Navigateur Chromium (Playwright)
         run: pnpm --filter @flowdsiml/web exec playwright install --with-deps chromium
+      - name: Manifeste figé (construction de la boutique, aucune autorisation ajoutée)
+        env:
+          WXT_SUPABASE_URL: http://localhost:54400
+          # Valeur factice : seule la forme du manifeste est contrôlée
+          WXT_SUPABASE_ANON_KEY: anon
+        run: |
+          cd apps/extension && pnpm build && node e2e/manifeste.cjs | tee /tmp/manifeste.log
+          ! grep -q '^NOT OK' /tmp/manifeste.log
       - name: Extension construite pour les tests et faux Supabase
         env:
           WXT_E2E: '1'
@@ -422,3 +430,16 @@ jobs:
         run: |
           cd apps/extension && node e2e/video-masque.e2e.cjs | tee /tmp/e2e-ext-masque.log
           ! grep -q '^NOT OK' /tmp/e2e-ext-masque.log
+      - name: Canal app vers extension (origine exacte, capture rattachée au Sandbox, permissions inchangées)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+          WXT_E2E: '1'
+          WXT_SUPABASE_URL: http://localhost:54400
+          WXT_SUPABASE_ANON_KEY: anon
+          # L'« app » de ce test est l'origine du faux serveur ; construction sans debugger, comme la boutique
+          WXT_APP_URL: http://localhost:54400
+        run: |
+          cd apps/extension && pnpm build
+          node e2e/external.e2e.cjs | tee /tmp/e2e-ext-canal.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-canal.log
