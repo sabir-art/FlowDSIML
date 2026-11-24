@@ -1,7 +1,7 @@
 /**
  * Médiathèque (retours client du 24/11 §3.2) : catégorie déduite à l'import, modifiable ensuite.
  *  - WOFF2 : Police ;
- *  - SVG, ou PNG avec transparence et à peu près carré (rapport entre 1:2 et 2:1, côté de 1 024 px au
+ *  - SVG, ou PNG / WebP avec transparence et à peu près carré (rapport entre 1:2 et 2:1, côté de 1 024 px au
  *    plus) : Logo ;
  *  - sinon : Image.
  * Importé depuis un filtre Logos ou Images, le fichier prend la catégorie du filtre.
@@ -15,7 +15,7 @@ export interface FileFacts {
   svg: boolean;
   width: number | null;
   height: number | null;
-  /** Au moins un pixel transparent (PNG) ; null : non mesuré. */
+  /** Au moins un pixel transparent (PNG, WebP) ; null : non mesuré. */
   alpha: boolean | null;
 }
 
@@ -43,7 +43,13 @@ export async function inspectFile(file: File): Promise<FileFacts> {
   const font = name.endsWith('.woff2') || file.type === 'font/woff2';
   const svg = name.endsWith('.svg') || file.type === 'image/svg+xml';
   const facts: FileFacts = { font, svg, width: null, height: null, alpha: null };
-  if (font || svg || !(name.endsWith('.png') || file.type === 'image/png')) return facts;
+  // Seuls PNG et WebP portent une transparence ; un JPEG est toujours une image
+  const alphaCapable =
+    name.endsWith('.png') ||
+    name.endsWith('.webp') ||
+    file.type === 'image/png' ||
+    file.type === 'image/webp';
+  if (font || svg || !alphaCapable) return facts;
   try {
     const bitmap = await createImageBitmap(file);
     facts.width = bitmap.width;

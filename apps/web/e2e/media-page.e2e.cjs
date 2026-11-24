@@ -22,10 +22,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   };
   const errors = [];
   // Images fictives dessinées dans le navigateur : logo transparent carré, visuel opaque large
-  const png = async (w, h, transparent) => {
+  const png = async (w, h, transparent, type = 'image/png') => {
     const p = await (await b.newContext()).newPage();
     const data = await p.evaluate(
-      ([w, h, transparent]) => {
+      ([w, h, transparent, type]) => {
         const c = document.createElement('canvas');
         c.width = w;
         c.height = h;
@@ -38,15 +38,17 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
         x.beginPath();
         x.arc(w / 2, h / 2, Math.min(w, h) / 3, 0, Math.PI * 2);
         x.fill();
-        return c.toDataURL('image/png').split(',')[1];
+        return c.toDataURL(type).split(',')[1];
       },
-      [w, h, transparent],
+      [w, h, transparent, type],
     );
     await p.context().close();
     return Buffer.from(data, 'base64');
   };
   const logoPng = await png(256, 256, true);
   const photoPng = await png(1600, 600, false);
+  // WebP transparent et carré : accepté, et rangé avec les logos comme un PNG
+  const logoWebp = await png(256, 256, true, 'image/webp');
   const svg = Buffer.from(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>',
   );
@@ -191,6 +193,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       kindOf('bandeau-formation.png') === 'image' && kindOf('pictogramme.svg') === 'logo',
       'visuel opaque et large : image ; SVG : logo',
     );
+    state.mediaFiles['logo-acme.webp'] = logoWebp;
+    await send(page, 'logo-acme.webp', logoWebp, 'image/webp');
+    await card(page, 'logo-acme.webp').waitFor();
+    ok(
+      logoWebp.subarray(0, 4).toString('latin1') === 'RIFF' &&
+        logoWebp.subarray(8, 12).toString('latin1') === 'WEBP' &&
+        kindOf('logo-acme.webp') === 'logo' &&
+        state.tables.media_files.find((f) => f.name === 'logo-acme.webp').mime === 'image/webp',
+      'WebP transparent et carré : accepté, rangé avec les logos',
+    );
+    ok(
+      /PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus\. La catégorie est déduite, vous pouvez la changer\./.test(
+        sp(await page.locator('.mp-zone').textContent()),
+      ),
+      'aide de la zone d’import : les types réellement acceptés, WebP compris',
+    );
     // Import depuis un filtre : la catégorie du filtre l'emporte
     await page.getByRole('radio', { name: /^Images/ }).click();
     state.mediaFiles['logo-bis.png'] = logoPng;
@@ -203,12 +221,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     const group = page.getByRole('radiogroup', { name: 'Catégorie' });
     ok(
       sp((await group.getByRole('radio').allTextContents()).join(' | ')) ===
-        'Tout 4 | Logos 1 | Images 3 | Polices 0',
+        'Tout 5 | Logos 2 | Images 3 | Polices 0',
       'filtres Tout, Logos, Images, Polices avec leurs compteurs',
     );
     ok(/ sur 500 Mo$/.test(sp(await page.locator('.mp-quota').textContent())), 'occupation « … sur 500 Mo »');
     await group.getByRole('radio', { name: /^Logos/ }).click();
-    ok((await cards(page).count()) === 1, 'filtre Logos : un fichier');
+    ok((await cards(page).count()) === 2, 'filtre Logos : deux fichiers');
     await group.getByRole('radio', { name: /^Tout/ }).click();
     await page.getByRole('searchbox').fill('bandeau');
     ok((await cards(page).count()) === 1, 'recherche par nom');
@@ -216,7 +234,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.getByText('Aucun fichier ne correspond.').waitFor();
     await page.getByRole('button', { name: 'Effacer la recherche' }).click();
     ok(
-      (await page.getByRole('searchbox').inputValue()) === '' && (await cards(page).count()) === 4,
+      (await page.getByRole('searchbox').inputValue()) === '' && (await cards(page).count()) === 5,
       'recherche sans résultat : « Effacer la recherche » la vide',
     );
 

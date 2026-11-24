@@ -2,7 +2,7 @@
 -- (20261201200000_mediatheque_categorie.sql). Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(18);
+select plan(22);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000360a1', 'olga-md@acme.example'),
@@ -84,6 +84,23 @@ select is((select (x ->> 'demos')::int from jsonb_array_elements(public.media_us
 select pg_temp.login('00000000-0000-0000-0000-0000000360a4');
 select throws_ok($$ select public.media_file_demos('00000000-0000-0000-0000-0000000360f1') $$, '42501', null,
   'autre espace : refusé');
+
+-- ===== WebP accepté (20261201220000_mediatheque_webp.sql) =====
+reset role;
+select ok((select allowed_mime_types @> array['image/webp', 'image/png', 'image/jpeg', 'image/svg+xml', 'font/woff2']
+             and cardinality(allowed_mime_types) = 5 from storage.buckets where id = 'media'),
+  'bucket media : WebP en plus des quatre types');
+insert into storage.objects (bucket_id, name, metadata) values
+  ('media', (select ws from ctx)::text || '/00000000-0000-0000-0000-0000000360f3.webp', '{"size": 1000}');
+select lives_ok(format($$ insert into public.media_files (id, workspace_id, kind, name, path, mime)
+  values ('00000000-0000-0000-0000-0000000360f3', '%s', 'logo', 'logo.webp', '%s/00000000-0000-0000-0000-0000000360f3.webp', 'image/webp') $$,
+  (select ws from ctx), (select ws from ctx)), 'fichier WebP enregistré');
+select throws_ok(format($$ insert into public.media_files (workspace_id, kind, name, path, mime)
+  values ('%s', 'image', 'anim.gif', '%s/00000000-0000-0000-0000-0000000360f3.webp', 'image/gif') $$,
+  (select ws from ctx), (select ws from ctx)), '23514', null, 'type hors liste toujours refusé');
+select ok(public.public_page_valid(jsonb_build_object('logo', (select ws from ctx)::text || '/00000000-0000-0000-0000-0000000360f3.webp'))
+          and not public.public_page_valid(jsonb_build_object('logo', (select ws from ctx)::text || '/00000000-0000-0000-0000-0000000360f3.gif')),
+  'page publique : un logo WebP de la médiathèque est accepté, pas un autre format');
 
 select * from finish();
 rollback;

@@ -242,6 +242,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await shot('l27-03-style-par-defaut');
   await conf.getByRole('button', { name: 'Utiliser par défaut' }).click();
   await page.getByText('« Acme bleu » est le style par défaut.').waitFor();
+  // La liste est rechargée après le toast : on attend le style marqué par défaut, pas un délai
+  await styles.locator('[aria-current="true"]', { hasText: 'Acme bleu' }).waitFor();
   ok(
     /Acme bleu/.test(await styles.locator('[aria-current="true"]').innerText()) &&
       t.themes.find((x) => x.id === 'th-acme').is_default,

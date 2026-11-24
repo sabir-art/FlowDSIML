@@ -36,6 +36,8 @@ describe('médiathèque : catégorie déduite à l’import', () => {
     expect(deduceKind(f({ width: 1000, height: 400, alpha: true })).kind).toBe('image');
     // trop grand
     expect(deduceKind(f({ width: 1600, height: 1600, alpha: true })).kind).toBe('image');
+    // WebP transparent et carré : logo, comme un PNG (les faits sont les mêmes)
+    expect(deduceKind(f({ width: 300, height: 300, alpha: true })).kind).toBe('logo');
     // JPEG : ni dimensions lues ni transparence
     expect(deduceKind(f({})).kind).toBe('image');
   });
