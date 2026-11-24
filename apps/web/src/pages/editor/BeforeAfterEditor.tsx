@@ -9,6 +9,7 @@ import {
   BA_NOTE_MAX,
   asBeforeAfter,
   asMasks,
+  maskCss,
   type BeforeAfterConfig,
   type MaskRect,
   type StepRow,
@@ -18,7 +19,7 @@ import {
 const MAX_BYTES = 10 * 1024 * 1024;
 const TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
-function Masks({ list }: { list: MaskRect[] }) {
+function Masks({ list, ratio }: { list: MaskRect[]; ratio: number }) {
   return (
     <>
       {list.map((b, i) => (
@@ -30,6 +31,7 @@ function Masks({ list }: { list: MaskRect[] }) {
             top: `${b.y * 100}%`,
             width: `${b.w * 100}%`,
             height: `${b.h * 100}%`,
+            ...maskCss(b, ratio),
             ...(b.style === 'solid' ? { background: b.color } : {}),
           }}
           aria-hidden="true"
@@ -69,7 +71,7 @@ export function BeforeAfterCanvas({
           {url ? (
             <div className="ba-shot" style={{ '--ratio': String(w / h) } as CSSProperties}>
               <img src={url} alt="" />
-              <Masks list={masks} />
+              <Masks list={masks} ratio={w / h} />
             </div>
           ) : (
             <span className="ba-missing">

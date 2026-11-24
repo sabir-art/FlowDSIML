@@ -9,6 +9,18 @@ import type {
   RuleOp,
   Step,
 } from '@flowdsiml/manifest';
+import { maskPreviewStyle, type Mask } from '@flowdsiml/manifest';
+
+/** EXT-02 §6.2 : aperçu d'un masque avant publication (arrondi, filtre de fond, teinte). */
+export function maskStyle(m: Mask, ratio: number) {
+  const p = maskPreviewStyle(m, ratio);
+  return {
+    borderRadius: p.borderRadius,
+    backdropFilter: p.backdropFilter,
+    '-webkit-backdrop-filter': p.backdropFilter,
+    ...(p.background ? { background: p.background } : {}),
+  };
+}
 
 export { resolvePlacement, type Placement } from '@flowdsiml/player-core';
 

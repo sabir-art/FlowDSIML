@@ -1066,7 +1066,7 @@
       "intensityValue": "Intensity, value",
       "applyTo": "Apply to",
       "thisStep": "This step only",
-      "allSteps": "All steps",
+      "allSteps": "Apply to all steps",
       "info": "The player applies this blur over the original capture. For sensitive data, blur it at capture time: the extension burns it into the image before upload.",
       "maskTitle": "Masked area",
       "help_blur": "Blur: the area is blurred and pixelated in the published image.",
@@ -1084,7 +1084,20 @@
         "light": "Light grey",
         "white": "White",
         "detected": "Colour detected around the area"
-      }
+      },
+      "shape": "Shape",
+      "shape_rect": "Rectangle",
+      "shape_rounded": "Rounded",
+      "shape_ellipse": "Ellipse",
+      "effect": "Effect",
+      "tint": "Tint",
+      "tint_none": "None",
+      "tint_gray": "Grey",
+      "tint_ink": "Ink",
+      "tint_plum": "Plum",
+      "tint_blue": "Blue",
+      "tint_white": "White",
+      "tintHelp": "Tint at 30% over the blur. The masked text is never readable, whatever the tint."
     },
     "blurTag": "Blur",
     "applyStyle": {

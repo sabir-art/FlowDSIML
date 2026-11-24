@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import { ChevronRight, MoveHorizontal } from 'lucide-preact';
 import type { ImageRef, Mask, Step } from '@flowdsiml/manifest';
+import { maskStyle } from './logic';
 import type { Dict } from './i18n';
 import { Slider } from './Slider';
 
@@ -19,6 +20,7 @@ function Shot({ img, blurs, alt }: { img: ImageRef; blurs: Mask[]; alt: string }
             top: `${b.y * 100}%`,
             width: `${b.w * 100}%`,
             height: `${b.h * 100}%`,
+            ...maskStyle(b, img.width / img.height),
             ...(b.style === 'solid' ? { background: b.color } : {}),
           }}
         >

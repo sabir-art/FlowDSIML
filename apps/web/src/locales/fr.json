@@ -1066,7 +1066,7 @@
       "intensityValue": "Intensité, valeur",
       "applyTo": "Appliquer à",
       "thisStep": "Cette étape seulement",
-      "allSteps": "Toutes les étapes",
+      "allSteps": "Appliquer à toutes les étapes",
       "info": "Le lecteur applique ce flou par-dessus la capture d’origine. Pour une donnée sensible, floutez-la dès la capture : l’extension l’incruste dans l’image avant l’envoi.",
       "maskTitle": "Zone masquée",
       "help_blur": "Flou : la zone est floutée et pixellisée dans l’image publiée.",
@@ -1084,7 +1084,20 @@
         "light": "Gris clair",
         "white": "Blanc",
         "detected": "Couleur détectée autour de la zone"
-      }
+      },
+      "shape": "Forme",
+      "shape_rect": "Rectangle",
+      "shape_rounded": "Arrondi",
+      "shape_ellipse": "Ellipse",
+      "effect": "Effet",
+      "tint": "Teinte",
+      "tint_none": "Aucune",
+      "tint_gray": "Gris",
+      "tint_ink": "Encre",
+      "tint_plum": "Prune",
+      "tint_blue": "Bleu",
+      "tint_white": "Blanc",
+      "tintHelp": "Teinte à 30 % par-dessus le flou. Le texte masqué n’est jamais lisible, quelle que soit la teinte."
     },
     "blurTag": "Flou",
     "applyStyle": {
