@@ -135,12 +135,53 @@ La bascule « Zones cliquables » (et la touche H) et le message « Aucun lien �
 
 Capture centrée en colonne, pastilles de 20 px, contrôles sur deux lignes si besoin ; l’infobulle de la bascule devient un texte court sous le bouton.
 
-## À venir (même document)
+## 4. Vidéo : catégorie et masquage
 
-- **4. Vidéo et masquage** : catégorie « Vidéo » (badge, filtre Type, création en deux étapes) ; « Masquer en direct : Oui / Non » ; revue après enregistrement avec démasquage ; suivi du défilement à toute vitesse ; masque qui ne couvre pas un panneau ouvert au-dessus ; « Pourquoi masqué ? » par zone ; faux positif « Assistant IA ».
+Maquettes : `video-revue-*`, `video-pourquoi-*`, `video-demasque-*`, `video-sans-*` (clair, sombre, 1440, 390) ; popup : variantes A et B, état « vidéo ».
+
+### 4.1 Catégorie « Vidéo »
+Même traitement que Captures, HTML et Sandbox (L48-G) : badge de type « Vidéo » (icône Video) sur la carte et la ligne de liste ; valeur « Vidéo » dans le filtre Type ; carte « Vidéo » dans l’étape 1 de « Nouvelle démo » (création en deux étapes), avec en étape 2 « Enregistrer avec l’extension » ou « Importer une vidéo » (zone large §18.1, MP4 ou WebM, 50 Mo au plus).
+
+### 4.2 Masquer en direct : un choix
+Dans le popup (type Vidéo) : interrupteur « Masquer en direct », activé par défaut, mémorisé ; aide dans le flux : « Floute les données personnelles pendant l’enregistrement. Vous pourrez démasquer ensuite. ». Désactivé, rien n’est masqué pendant l’enregistrement, mais les données sont repérées pour la revue.
+
+### 4.3 Rendu du masque (validé sur a4b809d)
+Masque porté par le contenu de la page : il défile avec elle à toute vitesse et passe sous un panneau ouvert par-dessus. Un élément entier : flou de 8 px. Une portion de texte (un nom dans une phrase) : aplat gris neutre #8f8f8f, texte transparent. Aucune couleur de marque. Un mot d’interface suivi d’un sigle (« Assistant IA », « Export PDF ») n’est pas un nom.
+
+### 4.4 Revue après l’enregistrement « Vérifier la vidéo »
+- En-tête de 56 px, titre, phrase : « Les données repérées ont été masquées pendant l’enregistrement. Vérifiez chaque zone : vous pouvez démasquer une erreur ou masquer un oubli. »
+- Deux colonnes (SPLIT-01) : lecteur à gauche (`minmax(0,1fr)`), liste de 440 px à droite ; une colonne sous 1 024 px de contenu.
+- Lecteur : la vidéo avec les masques ; la zone choisie est entourée d’un pointillé primary de 2 px ; sous l’image, une chronologie où chaque passage masqué est un segment (gris : masqué ; pointillé warning : non masqué), tête de lecture primary, temps « 0:07 / 1:02 ».
+- Liste « Zones masquées » (compteur « 5 sur 5 », « Ajouter un masque ») : une ligne par zone, colonnes type et valeur masquée (« Nom · « J*** D*** » », format de la vérification) avec le passage « 0:04 – 0:19 » · statut 100 px (« Masqué » neutre, « Non masqué » warning) · action 96 px (« Démasquer » / « Masquer ») ; dessous « Pourquoi masqué ? » qui déplie l’encart info : la raison de la détection (« Repéré comme un nom de personne : deux mots à majuscule dans le champ « Contact » de la fiche client. Si ce n’en est pas un, « Démasquer » rétablit l’image d’origine sur ce passage. »).
+- Cliquer une ligne amène la lecture au début du passage et sélectionne la zone ; glisser sur l’image crée un masque (raccourcis existants : flèches, Maj + flèches, Suppr).
+- Masquage désactivé (§4.2) : bandeau warning « 5 données repérées ne sont pas masquées. Elles seront visibles dans la démo si vous l’envoyez ainsi. », toutes les lignes en « Non masqué » avec « Masquer ». L’envoi reste possible.
+- Barre fixe : « Supprimer l’enregistrement » (danger), « Envoyer ».
+- À 390 : lecteur puis liste ; « Ajouter un masque » en pleine largeur sous le titre de la liste.
+
+## 6. Idées de l’éditeur de référence, à notre façon
+
+Maquettes : `lecteur-fenetre-*`, `lecteur-projecteur-*` (lecteur, 1440 et 390) ; `popup-voix-{generer,enregistrer,importer}-*`, `popup-flou-*`, `popup-projecteur-*` (panneaux de 320 px de l’éditeur).
+
+### 6.1 Fenêtre image + texte (type d’étape « Fenêtre »)
+Dans le lecteur, fenêtre centrée sur la capture voilée (noir à 45 %), 680 px au plus, rayon 16 : image à gauche (280 px, ou en haut sous 640 px), à droite « Étape 2 sur 6 », titre 22 px, texte, puis « Échap pour fermer », « Précédent » (secondaire) et « Suivant » (primaire). Focus piégé, Échap ferme, `role="dialog"` avec titre. Dans l’éditeur : choix « Fenêtre » parmi les types d’étape ; panneau Étape avec image (zone §18.2), titre, texte, libellé du bouton.
+
+### 6.2 Flou stylé
+Panneau « Flou » : Forme (Rectangle, Arrondi, Ellipse), Effet (Flou, Pixels, Aplat), Intensité (2 à 24 px, curseur avec valeur), Teinte (Aucune, Gris, Encre, Prune, Bleu, Blanc ; à 30 % par-dessus) et « Appliquer à toutes les étapes ». Aide : « Le texte masqué n’est jamais lisible, quelle que soit la teinte. » (intensité minimale garantie côté rendu).
+
+### 6.3 Projecteur libre (aujourd’hui « Bientôt »)
+Panneau « Projecteur » : interrupteur « Projecteur libre », taille du halo (120 à 400 px), assombrissement (20 à 80 %), « Désactivé si le visiteur préfère moins d’animations ». Dans le lecteur : halo net autour du pointeur, bord adouci de 12 px, reste assombri ; au clavier et au toucher, le halo se place sur l’élément de l’étape. C’est le seul dégradé permis, parce qu’il est la fonction elle-même. Tant qu’il n’est pas livré, l’entrée reste « Bientôt », grise, jamais masquée.
+
+### 6.4 Voix off dans le panneau de 320 px (réponse au §18.2 « Voix » et « Sous-titres »)
+- Segmenté en tête : « Générer », « Enregistrer », « Importer ».
+- Générer : « Texte lu » (zone de texte, compteur « 68 caractères · environ 5 s »), Langue et Voix côte à côte, « Aperçu » (lecture, onde, temps), « Régénérer ».
+- Enregistrer : bouton rond d’enregistrement (arrêt en danger), onde en direct, durée, aide « Micro : … 2 minutes au plus. ».
+- Importer : zone étroite §18.2 (« Importer… », formats et poids, dépôt sur le bloc).
+- Lignes communes (ALIGN-01) : « Lecture automatique », « Sous-titres », « Lecteur audio » (Bulle, Coin, Masqué).
+- Encart info permanent : « Les navigateurs bloquent le son avant le premier clic du visiteur : la voix démarre à son premier clic, les sous-titres s’affichent dès l’arrivée. »
+
+## À venir
+
 - **5. Captures** : étude de l’option à chaque clic (page, zone, élément).
-- **6. Idées de l’éditeur de référence, à adapter** : fenêtre modale image + texte, flou personnalisable, spotlight libre, bloc Voix off dans le panneau de 320 px (réponse au dev sur « Voix » et « Sous-titres » du §18.2).
-
 
 ## 7. Mot de passe et étape Formulaire
 
