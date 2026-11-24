@@ -31,6 +31,7 @@ import {
   Send,
   Share2,
   X,
+  GraduationCap,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { parseManifest, type Manifest } from '@flowdsiml/manifest';
@@ -72,6 +73,7 @@ import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import './distribute.css';
 import { Status, Select } from '@flowdsiml/ui';
+import { TrainingSection } from './TrainingCard';
 
 interface Info {
   demo: Tables<'demos'>;
@@ -88,6 +90,8 @@ interface ScormSettings {
 }
 
 const TABS: Array<{ id: Tab; icon: ReactNode }> = [
+  // §1 (retours du 24/11, 2e série) : les parcours de formation de la démo, en première section
+  { id: 'training', icon: <GraduationCap aria-hidden="true" /> },
   { id: 'scorm', icon: <Package aria-hidden="true" /> },
   { id: 'intranet', icon: <Globe aria-hidden="true" /> },
   { id: 'mail', icon: <Mail aria-hidden="true" /> },
@@ -98,7 +102,7 @@ const tabKey = (demoId: string) => `fd.l16.tab.${demoId}`;
 function readTab(demoId: string): Tab {
   try {
     const v = localStorage.getItem(tabKey(demoId));
-    return v === 'intranet' || v === 'mail' || v === 'where' ? v : 'scorm';
+    return v === 'training' || v === 'intranet' || v === 'mail' || v === 'where' ? v : 'scorm';
   } catch {
     return 'scorm';
   }
@@ -298,14 +302,19 @@ export function DistributeDialog({
       />
     ) : null;
 
-  const disabledTab = (v: Tab) => !published && v !== 'where';
+  const disabledTab = (v: Tab) => !published && v !== 'where' && v !== 'training';
   let body: ReactNode = null;
   let foot: ReactNode = (
     <button type="button" className="btn btn-secondary" onClick={close}>
       {t('common.close')}
     </button>
   );
-  if (info && !published && tab !== 'where') {
+  if (info && tab === 'training') {
+    // Parcours de formation : la démo y est ajoutée même avant sa publication
+    body = (
+      <TrainingSection demoId={demoId} workspaceId={info.demo.workspace_id} editable={can('demo.edit')} />
+    );
+  } else if (info && !published && tab !== 'where') {
     body = (
       <div className="empty dif-empty" role="status">
         <span className="dif-file-ic" aria-hidden="true">
@@ -438,7 +447,7 @@ export function DistributeDialog({
           ))}
         </div>
         <section role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${tab}`}>
-          {modified && tab !== 'where' && (
+          {modified && tab !== 'where' && tab !== 'training' && (
             <div className="alert alert-info dif-modified" role="note">
               <Info aria-hidden="true" />
               <span>
@@ -447,12 +456,14 @@ export function DistributeDialog({
               </span>
             </div>
           )}
-          {(pubBlocked || (tab === 'scorm' && !rules.exports_allowed)) && tab !== 'where' && (
-            <div className="alert alert-info dif-modified" role="note" id={`${id}-rule`}>
-              <Info aria-hidden="true" />
-              <span>{pubBlocked ? t('rules.errPublish') : t('rules.errExports')}</span>
-            </div>
-          )}
+          {(pubBlocked || (tab === 'scorm' && !rules.exports_allowed)) &&
+            tab !== 'where' &&
+            tab !== 'training' && (
+              <div className="alert alert-info dif-modified" role="note" id={`${id}-rule`}>
+                <Info aria-hidden="true" />
+                <span>{pubBlocked ? t('rules.errPublish') : t('rules.errExports')}</span>
+              </div>
+            )}
           {info ? body : <p className="muted">{t('common.loading')}</p>}
         </section>
       </div>

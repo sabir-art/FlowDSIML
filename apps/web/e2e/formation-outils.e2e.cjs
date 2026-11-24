@@ -123,8 +123,12 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
     t.paths = [{ id: 'p-1', workspace_id: ws, title: 'Logiciel métier', ordered: true }];
     t.path_modules = [{ path_id: 'p-1', demo_id: other, workspace_id: ws, position: 0, required: true }];
     await install(page, state);
-    // §1 : la carte Formation est un mode de la fenêtre Partager (en attendant sa place dans Diffuser)
-    await page.goto(`${APP}/#/demos/${DEMO}/edit?share=formation`);
+    // §1 : les parcours de formation de la démo sont la première section de la fenêtre « Diffuser »
+    await page.goto(`${APP}/#/demos/${DEMO}/distribute`);
+    await page
+      .locator('dialog.dif-dialog[open]')
+      .getByRole('tab', { name: /^Parcours de formation/ })
+      .click();
     const card = page.locator('.sh-training');
     await card.waitFor();
     ok(

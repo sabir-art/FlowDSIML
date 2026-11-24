@@ -24,6 +24,7 @@ import {
   Mail,
   Users,
   Play,
+  EyeOff,
 } from 'lucide-react';
 import {
   EditorRail,
@@ -119,6 +120,7 @@ import { BackButton, Select } from '@flowdsiml/ui';
 import { ImagePanel } from './images/ImagePanel';
 import { asLayers, layerName } from './images/layers';
 import { ShareDialog, useShareWindow } from '../share/ShareDialog';
+import { useUnpublish } from '../share/useUnpublish';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -255,6 +257,7 @@ export function EditorPage() {
   const location = useLocation();
   // §1 : fenêtre Partager au-dessus de l'éditeur ; « Publier » de son bandeau lance la publication d'ici
   const share = useShareWindow();
+  const [unpublishDialog, unpublish] = useUnpublish(editor.demo, () => void editor.reload());
   const shareWindow = share.view && demoId && (
     <ShareDialog
       demoId={demoId}
@@ -860,6 +863,7 @@ export function EditorPage() {
       )}
       <Suspense fallback={null}>
         {shareWindow}
+        {unpublishDialog}
         {distributing && demoId && can('demo.edit') && (
           <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
         )}
@@ -1117,6 +1121,18 @@ export function EditorPage() {
                       onSelect: () => setSavingTpl(true),
                     },
                   ] as const)
+                : []),
+              // §1 : l'état de publication se retire ici, pas dans Partager (ce n'est pas un accès)
+              ...(can('demo.publish') && editor.demo.status === 'published'
+                ? [
+                    'separator' as const,
+                    {
+                      label: t('share.unpublishMenu'),
+                      icon: <EyeOff />,
+                      danger: true,
+                      onSelect: () => void unpublish(),
+                    },
+                  ]
                 : []),
             ]}
           />

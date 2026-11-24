@@ -11,7 +11,7 @@ import {
 } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { ChartColumn, ChevronLeft, Mail, Pencil, Play, Rocket, Share2, Users } from 'lucide-react';
+import { ChartColumn, ChevronLeft, EyeOff, Mail, Pencil, Play, Rocket, Share2, Users } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Loading } from '../../components/guards';
 import { Menu } from '../../components/Menu';
@@ -20,6 +20,7 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { ShareDialog, useShareWindow } from '../share/ShareDialog';
+import { useUnpublish } from '../share/useUnpublish';
 import './demo-views.css';
 
 export type DemoView = 'analytics' | 'leads' | 'visitors';
@@ -44,6 +45,7 @@ export function DemoViewShell() {
   const { can } = useWorkspace();
   const [demo, setDemo] = useState<Tables<'demos'> | null | undefined>(undefined);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [rev, setRev] = useState(0);
   const view = (loc.pathname.split('/').pop() ?? 'analytics') as DemoView;
   const origin = (loc.state as Origin) ?? null;
   const fromAnalytics = origin?.from === 'analytics';
@@ -66,7 +68,9 @@ export function DemoViewShell() {
     return () => {
       alive = false;
     };
-  }, [demoId]);
+  }, [demoId, rev]);
+  // §1 : « Retirer la publication… » du menu ⋯ (l'état de publication, pas un accès)
+  const [unpublishDialog, unpublish] = useUnpublish(demo, () => setRev((n) => n + 1));
 
   if (demo === undefined) return <Loading />;
   if (demo === null) return <Navigate to="/" replace />;
@@ -136,6 +140,19 @@ export function DemoViewShell() {
           />
         </div>
         <div className="dv-bar__r">
+          {can('demo.publish') && published && (
+            <Menu
+              label={t('editor.more')}
+              items={[
+                {
+                  label: t('share.unpublishMenu'),
+                  icon: <EyeOff />,
+                  danger: true,
+                  onSelect: () => void unpublish(),
+                },
+              ]}
+            />
+          )}
           <button
             type="button"
             className="fd-btn dv-share"
@@ -155,6 +172,7 @@ export function DemoViewShell() {
           )}
         </div>
       </header>
+      {unpublishDialog}
       {share.view && (
         <ShareDialog
           demoId={demoId}

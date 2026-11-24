@@ -2147,7 +2147,8 @@
       "scorm": "SCORM",
       "intranet": "Intranet",
       "mail": "E-mail",
-      "where": "Où elle est diffusée"
+      "where": "Où elle est diffusée",
+      "training": "Parcours de formation"
     },
     "published_badge": "Publiée",
     "modified": "Modifiée",
@@ -2309,7 +2310,7 @@
     "open": "Ouvrir",
     "unpublish": "Dépublier",
     "confirmUnpublish": "Dépublier ? Le lien et les intégrations cesseront de fonctionner.",
-    "unpublished": "Démo dépubliée.",
+    "unpublished": "La publication est retirée.",
     "embed": "Intégration (iframe)",
     "embedHint": "Collez ce code dans votre site, landing page ou CMS.",
     "allowedOrigins": "Sites autorisés à intégrer la démo (un par ligne, vide = tous)",
@@ -2552,9 +2553,12 @@
       "perso": "Liens personnalisés",
       "acces": "Accès",
       "exporter": "Exporter",
-      "page": "Page publique",
-      "formation": "Formation"
-    }
+      "page": "Page publique"
+    },
+    "unpublishMenu": "Retirer la publication…",
+    "unpublishTitle": "Retirer la publication de « {{title}} » ?",
+    "unpublishBody": "Le lien, l’intégration et les liens personnalisés cesseront de fonctionner. Vous pourrez republier à tout moment.",
+    "unpublishConfirm": "Retirer la publication"
   },
   "analytics": {
     "title": "Analytics",

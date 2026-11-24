@@ -2147,7 +2147,8 @@
       "scorm": "SCORM",
       "intranet": "Intranet",
       "mail": "Email",
-      "where": "Where it is shared"
+      "where": "Where it is shared",
+      "training": "Training paths"
     },
     "published_badge": "Published",
     "modified": "Modified",
@@ -2309,7 +2310,7 @@
     "open": "Open",
     "unpublish": "Unpublish",
     "confirmUnpublish": "Unpublish? The link and embeds will stop working.",
-    "unpublished": "Demo unpublished.",
+    "unpublished": "The demo is no longer published.",
     "embed": "Embed (iframe)",
     "embedHint": "Paste this code into your website, landing page or CMS.",
     "allowedOrigins": "Websites allowed to embed the demo (one per line, empty = all)",
@@ -2552,9 +2553,12 @@
       "perso": "Personalised links",
       "acces": "Access",
       "exporter": "Export",
-      "page": "Public page",
-      "formation": "Training"
-    }
+      "page": "Public page"
+    },
+    "unpublishMenu": "Unpublish…",
+    "unpublishTitle": "Unpublish “{{title}}”?",
+    "unpublishBody": "The link, the embed and the personalised links will stop working. You can publish again at any time.",
+    "unpublishConfirm": "Unpublish"
   },
   "analytics": {
     "title": "Analytics",

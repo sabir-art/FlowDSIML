@@ -199,6 +199,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       `Lien : pastille d’accès « Toute personne avec le lien » + « Modifier » (${JSON.stringify(await pill.innerText())})`,
     );
     ok((await d.locator('.shd-banner').count()) === 0, 'démo publiée : pas de bandeau');
+    ok(
+      (await d.locator('#sh-panel-link').getByRole('checkbox').count()) === 0 &&
+        (await d.locator('#sh-panel-link').getByRole('switch').count()) === 0 &&
+        !names.includes('Formation'),
+      'Lien : plus d’interrupteur « Accès public » ; plus de mode Formation (il est dans Diffuser)',
+    );
     // Copie du lien
     const link = await d.locator('#sh-pub').inputValue();
     await d
@@ -266,6 +272,52 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       await d.locator('.shd.is-menu').waitFor();
       ok(/share=menu$/.test(page.url()), '390 : « ← » revient à la liste des modes');
     }
+    await page.context().close();
+  }
+
+  // ===== « Retirer la publication… » : dans le menu ⋯ de la barre de démo, avec confirmation =====
+  if (!MOBILE) {
+    const { page, state } = await open(`/demos/${DEMO}/edit`);
+    const demo = state.tables.demos.find((x) => x.id === DEMO);
+    await page.locator('.ed-bar').getByRole('button', { name: 'Plus d’options' }).click();
+    const item = page.getByRole('menuitem', { name: 'Retirer la publication…' });
+    await item.waitFor();
+    const last = (await page.getByRole('menuitem').allTextContents()).map((x) => x.trim()).at(-1);
+    ok(
+      last === 'Retirer la publication…',
+      `menu ⋯ de la barre : « Retirer la publication… » en bas (${last})`,
+    );
+    await item.click();
+    const confirm = page.getByRole('dialog', { name: 'Retirer la publication de «\u202fDémo CRM\u202f» ?' });
+    await confirm.waitFor();
+    ok(
+      (await confirm.textContent()).includes(
+        'Le lien, l’intégration et les liens personnalisés cesseront de fonctionner. Vous pourrez republier à tout moment.',
+      ),
+      'confirmation : ce qui cesse de fonctionner, republication possible',
+    );
+    await confirm.getByRole('button', { name: 'Annuler' }).click();
+    ok(demo.status === 'published', '« Annuler » : la démo reste publiée');
+    await page.locator('.ed-bar').getByRole('button', { name: 'Plus d’options' }).click();
+    await page.getByRole('menuitem', { name: 'Retirer la publication…' }).click();
+    await page
+      .getByRole('dialog', { name: /^Retirer la publication de/ })
+      .getByRole('button', { name: 'Retirer la publication' })
+      .click();
+    for (let i = 0; i < 60 && demo.status === 'published'; i++) await page.waitForTimeout(100);
+    ok(demo.status !== 'published', 'publication retirée');
+    await page.locator('.ed-bar [data-share-open]').click();
+    await dlg(page).locator('.shd-banner').waitFor();
+    ok(true, 'Partager affiche alors le bandeau « Publiez la démo pour activer le lien. »');
+    // Diffuser : les parcours de formation en première section
+    await page.keyboard.press('Escape');
+    await page.goto(`${APP}/#/demos/${DEMO}/distribute`);
+    await page.locator('dialog.dif-dialog[open]').getByRole('tab').first().waitFor();
+    const tabs = await page.locator('dialog.dif-dialog[open]').getByRole('tab').allTextContents();
+    ok(
+      tabs[0]?.trim() === 'Parcours de formation',
+      `Diffuser : « Parcours de formation » en premier (${tabs.map((x) => x.trim()).join(', ')})`,
+    );
     await page.context().close();
   }
 

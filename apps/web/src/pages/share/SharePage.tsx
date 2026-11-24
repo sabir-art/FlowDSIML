@@ -22,7 +22,6 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +30,6 @@ import { extractVariableKeys } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { addressUrl, embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
-import { unpublishDemo } from '../../lib/publish';
 import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
@@ -55,7 +53,6 @@ import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
 import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
 import { ImportLinksDialog } from './ImportLinksDialog';
-import { TrainingCard } from './TrainingCard';
 import { COHORT_MAX, cohorts, exportLinks, linkFromRow } from './linksCsv';
 import { downloadText } from '../../lib/download';
 import '../../styles/maquette.css';
@@ -63,9 +60,9 @@ import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { Status, Select } from '@flowdsiml/ui';
 
-type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page' | 'training';
+type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
 /** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
-export const SHARE_MODES = ['lien', 'integrer', 'perso', 'acces', 'exporter', 'page', 'formation'] as const;
+export const SHARE_MODES = ['lien', 'integrer', 'perso', 'acces', 'exporter', 'page'] as const;
 export type ShareMode = (typeof SHARE_MODES)[number];
 /** `menu` : à 390 px, la liste des modes seule (premier écran de la feuille). */
 export type ShareView = ShareMode | 'menu';
@@ -76,7 +73,6 @@ const TAB_OF: Record<ShareMode, Tab> = {
   acces: 'access',
   exporter: 'export',
   page: 'page',
-  formation: 'training',
 };
 const MODE_ICON: Record<ShareMode, typeof Link2> = {
   lien: Link2,
@@ -85,7 +81,6 @@ const MODE_ICON: Record<ShareMode, typeof Link2> = {
   acces: Lock,
   exporter: Download,
   page: Globe,
-  formation: GraduationCap,
 };
 type LinkStats = Record<string, { views: number; last: string | null }>;
 
@@ -113,7 +108,6 @@ export function SharePanel({
   justPublished?: boolean;
 }) {
   const { t } = useTranslation();
-  const [dialog, ask] = useConfirm();
   const { can, current } = useWorkspace();
   const rules = useShareRules(current?.id);
   const access = useDemoAccess(demoId);
@@ -144,10 +138,6 @@ export function SharePanel({
   const [cohortList, setCohortList] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
   /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
-  const [training, setTraining] = useState<{
-    paths: Pick<Tables<'paths'>, 'id' | 'title'>[];
-    modules: Pick<Tables<'path_modules'>, 'path_id' | 'demo_id' | 'position'>[];
-  }>({ paths: [], modules: [] });
   const tab: Tab = TAB_OF[mode];
   const [creating, setCreating] = useState(false);
   const [exporting, setExporting] = useState<boolean | 'gif'>(false);
@@ -212,7 +202,6 @@ export function SharePanel({
       supabase.from('share_links').select('cohort').eq('workspace_id', d.data.workspace_id).neq('cohort', ''),
     ]);
     setCenterModule(centerModuleOf(center.data, paths.data ?? [], mods.data ?? [], demoId));
-    setTraining({ paths: paths.data ?? [], modules: mods.data ?? [] });
     setCohortList(cohorts((groups.data ?? []).map((g) => g.cohort)));
     const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
     setPublishedAt(ver?.published_at ?? null);
@@ -313,12 +302,11 @@ export function SharePanel({
   const groups: Array<{ label?: string; modes: ShareMode[] }> = [
     { modes: ['lien', 'integrer', 'perso', 'acces'] },
     { label: t('share.group.files'), modes: ['exporter'] },
-    { label: t('share.group.more'), modes: ['page', 'formation'] },
+    { label: t('share.group.more'), modes: ['page'] },
   ];
 
   return (
     <div className={`mk sh shd${view === 'menu' ? ' is-menu' : ''}`}>
-      {dialog}
       {exporting && (
         <ExportDialog
           demoId={demoId}
@@ -467,36 +455,6 @@ export function SharePanel({
           <div className="shd-panel">
             {tab === 'link' && (
               <section id="sh-panel-link" aria-labelledby="shd-mode">
-                <div className="setting sh-first">
-                  <div>
-                    <b>{t('share.publicAccess')}</b>
-                    <p className="t-caption muted">{t('share.publicAccessHelp')}</p>
-                  </div>
-                  <span className="switch">
-                    <input
-                      type="checkbox"
-                      aria-label={t('share.publicAccess')}
-                      checked={published}
-                      disabled={!editable || !published}
-                      onChange={() =>
-                        void ask({
-                          title: t('share.unpublish'),
-                          body: t('share.confirmUnpublish'),
-                          confirmLabel: t('share.unpublish'),
-                          danger: true,
-                        }).then(
-                          (yes) =>
-                            yes &&
-                            void run(async () => {
-                              await unpublishDemo(demoId);
-                              await load();
-                            }, t('share.unpublished')),
-                        )
-                      }
-                    />
-                    <span />
-                  </span>
-                </div>
                 {publicLinksOff && (
                   <div className="alert sh-note">
                     <Info aria-hidden="true" />
@@ -837,18 +795,6 @@ export function SharePanel({
                     {t('export.menu')}
                   </button>
                 </div>
-              </section>
-            )}
-            {tab === 'training' && (
-              <section id="sh-panel-training" aria-labelledby="shd-mode">
-                <TrainingCard
-                  demoId={demoId}
-                  workspaceId={demo.workspace_id}
-                  editable={editable}
-                  paths={training.paths}
-                  modules={training.modules}
-                  onChanged={load}
-                />
               </section>
             )}
           </div>
