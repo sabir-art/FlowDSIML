@@ -22,8 +22,9 @@ import {
 import { Select, Switch } from '@flowdsiml/ui';
 import { Menu } from '../../../components/Menu';
 import { aiBlock, useAiStatus } from '../../../lib/ai';
+import { VoiceGenerate } from './VoiceGenerate';
 import { AudioLine, Wave } from './AudioLine';
-import { AiCaptions, AiVoice, TranscriptPreview } from '../../../components/ai/AiAudio';
+import { AiCaptions, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { asSettings } from '../types';
@@ -298,7 +299,8 @@ export function VoiceFields({
   // 065 (L30-10) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
   const aiVoice =
     ws && !readOnly ? (
-      <AiVoice
+      <VoiceGenerate
+        key={step.id}
         ws={ws.id}
         lang={lang}
         stepId={step.id}

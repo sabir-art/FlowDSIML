@@ -4280,6 +4280,50 @@
   font-size: 13px;
   font-weight: 600;
 }
+.vo-help {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.vo-panel .textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+}
+.vo-alert {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-danger-text, var(--fd-color-danger));
+}
+.vo-notice {
+  color: var(--fd-color-text-muted);
+}
+.vo-busy .vo-help {
+  margin: 0 0 8px;
+}
+/* Génération en cours : barre indéterminée de 6 px */
+.vo-indet {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-border));
+  overflow: hidden;
+}
+.vo-indet::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--fd-color-primary);
+  animation: ai-indet 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vo-indet::after {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
 .vo-opt {
   font-weight: 500;
   color: var(--fd-color-text-muted);
