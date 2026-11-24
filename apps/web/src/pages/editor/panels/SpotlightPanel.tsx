@@ -21,7 +21,7 @@ export function SpotlightPanel({ editor, readOnly }: { editor: DemoEditor; readO
     if (/^(Arrow|Home$|End$|Page)/.test(e.key)) e.stopPropagation();
   };
   return (
-    <div className="sp-panel">
+    <div className="sp-panel spot-panel">
       <div className="sp-card">
         <Switch
           label={

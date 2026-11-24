@@ -2547,7 +2547,7 @@
 /* EXT-02 §6.2 : Forme, Effet, Intensité, Teinte, « Appliquer à toutes les étapes » */
 .mk .blur-panel .blur-field > .label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-size: 13px;
   font-weight: 600;
 }

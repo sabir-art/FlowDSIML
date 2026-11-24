@@ -4647,8 +4647,8 @@
   color: var(--fd-color-text-muted);
 }
 
-/* EXT-02 §6.3 : panneau « Projecteur » */
-.sp-panel {
+/* EXT-02 §6.3 : panneau « Projecteur » (classe propre : .sp-panel est partagée par les autres panneaux) */
+.spot-panel {
   display: flex;
   flex-direction: column;
   gap: 16px;
