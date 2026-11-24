@@ -4001,8 +4001,9 @@
     "footEditor": "Demo creation steps. The others are followed by workspace admins.",
     "hide": "Hide getting started",
     "hideShort": "Hide",
+    "dismiss": "Don’t show again",
     "ready": "Your workspace is ready",
-    "readyBody": "All 7 steps are done. Find help anytime with F1.",
+    "readyBody": "All {{total}} steps are done. Find help anytime with F1.",
     "resume": "Resume getting started",
     "resumeHint": "Your workspace steps, on the Demos page"
   },

@@ -5,7 +5,8 @@
  * en grand, puis « À faire ensuite » en lignes, puis « Terminées » replié.
  * 7 étapes cochées automatiquement (calculées côté serveur : workspace_onboarding). Propriétaires et
  * administrateurs voient les 7 étapes, éditeurs les étapes 3 à 5, lecteurs rien. Quand tout est fait, le
- * bouton disparaît ; « Reprendre la prise en main » reste dans l'aide.
+ * bouton passe à « n/n » et le panneau dit « Votre espace est prêt », pendant 7 jours ou jusqu'à
+ * « Masquer » ; puis ils disparaissent. « Reprendre la prise en main » reste dans l'aide.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -91,6 +92,9 @@ export function useOnboarding({ deferred = false }: { deferred?: boolean } = {})
 }
 export type Onboarding = ReturnType<typeof useOnboarding>;
 
+/** Durée d'affichage de l'état terminé après le dernier pas (jours). */
+const DONE_DAYS = 7;
+
 /** §18.4 : extension pas encore publiée, l'étape est en « Bientôt » (ni action, ni compte). */
 const isSoon = (s: Step) => s === 'extension' && !EXTENSION_URL;
 
@@ -103,7 +107,11 @@ export function onboardingProgress(state: State | null, admin: boolean, editor: 
   const visible: Step[] = admin ? [...STEPS] : EDITOR_STEPS;
   const counted = visible.filter((s) => !isSoon(s));
   const done = counted.filter((s) => state.steps[s]);
-  return { visible, done, n: done.length, total: counted.length, complete: done.length === counted.length };
+  const complete = done.length === counted.length;
+  // État terminé : « Votre espace est prêt » reste proposé 7 jours, ou jusqu'à « Masquer »
+  const fresh = !state.doneAt || Date.now() - Date.parse(state.doneAt) < DONE_DAYS * 864e5;
+  const finished = complete && !state.hiddenAt && fresh;
+  return { visible, done, n: done.length, total: counted.length, complete, finished };
 }
 
 /**
@@ -192,12 +200,13 @@ export function OnboardingButton({
   const { current, can } = useWorkspace();
   const admin = current?.role === 'owner' || current?.role === 'admin';
   const p = onboardingProgress(onb.state, admin, can('demo.edit'));
-  if (!p || p.complete) return null;
+  // Tout est fait : la pastille reste en « n/n » tant que l'état terminé est proposé, puis disparaît
+  if (!p || (p.complete && !p.finished)) return null;
   return (
     <button
       type="button"
       id="onb-toggle"
-      className={`fd-btn onb-btn${open ? ' is-open' : ''}`}
+      className={`fd-btn onb-btn${open ? ' is-open' : ''}${p.complete ? ' is-done' : ''}`}
       aria-expanded={open}
       aria-controls={open ? 'onb-panel' : undefined}
       onClick={onToggle}
@@ -234,6 +243,15 @@ export function OnboardingPanel({
   const ws = current!;
   const admin = ws.role === 'owner' || ws.role === 'admin';
   const { state } = onb;
+  // « Masquer la prise en main » : préférence de la personne pour cet espace ; la pastille disparaît
+  const hide = async () => {
+    const hiddenAt = new Date().toISOString();
+    await supabase
+      .from('onboarding_prefs')
+      .upsert({ workspace_id: ws.id, hidden_at: hiddenAt }, { onConflict: 'user_id,workspace_id' });
+    onb.setState((cur) => (cur ? { ...cur, hiddenAt } : cur));
+    onClose();
+  };
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
   const [showDone, setShowDone] = useState(false);
   const panel = useRef<HTMLElement>(null);
@@ -356,7 +374,10 @@ export function OnboardingPanel({
             <PartyPopper />
           </span>
           <b>{t('onb.ready')}</b>
-          <span className="onb-next__h">{t('onb.readyBody')}</span>
+          <span className="onb-next__h">{t('onb.readyBody', { total: p.total })}</span>
+          <button type="button" className="fd-btn" onClick={() => void hide()}>
+            {t('onb.dismiss')}
+          </button>
         </div>
       )}
       {next && NextIcon && nextAction && (

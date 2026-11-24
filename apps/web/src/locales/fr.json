@@ -4001,8 +4001,9 @@
     "footEditor": "Les étapes de création de démos. Les autres sont suivies par les administrateurs de l’espace.",
     "hide": "Masquer la prise en main",
     "hideShort": "Masquer",
+    "dismiss": "Ne plus afficher",
     "ready": "Votre espace est prêt",
-    "readyBody": "Les 7 étapes sont faites. Retrouvez l’aide à tout moment avec F1.",
+    "readyBody": "Les {{total}} étapes sont faites. Retrouvez l’aide à tout moment avec F1.",
     "resume": "Reprendre la prise en main",
     "resumeHint": "Les étapes de votre espace, sur la page Démos"
   },
