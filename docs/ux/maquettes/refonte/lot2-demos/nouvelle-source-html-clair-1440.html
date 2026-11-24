@@ -445,6 +445,16 @@ main.withp { display: flex; flex-direction: column; min-width: 0; }
 .cgrip.vb:not(.hov) .cbtn { opacity: 0; }
 /* PAGE-01 : la 1re ligne du contenu commence 32 px sous le PageHeader (pas de marge de section en plus) */
 .wrap > .sec2:first-child { margin-top: 0; }
+/* EXT-02 §4.1 : zone d'import vidéo (MEDIA-01 §18.1) */
+.or { display: flex; align-items: center; gap: 12px; margin: -8px 0; color: var(--fd-color-text-muted); font-size: 13px; } .or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--fd-color-border); }
+.vz { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px dashed var(--fd-color-border-strong); border-radius: 12px; background: var(--fd-color-surface); }
+.vz .vzt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; } .vz .vzt b { font-weight: 600; overflow-wrap: anywhere; }
+.vz.er { border: 1px solid var(--fd-color-danger); } .vz.er .vzt span { color: var(--fd-color-danger); } .vz .tile.er { color: var(--fd-color-danger); }
+.vzbar { display: block; height: 6px; border-radius: 3px; background: var(--fd-color-surface-sunken); overflow: hidden; margin-top: 4px; } .vzbar i { display: block; height: 100%; background: var(--fd-color-primary); }
+.vz .btn { flex: none; }
+.mob .vz { flex-wrap: wrap; } .mob .vz .btn { width: 100%; justify-content: center; }
+.modal.md { height: auto; flex: initial; } /* la classe .md de MEDIA-01 (vignette 72 px) ne doit pas toucher la fenêtre */
+.vz.er { flex-wrap: wrap; align-items: flex-start; } .vz.er .vzt { flex-basis: calc(100% - 56px); } .vz.er .btn { margin-left: 52px; } .mob .vz.er .btn { margin-left: 0; }
 </style></head><body class="">
 
 <div class="shell"><nav class="side" aria-label="Navigation principale"><div class="sbh"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML"><button class="ib pin" aria-label="Replier la barre latérale" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panneau" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="4"/><path d="M9.5 3v18"/><path d="M6.25 8h.01M6.25 12h.01M6.25 16h.01"/></svg></button></div>

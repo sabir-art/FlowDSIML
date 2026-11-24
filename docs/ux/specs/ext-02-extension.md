@@ -142,6 +142,13 @@ Maquettes : `video-revue-*`, `video-pourquoi-*`, `video-demasque-*`, `video-sans
 ### 4.1 Catégorie « Vidéo »
 Même traitement que Captures, HTML et Sandbox (L48-G) : badge de type « Vidéo » (icône Video) sur la carte et la ligne de liste ; valeur « Vidéo » dans le filtre Type ; carte « Vidéo » dans l’étape 1 de « Nouvelle démo » (création en deux étapes), avec en étape 2 « Enregistrer avec l’extension » ou « Importer une vidéo » (zone large §18.1, MP4 ou WebM, 50 Mo au plus).
 
+### 4.1 bis Nouvelle démo, étape 2 Vidéo (maquettes `lot2-demos/nouvelle-video[-envoi|-format|-lourd|-long|-quota]-*`)
+- Fenêtre « Nouvelle démo vidéo », « Étape 2 sur 2 · Source ». En haut, la carte « Enregistrer avec l’extension » (« Lancez l’enregistrement depuis l’extension : la vidéo s’ouvre ensuite pour vérification, puis dans l’éditeur. ») ; un séparateur « ou » ; la zone large §18.1 « Importer une vidéo » : « Déposez le fichier ici ou choisissez-le. MP4 ou WebM, 50 Mo et 10 min au plus. », bouton « Choisir une vidéo… » ; « Dossier » ; pied « Retour » et « Annuler ».
+- Envoi : nom du fichier, « Envoi… 42 % · 21 sur 48 Mo », barre de progression de 6 px (déterminée), « Annuler » dans la zone.
+- Erreurs dans la zone (bord danger, `role="alert"`, bouton dessous) : format « « presentation.mov » n’est pas accepté. Choisissez une vidéo MP4 ou WebM. » ; poids « « atelier-complet.mp4 » pèse 212 Mo. La limite est de 50 Mo : raccourcissez ou découpez la vidéo. » ; durée « « reunion.webm » dure 24 min. La limite est de 10 min : découpez-la en plusieurs démos. » (bouton « Choisir une autre vidéo ») ; quota « Le stockage de l’espace est plein (5 sur 5 Go). Supprimez des vidéos ou demandez plus d’espace à la DSI. » (bouton « Voir l’utilisation »).
+- Si le stockage n’accepte que le WebM (décision du chef en attente), le texte et l’erreur de format ne citent que WebM.
+- Après l’envoi : la démo est créée dans le dossier choisi, titre = nom du fichier sans extension, une seule étape vidéo ; l’éditeur s’ouvre dessus avec la notification « Démo vidéo créée ». Pas d’écran « Vérifier la vidéo » pour un import (aucun masque proposé) ; les masques se posent dans l’éditeur (outil Flou).
+
 ### 4.2 Masquer en direct : un choix, désactivé par défaut (décision du chef, voie A)
 Dans le popup (type Vidéo) : interrupteur « Masquer en direct », **désactivé par défaut**, mémorisé ; aide dans le flux : « Floute les données pendant l’enregistrement. Ces masques ne pourront plus être retirés. Désactivé, vous décidez de chaque zone avant l’envoi. »
 - Désactivé : l’image brute reste dans le navigateur ; les données sont repérées et proposées masquées à la revue ; les masques sont incrustés à l’envoi. Aucune donnée non masquée ne quitte le poste.
