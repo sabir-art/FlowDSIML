@@ -37,11 +37,15 @@ const SHOTS = process.env.SHOTS_DIR;
   // L12-05 : libellés des boutons, montrés tout de suite dans la bulle du canevas
   await page.fill('#hs-next', 'J’ai compris');
   await page.fill('#hs-prev', 'Retour');
-  await page.getByLabel('Afficher « Précédent »').check();
+  // Étape 1 : rien ne la précède, l'interrupteur reste visible et désactivé (voir bulle-precedent.e2e)
+  ok(
+    (await page.getByLabel('Afficher « Précédent »').getAttribute('aria-disabled')) === 'true',
+    'L12-05 : « Afficher « Précédent » » désactivé à l’étape 1',
+  );
   ok((await page.textContent('#hs-next-c')).trim() === '12 / 24', 'L12-05 : compteur de 24 caractères');
   await page.waitForTimeout(900);
   ok(
-    st('s1').options?.buttonLabel === 'J’ai compris' && st('s1').options?.showPrev === true,
+    st('s1').options?.buttonLabel === 'J’ai compris' && st('s1').options?.prevLabel === 'Retour',
     'L12-05 : libellés enregistrés dans les options de l’étape',
   );
 

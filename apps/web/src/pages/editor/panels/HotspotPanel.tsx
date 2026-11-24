@@ -48,6 +48,7 @@ export function HotspotPanel({
 }) {
   const { t } = useTranslation();
   const [applying, setApplying] = useState(false);
+  const [prevAll, setPrevAll] = useState(false);
   const [spellAll, setSpellAll] = useState(false);
   const { current: ws } = useWorkspace();
   const action = asAction(hotspot.action);
@@ -61,6 +62,7 @@ export function HotspotPanel({
   const step = editor.steps.find((st) => st.id === hotspot.step_id);
   const opts = asStepOptions(step?.options);
   const isLast = !!step && editor.steps[editor.steps.length - 1]?.id === step.id;
+  const isFirst = !!step && editor.steps[0]?.id === step.id;
   /** L30 : repère « IA » de l'étape (bilan RGPD), posé par une proposition appliquée, retiré à la saisie. */
   const aiMarked = !!(step?.options as { aiText?: boolean } | null)?.aiText;
   // force : appel depuis un toast (closure d'un rendu antérieur), écriture sans comparer l'état
@@ -320,21 +322,45 @@ export function HotspotPanel({
             </span>
           </div>
         </div>
-        <div className="setting">
-          <span className="t-label" id="hs-showprev">
-            {t('editor.hs.showPrev')}
+        {/* Retours client du 24/11 §2 : l'option vaut pour l'étape, et rien ne précède l'étape 1.
+            L'interrupteur y reste visible, désactivé, avec la raison. */}
+        <div className="setting hs-showprev">
+          <span className="hs-showprev__text">
+            <span className="t-label" id="hs-showprev">
+              {t('editor.hs.showPrev')}
+            </span>
+            <span className="help" id="hs-showprev-h">
+              {isFirst ? t('editor.hs.showPrevFirst') : t('editor.hs.showPrevHelp')}
+            </span>
           </span>
-          <span className="switch">
+          <span className={`switch${isFirst ? ' is-off' : ''}`}>
             <input
               type="checkbox"
               aria-labelledby="hs-showprev"
-              checked={opts.showPrev}
+              aria-describedby="hs-showprev-h"
+              aria-disabled={isFirst || undefined}
+              checked={opts.showPrev && !isFirst}
               disabled={readOnly}
-              onChange={(e) => setOpts({ showPrev: e.target.checked })}
+              onChange={(e) => !isFirst && setOpts({ showPrev: e.target.checked })}
             />
             <span />
           </span>
         </div>
+        {!readOnly && step && editor.steps.length > 1 && (
+          <button type="button" className="link-button hs-showprev__all" onClick={() => setPrevAll(true)}>
+            {t('editor.hs.showPrevAll')}
+          </button>
+        )}
+        {prevAll && step && (
+          <ApplyStyleDialog
+            editor={editor}
+            step={step}
+            index={editor.steps.indexOf(step)}
+            hotspot={hotspot}
+            only="showPrev"
+            onClose={() => setPrevAll(false)}
+          />
+        )}
         <div className="setting">
           <span className="t-label" id="hs-adv">
             {t('editor.hs.advanceOnClick')}

@@ -19,12 +19,15 @@ export function ApplyStyleDialog({
   step,
   index,
   hotspot,
+  only,
   onClose,
 }: {
   editor: DemoEditor;
   step: StepRow;
   index: number;
   hotspot: HotspotRow;
+  /** Retours client du 24/11 §2 : n'applique que « Afficher « Précédent » », aux étapes 2 et suivantes. */
+  only?: 'showPrev';
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -48,6 +51,21 @@ export function ApplyStyleDialog({
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  // « Afficher « Précédent » » partout : les étapes à bulle à partir de la deuxième (celle-ci comprise)
+  const prevTargets = editor.steps.filter(
+    (s, i) => i > 0 && s.kind === 'image' && editor.hotspots.some((h) => h.step_id === s.id),
+  );
+  const applyPrev = () => {
+    editor.batch(() => {
+      for (const s of prevTargets)
+        editor.updateStep(s.id, {
+          options: { ...asStepOptions(s.options), showPrev: true } as unknown as StepRow['options'],
+        });
+    });
+    toast(t('editor.hs.showPrevDone', { count: prevTargets.length }));
+    onClose();
+  };
+
   const apply = () => {
     editor.batch(() => {
       for (const { step: s, hotspot: h } of targets) {
@@ -68,7 +86,8 @@ export function ApplyStyleDialog({
               ...o,
               buttonLabel: opts.buttonLabel,
               prevLabel: opts.prevLabel,
-              showPrev: opts.showPrev,
+              // Depuis l'étape 1, « Afficher « Précédent » » n'a pas de valeur à copier (rien ne la précède)
+              showPrev: index === 0 ? o.showPrev : opts.showPrev,
             } as unknown as StepRow['options'],
           });
         }
@@ -96,6 +115,53 @@ export function ApplyStyleDialog({
     </label>
   );
   const none = !Object.values(copy).some(Boolean);
+
+  if (only === 'showPrev')
+    return createPortal(
+      <div className="mk">
+        <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="as-t">
+            <div className="modal-head">
+              <h2 id="as-t">{t('editor.hs.showPrevAllTitle')}</h2>
+              <button
+                type="button"
+                className="btn btn-ghost btn-icon btn-sm"
+                aria-label={t('common.close')}
+                onClick={onClose}
+              >
+                <X aria-hidden="true" />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="alert as-info">
+                <Info aria-hidden="true" />
+                <span className="t-caption">
+                  {prevTargets.length
+                    ? t('editor.hs.showPrevAllInfo', { count: prevTargets.length })
+                    : t('editor.applyStyle.noTarget')}
+                </span>
+              </div>
+            </div>
+            <div className="modal-foot">
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={prevTargets.length === 0}
+                onClick={applyPrev}
+              >
+                {prevTargets.length
+                  ? t('editor.applyStyle.apply', { count: prevTargets.length })
+                  : t('editor.applyStyle.applyNone')}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
 
   // Portail : la modale ne doit pas être rognée par le panneau défilant
   return createPortal(
