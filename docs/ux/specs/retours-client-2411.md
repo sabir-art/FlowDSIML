@@ -148,15 +148,21 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
 
 ### 6.2 Connexions › Clés d'accès
 - **Qui** : propriétaires et administrateurs ; la rubrique est masquée pour les autres rôles.
-- **Phrase d'en-tête** : « Pour relier un outil de l'espace à TutoClick (API). Chaque clé donne les droits d'un administrateur : gardez-la comme un mot de passe. »
+- **Phrase d'en-tête** (mise à jour le 24/11, API en lecture seule) : « Pour qu'un outil de l'espace (CRM, intranet, tableau de bord) lise vos démos, leurs statistiques ou leurs leads. Une clé ne modifie rien. Gardez-la comme un mot de passe. »
 - **Tableau** :
   - **Nom**, avec « par {auteur} » dessous ;
+  - **Accès** : pastilles neutres Démos, Statistiques, Leads (celles de la clé) ; colonne masquée à 390 ;
   - **Clé** : `tc_` puis des points et les 4 derniers caractères, jamais la clé entière ;
   - **Créée** ;
   - **Dernière utilisation** : « il y a 2 h », « Jamais utilisée », ou la pastille « Révoquée ».
   - Le menu ⋯ propose Renommer et Révoquer.
 - **Liste vide** : « Aucune clé », avec le texte de la maquette et « Créer une clé ».
-- **Créer une clé** : fenêtre avec Nom (obligatoire) et Expiration (Jamais, 30 jours, 90 jours, 1 an ; 90 jours par défaut).
+- **Créer une clé** : fenêtre avec Nom (obligatoire), Expiration (Jamais, 30 jours, 90 jours, 1 an ; 90 jours par défaut) et un groupe de cases « Ce que la clé peut lire » (`fieldset` + `legend`), une aide sous chaque case :
+  - **Démos**, cochée par défaut : « Titre, statut et lien de chaque démo. » ;
+  - **Statistiques** : « Vues, visiteurs et taux de complétion. » ;
+  - **Leads** : « Adresses e-mail laissées par les visiteurs. À réserver à un outil de confiance, comme votre CRM. »
+  
+  Au moins une case : sinon « Créer la clé » reste désactivé, avec l'aide « Choisissez au moins un accès. ». Les accès d'une clé ne changent plus après la création (en créer une autre).
 - **Après la création** : fenêtre « Clé « {nom} » créée ».
   - Encart d'avertissement : « Copiez-la maintenant : elle ne sera plus jamais affichée. »
   - La clé entière s'affiche dans un CopyField. Après la copie, Check et « Clé copiée ».
@@ -164,6 +170,30 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
   - Fermer la fenêtre (Échap, croix) demande la même case.
 - **Révoquer** : `alertdialog` « Révoquer « {nom} » ? » : « L'outil qui utilise cette clé perdra l'accès tout de suite. Cette action est définitive. », bouton danger « Révoquer la clé ».
 - **Côté serveur** : seul un condensé de la clé est stocké, elle ne peut pas être réaffichée. Chaque appel met à jour « Dernière utilisation ».
+
+#### 6.2.1 Section « Utiliser l'API » (décision du chef, 24/11 : API publique v1 minimale, en lecture seule)
+Sous le tableau des clés, sur la même page (pas de sous-page), titre h2 « Utiliser l'API », phrase : « Lecture seule. Chaque demande porte la clé ; elle ne voit que les données de cet espace. » Visible aussi quand la liste est vide.
+- **Adresse de l'API** : CopyField avec l'URL de base de l'environnement (maquette : `https://api.tutoclick.example/v1`), bouton « Copier l'adresse ».
+- **Exemple** : « Exemple : lister les démos », bloc de code (seul endroit en monospace, ICON/typo : monospace réservé au code), `tabindex="0"`, puis « Copier l'exemple » (bouton secondaire, icône Copy, puis Check et « Exemple copié ») :
+  ```
+  curl https://api.tutoclick.example/v1/demos \
+    -H "Authorization: Bearer tc_votre_cle"
+  ```
+  On n'insère jamais une vraie clé dans l'exemple.
+- **Tableau « Ce que vous lisez »** (vrai tableau, `caption` masquée) :
+
+  | Ce que vous lisez | Adresse | Accès requis |
+  |---|---|---|
+  | La liste des démos — Titre, statut, lien. | `/demos` | Démos |
+  | Les statistiques d'une démo — Vues, visiteurs, complétion, sur 30 jours par défaut. | `/demos/{id}/stats` | Statistiques |
+  | Les leads d'une démo — Adresse e-mail et date. En CSV avec `?format=csv`. | `/demos/{id}/leads` | Leads |
+
+  À 390, la colonne Adresse est masquée ; « Accès requis » reste.
+- **Erreurs**, en une phrase d'aide : « Si la clé manque ou est révoquée, la réponse est 401. Si elle n'a pas l'accès demandé, 403. En cas de trop nombreuses demandes, 429 : réessayez une minute plus tard. » La limite exacte (par minute et par clé) est un choix du dev ; la phrase ne donne pas de chiffre.
+- **Ce que l'API ne renvoie jamais** : des données d'un autre espace, des brouillons non publiés dans `/demos` sauf avec leur statut (le statut est dans la réponse), le nom ou l'adresse d'un membre de l'espace.
+- **Leads et RGPD** : l'accès Leads expose des données personnelles de visiteurs. L'export suit la durée de conservation des leads de l'espace (Confidentialité) : un lead supprimé n'est plus renvoyé.
+- **Maquettes** : `lot1-parametres/cles-*` (liste avec section API, création avec les accès), 1440 et 390, clair et sombre.
+- **Recette** : création avec chaque combinaison d'accès, clé sans l'accès → 403 affiché tel quel par l'outil, révocation → 401 immédiat, CopyField et exemple copiables au clavier, axe sans violation, aucune clé réelle dans les captures.
 
 ### 6.3 Mon compte › Notifications
 - Les deux interrupteurs « Bientôt » du Profil partent ici.
