@@ -1,0 +1,326 @@
+<!doctype html><html lang="fr" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Paramètres · Page publique</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&display=swap">
+<link rel="stylesheet" href="../../../../../packages/ui/src/base.css"><style>/* Lot 1 des maquettes : Paramètres. NAV-02, NAV-03 (PageHeader), COMP-01, FIELD-01, MODAL-01. Données fictives (Acme, example.com). */
+:root { --nav-bg: #F7F7F8; --nav-hover: #F0F1F3; --nav-active: #E9EBEE; --content-bg: #FFFFFF; --field: #8A94A2; --field-h: #5E6978; --pill: #EEF0F3; --danger: #C42B1C; --tint: #FBF0F5; }
+[data-theme='dark'] { --nav-bg: #101317; --nav-hover: #1A1F26; --nav-active: #252B33; --content-bg: #15191F; --field: #5E6978; --field-h: #7A8494; --pill: #252B33; --danger: #F97066; --tint: #2A1A23; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--content-bg); color: var(--fd-color-text); font: 400 14px/1.5 var(--fd-font-sans); }
+svg.lucide { flex: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.shell { display: grid; grid-template-columns: 256px 232px minmax(0, 1fr); min-height: 100vh; }
+.mob .shell { display: block; }
+/* Barre latérale (NAV-02, LOGO-01) */
+.side { background: var(--nav-bg); border-right: 1px solid var(--fd-color-border); padding: 16px; display: flex; flex-direction: column; gap: 2px; }
+.logo { width: 224px; height: auto; margin: 0 0 16px; } .logo.d { display: none; }
+[data-theme='dark'] .logo.l { display: none; } [data-theme='dark'] .logo.d { display: block; }
+.ws { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 10px; margin-bottom: 12px; border: 1px solid var(--fd-color-border); border-radius: 10px; background: var(--content-bg); color: var(--fd-color-text); text-align: left; font: inherit; }
+.ws span:nth-child(2) { flex: 1; line-height: 1.25; } .ws small, .me small { display: block; color: var(--fd-color-text-muted); font-size: 12px; }
+.side a { display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 12px; border-radius: 8px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.side a.on, .snav a.on { background: var(--nav-active); color: var(--fd-color-text); font-weight: 600; }
+.side h3, .snav h3 { margin: 24px 0 6px 12px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.snav h3:first-child { margin-top: 0; }
+.grow { flex: 1; }
+.me { display: flex; align-items: center; gap: 10px; padding: 10px; margin-top: 8px; border-top: 1px solid var(--fd-color-border); line-height: 1.25; }
+.me span:nth-child(2) { flex: 1; }
+.snav { background: var(--nav-bg); border-right: 1px solid var(--fd-color-border); padding: 72px 12px 24px; display: flex; flex-direction: column; gap: 2px; }
+.snav a { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: 8px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.snav a span:nth-child(2) { flex: 1; }
+.soon { font: 400 13px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+/* Barre mobile */
+.mbar { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 16px; border-bottom: 1px solid var(--fd-color-border); background: var(--nav-bg); }
+/* PageHeader (NAV-03) */
+main { min-width: 0; }
+.ph { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 32px; background: var(--content-bg); border-bottom: 1px solid var(--fd-color-border); }
+.mob .ph { padding: 0 16px; }
+.ph ol { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.ph li { display: flex; align-items: center; gap: 2px; color: var(--fd-color-text-subtle); }
+.ph li a { display: inline-flex; align-items: center; height: 28px; padding: 0 6px; border-radius: 6px; color: var(--fd-color-text-muted); text-decoration: none; font-weight: 500; }
+.ph h1 { margin: 0; padding: 0 6px; font: 500 14px var(--fd-font-sans); color: var(--fd-color-text); }
+.mob .ph h1 { padding: 0; font-weight: 600; }
+.ph .sp { flex: 1; }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px 0 6px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); font: 500 14px var(--fd-font-sans); }
+.back.ico { width: 32px; padding: 0; justify-content: center; }
+/* Contenu */
+.wrap { max-width: 880px; margin: 0 auto; padding: 32px 32px 64px; }
+.mob .wrap { padding: 20px 16px 48px; }
+.sec + .sec { margin-top: 32px; }
+.sec-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.sec-h h2 { margin: 0; font: 600 16px var(--fd-font-sans); }
+.sec-h p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); max-width: 60ch; }
+.sec-h .acts { display: flex; gap: 8px; align-items: center; flex: none; }
+.mob .sec-h { flex-direction: column; } .mob .sec-h .acts { flex-wrap: wrap; }
+.row { display: grid; grid-template-columns: 40% minmax(0, 1fr); gap: 24px; padding: 20px 0; align-items: start; }
+.row + .row { border-top: 1px solid var(--fd-color-border); }
+.row.inl { align-items: center; } .row.inl .ctl { align-items: flex-end; }
+.mob .row { grid-template-columns: 1fr; gap: 8px; } .mob .row.inl { grid-template-columns: 1fr auto; } .mob .row.inl .ctl { align-items: flex-end; }
+.lab { font: 600 14px var(--fd-font-sans); display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.help { display: block; margin-top: 4px; font-size: 13px; color: var(--fd-color-text-muted); max-width: 46ch; }
+.ctl { display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
+.ctl.wide { max-width: none; }
+.inp { display: flex; align-items: center; gap: 8px; height: 40px; width: 100%; padding: 0 12px; border: 1px solid var(--field); border-radius: 10px; background: var(--fd-color-surface); color: var(--fd-color-text); overflow: hidden; }
+.inp.short { max-width: 240px; } .inp.ph .v { color: var(--fd-color-text-subtle); }
+.inp.dis { background: var(--fd-color-surface-sunken); border-color: var(--fd-color-border); color: var(--fd-color-text-muted); }
+.inp .pre { margin-left: -12px; height: 100%; display: flex; align-items: center; padding: 0 10px; background: var(--fd-color-surface-sunken); border-right: 1px solid var(--fd-color-border); color: var(--fd-color-text-muted); font-size: 13px; }
+.inp.trig { justify-content: space-between; } .inp .v { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mob .two { grid-template-columns: 1fr; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; font: 600 14px var(--fd-font-sans); border: 1px solid transparent; white-space: nowrap; }
+.ph .btn { height: 36px; padding: 0 14px; }
+.btn-p { background: var(--fd-color-primary); color: var(--fd-color-on-primary); }
+.btn-s { background: var(--fd-color-surface); color: var(--fd-color-text); border-color: var(--field); }
+.btn-g { background: none; color: var(--fd-color-text); height: 32px; padding: 0 8px; }
+.btn-d { background: var(--fd-color-surface); color: var(--danger); border-color: var(--danger); }
+.sec .btn-s { height: 36px; }
+.ib { display: inline-grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; color: var(--fd-color-text-muted); }
+.ib.sm { width: 20px; height: 20px; vertical-align: middle; }
+.sw { width: 36px; height: 20px; border-radius: 999px; background: var(--field); position: relative; flex: none; display: inline-block; }
+.sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.sw.on { background: var(--fd-color-primary); } .sw.on::after { left: 18px; }
+[data-theme='dark'] .sw.on::after { background: #080808; }
+.sw.dis { opacity: .5; }
+.opt-r, .opt-c { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
+.opt-r .help { margin-top: 0; }
+.rad { width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; border: 1.5px solid var(--field); display: grid; place-items: center; flex: none; }
+.rad.on { border-color: var(--fd-color-primary); } .rad.on::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--fd-color-primary); }
+.box { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--field); color: var(--fd-color-on-primary); flex: none; margin-top: 2px; }
+.box.on { background: var(--fd-color-primary); border-color: var(--fd-color-primary); }
+.av { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 13px var(--fd-font-sans); flex: none; }
+.av.sm { width: 28px; height: 28px; border-radius: 8px; } .av.sq { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; } .av.lg { width: 64px; height: 64px; font-size: 22px; }
+[data-theme='dark'] .av { background: #3A1527; color: #E3A9C4; }
+.lr { display: flex; align-items: center; gap: 16px; }
+.danger { margin-top: 32px; padding: 20px 24px; border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.danger h2 { margin: 0; font: 600 16px var(--fd-font-sans); color: var(--danger); }
+.danger p { margin: 4px 0 0; font-size: 13px; color: var(--fd-color-text-muted); }
+.mob .danger { flex-direction: column; align-items: flex-start; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); padding: 12px; border-bottom: 1px solid var(--fd-color-border); }
+td { height: 56px; padding: 0 12px; border-bottom: 1px solid var(--fd-color-border); }
+td.act, th.act { width: 48px; text-align: right; }
+.who { display: flex; align-items: center; gap: 12px; font-weight: 600; } .mu { color: var(--fd-color-text-muted); font-weight: 400; }
+.pill { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; background: var(--pill); color: var(--fd-color-text-muted); font: 500 12px var(--fd-font-sans); }
+.mob table thead { display: none; } .mob td:nth-child(2), .mob td:nth-child(3) { display: none; } .mob td { padding: 0 6px; }
+.search { display: flex; align-items: center; gap: 8px; width: 260px; height: 36px; padding: 0 10px; border: 1px solid var(--field); border-radius: 10px; color: var(--fd-color-text-subtle); }
+.search span { flex: 1; } .search kbd { font: 500 12px var(--fd-font-sans); color: var(--fd-color-text-muted); border: 1px solid var(--fd-color-border); border-radius: 4px; padding: 0 4px; }
+.mob .search { width: 100%; }
+.empty { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 48px 24px; }
+.empty .et { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); }
+.empty h3 { margin: 4px 0 0; font: 600 15px var(--fd-font-sans); } .empty p { margin: 0; color: var(--fd-color-text-muted); font-size: 13px; max-width: 46ch; } .empty .ea { margin-top: 8px; }
+.meter { height: 8px; border-radius: 4px; background: var(--pill); overflow: hidden; } .meter span { display: block; height: 100%; background: var(--fd-color-primary); border-radius: 4px; }
+.drop { display: grid; justify-items: center; gap: 8px; padding: 24px; border: 1.5px dashed var(--field); border-radius: 12px; color: var(--fd-color-text-muted); text-align: center; }
+.drop b { color: var(--fd-color-text); } .drop .btn-s { height: 32px; padding: 0 12px; margin-left: 4px; }
+.colr { display: flex; gap: 10px; align-items: center; } .swc { width: 40px; height: 40px; border-radius: 10px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .1); flex: none; }
+.styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-top: 20px; }
+.mob .styles { grid-template-columns: 1fr 1fr; }
+.stc { border: 1px solid var(--fd-color-border); border-radius: 12px; overflow: hidden; display: grid; grid-template-columns: 1fr auto; }
+.sth { grid-column: 1 / -1; height: 56px; } .stm { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; } .stm .pill { align-self: flex-start; } .stc .ib { margin: 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--fd-color-surface-sunken); margin-bottom: 24px; }
+.seg button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 0; border-radius: 999px; background: none; color: var(--fd-color-text-muted); font: 500 13px var(--fd-font-sans); }
+.seg button.on { background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 2px rgb(8 10 14 / .08); }
+.seg.sm { margin: 0; }
+.cards { display: grid; gap: 12px; padding-top: 20px; }
+.ic { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center; padding: 14px 16px; border: 1px solid var(--fd-color-border); border-radius: 12px; }
+.ic .help { margin: 0; }
+.tile { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--fd-color-border); }
+.note { margin-top: 24px; color: var(--fd-color-text-muted); font-size: 13px; } .note a { color: var(--fd-color-primary); }
+.banner { display: flex; gap: 10px; align-items: center; padding: 12px 16px; margin-bottom: 24px; border: 1px solid var(--fd-color-border); border-radius: 12px; background: var(--fd-color-surface-sunken); font-size: 13px; }
+/* Décision UX du 21/11 (question du dev, lot 1) : épinglage au-dessus du logo ; Aide et Notifications dans la PageHeader */
+.side .pin { width: 32px; height: 32px; margin: 0 0 12px 0; color: var(--fd-color-text-muted); }
+.ph .hdv { width: 1px; height: 20px; margin: 0 4px; background: var(--fd-color-border); }
+.ph .ib.h32 { width: 32px; height: 32px; color: var(--fd-color-text-muted); }
+.ph .acts + .hdv, .ph .sp + .hdv { margin-left: 0; }
+/* Questions du nouveau dev (22/11) : titres de groupe mesurés à 24 px au-dessus et 6 px au-dessous (gap de 2 px compris) ; cibles de 44 px dans la barre mobile */
+.side h3, .snav h3 { margin: 22px 0 4px 12px; }
+.mbar { gap: 4px; } .mbar img { margin-left: 4px; } .mbar .ib { width: 44px; height: 44px; border-radius: 10px; }
+/* Accueil des Paramètres sous 768 px */
+.ph .pt { padding: 0; font: 600 16px var(--fd-font-sans); }
+.shome { padding: 8px 16px 32px; }
+.shome h2 { margin: 24px 0 8px 4px; font: 600 11px var(--fd-font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--fd-color-text-muted); }
+.shome ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--fd-color-border); border-radius: 12px; background: var(--fd-color-surface); overflow: hidden; }
+.shome li + li { border-top: 1px solid var(--fd-color-border); }
+.shome a { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px 0 16px; color: var(--fd-color-text); text-decoration: none; font: 500 15px var(--fd-font-sans); }
+.shome a > svg:first-child { color: var(--fd-color-text-muted); flex: none; } .shome a span:not(.soon) { flex: 1; } .shome a > svg:last-child { color: var(--fd-color-text-subtle); flex: none; }
+.shome a .soon { margin-right: 4px; }
+.shome .dis { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; color: var(--fd-color-text); font: 500 15px var(--fd-font-sans); }
+.shome .dis > svg { color: var(--fd-color-text-muted); flex: none; } .shome .dis span:not(.soon) { flex: 1; }
+.mob .sec-h .acts { align-self: stretch; } .mob .sec-h .acts .search { flex: 1 1 auto; width: auto; }
+/* 22/11 : réponses au dev (Utilisation, Confidentialité, Sécurité) */
+.val { font: 600 14px var(--fd-font-sans); color: var(--fd-color-text); }
+.mention { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0 0; font-size: 13px; color: var(--fd-color-text-muted); } .mention svg { flex: none; margin-top: 2px; }
+.doms { display: grid; gap: 8px; margin: 4px 0 8px 28px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 2px; height: 28px; padding: 0 2px 0 10px; border-radius: 999px; background: var(--pill); font: 500 13px var(--fd-font-sans); color: var(--fd-color-text); }
+.chip .ib.sm { width: 24px; height: 24px; }
+.addd { display: flex; gap: 8px; } .addd .inp { flex: 1; min-width: 0; } .addd .btn { height: 40px; flex: none; }
+.inp .v.ph { color: var(--fd-color-text-subtle); }
+.mob .addd { flex-direction: column; } .mob .doms { margin-left: 0; }
+.doms { max-width: 460px; } .addd .inp { justify-content: flex-start; text-align: left; }
+.addd .inp .v { text-align: left; flex: 1; }
+/* Détail d'un webhook (22/11) */
+.mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 13px; }
+.chip.mono { padding-right: 10px; }
+.wst { display: inline-flex; align-items: center; gap: 6px; font: 500 13px var(--fd-font-sans); color: var(--fd-color-text); white-space: nowrap; }
+.wst.on svg { color: var(--fd-color-success, #557014); } .wst.ko svg { color: var(--danger); } .wst.off svg { color: #A15C00; }
+[data-theme='dark'] .wst.off svg { color: #E3A23B; }
+.row.inl .ctl:has(.wst) { flex-direction: row; align-items: center; justify-content: flex-end; gap: 16px; }
+.sec2r { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.wbanner { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 32px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface-sunken); font-size: 14px; }
+.wbanner > svg { flex: none; margin-top: 1px; color: #A15C00; } [data-theme='dark'] .wbanner > svg { color: #E3A23B; }
+.wbanner div { flex: 1; display: grid; gap: 4px; } .wbanner span { color: var(--fd-color-text-muted); font-size: 13px; }
+.wbanner .btn { flex: none; height: 36px; }
+.wlog { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; padding-top: 16px; align-items: start; }
+.wtab { min-width: 0; overflow-x: auto; }
+.wlog table { width: 100%; }
+.wlog :is(th, td) { padding-inline: 12px; white-space: nowrap; }
+.wlog td:nth-child(3) { line-height: 1.3; } .wlog :is(th, td).num { text-align: right; font-variant-numeric: tabular-nums; }
+.wat { display: block; padding-left: 20px; font: 400 12px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.wmeta { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; margin: 0 0 4px; }
+.wmeta div { display: grid; gap: 2px; } .wmeta dt { font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); } .wmeta dd { margin: 0; font: 500 14px var(--fd-font-sans); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chips { gap: 8px; } .chip:not(:has(.ib)) { padding: 0 12px; }
+.wlog table tr.sel td { background: var(--tint); }
+.wlog td { height: 48px; font-size: 14px; }
+.wdet { border: 1px solid var(--fd-color-border); border-radius: 12px; padding: 16px; display: grid; gap: 8px; min-width: 0; }
+.wdh { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 4px; } .wdh b { white-space: nowrap; font-size: 15px; } .wdh .btn { height: 32px; font-size: 13px; }
+.wdet h3 { margin: 8px 0 0; font: 600 12px var(--fd-font-sans); color: var(--fd-color-text-muted); }
+.code { margin: 0; padding: 12px; border-radius: 8px; background: var(--fd-color-surface-sunken); font: 12px/1.5 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--fd-color-text); white-space: pre; overflow-wrap: normal; overflow-x: auto; max-height: 320px; }
+.mob .wlog { grid-template-columns: minmax(0, 1fr); }
+.sec:has(> .wlog) { container: wl / inline-size; }
+@container wl (max-width: 799px) { .wlog { grid-template-columns: minmax(0, 1fr); } }
+.mob .wlog table thead { display: table-header-group; } .mob .wlog th:nth-child(2), .mob .wlog td:nth-child(2), .mob .wlog th:nth-child(4), .mob .wlog td:nth-child(4) { display: none; }
+.mob .wbanner { flex-wrap: wrap; } .mob .wbanner .btn { margin-left: 32px; }
+.mob .row.inl .ctl:has(.wst) { justify-content: flex-start; }
+.cp2 { display: flex; gap: 8px; align-items: center; } .cp2 .inp { flex: 1; min-width: 0; } .cp2 .ib { flex: none; width: 36px; height: 36px; }
+.wlog td:first-child, .wlog td.num, .wlog th.num { white-space: nowrap; }
+.mob .wlog td:nth-child(3) { display: table-cell; }
+.wlog td:nth-child(2) { white-space: nowrap; }
+.mob .wbanner .btn { margin-left: 32px; } .mob .wbanner div { flex-basis: calc(100% - 32px); }
+.mob .addd .inp { flex: none; }
+/* NAV-04 (22/11) : logo et bouton de repli sur une ligne, filet dessous, puis le sélecteur d'espace */
+.side .sbh { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--fd-color-border); }
+.side .sbh .logo { width: 184px; margin: 0; } .side .sbh .pin { margin: 0; flex: none; }
+.snav:not(.fold) { padding-top: 16px; }
+/* ALIGN-01 (22/11) : un seul bord droit par ligne de réglage, celui du filet */
+.ctl, .ctl.wide { max-width: none; }
+.ctl .inp, .ctl .inp.short, .ctl .two, .ctl .meter, .ctl .lr, .ctl .colr { width: 100%; max-width: none; }
+.ctl .colr { display: flex; gap: 8px; } .ctl .colr .inp { flex: 1; }
+.ctl > .seg { display: flex; width: 100%; margin: 0; } .ctl > .seg button { flex: 1; justify-content: center; }
+body:not(.mob) .ctl > .btn, body:not(.mob) .ctl > .val { align-self: flex-end; } .ctl > .val { text-align: right; }
+body:not(.mob) .ctl > .lr { justify-content: flex-end; }
+.ctl .doms { max-width: none; }
+body:not(.mob) .ctl .doms { width: calc(100% - 28px); box-sizing: border-box; }
+.ctl .doms { grid-template-columns: minmax(0, 1fr); } .ctl .doms > * { min-width: 0; }
+/* MEDIA-01 : photo de profil et logo d'espace */
+.mdw { display: grid; justify-items: end; gap: 6px; }
+.md { position: relative; width: 72px; height: 72px; flex: none; }
+.mdi { position: relative; width: 72px; height: 72px; padding: 0; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); overflow: hidden; cursor: pointer; display: grid; place-items: center; font: inherit; color: inherit; }
+.md.rd .mdi { border-radius: 50%; } .md.sq .mdi { border-radius: 16px; }
+.mini { width: 100%; height: 100%; display: grid; place-items: center; background: var(--fd-prune-100, #F3D3E2); color: var(--fd-prune-700, #85164B); font: 700 26px var(--fd-font-sans); }
+[data-theme='dark'] .mini { background: #3A1527; color: #E3A9C4; }
+.mlg { width: 100%; height: 100%; display: grid; place-items: center; background: #1B3A4B; color: #fff; font: 800 15px/1 var(--fd-font-sans); letter-spacing: -.02em; }
+.mveil { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 2px; background: rgb(8 10 14 / .55); color: #fff; font: 600 12px var(--fd-font-sans); }
+.mveil.drop { background: color-mix(in srgb, var(--fd-color-primary) 18%, transparent); color: var(--fd-color-primary); }
+[data-theme='dark'] .mveil.drop { color: var(--fd-color-text); }
+.md.drag .mdi { border: 2px dashed var(--fd-color-primary); }
+.md.focus .mdi { outline: 2px solid var(--fd-color-focus, var(--fd-color-primary)); outline-offset: 2px; }
+.md.error .mdi { border: 2px solid var(--fd-color-danger, #C42B1C); }
+.md.empty .mdi { border: 1.5px dashed var(--fd-color-border-field, var(--field)); background: var(--fd-color-surface-sunken); }
+.mph { display: grid; justify-items: center; gap: 2px; color: var(--fd-color-text-muted); font: 600 11px var(--fd-font-sans); }
+.spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgb(255 255 255 / .35); border-top-color: #fff; }
+.mbadge { position: absolute; right: -4px; bottom: -4px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; padding: 0; border: 1px solid var(--fd-color-border); background: var(--fd-color-surface); color: var(--fd-color-text); box-shadow: 0 1px 3px rgb(8 10 14 / .12); cursor: pointer; }
+.md.sq .mbadge { right: -6px; bottom: -6px; }
+.mbadge.open { border-color: var(--fd-color-primary); }
+.mmenu { top: 80px; right: 0; width: 200px; }
+.mmenu .o { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 6px; font-size: 14px; } .mmenu .o.dng { color: var(--fd-color-danger, #C42B1C); }
+[data-theme='dark'] .mmenu .o.dng { color: #F97066; }
+.merr { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--fd-color-danger, #C42B1C); max-width: 260px; text-align: right; } [data-theme='dark'] .merr { color: #F97066; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px 16px; padding: 24px 0 8px; }
+.mcell { margin: 0; display: grid; justify-items: center; gap: 12px; } .mcell .mdw { justify-items: center; } .mcell .merr { text-align: center; max-width: 180px; justify-content: center; }
+.mcell figcaption { font-size: 12px; color: var(--fd-color-text-muted); }
+.mcell:has(.mmenu) { padding-bottom: 96px; }
+.mob .mgrid { grid-template-columns: 1fr 1fr; }
+.mob .ctl > .lr .mdw { justify-items: start; }
+.md.hover .mdi > span:first-child, .md.focus .mdi > span:first-child, .md.loading .mdi > span:first-child, .md.drag .mdi > span:first-child { filter: blur(3px); opacity: .45; }
+.mveil { background: rgb(8 10 14 / .62); }
+.mcell:has(.mmenu) { padding-bottom: 0; } .mcell .mdw:has(.mmenu) { margin-bottom: 92px; }
+.mcell .mmenu { top: 84px; left: 50%; right: auto; transform: translateX(-50%); width: 180px; }
+.mmenu { position: absolute; z-index: 6; padding: 4px; border-radius: 10px; background: var(--fd-color-surface); border: 1px solid var(--fd-color-border); box-shadow: var(--fd-shadow-md, 0 6px 18px rgb(8 10 14 / .14)); }
+/* COL-01 (révisé le 22/11 par le client) : seule la barre latérale principale est teintée ; colonnes secondaires et panneaux sur le blanc de la page, avec filet */
+.snav { background: var(--fd-color-surface); }
+.onbp { background: var(--fd-color-surface); }
+/* MEDIA-01, zone de dépôt */
+.dz { display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px; border: 1.5px dashed var(--field); border-radius: 12px; background: var(--fd-color-surface); box-sizing: border-box; }
+.dzp { flex: none; width: 56px; height: 56px; border-radius: 10px; display: grid; place-items: center; background: var(--fd-color-surface-sunken); color: var(--fd-color-text-muted); overflow: hidden; }
+.dzp.img { width: 88px; border: 1px solid var(--fd-color-border); } .dzp.img .mlg { font-size: 14px; }
+.dzt { flex: 1; min-width: 0; display: grid; gap: 4px; } .dzt b { font: 600 14px var(--fd-font-sans); color: var(--fd-color-text); overflow-wrap: anywhere; } .dzt span { font-size: 13px; color: var(--fd-color-text-muted); }
+.dza { flex: none; display: flex; align-items: center; gap: 8px; } .dza .btn { height: 36px; }
+.dz.filled { border-style: solid; border-color: var(--fd-color-border); }
+.dz.drag { border: 2px dashed var(--fd-color-primary); background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface)); } .dz.drag .dzp { color: var(--fd-color-primary); background: color-mix(in srgb, var(--fd-color-primary) 12%, transparent); }
+.dz.loading { border-style: solid; border-color: var(--fd-color-border); }
+.dzbar { display: block; height: 6px; border-radius: 999px; background: var(--fd-color-border); overflow: hidden; } .dzbar span { display: block; height: 100%; background: var(--fd-color-primary); }
+.dz.error { border: 1.5px solid var(--fd-color-danger, #C42B1C); } .dz.error .dzp { color: var(--fd-color-danger, #C42B1C); } .dz.error .dzt span { color: var(--fd-color-danger, #C42B1C); }
+[data-theme='dark'] .dz.error .dzp, [data-theme='dark'] .dz.error .dzt span { color: #F97066; }
+.dzlist { display: grid; gap: 20px; padding: 24px 0 8px; } .dzcell { margin: 0; display: grid; gap: 8px; } .dzcell figcaption { font-size: 12px; color: var(--fd-color-text-muted); }
+.mob .dz { flex-wrap: wrap; } .mob .dzt { flex-basis: calc(100% - 72px); } .mob .dza { width: 100%; flex-wrap: wrap; } .mob .dza .btn { flex: 1; justify-content: center; }
+.row:has(.dz) { grid-template-columns: 1fr; gap: 12px; }
+.mob .dza .ib { flex: none; }
+/* NAV-04 §14 bis : rail replié, logo en tête qui laisse place au bouton « Déplier » au survol et au focus */
+.shell:has(.side.rail) { grid-template-columns: 64px 232px minmax(0, 1fr); }
+.side.rail { padding: 16px 0; align-items: center; gap: 4px; }
+.rail .rh { position: relative; display: flex; justify-content: center; width: 100%; height: 77px; padding-top: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--fd-color-border); box-sizing: border-box; }
+.rlogo { position: relative; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: none; cursor: pointer; }
+.rlogo .sym { position: absolute; inset: 0; width: 32px; height: 32px; transition: opacity 150ms ease-out; }
+.rlogo .rx { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 8px; background: #A3195B; color: #FFFFFF; opacity: 0; transition: opacity 150ms ease-out; }
+.rlogo.survol .sym, .rlogo.focus .sym { opacity: 0; }
+.rlogo.survol .rx, .rlogo.focus .rx { opacity: 1; }
+.rlogo.survol .rx { background: #85164B; }
+.rlogo.focus { box-shadow: 0 0 0 2px var(--nav-bg), 0 0 0 4px var(--fd-color-focus, var(--fd-color-primary)); }
+.rail .tip { position: absolute; left: 56px; top: 18px; z-index: 5; padding: 4px 8px; border-radius: 6px; background: var(--fd-color-text); color: var(--fd-color-surface); font: 500 12px var(--fd-font-sans); white-space: nowrap; }
+.rail .cur { position: absolute; left: 36px; top: 40px; width: 12px; height: 18px; z-index: 6; background: #111; clip-path: polygon(0 0, 0 100%, 30% 75%, 55% 100%, 70% 92%, 45% 68%, 100% 68%); outline: none; }
+[data-theme='dark'] .rail .cur { background: #FFFFFF; }
+.wsr { display: grid; place-items: center; width: 44px; height: 48px; margin-bottom: 12px; border: 1px solid var(--fd-color-border); border-radius: 10px; background: var(--content-bg); padding: 0; }
+.wsr .av.sm { width: 32px; height: 32px; }
+.side.rail a { width: 40px; height: 40px; padding: 0; justify-content: center; }
+.mer { padding-top: 12px; }
+/* 24/11 : Page publique, Clés d'accès, Notifications */
+.cpy{position:relative;display:flex;align-items:center}.cpy .inp{padding-right:44px}.cpy .ib.in{position:absolute;right:4px;top:4px}.ib.ok{color:var(--fd-color-success)}
+.lgo{display:flex;align-items:center;gap:12px}.lg-t{width:56px;height:56px;border-radius:14px;background:var(--fd-prune-600);color:#fff;display:grid;place-items:center;font:800 24px var(--fd-font-sans)}
+.inp.ta{height:auto;min-height:72px;align-items:flex-start;padding-top:10px}.inp.ta .v{white-space:normal}.cnt{display:block;text-align:right;font-size:12px;color:var(--fd-color-text-muted);margin-top:4px}
+.radios{display:flex;flex-direction:column;gap:4px;padding:16px 0 8px}
+.pick{list-style:none;margin:0;padding:0;border:1px solid var(--fd-color-border);border-radius:12px}.pick li{display:flex;align-items:center;gap:12px;height:52px;padding:0 8px 0 12px;border-bottom:1px solid var(--fd-color-border)}.pick li:last-child{border-bottom:0}.pick .grip{color:var(--fd-color-text-muted);display:flex}.pick .mu{font-size:13px}
+.box{width:20px;height:20px;border-radius:4px;border:1px solid var(--field);display:grid;place-items:center;flex:none;background:var(--fd-color-surface)}.box.on{background:var(--fd-color-primary);border-color:var(--fd-color-primary);color:var(--fd-color-on-primary)}
+td .sub{display:block;font-size:12px;color:var(--fd-color-text-muted);font-weight:400}td b{font-weight:600}td code{font:13px var(--fd-font-sans);color:var(--fd-color-text-muted);letter-spacing:.02em}
+.pill-r{display:inline-flex;height:22px;align-items:center;padding:0 8px;border-radius:11px;background:var(--fd-color-surface-sunken);border:1px solid var(--fd-color-border);font-size:12px;color:var(--fd-color-text-muted)}
+.nt th.c,.nt td.c{width:120px;text-align:center}.nt td{height:64px}
+.muted{list-style:none;margin:0;padding:0}.muted li{display:flex;align-items:center;height:56px;border-bottom:1px solid var(--fd-color-border)}
+.scrim{position:fixed;inset:0;background:rgba(15,18,24,.5);display:grid;place-items:center;padding:16px;z-index:9}
+.mdl{width:min(520px,100%);background:var(--fd-color-surface);border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25)}.mdl header{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--fd-color-border)}.mdl header h2{flex:1;margin:0;font:600 18px var(--fd-font-sans)}
+.mdl .tile{width:40px;height:40px;border-radius:10px;background:var(--fd-prune-50);color:var(--fd-prune-600);display:grid;place-items:center;flex:none}.mdl .tile.ok{background:var(--fd-color-success-soft);color:var(--fd-color-success)}
+[data-theme='dark'] .mdl .tile{background:var(--fd-prune-950);color:var(--fd-prune-300)}
+.mb{padding:20px 24px;display:flex;flex-direction:column;gap:8px}.mb p{margin:0}.flab{font:600 14px var(--fd-font-sans);margin-top:8px}.mb .help{max-width:none;margin-top:0}
+.mdl footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--fd-color-border)}
+.warn{display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--fd-color-warning-soft,#fff6e8);color:var(--fd-color-text);font-size:13px}.warn svg{flex:none;color:var(--fd-color-warning,#a86402)}
+.ok-t{font-size:12px;color:var(--fd-color-success)}
+.mob .nt th.c,.mob .nt td.c{width:72px}.mob .lgo{flex-wrap:wrap}
+.mob .nt thead{display:table-header-group}.mob .nt td.c,.mob .nt th.c{display:table-cell}.mob .nt td .sub{display:none}
+/* Clés d'accès + API (retours 24/11 §6.2) */
+.acc{border:0;margin:16px 0 0;padding:0;display:grid;gap:2px}.acc legend{padding:0;margin-bottom:6px}.acc .opt-c{align-items:flex-start}.acc .opt-c .help{display:block;margin-top:2px}
+.apiex{display:grid;gap:8px;justify-items:start;padding:16px 0;border-top:1px solid var(--fd-color-border)}.apiex .code{width:100%;box-sizing:border-box;max-width:100%}
+.apit td code{font:12px/1.5 ui-monospace,'SF Mono',Menlo,Consolas,monospace;color:var(--fd-color-text)}.apit .chip{padding:0 10px}
+.mob .apit thead{display:table-header-group}.mob .apit th:nth-child(2),.mob .apit td:nth-child(2){display:none}.mob .apit td:nth-child(3){display:table-cell}
+td .chips .chip{height:24px;padding:0 8px;font-size:12px}
+.mob td .chips{display:none}
+.wrap > .help + .sec{margin-top:32px}
+.banner.warnb{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--fd-color-border);border-radius:12px;background:var(--fd-color-surface-sunken);margin-bottom:24px;font-size:14px;line-height:1.5}.banner.warnb svg{flex:none;margin-top:3px;color:var(--fd-color-text-muted)}
+.help.err-h{display:flex;gap:6px;align-items:flex-start;color:var(--fd-color-text)}.help.err-h svg{flex:none;margin-top:2px;color:var(--fd-color-text-muted)}.help.err-h a{color:var(--fd-color-link,var(--fd-prune-700));font-weight:500}
+</style></head><body class="">
+
+<div class="shell">
+ <nav class="side" aria-label="Navigation principale"><div class="sbh"><img class="logo l" src="../../../brand-tutoclic/production/logo-tutoclick.svg" alt="TutoClick, porté par la DSIML"><img class="logo d" src="../../../brand-tutoclic/production/logo-tutoclick-sombre.svg" alt="TutoClick, porté par la DSIML"><button class="ib pin" aria-label="Replier la barre latérale" aria-expanded="true"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-panneau" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="4"/><path d="M9.5 3v18"/><path d="M6.25 8h.01M6.25 12h.01M6.25 16h.01"/></svg></button></div>
+  <button class="ws"><span class="av sm">A</span><span><b>Acme</b><small>Espace · 4 membres</small></span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevrons-up-down" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg></button>
+  <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>Démos</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></svg>Sandbox</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route" aria-hidden="true"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg>Parcours de formation</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>Analytics</a><h3>Formation</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-graduation-cap" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg>Apprenants</a>
+  <span class="grow"></span><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-puzzle" aria-hidden="true"><path d="M15.39 4.39a1 1 0 0 0 1.68-.474 2.5 2.5 0 1 1 3.014 3.015 1 1 0 0 0-.474 1.68l1.683 1.682a2.414 2.414 0 0 1 0 3.414L19.61 15.39a1 1 0 0 1-1.68-.474 2.5 2.5 0 1 0-3.014 3.015 1 1 0 0 1 .474 1.68l-1.683 1.682a2.414 2.414 0 0 1-3.414 0L8.61 19.61a1 1 0 0 0-1.68.474 2.5 2.5 0 1 1-3.014-3.015 1 1 0 0 0 .474-1.68l-1.683-1.682a2.414 2.414 0 0 1 0-3.414L4.39 8.61a1 1 0 0 1 1.68.474 2.5 2.5 0 1 0 3.014-3.015 1 1 0 0 1-.474-1.68l1.683-1.682a2.414 2.414 0 0 1 3.414 0z"></path></svg>Extension</a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg>Centre d'aide</a><a class="on" href="#" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>Paramètres</a>
+  <div class="me"><span class="av">A</span><span><b>Alice Exemple</b><small>Propriétaire</small></span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg></div></nav>
+ <nav class="snav" aria-label="Paramètres"><h3>Espace</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-building2 lucide-building-2" aria-hidden="true"><path d="M10 12h4"></path><path d="M10 8h4"></path><path d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg><span>Général</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg><span>Équipe</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge" aria-hidden="true"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg><span>Utilisation</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg><span>Sécurité</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-lock" aria-hidden="true"><path d="M4 9.8V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2h-3"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M9 17v-2a2 2 0 0 0-4 0v2"></path><rect width="8" height="5" x="3" y="17" rx="1"></rect></svg><span>Confidentialité</span></a><h3>Marque</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"></path><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span>Thème et couleurs</span></a><a href="#" class="on" aria-current="page"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Page publique</span></a><h3>Contenu</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-braces" aria-hidden="true"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"></path><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"></path></svg><span>Variables</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-a" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"></path><path d="m8 13 4-7 4 7"></path><path d="M9.1 11h5.7"></path></svg><span>Glossaire</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tag" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span>Étiquettes</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles" aria-hidden="true"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path><path d="M20 2v4"></path><path d="M22 4h-4"></path><circle cx="4" cy="20" r="2"></circle></svg><span>Assistance IA</span></a><h3>Connexions</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plug" aria-hidden="true"><path d="M12 22v-5"></path><path d="M15 8V2"></path><path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z"></path><path d="M9 8V2"></path></svg><span>Intégrations</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round" aria-hidden="true"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span>Clés d'accès</span></a><h3>Mon compte</h3><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></svg><span>Profil</span></a><a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><span>Notifications</span></a></nav>
+ <main><header class="ph"><nav aria-label="Fil d'Ariane"><ol><li><a href="#">Marque</a><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></li><li><h1 aria-current="page">Page publique</h1></li></ol></nav><span class="sp"></span><button class="btn btn-s"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>Voir la page</button><button class="btn btn-s">Annuler</button><button class="btn btn-p">Enregistrer</button><span class="hdv" aria-hidden="true"></span><button class="ib h32" aria-label="Aide"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-question-mark" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg></button><button class="ib h32" aria-label="Notifications, aucune non lue"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg></button></header><div class="wrap"><section class="sec"><div class="sec-h"><div><h2>Page publique</h2><p>Le catalogue public de l’espace : vos démos publiées, sur une seule page, sans connexion.</p></div></div><div class="row inl"><div><div class="lab">Page publique</div><div class="help err-h"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span>Impossible de l’activer : aucune démo n’est publiée en accès ouvert (« Toute personne avec le lien »). <a href="#">Voir les démos</a></span></div></div><div class="ctl"><span class="sw dis" role="switch" aria-checked="false"></span></div></div></section><section class="sec"><div class="sec-h"><div><h2>En-tête</h2><p>Ce que le visiteur voit en arrivant.</p></div></div><div class="row"><div><div class="lab">Logo</div><div class="help">Celui de l’espace par défaut. PNG ou SVG, 2 Mo au plus.</div></div><div class="ctl"><div class="lgo"><span class="lg-t">A</span><span class="grow"></span><button class="btn btn-s"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-images" aria-hidden="true"><path d="m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16"></path><path d="M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2"></path><circle cx="13" cy="7" r="1" fill="currentColor"></circle><rect x="8" y="2" width="14" height="14" rx="2"></rect></svg>Choisir dans la médiathèque</button></div></div></div><div class="row"><div><div class="lab">Titre</div></div><div class="ctl"><div class="inp"><span class="v">Les démos d’Acme</span></div></div></div><div class="row"><div><div class="lab">Phrase d’accueil</div><div class="help">Facultative, 160 caractères au plus.</div></div><div class="ctl"><div class="inp ta"><span class="v">Découvrez nos outils pas à pas, à votre rythme.</span></div><span class="cnt">48 / 160</span></div></div></section><section class="sec"><div class="sec-h"><div><h2>Démos affichées</h2><p>Seules les démos publiées peuvent apparaître ici.</p></div></div><div class="radios"><label class="opt-r"><span class="rad"></span><span><b>Toutes les démos publiées</b><span class="help">Une nouvelle démo publiée apparaît d’elle-même.</span></span></label><label class="opt-r"><span class="rad on"></span><span><b>Démos choisies</b><span class="help">Vous choisissez les démos et leur ordre.</span></span></label></div>
+      <ul class="pick"><li><span class="grip" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span><span class="box on" role="checkbox" aria-checked="true" aria-label="Afficher Démo CRM"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><b>Démo CRM</b><span class="mu">Captures</span><span class="grow"></span><button class="ib" aria-label="Monter Démo CRM"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button class="ib" aria-label="Descendre Démo CRM"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button></li><li><span class="grip" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span><span class="box on" role="checkbox" aria-checked="true" aria-label="Afficher Saisir une fiche"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><b>Saisir une fiche</b><span class="mu">Captures</span><span class="grow"></span><button class="ib" aria-label="Monter Saisir une fiche"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button class="ib" aria-label="Descendre Saisir une fiche"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button></li><li><span class="grip" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span><span class="box on" role="checkbox" aria-checked="true" aria-label="Afficher Facturer un client"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span><b>Facturer un client</b><span class="mu">HTML guidée</span><span class="grow"></span><button class="ib" aria-label="Monter Facturer un client"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg></button><button class="ib" aria-label="Descendre Facturer un client"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down" aria-hidden="true"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg></button></li><li><span class="grip" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></span><span class="box" role="checkbox" aria-checked="false" aria-label="Afficher Onboarding"></span><b>Onboarding</b><span class="mu">Vidéo</span><span class="grow"></span></li></ul>
+      <p class="help">3 démos affichées, dans cet ordre. Glissez la poignée ou utilisez les flèches.</p></section><section class="sec"><div class="sec-h"><div><h2>Pied de page</h2></div></div><div class="row"><div><div class="lab">Lien de contact</div><div class="help">Facultatif : e-mail ou adresse https.</div></div><div class="ctl"><div class="inp"><span class="v">formation@acme.example</span></div></div></div><div class="row inl"><div><div class="lab">Afficher « Fait avec TutoClick »</div></div><div class="ctl"><span class="sw on" role="switch" aria-checked="true"></span></div></div></section></div></main>
+</div></body></html>

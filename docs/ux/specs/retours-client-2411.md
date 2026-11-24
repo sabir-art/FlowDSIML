@@ -146,6 +146,20 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
   - **Afficher « Fait avec TutoClick »** : interrupteur, activé par défaut.
 - **Moteur** : c'est le catalogue de démos déjà servi par le lecteur (`/c/{adresse}`, type « Catalogue de démos » du centre). Cette page en est le réglage, pas un deuxième catalogue.
 
+**Précisions (questions du dev, 24/11)**
+- **Une seule adresse par espace** : le catalogue `/c/{adresse}` et le centre de formation sont la même ligne en base, donc l'adresse affiche l'un ou l'autre. Ce choix de cadrage revient au chef ; l'UX ci-dessous suppose « la Page publique peut remplacer le centre ».
+- **Centre de formation déjà publié à cette adresse** (maquette `page-publique-centre-*`) :
+  - en haut de la page, un bandeau neutre (`role="status"`, icône Info, pas d'aplat de couleur) : « **Cette adresse affiche aujourd'hui votre centre de formation « {titre} ».** Si vous enregistrez la page publique, elle prend sa place à {adresse}. Le centre de formation et ses parcours restent dans Parcours de formation. » ;
+  - « Enregistrer » ouvre alors un `alertdialog` (maquette `page-publique-remplacer-*`) : « Remplacer le centre de formation à cette adresse ? », texte de la maquette, boutons « Annuler » et « Remplacer et enregistrer » (primaire, pas danger : rien n'est supprimé).
+  - **Condition** : les réglages du centre (titre, parcours, ordre) sont conservés et le centre peut être remis depuis Parcours de formation. Si ce n'est pas possible techniquement, la phrase « Vous pourrez remettre… » est retirée et le bouton passe en danger ; à confirmer par le chef.
+- **Publication refusée** (maquettes `page-publique-refus-*` et `page-publique-sansdemo-*`) : l'interrupteur reste visible, désactivé, et l'aide de la ligne devient le motif, avec CircleAlert 14 px et un lien vers la correction :
+  - liens publics de l'espace coupés : « Impossible de l'activer : les liens publics sont coupés pour l'espace. » + « Ouvrir Sécurité » ;
+  - aucune démo publiée en accès ouvert : « Impossible de l'activer : aucune démo n'est publiée en accès ouvert (« Toute personne avec le lien »). » + « Voir les démos ».
+  
+  Les autres réglages restent modifiables et enregistrables.
+- **« Enregistrer »** : enregistre et publie d'un coup quand l'interrupteur est activé, il n'y a pas de bouton « Publier » à part. Toast après l'enregistrement : « Page publique enregistrée. Elle est en ligne. » avec l'action « Voir la page » ; interrupteur coupé : « Page publique enregistrée. Elle n'est pas visible. »
+- **Lien de contact** : celui du pied de page (« Aide », e-mail ou https), pas le bouton d'en-tête (https seulement).
+
 ### 6.2 Connexions › Clés d'accès
 - **Qui** : propriétaires et administrateurs ; la rubrique est masquée pour les autres rôles.
 - **Phrase d'en-tête** (mise à jour le 24/11, API en lecture seule) : « Pour qu'un outil de l'espace (CRM, intranet, tableau de bord) lise vos démos, leurs statistiques ou leurs leads. Une clé ne modifie rien. Gardez-la comme un mot de passe. »
