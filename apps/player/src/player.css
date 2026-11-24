@@ -3328,7 +3328,7 @@ h1.p-title {
 .p-popup-bg.p-win-plain {
   background: var(--p-bg);
 }
-.p-win-veil {
+.p-dwin-veil {
   position: absolute;
   inset: 0;
   z-index: 6;
@@ -3337,7 +3337,7 @@ h1.p-title {
   padding: 16px;
   overflow: auto;
 }
-.p-win {
+.p-dwin {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   width: min(100%, 680px);
@@ -3349,16 +3349,16 @@ h1.p-title {
   box-shadow: 0 24px 48px rgb(8 8 8 / 0.28);
   text-align: left;
 }
-.p-win--text {
+.p-dwin--text {
   grid-template-columns: minmax(0, 1fr);
   width: min(100%, 480px);
 }
-.p-win__img {
+.p-dwin__img {
   position: relative;
   min-height: 240px;
   background: color-mix(in srgb, var(--p-primary) 8%, var(--p-surface));
 }
-.p-win__img > img {
+.p-dwin__img > img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -3366,7 +3366,7 @@ h1.p-title {
   object-fit: cover;
   object-position: center;
 }
-.p-win__body {
+.p-dwin__body {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -3374,24 +3374,24 @@ h1.p-title {
   padding: 28px;
   overflow: auto;
 }
-.p-win__count,
-.p-win__hint {
+.p-dwin__count,
+.p-dwin__hint {
   font-size: 13px;
   color: color-mix(in srgb, var(--p-text) 70%, transparent);
 }
-.p-win .p-step-h {
+.p-dwin .p-step-h {
   margin: 0;
   font-size: 22px;
   line-height: 1.25;
 }
-.p-win .p-rich {
+.p-dwin .p-rich {
   margin: 0;
   color: color-mix(in srgb, var(--p-text) 75%, transparent);
 }
-.p-win .p-voice-line {
+.p-dwin .p-voice-line {
   margin-top: 0;
 }
-.p-win__foot {
+.p-dwin__foot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3400,32 +3400,32 @@ h1.p-title {
   margin-top: auto;
   padding-top: 12px;
 }
-.p-win__hint {
+.p-dwin__hint {
   margin-right: auto;
 }
 /* Boutons toujours sur une ligne, calés à droite, « Suivant » en dernier */
-.p-win__btns {
+.p-dwin__btns {
   display: flex;
   flex: none;
   gap: 8px;
   max-width: 100%;
 }
 /* Colonne étroite : l'aide passe sous les boutons, en 12 px */
-.p-win__foot.is-stacked .p-win__hint {
+.p-dwin__foot.is-stacked .p-dwin__hint {
   order: 2;
   flex-basis: 100%;
   margin-right: 0;
   font-size: 12px;
 }
 /* Boutons du pied : 36 px, pour tenir sur une ligne à côté de « Échap pour fermer » */
-.p-win__foot .p-btn {
+.p-dwin__foot .p-btn {
   min-height: 36px;
   height: 36px;
   padding: 0 14px;
   font-size: 14px;
 }
 /* « Rouvrir la fenêtre » : pilule de 36 px dans la barre, à gauche de « Suivant » */
-.p-win-reopen {
+.p-dwin-reopen {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -3441,38 +3441,38 @@ h1.p-title {
   white-space: nowrap;
   cursor: pointer;
 }
-.p-win-reopen:focus-visible {
+.p-dwin-reopen:focus-visible {
   outline: 2px solid var(--p-focus, var(--p-primary));
   outline-offset: 2px;
 }
 /* Sous 640 px : image en haut (160 px), texte dessous ; la pilule garde son icône seule */
-.is-compact .p-win {
+.is-compact .p-dwin {
   grid-template-columns: minmax(0, 1fr);
   overflow: auto;
 }
-.is-compact .p-win__img {
+.is-compact .p-dwin__img {
   min-height: 160px;
   height: 160px;
 }
-.is-compact .p-win__body {
+.is-compact .p-dwin__body {
   padding: 20px;
   overflow: visible;
 }
 /* Écran tactile : pas d'aide clavier ; « Précédent » et « Suivant » à largeur égale sur toute la ligne */
-.is-compact .p-win__hint {
+.is-compact .p-dwin__hint {
   display: none;
 }
-.is-compact .p-win__btns {
+.is-compact .p-dwin__btns {
   flex: 1;
 }
-.is-compact .p-win__btns .p-btn {
+.is-compact .p-dwin__btns .p-btn {
   flex: 1;
   justify-content: center;
 }
-.is-compact .p-win-reopen > span {
+.is-compact .p-dwin-reopen > span {
   display: none;
 }
-.is-compact .p-win-reopen {
+.is-compact .p-dwin-reopen {
   width: 36px;
   padding: 0;
   justify-content: center;

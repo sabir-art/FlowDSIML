@@ -242,9 +242,9 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
         'none',
       `${tag} capture voilée, pas floutée`,
     );
-    const img = dlg.locator('.p-win__img');
+    const img = dlg.locator('.p-dwin__img');
     const ib = await img.boundingBox();
-    const tb = await dlg.locator('.p-win__body').boundingBox();
+    const tb = await dlg.locator('.p-dwin__body').boundingBox();
     if (width >= 640)
       ok(
         Math.round(ib.width) === 280 && ib.height >= 240 && ib.x < tb.x,
@@ -260,19 +260,19 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
         (await img.locator('img').evaluate((el) => getComputedStyle(el).objectFit)) === 'cover',
       `${tag} image en « cover » avec son texte alternatif`,
     );
-    ok((await dlg.locator('.p-win__count').textContent()) === 'Étape 2 sur 4', `${tag} « Étape 2 sur 4 »`);
+    ok((await dlg.locator('.p-dwin__count').textContent()) === 'Étape 2 sur 4', `${tag} « Étape 2 sur 4 »`);
     ok(
       (await dlg.locator('h2').evaluate((el) => getComputedStyle(el).fontSize)) === '22px',
       `${tag} titre de 22 px`,
     );
-    const btns = await dlg.locator('.p-win__btns .p-btn').evaluateAll((els) =>
+    const btns = await dlg.locator('.p-dwin__btns .p-btn').evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
         return { y: Math.round(r.top), w: Math.round(r.width), r: Math.round(r.right), t: el.textContent };
       }),
     );
     const footRight = Math.round(
-      await dlg.locator('.p-win__foot').evaluate((el) => el.getBoundingClientRect().right),
+      await dlg.locator('.p-dwin__foot').evaluate((el) => el.getBoundingClientRect().right),
     );
     ok(
       btns.length === 2 && btns[0].y === btns[1].y && btns[1].t === 'Suivant' && btns[1].r === footRight,
@@ -280,19 +280,19 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
     );
     if (width < 640)
       ok(
-        (await dlg.locator('.p-win__hint').isVisible()) === false && Math.abs(btns[0].w - btns[1].w) <= 1,
+        (await dlg.locator('.p-dwin__hint').isVisible()) === false && Math.abs(btns[0].w - btns[1].w) <= 1,
         `${tag} mobile : pas de « Échap pour fermer », boutons à largeur égale sur toute la ligne`,
       );
     if (width >= 640) {
       const ys = await dlg
-        .locator('.p-win__foot > *')
+        .locator('.p-dwin__foot > *')
         .evaluateAll((els) =>
           els.map((el) => Math.round(el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2)),
         );
       ok(new Set(ys).size === 1, `${tag} pied sur une seule ligne`);
     }
     ok(
-      (width < 640 || (await dlg.locator('.p-win__hint').textContent()) === 'Échap pour fermer') &&
+      (width < 640 || (await dlg.locator('.p-dwin__hint').textContent()) === 'Échap pour fermer') &&
         (await dlg.getByRole('button').allTextContents()).join('|') === 'Précédent|Suivant',
       `${tag} pied : « Précédent », « Suivant »${width < 640 ? '' : ' et « Échap pour fermer »'}`,
     );
@@ -301,7 +301,7 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
       `${tag} le focus entre dans la fenêtre, sur « Suivant »`,
     );
     // Focus piégé : Tab et Maj + Tab restent dans la fenêtre
-    const inside = () => pl.evaluate(() => !!document.activeElement?.closest('.p-win'));
+    const inside = () => pl.evaluate(() => !!document.activeElement?.closest('.p-dwin'));
     await pl.keyboard.press('Tab');
     const a = await inside();
     await pl.keyboard.press('Tab');
@@ -335,7 +335,7 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
       `${tag} pilule « Rouvrir la fenêtre » de 36 px, à gauche de « Suivant »`,
     );
     ok(
-      await until(() => pl.evaluate(() => document.activeElement?.classList.contains('p-win-reopen'))),
+      await until(() => pl.evaluate(() => document.activeElement?.classList.contains('p-dwin-reopen'))),
       `${tag} le focus va sur la pilule`,
     );
     await axe(pl, '.p-root', `${tag} fenêtre fermée`);
@@ -366,7 +366,7 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
     await pl.goto(`${PLAYER}/#/d/${PID}`);
     await dlg.waitFor();
     ok(
-      (await pl.locator('.p-win-plain').count()) === 1 && (await pl.locator('.p-dim').count()) === 0,
+      (await pl.locator('.p-dwin-plain').count()) === 1 && (await pl.locator('.p-dim').count()) === 0,
       `${tag} première étape : fond uni, sans voile`,
     );
     ok(

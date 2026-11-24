@@ -235,7 +235,7 @@ const AIDE = `<!doctype html><html><head><meta charset="utf-8"><style>${css}</st
     const st = await pp.locator('.p-win > .p-stage').boundingBox();
     ok(
       Math.abs(win.width - st.width) < 1 && st.y > win.y + 30,
-      'lecteur : barre d’onglets au-dessus de la capture',
+      `lecteur : barre d’onglets au-dessus de la capture (${JSON.stringify({ win, st })})`,
     );
   }
   await shot(pp, 'l25-06-lecteur');

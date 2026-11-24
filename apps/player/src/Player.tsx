@@ -349,7 +349,7 @@ export function Player({
   useEffect(() => {
     if (!winOpen) return;
     const id = requestAnimationFrame(() =>
-      winBox.current?.querySelector<HTMLElement>('.p-win__foot .p-btn-primary')?.focus(),
+      winBox.current?.querySelector<HTMLElement>('.p-dwin__foot .p-btn-primary')?.focus(),
     );
     return () => cancelAnimationFrame(id);
   }, [winOpen, index]);
@@ -814,6 +814,30 @@ export function Player({
           .filter(Boolean)
           .join('. ');
 
+  // A8 : annonce de l'étape du guide, dans la même zone que l'annonce de l'étape
+  const guideLive = gBubble
+    ? fmt(t.guide as unknown as Record<string, string>, 'live', {
+        k: gs.k + 1,
+        n: gn,
+        title: richTextToPlain(sub(gBubble.hotspot.title || gBubble.hotspot.body)),
+      })
+    : gv.kind === 'guide' && gv.done
+      ? t.guide.done
+      : '';
+  const liveSeen = useRef({ announce: '', guide: '', text: '' });
+  if (liveSeen.current.announce !== announce || liveSeen.current.guide !== guideLive) {
+    const prev = liveSeen.current;
+    // Celle qui vient de changer ; si les deux changent ensemble, le guide (plus précis) passe en premier
+    const text =
+      prev.guide !== guideLive && guideLive
+        ? guideLive
+        : prev.announce !== announce && announce
+          ? announce
+          : guideLive || announce;
+    liveSeen.current = { announce, guide: guideLive, text };
+  }
+  const liveText = liveSeen.current.text;
+
   return (
     <VoiceLineContext.Provider value={voiceLine}>
       <div
@@ -831,20 +855,10 @@ export function Player({
             {t.paused}
           </div>
         )}
+        {/* Une seule zone d'annonce : l'étape, ou l'étape du guide (A8 : la bulle ne prend pas le focus).
+            Deux zones parlaient en même temps ; la dernière annonce qui change l'emporte. */}
         <p class="sr-only" aria-live="polite" aria-atomic="true">
-          {announce}
-        </p>
-        {/* A8 : annonce de l'étape du guide (la bulle ne prend pas le focus) */}
-        <p class="sr-only" aria-live="polite" aria-atomic="true">
-          {gBubble
-            ? fmt(t.guide as unknown as Record<string, string>, 'live', {
-                k: gs.k + 1,
-                n: gn,
-                title: richTextToPlain(sub(gBubble.hotspot.title || gBubble.hotspot.body)),
-              })
-            : gv.kind === 'guide' && gv.done
-              ? t.guide.done
-              : ''}
+          {liveText}
         </p>
         {preview && !present && <div class="p-preview">{t.preview}</div>}
         <header class="p-top" inert={!!gateForm}>
@@ -1216,7 +1230,7 @@ export function Player({
                 />
               ) : (
                 <div
-                  class="p-popup-bg p-win-plain"
+                  class="p-popup-bg p-dwin-plain"
                   style={{
                     background: step.options.background === 'color' ? step.options.bgColor : undefined,
                   }}
@@ -1224,10 +1238,10 @@ export function Player({
                 />
               )}
               {!winClosed && (
-                <div class="p-win-veil">
+                <div class="p-dwin-veil">
                   <div
                     ref={winBox}
-                    class={`p-win${step.image ? '' : ' p-win--text'}`}
+                    class={`p-dwin${step.image ? '' : ' p-dwin--text'}`}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby={`p-step-title-${step.id}`}
@@ -1253,7 +1267,7 @@ export function Player({
                     }}
                   >
                     {step.image && (
-                      <div class="p-win__img">
+                      <div class="p-dwin__img">
                         <img
                           src={step.image.url}
                           alt={sub(step.options.imageAlt)}
@@ -1262,8 +1276,8 @@ export function Player({
                         />
                       </div>
                     )}
-                    <div class="p-win__body">
-                      <span class="p-win__count">
+                    <div class="p-dwin__body">
+                      <span class="p-dwin__count">
                         {fmt(t as unknown as Record<string, string>, 'stepOf', {
                           n: index + 1,
                           total: m.steps.length,
@@ -1276,9 +1290,9 @@ export function Player({
                         <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />
                       )}
                       <VoiceLine />
-                      <div class="p-win__foot" ref={winFoot}>
-                        <span class="p-win__hint">{t.escToClose}</span>
-                        <div class="p-win__btns">
+                      <div class="p-dwin__foot" ref={winFoot}>
+                        <span class="p-dwin__hint">{t.escToClose}</span>
+                        <div class="p-dwin__btns">
                           {index > 0 && (
                             <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
                               {t.prev}
@@ -1545,7 +1559,7 @@ export function Player({
           {win && winClosed && (
             <button
               ref={winPill}
-              class="p-win-reopen"
+              class="p-dwin-reopen"
               onClick={() => setWinClosed(false)}
               aria-label={t.reopenWindow}
             >
