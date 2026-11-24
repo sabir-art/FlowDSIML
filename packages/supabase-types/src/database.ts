@@ -1366,6 +1366,8 @@ export type Database = {
           access_mode: string;
           draft: Json;
           password_changed_at: string | null;
+          public_page: Json;
+          public_page_enabled: boolean;
           published: Json | null;
           published_at: string | null;
           slug: string;
@@ -2356,6 +2358,11 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      public_page_info: { Args: { p_ws: string }; Returns: Json };
+      save_public_page: {
+        Args: { p_ws: string; p_slug: string; p_page: Json; p_enabled: boolean; p_replace?: boolean };
+        Returns: undefined;
+      };
       create_api_key: {
         Args: { p_workspace: string; p_name: string; p_scopes: string[]; p_expires_days?: number | null };
         Returns: Json;
