@@ -181,6 +181,13 @@ Maquettes : `lecteur-fenetre-*`, `lecteur-projecteur-*` (lecteur, 1440 et 390) ;
 ### 6.1 Fenêtre image + texte (type d’étape « Fenêtre »)
 Dans le lecteur, fenêtre centrée sur la capture voilée (noir à 45 %), 680 px au plus, rayon 16 : image à gauche (280 px, ou en haut sous 640 px), à droite « Étape 2 sur 6 », titre 22 px, texte, puis « Échap pour fermer », « Précédent » (secondaire) et « Suivant » (primaire). Focus piégé, Échap ferme, `role="dialog"` avec titre. Dans l’éditeur : choix « Fenêtre » parmi les types d’étape ; panneau Étape avec image (zone §18.2), titre, texte, libellé du bouton.
 
+Précisions (réponses au dev, 24/11) :
+- **Échap** ferme la fenêtre : la capture n’est plus voilée, et une pilule « Rouvrir la fenêtre » (icône AppWindow, 36 px) apparaît sur la ligne sous la page, à gauche de « Suivant » ; « Suivant » reste disponible. Le texte du pied reste « Échap pour fermer ».
+- **Éditeur** : entrée « Fenêtre » (icône AppWindow) dans le menu « Ajouter une étape » ; dans le panneau Étape, le segmenté « Affichage » a trois valeurs : Écran, Pop-up, Fenêtre. Pour Fenêtre : « Image » en zone étroite §18.2 (PNG, JPEG ou WebP, 5 Mo au plus ; puis vignette, « Remplacer… » et « Retirer » dans ⋯), « Texte alternatif » (facultatif ; vide = image décorative, `alt=""`, avec l’aide « Laissez vide si l’image est décorative. »), « Titre », « Texte », « Libellé du bouton » (« Suivant » par défaut).
+- **Sans image** : pas de colonne image ni de fond teinté ; la fenêtre fait 480 px au plus, texte sur toute la largeur. (L’icône sur fond teinté de la maquette tient lieu d’image d’exemple.)
+- **Image** : cadrée en « cover » dans la colonne de 280 px (hauteur 240 px au moins, celle du texte au-delà), centrée ; en mobile, 160 px de haut au-dessus du texte.
+- **Première étape sans capture** : fond uni comme la pop-up actuelle (couleur de fond du thème de la démo), pas de voile.
+
 ### 6.2 Flou stylé
 Panneau « Flou » : Forme (Rectangle, Arrondi, Ellipse), Effet (Flou, Pixels, Aplat), Intensité (2 à 24 px, curseur avec valeur), Teinte (Aucune, Gris, Encre, Prune, Bleu, Blanc ; à 30 % par-dessus) et « Appliquer à toutes les étapes ». Aide : « Le texte masqué n’est jamais lisible, quelle que soit la teinte. » (intensité minimale garantie côté rendu).
 
