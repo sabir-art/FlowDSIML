@@ -1,0 +1,391 @@
+/* AUTH-ILL (docs/ux/specs/auth-illustration.md). Couleurs de la marque uniquement : prune, neutres, et
+   les quatre points de la DSIML. Aucun bleu d'interface. */
+.mk .auth-ill {
+  --ill-bg: var(--fd-prune-900);
+  --ill-title: #ffffff; /* 15,2:1 sur prune-900 */
+  --ill-sub: var(--fd-prune-100); /* 11,0:1 */
+  --ill-nav: #f7f7f8;
+  --ill-nav-active: #e9ebee;
+  --ill-win: #ffffff;
+  --ill-line: #e2e8ef;
+  --ill-ink: #c9ced6;
+  --ill-ink-strong: #8a94a2;
+  --ill-card: #f6f8fa;
+  --ill-hs: var(--fd-prune-600);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 64px 56px;
+  background: var(--ill-bg);
+}
+:root[data-theme='dark'] .mk .auth-ill {
+  --ill-bg: var(--fd-prune-950); /* blanc : 18,3:1 ; prune-100 : 13,3:1 */
+  --ill-nav: #101317;
+  --ill-nav-active: #252b33;
+  --ill-win: #15191f;
+  --ill-line: #272e37;
+  --ill-ink: #3a424d;
+  --ill-ink-strong: #6b7582;
+  --ill-card: #1b2027;
+  --ill-hs: var(--fd-prune-300);
+}
+
+/* Fenêtre de l'app, stylisée : sans barre de navigateur */
+.mk .auth-ill__win {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 16 / 9;
+  align-self: center;
+  flex: none;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--ill-win);
+  box-shadow: 0 24px 48px rgb(0 0 0 / 0.32);
+  display: grid;
+  grid-template-columns: 26% 1fr;
+}
+.mk .auth-ill__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 10px;
+  border-right: 1px solid var(--ill-line);
+  background: var(--ill-nav);
+}
+.mk .auth-ill__logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.mk .auth-ill__logo i {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--fd-prune-600);
+}
+.mk .auth-ill__logo span {
+  width: 46px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ill-ink-strong);
+}
+.mk .auth-ill__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 5px;
+}
+.mk .auth-ill__item i {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--ill-ink-strong);
+  border-radius: 2px;
+}
+.mk .auth-ill__item span {
+  flex: 1;
+  max-width: 52px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ill-ink);
+}
+.mk .auth-ill__item.is-on {
+  background: var(--ill-nav-active);
+}
+.mk .auth-ill__item.is-on span {
+  background: var(--ill-ink-strong);
+}
+.mk .auth-ill__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px 18px;
+}
+.mk .auth-ill__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mk .auth-ill__title {
+  width: 80px;
+  height: 9px;
+  border-radius: 4px;
+  background: var(--ill-ink-strong);
+}
+.mk .auth-ill__new {
+  position: relative;
+  width: 74px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--fd-prune-600);
+}
+.mk .auth-ill__new::after {
+  content: '';
+  position: absolute;
+  inset: 7px 12px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.85);
+}
+.mk .auth-ill__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.mk .auth-ill__card {
+  border: 1px solid var(--ill-line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ill-win);
+}
+.mk .auth-ill__thumb {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--ill-card);
+}
+.mk .auth-ill__thumb::before {
+  content: '';
+  position: absolute;
+  inset: 18% 12% auto 12%;
+  height: 22%;
+  border-radius: 3px;
+  background: var(--ill-line);
+}
+.mk .auth-ill__thumb::after {
+  content: '';
+  position: absolute;
+  top: 52%;
+  right: 40%;
+  left: 12%;
+  height: 10%;
+  border-radius: 3px;
+  background: var(--ill-line);
+}
+.mk .auth-ill__meta {
+  display: grid;
+  gap: 4px;
+  padding: 6px 8px 8px;
+}
+.mk .auth-ill__meta span {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--ill-ink);
+}
+.mk .auth-ill__meta span:first-child {
+  width: 70%;
+  background: var(--ill-ink-strong);
+}
+.mk .auth-ill__meta span:last-child {
+  width: 40%;
+}
+.mk .auth-ill__rows {
+  display: grid;
+  gap: 7px;
+  margin-top: 4px;
+}
+.mk .auth-ill__rows span {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ill-line);
+}
+.mk .auth-ill__rows span:nth-child(2n) {
+  width: 82%;
+}
+.mk .auth-ill__rows span:nth-child(3n) {
+  width: 64%;
+}
+
+/* Hotspot et bulle : deux positions (étapes 1/6 et 2/6) */
+.mk .auth-ill__hs {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--ill-hs);
+  /* Contour blanc : le hotspot reste visible sur le bouton prune */
+  box-shadow: 0 0 0 2px #ffffff;
+  transition:
+    left var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
+    top var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
+}
+.mk .auth-ill__hs::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--ill-hs);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: auth-ill-pulse var(--fd-motion-duration-pulse) ease-out infinite;
+}
+@keyframes auth-ill-pulse {
+  from {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.mk .auth-ill__tip {
+  position: absolute;
+  width: 196px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1f26;
+  box-shadow: 0 10px 24px rgb(8 10 14 / 0.18);
+  font-size: 11px;
+  line-height: 1.4;
+  transition:
+    left var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
+    top var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
+    opacity 120ms;
+}
+.mk .auth-ill__tip small {
+  display: block;
+  color: #4f5966;
+  font-size: 10px;
+}
+.mk .auth-ill__tip b {
+  display: block;
+  margin: 2px 0 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mk .auth-ill__tip > span {
+  display: block;
+}
+.mk .auth-ill__tip .auth-ill__go {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #a3195b;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 600;
+}
+.mk .auth-ill__tip.is-fade {
+  opacity: 0;
+}
+.mk .auth-ill__win[data-step='1'] .auth-ill__hs {
+  top: 8.5%;
+  left: 88%;
+}
+.mk .auth-ill__win[data-step='1'] .auth-ill__tip {
+  top: 15%;
+  left: 52%;
+}
+.mk .auth-ill__win[data-step='2'] .auth-ill__hs {
+  top: 36%;
+  left: 40%;
+}
+.mk .auth-ill__win[data-step='2'] .auth-ill__tip {
+  top: 42%;
+  left: 44%;
+}
+
+/* Accroche et signature */
+.mk .auth-ill__quote {
+  max-width: 460px;
+}
+.mk .auth-ill__h {
+  margin: 0;
+  color: var(--ill-title);
+  font: 800 30px / 1.2 var(--fd-font-sans);
+  letter-spacing: -0.01em;
+}
+.mk .auth-ill__sub {
+  margin: 12px 0 0;
+  color: var(--ill-sub);
+  font-size: 16px;
+}
+.mk .auth-ill__dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+.mk .auth-ill__dots::before {
+  content: '';
+  width: 56px;
+  height: 2px;
+  margin-right: 6px;
+  border-radius: 1px;
+  background: var(--ill-sub);
+  opacity: 0.6;
+}
+.mk .auth-ill__dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+/* Les quatre points de la DSIML : le seul bleu du panneau, il vient de la marque */
+.mk .auth-ill__dots i:nth-child(1) {
+  background: #d50d52;
+}
+.mk .auth-ill__dots i:nth-child(2) {
+  background: #2b95d2;
+}
+.mk .auth-ill__dots i:nth-child(3) {
+  background: #95c020;
+}
+.mk .auth-ill__dots i:nth-child(4) {
+  background: #f19103;
+}
+
+/* Inscription : trois étapes sous la même fenêtre */
+.mk .auth-ill__steps {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mk .auth-ill__steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 12px;
+  color: var(--ill-sub);
+}
+.mk .auth-ill__n {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.12);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+.mk .auth-ill__steps b {
+  display: block;
+  color: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk .auth-ill__hs,
+  .mk .auth-ill__tip {
+    transition: none;
+  }
+  .mk .auth-ill__hs::after {
+    animation: none;
+    opacity: 0.35;
+    transform: scale(1.2);
+  }
+}
+/* Masqué sous 900 px, comme le reste du gabarit */
+@media (max-width: 899px) {
+  .mk .auth-ill {
+    display: none;
+  }
+}

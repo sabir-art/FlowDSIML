@@ -128,8 +128,13 @@
     "changeLanguage": "Change language",
     "privacy": "Privacy",
     "terms": "Terms",
-    "asideTipTitle": "Create a report in one click",
-    "asideTipBody": "Your teams follow the procedure step by step, with nothing to install.",
+    "ill": {
+      "tip1Title": "Create your first demo",
+      "tip1Body": "Click “New demo”, then capture the procedure.",
+      "tip2Title": "Open the Acme CRM demo",
+      "tip2Body": "Add a tooltip on the button to click.",
+      "next": "Next"
+    },
     "asideQuote": "Show the procedure. Let it guide.",
     "asideQuoteSub": "Capture a walkthrough, guide it, distribute it, and see who completed it.",
     "googleSignup": "Sign up with Google",
@@ -146,9 +151,9 @@
     "step1Title": "Capture",
     "step1Body": "Click through the software; the extension records each screen.",
     "step2Title": "Guide",
-    "step2Body": "Add bubbles, blur personal data, adapt texts with variables.",
+    "step2Body": "Add bubbles, blur personal data.",
     "step3Title": "Distribute",
-    "step3Body": "One demo per procedure: a link, a SCORM package or the intranet.",
+    "step3Body": "A link, a SCORM package or the intranet.",
     "googleConsent": "By continuing with Google, you accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>."
   },
   "onboarding": {

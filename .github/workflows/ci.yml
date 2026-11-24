@@ -174,6 +174,9 @@ jobs:
       - name: Boutons des pages d'authentification lisibles (libellé, contraste au repos, au survol, au focus)
         if: always()
         run: cd apps/web && node e2e/boutons-auth.e2e.cjs
+      - name: AUTH-ILL panneau illustré des pages d'accès (couleurs de la marque, contrastes, fenêtre, bulle, mouvement réduit)
+        if: always()
+        run: cd apps/web && node e2e/auth-illustration.e2e.cjs
       - name: Finalité des champs personnels (RGAA 11.13, autocomplete et name)
         if: always()
         run: cd apps/web && node e2e/autocomplete.e2e.cjs
