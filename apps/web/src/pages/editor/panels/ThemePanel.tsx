@@ -282,10 +282,12 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
+                        // Panneau de 320 px : libellé court « Médiathèque », nom complet pour les lecteurs d'écran
+                        aria-label={t('media.choose')}
                         onClick={() => setLibrary('logo')}
                       >
                         <Images aria-hidden="true" />
-                        {t('media.choose')}
+                        {t('media.open')}
                       </button>
                     </>
                   )}
