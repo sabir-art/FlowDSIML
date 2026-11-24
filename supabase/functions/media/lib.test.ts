@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertThrows } from 'jsr:@std/assert@1';
-import { MediaError, pngSize, sanitizeSvg, sniff, webpSize } from './lib.ts';
+import { LOGO_RULES, MediaError, logoCopy, logoPath, pngSize, sanitizeSvg, sniff, webpSize } from './lib.ts';
 
 const enc = (s: string) => new TextEncoder().encode(s);
 const svg = (inner: string, attrs = '') => `<svg xmlns="http://www.w3.org/2000/svg"${attrs}>${inner}</svg>`;
@@ -170,4 +170,91 @@ Deno.test('dimensions WebP (VP8X, VP8L, VP8)', () => {
   // En-tête incohérent ou tronqué : pas de dimensions (le fichier reste accepté, sans largeur ni hauteur)
   assertEquals(webpSize(webp('VP8 ', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])), null);
   assertEquals(webpSize(enc('RIFF')), null);
+});
+
+// ===== Logo pris dans la médiathèque : copie vérifiée =====
+const PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 64, 0, 0, 0, 64,
+]);
+const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0]);
+const codeOf = (fn: () => unknown) => {
+  try {
+    fn();
+    return null;
+  } catch (e) {
+    return e instanceof MediaError ? e.code : 'autre';
+  }
+};
+
+Deno.test('logo depuis la médiathèque : la signature est relue, pas le type enregistré', () => {
+  assertEquals(logoCopy(PNG, 'workspace').mime, 'image/png');
+  assertEquals(logoCopy(PNG, 'center').ext, 'png');
+  // Octets qui ne sont pas une image (police, texte, script) : refusés quel que soit l'emplacement
+  assertEquals(
+    codeOf(() => logoCopy(enc('wOF2xxxxxxxx'), 'workspace')),
+    'BAD_TYPE',
+  );
+  assertEquals(
+    codeOf(() => logoCopy(enc('<script>alert(1)</script>'), 'workspace')),
+    'BAD_TYPE',
+  );
+  assertEquals(
+    codeOf(() => logoCopy(new Uint8Array(0), 'center')),
+    'BAD_TYPE',
+  );
+});
+
+Deno.test('logo depuis la médiathèque : mêmes types et mêmes plafonds qu’un téléversement', () => {
+  // JPEG : accepté pour l'espace, pas pour le centre de formation (comme le téléversement direct)
+  assertEquals(logoCopy(JPEG, 'workspace').ext, 'jpg');
+  assertEquals(
+    codeOf(() => logoCopy(JPEG, 'center')),
+    'BAD_TYPE',
+  );
+  const big = (n: number) => {
+    const b = new Uint8Array(n);
+    b.set(PNG);
+    return b;
+  };
+  assertEquals(logoCopy(big(LOGO_RULES.workspace.maxBytes), 'workspace').bytes.length, 2 * 1024 * 1024);
+  assertEquals(
+    codeOf(() => logoCopy(big(LOGO_RULES.workspace.maxBytes + 1), 'workspace')),
+    'TOO_BIG',
+  );
+  assertEquals(
+    codeOf(() => logoCopy(big(LOGO_RULES.center.maxBytes + 1), 'center')),
+    'TOO_BIG',
+  );
+  assertEquals(logoCopy(big(LOGO_RULES.center.maxBytes), 'center').mime, 'image/png');
+});
+
+Deno.test('logo depuis la médiathèque : un SVG est assaini de nouveau à la copie', () => {
+  const clean = new TextDecoder().decode(
+    logoCopy(
+      enc(
+        '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><circle r="4" onclick="x()"/></svg>',
+      ),
+      'center',
+    ).bytes,
+  );
+  assertEquals(/script|onclick/.test(clean), false);
+  // Construction refusée par l'assainissement (CDATA) : la copie échoue, rien n'est posé
+  assertEquals(
+    codeOf(() => logoCopy(enc('<svg xmlns="http://www.w3.org/2000/svg"><![CDATA[x]]></svg>'), 'workspace')),
+    'SVG_REJECTED',
+  );
+  // Un fichier qui ne commence pas par un SVG n'est pas traité comme tel
+  assertEquals(
+    codeOf(() => logoCopy(enc('<!DOCTYPE svg [<!ENTITY x "y">]><svg/>'), 'workspace')),
+    'BAD_TYPE',
+  );
+});
+
+Deno.test('chemin du logo copié : dans le dossier de l’espace, au format de chaque emplacement', () => {
+  const ws = '00000000-0000-4000-8000-000000000001';
+  const rand = () => '3f2a9c1e-7b64-4d10-9a55-0c8e6f1b2d34';
+  assertEquals(logoPath(ws, 'workspace', 'png', rand), `${ws}/logo-3f2a9c1e-7b64-4d10-9a55-0c8e6f1b2d34.png`);
+  const center = logoPath(ws, 'center', 'webp', rand);
+  // Format exigé par center_draft_valid
+  assertEquals(new RegExp(`^${ws}/center-logo-[0-9a-z]{4,24}\\.(png|svg|webp)$`).test(center), true);
 });
