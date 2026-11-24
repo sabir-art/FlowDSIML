@@ -205,7 +205,7 @@ Maquette : `lot2-demos/nouvelle-source-*`.
   - « Vous n'avez rien demandé ? Ignorez cet e-mail… » ;
   - pied « Envoyé par TutoClick pour {Espace}… » ;
   - 600 px, une colonne, sans pixel de suivi, mode sombre (charte des e-mails).
-- **Pourquoi « Bientôt » en ligne** : ces deux modes ont besoin de l'envoi d'e-mails. Tant que la clé d'envoi n'est pas configurée en production, ils restent « Bientôt » (règle L11 §4), et c'est normal. Ils s'activeront avec la clé, que le chef doit demander au client.
+- **Activation** : la clé d’envoi (Brevo) et l’adresse d’expéditeur sont déjà configurées en production avec la fonction `access-email` (précision du chef, 24/11). Les deux modes passent donc de « Bientôt » à actifs, sans attente côté client.
 
 ## 9. Prise en main terminée
 
