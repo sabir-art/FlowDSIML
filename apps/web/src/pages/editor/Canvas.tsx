@@ -313,7 +313,14 @@ export function Canvas({
 
   // L17-02 : étape Avant / Après (aperçu des deux captures, sans outils)
   if (step.kind === 'before_after')
-    return <BeforeAfterCanvas editor={editor} step={step} onSelect={() => setSelection({ kind: 'step' })} />;
+    return (
+      <BeforeAfterCanvas
+        editor={editor}
+        step={step}
+        readOnly={readOnly}
+        onSelect={() => setSelection({ kind: 'step' })}
+      />
+    );
 
   // F7 (L21-03) : étape vidéo (canevas et montage, sans outils de capture)
   if (step.kind === 'video') return <VideoCanvas editor={editor} step={step} readOnly={readOnly} />;

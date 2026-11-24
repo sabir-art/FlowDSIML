@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImagePlus, ListOrdered, TriangleAlert, X } from 'lucide-react';
 import { Menu } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
+import { FileDropzone } from '../../components/FileDropzone';
+import { DropBlock } from '../../components/DropBlock';
 import type { DemoEditor } from './useDemoEditor';
 import {
   BA_LABEL_MAX,
@@ -49,15 +51,47 @@ export function BeforeAfterCanvas({
   editor,
   step,
   onSelect,
+  readOnly = false,
 }: {
   editor: DemoEditor;
   step: StepRow;
   onSelect: () => void;
+  readOnly?: boolean;
 }) {
   const { t } = useTranslation();
   const ba = asBeforeAfter(step.options);
   const lb = ba.labels.before || t('editor.ba.before');
   const la = ba.labels.after || t('editor.ba.after');
+  // MEDIA-01 §18.3 : envoi d'une image depuis le canevas (zone vide, ou dépôt sur la capture en place)
+  const [sending, setSending] = useState<'before' | 'after' | null>(null);
+  const [errors, setErrors] = useState<{ before?: string; after?: string }>({});
+  const send = async (side: 'before' | 'after', f: File | undefined) => {
+    if (!f || readOnly) return;
+    const fail = (msg: string) => setErrors((e) => ({ ...e, [side]: msg }));
+    if (!TYPES.includes(f.type)) return fail(t('editor.ba.badType'));
+    if (f.size > MAX_BYTES) return fail(t('editor.ba.tooBig'));
+    setErrors((e) => ({ ...e, [side]: undefined }));
+    setSending(side);
+    try {
+      await editor.setBeforeAfterImage(step.id, side, { file: f });
+    } finally {
+      setSending(null);
+    }
+  };
+  /** Cadre d'un côté (fonction, pas composant : pas de remontage à chaque rendu) : une capture en place
+   *  accepte un dépôt pour être remplacée (voile). */
+  const pic = (side: 'before' | 'after', filled: boolean, children: ReactNode) =>
+    filled && !readOnly ? (
+      <DropBlock
+        className={`ba-pic${side === 'before' ? ' is-old' : ''}`}
+        disabled={sending !== null}
+        onFile={(f) => void send(side, f)}
+      >
+        {children}
+      </DropBlock>
+    ) : (
+      <div className={`ba-pic${side === 'before' ? ' is-old' : ''}`}>{children}</div>
+    );
   const col = (side: 'before' | 'after') => {
     const path = side === 'before' ? step.before_image_path : step.image_path;
     const url = path ? editor.imageUrls[path] : undefined;
@@ -67,19 +101,37 @@ export function BeforeAfterCanvas({
     return (
       <div className="ba-col">
         <span className={`ba-pill ba-pill--${side}`}>{side === 'before' ? lb : la}</span>
-        <div className={`ba-pic${side === 'before' ? ' is-old' : ''}`}>
-          {url ? (
+        {pic(
+          side,
+          !!url,
+          url ? (
             <div className="ba-shot" style={{ '--ratio': String(w / h) } as CSSProperties}>
               <img src={url} alt="" />
               <Masks list={masks} ratio={w / h} />
             </div>
-          ) : (
+          ) : readOnly ? (
             <span className="ba-missing">
               <ImagePlus aria-hidden="true" />
               {t(side === 'before' ? 'editor.ba.missingBefore' : 'editor.ba.missingAfter')}
             </span>
-          )}
-        </div>
+          ) : (
+            // MEDIA-01 §18.3 : zone large, titrée « Avant » ou « Après », avec ses états
+            <FileDropzone
+              className="ba-zone"
+              label={side === 'before' ? lb : la}
+              title={side === 'before' ? lb : la}
+              inputId={`ba-zone-${side}`}
+              accept={TYPES.join(',')}
+              icon={<ImagePlus />}
+              hint={t('editor.ba.zoneHint')}
+              pickLabel={t('dropzone.import')}
+              busy={sending === side}
+              busyLabel={t('editor.ba.zoneSending')}
+              error={errors[side]}
+              onFiles={(files) => void send(side, files[0])}
+            />
+          ),
+        )}
       </div>
     );
   };

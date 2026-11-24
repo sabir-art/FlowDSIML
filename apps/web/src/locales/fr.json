@@ -1274,7 +1274,9 @@
       "missingAfter": "Capture « Maintenant » à choisir",
       "pickTitle": "{{name}} : choisir une étape",
       "pickHelp": "La capture est copiée avec ses flous : modifier ensuite l’étape ne change pas l’Avant / Après.",
-      "incomplete": "L’étape {{n}} Avant / Après n’a pas ses deux captures."
+      "incomplete": "L’étape {{n}} Avant / Après n’a pas ses deux captures.",
+      "zoneHint": "PNG, JPEG ou WebP, 10 Mo au plus.",
+      "zoneSending": "Envoi de l’image"
     },
     "styles": {
       "title": "Choisir un style",
