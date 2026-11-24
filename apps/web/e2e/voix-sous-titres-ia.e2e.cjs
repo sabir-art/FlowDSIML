@@ -6,6 +6,7 @@
  * Usage : SHOTS_DIR=… [THEME=dark] node e2e/voix-sous-titres-ia.e2e.cjs
  */
 const { chromium } = require('playwright');
+const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const { sfx, themedContext } = require('./_theme.cjs');
@@ -117,7 +118,7 @@ function prepare(over = {}) {
     }
     fresh = false;
     sec = page.locator('.voice-sec');
-    panel = sec.locator('.ai-voice');
+    panel = sec.locator('#vo-panel');
     ask = page.getByRole('dialog', { name: 'Envoyer l’audio pour transcription ?' });
     dlg = page.locator('dialog.vd-dialog');
     await install(page, state);
@@ -142,12 +143,27 @@ function prepare(over = {}) {
   });
   await open(state);
   const s1 = () => state.tables.steps.find((s) => s.demo_id === DEMO && s.position === 0);
-  ok((await sec.getByText('Bientôt').count()) === 0, '« Générer à partir du texte » n’est plus en Bientôt');
-  await sec.getByRole('button', { name: 'Générer à partir du texte' }).click();
-  const txt = panel.getByLabel('Texte à lire');
+  // EXT-02 §6.4 : « Générer » dans le panneau, sans fenêtre à part
+  const toGenerate = async () => {
+    await sec.getByRole('button', { name: 'Remplacer…' }).click();
+    await sec.getByRole('tab', { name: 'Générer' }).click();
+  };
+  const voices = async () => {
+    await panel.getByRole('combobox', { name: 'Voix' }).click();
+    const list = page.getByRole('listbox');
+    await list.waitFor();
+    const names = await list.getByRole('option').allTextContents();
+    return { list, names };
+  };
+  await toGenerate();
+  const txt = panel.getByLabel(/^Texte lu/);
   ok(
     (await txt.inputValue()) === 'Bienvenue chez {{company}}. Ouvrez la fiche du jeune.',
-    'Texte à lire prérempli avec la transcription',
+    'Texte lu prérempli avec la transcription',
+  );
+  ok(
+    (await panel.getByText('(sert aussi de transcription)').count()) === 1,
+    'Le texte lu sert aussi de transcription',
   );
   ok(
     /Les variables sont lues avec leur valeur par défaut \(\{\{company\}\} → « votre entreprise »\)/.test(
@@ -155,13 +171,12 @@ function prepare(over = {}) {
     ),
     'Aide : variables lues avec leur valeur par défaut',
   );
-  ok((await panel.getByRole('radio').count()) === 9, '6 voix et 3 vitesses');
+  ok(/53\scaractères · environ\s\d+\ss/.test(await panel.textContent()), 'Compteur et durée estimée');
   ok(
-    (await panel.getByRole('button', { name: /^Écouter un exemple de la voix/ }).count()) === 6,
-    'Un exemple par voix',
+    (await panel.getByText('Langue de la démo : français.').count()) === 1,
+    'Langue de la démo rappelée sous la voix',
   );
-  ok(await panel.getByRole('radio', { name: 'Normale' }).isChecked(), 'Vitesse « Normale » par défaut');
-  ok(/Environ\s\d+\ss/.test(await panel.textContent()), 'Durée estimée');
+  ok((await panel.getByRole('radio').count()) === 0, 'Ni liste de voix à cocher, ni vitesse');
   ok(
     (await panel.getByText('Le texte ci-dessus sera envoyé à ElevenLabs pour produire l’audio.').count()) ===
       1,
@@ -171,37 +186,56 @@ function prepare(over = {}) {
     (state.aiCalls || []).every((c) => c.task === 'voice_list'),
     'Rien n’est envoyé à l’ouverture (liste des voix seulement)',
   );
-  const used0 = state.ai.used;
-  await panel.getByRole('button', { name: 'Écouter un exemple de la voix Antoine' }).click();
-  await until(() => (state.aiCalls || []).some((c) => c.task === 'voice_sample'));
-  ok(
-    state.aiCalls.at(-1).task === 'voice_sample' && state.aiCalls.at(-1).input.voice === 'antoine',
-    'Exemple demandé sans texte',
-  );
-  ok(state.ai.used === used0, 'L’exemple ne consomme pas de quota');
-  await panel.getByRole('radio', { name: /Antoine/ }).check();
-  await panel.getByRole('radio', { name: 'Rapide' }).check();
+  const v0 = await voices();
+  ok(v0.names.length === 6 && /^Claire/.test(v0.names[0]), 'Six voix, « Claire » en premier');
+  await v0.list.getByRole('option', { name: /Antoine/ }).click();
   await shot('l30-10-voix-panneau');
   await panel.getByRole('button', { name: 'Générer la voix' }).click();
-  await panel.getByRole('button', { name: 'Appliquer' }).waitFor();
+  await panel.getByRole('button', { name: 'Utiliser' }).waitFor();
   const call = state.aiCalls.at(-1);
   ok(
     call.task === 'voice' &&
       call.input.voice === 'antoine' &&
-      call.input.speed === 'fast' &&
+      call.input.speed === 'normal' &&
       call.input.text === 'Bienvenue chez votre entreprise. Ouvrez la fiche du jeune.',
-    'Demande : texte avec les valeurs par défaut, voix et vitesse',
+    'Demande : texte avec les valeurs par défaut et voix choisie',
   );
-  ok((await panel.locator('audio').count()) === 1, 'Aperçu à écouter');
-  ok(/Durée\s:\s4\ss/.test(await panel.textContent()), 'Durée réelle');
-  ok((await panel.getByText('Généré par IA, à vérifier').count()) === 1, 'Mention IA');
   ok(
-    (await panel.getByRole('button', { name: 'Générer à nouveau' }).count()) === 1,
-    'Lien « Générer à nouveau »',
+    (await panel.getByText('Aperçu', { exact: true }).count()) === 1 &&
+      (await panel.getByRole('button', { name: 'Écouter' }).count()) === 1,
+    'Aperçu à écouter',
   );
-  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant « Appliquer »');
+  ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
+  ok((await panel.locator('audio[controls]').count()) === 0, 'Pas de lecteur natif');
+  const two = await panel.locator('.vo-two button').allTextContents();
+  ok(two.join('|') === 'Régénérer|Utiliser', '« Régénérer » et « Utiliser » côte à côte');
+  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant « Utiliser »');
   await shot('l30-10-voix-apercu');
-  await panel.getByRole('button', { name: 'Appliquer' }).click();
+  // Accessibilité et espacements du panneau « Générer » (aperçu affiché)
+  const axe = await new AxeBuilder({ page })
+    .include('.voice-sec')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+  ok(
+    axe.violations.length === 0,
+    `Panneau « Générer » : aucune violation axe (${axe.violations.map((v) => v.id).join(', ')})`,
+  );
+  const tight = await page.evaluate(() => {
+    const out = [];
+    for (const box of document.querySelectorAll('#vo-panel, #vo-panel .vo-two')) {
+      const kids = [...box.children].filter((c) => c.getClientRects().length && !c.matches('.sr-only'));
+      for (let i = 1; i < kids.length; i++) {
+        const a = kids[i - 1].getBoundingClientRect();
+        const b = kids[i].getBoundingClientRect();
+        const gap = Math.max(b.top - a.bottom, b.left - a.right);
+        if (gap < 8) out.push(`${kids[i].className} ${Math.round(gap)}`);
+      }
+    }
+    if (document.documentElement.scrollWidth > innerWidth) out.push('défilement horizontal');
+    return out;
+  });
+  ok(tight.length === 0, `Panneau « Générer » : 8 px au moins entre les blocs (${tight.join(' ; ')})`);
+  await panel.getByRole('button', { name: 'Utiliser' }).click();
   const confirm = page.getByRole('dialog', {
     name: 'Remplacer votre enregistrement par la voix de synthèse ?',
   });
@@ -329,12 +363,13 @@ function prepare(over = {}) {
   state = prepare({ ttsUsed: 298 });
   state.aiVoices = ['claire', 'louise', 'sarah', 'antoine', 'daniel'];
   await open(state);
-  await sec.getByRole('button', { name: 'Générer à partir du texte' }).click();
-  await panel.getByRole('radio', { name: /Claire/ }).waitFor();
-  await page.waitForTimeout(500);
+  await toGenerate();
   ok(
-    (await panel.getByRole('radio', { name: /Adam/ }).count()) === 0 &&
-      (await panel.getByRole('button', { name: /^Écouter un exemple de la voix/ }).count()) === 5,
+    await until(async () => {
+      const v = await voices();
+      await page.keyboard.press('Escape');
+      return v.names.length === 5 && !v.names.some((n) => /Adam/.test(n));
+    }),
     'Voix absente chez le fournisseur : masquée',
   );
   await panel.getByText(/Il reste 2\ss ce mois-ci, la demande en demande environ \d+\ss\./).waitFor();
@@ -346,19 +381,22 @@ function prepare(over = {}) {
 
   state = prepare({ ttsUsed: 300, sttUsed: 300 });
   await open(state);
-  await sec.getByRole('button', { name: 'Générer à partir du texte' }).click();
-  await panel.getByRole('button', { name: 'Générer la voix' }).click();
+  await toGenerate();
   const alert = panel.getByRole('alert');
+  await alert.waitFor();
   ok(
     /^Quota de voix de synthèse atteint pour ce mois \(300\ss\)\. Il se renouvelle le 1\sdécembre\s2026\.$/.test(
       await alert.textContent(),
     ),
-    'Quota de voix atteint, sans envoi',
+    'Quota de voix atteint : message et date de remise à zéro, dans le panneau',
+  );
+  ok(
+    await panel.getByRole('button', { name: 'Générer la voix' }).isDisabled(),
+    'Quota atteint : bouton désactivé',
   );
   ok(!(state.aiCalls || []).some((c) => c.task === 'voice'), 'Quota atteint : rien n’est envoyé');
-  ok((await panel.getByRole('button', { name: 'Fermer' }).count()) === 1, 'Bouton « Fermer »');
   await shot('l30-13-quota-voix');
-  await panel.getByRole('button', { name: 'Fermer' }).click();
+  await sec.getByRole('button', { name: 'Garder la voix actuelle' }).click();
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
   ok(
     /^Quota de sous-titres automatiques atteint pour ce mois \(300\ss\)\./.test(
@@ -369,14 +407,13 @@ function prepare(over = {}) {
 
   state = prepare({ features: { ...FEATURES, voice: false, captions: false } });
   await open(state);
-  const entry = sec.getByRole('button', { name: 'Générer à partir du texte' });
-  ok((await entry.getAttribute('aria-disabled')) === 'true', 'Voix désactivée : entrée estompée');
+  await sec.getByRole('button', { name: 'Remplacer…' }).click();
+  const entry = sec.getByRole('tab', { name: 'Générer' });
+  ok((await entry.getAttribute('aria-disabled')) === 'true', 'Voix désactivée : onglet « Générer » grisé');
   ok(
-    (await sec.locator('.ai-tip').first().textContent()) ===
-      'Voix de synthèse désactivée dans cet espace. Un administrateur peut l’activer dans Paramètres > Assistance IA.',
-    'Infobulle de la voix désactivée',
+    (await sec.locator('#vo-gen-off').textContent()) === 'Générer : désactivé par l’espace.',
+    'Raison affichée sous les onglets',
   );
-  await entry.hover();
   await shot('l30-13-desactive');
   await railTo('Saisie de la fiche');
   await openTool(page, 'step');
