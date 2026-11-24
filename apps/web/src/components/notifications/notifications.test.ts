@@ -47,7 +47,7 @@ describe('L22-05 : centre de notifications', () => {
   });
   it('nouveau lead : lien vers les leads de la démo', () => {
     expect(notificationHref({ kind: 'lead', demo_id: 'd', step_id: null, comment_id: null })).toBe(
-      '/demos/d/analytics',
+      '/demos/d/leads',
     );
   });
   it('lien vers l’étape avec le fil ouvert', () => {

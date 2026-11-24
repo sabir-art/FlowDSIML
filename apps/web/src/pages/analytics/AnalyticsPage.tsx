@@ -657,7 +657,7 @@ function Overview({
   );
 }
 
-function Sessions({
+export function Sessions({
   wsId,
   days,
   demo,
@@ -712,7 +712,8 @@ function Sessions({
   const to = Math.min(res.total, (page + 1) * PAGE);
   return (
     <div className="card">
-      <div className="table-wrap">
+      {/* Tableau large : la zone qui défile se parcourt aussi au clavier (RGAA 12.9) */}
+      <div className="table-wrap" role="region" aria-label={t('analytics.tab.sessions')} tabIndex={0}>
         <table className="table">
           <caption className="sr-only">{t('analytics.tab.sessions')}</caption>
           <thead>

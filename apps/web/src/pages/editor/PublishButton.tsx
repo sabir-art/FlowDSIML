@@ -28,8 +28,11 @@ export function PublishButton({
   onPlan,
   republishLabel,
   onPublished,
+  autoOpen = false,
 }: {
   editor: DemoEditor;
+  /** « Publier » cliqué depuis une autre vue de la démo (Analytics, Leads, Visiteurs) : la fenêtre s'ouvre. */
+  autoOpen?: boolean;
   /** L16 : publication depuis « Diffuser » : rester dans la modale au lieu d'ouvrir Partager. */
   onPublished?: (version: number) => void;
   /** Libellé quand la démo est déjà publiée (page Partager : « Publier les modifications »). */
@@ -106,6 +109,14 @@ export function PublishButton({
   const restricted = !canPublishWith(useShareRules(demo.workspace_id), current?.role);
   const [gdprOpen, setGdprOpen] = useState(false);
   const { current: ws } = useWorkspace();
+
+  const auto = useRef(autoOpen);
+  useEffect(() => {
+    if (!auto.current || restricted) return;
+    auto.current = false;
+    void publish();
+    // Une seule fois, à l'ouverture de l'éditeur
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function publish() {
     // F2 : publication bloquée tant qu'une question du quiz est incomplète

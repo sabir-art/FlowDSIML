@@ -125,8 +125,10 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   const badge = (name) =>
     p.getByRole('menuitem', { name: new RegExp(`^${name}`) }).locator('.ct-badge > span[aria-hidden]');
   ok(
-    (await badge('Exporter').innerText()) === 'HTML' && (await badge('Importer').innerText()) === 'Captures',
-    'L48-G : type de contenu de chaque démo dans le menu (HTML, Captures)',
+    (await badge('Exporter').innerText()) === 'HTML guidée' &&
+      (await badge('Importer').innerText()) === 'Captures' &&
+      (await p.getByRole('menu').locator('.ct-badge--tone').count()) >= 2,
+    'L48-G : type de contenu de chaque démo dans le menu, en pastille colorée (HTML guidée, Captures)',
   );
   await search.fill('fiche');
   const shown = await p.getByRole('menuitem').allTextContents();

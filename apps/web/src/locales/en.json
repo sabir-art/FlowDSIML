@@ -6177,5 +6177,20 @@
     "leaveTitle": "Leave without saving?",
     "leaveBody": "Your changes to the public page are not saved.",
     "leaveConfirm": "Leave"
+  },
+  "demoViews": {
+    "visitors": "Visitors",
+    "tabs": "Demo views",
+    "publishedOn": "Published · version of {{date}}",
+    "sourceFilter": "Sharing channel",
+    "allSources": "All",
+    "h1": {
+      "analytics": "Analytics of “{{title}}”",
+      "leads": "Leads of “{{title}}”",
+      "visitors": "Visitors of “{{title}}”"
+    },
+    "byChannel": "By sharing channel",
+    "channel": "Channel",
+    "backTo": "Back: {{name}}"
   }
 }

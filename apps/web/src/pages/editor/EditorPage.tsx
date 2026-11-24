@@ -20,6 +20,10 @@ import {
   Languages,
   Lightbulb,
   Pencil,
+  ChartColumn,
+  Mail,
+  Users,
+  Play,
 } from 'lucide-react';
 import {
   EditorRail,
@@ -51,7 +55,7 @@ import { activityOf, type EditTable, type PresencePayload } from './presence/pre
 import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
 import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
 import { useShowCursors } from './presence/showCursors';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -247,6 +251,7 @@ export function EditorPage() {
   /** Outils du rail visibles (Assistant : éditeurs), dans l'ordre (raccourcis Alt + 1 à 9). */
   const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
+  const location = useLocation();
   // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages
   const [panel, setPanelState] = useState<ToolId | null>(() =>
     params.get('tab') === 'settings' ? 'settings' : savedTool(),
@@ -572,6 +577,14 @@ export function EditorPage() {
   useEffect(() => {
     if (ready) storeEditorGeometry(demoId);
   }, [ready, demoId]);
+  // §9 : « Aperçu » cliqué depuis une autre vue de la démo (Analytics, Leads, Visiteurs)
+  const wantPreview = useRef(!!(location.state as { preview?: boolean } | null)?.preview);
+  useEffect(() => {
+    if (!ready || !wantPreview.current || !editor.steps.length) return;
+    wantPreview.current = false;
+    preview();
+    // Une seule fois, quand la démo est chargée
+  }, [ready, editor.steps.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (narrow)
     return <EditorNarrowView editor={editor} comments={comments} index={index} setIndex={setIndex} />;
@@ -894,6 +907,7 @@ export function EditorPage() {
               role="radio"
               onClick={() => setPreviewManifest(null)}
             >
+              <Pencil aria-hidden="true" />
               {t('editor.modeEdit')}
             </button>
             <button
@@ -903,11 +917,25 @@ export function EditorPage() {
               onClick={() => preview()}
               disabled={!editor.steps.length}
             >
+              <Play aria-hidden="true" />
               {t('editor.preview')}
             </button>
           </div>
-          <Link to={`/demos/${demoId}/analytics`}>{t('nav.analytics')}</Link>
-          <Link to={`/demos/${demoId}/analytics?indicateur=leads`}>{t('kpi.leads')}</Link>
+          {/* §9 : mêmes onglets que les autres vues de la démo */}
+          <Link to={`/demos/${demoId}/analytics`}>
+            <ChartColumn aria-hidden="true" />
+            {t('nav.analytics')}
+          </Link>
+          {can('leads.view') && (
+            <Link to={`/demos/${demoId}/leads`}>
+              <Mail aria-hidden="true" />
+              {t('kpi.leads')}
+            </Link>
+          )}
+          <Link to={`/demos/${demoId}/visitors`}>
+            <Users aria-hidden="true" />
+            {t('demoViews.visitors')}
+          </Link>
         </div>
         <div className="ed-bar__r">
           {user && (
@@ -1072,6 +1100,7 @@ export function EditorPage() {
             <span className="ed-publish">
               <PublishButton
                 editor={editor}
+                autoOpen={!!(location.state as { publish?: boolean } | null)?.publish}
                 republishLabel={t('publish.publish')}
                 onReviewStep={(i) => {
                   setIndex(i);

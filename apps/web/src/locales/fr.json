@@ -6177,5 +6177,20 @@
     "leaveTitle": "Quitter sans enregistrer ?",
     "leaveBody": "Vos modifications de la page publique ne sont pas enregistrées.",
     "leaveConfirm": "Quitter"
+  },
+  "demoViews": {
+    "visitors": "Visiteurs",
+    "tabs": "Vues de la démo",
+    "publishedOn": "Publiée · version du {{date}}",
+    "sourceFilter": "Moyen de partage",
+    "allSources": "Tous",
+    "h1": {
+      "analytics": "Analytics de « {{title}} »",
+      "leads": "Leads de « {{title}} »",
+      "visitors": "Visiteurs de « {{title}} »"
+    },
+    "byChannel": "Par moyen de partage",
+    "channel": "Moyen",
+    "backTo": "Retour : {{name}}"
   }
 }

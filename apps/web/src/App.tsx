@@ -135,10 +135,25 @@ const QuizEditorPage = lazyRest(() =>
 const DemoAnalyticsPage = lazyRest(() =>
   import('./pages/analytics/DemoAnalyticsPage').then((m) => ({ default: m.DemoAnalyticsPage })),
 );
+const DemoViewShell = lazyRest(() =>
+  import('./pages/demo/DemoViewShell').then((m) => ({ default: m.DemoViewShell })),
+);
+const DemoLeadsView = lazyRest(() =>
+  import('./pages/demo/DemoLeadsView').then((m) => ({ default: m.DemoLeadsView })),
+);
+const DemoVisitorsView = lazyRest(() =>
+  import('./pages/demo/DemoVisitorsView').then((m) => ({ default: m.DemoVisitorsView })),
+);
 const AnalyticsPage = lazyRest(() =>
   import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 );
 const SharePage = lazyRest(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
+/** §9 : #/demos/:id/preview ouvre l'éditeur sur l'aperçu. */
+function PreviewRedirect() {
+  const { demoId } = useParams();
+  return <Navigate to={`/demos/${demoId}/edit`} state={{ preview: true }} replace />;
+}
+
 /** L16 : #/demos/:id/distribute ouvre la modale « Diffuser » au-dessus de l'éditeur. */
 function DistributeRoute() {
   const { demoId = '' } = useParams();
@@ -254,6 +269,22 @@ export function App() {
                       </RequireAuth>
                     }
                   />
+                  {/* §9 : Aperçu d'une démo, ouvert depuis ses autres vues */}
+                  <Route path="/demos/:demoId/preview" element={<PreviewRedirect />} />
+                  {/* §9 : vues d'une démo hors de l'éditeur, sans la barre latérale de l'application */}
+                  <Route
+                    element={
+                      <RequireAuth>
+                        <RequireWorkspace>
+                          <DemoViewShell />
+                        </RequireWorkspace>
+                      </RequireAuth>
+                    }
+                  >
+                    <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
+                    <Route path="/demos/:demoId/leads" element={<DemoLeadsView />} />
+                    <Route path="/demos/:demoId/visitors" element={<DemoVisitorsView />} />
+                  </Route>
                   <Route
                     element={
                       <RequireAuth>
@@ -267,7 +298,6 @@ export function App() {
                     <Route path="/sandbox" element={<DemosPage key="sandbox" sandbox />} />
                     <Route path="/demos/:demoId/share" element={<SharePage />} />
                     <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
-                    <Route path="/demos/:demoId/analytics" element={<DemoAnalyticsPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/nouveautes" element={<NewsPage />} />
                     <Route path="/learners" element={<LearnersPage />} />

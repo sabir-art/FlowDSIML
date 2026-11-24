@@ -1,0 +1,173 @@
+/* Retours client du 24/11 (2e série) §9 : vues d'une démo hors de l'éditeur (Analytics, Leads, Visiteurs).
+   Barre commune de 56 px, contenu centré (1 200 px au plus) sur le fond de l'application. */
+.mk.dv {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--fd-color-bg);
+  color: var(--fd-color-text);
+}
+.mk .dv-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  flex: none;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+  padding: 0 16px 0 8px;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: var(--fd-color-content-bg);
+}
+.mk .dv-bar__l {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mk .dv-back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 10px 0 6px;
+  border-radius: 8px;
+  color: var(--fd-color-text-muted);
+  font: 500 14px var(--fd-font-sans);
+  text-decoration: none;
+}
+.mk .dv-back:hover {
+  background: var(--fd-color-nav-hover);
+  color: var(--fd-color-text);
+}
+.mk .dv-back svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .dv-tt {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+.mk .dv-tt b {
+  overflow: hidden;
+  font: 600 15px/19px var(--fd-font-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .dv-state {
+  overflow: hidden;
+  font: 400 12px/15px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Onglets : même contrôle segmenté que l'éditeur (36 px, liens de 30 px en 13 px) ; l'onglet courant
+   est le lien aria-current */
+.mk .dv-tabs {
+  display: inline-flex;
+  gap: 2px;
+  justify-self: center;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .dv-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--fd-color-text-muted);
+  font: 500 13px var(--fd-font-sans);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mk .dv-tabs a > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.mk .dv-tabs a:hover {
+  color: var(--fd-color-text);
+}
+.mk .dv-tabs a[aria-current='page'] {
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
+}
+.mk .dv-tabs a:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
+}
+.mk .dv-tabs-menu {
+  display: none;
+  justify-self: center;
+}
+.mk .dv-bar__r {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 8px;
+  min-width: 0;
+}
+.mk .dv-main {
+  flex: 1;
+  min-width: 0;
+  padding: 20px 24px 48px;
+}
+.mk .dv-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+/* Outils de la vue : période à gauche, action (export) à droite */
+.mk .dv-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* Sous 900 px : onglets en bouton-menu, « Partager » en bouton icône */
+@media (max-width: 899px) {
+  .mk .dv-bar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    padding: 0 8px 0 4px;
+  }
+  .mk .dv-tabs {
+    display: none;
+  }
+  .mk .dv-tabs-menu {
+    display: block;
+  }
+  .mk .dv-back span,
+  .mk .dv-bar .ed-vsep {
+    display: none;
+  }
+  .mk .dv-share {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .mk .dv-share span {
+    display: none;
+  }
+  .mk .dv-main {
+    padding: 16px 16px 40px;
+  }
+}
+/* Sous 640 px : « Publier » se fait depuis l'onglet Édition (la barre garde le nom, les vues, Partager) */
+@media (max-width: 639px) {
+  .mk .dv-bar__r .fd-btn--primary {
+    display: none;
+  }
+}

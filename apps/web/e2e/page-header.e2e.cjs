@@ -24,7 +24,6 @@ const SHELL = [
   ['Apprenants', '/learners'],
   ['Analytics', '/analytics'],
   ['Analytics · Leads', '/analytics?tab=leads'],
-  ['Analytics d’une démo', `/demos/${DEMO}/analytics`],
   ['Partager', `/demos/${DEMO}/share`],
   ['Nouveautés', '/nouveautes'],
 ];
