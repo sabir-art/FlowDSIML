@@ -180,6 +180,9 @@ jobs:
       - name: MOTION-01 la scène de l'éditeur suit les panneaux (FLIP en transform seul, 0,32 s, mouvement réduit)
         if: always()
         run: cd apps/web && node e2e/mouvement.e2e.cjs
+      - name: Bulle « Afficher « Précédent » » (désactivé à l'étape 1, aperçu à l'étape 2, toutes les étapes)
+        if: always()
+        run: cd apps/web && node e2e/bulle-precedent.e2e.cjs
       - name: Finalité des champs personnels (RGAA 11.13, autocomplete et name)
         if: always()
         run: cd apps/web && node e2e/autocomplete.e2e.cjs

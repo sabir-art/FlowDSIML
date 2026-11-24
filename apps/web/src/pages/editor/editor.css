@@ -4747,3 +4747,37 @@
     opacity: 0;
   }
 }
+
+/* Retours client du 24/11 §2 : « Afficher « Précédent » » : 16 px au-dessus de la ligne, aide sous le
+   libellé, interrupteur gris à l'étape 1 (désactivé, jamais masqué), lien « sur toutes les étapes » */
+.mk .hs-showprev {
+  align-items: flex-start;
+  padding-top: 16px;
+  padding-bottom: 0;
+}
+.mk .hs-showprev__text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.mk .hs-showprev__text .help {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.mk .switch.is-off {
+  cursor: not-allowed;
+}
+.mk .switch.is-off span {
+  background: var(--fd-color-surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--fd-color-border);
+}
+.mk .switch.is-off span::after {
+  background: var(--fd-color-text-subtle);
+}
+.mk .hs-showprev__all {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
