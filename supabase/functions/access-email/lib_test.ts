@@ -1,5 +1,6 @@
 // Tests de la logique d'access-email avec des doubles (aucun envoi réel, aucun appel réseau).
-import { assertEquals } from 'jsr:@std/assert@1';
+import { assert, assertEquals, assertStringIncludes } from 'jsr:@std/assert@1';
+import { oneLine, renderAccess, sendAccessMail, ttlText, type AccessMail } from './mail.ts';
 import { handle, redirectFor, type Deps, type Reserve } from './lib.ts';
 
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -165,4 +166,127 @@ Deno.test('démo invalide refusée', async () => {
     (await handle({ action: 'request', demoId: 'x', email: 'a@nord.example' }, '', null, deps)).status,
     400,
   );
+});
+
+// ===== §8 : e-mail d'accès aux couleurs de l'espace (service d'e-mail configuré) =====
+
+function withMailer(ok = true) {
+  const sent: AccessMail[] = [];
+  const f = fake({
+    mailer: {
+      ttlSeconds: 3600,
+      link: (kind, email, to) => Promise.resolve({ url: `${to}#lien-${kind}-${email}`, userId: 'u-lien' }),
+      send: (mail) => {
+        sent.push(mail);
+        return Promise.resolve(ok);
+      },
+    },
+  });
+  return { ...f, sent };
+}
+
+Deno.test(
+  'service d’e-mail configuré : nouveau visiteur, lien d’invitation et e-mail de l’espace',
+  async () => {
+    const { deps, calls, sent } = withMailer();
+    const r = await handle({ action: 'request', demoId: DEMO, email: 'lea@nord.example' }, '', null, deps);
+    assertEquals(r.body, { status: 'sent' });
+    // Aucun envoi par les gabarits d'Auth
+    assertEquals(calls, ['mark:u-lien:Acme:true']);
+    assertEquals(sent.length, 1);
+    assertEquals(sent[0]!.to, 'lea@nord.example');
+    assertEquals(sent[0]!.senderName, 'Acme via TutoClick');
+    assertEquals(sent[0]!.subject, 'Votre lien d’accès à « Créer une fiche »');
+    assertStringIncludes(sent[0]!.html, `?acces=${DEMO}#lien-invite-lea@nord.example`);
+  },
+);
+
+Deno.test('service d’e-mail configuré : compte existant, lien magique sans création de compte', async () => {
+  const { deps, calls, sent } = withMailer();
+  await handle({ action: 'request', demoId: DEMO, email: 'connu-visiteur@nord.example' }, '', null, deps);
+  assertEquals(calls, ['mark:u-connu:Acme:false']);
+  assertStringIncludes(sent[0]!.text, '#lien-magiclink-connu-visiteur@nord.example');
+});
+
+Deno.test(
+  'service d’e-mail en échec : la demande ne dit rien de plus au visiteur, rien n’est envoyé par Auth',
+  async () => {
+    const { deps, calls } = withMailer(false);
+    const r = await handle({ action: 'request', demoId: DEMO, email: 'lea@nord.example' }, '', null, deps);
+    assertEquals(r.status, 200);
+    assert(!calls.some((c) => c.startsWith('invite:') || c.startsWith('magic:')));
+  },
+);
+
+Deno.test('e-mail d’accès : textes de la maquette, durée réelle, aucune image distante ni suivi', () => {
+  const m = renderAccess({
+    to: 'lea@nord.example',
+    demoTitle: 'Démo CRM',
+    workspace: 'Acme',
+    url: 'https://demos.tutoclick.example/?acces=x#jeton',
+    ttlSeconds: 3600,
+  });
+  for (const s of [
+    'Vous avez demandé à ouvrir la démo « Démo CRM » partagée par Acme. Ce lien vous est personnel : ne le transférez pas.',
+    'Ouvrir la démo',
+    'Le lien est valable 1 heure et ne sert qu’une fois.',
+    'Vous n’avez rien demandé ? Ignorez cet e-mail : personne n’aura accès à la démo avec votre adresse.',
+    'Envoyé par TutoClick pour Acme. Cet e-mail suit votre demande sur la page de la démo ; vous ne recevrez rien d’autre.',
+  ]) {
+    assertStringIncludes(m.text, s);
+    assertStringIncludes(m.html, s);
+  }
+  assert(!/<img|<script|<link/i.test(m.html));
+  assertStringIncludes(m.html, 'prefers-color-scheme: dark');
+  assertStringIncludes(m.html, 'width="600"');
+  // La durée annoncée suit celle du serveur
+  assertStringIncludes(renderAccess({ ...argsOf(m), ttlSeconds: 1800 }).text, 'valable 30 minutes');
+  assertEquals([ttlText(60), ttlText(7200), ttlText(5400)], ['1 minute', '2 heures', '90 minutes']);
+});
+const argsOf = (m: AccessMail) => ({
+  to: m.to,
+  demoTitle: 'Démo CRM',
+  workspace: 'Acme',
+  url: 'https://x.example/',
+});
+
+Deno.test('e-mail d’accès : un nom d’espace ou un titre hostile reste du texte', () => {
+  const m = renderAccess({
+    to: 'lea@nord.example',
+    demoTitle: '<script>alert(1)</script>',
+    workspace: 'Acme\r\nBcc: tiers@exemple.example <b>',
+    url: 'https://demos.tutoclick.example/?a="x"',
+    ttlSeconds: 3600,
+  });
+  assert(!m.html.includes('<script>') && !m.html.includes('<b>'));
+  assert(!/[\r\n]/.test(m.senderName) && !/[\r\n]/.test(m.subject));
+  assertStringIncludes(m.html, 'href="https://demos.tutoclick.example/?a=&quot;x&quot;"');
+  assertEquals(oneLine('  a\u0000b\n c  '), 'a b c');
+});
+
+Deno.test('envoi : expéditeur « {Espace} via TutoClick », clé en en-tête seulement', async () => {
+  let seen: { url: string; key: string | null; body: Record<string, unknown> } | null = null;
+  const fetcher = ((url: string, init: RequestInit) => {
+    seen = {
+      url,
+      key: new Headers(init.headers).get('api-key'),
+      body: JSON.parse(String(init.body)),
+    };
+    return Promise.resolve(new Response('{}', { status: 201 }));
+  }) as unknown as typeof fetch;
+  const mail = renderAccess({
+    to: 'lea@nord.example',
+    demoTitle: 'Démo CRM',
+    workspace: 'Acme',
+    url: 'https://x.example/',
+    ttlSeconds: 3600,
+  });
+  assert(
+    await sendAccessMail(mail, 'cle-factice', 'acces@tutoclick.example', fetcher, 'http://127.0.0.1:9/envoi'),
+  );
+  assertEquals(seen!.key, 'cle-factice');
+  assertEquals(seen!.body.sender, { name: 'Acme via TutoClick', email: 'acces@tutoclick.example' });
+  assert(!JSON.stringify(seen!.body).includes('cle-factice'));
+  const down = (() => Promise.reject(new Error('réseau'))) as unknown as typeof fetch;
+  assertEquals(await sendAccessMail(mail, 'cle-factice', 'acces@tutoclick.example', down), false);
 });
