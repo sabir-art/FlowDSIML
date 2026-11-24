@@ -147,6 +147,22 @@ export function spotlightVeilPath(boxes: Box[]): string {
     ...boxes.map((b) => `M${r(b.x)} ${r(b.y)}V${r(b.y + b.h)}H${r(b.x + b.w)}V${r(b.y)}Z`),
   ].join('');
 }
+/**
+ * EXT-02 §6.1 : pied d'une étape « Fenêtre ». L'aide (premier enfant) reste à gauche des boutons (dernier
+ * enfant) tant que tout tient sur une ligne ; sinon le pied reçoit `is-stacked` et la feuille de style la
+ * passe sous les boutons, en 12 px. La largeur de l'aide est mesurée sur son texte, à sa taille de 13 px.
+ */
+export function stackWindowHint(foot: HTMLElement): boolean {
+  const hint = foot.firstElementChild as HTMLElement | null;
+  const btns = foot.lastElementChild as HTMLElement | null;
+  if (!hint || !btns || hint === btns) return false;
+  const range = document.createRange();
+  range.selectNodeContents(hint);
+  const text = range.getBoundingClientRect().width * (foot.classList.contains('is-stacked') ? 13 / 12 : 1);
+  const stacked = text > 0 && text + 8 + btns.getBoundingClientRect().width > foot.clientWidth + 0.5;
+  foot.classList.toggle('is-stacked', stacked);
+  return stacked;
+}
 export * from './htmlFrame';
 export * from './animation';
 export * from './crop';
