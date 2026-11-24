@@ -13,8 +13,12 @@ export type ToastAction = {
   durationMs?: number;
 };
 /** REV-07 : variante « avertissement » (icône et couleur d'alerte, affichée plus longtemps). */
-export type ToastOptions = { tone?: 'warning' };
-type Toast = { id: number; text: string; action?: ToastAction; tone?: 'warning' };
+export type ToastOptions = {
+  tone?: 'warning';
+  /** Deuxième ligne, en texte atténué, sous le message en gras (ex. la raison d'un classement). */
+  detail?: string;
+};
+type Toast = { id: number; text: string; detail?: string; action?: ToastAction; tone?: 'warning' };
 /** Affiche un toast ; renvoie de quoi le fermer avant son délai (consigne devenue inutile, A8). */
 const Ctx = createContext<(text: string, action?: ToastAction, opts?: ToastOptions) => () => void>(
   () => () => {},
@@ -35,7 +39,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback(
     (text: string, action?: ToastAction, opts?: ToastOptions) => {
       const id = ++seq.current;
-      setToasts((l) => [...l.slice(-2), { id, text, action, tone: opts?.tone }]);
+      setToasts((l) => [...l.slice(-2), { id, text, detail: opts?.detail, action, tone: opts?.tone }]);
       if (!action || action.durationMs)
         window.setTimeout(
           () => close(id),
@@ -51,7 +55,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="mk mk-toasts">
         <div className="toasts" role="status" aria-live="polite">
           {toasts.map((x) => (
-            <div key={x.id} className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}`}>
+            <div
+              key={x.id}
+              className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}${x.detail ? ' toast--rich' : ''}`}
+            >
               {x.tone === 'warning' ? (
                 <TriangleAlert aria-hidden="true" />
               ) : (
@@ -59,6 +66,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               )}
               <div className="grow">
                 <div className="t-label toast-text">{x.text}</div>
+                {x.detail && <div className="toast-detail">{x.detail}</div>}
               </div>
               {x.action && (
                 <button

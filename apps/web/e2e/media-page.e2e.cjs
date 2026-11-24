@@ -112,9 +112,40 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await card(page, 'logo-acme-blanc.png').waitFor();
     const toast = page.locator('.toast').last();
     ok(
-      sp(await toast.textContent()).includes('« logo-acme-blanc.png » importé dans Logos.') &&
-        sp(await toast.textContent()).includes('Fond transparent et format carré : rangé avec les logos.'),
-      'import d’un PNG transparent et carré : « importé dans Logos », avec la raison',
+      sp(await toast.locator('.toast-text').textContent()) === '« logo-acme-blanc.png » importé dans Logos' &&
+        sp(await toast.locator('.toast-detail').textContent()) ===
+          'Fond transparent et format carré : rangé avec les logos.' &&
+        (await toast.locator('.toast-text').evaluate((el) => getComputedStyle(el).fontWeight)) === '600',
+      'toast d’import sur deux lignes : « importé dans Logos » en gras, la raison dessous',
+    );
+    {
+      // Mesure après l'animation d'apparition (elle met le toast à l'échelle)
+      await toast.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished.catch(() => {}))));
+      const w = (await toast.boundingBox()).width;
+      // Sous 640 px : toute la largeur visible moins 32 px (la barre de défilement n'en fait pas partie)
+      const visible = await page.evaluate(() => document.documentElement.clientWidth);
+      ok(
+        MOBILE ? Math.abs(w - (visible - 32)) <= 1 : w <= 400 && w > 300,
+        `toast : largeur ${Math.round(w)} px`,
+      );
+    }
+    // Aperçu : le fichier entier, sans rognage
+    const fit = await card(page, 'logo-acme-blanc.png')
+      .locator('.mp-thumb img')
+      .evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const z = el.parentElement.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        return {
+          contain: cs.objectFit === 'contain',
+          pad: cs.paddingTop,
+          inside: r.bottom <= z.bottom + 0.5 && r.top >= z.top - 0.5,
+          h: Math.round(z.height),
+        };
+      });
+    ok(
+      fit.contain && fit.pad === '12px' && fit.inside && fit.h === 112,
+      `aperçu de 112 px : fichier entier (contain), 12 px de marge (${JSON.stringify(fit)})`,
     );
     ok(state.tables.media_files[0].kind === 'logo', 'catégorie déduite envoyée : logo');
     await shot(page, 'media-import');
@@ -127,6 +158,19 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
         (await menu.getByRole('menuitemradio', { name: 'Image' }).getAttribute('aria-checked')) === 'false',
       '« Changer » ouvre le menu de la carte : Catégorie, Logo coché',
     );
+    {
+      const logoItem = menu.getByRole('menuitemradio', { name: 'Logo' });
+      const imageItem = menu.getByRole('menuitemradio', { name: 'Image' });
+      const x = async (l) => (await l.locator('.menu-item__icon').boundingBox()).x;
+      const lead = async (l) => (await l.locator('.menu-item__icon').boundingBox()).width;
+      ok(
+        (await logoItem.locator('svg.lucide-check').count()) === 1 &&
+          (await imageItem.locator('svg').count()) === 0 &&
+          Math.round(await lead(imageItem)) === 16 &&
+          Math.abs((await x(logoItem)) - (await x(menu.getByRole('menuitem', { name: 'Renommer' })))) < 1,
+        'menu : coche devant la catégorie actuelle, colonne vide de 16 px devant l’autre, alignées',
+      );
+    }
     ok(
       sp((await menu.getByRole('menuitem').allTextContents()).join(' | ')) ===
         'Renommer | Télécharger | Voir les démos qui l’utilisent | Supprimer',
@@ -168,7 +212,13 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await group.getByRole('radio', { name: /^Tout/ }).click();
     await page.getByRole('searchbox').fill('bandeau');
     ok((await cards(page).count()) === 1, 'recherche par nom');
-    await page.getByRole('searchbox').fill('');
+    await page.getByRole('searchbox').fill('introuvable');
+    await page.getByText('Aucun fichier ne correspond.').waitFor();
+    await page.getByRole('button', { name: 'Effacer la recherche' }).click();
+    ok(
+      (await page.getByRole('searchbox').inputValue()) === '' && (await cards(page).count()) === 4,
+      'recherche sans résultat : « Effacer la recherche » la vide',
+    );
 
     // Les toasts des imports s'empilent en bas de l'écran (sur toute la largeur à 390 px) : on les ferme
     // comme le ferait la personne avant d'agir sur une carte qu'ils recouvrent
