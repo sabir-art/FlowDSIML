@@ -44,7 +44,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await fromMore(page, 'Présenter');
   const launch = page.getByRole('dialog', { name: /Présenter/ });
   await launch.waitFor();
-  await launch.getByRole('radio', { name: /Un seul écran/ }).check();
+  // Carte de choix : le bouton radio est sous l’illustration de sa carte (le clic sur la carte le coche)
+  await launch.getByRole('radio', { name: /Un seul écran/ }).check({ force: true });
   const sw = launch.getByRole('switch', { name: /Piloter depuis mon téléphone/ });
   await sw.check();
   await launch.getByRole('button', { name: 'Lancer la présentation' }).click();
