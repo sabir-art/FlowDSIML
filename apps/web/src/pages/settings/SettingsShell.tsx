@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -179,6 +179,30 @@ export function SettingsShell({
   const crumbs: Crumb[] = here && first ? [{ label: t(`settings.grp.${here.group}`), to: first }] : [];
   if (here && sub) crumbs.push({ label: t(here.entry.label), to: here.entry.to! }, ...(sub.trail ?? []));
   const title = sub ? sub.title : here ? t(here.entry.label) : t('settings.title');
+  // §6 (retours du 24/11, 2e série) : en-tête de page dans le contenu, h1 de 24 px et description. Quand
+  // la première section porte le même titre que la page, son intitulé est celui de la page : il n'est
+  // pas répété, et son texte devient la description.
+  const wrap = useRef<HTMLDivElement>(null);
+  const [own, setOwn] = useState<string | null>(null);
+  useLayoutEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const sync = () => {
+      const head = el.querySelector<HTMLElement>('.stg-sec__head');
+      const h2 = head?.querySelector('h2');
+      const dup = !!head && !!h2 && h2.textContent?.trim() === title;
+      for (const x of el.querySelectorAll('.stg-sec__head[data-page-title]'))
+        if (x !== head || !dup) x.removeAttribute('data-page-title');
+      if (dup && !head.hasAttribute('data-page-title')) head.setAttribute('data-page-title', '');
+      setOwn(dup ? h2.parentElement?.querySelector('p')?.textContent?.trim() || null : null);
+    };
+    sync();
+    const mo = new MutationObserver(sync);
+    mo.observe(el, { childList: true, subtree: true, characterData: true });
+    return () => mo.disconnect();
+  }, [title]);
+  const key = sub ? null : (here?.entry.to?.replace('/settings/', '').replace('/', '-') ?? null);
+  const desc = own ?? (key ? t(`settings.desc.${key}`, { defaultValue: '' }) : '');
   return (
     <div className="st">
       <SettingsNav />
@@ -191,8 +215,15 @@ export function SettingsShell({
           tools={<NotificationBell />}
           labels={{ breadcrumb: t('settings.breadcrumb') }}
           as={CrumbLink}
+          headingInPage
         />
-        <div className={legacy ? 'mk st-wrap' : 'st-wrap st-wrap--plain'}>{children}</div>
+        <div ref={wrap} className={legacy ? 'mk st-wrap' : 'st-wrap st-wrap--plain'}>
+          <header className="stg-page">
+            <h1>{title}</h1>
+            {desc && <p>{desc}</p>}
+          </header>
+          {children}
+        </div>
       </div>
     </div>
   );

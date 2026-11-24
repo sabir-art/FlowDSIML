@@ -15,7 +15,7 @@
   border-bottom: 1px solid var(--fd-color-border);
 }
 .fd-page-header__title,
-.fd-crumb h1 {
+.fd-crumb .fd-crumb__current {
   margin: 0;
   padding: 0 6px;
   overflow: hidden;
@@ -154,7 +154,7 @@
   .fd-page-header--mback .fd-crumb li:not(:last-child) {
     display: none;
   }
-  .fd-page-header--mback .fd-crumb h1 {
+  .fd-page-header--mback .fd-crumb .fd-crumb__current {
     padding: 0;
     font-weight: 600;
   }

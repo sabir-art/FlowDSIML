@@ -3105,6 +3105,17 @@
       "content": "Content",
       "connections": "Connections",
       "account": "My account"
+    },
+    "desc": {
+      "workspace": "The name, address and shared settings of the workspace.",
+      "members": "The people in the workspace, their roles and pending invitations.",
+      "usage": "What the workspace uses, and its limits.",
+      "security": "The workspace’s capture, sharing and sign-in rules.",
+      "privacy": "What the workspace measures about the visitors of your demos.",
+      "brand": "The workspace’s logo and colours, in the app, the training centre and public pages.",
+      "integrations": "Connect your demos to your workspace’s tools.",
+      "profile": "Your details, your preferences and your password.",
+      "keys": "So that a tool of the workspace (CRM, intranet, dashboard) can read your demos, their statistics or their leads. A key changes nothing. Keep it like a password."
     }
   },
   "toast": {

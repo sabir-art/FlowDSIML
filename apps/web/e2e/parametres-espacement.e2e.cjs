@@ -74,6 +74,8 @@ const ok = (c, l) => {
           (c) =>
             c.tagName !== 'DIALOG' &&
             c.getAttribute('role') !== 'note' &&
+            // §6 : l'en-tête de page (h1, description) est à 24 px de la première section, mesuré à part
+            !c.classList.contains('stg-page') &&
             // Filtre et ligne de texte hors sections (24 px, mesure des maquettes), déclarés par la page
             !c.hasAttribute('data-gap-exempt') &&
             c.getBoundingClientRect().height > 0,
@@ -87,6 +89,22 @@ const ok = (c, l) => {
       ok(
         gaps.every((g) => g === want),
         `${p} (${scheme}) : ${want} px entre les blocs (${gaps.join(', ') || 'un seul bloc'})`,
+      );
+      const head = await page.evaluate(() => {
+        const h = document.querySelector('.st-wrap > .stg-page');
+        const next =
+          h && [...h.parentElement.children].find((c) => c !== h && c.getBoundingClientRect().height > 0);
+        return h && next
+          ? {
+              gap: Math.round(next.getBoundingClientRect().top - h.getBoundingClientRect().bottom),
+              size: getComputedStyle(h.querySelector('h1')).fontSize,
+              weight: getComputedStyle(h.querySelector('h1')).fontWeight,
+            }
+          : null;
+      });
+      ok(
+        !!head && head.gap === 24 && head.size === '24px' && head.weight === '700',
+        `${p} (${scheme}) : en-tête de page, h1 de 24 px en 700, 24 px avant le premier bloc (${JSON.stringify(head)})`,
       );
     }
     await page.close();
