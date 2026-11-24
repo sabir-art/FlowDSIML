@@ -1,7 +1,7 @@
--- Tests pgTAP : EXT-02 §6.1, étape « Fenêtre » (texte + image), affichage « window ».
+-- Tests pgTAP : EXT-02 §6.1, étape « Fenêtre » (texte + image), affichage « window » ; reprise par les modèles.
 begin;
 set search_path = public, extensions;
-select plan(8);
+select plan(11);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000098a1', 'fenetre@example.com'),
@@ -61,6 +61,20 @@ select is((select r -> 'manifest' -> 'steps' -> 1 -> 'options' ->> 'display' fro
 select ok((select r -> 'manifest' -> 'steps' -> 1 -> 'image' ->> 'url' like 'assets/%.webp'
              and (r -> 'manifest' -> 'steps' -> 1 -> 'image' ->> 'width')::int = 560 from pub),
   'manifeste : image de la fenêtre publiée avec sa taille');
+
+-- Modèle : une démo créée depuis le modèle garde la fenêtre (affichage, réglages, image à recopier)
+update public.steps set options = '{"display":"window","buttonLabel":"Continuer","imageAlt":"Schéma"}'
+ where id = '00000000-0000-0000-0000-0000000098b2';
+create temp table tpl as select public.save_demo_as_template('00000000-0000-0000-0000-0000000098d1',
+  'Avec une fenêtre', '', 'logiciel', true, true) as id;
+create temp table made as select public.create_demo_from_template((select id from tpl), (select ws from ctx)) as id;
+select is((select options ->> 'display' from public.steps where demo_id = (select id from made) and position = 1),
+  'window', 'modèle : l''étape créée reste une fenêtre');
+select is((select kind::text || '|' || (options ->> 'buttonLabel') || '|' || (options ->> 'imageAlt') || '|' || to_capture::text
+             from public.steps where demo_id = (select id from made) and position = 1),
+  'text|Continuer|Schéma|false', 'modèle : étape de texte avec son bouton et son texte alternatif, jamais « À capturer »');
+select is((select options ->> 'templateImage' from public.steps where demo_id = (select id from made) and position = 1),
+  (select img from p), 'modèle avec captures : image de la fenêtre à recopier dans la nouvelle démo');
 
 select * from finish();
 rollback;
