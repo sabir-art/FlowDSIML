@@ -235,7 +235,16 @@ const SHOTS = process.env.SHOTS_DIR;
     );
     ok(await bar.isVisible(), `${tag} zone, « Continuer » : l’envoi se poursuit`);
 
-    // Fermer pendant l'envoi : confirmation, « Continuer » garde l'envoi
+    // Fermer pendant l'envoi : confirmation, « Continuer » garde l'envoi.
+    // Cas vu en CI à 390 px : le pointeur reste posé sur un bouton à icône, son infobulle s'ouvre, et
+    // Échap ne doit pas s'arrêter à elle (le focus est ailleurs). On le provoque : infobulle affichée au
+    // survol de « Fermer », focus toujours sur le bouton de la zone.
+    await win.getByRole('button', { name: 'Fermer', exact: true }).hover();
+    await page.waitForSelector('.fd-tooltip');
+    ok(
+      await page.evaluate(() => !document.activeElement?.matches('.fd-modal__close')),
+      `${tag} infobulle de survol affichée, focus ailleurs`,
+    );
     await page.keyboard.press('Escape');
     const stop = page.getByRole('dialog', { name: 'Arrêter l’envoi ?' });
     // En cas d'échec : l'état des fenêtres et du focus, pour distinguer une instabilité d'une régression

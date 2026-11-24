@@ -276,10 +276,16 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
   const onKey = (e: KeyboardEvent) => {
     if (/^(Tab|Arrow(Up|Down|Left|Right)|Home|End)$/.test(e.key)) navKeyAt = win.performance.now();
     if (e.key === 'Escape' && bubble) {
-      // Ferme l'infobulle seulement (pas la modale ou le panneau parent)
-      e.stopPropagation();
-      e.preventDefault();
+      // Infobulle du bouton qui a le focus : Échap ne ferme qu'elle (pas la modale ou le panneau parent).
+      // Infobulle ouverte au survol alors que le focus est ailleurs : elle se ferme, mais la touche
+      // continue son chemin. Sinon un pointeur resté sur un bouton à icône empêchait Échap d'atteindre la
+      // fenêtre (pas de demande de confirmation pendant un envoi).
+      const own = anchor === doc.activeElement;
       close();
+      if (own) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
     }
   };
   const onDown = (e: PointerEvent) => {

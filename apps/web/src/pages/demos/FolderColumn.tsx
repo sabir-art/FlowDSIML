@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Menu, type MenuItem } from '../../components/Menu';
+import { modalOnTop } from '../../lib/modalOnTop';
 
 type FolderRow = Tables<'folders'>;
 /** Entrée choisie : tout, mes démos, archivées, ou un dossier (id). */
@@ -207,7 +208,8 @@ export function FolderColumn({
   useEffect(() => {
     if (!drawer) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
+      // Une fenêtre modale ouverte par-dessus garde Échap pour elle
+      if (e.key !== 'Escape' || modalOnTop()) return;
       refocus.current = true;
       onToggle();
     };
