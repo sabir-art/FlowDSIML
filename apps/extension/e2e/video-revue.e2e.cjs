@@ -30,6 +30,11 @@ const MOCK = 'http://localhost:54400';
       '--autoplay-policy=no-user-gesture-required',
     ],
   });
+  // Après l'envoi, la page s'ouvre sur l'éditeur de l'app. Le test sert lui-même cette adresse : il ne
+  // dépend ni d'une app lancée à côté, ni du port de la construction (5173 par défaut, 5183 en local).
+  await ctx.route(/^http:\/\/localhost:51\d\d\//, (r) =>
+    r.fulfill({ contentType: 'text/html', body: '<!doctype html><title>App fictive</title>' }),
+  );
   const shot = (p, name) =>
     process.env.SHOTS_DIR &&
     p.screenshot({
@@ -357,11 +362,19 @@ const MOCK = 'http://localhost:54400';
   await v.setViewportSize({ width: 1440, height: 900 });
 
   // Envoi : préparation (masques incrustés), puis envoi
+  const seen = [];
+  v.on('console', (msg) => {
+    const t = msg.text();
+    if (t.startsWith('#etat ')) seen.push(t.slice(6));
+  });
   await v.evaluate(() => {
-    window.__seen = [];
+    let last = '';
     new MutationObserver(() => {
-      const t = document.querySelector('#status')?.textContent ?? '';
-      if (t && window.__seen[window.__seen.length - 1] !== t) window.__seen.push(t);
+      const t = document.querySelector('#status b')?.textContent ?? '';
+      if (t && t !== last) {
+        last = t;
+        console.log(`#etat ${t}`);
+      }
     }).observe(document.querySelector('#status'), { childList: true, subtree: true, characterData: true });
   });
   await v.getByRole('button', { name: 'Envoyer' }).click();
@@ -383,12 +396,9 @@ const MOCK = 'http://localhost:54400';
     'préparation : « Gardez cet onglet visible pendant la préparation. »',
   );
   await shot(v, 'video-prepa');
-  const seenBefore = async () => v.evaluate(() => window.__seen).catch(() => null);
-  let seen = [];
-  for (let i = 0; i < 240 && !/22222222/.test(v.url()); i++) {
-    seen = (await seenBefore()) ?? seen;
-    await new Promise((r) => setTimeout(r, 250));
-  }
+  // La préparation dure à peu près la durée de la vidéo (12 s), davantage sur une machine lente : on
+  // attend l'ouverture de l'éditeur elle-même, pas un délai
+  await v.waitForURL(/22222222-2222-2222-2222-222222222222(\/|%2F)edit/, { timeout: 180000 });
   ok(
     /22222222-2222-2222-2222-222222222222(\/|%2F)edit/.test(v.url()),
     'après envoi : ouverture de l’éditeur',
@@ -448,7 +458,7 @@ const MOCK = 'http://localhost:54400';
   await shot(d, 'video-direct');
   const before = (await tus()).length;
   await d.getByRole('button', { name: 'Envoyer' }).click();
-  await d.waitForURL(/22222222/, { timeout: 30000 }).catch(() => {});
+  await d.waitForURL(/22222222-2222-2222-2222-222222222222(\/|%2F)edit/, { timeout: 60000 });
   const up2 = (await tus()).slice(before);
   ok(
     /22222222/.test(d.url()) && up2.reduce((n, l) => n + (l.len || 0), 0) === fixture.length,
