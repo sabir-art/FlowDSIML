@@ -161,6 +161,13 @@ const WS = '11111111-1111-1111-1111-111111111111';
   ok(/data-fd-blurred/.test(p2) && /blur\(6px\)/.test(p2), 'données floutées');
   ok(/rgb\(163, 25, 91\)/i.test(p2), 'feuille de style externe intégrée');
   ok(/<img[^>]+src="data:image\/webp/.test(p2), 'image intégrée en WebP');
+  // Ressources refusées : rien n'est rapporté dans la capture, l'image perd son adresse
+  const tag = (id) => (new RegExp(`<img[^>]*id="${id}"[^>]*>`).exec(p2) || [''])[0];
+  ok((p2.match(/src="data:image\//g) || []).length === 1, 'une seule image intégrée (celle de la page)');
+  ok(tag('r-hote') && !/src=/.test(tag('r-hote')), 'ressource d’un autre hôte interne : non récupérée');
+  ok(tag('r-type') && !/src=/.test(tag('r-type')), 'adresse d’image qui rend une page : non rapportée');
+  ok(!/Contenu réservé fictif/.test(p2), 'le contenu de cette page n’est pas dans la capture');
+  ok(tag('r-poids') && !/src=/.test(tag('r-poids')), 'ressource de plus de 3 Mo : non rapportée');
   ok(!/<link/i.test(p2), 'aucun chargement externe');
   ok(
     pages[1].links.some((l) => l.sel === '#menu > a:nth-of-type(1)' && /\/page$/.test(l.href)),

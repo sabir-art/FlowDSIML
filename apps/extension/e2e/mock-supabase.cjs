@@ -239,12 +239,25 @@ http
           '<html><head><meta charset="utf-8"><title>Agenda</title><link rel="stylesheet" href="/style.css"><script>window.__x=1</script></head>' +
             '<body><nav id="menu"><a href="/page">Accueil</a><a href="/page2">Agenda</a></nav><h1 class="titre">Agenda</h1>' +
             '<button onclick="alert(1)">Valider</button><p>Conseillère : Camille MARTIN</p><p>Tél. 06 12 34 56 78</p>' +
-            '<input type="password" value="secret"><input name="q" value="recherche"><img src="/img.png" alt="Logo Acme"></body></html>',
+            '<input type="password" value="secret"><input name="q" value="recherche"><img src="/img.png" alt="Logo Acme">' +
+            // Ressources que l'extension ne doit pas rapporter : autre hôte interne, mauvais type, trop lourde
+            '<img id="r-hote" src="http://127.0.0.1:54400/img.png?autre-hote" alt="">' +
+            '<img id="r-type" src="/pas-une-image.png" alt="">' +
+            '<img id="r-poids" src="/trop-lourde.png" alt=""></body></html>',
         );
       }
       if (req.url.startsWith('/style.css')) {
         res.writeHead(200, { 'content-type': 'text/css' });
         return res.end('.titre{color:rgb(163, 25, 91)} body{background:url(/img.png) no-repeat -999px 0}');
+      }
+      if (req.url.startsWith('/pas-une-image.png')) {
+        // Une page servie à une adresse d'image : jamais rapportée dans la capture
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end('<html><body>Contenu réservé fictif</body></html>');
+      }
+      if (req.url.startsWith('/trop-lourde.png')) {
+        res.writeHead(200, { 'content-type': 'image/png' });
+        return res.end(Buffer.alloc(3 * 1024 * 1024 + 10));
       }
       if (req.url.startsWith('/img.png')) {
         res.writeHead(200, { 'content-type': 'image/png' });
