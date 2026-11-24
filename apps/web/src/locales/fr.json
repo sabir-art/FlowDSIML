@@ -4645,9 +4645,9 @@
     "count_other": "{{count}} fichiers",
     "import": "Importer",
     "uploading": "Import en cours…",
-    "types": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus",
+    "types": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus",
     "importFirst": "Importer votre premier fichier",
-    "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos de l’espace. PNG, JPG, SVG ou WOFF2, 5 Mo au plus.",
+    "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos de l’espace. PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus.",
     "quota": "{{used}} sur {{total}} Mo",
     "usedIn_one": "Utilisé dans {{count}} démo",
     "usedIn_other": "Utilisé dans {{count}} démos",
@@ -4658,7 +4658,7 @@
     "inUse_one": "Ce fichier est utilisé dans {{count}} démo. Cet emplacement restera vide.",
     "inUse_other": "Ce fichier est utilisé dans {{count}} démos. Ces emplacements resteront vides.",
     "tooBig": "Fichier trop lourd : 5 Mo au plus.",
-    "badType": "Format non accepté : PNG, JPG, SVG ou WOFF2.",
+    "badType": "Format non accepté : PNG, JPEG, WebP, SVG ou WOFF2.",
     "svgRejected": "Ce SVG contient des éléments refusés (script, entité, lien externe).",
     "error": "L’import n’a pas abouti. Réessayez.",
     "open": "Médiathèque",
@@ -4671,7 +4671,7 @@
     },
     "unused": "Non utilisé",
     "dropHere": "Glissez des fichiers ici",
-    "pageHint": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
+    "pageHint": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
     "imported": "« {{name}} » importé dans {{category}}",
     "change": "Changer",
     "reason": {
@@ -4702,8 +4702,8 @@
         "font": "Importer une nouvelle police"
       },
       "hint": {
-        "logo": "PNG, JPG ou SVG, 5 Mo au plus. Il sera choisi d’office.",
-        "image": "PNG, JPG ou SVG, 5 Mo au plus. Elle sera choisie d’office.",
+        "logo": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Il sera choisi d’office.",
+        "image": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Elle sera choisie d’office.",
         "font": "WOFF2, 5 Mo au plus. Elle sera choisie d’office."
       },
       "use": {

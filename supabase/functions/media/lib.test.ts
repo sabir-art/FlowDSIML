@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertThrows } from 'jsr:@std/assert@1';
-import { MediaError, pngSize, sanitizeSvg, sniff } from './lib.ts';
+import { MediaError, pngSize, sanitizeSvg, sniff, webpSize } from './lib.ts';
 
 const enc = (s: string) => new TextEncoder().encode(s);
 const svg = (inner: string, attrs = '') => `<svg xmlns="http://www.w3.org/2000/svg"${attrs}>${inner}</svg>`;
@@ -108,4 +108,66 @@ Deno.test('constructions refusées : DOCTYPE, ENTITY, CDATA, instructions, balis
   rejected('<html><svg></svg></html>');
   rejected('<svg xmlns="http://www.w3.org/2000/svg"><g></svg>');
   rejected('<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" <script>alert(1)</script></svg>');
+});
+
+// ===== WebP : reconnu à sa signature, jamais à son extension =====
+/** En-tête RIFF/WEBP factice : « RIFF », taille, « WEBP », puis le bloc donné. */
+function webp(chunk: string, body: number[]): Uint8Array {
+  const out = new Uint8Array(12 + 8 + body.length);
+  out.set(enc('RIFF'), 0);
+  out.set(enc('WEBP'), 8);
+  out.set(enc(chunk), 12);
+  out.set(body, 20);
+  return out;
+}
+
+Deno.test('WebP : signature RIFF … WEBP et bloc VP8, VP8L ou VP8X', () => {
+  assertEquals(sniff(webp('VP8 ', new Array(12).fill(0))), 'image/webp');
+  assertEquals(sniff(webp('VP8L', new Array(12).fill(0))), 'image/webp');
+  assertEquals(sniff(webp('VP8X', new Array(12).fill(0))), 'image/webp');
+  // Un fichier RIFF d'un autre genre (son, vidéo) n'est pas une image
+  const wav = webp('VP8 ', new Array(12).fill(0));
+  wav.set(enc('WAVE'), 8);
+  assertEquals(sniff(wav), null);
+  // « WEBP » sans bloc d'image reconnu
+  assertEquals(sniff(webp('ABCD', new Array(12).fill(0))), null);
+  // Le nom du fichier ne compte pas : un script renommé en .webp reste refusé
+  assertEquals(sniff(enc('<script>alert(1)</script>')), null);
+  // Tronqué
+  assertEquals(sniff(enc('RIFF\0\0\0\0WEBP')), null);
+});
+
+Deno.test('dimensions WebP (VP8X, VP8L, VP8)', () => {
+  // VP8X : 4 octets de drapeaux, puis largeur - 1 et hauteur - 1 sur 24 bits (640 × 480)
+  assertEquals(webpSize(webp('VP8X', [0, 0, 0, 0, 0x7f, 0x02, 0x00, 0xdf, 0x01, 0x00])), {
+    width: 640,
+    height: 480,
+  });
+  // VP8L : 0x2f, puis 14 bits de largeur - 1 et 14 bits de hauteur - 1 (256 × 128)
+  const bits = 255 | (127 << 14);
+  assertEquals(
+    webpSize(
+      webp('VP8L', [
+        0x2f,
+        bits & 0xff,
+        (bits >> 8) & 0xff,
+        (bits >> 16) & 0xff,
+        (bits >> 24) & 0xff,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ]),
+    ),
+    { width: 256, height: 128 },
+  );
+  // VP8 : 3 octets d'en-tête de trame, 9d 01 2a, largeur et hauteur sur 14 bits (320 × 200)
+  assertEquals(webpSize(webp('VP8 ', [0, 0, 0, 0x9d, 0x01, 0x2a, 0x40, 0x01, 0xc8, 0x00])), {
+    width: 320,
+    height: 200,
+  });
+  // En-tête incohérent ou tronqué : pas de dimensions (le fichier reste accepté, sans largeur ni hauteur)
+  assertEquals(webpSize(webp('VP8 ', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0])), null);
+  assertEquals(webpSize(enc('RIFF')), null);
 });

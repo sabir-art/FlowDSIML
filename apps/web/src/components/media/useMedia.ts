@@ -12,7 +12,8 @@ export type MediaFile = Tables<'media_files'>;
 export type MediaFilter = 'all' | MediaKind;
 export const MEDIA_QUOTA = 500 * 1024 * 1024;
 export const MEDIA_MAX_BYTES = 5 * 1024 * 1024;
-export const MEDIA_ACCEPT = '.png,.jpg,.jpeg,.svg,.woff2,image/png,image/jpeg,image/svg+xml,font/woff2';
+export const MEDIA_ACCEPT =
+  '.png,.jpg,.jpeg,.webp,.svg,.woff2,image/png,image/jpeg,image/webp,image/svg+xml,font/woff2';
 
 export type UploadResult =
   | { ok: true; file: MediaFile; reason: KindReason }

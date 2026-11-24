@@ -4645,9 +4645,9 @@
     "count_other": "{{count}} files",
     "import": "Import",
     "uploading": "Importing…",
-    "types": "PNG, JPG, SVG or WOFF2, 5 MB at most",
+    "types": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most",
     "importFirst": "Import your first file",
-    "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPG, SVG or WOFF2, 5 MB at most.",
+    "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most.",
     "quota": "{{used}} of {{total}} MB",
     "usedIn_one": "Used in {{count}} demo",
     "usedIn_other": "Used in {{count}} demos",
@@ -4658,7 +4658,7 @@
     "inUse_one": "This file is used in {{count}} demo. That spot will be left empty.",
     "inUse_other": "This file is used in {{count}} demos. Those spots will be left empty.",
     "tooBig": "File too large: 5 MB at most.",
-    "badType": "Format not accepted: PNG, JPG, SVG or WOFF2.",
+    "badType": "Format not accepted: PNG, JPEG, WebP, SVG or WOFF2.",
     "svgRejected": "This SVG contains rejected content (script, entity, external link).",
     "error": "The import failed. Try again.",
     "open": "Media library",
@@ -4671,7 +4671,7 @@
     },
     "unused": "Not used",
     "dropHere": "Drop files here",
-    "pageHint": "PNG, JPG, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
+    "pageHint": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
     "imported": "“{{name}}” imported into {{category}}",
     "change": "Change",
     "reason": {
@@ -4702,8 +4702,8 @@
         "font": "Import a new font"
       },
       "hint": {
-        "logo": "PNG, JPG or SVG, 5 MB at most. It will be selected automatically.",
-        "image": "PNG, JPG or SVG, 5 MB at most. It will be selected automatically.",
+        "logo": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
+        "image": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
         "font": "WOFF2, 5 MB at most. It will be selected automatically."
       },
       "use": {

@@ -27,8 +27,8 @@ export const sizeLabel = (n: number, locale: string) => {
 const FILTERS: MediaFilter[] = ['all', 'logo', 'image', 'font'];
 /** Types de fichier proposés à l'import, selon ce qu'on choisit. */
 const ACCEPT: Record<MediaKind, string> = {
-  logo: '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml',
-  image: '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml',
+  logo: '.png,.jpg,.jpeg,.webp,.svg,image/png,image/jpeg,image/webp,image/svg+xml',
+  image: '.png,.jpg,.jpeg,.webp,.svg,image/png,image/jpeg,image/webp,image/svg+xml',
   font: '.woff2,font/woff2',
 };
 /** Un logo ou une image ne reçoit pas une police, et inversement. */

@@ -7,7 +7,17 @@
 // JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle (auth.getUser).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { EXT, MAX_BYTES, MediaError, allowed, pngSize, sanitizeSvg, sniff, type Kind } from './lib.ts';
+import {
+  EXT,
+  MAX_BYTES,
+  MediaError,
+  allowed,
+  pngSize,
+  webpSize,
+  sanitizeSvg,
+  sniff,
+  type Kind,
+} from './lib.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
@@ -67,6 +77,7 @@ async function upload(req: Request) {
       return json(422, { error: e instanceof MediaError ? e.code : 'SVG_REJECTED' });
     }
   } else if (mime === 'image/png') dims = pngSize(bytes);
+  else if (mime === 'image/webp') dims = webpSize(bytes);
 
   const path = `${ws}/${crypto.randomUUID()}.${EXT[mime]}`;
   const up = await admin.storage.from('media').upload(path, bytes, {

@@ -645,7 +645,7 @@ export function PublicPage() {
           onPick={(file) => {
             setPicking(false);
             // Image seulement (la médiathèque range aussi des polices)
-            if (/\.(png|jpe?g|svg)$/i.test(file.path)) set({ logo: file.path });
+            if (/\.(png|jpe?g|svg|webp)$/i.test(file.path)) set({ logo: file.path });
           }}
         />
       )}

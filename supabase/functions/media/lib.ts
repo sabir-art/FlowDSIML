@@ -6,7 +6,7 @@
 // en fond CSS, jamais en ligne (deuxième barrière : aucun script ne s'exécute dans ces contextes).
 
 export type Kind = 'logo' | 'image' | 'font';
-export type Mime = 'image/png' | 'image/jpeg' | 'image/svg+xml' | 'font/woff2';
+export type Mime = 'image/png' | 'image/jpeg' | 'image/webp' | 'image/svg+xml' | 'font/woff2';
 
 export const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -22,6 +22,23 @@ export function sniff(bytes: Uint8Array): Mime | null {
   if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';
   if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
   if (b.length >= 4 && b[0] === 0x77 && b[1] === 0x4f && b[2] === 0x46 && b[3] === 0x32) return 'font/woff2';
+  // WebP : conteneur RIFF (« RIFF », taille, « WEBP ») suivi d'un bloc VP8, VP8L ou VP8X
+  if (
+    b.length >= 16 &&
+    b[0] === 0x52 &&
+    b[1] === 0x49 &&
+    b[2] === 0x46 &&
+    b[3] === 0x46 &&
+    b[8] === 0x57 &&
+    b[9] === 0x45 &&
+    b[10] === 0x42 &&
+    b[11] === 0x50 &&
+    b[12] === 0x56 &&
+    b[13] === 0x50 &&
+    b[14] === 0x38 &&
+    (b[15] === 0x20 || b[15] === 0x4c || b[15] === 0x58)
+  )
+    return 'image/webp';
   const head = new TextDecoder().decode(b.subarray(0, 512)).replace(/^﻿/, '').trimStart();
   if (/^(<\?xml[^>]*\?>\s*)?(<!--[\s\S]*?-->\s*)*<svg[\s>]/i.test(head)) return 'image/svg+xml';
   return null;
@@ -33,6 +50,31 @@ export function pngSize(b: Uint8Array): { width: number; height: number } | null
   const v = new DataView(b.buffer, b.byteOffset, b.byteLength);
   const width = v.getUint32(16);
   const height = v.getUint32(20);
+  return width > 0 && height > 0 && width <= 20000 && height <= 20000 ? { width, height } : null;
+}
+
+/** Dimensions d'un WebP (blocs VP8X, VP8L ou VP8), ou null si l'en-tête est tronqué ou incohérent. */
+export function webpSize(b: Uint8Array): { width: number; height: number } | null {
+  if (b.length < 30) return null;
+  const v = new DataView(b.buffer, b.byteOffset, b.byteLength);
+  let width = 0;
+  let height = 0;
+  if (b[15] === 0x58) {
+    // VP8X : largeur et hauteur moins 1, sur 24 bits
+    width = 1 + (b[24]! | (b[25]! << 8) | (b[26]! << 16));
+    height = 1 + (b[27]! | (b[28]! << 8) | (b[29]! << 16));
+  } else if (b[15] === 0x4c) {
+    // VP8L : signature 0x2f, puis 14 bits de largeur moins 1 et 14 bits de hauteur moins 1
+    if (b[20] !== 0x2f) return null;
+    const bits = v.getUint32(21, true);
+    width = 1 + (bits & 0x3fff);
+    height = 1 + ((bits >> 14) & 0x3fff);
+  } else {
+    // VP8 : code de début 9d 01 2a, puis largeur et hauteur sur 14 bits
+    if (b[23] !== 0x9d || b[24] !== 0x01 || b[25] !== 0x2a) return null;
+    width = v.getUint16(26, true) & 0x3fff;
+    height = v.getUint16(28, true) & 0x3fff;
+  }
   return width > 0 && height > 0 && width <= 20000 && height <= 20000 ? { width, height } : null;
 }
 
@@ -292,6 +334,7 @@ export function allowed(kind: Kind, mime: Mime): boolean {
 export const EXT: Record<Mime, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
+  'image/webp': 'webp',
   'image/svg+xml': 'svg',
   'font/woff2': 'woff2',
 };
