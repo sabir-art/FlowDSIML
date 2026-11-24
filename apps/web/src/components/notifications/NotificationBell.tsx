@@ -2,7 +2,7 @@
  * L22-05/06 : cloche de la barre du haut et panneau de notifications (commentaires et mentions).
  * Panneau non modal (role=dialog) : Échap ou clic à l'extérieur le ferme, le focus revient à la cloche.
  */
-import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { AvatarPhoto } from '../AvatarPhoto';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +33,7 @@ import { useToast } from '../Toast';
 import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
+import { bellState } from './bellState';
 import {
   LEADS_FOCUS,
   NOTIFICATION_KINDS,
@@ -62,7 +63,12 @@ function BellPanel() {
   const { t } = useTranslation();
   const id = useId();
   const n = useNotifications();
-  const [open, setOpen] = useState(false);
+  // Ouverture gardée d'un montage à l'autre (bellState) : un clic pendant le chargement n'est pas perdu
+  const [open, setOpenState] = useState(bellState.open);
+  const setOpen = useCallback((next: boolean) => {
+    bellState.open = next;
+    setOpenState(next);
+  }, []);
   // E-mails P2 : « Ouvrir les notifications » du résumé mène à #/?notifications=1, panneau ouvert. Le
   // paramètre est retiré de l'adresse sans navigation (une navigation remonterait la page et le panneau).
   const location = useLocation();
@@ -74,7 +80,7 @@ function BellPanel() {
       '',
       window.location.href.replace(/[?&]notifications=1/, ''),
     );
-  }, [location.search]);
+  }, [location.search, setOpen]);
   const [view, setView] = useState<'list' | 'prefs'>('list');
   const [filter, setFilter] = useState<Filter>('all');
   // Cloche placée à gauche (barre d'Analytics) : le panneau s'ouvre vers la droite, jamais sous la barre latérale
@@ -88,11 +94,14 @@ function BellPanel() {
   const pop = useRef<HTMLDivElement>(null);
   const tabs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const close = (refocus = true) => {
-    setOpen(false);
-    setView('list');
-    if (refocus) btn.current?.focus();
-  };
+  const close = useCallback(
+    (refocus = true) => {
+      setOpen(false);
+      setView('list');
+      if (refocus) btn.current?.focus();
+    },
+    [setOpen],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -105,7 +114,7 @@ function BellPanel() {
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  }, [open, close]);
 
   // L28-06 : nouvelle notification annoncée (aria-live polite) au plus une fois par minute, regroupée
   const toast = useToast();

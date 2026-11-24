@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { HelpButton } from '../../help/HelpButton';
 import { useMediaQuery } from '../../lib/useMediaQuery';
+import { bellState } from './bellState';
 import './notifications.css';
 
 const NotificationBell = lazy(() =>
@@ -28,6 +29,8 @@ export function LazyNotificationBell({ topbar = false }: { topbar?: boolean }) {
               type="button"
               className="fd-btn fd-btn--ghost fd-btn--icon nb-bell"
               aria-label={t('notifications.bellNone')}
+              // Clic avant la fin du chargement : retenu, le panneau s'ouvre dès que la cloche est prête
+              onClick={() => (bellState.open = true)}
             >
               <Bell aria-hidden="true" />
             </button>
