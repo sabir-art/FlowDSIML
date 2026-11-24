@@ -1536,6 +1536,16 @@
   align-items: center;
   gap: 8px;
 }
+/* Sans logo : « Importer… » et « Médiathèque » l'un sous l'autre, chacun sur toute la largeur de la colonne */
+.mk .logo-block__acts--stack {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+.mk .logo-block__acts--stack > .btn {
+  justify-content: center;
+  width: 100%;
+}
 .mk .logo-block__acts .logo-name {
   flex: 1;
   min-width: 0;

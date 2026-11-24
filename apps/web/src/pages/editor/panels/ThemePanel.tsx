@@ -222,7 +222,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
             </span>
             <div className="logo-block__main">
               {!readOnly && (
-                <div className="logo-block__acts">
+                <div className={`logo-block__acts${theme.logoUrl ? '' : ' logo-block__acts--stack'}`}>
                   <input
                     ref={logoInput}
                     id="th-logo"
