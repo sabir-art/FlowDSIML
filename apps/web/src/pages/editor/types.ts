@@ -23,6 +23,12 @@ export type DemoSettings = {
   allowedEmbedOrigins?: string[];
   /** L30-10 : dernière voix de synthèse choisie pour la démo. */
   aiVoice?: string;
+  /**
+   * EXT-02 §6.4 : réglages de la voix off pour toute la démo. `autoplay` : la voix démarre à l'arrivée sur
+   * l'étape ; `captions` : sous-titres affichés par défaut (le visiteur garde son bouton) ; `player` : lecteur
+   * dans la bulle (par défaut) ou boutons de la barre du lecteur.
+   */
+  voice?: { autoplay?: boolean; captions?: boolean; player?: 'bubble' | 'bar' };
   theme?: Partial<Theme>;
   cta?: Cta | null;
   /** F1 : mode de lecture de toute la démo (visite guidée = pastille + bulle). */

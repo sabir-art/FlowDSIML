@@ -1,7 +1,28 @@
 import { DropBlock, UploadBar } from '../../../components/DropBlock';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Mic, Pause, Play, Square, Trash2, Upload } from 'lucide-react';
+import {
+  ArrowRight,
+  AudioLines,
+  Captions,
+  Download,
+  Ellipsis,
+  Info,
+  MessageSquare,
+  Mic,
+  Pause,
+  Play,
+  Replace,
+  RotateCcw,
+  Square,
+  Trash2,
+  Upload,
+  Volume2,
+} from 'lucide-react';
+import { Select, Switch } from '@flowdsiml/ui';
+import { Menu } from '../../../components/Menu';
+import { aiBlock, useAiStatus } from '../../../lib/ai';
+import { AudioLine, Wave } from './AudioLine';
 import { AiCaptions, AiVoice, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -14,10 +35,17 @@ import { VOICE_ACCEPT, VOICE_MAX_BYTES, VOICE_MAX_MS, bubbleText, formatClock, v
 
 type Rec = { state: 'recording' | 'paused'; ms: number };
 
+type Source = 'generate' | 'record' | 'import';
+const SOURCES: Source[] = ['generate', 'record', 'import'];
+const FLAT = Array.from({ length: 22 }, () => 4);
+
 /**
- * L28-02 : section « Voix off » de l'onglet Étape. Une piste par étape (micro ou fichier), 2 min et 5 Mo au
- * plus ; transcription obligatoire pour publier (préremplie avec le texte de la bulle) ; « Générer à partir
- * du texte » reste en « Bientôt ».
+ * EXT-02 §6.4 : « Voix off » dans le panneau de 320 px. Une piste par étape, 2 min et 5 Mo au plus.
+ *  - Sans voix : segmenté « Générer », « Enregistrer », « Importer ». Un enregistrement s'écoute avant d'être
+ *    gardé (« Recommencer », « Garder »).
+ *  - Voix en place : carte avec son lecteur, « Remplacer… » (rouvre le segmenté) et un menu (« Télécharger »,
+ *    « Supprimer la voix ») ; dessous la transcription, obligatoire pour publier.
+ *  - « Pour toute la démo » : lecture automatique, sous-titres affichés, lecteur audio.
  */
 export function VoiceFields({
   editor,
@@ -33,6 +61,7 @@ export function VoiceFields({
 }) {
   const { current: ws } = useWorkspace();
   const { t } = useTranslation();
+  const demoVoice = asSettings(editor.demo?.settings).voice ?? {};
   const [dialog, ask] = useConfirm();
   const [url, setUrl] = useState<string | null>(null);
   const [rec, setRec] = useState<Rec | null>(null);
@@ -41,12 +70,29 @@ export function VoiceFields({
   /** MEDIA-01 §18.2 : envoi d'un fichier importé (bouton « Envoi… » et barre). */
   const [sending, setSending] = useState(false);
   const [announce, setAnnounce] = useState('');
+  /** Voix en place : « Remplacer… » rouvre le choix de la source */
+  const [replacing, setReplacing] = useState(false);
+  const [source, setSource] = useState<Source | null>(null);
+  /** Enregistrement terminé, à écouter avant de le garder */
+  const [take, setTake] = useState<{ blob: Blob; ms: number; url: string } | null>(null);
+  /** Onde de l'enregistrement en cours (niveaux du micro) */
+  const [levels, setLevels] = useState<number[]>(FLAT);
+  const meter = useRef<{ ctx: AudioContext; raf: number } | null>(null);
+  const { status: ai } = useAiStatus(ws?.id);
   const toast = useToast();
   // Les « Annuler » des toasts agissent après d'autres rendus : toujours l'éditeur courant
   const live = useRef(editor);
   live.current = editor;
   const [heard, setHeard] = useState<{ text: string; language: string } | null>(null);
-  useEffect(() => setHeard(null), [step.id]);
+  useEffect(() => {
+    setHeard(null);
+    setReplacing(false);
+    setSource(null);
+    setTake((k) => {
+      if (k) URL.revokeObjectURL(k.url);
+      return null;
+    });
+  }, [step.id]);
   const file = useRef<HTMLInputElement>(null);
   const media = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
@@ -75,9 +121,42 @@ export function VoiceFields({
     if (clock.current.timer) window.clearInterval(clock.current.timer);
     clock.current.timer = null;
     media.current?.stream.getTracks().forEach((tr) => tr.stop());
+    if (meter.current) {
+      cancelAnimationFrame(meter.current.raf);
+      void meter.current.ctx.close().catch(() => undefined);
+      meter.current = null;
+    }
+    setLevels(FLAT);
   }
 
-  async function store(blob: Blob, durationMs: number) {
+  /** Onde en direct : niveau du micro, une barre toutes les 120 ms (figée si l'animation est réduite). */
+  function watch(stream: MediaStream) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      const ctx = new AudioContext();
+      const an = ctx.createAnalyser();
+      an.fftSize = 256;
+      ctx.createMediaStreamSource(stream).connect(an);
+      const buf = new Uint8Array(an.frequencyBinCount);
+      let last = 0;
+      const loop = (now: number) => {
+        if (!meter.current) return;
+        if (now - last > 120 && media.current?.state === 'recording') {
+          last = now;
+          an.getByteTimeDomainData(buf);
+          let peak = 0;
+          for (const v of buf) peak = Math.max(peak, Math.abs(v - 128));
+          setLevels((l) => [...l.slice(1), 4 + Math.min(16, Math.round((peak / 128) * 40))]);
+        }
+        meter.current.raf = requestAnimationFrame(loop);
+      };
+      meter.current = { ctx, raf: requestAnimationFrame(loop) };
+    } catch {
+      /* pas d'analyse du son : l'onde reste plate */
+    }
+  }
+
+  async function store(blob: Blob, durationMs: number, from: 'record' | 'import') {
     const ext = voiceExt(blob.type);
     if (!ext) return setErr(t('editor.voice.badType'));
     if (blob.size > VOICE_MAX_BYTES) return setErr(t('editor.voice.tooBig'));
@@ -96,9 +175,17 @@ export function VoiceFields({
           ? step.voice_transcript
           : bubbleText(step, editor.hotspots),
         // Voix enregistrée ou importée : plus de repère « IA »
-        options: { ...((step.options ?? {}) as Record<string, unknown>), aiVoice: undefined },
+        // Nouvelle voix : elle suit le réglage « Lecture automatique » de la démo
+        voice_autoplay: demoVoice.autoplay !== false,
+        options: {
+          ...((step.options ?? {}) as Record<string, unknown>),
+          aiVoice: undefined,
+          voiceSource: from,
+        },
       });
       if (old) void supabase.storage.from('voices').remove([old]);
+      setReplacing(false);
+      setSource(null);
     } catch {
       setErr(t('editor.voice.uploadError'));
     } finally {
@@ -125,10 +212,13 @@ export function VoiceFields({
       const ms = elapsed();
       stopTracks();
       setRec(null);
-      void store(new Blob(chunks.current, { type: 'audio/webm' }), Math.min(ms, VOICE_MAX_MS));
+      // EXT-02 §6.4 : on écoute avant de garder
+      const blob = new Blob(chunks.current, { type: 'audio/webm' });
+      setTake({ blob, ms: Math.min(ms, VOICE_MAX_MS), url: URL.createObjectURL(blob) });
     };
     clock.current = { started: Date.now(), acc: 0, timer: null };
     mr.start(250);
+    watch(stream);
     setRec({ state: 'recording', ms: 0 });
     clock.current.timer = window.setInterval(tick, 250);
   }
@@ -175,7 +265,7 @@ export function VoiceFields({
     if (!Number.isFinite(ms)) return setErr(t('editor.voice.badType'));
     setSending(true);
     try {
-      await store(f, ms);
+      await store(f, ms, 'import');
     } finally {
       setSending(false);
     }
@@ -202,6 +292,9 @@ export function VoiceFields({
   const lang = settings.locale ?? 'fr';
   const opts = (step.options ?? {}) as Record<string, unknown>;
   const generated = !!opts.aiVoice;
+  // Assistance IA coupée pour l'espace (ou rôle sans droit) : « Générer » reste visible, grisé, avec la raison
+  const aiOff = aiBlock(ai, 'voice');
+  const genOff = aiOff === 'disabled' || aiOff === 'role';
   // 065 (L30-10) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
   const aiVoice =
     ws && !readOnly ? (
@@ -227,8 +320,11 @@ export function VoiceFields({
             voice_path: r.path,
             voice_duration_ms: Math.max(1, Math.round(r.durationMs)),
             voice_transcript: r.transcript,
-            options: { ...opts, aiVoice: true },
+            voice_autoplay: demoVoice.autoplay !== false,
+            options: { ...opts, aiVoice: true, voiceSource: undefined },
           });
+          setReplacing(false);
+          setSource(null);
           // L'ancien fichier n'est retiré qu'une fois l'annulation impossible
           let undone = false;
           toast(t('ai.voice.applied'), {
@@ -249,11 +345,46 @@ export function VoiceFields({
     ) : null;
   const has = !!step.voice_path;
   const missing = has && !step.voice_transcript?.trim();
+  const choosing = !has || replacing;
+  const tab: Source = source ?? (genOff ? 'record' : 'generate');
+  const kind = generated
+    ? 'generated'
+    : opts.voiceSource === 'import' ||
+        (opts.voiceSource !== 'record' && !/\.webm$/.test(step.voice_path ?? ''))
+      ? 'imported'
+      : 'recorded';
+  const discardTake = () =>
+    setTake((k) => {
+      if (k) URL.revokeObjectURL(k.url);
+      return null;
+    });
+
+  /** Réglage de la démo ; « Lecture automatique » s'applique aussi aux voix déjà en place. */
+  const setDemoVoice = (patch: NonNullable<typeof settings.voice>) => {
+    editor.updateDemo({ settings: { ...settings, voice: { ...demoVoice, ...patch } } });
+    if (patch.autoplay !== undefined)
+      for (const st of editor.steps)
+        if (st.voice_path && (st.voice_autoplay !== false) !== patch.autoplay)
+          editor.updateStep(st.id, { voice_autoplay: patch.autoplay });
+  };
+  const autoplay = demoVoice.autoplay ?? step.voice_autoplay !== false;
+
+  async function download() {
+    if (!url || !step.voice_path) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `voix-etape.${step.voice_path.split('.').pop()}`;
+    a.rel = 'noopener';
+    document.body.append(a);
+    a.click();
+    a.remove();
+  }
+
   return (
     // MEDIA-01 §18.2 : un fichier audio déposé n'importe où sur le bloc est importé
     <DropBlock
       className="sec voice-sec"
-      disabled={readOnly || busy || !!rec}
+      disabled={readOnly || busy || !!rec || !!take}
       onFile={(f) => void importFile(f)}
     >
       {dialog}
@@ -261,167 +392,333 @@ export function VoiceFields({
       <span className="sr-only" aria-live="polite">
         {announce}
       </span>
-      {rec ? (
-        <div className="voice-rec" role="group" aria-label={t('editor.voice.recording')}>
-          <span className={`voice-dot${rec.state === 'paused' ? ' is-paused' : ''}`} aria-hidden="true" />
-          <span className="t-mono voice-clock">
-            {formatClock(rec.ms)} / {formatClock(VOICE_MAX_MS)}
-          </span>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={pause}>
-            {rec.state === 'paused' ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-            {rec.state === 'paused' ? t('editor.voice.resume') : t('editor.voice.pause')}
-          </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={finish}>
-            <Square aria-hidden="true" />
-            {t('editor.voice.finish')}
-          </button>
-        </div>
-      ) : has ? (
-        <>
-          {url ? (
-            <audio
-              className="voice-player"
-              controls
-              preload="metadata"
-              src={url}
-              aria-label={t('editor.voice.player')}
-            />
-          ) : (
-            <div className="voice-player is-loading" />
-          )}
-          {!readOnly && (
-            <div className="row wrap voice-actions">
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={busy}
-                onClick={() => void start()}
-              >
-                <Mic aria-hidden="true" />
-                {t('editor.voice.rerecord')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={busy}
-                aria-controls="voicefields-file"
-                onClick={() => file.current?.click()}
-              >
-                <Upload aria-hidden="true" />
-                {sending ? t('dropzone.sendingShort') : t('editor.voice.replace')}
-              </button>
-              {/* L38 : « Supprimer » en bouton ghost (icône) aligné avec Réenregistrer et Remplacer */}
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm btn-icon voice-del"
-                aria-label={t('editor.voice.removeLabel')}
-                title={t('editor.voice.removeLabel')}
-                disabled={busy}
-                onClick={() => void remove()}
-              >
-                <Trash2 aria-hidden="true" />
-              </button>
-            </div>
-          )}
-          {sending && <UploadBar label={t('editor.voice.sending')} />}
-          {!readOnly && aiVoice}
-          <label className="check voice-auto">
-            <input
-              type="checkbox"
-              checked={step.voice_autoplay !== false}
-              disabled={readOnly}
-              onChange={(e) => editor.updateStep(step.id, { voice_autoplay: e.target.checked })}
-            />
-            {t('editor.voice.autoplay')}
-          </label>
-          <div className="field">
-            <label htmlFor={`voice-tr-${step.id}`}>{t('editor.voice.transcript')}</label>
-            <textarea
-              id={`voice-tr-${step.id}`}
-              className="textarea"
-              rows={3}
-              maxLength={4000}
-              readOnly={readOnly}
-              value={step.voice_transcript ?? ''}
-              aria-describedby={`voice-tr-h-${step.id}`}
-              aria-invalid={missing || undefined}
-              onChange={(e) => editor.updateStep(step.id, { voice_transcript: e.target.value })}
-            />
-            <span className="help" id={`voice-tr-h-${step.id}`}>
-              {t('editor.voice.transcriptHelp')}
+
+      {has && !replacing && (
+        <div className="vo-card">
+          <div className="vo-card__head">
+            <span className="vo-card__icon" aria-hidden="true">
+              <AudioLines />
             </span>
-            {/* 066 (L30-11) : transcription automatique d'une voix enregistrée */}
-            {ws && !readOnly && !generated && !heard && (
-              <AiCaptions
-                ws={ws.id}
-                lang={lang}
-                demoId={step.demo_id}
-                stepId={step.id}
-                source="voice"
-                durationMs={step.voice_duration_ms ?? 0}
-                label={t('ai.captions.voiceOpen')}
-                onResult={(r) => setHeard({ text: r.text, language: r.language })}
+            <div className="vo-card__txt">
+              <b>{t(`editor.voice.kind.${kind}`)}</b>
+              <span className="muted">{formatClock(step.voice_duration_ms ?? 0)}</span>
+            </div>
+            {!readOnly && (
+              <Menu
+                label={t('editor.voice.more')}
+                icon={<Ellipsis />}
+                items={[
+                  { label: t('editor.voice.download'), icon: <Download />, onSelect: () => void download() },
+                  'separator',
+                  {
+                    label: t('editor.voice.removeLabel'),
+                    icon: <Trash2 />,
+                    danger: true,
+                    onSelect: () => void remove(),
+                  },
+                ]}
               />
-            )}
-            {heard && (
-              <TranscriptPreview
-                text={heard.text}
-                language={heard.language}
-                onIgnore={() => setHeard(null)}
-                onApply={() => {
-                  const before = step.voice_transcript;
-                  editor.updateStep(step.id, { voice_transcript: heard.text.slice(0, 4000) });
-                  setHeard(null);
-                  toast(t('ai.captions.transcriptApplied'), {
-                    label: t('ai.undo'),
-                    durationMs: 8000,
-                    onClick: () => live.current.updateStep(step.id, { voice_transcript: before }),
-                  });
-                }}
-              />
-            )}
-            {missing && (
-              <span className="field-error" role="alert">
-                {t('editor.voice.transcriptMissing')}
-              </span>
             )}
           </div>
+          <AudioLine
+            src={url}
+            durationMs={step.voice_duration_ms ?? 0}
+            label={t('editor.voice.listen')}
+            pauseLabel={t('editor.voice.pause')}
+          />
+          {!readOnly && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm vo-wide"
+              disabled={busy}
+              onClick={() => setReplacing(true)}
+            >
+              <Replace aria-hidden="true" />
+              {t('editor.voice.replaceDots')}
+            </button>
+          )}
+        </div>
+      )}
+
+      {choosing && !readOnly && (
+        <>
+          <div className="fd-segmented vo-tabs" role="tablist" aria-label={t('editor.voice.source')}>
+            {SOURCES.map((k) => {
+              const off = k === 'generate' && genOff;
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  role="tab"
+                  id={`vo-tab-${k}`}
+                  aria-selected={tab === k}
+                  aria-controls="vo-panel"
+                  aria-disabled={off || undefined}
+                  aria-describedby={off ? 'vo-gen-off' : undefined}
+                  tabIndex={tab === k ? 0 : -1}
+                  disabled={!!rec || busy}
+                  onClick={() => !off && setSource(k)}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                    e.preventDefault();
+                    // Les flèches changent d'onglet, pas d'étape (raccourci de l'éditeur)
+                    e.stopPropagation();
+                    const list = SOURCES.filter((x) => !(x === 'generate' && genOff));
+                    const n =
+                      list[
+                        (list.indexOf(tab) + (e.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length
+                      ]!;
+                    setSource(n);
+                    document.getElementById(`vo-tab-${n}`)?.focus();
+                  }}
+                >
+                  {t(`editor.voice.tab.${k}`)}
+                </button>
+              );
+            })}
+          </div>
+          {genOff && (
+            <p className="help" id="vo-gen-off">
+              {t('editor.voice.generateOff')}
+            </p>
+          )}
+          <div id="vo-panel" role="tabpanel" aria-labelledby={`vo-tab-${tab}`} className="vo-panel">
+            {tab === 'generate' && aiVoice}
+            {tab === 'record' &&
+              (take ? (
+                <>
+                  <div>
+                    <span className="vo-label" id="vo-take">
+                      {t('editor.voice.listenFirst')}
+                    </span>
+                    <AudioLine
+                      src={take.url}
+                      durationMs={take.ms}
+                      label={t('editor.voice.listen')}
+                      pauseLabel={t('editor.voice.pause')}
+                    />
+                  </div>
+                  <div className="vo-two">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      disabled={busy}
+                      onClick={() => {
+                        discardTake();
+                        void start();
+                      }}
+                    >
+                      <RotateCcw aria-hidden="true" />
+                      {t('editor.voice.again')}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      disabled={busy}
+                      onClick={() => {
+                        const k = take;
+                        void store(k.blob, k.ms, 'record').then(discardTake);
+                      }}
+                    >
+                      {t('editor.voice.keep')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="vo-aud vo-aud--rec"
+                    role="group"
+                    aria-label={rec ? t('editor.voice.recording') : t('editor.voice.tab.record')}
+                  >
+                    {rec ? (
+                      <button
+                        type="button"
+                        className="vo-play is-stop"
+                        aria-label={t('editor.voice.stop')}
+                        onClick={finish}
+                      >
+                        <Square aria-hidden="true" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="vo-play"
+                        aria-label={t('editor.voice.startRec')}
+                        disabled={busy}
+                        onClick={() => void start()}
+                      >
+                        <Mic aria-hidden="true" />
+                      </button>
+                    )}
+                    <Wave levels={levels} played={rec ? 1 : 0} />
+                    <span className="vo-time">{formatClock(rec?.ms ?? 0)}</span>
+                    {rec && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm btn-icon"
+                        aria-label={
+                          rec.state === 'paused' ? t('editor.voice.resume') : t('editor.voice.pause')
+                        }
+                        onClick={pause}
+                      >
+                        {rec.state === 'paused' ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+                      </button>
+                    )}
+                  </div>
+                  <p className="help">{t('editor.voice.recHelp')}</p>
+                </>
+              ))}
+            {tab === 'import' && (
+              <div className="vo-import">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  disabled={busy}
+                  aria-controls="voicefields-file"
+                  onClick={() => file.current?.click()}
+                >
+                  <Upload aria-hidden="true" />
+                  {sending ? t('dropzone.sendingShort') : t('dropzone.import')}
+                </button>
+                {sending && <UploadBar label={t('editor.voice.sending')} />}
+                <span className="help">{t('editor.voice.importHelp')}</span>
+              </div>
+            )}
+          </div>
+          {replacing && !rec && !take && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm vo-wide"
+              onClick={() => setReplacing(false)}
+            >
+              {t('editor.voice.keepCurrent')}
+            </button>
+          )}
         </>
-      ) : (
-        !readOnly && (
-          <>
-            <div className="row wrap voice-actions">
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={busy}
-                onClick={() => void start()}
-              >
-                <Mic aria-hidden="true" />
-                {t('editor.voice.record')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={busy}
-                aria-controls="voicefields-file"
-                onClick={() => file.current?.click()}
-              >
-                <Upload aria-hidden="true" />
-                {sending ? t('dropzone.sendingShort') : t('dropzone.import')}
-              </button>
-            </div>
-            {sending && <UploadBar label={t('editor.voice.sending')} />}
-            {aiVoice}
-            <p className="help">{t('editor.voice.help')}</p>
-          </>
-        )
       )}
       {err && (
         <p className="field-error" role="alert">
           {err}
         </p>
       )}
+
+      {has && !replacing && (
+        <div className="field">
+          <label htmlFor={`voice-tr-${step.id}`}>
+            {generated ? t('editor.voice.readText') : t('editor.voice.transcript')}{' '}
+            <span className="vo-opt">
+              {generated ? t('editor.voice.readTextNote') : t('editor.voice.transcriptNote')}
+            </span>
+          </label>
+          <textarea
+            id={`voice-tr-${step.id}`}
+            className="textarea"
+            rows={3}
+            maxLength={4000}
+            readOnly={readOnly}
+            value={step.voice_transcript ?? ''}
+            aria-describedby={`voice-tr-h-${step.id}`}
+            aria-invalid={missing || undefined}
+            onChange={(e) => editor.updateStep(step.id, { voice_transcript: e.target.value })}
+          />
+          <span className="help" id={`voice-tr-h-${step.id}`}>
+            {t('editor.voice.transcriptHelp')}
+          </span>
+          {/* 066 (L30-11) : transcription automatique d'une voix enregistrée */}
+          {ws && !readOnly && !generated && !heard && (
+            <AiCaptions
+              ws={ws.id}
+              lang={lang}
+              demoId={step.demo_id}
+              stepId={step.id}
+              source="voice"
+              durationMs={step.voice_duration_ms ?? 0}
+              label={t('ai.captions.voiceOpen')}
+              onResult={(r) => setHeard({ text: r.text, language: r.language })}
+            />
+          )}
+          {heard && (
+            <TranscriptPreview
+              text={heard.text}
+              language={heard.language}
+              onIgnore={() => setHeard(null)}
+              onApply={() => {
+                const before = step.voice_transcript;
+                editor.updateStep(step.id, { voice_transcript: heard.text.slice(0, 4000) });
+                setHeard(null);
+                toast(t('ai.captions.transcriptApplied'), {
+                  label: t('ai.undo'),
+                  durationMs: 8000,
+                  onClick: () => live.current.updateStep(step.id, { voice_transcript: before }),
+                });
+              }}
+            />
+          )}
+          {missing && (
+            <span className="field-error" role="alert">
+              {t('editor.voice.transcriptMissing')}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Réglages de la voix pour toute la démo (pas seulement cette étape) */}
+      <div className="vo-demo" role="group" aria-labelledby="vo-demo-t">
+        <p className="vo-demo__t" id="vo-demo-t">
+          {t('editor.voice.forDemo')}
+        </p>
+        <div className="vo-rows">
+          <Switch
+            className="vo-row"
+            label={
+              <span className="vo-row__k">
+                <Volume2 aria-hidden="true" />
+                {t('editor.voice.autoplayDemo')}
+              </span>
+            }
+            checked={autoplay}
+            disabled={readOnly}
+            onChange={(e) => setDemoVoice({ autoplay: e.target.checked })}
+          />
+          <Switch
+            className="vo-row"
+            label={
+              <span className="vo-row__k">
+                <Captions aria-hidden="true" />
+                {t('editor.voice.captionsDemo')}
+              </span>
+            }
+            checked={demoVoice.captions !== false}
+            disabled={readOnly}
+            onChange={(e) => setDemoVoice({ captions: e.target.checked })}
+          />
+          <div className="vo-row">
+            <span className="vo-row__k" id="vo-player-l">
+              <MessageSquare aria-hidden="true" />
+              {t('editor.voice.playerDemo')}
+            </span>
+            <span className="vo-row__v">
+              <Select
+                size="sm"
+                aria-labelledby="vo-player-l"
+                value={demoVoice.player ?? 'bubble'}
+                disabled={readOnly}
+                onChange={(e) => setDemoVoice({ player: e.target.value === 'bar' ? 'bar' : 'bubble' })}
+                options={[
+                  { value: 'bubble', label: t('editor.voice.playerBubble') },
+                  { value: 'bar', label: t('editor.voice.playerBar') },
+                ]}
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="vo-info" role="note">
+        <Info aria-hidden="true" />
+        <span>{t('editor.voice.soundNote')}</span>
+      </div>
+
       {chain && has && !rec && !readOnly && editor.steps[editor.steps.length - 1]?.id !== step.id && (
         <button
           type="button"
