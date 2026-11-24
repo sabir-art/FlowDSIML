@@ -74,6 +74,7 @@ import { HtmlStep } from './HtmlStep';
 import { GuideBubble, GuidePill } from './SandboxGuide';
 import { advance, GUIDE_START, guideKey, guidePath, guideView, readGuide, type GuideState } from './guide';
 import { InfoDialog } from './InfoDialog';
+import { VoiceLine, VoiceLineContext, type VoiceLineState } from './VoiceLine';
 import { GlossaryDrawer, GlossaryTip } from './Glossary';
 import { Quiz, ringVars } from './Quiz';
 import { submitQuizAttempt } from './api';
@@ -253,7 +254,10 @@ export function Player({
       return false;
     }
   });
-  const [voiceCc, setVoiceCc] = useState(true);
+  // EXT-02 §6.4 : sous-titres affichés par défaut selon le réglage de la démo ; le visiteur garde la main
+  const [voiceCc, setVoiceCc] = useState(m.voice.captions);
+  /** La ligne audio est affichée dans une bulle : la barre n'a plus ses boutons de voix. */
+  const [voiceHosted, setVoiceHosted] = useState(false);
   const voiceRef = useRef<HTMLAudioElement>(null);
   const defaults = useMemo(
     () => Object.fromEntries(m.variables.map((v) => [v.key, v.default])),
@@ -645,6 +649,30 @@ export function Player({
     // Lecture lancée dans le geste de l'utilisateur (autorisée par le navigateur)
     if (voice?.autoplay) void voiceRef.current?.play().catch(() => undefined);
   }
+  // EXT-02 §6.4 : ligne audio de la bulle (réglage « Lecteur audio : Bulle », par défaut)
+  const voiceLine = useMemo<VoiceLineState | null>(
+    () =>
+      voice && m.voice.player === 'bubble'
+        ? {
+            audio: voiceRef,
+            stepId: step.id,
+            durationMs: voice.durationMs,
+            cc: voiceCc,
+            onCc: () => setVoiceCc((c) => !c),
+            onPlay: () => {
+              setSoundOn(true);
+              try {
+                sessionStorage.setItem('fd.voice.sound', '1');
+              } catch {
+                /* stockage indisponible */
+              }
+            },
+            onHosted: setVoiceHosted,
+            labels: { play: t.voice.play, pause: t.voice.pause, captions: t.voice.captions },
+          }
+        : null,
+    [voice, m.voice.player, step.id, voiceCc, t],
+  );
   function toggleVoice() {
     const a = voiceRef.current;
     if (!a) return;
@@ -743,682 +771,687 @@ export function Player({
           .join('. ');
 
   return (
-    <div
-      class={`p-root ${compact ? 'is-compact' : ''}${mobile ? ' is-mobile' : ''}${framed ? ' is-framed' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
-      style={style}
-      ref={rootRef}
-      // L30-03 : langue du contenu (copies traduites) ; l'arabe se lit de droite à gauche
-      lang={m.locale}
-      dir={m.locale === 'ar' ? 'rtl' : undefined}
-    >
-      {/* L18 : police de la médiathèque (WOFF2 https, URL contrôlée) */}
-      {fontFaceCss(theme) && <style>{fontFaceCss(theme)}</style>}
-      {present?.black && (
-        <div class="p-black" role="status">
-          {t.paused}
-        </div>
-      )}
-      <p class="sr-only" aria-live="polite" aria-atomic="true">
-        {announce}
-      </p>
-      {/* A8 : annonce de l'étape du guide (la bulle ne prend pas le focus) */}
-      <p class="sr-only" aria-live="polite" aria-atomic="true">
-        {gBubble
-          ? fmt(t.guide as unknown as Record<string, string>, 'live', {
-              k: gs.k + 1,
-              n: gn,
-              title: richTextToPlain(sub(gBubble.hotspot.title || gBubble.hotspot.body)),
-            })
-          : gv.kind === 'guide' && gv.done
-            ? t.guide.done
-            : ''}
-      </p>
-      {preview && !present && <div class="p-preview">{t.preview}</div>}
-      <header class="p-top" inert={!!gateForm}>
-        {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}
-        <div class="p-id">
-          {theme.logoUrl ? (
-            <span class="p-ws">
-              <img src={theme.logoUrl} alt="" />
-            </span>
-          ) : m.workspaceName ? (
-            <span class="p-ws" aria-hidden="true">
-              {initials(m.workspaceName)}
-            </span>
-          ) : null}
-          <div class="p-id-text">
-            <h1 class="p-title">{sub(m.title)}</h1>
-            <small class="p-meta">
-              {m.workspaceName
-                ? fmt(t as unknown as Record<string, string>, 'meta', {
-                    ws: m.workspaceName,
-                    count: m.steps.length,
-                  })
-                : fmt(t as unknown as Record<string, string>, 'metaSteps', { count: m.steps.length })}
-            </small>
-          </div>
-        </div>
-        <div class="p-top-acts">
-          {gv.kind === 'guide' && (
-            <GuidePill
-              t={t}
-              view={gv}
-              k={gs.k}
-              n={gn}
-              short={compact}
-              btnRef={pillRef}
-              onBack={guideBack}
-              onRestart={() => {
-                setGs(GUIDE_START);
-                goGuidePage(guide[0]!.page);
-              }}
-              onQuit={() => guideSkip('quit')}
-            />
-          )}
-          {m.checklist && items.length > 0 && !compact && checklistDocked && (
-            <Checklist
-              title={m.checklist.title}
-              position="collapsed"
-              items={items}
-              t={t}
-              sub={sub}
-              onGo={go}
-              docked
-            />
-          )}
-          {/* PY-2 : « Chapitres » (si la démo a des chapitres), puis le CTA de la page */}
-          {m.chapters.length > 0 && (
-            <button
-              class="p-btn p-btn-ghost p-btn-sm p-chapters-btn"
-              aria-expanded={menu}
-              aria-haspopup="menu"
-              onClick={() => setMenu(!menu)}
-            >
-              <ListChecks {...ICON} size={16} />
-              {t.chapters}
-            </button>
-          )}
-          {presentTerms.length > 0 && (
-            <button
-              class="p-btn p-btn-ghost p-btn-sm p-gloss-btn"
-              aria-haspopup="dialog"
-              onClick={() => setGlossOpen(true)}
-            >
-              <Notebook {...ICON} size={16} />
-              {/* Spec §6 : sur mobile, bouton icône seul nommé « Glossaire » */}
-              <span class={compact ? 'sr-only' : undefined}>{t.glossary}</span>
-            </button>
-          )}
-          {measureInfo && (
-            <button
-              class="p-btn p-btn-ghost p-btn-sm p-info-btn"
-              aria-haspopup="dialog"
-              aria-label={t.infoBtn}
-              onClick={() => setInfoOpen(true)}
-            >
-              <Info {...ICON} size={16} />
-            </button>
-          )}
-          {m.cta && (
-            <button
-              class="p-btn p-btn-primary p-btn-sm p-top-cta"
-              title={sub(m.cta.label)}
-              onClick={() => onCta(m.cta!.url, m.cta!.label)}
-            >
-              <span class="p-top-cta-label">{sub(m.cta.label)}</span>
-              <span class="p-top-cta-icon">
-                <ExternalLink {...ICON} size={16} />
-              </span>
-            </button>
-          )}
-        </div>
-      </header>
-      {menu && !gateForm && (
-        <nav class="p-menu" aria-label={t.chapters}>
-          {m.chapters.map((c) => {
-            const i = m.steps.findIndex((s) => s.chapterId === c.id);
-            return (
-              <button
-                key={c.id}
-                class="p-menu-item"
-                disabled={i < 0}
-                aria-current={chapterOf(step)?.id === c.id}
-                onClick={() => go(i)}
-              >
-                {sub(c.title)}
-              </button>
-            );
-          })}
-        </nav>
-      )}
-
-      <main
-        id="p-main"
-        tabIndex={-1}
-        class="p-stage-wrap"
-        onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
-        onTouchEnd={(e) => {
-          const x0 = touchX.current;
-          const x1 = e.changedTouches[0]?.clientX;
-          touchX.current = null;
-          if (x0 === null || x1 === undefined || Math.abs(x1 - x0) < 50 || gateForm) return;
-          if (view === 'quiz') return;
-          go(x1 < x0 ? index + 1 : index - 1);
-        }}
+    <VoiceLineContext.Provider value={voiceLine}>
+      <div
+        class={`p-root ${compact ? 'is-compact' : ''}${mobile ? ' is-mobile' : ''}${framed ? ' is-framed' : ''}${dark ? ' is-dark' : ''}${present ? ' is-present' : ''}${present?.hideHotspots ? ' is-present-nohs' : ''}`}
+        style={style}
+        ref={rootRef}
+        // L30-03 : langue du contenu (copies traduites) ; l'arabe se lit de droite à gauche
+        lang={m.locale}
+        dir={m.locale === 'ar' ? 'rtl' : undefined}
       >
-        {reviewing && view === 'steps' && (
-          <div class="p-review-bar">
-            <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={openQuiz}>
-              <ChevronLeft {...ICON} size={16} />
-              {t.quiz.backToQuiz}
-            </button>
+        {/* L18 : police de la médiathèque (WOFF2 https, URL contrôlée) */}
+        {fontFaceCss(theme) && <style>{fontFaceCss(theme)}</style>}
+        {present?.black && (
+          <div class="p-black" role="status">
+            {t.paused}
           </div>
         )}
-        {quizOpened && m.quiz && (
-          <div class="p-quiz-wrap" hidden={view !== 'quiz'}>
-            <Quiz
-              quiz={m.quiz}
-              module={m.title}
-              t={t}
-              sub={sub}
-              stepNumber={(id) => {
-                const i = id ? m.steps.findIndex((s) => s.id === id) : -1;
-                return i >= 0 ? i + 1 : null;
-              }}
-              attemptsUsed={quizAttemptsUsed()}
-              onSubmit={async (answers) => {
-                memory.current.answers = { ...memory.current.answers, ...answers };
-                if (preview) return null; // « Tester le quiz » : tentative non comptée
-                const res = scoreQuiz
-                  ? await scoreQuiz(answers, quizAttemptsUsed())
-                  : await submitQuizAttempt({
-                      demoId: m.demoId,
-                      versionId: m.versionId,
-                      visitorId: tracker.visitorId,
-                      sessionId: tracker.sessionId,
-                      linkToken: tracker.linkToken,
-                      answers: Object.entries(answers).map(([questionId, answerIds]) =>
-                        quizAnswerPayload(m.quiz!, questionId, answerIds),
-                      ),
-                    });
-                try {
-                  localStorage.setItem(QUIZ_KEY, String(quizAttemptsUsed() + 1));
-                } catch {
-                  /* stockage indisponible */
-                }
-                // L25-10 : score lu par les règles « Score du quiz »
-                memory.current.score = res.score;
-                if (res.passed && !completed.current) {
-                  completed.current = true;
-                  tracker.track('demo_complete', { stepIndex: m.steps.length - 1 });
-                }
-                return res;
-              }}
-              onReviewStep={(id) => {
-                const i = m.steps.findIndex((s) => s.id === id);
-                if (i < 0) return;
-                setIndex(i);
-                setView('steps');
-                setReviewing(true);
-              }}
-              onRestartModule={() => go(0)}
-              onFinish={() => {
-                setView('steps');
-                setEnded(true);
-              }}
-            />
+        <p class="sr-only" aria-live="polite" aria-atomic="true">
+          {announce}
+        </p>
+        {/* A8 : annonce de l'étape du guide (la bulle ne prend pas le focus) */}
+        <p class="sr-only" aria-live="polite" aria-atomic="true">
+          {gBubble
+            ? fmt(t.guide as unknown as Record<string, string>, 'live', {
+                k: gs.k + 1,
+                n: gn,
+                title: richTextToPlain(sub(gBubble.hotspot.title || gBubble.hotspot.body)),
+              })
+            : gv.kind === 'guide' && gv.done
+              ? t.guide.done
+              : ''}
+        </p>
+        {preview && !present && <div class="p-preview">{t.preview}</div>}
+        <header class="p-top" inert={!!gateForm}>
+          {/* PY-1 : pastille du workspace (logo, sinon initiales), titre, méta */}
+          <div class="p-id">
+            {theme.logoUrl ? (
+              <span class="p-ws">
+                <img src={theme.logoUrl} alt="" />
+              </span>
+            ) : m.workspaceName ? (
+              <span class="p-ws" aria-hidden="true">
+                {initials(m.workspaceName)}
+              </span>
+            ) : null}
+            <div class="p-id-text">
+              <h1 class="p-title">{sub(m.title)}</h1>
+              <small class="p-meta">
+                {m.workspaceName
+                  ? fmt(t as unknown as Record<string, string>, 'meta', {
+                      ws: m.workspaceName,
+                      count: m.steps.length,
+                    })
+                  : fmt(t as unknown as Record<string, string>, 'metaSteps', { count: m.steps.length })}
+              </small>
+            </div>
           </div>
+          <div class="p-top-acts">
+            {gv.kind === 'guide' && (
+              <GuidePill
+                t={t}
+                view={gv}
+                k={gs.k}
+                n={gn}
+                short={compact}
+                btnRef={pillRef}
+                onBack={guideBack}
+                onRestart={() => {
+                  setGs(GUIDE_START);
+                  goGuidePage(guide[0]!.page);
+                }}
+                onQuit={() => guideSkip('quit')}
+              />
+            )}
+            {m.checklist && items.length > 0 && !compact && checklistDocked && (
+              <Checklist
+                title={m.checklist.title}
+                position="collapsed"
+                items={items}
+                t={t}
+                sub={sub}
+                onGo={go}
+                docked
+              />
+            )}
+            {/* PY-2 : « Chapitres » (si la démo a des chapitres), puis le CTA de la page */}
+            {m.chapters.length > 0 && (
+              <button
+                class="p-btn p-btn-ghost p-btn-sm p-chapters-btn"
+                aria-expanded={menu}
+                aria-haspopup="menu"
+                onClick={() => setMenu(!menu)}
+              >
+                <ListChecks {...ICON} size={16} />
+                {t.chapters}
+              </button>
+            )}
+            {presentTerms.length > 0 && (
+              <button
+                class="p-btn p-btn-ghost p-btn-sm p-gloss-btn"
+                aria-haspopup="dialog"
+                onClick={() => setGlossOpen(true)}
+              >
+                <Notebook {...ICON} size={16} />
+                {/* Spec §6 : sur mobile, bouton icône seul nommé « Glossaire » */}
+                <span class={compact ? 'sr-only' : undefined}>{t.glossary}</span>
+              </button>
+            )}
+            {measureInfo && (
+              <button
+                class="p-btn p-btn-ghost p-btn-sm p-info-btn"
+                aria-haspopup="dialog"
+                aria-label={t.infoBtn}
+                onClick={() => setInfoOpen(true)}
+              >
+                <Info {...ICON} size={16} />
+              </button>
+            )}
+            {m.cta && (
+              <button
+                class="p-btn p-btn-primary p-btn-sm p-top-cta"
+                title={sub(m.cta.label)}
+                onClick={() => onCta(m.cta!.url, m.cta!.label)}
+              >
+                <span class="p-top-cta-label">{sub(m.cta.label)}</span>
+                <span class="p-top-cta-icon">
+                  <ExternalLink {...ICON} size={16} />
+                </span>
+              </button>
+            )}
+          </div>
+        </header>
+        {menu && !gateForm && (
+          <nav class="p-menu" aria-label={t.chapters}>
+            {m.chapters.map((c) => {
+              const i = m.steps.findIndex((s) => s.chapterId === c.id);
+              return (
+                <button
+                  key={c.id}
+                  class="p-menu-item"
+                  disabled={i < 0}
+                  aria-current={chapterOf(step)?.id === c.id}
+                  onClick={() => go(i)}
+                >
+                  {sub(c.title)}
+                </button>
+              );
+            })}
+          </nav>
         )}
-        {view === 'quiz' ? null : step.kind === 'before_after' && step.image && step.beforeAfter ? (
-          <BeforeAfterStep
-            key={step.id}
-            step={step}
-            narrow={compact}
-            t={t}
-            sub={sub}
-            html={html}
-            stepLabel={`${index + 1} ${t.of} ${m.steps.length}`}
-            nextLabel={
-              step.options.buttonLabel
-                ? sub(step.options.buttonLabel)
-                : last
-                  ? m.quiz
-                    ? t.quiz.start
-                    : t.finish
-                  : t.next
-            }
-            onNext={last ? (m.quiz ? openQuiz : finish) : next}
-          />
-        ) : step.kind === 'video' && step.video ? (
-          <VideoStep
-            key={step.id}
-            step={step}
-            t={t}
-            sub={sub}
-            nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
-            onNext={last ? (m.quiz ? openQuiz : finish) : next}
-            onPause={(n) =>
-              tracker.track('step_view', { stepId: step.id, stepIndex: index, props: { pause: n } })
-            }
-          />
-        ) : step.kind === 'html' && step.html ? (
-          <>
-            <HtmlStep
+
+        <main
+          id="p-main"
+          tabIndex={-1}
+          class="p-stage-wrap"
+          onTouchStart={(e) => (touchX.current = e.touches[0]?.clientX ?? null)}
+          onTouchEnd={(e) => {
+            const x0 = touchX.current;
+            const x1 = e.changedTouches[0]?.clientX;
+            touchX.current = null;
+            if (x0 === null || x1 === undefined || Math.abs(x1 - x0) < 50 || gateForm) return;
+            if (view === 'quiz') return;
+            go(x1 < x0 ? index + 1 : index - 1);
+          }}
+        >
+          {reviewing && view === 'steps' && (
+            <div class="p-review-bar">
+              <button type="button" class="p-btn p-btn-primary p-btn-sm" onClick={openQuiz}>
+                <ChevronLeft {...ICON} size={16} />
+                {t.quiz.backToQuiz}
+              </button>
+            </div>
+          )}
+          {quizOpened && m.quiz && (
+            <div class="p-quiz-wrap" hidden={view !== 'quiz'}>
+              <Quiz
+                quiz={m.quiz}
+                module={m.title}
+                t={t}
+                sub={sub}
+                stepNumber={(id) => {
+                  const i = id ? m.steps.findIndex((s) => s.id === id) : -1;
+                  return i >= 0 ? i + 1 : null;
+                }}
+                attemptsUsed={quizAttemptsUsed()}
+                onSubmit={async (answers) => {
+                  memory.current.answers = { ...memory.current.answers, ...answers };
+                  if (preview) return null; // « Tester le quiz » : tentative non comptée
+                  const res = scoreQuiz
+                    ? await scoreQuiz(answers, quizAttemptsUsed())
+                    : await submitQuizAttempt({
+                        demoId: m.demoId,
+                        versionId: m.versionId,
+                        visitorId: tracker.visitorId,
+                        sessionId: tracker.sessionId,
+                        linkToken: tracker.linkToken,
+                        answers: Object.entries(answers).map(([questionId, answerIds]) =>
+                          quizAnswerPayload(m.quiz!, questionId, answerIds),
+                        ),
+                      });
+                  try {
+                    localStorage.setItem(QUIZ_KEY, String(quizAttemptsUsed() + 1));
+                  } catch {
+                    /* stockage indisponible */
+                  }
+                  // L25-10 : score lu par les règles « Score du quiz »
+                  memory.current.score = res.score;
+                  if (res.passed && !completed.current) {
+                    completed.current = true;
+                    tracker.track('demo_complete', { stepIndex: m.steps.length - 1 });
+                  }
+                  return res;
+                }}
+                onReviewStep={(id) => {
+                  const i = m.steps.findIndex((s) => s.id === id);
+                  if (i < 0) return;
+                  setIndex(i);
+                  setView('steps');
+                  setReviewing(true);
+                }}
+                onRestartModule={() => go(0)}
+                onFinish={() => {
+                  setView('steps');
+                  setEnded(true);
+                }}
+              />
+            </div>
+          )}
+          {view === 'quiz' ? null : step.kind === 'before_after' && step.image && step.beforeAfter ? (
+            <BeforeAfterStep
               key={step.id}
-              step={withDataset(step, m.dataset, dsRow)}
+              step={step}
+              narrow={compact}
               t={t}
               sub={sub}
-              sandbox={sandbox}
+              html={html}
+              stepLabel={`${index + 1} ${t.of} ${m.steps.length}`}
+              nextLabel={
+                step.options.buttonLabel
+                  ? sub(step.options.buttonLabel)
+                  : last
+                    ? m.quiz
+                      ? t.quiz.start
+                      : t.finish
+                    : t.next
+              }
+              onNext={last ? (m.quiz ? openQuiz : finish) : next}
+            />
+          ) : step.kind === 'video' && step.video ? (
+            <VideoStep
+              key={step.id}
+              step={step}
+              t={t}
+              sub={sub}
               nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
               onNext={last ? (m.quiz ? openQuiz : finish) : next}
-              onGo={goStep}
-              target={
-                point
-                  ? {
-                      sel: point.hotspot.sel,
-                      rect: {
-                        x: point.hotspot.x,
-                        y: point.hotspot.y,
-                        w: point.hotspot.w,
-                        h: point.hotspot.h,
-                      },
-                    }
-                  : null
+              onPause={(n) =>
+                tracker.track('step_view', { stepId: step.id, stepIndex: index, props: { pause: n } })
               }
-              onAddZone={
-                preview
-                  ? () =>
-                      // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent) : l'éditeur ouvre l'étape
-                      (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
-                        { type: 'fd:preview-add-zone', stepId: step.id },
-                        APP_ORIGIN,
-                      )
-                  : undefined
-              }
-              onHit={() => {
-                if (gBubble?.advance === 'click') guideNext();
-                // L30-05 : démo guidée, clic sur l'élément visé : étape suivante
-                else if (htmlBubble) (last ? (m.quiz ? openQuiz : finish) : next)();
-              }}
-              overlay={
-                gv.kind === 'guide' && (gv.bubble || gv.startsOn || gv.done)
-                  ? (box, found) => (
-                      <GuideBubble
-                        t={t}
-                        sub={sub}
-                        html={html}
-                        point={gv.bubble}
-                        box={gv.bubble ? box : null}
-                        found={found}
-                        k={gs.k}
-                        n={gn}
-                        sheet={compact}
-                        startsOn={
-                          gv.startsOn ? sub(m.steps.find((s) => s.id === gv.startsOn)?.title ?? '') : null
-                        }
-                        done={gv.done}
-                        onNext={guideNext}
-                        onSkip={() => guideSkip('skip')}
-                        onGo={() => goGuidePage(guide[0]!.page)}
-                        onClose={() => {
-                          setGs({ k: gs.k, mode: 'closed' });
-                        }}
-                      />
-                    )
-                  : htmlBubble
+            />
+          ) : step.kind === 'html' && step.html ? (
+            <>
+              <HtmlStep
+                key={step.id}
+                step={withDataset(step, m.dataset, dsRow)}
+                t={t}
+                sub={sub}
+                sandbox={sandbox}
+                nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
+                onNext={last ? (m.quiz ? openQuiz : finish) : next}
+                onGo={goStep}
+                target={
+                  point
+                    ? {
+                        sel: point.hotspot.sel,
+                        rect: {
+                          x: point.hotspot.x,
+                          y: point.hotspot.y,
+                          w: point.hotspot.w,
+                          h: point.hotspot.h,
+                        },
+                      }
+                    : null
+                }
+                onAddZone={
+                  preview
+                    ? () =>
+                        // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent) : l'éditeur ouvre l'étape
+                        (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
+                          { type: 'fd:preview-add-zone', stepId: step.id },
+                          APP_ORIGIN,
+                        )
+                    : undefined
+                }
+                onHit={() => {
+                  if (gBubble?.advance === 'click') guideNext();
+                  // L30-05 : démo guidée, clic sur l'élément visé : étape suivante
+                  else if (htmlBubble) (last ? (m.quiz ? openQuiz : finish) : next)();
+                }}
+                overlay={
+                  gv.kind === 'guide' && (gv.bubble || gv.startsOn || gv.done)
                     ? (box, found) => (
                         <GuideBubble
                           t={t}
                           sub={sub}
                           html={html}
-                          point={htmlBubble}
-                          box={box}
+                          point={gv.bubble}
+                          box={gv.bubble ? box : null}
                           found={found}
-                          k={index}
-                          n={m.steps.length}
+                          k={gs.k}
+                          n={gn}
                           sheet={compact}
-                          startsOn={null}
-                          done={false}
-                          onGo={() => undefined}
-                          onClose={() => undefined}
+                          startsOn={
+                            gv.startsOn ? sub(m.steps.find((s) => s.id === gv.startsOn)?.title ?? '') : null
+                          }
+                          done={gv.done}
+                          onNext={guideNext}
+                          onSkip={() => guideSkip('skip')}
+                          onGo={() => goGuidePage(guide[0]!.page)}
+                          onClose={() => {
+                            setGs({ k: gs.k, mode: 'closed' });
+                          }}
                         />
                       )
+                    : htmlBubble
+                      ? (box, found) => (
+                          <GuideBubble
+                            t={t}
+                            sub={sub}
+                            html={html}
+                            point={htmlBubble}
+                            box={box}
+                            found={found}
+                            k={index}
+                            n={m.steps.length}
+                            sheet={compact}
+                            startsOn={null}
+                            done={false}
+                            onGo={() => undefined}
+                            onClose={() => undefined}
+                          />
+                        )
+                      : undefined
+                }
+                status={
+                  sandbox && keyPages.length > 0
+                    ? fmt(t.html as unknown as Record<string, string>, 'keyPages', {
+                        seen: keyPages.filter((id) => seenPages.has(id)).length,
+                        total: keyPages.length,
+                      })
                     : undefined
-              }
-              status={
-                sandbox && keyPages.length > 0
-                  ? fmt(t.html as unknown as Record<string, string>, 'keyPages', {
-                      seen: keyPages.filter((id) => seenPages.has(id)).length,
-                      total: keyPages.length,
-                    })
-                  : undefined
-              }
-            />
-          </>
-        ) : step.kind === 'image' && step.image ? (
-          <>
-            <TabWindow
-              tabs={tabs}
-              changed={newTab}
-              frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
-              title={m.title}
-              ratio={(() => {
-                const c = croppedSize(step.image, asCrop(step.options.crop));
-                return c.width / c.height;
-              })()}
-            >
-              <ImageStep
-                key={step.id}
-                step={step}
-                sub={sub}
-                onHotspot={onHotspot}
-                onCta={onCta}
-                tip={!compact && !gateForm && !ended ? tipProps : undefined}
-                carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
-                alt={shotAlt}
-                tap={mobile ? t.mobile.tap : undefined}
-                tapHere={t.mobile.tapHere}
-                missing={{ text: t.imgMissing, retry: t.retry }}
-                autoZoom={autoZoom && !fullShot}
+                }
               />
-            </TabWindow>
-            {autoZoom && (
-              <button type="button" class="p-autozoom" onClick={() => setFullShot((f) => !f)}>
-                {fullShot ? <ZoomIn {...ICON} size={16} /> : <Expand {...ICON} size={16} />}
-                {fullShot ? t.zoomOnSpot : t.seeFullScreen}
-              </button>
-            )}
-          </>
-        ) : (
-          <>
-            {popup && backdrop !== null && (
-              <ImageStep
-                key={`bg-${m.steps[backdrop]!.id}`}
-                step={m.steps[backdrop]!}
-                sub={sub}
-                onHotspot={onHotspot}
-                onCta={onCta}
-                dimmed
-              />
-            )}
-            {popup && backdrop === null && (
+            </>
+          ) : step.kind === 'image' && step.image ? (
+            <>
+              <TabWindow
+                tabs={tabs}
+                changed={newTab}
+                frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+                title={m.title}
+                ratio={(() => {
+                  const c = croppedSize(step.image, asCrop(step.options.crop));
+                  return c.width / c.height;
+                })()}
+              >
+                <ImageStep
+                  key={step.id}
+                  step={step}
+                  sub={sub}
+                  onHotspot={onHotspot}
+                  onCta={onCta}
+                  tip={!compact && !gateForm && !ended ? tipProps : undefined}
+                  carry={index > 0 && m.steps[index - 1]?.zoom?.keep ? m.steps[index - 1]!.zoom : null}
+                  alt={shotAlt}
+                  tap={mobile ? t.mobile.tap : undefined}
+                  tapHere={t.mobile.tapHere}
+                  missing={{ text: t.imgMissing, retry: t.retry }}
+                  autoZoom={autoZoom && !fullShot}
+                />
+              </TabWindow>
+              {autoZoom && (
+                <button type="button" class="p-autozoom" onClick={() => setFullShot((f) => !f)}>
+                  {fullShot ? <ZoomIn {...ICON} size={16} /> : <Expand {...ICON} size={16} />}
+                  {fullShot ? t.zoomOnSpot : t.seeFullScreen}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {popup && backdrop !== null && (
+                <ImageStep
+                  key={`bg-${m.steps[backdrop]!.id}`}
+                  step={m.steps[backdrop]!}
+                  sub={sub}
+                  onHotspot={onHotspot}
+                  onCta={onCta}
+                  dimmed
+                />
+              )}
+              {popup && backdrop === null && (
+                <div
+                  class="p-popup-bg"
+                  style={{
+                    background: step.options.background === 'color' ? step.options.bgColor : undefined,
+                  }}
+                  aria-hidden="true"
+                />
+              )}
               <div
-                class="p-popup-bg"
-                style={{ background: step.options.background === 'color' ? step.options.bgColor : undefined }}
-                aria-hidden="true"
-              />
-            )}
-            <div
-              class={`p-text-step${popup ? ' p-popup' : ''}${endText ? ' p-end-text' : ''}`}
-              role={popup ? 'dialog' : undefined}
-              aria-labelledby={`p-step-title-${step.id}`}
-            >
-              {popup && !endText && (
-                <span class={`p-variant p-variant--${step.options.variant}`}>
-                  {step.options.showIcon &&
-                    (step.options.variant === 'instruction' ? (
-                      <ClipboardList {...ICON} size={14} />
-                    ) : (
-                      <Info {...ICON} size={14} />
-                    ))}
-                  {step.options.variant === 'instruction' ? t.instruction : t.info}
-                </span>
-              )}
-              <h2 id={`p-step-title-${step.id}`} class="p-step-h" tabIndex={-1}>
-                {sub(step.title)}
-              </h2>
-              {step.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />}
-              {choices.length > 0 && (
-                <div class="p-choices" role="group" aria-label={t.choose}>
-                  {choices.map((c, ci) => (
-                    <button key={ci} class="p-choice" onClick={() => onChoice(c)} autoFocus={ci === 0}>
-                      <span>{sub(c.label)}</span>
-                      {c.action.type === 'url' ? (
-                        <ExternalLink {...ICON} size={16} />
+                class={`p-text-step${popup ? ' p-popup' : ''}${endText ? ' p-end-text' : ''}`}
+                role={popup ? 'dialog' : undefined}
+                aria-labelledby={`p-step-title-${step.id}`}
+              >
+                {popup && !endText && (
+                  <span class={`p-variant p-variant--${step.options.variant}`}>
+                    {step.options.showIcon &&
+                      (step.options.variant === 'instruction' ? (
+                        <ClipboardList {...ICON} size={14} />
                       ) : (
-                        <ChevronRight {...ICON} size={16} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <div class={`p-actions${endText ? ' p-card-acts--col' : ''}`}>
-                {index > 0 && !endText && (
-                  <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
-                    {t.prev}
-                  </button>
+                        <Info {...ICON} size={14} />
+                      ))}
+                    {step.options.variant === 'instruction' ? t.instruction : t.info}
+                  </span>
                 )}
-                {step.cta && (
-                  <button class="p-btn p-btn-primary" onClick={() => onCta(step.cta!.url, step.cta!.label)}>
-                    {sub(step.cta.label)}
+                <h2 id={`p-step-title-${step.id}`} class="p-step-h" tabIndex={-1}>
+                  {sub(step.title)}
+                </h2>
+                {step.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />}
+                <VoiceLine />
+                {choices.length > 0 && (
+                  <div class="p-choices" role="group" aria-label={t.choose}>
+                    {choices.map((c, ci) => (
+                      <button key={ci} class="p-choice" onClick={() => onChoice(c)} autoFocus={ci === 0}>
+                        <span>{sub(c.label)}</span>
+                        {c.action.type === 'url' ? (
+                          <ExternalLink {...ICON} size={16} />
+                        ) : (
+                          <ChevronRight {...ICON} size={16} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div class={`p-actions${endText ? ' p-card-acts--col' : ''}`}>
+                  {index > 0 && !endText && (
+                    <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
+                      {t.prev}
+                    </button>
+                  )}
+                  {step.cta && (
+                    <button class="p-btn p-btn-primary" onClick={() => onCta(step.cta!.url, step.cta!.label)}>
+                      {sub(step.cta.label)}
+                      <ExternalLink {...ICON} size={16} />
+                    </button>
+                  )}
+                  {choices.length > 0 ? null : !last ? (
+                    <button
+                      class={`p-btn ${step.cta ? 'p-btn-ghost' : 'p-btn-primary'}`}
+                      onClick={() => next()}
+                      autoFocus
+                    >
+                      {step.options.buttonLabel
+                        ? sub(step.options.buttonLabel)
+                        : index === 0
+                          ? t.start
+                          : t.next}
+                      <ChevronRight {...ICON} size={16} />
+                    </button>
+                  ) : m.quiz ? (
+                    <button class="p-btn p-btn-primary" onClick={openQuiz} autoFocus>
+                      {t.quiz.start}
+                      <ChevronRight {...ICON} size={16} />
+                    </button>
+                  ) : (
+                    <>
+                      {fromCenter && (
+                        <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
+                      )}
+                      <button
+                        class={
+                          fromCenter
+                            ? 'p-link p-link--muted'
+                            : `p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`
+                        }
+                        onClick={() => go(0)}
+                      >
+                        <RotateCcw {...ICON} size={16} />
+                        {t.restart}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+          {ended && <div class="p-scrim" aria-hidden="true" />}
+          {ended && (
+            <ModalBox class="p-card p-end" labelledby="p-end-title">
+              <span class="p-end-chip" aria-hidden="true">
+                <CheckCircle2 {...ICON} size={24} />
+              </span>
+              <h2 id="p-end-title">{t.endTitle}</h2>
+              <p class="p-sub">
+                {fmt(t as unknown as Record<string, string>, 'endBody', {
+                  count: m.steps.length,
+                  title: sub(m.title),
+                })}
+              </p>
+              <div class="p-card-acts p-card-acts--col">
+                {fromCenter && (
+                  <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
+                )}
+                {m.cta && (
+                  <button
+                    class={`p-btn ${fromCenter ? 'p-btn-ghost' : 'p-btn-primary'}`}
+                    onClick={() => onCta(m.cta!.url, m.cta!.label)}
+                    autoFocus={!fromCenter}
+                  >
+                    {sub(m.cta.label)}
                     <ExternalLink {...ICON} size={16} />
                   </button>
                 )}
-                {choices.length > 0 ? null : !last ? (
-                  <button
-                    class={`p-btn ${step.cta ? 'p-btn-ghost' : 'p-btn-primary'}`}
-                    onClick={() => next()}
-                    autoFocus
-                  >
-                    {step.options.buttonLabel
-                      ? sub(step.options.buttonLabel)
-                      : index === 0
-                        ? t.start
-                        : t.next}
-                    <ChevronRight {...ICON} size={16} />
-                  </button>
-                ) : m.quiz ? (
-                  <button class="p-btn p-btn-primary" onClick={openQuiz} autoFocus>
-                    {t.quiz.start}
-                    <ChevronRight {...ICON} size={16} />
-                  </button>
-                ) : (
-                  <>
-                    {fromCenter && (
-                      <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
-                    )}
-                    <button
-                      class={
-                        fromCenter
-                          ? 'p-link p-link--muted'
-                          : `p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`
-                      }
-                      onClick={() => go(0)}
-                    >
-                      <RotateCcw {...ICON} size={16} />
-                      {t.restart}
-                    </button>
-                  </>
-                )}
+                <button
+                  class={
+                    fromCenter ? 'p-link p-link--muted' : `p-btn ${m.cta ? 'p-btn-ghost' : 'p-btn-secondary'}`
+                  }
+                  onClick={() => go(0)}
+                  autoFocus={!m.cta && !fromCenter}
+                >
+                  <RotateCcw {...ICON} size={16} />
+                  {t.restart}
+                </button>
               </div>
-            </div>
+            </ModalBox>
+          )}
+          {m.checklist && items.length > 0 && !gateForm && !compact && !checklistDocked && (
+            <Checklist
+              title={m.checklist.title}
+              position={m.checklist.position}
+              items={items}
+              t={t}
+              sub={sub}
+              onGo={go}
+            />
+          )}
+          {gateForm && (
+            <LeadForm
+              form={gateForm}
+              privacyUrl={m.privacyUrl}
+              workspaceName={m.workspaceName}
+              t={t}
+              sub={sub}
+              rich={(x) => richTextToHtml(sub(x))}
+              onSkip={() => markGate(gateForm.id)}
+              onSubmit={async (data) => {
+                await onLead(gateForm, data);
+                setFormVars((v) => ({ ...v, ...variablesFromForm(data.fields) }));
+                tracker.track('form_submit', { stepId: step.id, stepIndex: index });
+                markGate(gateForm.id);
+              }}
+            />
+          )}
+        </main>
+
+        {needles.length > 0 && <GlossaryTip root={rootRef} terms={glossary} t={t} />}
+        {glossOpen && <GlossaryDrawer terms={presentTerms} t={t} onClose={() => setGlossOpen(false)} />}
+        {infoOpen && <InfoDialog t={t} privacyUrl={m.privacyUrl} onClose={() => setInfoOpen(false)} />}
+
+        {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
+          navigation sont retirées (rien ne permet de le contourner). */}
+        {compact && tipProps && !gateForm && !ended && view === 'steps' && (
+          <Tooltip
+            {...tipProps}
+            sheet
+            // F7 (L21-06) : hotspot dans le tiers bas de l'écran : la feuille passe en haut
+            top={mobile && tipProps.h.y + tipProps.h.h / 2 > 2 / 3}
+          />
+        )}
+        {compact && m.checklist && items.length > 0 && !gateForm && (
+          <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
+        )}
+
+        {voice && (
+          <>
+            <audio ref={voiceRef} src={voice.src} preload="auto" aria-label={t.voice.label} />
+            {voiceCc && voice.transcript && (
+              <p class="p-voice-cc" lang={locale}>
+                {sub(voice.transcript)}
+              </p>
+            )}
           </>
         )}
-        {ended && <div class="p-scrim" aria-hidden="true" />}
-        {ended && (
-          <ModalBox class="p-card p-end" labelledby="p-end-title">
-            <span class="p-end-chip" aria-hidden="true">
-              <CheckCircle2 {...ICON} size={24} />
-            </span>
-            <h2 id="p-end-title">{t.endTitle}</h2>
-            <p class="p-sub">
-              {fmt(t as unknown as Record<string, string>, 'endBody', {
-                count: m.steps.length,
-                title: sub(m.title),
-              })}
-            </p>
-            <div class="p-card-acts p-card-acts--col">
-              {fromCenter && (
-                <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
-              )}
-              {m.cta && (
-                <button
-                  class={`p-btn ${fromCenter ? 'p-btn-ghost' : 'p-btn-primary'}`}
-                  onClick={() => onCta(m.cta!.url, m.cta!.label)}
-                  autoFocus={!fromCenter}
-                >
-                  {sub(m.cta.label)}
-                  <ExternalLink {...ICON} size={16} />
-                </button>
-              )}
-              <button
-                class={
-                  fromCenter ? 'p-link p-link--muted' : `p-btn ${m.cta ? 'p-btn-ghost' : 'p-btn-secondary'}`
-                }
-                onClick={() => go(0)}
-                autoFocus={!m.cta && !fromCenter}
-              >
-                <RotateCcw {...ICON} size={16} />
-                {t.restart}
-              </button>
-            </div>
-          </ModalBox>
-        )}
-        {m.checklist && items.length > 0 && !gateForm && !compact && !checklistDocked && (
-          <Checklist
-            title={m.checklist.title}
-            position={m.checklist.position}
-            items={items}
-            t={t}
-            sub={sub}
-            onGo={go}
-          />
-        )}
-        {gateForm && (
-          <LeadForm
-            form={gateForm}
-            privacyUrl={m.privacyUrl}
-            workspaceName={m.workspaceName}
-            t={t}
-            sub={sub}
-            rich={(x) => richTextToHtml(sub(x))}
-            onSkip={() => markGate(gateForm.id)}
-            onSubmit={async (data) => {
-              await onLead(gateForm, data);
-              setFormVars((v) => ({ ...v, ...variablesFromForm(data.fields) }));
-              tracker.track('form_submit', { stepId: step.id, stepIndex: index });
-              markGate(gateForm.id);
-            }}
-          />
-        )}
-      </main>
-
-      {needles.length > 0 && <GlossaryTip root={rootRef} terms={glossary} t={t} />}
-      {glossOpen && <GlossaryDrawer terms={presentTerms} t={t} onClose={() => setGlossOpen(false)} />}
-      {infoOpen && <InfoDialog t={t} privacyUrl={m.privacyUrl} onClose={() => setInfoOpen(false)} />}
-
-      {/* PL6 : un seul overlay modal à la fois. Tant que le formulaire est ouvert, la bulle et la
-          navigation sont retirées (rien ne permet de le contourner). */}
-      {compact && tipProps && !gateForm && !ended && view === 'steps' && (
-        <Tooltip
-          {...tipProps}
-          sheet
-          // F7 (L21-06) : hotspot dans le tiers bas de l'écran : la feuille passe en haut
-          top={mobile && tipProps.h.y + tipProps.h.h / 2 > 2 / 3}
-        />
-      )}
-      {compact && m.checklist && items.length > 0 && !gateForm && (
-        <Checklist title={m.checklist.title} position="collapsed" items={items} t={t} sub={sub} onGo={go} />
-      )}
-
-      {voice && (
-        <>
-          <audio ref={voiceRef} src={voice.src} preload="auto" aria-label={t.voice.label} />
-          {voiceCc && voice.transcript && (
-            <p class="p-voice-cc" lang={locale}>
-              {sub(voice.transcript)}
-            </p>
+        {/* PY-3 : une pilule centrée : ←, progression, « n / N », →, séparateur, langue, plein écran */}
+        <nav
+          class="p-controls"
+          aria-label={t.nav}
+          inert={!!gateForm || ended}
+          aria-hidden={gateForm ? true : undefined}
+        >
+          <button
+            class="p-icon-btn"
+            onClick={() => go(index - 1)}
+            disabled={index === 0 || view === 'quiz'}
+            aria-label={t.prevStep}
+          >
+            <ArrowLeft {...ICON} />
+          </button>
+          {autoplay && (
+            <button
+              class="p-icon-btn p-play"
+              onClick={() => setPlaying(!playing)}
+              aria-pressed={playing}
+              aria-label={playing ? t.pause : t.play}
+            >
+              {playing ? <Pause {...ICON} /> : <Play {...ICON} />}
+            </button>
           )}
-        </>
-      )}
-      {/* PY-3 : une pilule centrée : ←, progression, « n / N », →, séparateur, langue, plein écran */}
-      <nav
-        class="p-controls"
-        aria-label={t.nav}
-        inert={!!gateForm || ended}
-        aria-hidden={gateForm ? true : undefined}
-      >
-        <button
-          class="p-icon-btn"
-          onClick={() => go(index - 1)}
-          disabled={index === 0 || view === 'quiz'}
-          aria-label={t.prevStep}
-        >
-          <ArrowLeft {...ICON} />
-        </button>
-        {autoplay && (
-          <button
-            class="p-icon-btn p-play"
-            onClick={() => setPlaying(!playing)}
-            aria-pressed={playing}
-            aria-label={playing ? t.pause : t.play}
+          <div
+            class="p-progress"
+            role="progressbar"
+            aria-valuemin={1}
+            aria-valuemax={m.steps.length}
+            aria-valuenow={view === 'quiz' ? m.steps.length : index + 1}
+            aria-label={view === 'quiz' ? t.quiz.label : `${index + 1} ${t.of} ${m.steps.length}`}
           >
-            {playing ? <Pause {...ICON} /> : <Play {...ICON} />}
-          </button>
-        )}
-        <div
-          class="p-progress"
-          role="progressbar"
-          aria-valuemin={1}
-          aria-valuemax={m.steps.length}
-          aria-valuenow={view === 'quiz' ? m.steps.length : index + 1}
-          aria-label={view === 'quiz' ? t.quiz.label : `${index + 1} ${t.of} ${m.steps.length}`}
-        >
-          <div style={{ width: `${view === 'quiz' ? 100 : progress}%` }} />
-        </div>
-        <span class="p-count" aria-hidden="true">
-          {view === 'quiz' ? t.quiz.label : `${index + 1} / ${m.steps.length}`}
-        </span>
-        <button
-          class="p-icon-btn"
-          onClick={() => (last && !m.quiz ? finish() : next())}
-          disabled={(last && !m.quiz && (ended || endText)) || view === 'quiz'}
-          aria-label={t.nextStep}
-        >
-          <ArrowRight {...ICON} />
-        </button>
-        {voice && !soundOn && (
-          <button class="p-sound-btn" onClick={enableSound}>
-            <Volume2 {...ICON} />
-            {t.voice.enableSound}
-          </button>
-        )}
-        {voice && soundOn && !voice.autoplay && (
-          <button class="p-icon-btn p-icon-btn--ghost" onClick={toggleVoice} aria-label={t.voice.listen}>
-            <Volume2 {...ICON} />
-          </button>
-        )}
-        {voice && (
+            <div style={{ width: `${view === 'quiz' ? 100 : progress}%` }} />
+          </div>
+          <span class="p-count" aria-hidden="true">
+            {view === 'quiz' ? t.quiz.label : `${index + 1} / ${m.steps.length}`}
+          </span>
           <button
-            class="p-icon-btn p-icon-btn--ghost p-cc"
-            onClick={() => setVoiceCc(!voiceCc)}
-            aria-pressed={voiceCc}
-            aria-label={t.voice.captions}
-            aria-keyshortcuts="C"
+            class="p-icon-btn"
+            onClick={() => (last && !m.quiz ? finish() : next())}
+            disabled={(last && !m.quiz && (ended || endText)) || view === 'quiz'}
+            aria-label={t.nextStep}
           >
-            <Captions {...ICON} />
+            <ArrowRight {...ICON} />
           </button>
-        )}
-        <span class="p-sep" aria-hidden="true" />
-        <button
-          class="p-icon-btn p-icon-btn--ghost p-lang"
-          onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
-          aria-label={t.language}
-        >
-          <Globe {...ICON} />
-        </button>
-        {document.fullscreenEnabled && (
+          {voice && !voiceHosted && !soundOn && (
+            <button class="p-sound-btn" onClick={enableSound}>
+              <Volume2 {...ICON} />
+              {t.voice.enableSound}
+            </button>
+          )}
+          {voice && !voiceHosted && soundOn && !voice.autoplay && (
+            <button class="p-icon-btn p-icon-btn--ghost" onClick={toggleVoice} aria-label={t.voice.listen}>
+              <Volume2 {...ICON} />
+            </button>
+          )}
+          {voice && !voiceHosted && (
+            <button
+              class="p-icon-btn p-icon-btn--ghost p-cc"
+              onClick={() => setVoiceCc(!voiceCc)}
+              aria-pressed={voiceCc}
+              aria-label={t.voice.captions}
+              aria-keyshortcuts="C"
+            >
+              <Captions {...ICON} />
+            </button>
+          )}
+          <span class="p-sep" aria-hidden="true" />
           <button
-            class="p-icon-btn p-icon-btn--ghost p-fs"
-            onClick={toggleFullscreen}
-            aria-label={fullscreen ? t.exitFullscreen : t.fullscreen}
+            class="p-icon-btn p-icon-btn--ghost p-lang"
+            onClick={() => setLocale(locale === 'fr' ? 'en' : 'fr')}
+            aria-label={t.language}
           >
-            {fullscreen ? <Minimize2 {...ICON} /> : <Maximize2 {...ICON} />}
+            <Globe {...ICON} />
           </button>
-        )}
-      </nav>
-      {theme.showBranding && <p class="p-branding">{t.madeWith}</p>}
-    </div>
+          {document.fullscreenEnabled && (
+            <button
+              class="p-icon-btn p-icon-btn--ghost p-fs"
+              onClick={toggleFullscreen}
+              aria-label={fullscreen ? t.exitFullscreen : t.fullscreen}
+            >
+              {fullscreen ? <Minimize2 {...ICON} /> : <Maximize2 {...ICON} />}
+            </button>
+          )}
+        </nav>
+        {theme.showBranding && <p class="p-branding">{t.madeWith}</p>}
+      </div>
+    </VoiceLineContext.Provider>
   );
 
   function markGate(id: string) {
@@ -1839,6 +1872,8 @@ function Tooltip({
         </div>
       )}
       {h.body && <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(h.body) }} />}
+      {/* EXT-02 §6.4 : lecteur de la voix dans la bulle, sous le texte */}
+      <VoiceLine />
       {/* PY-4 : pied « n / N » + bouton ; « Précédent » est dans la barre */}
       <div class="p-actions">
         <span class="p-tip-count">
