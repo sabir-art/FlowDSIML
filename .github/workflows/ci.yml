@@ -334,6 +334,23 @@ jobs:
       - name: 'Notifications (cloche, lien vers un commentaire)'
         if: always()
         run: cd apps/web && node e2e/notifications.e2e.cjs
+      - name: Cloche sur le build de production, réseau ralenti (clic pendant le chargement)
+        if: always()
+        env:
+          VITE_SUPABASE_ANON_KEY: test
+          VITE_SUPABASE_URL: https://api.tutoclick.example
+          VITE_PLAYER_URL: https://demos.tutoclick.example
+          VITE_APP_ORIGIN: http://localhost:5175
+          VITE_EXTENSION_ID: abcdefghijklmnopabcdefghijklmnop
+        run: |
+          cd apps/web
+          pnpm exec vite build --outDir /tmp/web-build --emptyOutDir > /tmp/web-build.log 2>&1 || { cat /tmp/web-build.log; exit 1; }
+          (nohup pnpm exec vite preview --port 5175 --strictPort --outDir /tmp/web-build > /tmp/web-preview.log 2>&1 &)
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5175/ >/dev/null && break
+            sleep 1
+          done
+          APP_URL=http://localhost:5175 node e2e/cloche-build.e2e.cjs
       - name: Assistant de démarrage L48-C (5 étapes, reprise, extension détectée, Nouvel espace)
         if: always()
         run: cd apps/web && node e2e/onboarding-import.e2e.cjs
