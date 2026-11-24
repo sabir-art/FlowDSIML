@@ -957,7 +957,16 @@
       "gradient": "Fond dégradé",
       "typography": "Typographie",
       "brand": "Logo et marque",
-      "fontMedia": "Police de la médiathèque"
+      "fontMedia": "Police de la médiathèque",
+      "logo": "Logo",
+      "logoSet": "Logo en place",
+      "logoMore": "Plus d’actions sur le logo",
+      "logoRemove": "Retirer",
+      "logoSending": "Envoi du logo",
+      "logoHelp": "PNG, JPEG, WebP ou SVG, 2 Mo au plus. Ou déposez le fichier sur ce bloc.",
+      "logoBadType": "Format non accepté : PNG, JPEG, WebP ou SVG.",
+      "logoTooBig": "Fichier trop lourd : 2 Mo au plus.",
+      "logoError": "Le logo n’a pas pu être envoyé. Réessayez."
     },
     "settings": {
       "reading": "Lecture",

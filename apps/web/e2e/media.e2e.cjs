@@ -55,8 +55,69 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await page.waitForSelector('.canvas-frame img');
   await openTool(page, 'design');
-  const open = page.getByRole('button', { name: 'Choisir dans la médiathèque' });
-  await open.scrollIntoViewIfNeeded();
+  // MEDIA-01 §18.3 : logo du panneau Design en forme étroite
+  const block = page.locator('.logo-block');
+  await block.scrollIntoViewIfNeeded();
+  const demoRow = () => state.tables.demos.find((d) => d.id === DEMO);
+  const pv = await block.locator('.logo-preview').boundingBox();
+  ok(Math.round(pv.width) === 72 && Math.round(pv.height) === 72, 'logo : vignette carrée de 72 px');
+  const imp = block.getByRole('button', { name: 'Importer…' });
+  ok(
+    Math.round((await imp.boundingBox()).height) === 32 &&
+      /PNG, JPEG, WebP ou SVG, 2 Mo au plus\. Ou déposez le fichier sur ce bloc\./.test(
+        await block.textContent(),
+      ),
+    'logo : « Importer… » de 32 px, formats et poids dans l’aide',
+  );
+  await block.locator('input[type=file]').setInputFiles({
+    name: 'notes.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('x'),
+  });
+  ok(
+    (await block.getByRole('alert').textContent()) === 'Format non accepté : PNG, JPEG, WebP ou SVG.',
+    'logo : format refusé, erreur dans le bloc',
+  );
+  await block.locator('input[type=file]').setInputFiles(logo);
+  await block.locator('.logo-preview img').waitFor();
+  // L'enregistrement de la démo est différé : on attend l'état réel
+  const saved = async (test) => {
+    const end = Date.now() + 8000;
+    while (Date.now() < end && !test()) await new Promise((r) => setTimeout(r, 50));
+    return test();
+  };
+  ok(
+    await saved(() => /\/branding\/.+\/logo-/.test(demoRow().settings?.theme?.logoUrl || '')),
+    'logo : importé dans le thème de la démo',
+  );
+  ok(
+    (await block.getByRole('alert').count()) === 0 && (await block.getByText('logo-acme.png').count()) === 1,
+    'logo : l’erreur disparaît, le nom du fichier s’affiche',
+  );
+  await block.getByRole('button', { name: 'Plus d’actions sur le logo' }).click();
+  ok(
+    (await page.getByRole('menuitem').allTextContents()).join('|') ===
+      'Remplacer…|Choisir dans la médiathèque|Retirer',
+    'logo : ⋯ avec « Remplacer… », « Choisir dans la médiathèque » et « Retirer »',
+  );
+  await page.getByRole('menuitem', { name: 'Retirer' }).click();
+  await imp.waitFor();
+  ok(await saved(() => !demoRow().settings?.theme?.logoUrl), 'logo : « Retirer » enlève le logo');
+  // Dépôt sur tout le bloc : voile « Déposer le fichier ici »
+  const dragOn = (type) =>
+    page.evaluate((t) => {
+      const el = document.querySelector('.logo-block');
+      const dt = new DataTransfer();
+      dt.items.add(new File(['x'], 'logo.png', { type: 'image/png' }));
+      el.dispatchEvent(new DragEvent(t, { bubbles: true, cancelable: true, dataTransfer: dt }));
+    }, type);
+  await dragOn('dragenter');
+  await block.locator('.fd-drop__veil').waitFor();
+  const veil = await block.locator('.fd-drop__veil').textContent();
+  await dragOn('dragleave');
+  await block.locator('.fd-drop__veil').waitFor({ state: 'detached' });
+  ok(/Déposer le fichier ici/.test(veil), 'logo : dépôt sur tout le bloc (voile)');
+  const open = block.getByRole('button', { name: 'Médiathèque' });
   await open.click();
   const dlg = page.getByRole('dialog', { name: 'Médiathèque' });
   await dlg.waitFor();
@@ -188,7 +249,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await qp.goto(`${APP}/#/demos/${DEMO}/edit`);
   await qp.waitForSelector('.canvas-frame img');
   await openTool(qp, 'design');
-  await qp.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+  await qp.locator('.logo-block').getByRole('button', { name: 'Médiathèque' }).click();
   const qd = qp.getByRole('dialog', { name: 'Médiathèque' });
   await qd.locator('.md-near').waitFor();
   ok(
