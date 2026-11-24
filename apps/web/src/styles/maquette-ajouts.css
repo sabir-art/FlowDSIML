@@ -2931,9 +2931,10 @@
   font-size: 14px;
   color: var(--fd-color-text-muted);
 }
-/* E-mails P2 : page de désinscription, 8 px sous le titre, 24 px avant le bouton */
+/* E-mails P2 : page de désinscription, 8 px sous le titre, 24 px avant le bouton. Le formulaire
+   d'authentification espace déjà ses blocs de 12 px (gap) : les marges complètent cet écart. */
 .mk .unsub-msg {
-  margin: 8px 0 24px;
+  margin: -4px 0 12px;
 }
 .mk .unsub-msg p {
   margin: 0;
