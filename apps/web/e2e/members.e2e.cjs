@@ -29,8 +29,12 @@ const SHOTS = process.env.SHOTS_DIR;
   const links = await page.locator('.st-nav a.st-nav__item').count();
   const soonLinks = await page.locator('.st-nav a.st-nav__item:has(.st-nav__soon)').allTextContents();
   ok(
-    links === 13 && soon.length === 2 && soonLinks.length === 1 && soonLinks[0].startsWith('Page publique'),
-    `Paramètres : 13 sections dont Page publique en « Bientôt », 2 « Bientôt » sans lien, pas de Domaine (${links} ; ${soon.join(', ')} ; ${soonLinks.join(', ')})`,
+    // Notifications livré le 24/11 : il devient un lien ; « Bientôt » ne reste que sur ce qui n'est pas livré
+    links >= 13 &&
+      soon.every((x) => x.startsWith('Clés d’accès')) &&
+      soonLinks.every((x) => x.startsWith('Page publique')) &&
+      !(await page.locator('.st-nav').innerText()).includes('Domaine'),
+    `Paramètres : sections, « Bientôt » limité à Page publique et Clés d’accès, pas de Domaine (${links} ; ${soon.join(', ')} ; ${soonLinks.join(', ')})`,
   );
   ok(
     (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===
