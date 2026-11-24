@@ -1,8 +1,8 @@
 /**
  * Recette A8 (spec a8-guide-sandbox, recette 7 et 8) : guide optionnel du Sandbox dans l'éditeur.
- * Activer le guide, liste vide et ligne de la liste de contrôle, « Ajouter une étape », bulles posées
- * sur des éléments de la page (« Bulle du guide »), panneau de la bulle, repères « Guide : 1, 2 »,
- * Monter au clavier, avance « Bouton Suivant », bulle supprimée → étape orpheline. Faux Supabase,
+ * Activer le guide, liste vide et ligne de la liste de contrôle, «\u202fAjouter une étape\u202f», bulles posées
+ * sur des éléments de la page («\u202fBulle du guide\u202f»), panneau de la bulle, repères «\u202fGuide : 1, 2\u202f»,
+ * Monter au clavier, avance «\u202fBouton Suivant\u202f», bulle supprimée → étape orpheline. Faux Supabase,
  * données fictives (acme.example). Usage : node e2e/guide-sandbox-editeur.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -93,14 +93,14 @@ const U = 'https://logiciel.acme.example';
   const sw = p.getByLabel('Guide optionnel', { exact: true });
   ok(
     (await p.locator('#sb-guide-help').innerText()).includes('Des bulles qui montrent une tâche pas à pas'),
-    'interrupteur « Guide optionnel » avec son aide',
+    'interrupteur «\u202fGuide optionnel\u202f» avec son aide',
   );
   await sw.check();
   const list = p.locator('.sb-guide');
   await list.waitFor();
-  ok((await list.locator('h3').innerText()) === 'Étapes du guide · 0', '« Étapes du guide · 0 »');
+  ok((await list.locator('h3').innerText()) === 'Étapes du guide · 0', '«\u202fÉtapes du guide · 0\u202f»');
   ok(
-    (await list.innerText()).includes('Aucune étape. Ouvrez une page, puis « Ajouter une étape »'),
+    (await list.innerText()).includes('Aucune étape. Ouvrez une page, puis «\u202fAjouter une étape\u202f»'),
     'liste vide : texte d’aide',
   );
   await settle();
@@ -120,15 +120,15 @@ const U = 'https://logiciel.acme.example';
   );
   await todo.getByRole('button', { name: 'Ajouter une étape' }).click();
   await list.waitFor();
-  ok(true, 'liste de contrôle : « Ajouter une étape » ouvre le plan');
+  ok(true, 'liste de contrôle : «\u202fAjouter une étape\u202f» ouvre le plan');
 
   // ===== Ajouter une étape depuis la vue Page =====
   await list.getByRole('button', { name: 'Ajouter une étape' }).click();
   await frame.locator('h1').waitFor();
   await p
-    .getByText('Sélectionnez un élément de la page, puis « Bulle du guide »', { exact: false })
+    .getByText('Sélectionnez un élément de la page, puis «\u202fBulle du guide\u202f»', { exact: false })
     .waitFor();
-  ok(true, '« Ajouter une étape » : la page s’ouvre, avec la consigne');
+  ok(true, '«\u202fAjouter une étape\u202f» : la page s’ouvre, avec la consigne');
   const addOn = async (sel) => {
     await frame.locator(sel).click();
     const btn = p.locator('.eltb').getByRole('button', { name: 'Bulle du guide' });
@@ -145,7 +145,7 @@ const U = 'https://logiciel.acme.example';
   ok(true, 'recette 7 : bulle 1 posée sur un élément, son panneau s’ouvre');
   ok(
     (await p
-      .getByText('Sélectionnez un élément de la page, puis « Bulle du guide »', { exact: false })
+      .getByText('Sélectionnez un élément de la page, puis «\u202fBulle du guide\u202f»', { exact: false })
       .count()) === 0,
     'toast de consigne fermé dès que la bulle est ajoutée',
   );
@@ -163,14 +163,14 @@ const U = 'https://logiciel.acme.example';
       .evaluate((el) => getComputedStyle(el).fontSize);
     ok(
       fs.b === 'none' && fs.p === '0px' && !fs.btn && lg === title,
-      `avance : groupe sans cadre natif, légende comme les titres (${lg}), « Retirer du guide » hors du groupe`,
+      `avance : groupe sans cadre natif, légende comme les titres (${lg}), «\u202fRetirer du guide\u202f» hors du groupe`,
     );
     const gap = await panel.evaluate((el) => {
       const f = el.querySelector('fieldset.gd-advance').getBoundingClientRect();
       const b = el.querySelector('.gd-remove').getBoundingClientRect();
       return Math.round(b.top - f.bottom);
     });
-    ok(gap === 16, `« Retirer du guide » 16 px sous le groupe (${gap} px)`);
+    ok(gap === 16, `«\u202fRetirer du guide\u202f» 16 px sous le groupe (${gap} px)`);
   }
   await panel.getByLabel('Titre (facultatif)').fill('Vos rendez-vous');
   ok((await panel.innerText()).includes('p.kpi'), 'panneau : élément visé (sélecteur)');
@@ -186,7 +186,7 @@ const U = 'https://logiciel.acme.example';
   ok(
     JSON.stringify(saved().guideSteps.map((g) => g.advance)) === '["click","click"]' &&
       saved().guideSteps.every((g) => g.page === ID(1)),
-    'guideSteps : 2 étapes sur la page, avance « click »',
+    'guideSteps : 2 étapes sur la page, avance «\u202fclick\u202f»',
   );
 
   // ===== Plan : repères, ordre au clavier, avance =====
@@ -197,12 +197,12 @@ const U = 'https://logiciel.acme.example';
   ok(
     (await rows.nth(0).innerText()).includes('Vos rendez-vous') &&
       (await rows.nth(0).innerText()).includes('Tableau de bord · Au clic'),
-    'ligne : titre, page, « Au clic »',
+    'ligne : titre, page, «\u202fAu clic\u202f»',
   );
   ok(
     (await p.locator('.sbnode', { hasText: 'Tableau de bord' }).locator('.sb-guide-on').innerText()) ===
       'Guide : 1, 2',
-    'recette 8 : « Guide : 1, 2 » sur la carte',
+    'recette 8 : «\u202fGuide : 1, 2\u202f» sur la carte',
   );
   ok(
     (await p.locator('.sbnode', { hasText: 'Agenda' }).locator('.sb-guide-on').count()) === 0,
@@ -229,7 +229,7 @@ const U = 'https://logiciel.acme.example';
   await settle();
   ok(
     saved().guideSteps[0].advance === 'next' && saved().guideSteps[1].advance === 'click',
-    'avance « Bouton Suivant » enregistrée sur la bonne étape',
+    'avance «\u202fBouton Suivant\u202f» enregistrée sur la bonne étape',
   );
   await new AxeBuilder({ page: p })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -249,7 +249,7 @@ const U = 'https://logiciel.acme.example';
   await bubble.waitFor();
   ok(
     (await bubble.getByLabel('Titre (facultatif)').innerText()).trim() === 'Vos rendez-vous',
-    '« Modifier la bulle » ouvre la bonne bulle',
+    '«\u202fModifier la bulle\u202f» ouvre la bonne bulle',
   );
   await bubble.getByRole('button', { name: 'Supprimer le hotspot' }).click();
   await view('Plan');
@@ -271,7 +271,7 @@ const U = 'https://logiciel.acme.example';
   await settle();
   ok(saved().guideSteps.length === 1, 'Retirer du guide : étape retirée');
 
-  // ===== Élément introuvable : « Replacer la bulle » =====
+  // ===== Élément introuvable : «\u202fReplacer la bulle\u202f» =====
   await view('Page');
   await p
     .locator('.step-list, [role="listbox"]')
@@ -294,7 +294,10 @@ const U = 'https://logiciel.acme.example';
   await lost.waitFor({ state: 'detached' });
   await settle();
   const moved = state.tables.hotspots.find((h) => h.id === LOST);
-  ok(/h1$/.test(moved.sel) && moved.y < 0.2, `« Replacer la bulle » : nouvel élément et rect (${moved.sel})`);
+  ok(
+    /h1$/.test(moved.sel) && moved.y < 0.2,
+    `«\u202fReplacer la bulle\u202f» : nouvel élément et rect (${moved.sel})`,
+  );
 
   ok(errors.length === 0, `aucune erreur de page (${errors.join(' | ')})`);
   await b.close();

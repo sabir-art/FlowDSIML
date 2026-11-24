@@ -1,8 +1,8 @@
 /**
- * Test e2e L38 paquet 2 (revue « parcours de formation », n° 2 et 3). Données fictives.
- *  - n° 2 : Partager > Liens personnalisés > « Importer une liste (CSV) » : modèle, aperçu avec erreurs par
+ * Test e2e L38 paquet 2 (revue «\u202fparcours de formation\u202f», n° 2 et 3). Données fictives.
+ *  - n° 2 : Partager > Liens personnalisés > «\u202fImporter une liste (CSV)\u202f» : modèle, aperçu avec erreurs par
  *    ligne, création des seules lignes valides, export des liens (lien du centre compris).
- *  - n° 3 : groupe à la création d'un lien et à l'import ; filtre « Groupe » dans Apprenants, repris dans
+ *  - n° 3 : groupe à la création d'un lien et à l'import ; filtre «\u202fGroupe\u202f» dans Apprenants, repris dans
  *    l'export ; groupe modifiable depuis la fiche de l'apprenant.
  * Usage : node e2e/formation-groupes.e2e.cjs
  */
@@ -81,10 +81,10 @@ const GROUP = 'Session du 12 novembre';
     (await page.locator('table.sh-links .sh-cohort-cell').first().textContent()) === 'Session du 5 novembre',
     'n° 3 : groupe affiché sur la ligne du lien',
   );
-  // Retour Lead UX : colonne « Groupe » propre ; les 3 actions de l'en-tête sur une ligne, à droite de l'aide
+  // Retour Lead UX : colonne «\u202fGroupe\u202f» propre ; les 3 actions de l'en-tête sur une ligne, à droite de l'aide
   ok(
     (await page.locator('table.sh-links thead th').allTextContents()).includes('Groupe'),
-    'Lead UX : colonne « Groupe » dans la liste des liens',
+    'Lead UX : colonne «\u202fGroupe\u202f» dans la liste des liens',
   );
   const acts = await page
     .locator('.sh-perso-acts > .btn')
@@ -109,7 +109,7 @@ const GROUP = 'Session du 12 novembre';
         )) &&
       // MEDIA-01 : zone de dépôt, vide tant qu'aucun fichier n'est choisi
       /Glissez un fichier ici/.test(await dlg.locator('.fd-dz__txt').textContent()),
-    'Lead UX : bouton « Choisir un fichier » (champ natif masqué)',
+    'Lead UX : bouton «\u202fChoisir un fichier\u202f» (champ natif masqué)',
   );
   // Modèle
   const [tpl] = await Promise.all([
@@ -128,7 +128,7 @@ const GROUP = 'Session du 12 novembre';
   await zone.getByRole('alert').waitFor();
   ok(
     (await zone.getByRole('alert').textContent()) ===
-      '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
+      '«\u202fphoto.png\u202f» n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
       !(await zone.textContent()).includes('séparé par des virgules') &&
       (await dlg.getByRole('alert').count()) === 1 &&
       (await dlg.locator('.sh-import-preview').count()) === 0,
@@ -249,7 +249,7 @@ const GROUP = 'Session du 12 novembre';
   ]);
   ok(
     (await read(all)).split('\r\n').length === 4,
-    'n° 2 : « Exporter les liens » de l’onglet : tous les liens',
+    'n° 2 : «\u202fExporter les liens\u202f» de l’onglet : tous les liens',
   );
 
   // ===== n° 3 : groupe à la création d'un lien =====
@@ -296,7 +296,10 @@ const GROUP = 'Session du 12 novembre';
   await page.getByRole('button', { name: /^Groupe\s*:/ }).click();
   await page.getByRole('menuitem', { name: GROUP }).click();
   await page.waitForTimeout(300);
-  ok((await page.locator('.l13-table tbody tr').count()) === 2, 'n° 3 : filtre « Groupe » dans Apprenants');
+  ok(
+    (await page.locator('.l13-table tbody tr').count()) === 2,
+    'n° 3 : filtre «\u202fGroupe\u202f» dans Apprenants',
+  );
   // Retour Lead UX : indicateurs calculés sur le groupe, groupe nommé sous le titre
   const kpiSum = (await page.locator('.kpis').first().locator('.fd-kpi__value').allTextContents())
     .slice(0, 3)
@@ -317,7 +320,7 @@ const GROUP = 'Session du 12 novembre';
   const rows = (await read(dl)).split('\r\n');
   ok(
     rows[0].startsWith('Nom;E-mail;Structure;Groupe;') && rows.length === 3 && rows[1].includes(`;${GROUP};`),
-    'n° 3 : export filtré par groupe, colonne « Groupe »',
+    'n° 3 : export filtré par groupe, colonne «\u202fGroupe\u202f»',
   );
   // Fiche : changer le groupe
   await page.locator('.l13-table tbody tr').first().locator('button, a').first().click();

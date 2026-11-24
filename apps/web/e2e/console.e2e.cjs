@@ -1,9 +1,9 @@
 /**
  * L41 : retours sur l'aide et Console propriétaire (faux backend, données fictives Acme et Globex).
- *  - Client : « Non » puis commentaire (donnée personnelle bloquée), « Passer » ; aucune entrée Console ;
+ *  - Client : «\u202fNon\u202f» puis commentaire (donnée personnelle bloquée), «\u202fPasser\u202f» ; aucune entrée Console ;
  *    #/console se comporte comme une adresse inconnue ; Nouveautés et point de nouveauté.
  *  - Propriétaire admin : Vue d'ensemble, Retours, Créer un élément, Backlog, Fait → Annoncer → publier,
- *    Équipe (compte inconnu : « introuvable »), journal ; axe sans violation.
+ *    Équipe (compte inconnu : «\u202fintrouvable\u202f»), journal ; axe sans violation.
  *  - Lecture seule : bandeau, actions désactivées.
  * Usage : node e2e/console.e2e.cjs
  */
@@ -33,12 +33,18 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await install(p, state);
   await p.goto(`${APP}/#/`);
   await p.getByRole('button', { name: /^Mon compte/ }).click();
-  ok((await p.getByRole('menuitem', { name: 'Nouveautés' }).count()) === 1, 'client : entrée « Nouveautés »');
+  ok(
+    (await p.getByRole('menuitem', { name: 'Nouveautés' }).count()) === 1,
+    'client : entrée «\u202fNouveautés\u202f»',
+  );
   ok(
     (await p.getByRole('menuitem', { name: 'Console propriétaire' }).count()) === 0,
     'client : aucune entrée Console',
   );
-  ok((await p.getByText('Équipe TutoClick').count()) === 0, 'client : aucun groupe « Équipe TutoClick »');
+  ok(
+    (await p.getByText('Équipe TutoClick').count()) === 0,
+    'client : aucun groupe «\u202fÉquipe TutoClick\u202f»',
+  );
   await p.keyboard.press('Escape');
   await p.goto(`${APP}/#/console`);
   await p.waitForURL((u) => !u.hash.startsWith('#/console'));
@@ -48,7 +54,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     'client : aucune lecture de la console',
   );
 
-  // Aide : « Non », commentaire
+  // Aide : «\u202fNon\u202f», commentaire
   await p.getByRole('button', { name: 'Aide', exact: true }).click();
   const drawer = p.getByRole('complementary', { name: /Aide/ });
   await drawer.locator('.help-link').first().click();
@@ -56,14 +62,17 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await art.getByRole('button', { name: 'Non' }).click();
   const box = art.getByLabel('Qu’est-ce qui vous manquait ?');
   await box.waitFor();
-  ok(await box.evaluate((e) => e === document.activeElement), 'après « Non » : focus dans le champ');
+  ok(
+    await box.evaluate((e) => e === document.activeElement),
+    'après «\u202fNon\u202f» : focus dans le champ',
+  );
   ok(
     (state.helpFeedback || []).some((x) => x.p_helpful === false && x.p_page === 'demos'),
-    'vote « Non » enregistré tout de suite (avec la page)',
+    'vote «\u202fNon\u202f» enregistré tout de suite (avec la page)',
   );
   ok(
     await art.getByRole('button', { name: 'Envoyer' }).isDisabled(),
-    '« Envoyer » désactivé si le champ est vide',
+    '«\u202fEnvoyer\u202f» désactivé si le champ est vide',
   );
   await box.fill('Écrivez-moi à test@example.com');
   await art.getByRole('button', { name: 'Envoyer' }).click();
@@ -74,7 +83,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   ok(!(state.helpComments || []).length, 'rien envoyé au serveur');
   const msg = 'Il manque un exemple avec deux dossiers.';
   await box.fill(msg);
-  ok((await art.getByText(`${msg.length} / 500`).count()) === 1, 'compteur « n / 500 »');
+  ok((await art.getByText(`${msg.length} / 500`).count()) === 1, 'compteur «\u202fn / 500\u202f»');
   await art.getByRole('button', { name: 'Envoyer' }).click();
   await art.getByText('Merci, votre commentaire a été transmis.').waitFor();
   ok((state.helpComments || []).length === 1, 'commentaire transmis');
@@ -108,7 +117,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   ok(true, 'point de nouveauté sur l’avatar');
   ok(
     (await p.getByRole('button', { name: 'Mon compte, 1 nouveauté' }).count()) === 1,
-    'nom accessible : « Mon compte, 1 nouveauté »',
+    'nom accessible : «\u202fMon compte, 1 nouveauté\u202f»',
   );
   await p.goto(`${APP}/#/nouveautes`);
   await p.getByRole('heading', { level: 2, name: 'Rôles mieux expliqués' }).waitFor();
@@ -131,7 +140,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
       .getByRole('group', { name: 'Équipe TutoClick' })
       .getByRole('menuitem', { name: 'Console propriétaire' })
       .count()) === 1,
-    'propriétaire : « Console propriétaire » dans le groupe « Équipe TutoClick »',
+    'propriétaire : «\u202fConsole propriétaire\u202f» dans le groupe «\u202fÉquipe TutoClick\u202f»',
   );
   await o.getByRole('menuitem', { name: 'Console propriétaire' }).click();
   await o.waitForURL(/#\/console$/);
@@ -147,14 +156,14 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   ok(
     (await ctabs.locator('.console-tab__n').innerText()) === '3' &&
       (await ctabs.getByRole('link', { name: /^Retours\s*3 nouveaux$/ }).count()) === 1,
-    'onglet « Retours » avec sa pastille « 3 » (nom accessible « Retours 3 nouveaux »)',
+    'onglet «\u202fRetours\u202f» avec sa pastille «\u202f3\u202f» (nom accessible «\u202fRetours 3 nouveaux\u202f»)',
   );
   ok(
     (await cbar.getByRole('heading', { level: 1, name: 'Console propriétaire' }).count()) === 1 &&
       (await o.locator('h1').count()) === 1 &&
       (await cbar.getByRole('link', { name: 'Retour à l’application' }).getAttribute('href')) === '#/' &&
       (await cbar.getByRole('button', { name: 'Aide' }).count()) === 1,
-    'barre : retour « Application », seul h1 « Console propriétaire », Aide à droite',
+    'barre : retour «\u202fApplication\u202f», seul h1 «\u202fConsole propriétaire\u202f», Aide à droite',
   );
   const cb = await cbar.boundingBox();
   ok(
@@ -185,7 +194,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await o.getByRole('link', { name: /^Retours/ }).click();
   const firstRow = await o.locator('.console-table tbody tr').first().innerText();
   ok(/membres|rôles/i.test(firstRow), `moins bien noté d'abord (${firstRow.split('\n')[0]})`);
-  ok((await o.getByText('Peu de réponses').count()) === 1, 'badge « Peu de réponses »');
+  ok((await o.getByText('Peu de réponses').count()) === 1, 'badge «\u202fPeu de réponses\u202f»');
   await axe(o, 'console, retours par article');
 
   // Commentaires : aucune identité, créer un élément
@@ -203,8 +212,8 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await dlg.getByLabel('Ticket GitHub').fill('https://github.com/acme/app/issues/431');
   await dlg.getByLabel('Titre').fill('Expliquer les rôles');
   await dlg.getByRole('button', { name: 'Créer l’élément' }).click();
-  await o.getByText('Élément créé dans « À trier ». Le commentaire y est rattaché.').waitFor();
-  ok(true, 'toast « Élément créé dans « À trier ». Le commentaire y est rattaché. »');
+  await o.getByText('Élément créé dans «\u202fÀ trier\u202f». Le commentaire y est rattaché.').waitFor();
+  ok(true, 'toast «\u202fÉlément créé dans «\u202fÀ trier\u202f». Le commentaire y est rattaché.\u202f»');
   ok(!os.calls.some((c) => /github\.com/.test(c.url || '')), 'aucun appel vers GitHub');
   await axe(o, 'console, commentaires');
 
@@ -214,7 +223,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     name: /^Expliquer les rôles\s*, À trier, priorité\s*Moyenne\s*1 retour/,
   });
   await card.waitFor();
-  ok((await o.locator('.console-card').first().innerText()).includes('#431'), 'carte : « #431 »');
+  ok((await o.locator('.console-card').first().innerText()).includes('#431'), 'carte : «\u202f#431\u202f»');
   await axe(o, 'console, backlog');
   await card.click();
   const drawerItem = o.getByRole('dialog', { name: 'Élément du backlog' });
@@ -222,7 +231,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   ok(
     (await drawerItem.getByRole('link', { name: 'Ouvrir le ticket #431' }).getAttribute('target')) ===
       '_blank',
-    'lien « Ouvrir le ticket #431 »',
+    'lien «\u202fOuvrir le ticket #431\u202f»',
   );
   await drawerItem.getByRole('button', { name: 'Rejeté' }).click();
   const rj = o.getByRole('dialog', { name: 'Rejeter cet élément' });
@@ -231,7 +240,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await drawerItem.getByRole('button', { name: 'Fait' }).click();
   const an = o.getByRole('alertdialog', { name: 'Annoncer cette amélioration ?' });
   await an.waitFor();
-  ok(true, '« Annoncer cette amélioration ? » au passage à Fait');
+  ok(true, '«\u202fAnnoncer cette amélioration ?\u202f» au passage à Fait');
   await an.getByRole('button', { name: 'Rédiger l’annonce' }).click();
   const ed = o.getByRole('dialog', { name: 'Rédiger l’annonce' });
   await ed.getByLabel('Texte').fill('L’article sur les rôles a été réécrit avec des exemples.');
@@ -240,7 +249,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
     'aperçu côté client',
   );
   await ed.getByRole('button', { name: 'Publier l’annonce' }).click();
-  await o.getByText('Annonce publiée. Les clients voient un point sur « Nouveautés ».').waitFor();
+  await o.getByText('Annonce publiée. Les clients voient un point sur «\u202fNouveautés\u202f».').waitFor();
   ok(
     os.news.some((n) => n.state === 'published' && n.itemId),
     'annonce publiée, liée à l’élément',
@@ -250,7 +259,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   // Nouveautés (console)
   await o.goto(`${APP}/#/console/nouveautes`);
   await o.getByText('Publiée · 1').waitFor();
-  ok(true, 'onglet Nouveautés : « Publiée · 1 »');
+  ok(true, 'onglet Nouveautés : «\u202fPubliée · 1\u202f»');
   await axe(o, 'console, nouveautés');
 
   // Équipe et journal
@@ -263,12 +272,14 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   await add.getByRole('button', { name: 'Ajouter' }).click();
   ok(
     (await add.getByRole('alert').innerText()) === 'Compte introuvable.',
-    'compte inconnu : « introuvable », rien d’autre',
+    'compte inconnu : «\u202fintrouvable\u202f», rien d’autre',
   );
   await add.getByRole('button', { name: 'Annuler' }).click();
   const journal = await o.locator('main').innerText();
   ok(
-    /Élément créé/.test(journal) && /Passé à « Fait »/.test(journal) && /Annonce publiée/.test(journal),
+    /Élément créé/.test(journal) &&
+      /Passé à «\u202fFait\u202f»/.test(journal) &&
+      /Annonce publiée/.test(journal),
     'journal : actions du parcours tracées',
   );
   await axe(o, 'console, équipe et journal');

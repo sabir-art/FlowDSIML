@@ -1,11 +1,11 @@
 /**
  * Recette L48-A (spec docs/ux/specs/l48a-navigation.md §1, §4, §5, §6, §7). Données fictives.
  *  - barre latérale : Contenus, Formation, Utilitaires (Extension, Centre d'aide, Paramètres) ; plus de
- *    Leads, Membres ni Plans ; deux nav ; « Espace · n membres » ; Paramètres actif sur /settings/* ;
+ *    Leads, Membres ni Plans ; deux nav ; «\u202fEspace · n membres\u202f» ; Paramètres actif sur /settings/* ;
  *  - modale Extension (non détectée, puis détectée) ; Centre d'aide ouvre le tiroir ;
- *  - Utilisation : aucun prix ni offre, jauges à 2, 82 et 100 %, « Demander plus à la DSI » avec le lien
+ *  - Utilisation : aucun prix ni offre, jauges à 2, 82 et 100 %, «\u202fDemander plus à la DSI\u202f» avec le lien
  *    du support (masqué sans lien) ; /settings/plans et /settings/soon redirigés ;
- *  - textes : aucun « Workspace », « € » ni « facturation » dans fr.json.
+ *  - textes : aucun «\u202fWorkspace\u202f», «\u202f€\u202f» ni «\u202ffacturation\u202f» dans fr.json.
  * Usage : node e2e/l48a-navigation.e2e.cjs
  */
 const fs = require('fs');
@@ -43,7 +43,7 @@ const MB = 1024 * 1024;
     const utils = page.getByRole('navigation', { name: 'Utilitaires' });
     const names = (await main.locator('.fd-nav__item').allTextContents()).map((s) => s.trim());
     ok(
-      names.join('|') === 'Démos|Sandbox|Parcours de formation|Analytics|Apprenants', // L48-G : entrée Sandbox
+      names.join('|') === 'Démos|Sandbox|Parcours de formation|Médiathèque|Analytics|Apprenants', // L48-G : entrée Sandbox
       `Contenus puis Formation : ${names.join(', ')}`,
     );
     ok(
@@ -54,20 +54,20 @@ const MB = 1024 * 1024;
     const side = await page.locator('#sidebar').innerText();
     ok(
       !/\bLeads\b|\bMembres\b|\bPlans\b|Workspace/.test(side),
-      'ni Leads, ni Membres, ni Plans, ni « Workspace »',
+      'ni Leads, ni Membres, ni Plans, ni «\u202fWorkspace\u202f»',
     );
     ok(
       (await main.locator('[aria-current="page"]').textContent()).trim() === 'Démos',
-      'page active : aria-current sur « Démos »',
+      'page active : aria-current sur «\u202fDémos\u202f»',
     );
     ok(
       /^Espace · \d+ membres?$/.test(await page.locator('.ws-text small').innerText()),
-      'sous-titre « Espace · n membres »',
+      'sous-titre «\u202fEspace · n membres\u202f»',
     );
 
     // Extension : non détectée
     await utils.getByRole('button', { name: 'Extension' }).click();
-    // §18.4 : pas de VITE_EXTENSION_URL dans les tests, extension jamais détectée : « Bientôt disponible »
+    // §18.4 : pas de VITE_EXTENSION_URL dans les tests, extension jamais détectée : «\u202fBientôt disponible\u202f»
     const dlg = page.getByRole('dialog', { name: /^Extension TutoClick/ });
     await dlg.waitFor();
     {
@@ -77,7 +77,7 @@ const MB = 1024 * 1024;
       }));
       ok(
         soon.txt === 'Bientôt disponible' && soon.fs === '13px',
-        '§18.4 : titre « Extension TutoClick », « Bientôt disponible » en 13 px',
+        '§18.4 : titre «\u202fExtension TutoClick\u202f», «\u202fBientôt disponible\u202f» en 13 px',
       );
     }
     ok(
@@ -86,7 +86,7 @@ const MB = 1024 * 1024;
         JSON.stringify(await dlg.locator('.dialog-actions').getByRole('button').allInnerTexts()) ===
           JSON.stringify(['Fermer']) &&
         (await dlg.locator('.dialog-actions a').count()) === 0,
-      '§18.4 : une phrase, ni étapes ni lien d’aide, « Fermer » seul',
+      '§18.4 : une phrase, ni étapes ni lien d’aide, «\u202fFermer\u202f» seul',
     );
     await page.keyboard.press('Escape');
     await dlg.waitFor({ state: 'hidden' });
@@ -184,7 +184,7 @@ const MB = 1024 * 1024;
     await ctx.close();
   }
 
-  // Extension détectée ; éditeur : pas d'entrée « Parcours de formation » (droits inchangés)
+  // Extension détectée ; éditeur : pas d'entrée «\u202fParcours de formation\u202f» (droits inchangés)
   {
     const { page, ctx } = await open('/#/', (d) => {
       d.tables.profiles[0].extension_seen_at = '2026-11-02T10:00:00Z';
@@ -193,7 +193,7 @@ const MB = 1024 * 1024;
     await page.getByRole('navigation', { name: 'Navigation principale' }).waitFor();
     ok(
       (await page.getByRole('link', { name: 'Parcours de formation' }).count()) === 0,
-      'éditeur : pas de « Parcours de formation »',
+      'éditeur : pas de «\u202fParcours de formation\u202f»',
     );
     await page.getByRole('button', { name: 'Extension', exact: true }).click();
     const dlg = page.getByRole('dialog', { name: 'Extension installée' });
@@ -201,7 +201,7 @@ const MB = 1024 * 1024;
     ok(/2 nov\. 2026/.test(await dlg.innerText()), 'Extension détectée : date de détection');
     await dlg.getByRole('button', { name: 'Lancer une capture' }).click();
     await page.getByRole('dialog', { name: /Nouvelle démo/ }).waitFor();
-    ok(true, '« Lancer une capture » ouvre « Nouvelle démo »');
+    ok(true, '«\u202fLancer une capture\u202f» ouvre «\u202fNouvelle démo\u202f»');
     await ctx.close();
   }
 
@@ -219,7 +219,7 @@ const MB = 1024 * 1024;
       (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText())
         .replace(/\s+/g, ' ')
         .trim() === 'Espace Utilisation',
-      'fil d’Ariane « Espace › Utilisation »',
+      'fil d’Ariane «\u202fEspace › Utilisation\u202f»',
     );
     ok((await page.locator('.us-row:not(.us-emails)').count()) === 7, 'sept lignes de quota');
     // L48-03 : voix de synthèse et sous-titres, deux lignes distinctes (minutes)
@@ -281,9 +281,12 @@ const MB = 1024 * 1024;
     ok(
       (await storage.getByRole('meter').getAttribute('aria-valuenow')) === '100' &&
         (await storage.getByRole('meter').getAttribute('aria-label')) === 'Stockage : 100\u00a0% utilisés',
-      'stockage : jauge à 100 %, nom « Stockage : 100 % utilisés »',
+      'stockage : jauge à 100 %, nom «\u202fStockage : 100 % utilisés\u202f»',
     );
-    ok(/Limite atteinte/.test(await storage.innerText()), 'stockage : « Limite atteinte » en texte');
+    ok(
+      /Limite atteinte/.test(await storage.innerText()),
+      'stockage : «\u202fLimite atteinte\u202f» en texte',
+    );
     ok(/Ajout de fichiers bloqué/.test(await storage.innerText()), 'stockage : conséquence écrite');
     ok(
       /Médiathèque 300\sMo · vidéos 160\sMo · voix 40\sMo/.test(await storage.innerText()),
@@ -295,19 +298,19 @@ const MB = 1024 * 1024;
         !/atteinte/.test(await ai.innerText()),
       'Assistance IA : 2 %, sans pastille',
     );
-    // Décision UX du 22/11 : la remise à zéro est dite une fois, sous « Ressources du mois »
+    // Décision UX du 22/11 : la remise à zéro est dite une fois, sous «\u202fRessources du mois\u202f»
     ok(
       /Remise à zéro le 1er décembre\./.test(
         await page.getByRole('region', { name: 'Ressources du mois' }).locator('.stg-sec__head').innerText(),
       ) &&
         (await page.locator('.stg-sec__head h2').allTextContents()).join('|') ===
           'Contenu et équipe|Ressources du mois',
-      'deux sections ; remise à zéro le 1er du mois sous « Ressources du mois »',
+      'deux sections ; remise à zéro le 1er du mois sous «\u202fRessources du mois\u202f»',
     );
     const pub = page.locator('.us-row', { hasText: 'Démos publiées' });
     ok(
       (await pub.getByRole('meter').count()) === 0 && /sans limite/.test(await pub.innerText()),
-      'démos publiées : « sans limite », sans jauge',
+      'démos publiées : «\u202fsans limite\u202f», sans jauge',
     );
     ok(
       /24 mois/.test(await page.locator('.us-row', { hasText: 'Conservation' }).innerText()),
@@ -320,7 +323,7 @@ const MB = 1024 * 1024;
     ok(
       (await page.getByRole('link', { name: 'Renseigner le lien du support' }).getAttribute('href')) ===
         '#/settings/workspace',
-      'U2 : propriétaire sans lien du support : « Renseigner le lien du support »',
+      'U2 : propriétaire sans lien du support : «\u202fRenseigner le lien du support\u202f»',
     );
     const axe = await new AxeBuilder({ page }).analyze();
     ok(axe.violations.length === 0, `axe : Utilisation (${axe.violations.map((v) => v.id).join(', ')})`);
@@ -341,12 +344,12 @@ const MB = 1024 * 1024;
     ok(
       (await ai.getByRole('meter').getAttribute('aria-valuenow')) === '82' &&
         /Bientôt atteinte/.test(await ai.innerText()),
-      'Assistance IA : 82 %, « Bientôt atteinte »',
+      'Assistance IA : 82 %, «\u202fBientôt atteinte\u202f»',
     );
     ok(
       (await page.getByRole('link', { name: 'Demander plus à la DSI' }).getAttribute('href')) ===
         `mailto:dsi@acme.example?subject=${encodeURIComponent('Demande de quota : Acme Analytics')}`,
-      '« Demander plus à la DSI » : lien du support, objet prérempli',
+      '«\u202fDemander plus à la DSI\u202f» : lien du support, objet prérempli',
     );
     await page.goto(`${APP}/#/settings/soon`);
     await page.waitForURL(/settings\/workspace/);
@@ -357,8 +360,11 @@ const MB = 1024 * 1024;
   // ===== Vocabulaire =====
   const fr = fs.readFileSync(path.join(__dirname, '../src/locales/fr.json'), 'utf8');
   const values = [...fr.matchAll(/":\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1].replace(/\{\{[^}]*\}\}/g, ''));
-  ok(!values.some((v) => /workspace/i.test(v)), 'fr.json : aucun « Workspace » visible');
-  ok(!values.some((v) => /€|facturation/i.test(v)), 'fr.json : aucun « € » ni « facturation »');
+  ok(!values.some((v) => /workspace/i.test(v)), 'fr.json : aucun «\u202fWorkspace\u202f» visible');
+  ok(
+    !values.some((v) => /€|facturation/i.test(v)),
+    'fr.json : aucun «\u202f€\u202f» ni «\u202ffacturation\u202f»',
+  );
 
   // ===== LOGO-01 (§16.5) : logo complet de 400 px sur la connexion, logo compact de 40 px sous 480 px =====
   for (const width of [1440, 390]) {

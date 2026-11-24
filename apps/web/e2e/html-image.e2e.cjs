@@ -1,5 +1,5 @@
 /**
- * L28 051 : « Remplacer l'image » d'une image capturée dans une étape HTML (médiathèque de l'espace),
+ * L28 051 : «\u202fRemplacer l'image\u202f» d'une image capturée dans une étape HTML (médiathèque de l'espace),
  * aperçu dans l'éditeur, retour à l'image d'origine, image comptée au bilan RGPD comme importée.
  * Données fictives (faux Supabase). Usage : SHOTS_DIR=… [THEME=dark] node e2e/html-image.e2e.cjs
  */
@@ -84,25 +84,28 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
 
   const bar = () => p.getByRole('toolbar', { name: 'Actions sur l’élément sélectionné' });
 
-  // Élément qui n'est pas une image : pas d'action d'image, pas de section « Image »
+  // Élément qui n'est pas une image : pas d'action d'image, pas de section «\u202fImage\u202f»
   await frame.locator('h1').click();
   await bar().waitFor();
   ok(
     (await bar().getByRole('button', { name: 'Remplacer l’image', exact: true }).count()) === 0 &&
       (await bar().getByRole('button', { name: 'Modifier le texte', exact: true }).count()) === 1 &&
       (await p.getByRole('group', { name: 'Image' }).count()) === 0,
-    'élément non image : « Modifier le texte », aucune action d’image',
+    'élément non image : «\u202fModifier le texte\u202f», aucune action d’image',
   );
 
-  // Image : la barre propose « Remplacer l'image » à la place de « Modifier le texte »
+  // Image : la barre propose «\u202fRemplacer l'image\u202f» à la place de «\u202fModifier le texte\u202f»
   await frame.locator('img.logo').click();
   await p.getByRole('group', { name: 'Image' }).waitFor();
   ok(
     (await bar().getByRole('button', { name: 'Remplacer l’image', exact: true }).count()) === 1 &&
       (await bar().getByRole('button', { name: 'Modifier le texte', exact: true }).count()) === 0,
-    'image : « Remplacer l’image » dans la barre, à la place de « Modifier le texte »',
+    'image : «\u202fRemplacer l’image\u202f» dans la barre, à la place de «\u202fModifier le texte\u202f»',
   );
-  ok((await p.locator('#html-text').count()) === 0, 'image : pas de champ « Texte » dans le panneau');
+  ok(
+    (await p.locator('#html-text').count()) === 0,
+    'image : pas de champ «\u202fTexte\u202f» dans le panneau',
+  );
   ok(
     await p.getByRole('radio', { name: 'Ajuster' }).isDisabled(),
     'Ajuster / Remplir inactifs tant que l’image n’est pas remplacée',
@@ -111,15 +114,16 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
   const lib = p.getByRole('dialog').filter({ hasText: 'logo-acme-2026.png' });
   await lib.waitFor();
   ok(true, 'médiathèque de l’espace ouverte');
-  await lib.getByRole('button', { name: 'logo-acme-2026.png' }).click();
-  await lib.getByRole('button', { name: 'Utiliser ce fichier' }).click();
+  // Fenêtre de sélection (retours-2411 §3.3) : cartes à choix unique, puis « Utiliser… »
+  await lib.getByRole('radio', { name: 'logo-acme-2026.png', exact: true }).click({ force: true });
+  await lib.getByRole('button', { name: /^Utiliser/ }).click();
   await p.getByText('Image remplacée.', { exact: true }).waitFor();
   await p.getByText(/Image importée.: aucune détection automatique/).waitFor();
-  ok(true, 'toasts « Image remplacée. » (avec Annuler) et avertissement d’import');
+  ok(true, 'toasts «\u202fImage remplacée.\u202f» (avec Annuler) et avertissement d’import');
   for (let i = 0; i < 40 && !ops().some((o) => o.op === 'image'); i++) await p.waitForTimeout(100);
   ok(
     ops().some((o) => o.op === 'image' && o.sel && o.value === `${ws}/logo-acme-2026.png`),
-    'opération « image » enregistrée (chemin de la médiathèque)',
+    'opération «\u202fimage\u202f» enregistrée (chemin de la médiathèque)',
   );
   await p.waitForTimeout(500);
   const src = await frame.locator('img.logo').getAttribute('src');
@@ -156,11 +160,11 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
   await gdpr.waitFor();
   ok(
     /1 image importée non vérifiée/.test(sp(await gdpr.innerText())),
-    'bilan RGPD : « 1 image importée non vérifiée »',
+    'bilan RGPD : «\u202f1 image importée non vérifiée\u202f»',
   );
   await gdpr.getByRole('button', { name: 'Annuler' }).click();
 
-  // Retour à l'image d'origine (panneau), puis « Masquer l'image »
+  // Retour à l'image d'origine (panneau), puis «\u202fMasquer l'image\u202f»
   await frame.locator('img.logo').click();
   await p.getByRole('button', { name: 'Revenir à l’image d’origine' }).click();
   for (let i = 0; i < 40 && ops().some((o) => o.op === 'image'); i++) await p.waitForTimeout(100);
@@ -174,11 +178,11 @@ const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>Accueil</t
   }));
   ok(
     ops().some((o) => o.op === 'mask') && /^data:image\/gif/.test(masked.src) && masked.w > 0,
-    '« Masquer l’image » : aplat à la même taille, image d’origine retirée',
+    '«\u202fMasquer l’image\u202f» : aplat à la même taille, image d’origine retirée',
   );
   ok(
     (await p.getByRole('button', { name: 'Masquer l’image' }).getAttribute('aria-pressed')) === 'true',
-    'bouton « Masquer l’image » enfoncé',
+    'bouton «\u202fMasquer l’image\u202f» enfoncé',
   );
   if (SHOTS) {
     await p.mouse.move(0, 0);

@@ -84,7 +84,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await frame.locator('b.value').first().click();
     await p.waitForTimeout(400);
     const similar = p.getByRole('button', { name: 'Sélectionner les semblables (3)' });
-    ok(await similar.isVisible(), 'élément seul : « Sélectionner les semblables (3) »');
+    ok(await similar.isVisible(), 'élément seul : «\u202fSélectionner les semblables (3)\u202f»');
     await frame
       .locator('b.value')
       .nth(1)
@@ -102,7 +102,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await p.waitForTimeout(300);
     ok(
       (await p.locator('.html-crumbs').textContent()).includes('3 éléments b.value'),
-      'semblables : le fil affiche « 3 éléments b.value »',
+      'semblables : le fil affiche «\u202f3 éléments b.value\u202f»',
     );
     const outlined = await frame
       .locator('[data-fd-ui]')
@@ -143,7 +143,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     ok(fs.join('|') === '24px|24px|24px', `style appliqué dans la page (${fs.join('|')})`);
     ok(
       (await p.locator('.mods li').filter({ hasText: 'Style · 3 éléments' }).count()) === 1,
-      'une seule ligne « Style · 3 éléments »',
+      'une seule ligne «\u202fStyle · 3 éléments\u202f»',
     );
     await p.getByRole('button', { name: 'Annuler le style de b.value' }).click();
     await p.waitForTimeout(1500);
@@ -211,7 +211,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     );
     ok(
       (await panel.getByRole('button', { name: 'Supprimer la ligne 5' }).count()) === 1,
-      'bouton nommé « Supprimer la ligne 5 »',
+      'bouton nommé «\u202fSupprimer la ligne 5\u202f»',
     );
     await shot('l25-08-graphique');
   }
@@ -237,7 +237,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await zone.getByRole('alert').waitFor();
     ok(
       (await zone.getByRole('alert').textContent()) ===
-        'La colonne « contact » contient des données personnelles : retirez-la du fichier.' &&
+        'La colonne «\u202fcontact\u202f» contient des données personnelles : retirez-la du fichier.' &&
         (await zone.evaluate((e) => e.classList.contains('is-error'))),
       'colonne personnelle refusée à l’import, dans la zone en erreur',
     );
@@ -261,7 +261,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       (await dlg.locator('.ds-table').first().locator('tbody tr').count()) === 3,
       'aperçu des 3 premières lignes',
     );
-    // Un fichier qui n'est pas un CSV, après un bon : erreur dans la zone, ancien aperçu retiré, « Relier » inactif
+    // Un fichier qui n'est pas un CSV, après un bon : erreur dans la zone, ancien aperçu retiré, «\u202fRelier\u202f» inactif
     await input.setInputFiles({
       name: 'photo.png',
       mimeType: 'image/png',
@@ -270,7 +270,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await zone.getByRole('alert').waitFor();
     ok(
       (await zone.getByRole('alert').textContent()) ===
-        '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou générez des données fictives.' &&
+        '«\u202fphoto.png\u202f» n’est pas un fichier CSV. Choisissez un fichier .csv ou générez des données fictives.' &&
         !(await zone.textContent()).includes('equipes-acme.csv'),
       'fichier non CSV : message juste dans la zone, l’ancien fichier n’y figure plus',
     );
@@ -279,7 +279,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
         (await dlg.locator('.ds-mode').count()) === 0 &&
         (await dlg.getByRole('button', { name: 'Relier', exact: true }).isDisabled()) &&
         (await dlg.locator('.fd-alert--info [role=alert], .fd-alert--danger').count()) === 0,
-      'fichier non CSV : aperçu et liaisons retirés, « Relier » désactivé, pas d’autre alerte',
+      'fichier non CSV : aperçu et liaisons retirés, «\u202fRelier\u202f» désactivé, pas d’autre alerte',
     );
     // Pluriels : une ligne, une colonne
     await input.setInputFiles({
@@ -290,7 +290,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await dlg.locator('.ds-table').first().waitFor();
     ok(
       /^une\.csv1\sligne · 1\scolonne · /.test(await dlg.locator('.fd-dz__txt').textContent()),
-      `pluriels : « 1 ligne · 1 colonne » (${await dlg.locator('.fd-dz__txt').textContent()})`,
+      `pluriels : «\u202f1 ligne · 1 colonne\u202f» (${await dlg.locator('.fd-dz__txt').textContent()})`,
     );
     await input.setInputFiles({
       name: 'equipes-acme.csv',
@@ -300,10 +300,12 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       ),
     });
     await dlg.locator('.ds-table').first().locator('tbody tr').nth(2).waitFor();
-    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }), { index: 1 });
-    const chosen = await pickedLabel(dlg.getByRole('combobox', { name: 'Relier la colonne « rapports »' }));
+    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne «\u202frapports\u202f»' }), { index: 1 });
+    const chosen = await pickedLabel(
+      dlg.getByRole('combobox', { name: 'Relier la colonne «\u202frapports\u202f»' }),
+    );
     ok(chosen.startsWith('Élément b.value'), `colonne reliée à un élément (${chosen})`);
-    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne « equipe »' }), {
+    await pick(dlg.getByRole('combobox', { name: 'Relier la colonne «\u202fequipe\u202f»' }), {
       label: 'Variable {{company}}',
     });
     const link = dlg.getByRole('radio', {
@@ -401,7 +403,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       await f.locator('h1').waitFor();
       await pp.waitForTimeout(500);
       const v = await f.locator('b.value').first().textContent();
-      ok(v === want, `lecteur ${q} → « ${v} »`);
+      ok(v === want, `lecteur ${q} → «\u202f${v}\u202f»`);
       await pp.context().close();
     }
   }
@@ -418,17 +420,20 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
               .position,
       );
     await p.locator('[data-step-index="2"]').click();
-    // L48-E : « Suite de l'étape » est l'outil « Suite du parcours » du rail
+    // L48-E : «\u202fSuite de l'étape\u202f» est l'outil «\u202fSuite du parcours\u202f» du rail
     await openTool(p, 'next');
     const sec = p.locator('.rules-sec');
     await sec.scrollIntoViewIfNeeded();
     ok(
       (await sec.getByRole('heading').textContent()) === 'Suite de l’étape' ||
         (await sec.getByRole('heading').textContent()) === "Suite de l'étape",
-      'section « Suite de l’étape »',
+      'section «\u202fSuite de l’étape\u202f»',
     );
     const elseSel = sec.getByRole('combobox', { name: 'Destination par défaut' });
-    ok((await pickedLabel(elseSel)) === 'Étape suivante (4)', '« Sinon » : étape suivante par défaut');
+    ok(
+      (await pickedLabel(elseSel)) === 'Étape suivante (4)',
+      '«\u202fSinon\u202f» : étape suivante par défaut',
+    );
     await sec.getByRole('button', { name: 'Ajouter une règle' }).click();
     await p.waitForTimeout(300);
     const r1 = sec.getByRole('group', { name: 'Règle 1' });
@@ -477,7 +482,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
         1,
       'rail : flèche secondaire vers chaque destination',
     );
-    // Panneau défilé : « Sinon » en entier, « Ajouter une règle » et l'aide de lecture visibles
+    // Panneau défilé : «\u202fSinon\u202f» en entier, «\u202fAjouter une règle\u202f» et l'aide de lecture visibles
     await sec
       .locator('p.fd-help')
       .last()
@@ -502,7 +507,7 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
     await sec4.getByRole('button', { name: 'Supprimer la règle 1' }).click();
     await pick(sec4.getByRole('combobox', { name: 'Destination par défaut' }), { index: 0 });
 
-    // Lecteur : la première règle vraie s'applique ; sinon « Sinon »
+    // Lecteur : la première règle vraie s'applique ; sinon «\u202fSinon\u202f»
     const manifest = {
       schemaVersion: 1,
       demoId: DEMO,
@@ -552,7 +557,10 @@ const page = (h1) => `<!doctype html><html lang="fr"><head><meta charset="utf-8"
       await pp.getByText('Bienvenue').first().waitFor();
       await pp.getByRole('button', { name: 'Commencer' }).click();
       await pp.waitForTimeout(500);
-      ok((await pp.getByText(want).count()) >= 1, `lecteur ${q || '(sans variable)'} → « ${want} »`);
+      ok(
+        (await pp.getByText(want).count()) >= 1,
+        `lecteur ${q || '(sans variable)'} → «\u202f${want}\u202f»`,
+      );
       await pp.context().close();
     }
   }

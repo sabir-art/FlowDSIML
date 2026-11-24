@@ -2,14 +2,14 @@
  * Recette L52 (spec docs/ux/specs/l52-etiquettes.md). Données fictives (acme.example).
  *  - P1 : les 8 couleurs sur des cartes de Démos ; contraste au-dessus de 4,5:1 (axe et calcul), en clair et en sombre ;
  *    l'orange a le texte #8F5300.
- *  - P2 (recette 1, 4, 5, 7, 9) : /settings/tags trié par nom, « 8 sur 20 », lien « n démos » vers Démos filtré
+ *  - P2 (recette 1, 4, 5, 7, 9) : /settings/tags trié par nom, «\u202f8 sur 20\u202f», lien «\u202fn démos\u202f» vers Démos filtré
  *    (?etiquettes=), tri par nombre de démos ; suppression confirmée (les démos restent) ; couleur Sarcelle (anneau,
  *    coche, flèches) ; lecteur sans bouton ni menu ; clavier (menu, renommage Entrée et Échap) ; création, nom pris ;
  *    état vide.
- *  - P3 (recette 2, 3) : nom déjà pris → « Fusionner avec « Outil CRM » » ouvre la fusion ; fusion de « Outil métier »
- *    (7 démos) dans « Outil CRM » : toutes l'ont, « Outil métier » a disparu, aucune démo au-delà de 5, toast.
- *  - P4 (recette 6) : « + Étiquette » au survol et au focus de la carte (et de la ligne de liste) ; sélecteur accroché à
- *    la ligne, créer « Nouvelle » (couleur proposée) : elle paraît sur la carte et dans la page ; limite de 5 ; lecteur.
+ *  - P3 (recette 2, 3) : nom déjà pris → «\u202fFusionner avec «\u202fOutil CRM\u202f»\u202f» ouvre la fusion ; fusion de «\u202fOutil métier\u202f»
+ *    (7 démos) dans «\u202fOutil CRM\u202f» : toutes l'ont, «\u202fOutil métier\u202f» a disparu, aucune démo au-delà de 5, toast.
+ *  - P4 (recette 6) : «\u202f+ Étiquette\u202f» au survol et au focus de la carte (et de la ligne de liste) ; sélecteur accroché à
+ *    la ligne, créer «\u202fNouvelle\u202f» (couleur proposée) : elle paraît sur la carte et dans la page ; limite de 5 ; lecteur.
  * Usage : node e2e/l52-etiquettes.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -169,7 +169,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       JSON.stringify(await names(page)) === JSON.stringify(PAGE_TAGS.map((x) => x[0])),
       'recette 1 : liste triée par nom',
     );
-    ok((await page.locator('.tgs-quota').innerText()) === '8 sur\u00a020', '« 8 sur 20 »');
+    ok((await page.locator('.tgs-quota').innerText()) === '8 sur\u00a020', '«\u202f8 sur 20\u202f»');
     ok(
       (await page.getByRole('columnheader', { name: 'Nom' }).getAttribute('aria-sort')) === 'ascending',
       'en-tête Nom : aria-sort="ascending"',
@@ -177,7 +177,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     ok(
       (await page.locator('.tgs-row', { hasText: 'Réglementaire' }).getByText('Aucune démo').count()) === 1 &&
         (await page.locator('.tgs-row', { hasText: 'Réglementaire' }).getByRole('link').count()) === 0,
-      '« Aucune démo », sans lien',
+      '«\u202fAucune démo\u202f», sans lien',
     );
     await page.getByRole('button', { name: 'Démos' }).click();
     ok(
@@ -185,7 +185,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
         (await page.getByRole('columnheader', { name: 'Démos' }).getAttribute('aria-sort')) === 'descending',
       'tri par nombre de démos (le plus grand en tête, aria-sort)',
     );
-    // Lecteur d'écran et lien : « 3 démos avec l'étiquette Pilotage »
+    // Lecteur d'écran et lien : «\u202f3 démos avec l'étiquette Pilotage\u202f»
     await page.getByRole('link', { name: '3 démos avec l’étiquette Pilotage' }).click();
     await page.waitForSelector('.demo-card');
     await page.waitForTimeout(300);
@@ -210,7 +210,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     const before = state.tables.demos.length;
     await page.getByRole('button', { name: 'Plus d’actions pour Pilotage' }).click();
     await page.getByRole('menuitem', { name: 'Supprimer' }).click();
-    const dlg = page.getByRole('dialog', { name: 'Supprimer « Pilotage » ?' });
+    const dlg = page.getByRole('dialog', { name: 'Supprimer «\u202fPilotage\u202f» ?' });
     await dlg.waitFor();
     ok(
       /Elle sera retirée de 3 démos\. Les démos ne sont pas supprimées\./.test(await dlg.innerText()),
@@ -223,12 +223,15 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       'étiquette supprimée, démos conservées',
     );
     ok(!(await names(page)).includes('Pilotage'), 'ligne retirée de la liste');
-    // Sans démo : « Aucune démo ne l'utilise. »
+    // Sans démo : «\u202fAucune démo ne l'utilise.\u202f»
     await page.getByRole('button', { name: 'Plus d’actions pour Réglementaire' }).click();
     await page.getByRole('menuitem', { name: 'Supprimer' }).click();
-    const d2 = page.getByRole('dialog', { name: 'Supprimer « Réglementaire » ?' });
+    const d2 = page.getByRole('dialog', { name: 'Supprimer «\u202fRéglementaire\u202f» ?' });
     await d2.waitFor();
-    ok(/Aucune démo ne l’utilise\./.test(await d2.innerText()), 'sans démo : « Aucune démo ne l’utilise. »');
+    ok(
+      /Aucune démo ne l’utilise\./.test(await d2.innerText()),
+      'sans démo : «\u202fAucune démo ne l’utilise.\u202f»',
+    );
     await d2.getByRole('button', { name: 'Annuler' }).click();
     await page.context().close();
   }
@@ -244,7 +247,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     await page.keyboard.press('ArrowDown');
     ok(
       (await page.evaluate(() => document.activeElement?.textContent)) === 'Couleur',
-      'recette 9 : menu « Plus d’actions » aux flèches',
+      'recette 9 : menu «\u202fPlus d’actions\u202f» aux flèches',
     );
     await page.keyboard.press('Enter');
     const colors = page.getByRole('radiogroup', { name: 'Couleur' });
@@ -322,7 +325,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     ok(
       (await page.getByRole('alert').filter({ hasText: 'Cette étiquette existe déjà.' }).count()) === 1 &&
         (await field.getAttribute('aria-invalid')) === 'true',
-      'nom déjà pris (casse ignorée) : « Cette étiquette existe déjà. »',
+      'nom déjà pris (casse ignorée) : «\u202fCette étiquette existe déjà.\u202f»',
     );
     await page.keyboard.press('Escape');
 
@@ -353,17 +356,20 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     const field = page.getByRole('textbox', { name: 'Renommer Outil métier' });
     await field.fill('outil crm');
     await page.keyboard.press('Enter');
-    const link = page.getByRole('button', { name: 'Fusionner avec « Outil CRM »' });
-    ok((await link.count()) === 1, 'recette 2 : « Fusionner avec « Outil CRM » » sous le message');
+    const link = page.getByRole('button', { name: 'Fusionner avec «\u202fOutil CRM\u202f»' });
+    ok(
+      (await link.count()) === 1,
+      'recette 2 : «\u202fFusionner avec «\u202fOutil CRM\u202f»\u202f» sous le message',
+    );
     await link.click();
-    const dlg = page.getByRole('dialog', { name: 'Fusionner « Outil métier »' });
+    const dlg = page.getByRole('dialog', { name: 'Fusionner «\u202fOutil métier\u202f»' });
     await dlg.waitFor();
     ok(
       (await dlg.getByRole('radio', { name: /Outil CRM/ }).isChecked()) &&
-        /Les 7 démos de « Outil métier » reçoivent l’étiquette choisie\. « Outil métier » est ensuite supprimée\./.test(
+        /Les 7 démos de «\u202fOutil métier\u202f» reçoivent l’étiquette choisie\. «\u202fOutil métier\u202f» est ensuite supprimée\./.test(
           await dlg.innerText(),
         ),
-      'recette 2 : la fusion s’ouvre, « Outil CRM » choisie, phrase avec 7 démos',
+      'recette 2 : la fusion s’ouvre, «\u202fOutil CRM\u202f» choisie, phrase avec 7 démos',
     );
     ok(
       state.tables.tags.some((x) => x.name === 'Outil métier'),
@@ -377,22 +383,22 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     ok(
       !state.tables.tags.some((x) => x.id === met) &&
         [...before].every((d) => state.tables.demo_tags.some((x) => x.demo_id === d && x.tag_id === crm)),
-      'recette 3 : les 7 démos ont « Outil CRM », « Outil métier » a disparu',
+      'recette 3 : les 7 démos ont «\u202fOutil CRM\u202f», «\u202fOutil métier\u202f» a disparu',
     );
     const perDemo = {};
     for (const x of state.tables.demo_tags) perDemo[x.demo_id] = (perDemo[x.demo_id] || 0) + 1;
     ok(Math.max(...Object.values(perDemo)) <= 5, 'aucune démo au-delà de 5 étiquettes');
     ok(
-      /« Outil métier » fusionnée dans « Outil CRM » \(7 démos\)/.test(
+      /«\u202fOutil métier\u202f» fusionnée dans «\u202fOutil CRM\u202f» \(7 démos\)/.test(
         await page.locator('.mk-toasts').innerText(),
       ),
       'toast avec le compte',
     );
     ok(!(await names(page)).includes('Outil métier'), 'ligne retirée de la liste');
-    // Menu « Fusionner avec… » : choix dans la liste (pastille et nombre de démos)
+    // Menu «\u202fFusionner avec…\u202f» : choix dans la liste (pastille et nombre de démos)
     await page.getByRole('button', { name: 'Plus d’actions pour Pilotage' }).click();
     await page.getByRole('menuitem', { name: 'Fusionner avec…' }).click();
-    const d2 = page.getByRole('dialog', { name: 'Fusionner « Pilotage »' });
+    const d2 = page.getByRole('dialog', { name: 'Fusionner «\u202fPilotage\u202f»' });
     await d2.waitFor();
     ok(
       (await d2.getByRole('radio').count()) === 6 &&
@@ -425,12 +431,12 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     const add = card2.getByRole('button', { name: '+ Étiquette' });
     const opacity = () => add.evaluate((el) => getComputedStyle(el.closest('.tg-card')).opacity);
     await page.mouse.move(0, 0);
-    ok((await opacity()) === '0', 'recette 6 : « + Étiquette » masqué au repos');
+    ok((await opacity()) === '0', 'recette 6 : «\u202f+ Étiquette\u202f» masqué au repos');
     await card2.hover();
-    ok((await opacity()) === '1', '« + Étiquette » visible au survol de la carte');
+    ok((await opacity()) === '1', '«\u202f+ Étiquette\u202f» visible au survol de la carte');
     await page.mouse.move(0, 0);
     await add.focus();
-    ok((await opacity()) === '1', '« + Étiquette » visible au focus');
+    ok((await opacity()) === '1', '«\u202f+ Étiquette\u202f» visible au focus');
     await page.keyboard.press('Enter');
     const pop = card2.getByRole('dialog', { name: `Étiquettes de ${d2.title}` });
     await pop.waitFor();
@@ -438,14 +444,14 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
       (await pop.getByRole('link', { name: 'Gérer les étiquettes' }).getAttribute('href')).endsWith(
         '/settings/tags',
       ),
-      'sélecteur accroché à la ligne, lien de pied « Gérer les étiquettes »',
+      'sélecteur accroché à la ligne, lien de pied «\u202fGérer les étiquettes\u202f»',
     );
     await pop.getByRole('searchbox').fill('Nouvelle');
     ok(
       (await pop.getByRole('radio', { name: 'Bleu' }).getAttribute('aria-checked')) === 'true',
       'couleur proposée : la première libre (Bleu)',
     );
-    await pop.getByRole('button', { name: 'Créer « Nouvelle »' }).click();
+    await pop.getByRole('button', { name: 'Créer «\u202fNouvelle\u202f»' }).click();
     await page.waitForTimeout(500);
     const created = state.tables.tags.find((x) => x.name === 'Nouvelle');
     ok(
@@ -457,7 +463,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     // La carte a maintenant une étiquette : la ligne ouvre le sélecteur
     ok(
       (await card2.getByRole('button', { name: `Étiquettes de ${d2.title}` }).count()) === 1,
-      'ligne d’étiquettes cliquable (nom « Étiquettes de … »)',
+      'ligne d’étiquettes cliquable (nom «\u202fÉtiquettes de …\u202f»)',
     );
     await page.goto(`${APP}/#/settings/tags`);
     await page.locator('.tgs-row .tg').first().waitFor();
@@ -496,18 +502,18 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     ok(
       (await pop.getByRole('checkbox', { name: 'Étiquette 6' }).isDisabled()) &&
         (await pop.getByText('5 étiquettes au plus par démo.').count()) === 1,
-      'à 5 étiquettes : les autres cases désactivées, « 5 étiquettes au plus par démo. »',
+      'à 5 étiquettes : les autres cases désactivées, «\u202f5 étiquettes au plus par démo.\u202f»',
     );
     await page.context().close();
   }
-  // Lecteur : pastilles seules, sans « + Étiquette »
+  // Lecteur : pastilles seules, sans «\u202f+ Étiquette\u202f»
   {
     const { page } = await openPage(pageSeed({ role: 'viewer' }), '/');
     await page.waitForSelector('.demo-card .tg');
     ok(
       (await page.getByRole('button', { name: '+ Étiquette' }).count()) === 0 &&
         (await page.locator('.demo-card .tg-line').count()) === 0,
-      'lecteur : pastilles seules, ni « + Étiquette » ni sélecteur',
+      'lecteur : pastilles seules, ni «\u202f+ Étiquette\u202f» ni sélecteur',
     );
     await page.context().close();
   }
@@ -561,7 +567,7 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
     ok(
       (await btn.getAttribute('aria-disabled')) === 'true' &&
         (await btn.getAttribute('title')) === '20 étiquettes au plus par espace.',
-      'à 20 : « Nouvelle étiquette » désactivé, raison en infobulle',
+      'à 20 : «\u202fNouvelle étiquette\u202f» désactivé, raison en infobulle',
     );
     await p20.context().close();
   }

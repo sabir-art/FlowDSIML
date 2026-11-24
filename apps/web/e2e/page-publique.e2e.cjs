@@ -1,8 +1,8 @@
 /**
  * Paramètres › Page publique (retours client §6.1, maquettes lot1-parametres/page-publique-*) : réglage du
  * catalogue public /c/{adresse}. Activation, adresse, en-tête, démos choisies et ordonnées, pied, refus
- * d'activation, centre de formation à la même adresse. Puis le lecteur : logo de la médiathèque, « Créé
- * avec TutoClick » masqué, page coupée. Données fictives.
+ * d'activation, centre de formation à la même adresse. Puis le lecteur : logo de la médiathèque, «\u202fCréé
+ * avec TutoClick\u202f» masqué, page coupée. Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] [WIDTH=390] node e2e/page-publique.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -77,17 +77,17 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       !(await sw(page).isChecked()) && (await sw(page).isEnabled()) && (await save(page).isDisabled()),
       'page coupée par défaut, interrupteur disponible, rien à enregistrer',
     );
-    // À 390 px, l'en-tête ne garde que « Enregistrer » (maquette page-publique-*-390)
+    // À 390 px, l'en-tête ne garde que «\u202fEnregistrer\u202f» (maquette page-publique-*-390)
     if (!MOBILE)
       ok(
         (await page.getByRole('button', { name: 'Voir la page' }).isDisabled()) === true,
-        '« Voir la page » indisponible tant que la page n’est pas en ligne',
+        '«\u202fVoir la page\u202f» indisponible tant que la page n’est pas en ligne',
       );
     else
       ok(
         (await page.getByRole('button', { name: 'Voir la page' }).count()) === 0 &&
           (await page.getByRole('button', { name: 'Annuler', exact: true }).count()) === 0,
-        '390 : l’en-tête ne garde que « Enregistrer »',
+        '390 : l’en-tête ne garde que «\u202fEnregistrer\u202f»',
       );
     const slug = page.getByLabel('Adresse', { exact: true });
     ok((await slug.inputValue()) === 'acme', 'adresse proposée à partir du nom de l’espace');
@@ -129,7 +129,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     // Démos choisies et ordonnées
     ok(
       await page.getByRole('radio', { name: /^Toutes les démos publiées/ }).isChecked(),
-      '« Toutes les démos publiées » par défaut',
+      '«\u202fToutes les démos publiées\u202f» par défaut',
     );
     await page.getByRole('radio', { name: /^Démos choisies/ }).check();
     const items = page.locator('.pp-pick li');
@@ -149,7 +149,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       (await page
         .getByText('3 démos affichées, dans cet ordre. Glissez la poignée ou utilisez les flèches.')
         .count()) === 1,
-      '« 3 démos affichées, dans cet ordre… »',
+      '«\u202f3 démos affichées, dans cet ordre…\u202f»',
     );
     await page.getByRole('button', { name: 'Monter Saisir une fiche' }).click();
     await page.getByRole('button', { name: 'Monter Saisir une fiche' }).click();
@@ -162,7 +162,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     ok(
       (await page.getByRole('button', { name: 'Monter Saisir une fiche' }).getAttribute('aria-disabled')) ===
         'true' && (await page.getByRole('button', { name: 'Monter Démo CRM' }).count()) === 0,
-      'première démo : « Monter » désactivé ; pas de flèches sur une démo non affichée',
+      'première démo : «\u202fMonter\u202f» désactivé ; pas de flèches sur une démo non affichée',
     );
 
     // Pied
@@ -175,7 +175,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       'contact : ni e-mail ni https, erreur dite et enregistrement impossible',
     );
     await contact.fill('formation@acme.example');
-    await page.getByRole('switch', { name: 'Afficher « Créé avec TutoClick »' }).uncheck();
+    await page.getByRole('switch', { name: 'Afficher «\u202fCréé avec TutoClick\u202f»' }).uncheck();
     await sw(page).check();
     await shot(page, 'page-publique');
     ok(
@@ -194,7 +194,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
         c.public_page.madeWith === false &&
         c.public_page.logo === null &&
         JSON.stringify(c.public_page.demos) === JSON.stringify([D(2), D(3)]),
-      '« Enregistrer » enregistre et met en ligne : réglages et démos choisies dans l’ordre',
+      '«\u202fEnregistrer\u202f» enregistre et met en ligne : réglages et démos choisies dans l’ordre',
     );
     if (!MOBILE) {
       const view = page
@@ -204,14 +204,14 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       ok(
         /\/#\/c\/acme$/.test(await view.getAttribute('href')) &&
           (await view.getAttribute('target')) === '_blank',
-        '« Voir la page » ouvre l’adresse dans un nouvel onglet',
+        '«\u202fVoir la page\u202f» ouvre l’adresse dans un nouvel onglet',
       );
     }
     if (MOBILE) {
       const link = page.locator('a.pp-view-m');
       ok(
         (await link.isVisible()) && /\/#\/c\/acme$/.test(await link.getAttribute('href')),
-        '390 : « Voir la page » sous le champ Adresse',
+        '390 : «\u202fVoir la page\u202f» sous le champ Adresse',
       );
       await page.getByLabel('Titre', { exact: true }).fill('Titre non enregistré');
       await page.locator('.fd-page-header__mback').click();
@@ -221,11 +221,14 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       await leave.waitFor({ state: 'detached' });
       ok(
         /#\/settings\/brand\/page$/.test(page.url()),
-        '390 : retour avec des modifications, « Quitter sans enregistrer ? » ; Annuler reste sur la page',
+        '390 : retour avec des modifications, «\u202fQuitter sans enregistrer ?\u202f» ; Annuler reste sur la page',
       );
       await page.getByLabel('Titre', { exact: true }).fill('Les démos d’Acme');
     } else {
-      ok(!(await page.locator('a.pp-view-m').isVisible()), '1440 : « Voir la page » reste dans l’en-tête');
+      ok(
+        !(await page.locator('a.pp-view-m').isVisible()),
+        '1440 : «\u202fVoir la page\u202f» reste dans l’en-tête',
+      );
     }
     // Coupée de nouveau
     await sw(page).uncheck();
@@ -240,7 +243,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     ok(row(state).slug === 'acme', 'adresse déjà prise : dite sous le champ, rien n’est enregistré');
     if (!MOBILE) {
       await page.getByRole('button', { name: 'Annuler', exact: true }).click();
-      ok((await slug.inputValue()) === 'acme', '« Annuler » revient aux réglages enregistrés');
+      ok((await slug.inputValue()) === 'acme', '«\u202fAnnuler\u202f» revient aux réglages enregistrés');
     }
     await page.context().close();
   }
@@ -260,7 +263,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
         ) &&
         (await sw(page).isDisabled()) &&
         !(await sw(page).isChecked()),
-      'liens publics coupés : interrupteur désactivé, motif et lien « Ouvrir Sécurité »',
+      'liens publics coupés : interrupteur désactivé, motif et lien «\u202fOuvrir Sécurité\u202f»',
     );
     const tone = await why.evaluate((el) => {
       const probe = document.createElement('span');
@@ -295,7 +298,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       (await why.textContent()).includes('aucune démo n’est publiée en accès ouvert') &&
         (await why.getByRole('link', { name: 'Voir les démos' }).count()) === 1 &&
         (await sw(page).isDisabled()),
-      'aucune démo en accès ouvert : interrupteur désactivé, motif et lien « Voir les démos »',
+      'aucune démo en accès ouvert : interrupteur désactivé, motif et lien «\u202fVoir les démos\u202f»',
     );
     await shot(page, 'page-publique-sansdemo');
     await page.context().close();
@@ -322,7 +325,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     ok(
       (await banner.getAttribute('role')) === 'status' &&
         (await banner.textContent()).includes(
-          'Cette adresse affiche aujourd’hui votre centre de formation « Se former chez Acme ».',
+          'Cette adresse affiche aujourd’hui votre centre de formation «\u202fSe former chez Acme\u202f».',
         ) &&
         (await banner.textContent()).includes(
           'Le centre de formation et ses parcours restent dans Parcours de formation.',
@@ -351,7 +354,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     await shot(page, 'page-publique-remplacer');
     await dlg.getByRole('button', { name: 'Annuler' }).click();
     await dlg.waitFor({ state: 'detached' });
-    ok(!(state.publicPageSaves || []).length, '« Annuler » : rien n’est enregistré');
+    ok(!(state.publicPageSaves || []).length, '«\u202fAnnuler\u202f» : rien n’est enregistré');
     await save(page).click();
     await dlg.getByRole('button', { name: 'Remplacer et enregistrer' }).click();
     await page.getByText('Page publique enregistrée. Elle est en ligne.').waitFor();
@@ -374,7 +377,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
         /Votre centre de formation n’est plus affiché à .+\/#\/c\/acme\. La page publique des démos l’a remplacé\./.test(
           await notice.textContent(),
         ),
-      'Parcours de formation : bandeau « Votre centre de formation n’est plus affiché à… »',
+      'Parcours de formation : bandeau «\u202fVotre centre de formation n’est plus affiché à…\u202f»',
     );
     await shot(page, 'page-publique-parcours');
     await notice.getByRole('button', { name: 'Remettre le centre de formation' }).click();
@@ -393,7 +396,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       after.public_page_enabled === false &&
         after.public_page.demos === 'all' &&
         after.published.title === 'Se former chez Acme',
-      '« Remettre le centre » : page publique coupée, ses réglages et ceux du centre conservés',
+      '«\u202fRemettre le centre\u202f» : page publique coupée, ses réglages et ceux du centre conservés',
     );
     await page.context().close();
   }
@@ -493,7 +496,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       'lecteur : logo choisi dans la médiathèque',
     );
     const foot = await p.locator('footer.ctr-foot').textContent();
-    ok(!/TutoClick/.test(foot), 'lecteur : « Créé avec TutoClick » masqué');
+    ok(!/TutoClick/.test(foot), 'lecteur : «\u202fCréé avec TutoClick\u202f» masqué');
     ok(
       (await p.locator('footer.ctr-foot a[href="mailto:formation@acme.example"]').count()) === 1,
       'lecteur : lien de contact par e-mail dans le pied',
@@ -512,7 +515,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     reply = { status: 'not_found' };
     await p.reload();
     await p.getByRole('heading', { level: 1, name: 'Cette page n’est pas disponible' }).waitFor();
-    ok(true, 'lecteur : page coupée, « Cette page n’est pas disponible »');
+    ok(true, 'lecteur : page coupée, «\u202fCette page n’est pas disponible\u202f»');
     await ctx.close();
   }
 

@@ -40,7 +40,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.waitForTimeout(900);
   ok(demo().presenter_notes?.startsWith('Introduction'), 'notes de la démo enregistrées');
 
-  // ===== Lancement avec « Piloter depuis mon téléphone » =====
+  // ===== Lancement avec «\u202fPiloter depuis mon téléphone\u202f» =====
   await fromMore(page, 'Présenter');
   const launch = page.getByRole('dialog', { name: /Présenter/ });
   await launch.waitFor();
@@ -62,7 +62,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   ok(/\/t\b/.test(await rd.innerText()), 'adresse courte …/t');
   const status = rd.getByRole('status');
-  ok(sp(await status.innerText()) === 'En attente du téléphone…', 'statut « En attente du téléphone… »');
+  ok(
+    sp(await status.innerText()) === 'En attente du téléphone…',
+    'statut «\u202fEn attente du téléphone…\u202f»',
+  );
   if (SHOTS) {
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${SHOTS}/l26-10-appairage${sfx}.png` });
@@ -99,7 +102,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
           .catch(() => ''),
       ),
     ),
-    'présentateur : puce « Téléphone connecté »',
+    'présentateur : puce «\u202fTéléphone connecté\u202f»',
   );
   await rd.waitFor({ state: 'detached', timeout: 5000 }).catch(() => undefined);
   ok(sp(await phone.locator('.rmp-head').innerText()).includes('1 / 3'), 'téléphone : titre et n / N');
@@ -109,19 +112,22 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   await phone.getByRole('button', { name: 'Suivante' }).click();
   await page.locator('.pr-count', { hasText: 'Étape 2 sur 3' }).waitFor({ timeout: 5000 });
-  ok(true, 'téléphone « Suivante » : la vue présentateur suit');
+  ok(true, 'téléphone «\u202fSuivante\u202f» : la vue présentateur suit');
   await phone.locator('.rmp-head', { hasText: '2 / 3' }).waitFor({ timeout: 5000 });
   ok(
     sp(await phone.locator('.rmp-notes').innerText()).includes('Insister'),
     'téléphone : notes de l’étape 2',
   );
-  ok(sp(await phone.locator('.rmp-nextis').innerText()).startsWith('Ensuite'), 'téléphone : « Ensuite : … »');
+  ok(
+    sp(await phone.locator('.rmp-nextis').innerText()).startsWith('Ensuite'),
+    'téléphone : «\u202fEnsuite : …\u202f»',
+  );
   const nextBox = await phone.getByRole('button', { name: 'Suivante' }).boundingBox();
-  ok(nextBox.height >= 64, 'téléphone : « Suivante » de 64 px au moins');
+  ok(nextBox.height >= 64, 'téléphone : «\u202fSuivante\u202f» de 64 px au moins');
   if (SHOTS) await phone.screenshot({ path: `${SHOTS}/l26-11-telephone${sfx}.png` });
   await phone.getByRole('button', { name: 'Écran noir' }).click();
   await page.locator('button[aria-pressed="true"]', { hasText: 'Écran noir' }).waitFor({ timeout: 5000 });
-  ok(true, 'téléphone « Écran noir » : synchronisé');
+  ok(true, 'téléphone «\u202fÉcran noir\u202f» : synchronisé');
   await phone.getByRole('button', { name: 'Écran noir' }).click();
 
   // ===== L26-09 : onglets et modification en direct (étape 2) =====
@@ -139,7 +145,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     sp(await page.locator('.pr-saved').innerText()) ===
       'Enregistré dans la démo. Visible seulement par les éditeurs.',
-    '« Enregistré dans la démo. Visible seulement par les éditeurs. »',
+    '«\u202fEnregistré dans la démo. Visible seulement par les éditeurs.\u202f»',
   );
   await phone.locator('.rmp-notes', { hasText: 'Montrer l’étape 6' }).waitFor({ timeout: 5000 });
   ok(true, 'téléphone : notes modifiées reçues');
@@ -163,7 +169,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     .click();
   const rep = page.getByRole('dialog', { name: /Présentation terminée · \d+\smin \d\d/ });
   await rep.waitFor({ timeout: 5000 });
-  ok(true, 'téléphone « Terminer » : bilan de fin');
+  ok(true, 'téléphone «\u202fTerminer\u202f» : bilan de fin');
   await phone.getByText(/La présentation est terminée/).waitFor({ timeout: 5000 });
   ok(true, 'téléphone : fin annoncée');
   const rows = rep.getByRole('table').getByRole('row');
@@ -189,7 +195,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     rep.getByRole('button', { name: n, exact: true }).evaluate((e) => getComputedStyle(e).backgroundColor);
   ok(
     (await bg('Retour à l’éditeur')) !== (await bg('Fermer')),
-    'bilan : « Retour à l’éditeur » en bouton principal',
+    'bilan : «\u202fRetour à l’éditeur\u202f» en bouton principal',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l26-12-bilan${sfx}.png` });
   await rep.getByRole('button', { name: 'Retour à l’éditeur' }).click();
