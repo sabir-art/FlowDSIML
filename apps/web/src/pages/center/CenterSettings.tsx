@@ -11,6 +11,7 @@ import {
   Globe,
   GraduationCap,
   GripVertical,
+  Images,
   LayoutTemplate,
   Palette,
   Plus,
@@ -29,6 +30,7 @@ import { initials } from '../../lib/initials';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { PublicPageNotice } from './PublicPageNotice';
+import { MediaLibrary, type MediaFile } from '../../components/media/MediaLibrary';
 import { PathsDialog } from '../learners/PathsDialog';
 import { buildRows, learnerCounts, type ProgressData } from '../learners/progress';
 import {
@@ -231,6 +233,7 @@ export function CenterSettings() {
 
   // Envoi du logo : le voile de la vignette ne suit que cet envoi, pas les autres actions de la page
   const [logoBusy, setLogoBusy] = useState(false);
+  const [logoLibrary, setLogoLibrary] = useState(false);
   async function uploadLogo(file: File) {
     setLogoBusy(true);
     try {
@@ -238,6 +241,19 @@ export function CenterSettings() {
     } finally {
       setLogoBusy(false);
     }
+  }
+  /** §3.1 : logo pris dans la médiathèque. Le serveur le copie ; le chemin rejoint le brouillon du centre. */
+  async function pickMediaLogo(file: MediaFile) {
+    await run(async () => {
+      const { data, error: e } = await supabase.functions.invoke<{ path: string }>('media', {
+        body: { action: 'logo', id: file.id, target: 'center' },
+      });
+      if (e || !data?.path) throw new Error(t('center.logoFromMediaError'));
+      const old = draft.logoPath;
+      update({ logoPath: data.path });
+      if (old && old !== data.path) await supabase.storage.from('branding').remove([old]);
+      toast(t('center.logoSaved'));
+    });
   }
   async function sendLogo(file: File) {
     await run(async () => {
@@ -501,8 +517,12 @@ export function CenterSettings() {
                 />
                 <span className="tx" id="c-logo-h">
                   <b>{draft.logoPath ? t('center.logoSet') : t('center.logoNone')}</b>
-                  {t('center.logoHelp')}
+                  {t('center.logoHelp')} {t('center.logoFromMediaHelp')}
                 </span>
+                {/* §3.1 : un logo déjà dans la médiathèque (copié à l'emplacement du logo du centre) */}
+                <Button icon={<Images />} disabled={logoBusy} onClick={() => setLogoLibrary(true)}>
+                  {t('media.choose')}
+                </Button>
               </div>
             </div>
             <div className="two">
@@ -947,6 +967,15 @@ export function CenterSettings() {
             setManaging(false);
             void load();
           }}
+        />
+      )}
+      {logoLibrary && ws && (
+        <MediaLibrary
+          wsId={ws}
+          kind="logo"
+          destination={t('media.dest.centerLogo')}
+          onClose={() => setLogoLibrary(false)}
+          onPick={(f) => void pickMediaLogo(f)}
         />
       )}
     </AppPage>
