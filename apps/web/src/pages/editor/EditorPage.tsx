@@ -9,6 +9,7 @@ import {
   Download,
   ListChecks,
   ImagePlus,
+  Upload,
   Keyboard,
   PenLine,
   Presentation,
@@ -132,6 +133,9 @@ export function EditorPage() {
     Object.values(comments.authors).map((a) => [a.user_id, a.full_name || a.email]),
   );
   const replacePicker = useRef<HTMLInputElement>(null);
+  /** Étape dont on remplace la capture (menu de l'étape) ; à défaut, l'étape affichée. */
+  const replaceTarget = useRef<string | null>(null);
+  const [stageDrop, setStageDrop] = useState(false);
   /** Mes dernières modifications par ligne et champ (pour signaler un écrasement). */
   const myEdits = useRef(new Map<string, number>());
   const noteEdit = (tb: EditTable, id: string, fields: string[]) => {
@@ -333,6 +337,17 @@ export function EditorPage() {
   }, [versionId]);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
+  // MEDIA-01 : remplacer la capture d'une étape (menu, bouton du panneau, dépôt sur la carte ou le canevas)
+  const canDropImage = !readOnly && step?.kind === 'image';
+  const replaceImage = (stepId: string, file: File) => {
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast(t('editor.replaceBadType'), undefined, { tone: 'warning' });
+      return;
+    }
+    void editor.captureStep(stepId, file).then((r) => {
+      if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
+    });
+  };
   // L25-02 : changer d'étape quitte le recadrage (le brouillon appartient à l'étape)
   useEffect(() => {
     setSelection((cur) => (cur.kind === 'crop' ? { kind: 'step' } : cur));
@@ -720,7 +735,10 @@ export function EditorPage() {
               type="button"
               className="btn btn-secondary btn-sm"
               aria-controls="editorpage-file"
-              onClick={() => replacePicker.current?.click()}
+              onClick={() => {
+                replaceTarget.current = null;
+                replacePicker.current?.click();
+              }}
             >
               <ImagePlus aria-hidden="true" />
               {t('editor.toolReplace')}
@@ -1068,6 +1086,13 @@ export function EditorPage() {
             }}
             readOnly={readOnly}
             onPlayFrom={(i) => preview(i)}
+            onReplaceImage={(i, file) => {
+              const s = editor.steps[i];
+              if (!s) return;
+              if (file) return replaceImage(s.id, file);
+              replaceTarget.current = s.id;
+              replacePicker.current?.click();
+            }}
             onEdit={(i) => {
               setIndex(i);
               setSelection({ kind: 'step' });
@@ -1098,7 +1123,33 @@ export function EditorPage() {
           onClosed={stepsCol.setClosed}
           onDragging={setStepsDrag}
         />
-        <section className="stage" aria-label={t('editor.canvas')} id="canvas">
+        <section
+          className={`stage${stageDrop ? ' is-file-over' : ''}`}
+          aria-label={t('editor.canvas')}
+          id="canvas"
+          // MEDIA-01 : une image déposée sur le canevas remplace la capture de l'étape affichée
+          onDragOver={(e) => {
+            if (!canDropImage || !e.dataTransfer.types.includes('Files')) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            setStageDrop(true);
+          }}
+          onDragLeave={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setStageDrop(false);
+          }}
+          onDrop={(e) => {
+            if (!canDropImage || !e.dataTransfer.files.length) return;
+            e.preventDefault();
+            setStageDrop(false);
+            if (step) replaceImage(step.id, e.dataTransfer.files[0]!);
+          }}
+        >
+          {stageDrop && (
+            <span className="fd-drop__veil stage-drop" aria-hidden="true">
+              <Upload />
+              {t('dropzone.dropBlock')}
+            </span>
+          )}
           <div className="row stage-head">
             <span className="t-caption muted">
               {selectedForm
@@ -1302,10 +1353,9 @@ export function EditorPage() {
           onChange={(e) => {
             const f = e.target.files?.[0];
             e.target.value = '';
-            if (!f || !step) return;
-            void editor.captureStep(step.id, f).then((r) => {
-              if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
-            });
+            const id = replaceTarget.current ?? step?.id;
+            replaceTarget.current = null;
+            if (f && id) replaceImage(id, f);
           }}
         />
       </div>

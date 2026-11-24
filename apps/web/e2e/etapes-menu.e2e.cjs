@@ -10,6 +10,8 @@
  */
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
+const fs = require('fs');
+const path = require('path');
 const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 
@@ -94,6 +96,57 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     serious.length === 0,
     `axe, menu ouvert : ${serious.map((v) => v.id).join(', ') || '0 violation grave'}`,
   );
+
+  // ===== MEDIA-01 : « Remplacer la capture… » (menu), puis dépôt d'un fichier sur la carte =====
+  const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
+  const img0 = steps().sort((x, y) => x.position - y.position)[0];
+  const path0 = img0.image_path;
+  ok(names.includes('Remplacer la capture…'), 'menu d’une étape image : « Remplacer la capture… »');
+  const [chooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('menuitem', { name: 'Remplacer la capture…' }).click(),
+  ]);
+  await chooser.setFiles({ name: 'ecran.png', mimeType: 'image/png', buffer: png });
+  await page.getByText('Image importée', { exact: false }).first().waitFor({ state: 'attached' });
+  ok(
+    img0.image_path !== path0 && img0.element_meta?.imported === true,
+    'capture remplacée par le fichier choisi, signalée comme importée',
+  );
+  const dropOn = async (selector, type) => {
+    const dt = await page.evaluateHandle(
+      ({ b64, type }) => {
+        const d = new DataTransfer();
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        d.items.add(new File([bytes], type === 'image/png' ? 'depot.png' : 'notes.txt', { type }));
+        return d;
+      },
+      { b64: png.toString('base64'), type },
+    );
+    await page.dispatchEvent(selector, 'dragover', { dataTransfer: dt });
+    const over = await page.locator(selector).evaluate((e) => e.classList.contains('is-file-over'));
+    await page.dispatchEvent(selector, 'drop', { dataTransfer: dt });
+    return over;
+  };
+  const path1 = img0.image_path;
+  const over1 = await dropOn('.rail-list .rail-li:nth-child(1)', 'image/png');
+  await page.waitForFunction(() => !document.querySelector('.rail-list .rail-li.is-file-over'));
+  for (let i = 0; i < 40 && img0.image_path === path1; i++) await page.waitForTimeout(100);
+  ok(
+    over1 && img0.image_path !== path1,
+    'image déposée sur la carte : pointillé au survol, capture remplacée',
+  );
+  const path2 = img0.image_path;
+  const over2 = await dropOn('#canvas', 'image/png');
+  for (let i = 0; i < 40 && img0.image_path === path2; i++) await page.waitForTimeout(100);
+  ok(
+    over2 && img0.image_path !== path2,
+    'image déposée sur le canevas : capture de l’étape affichée remplacée',
+  );
+  const path3 = img0.image_path;
+  await dropOn('#canvas', 'text/plain');
+  await page.getByText('Format non accepté : PNG, JPEG ou WebP.').first().waitFor({ state: 'attached' });
+  ok(img0.image_path === path3, 'fichier refusé : message, capture inchangée');
+  await openMenu(0);
 
   // ===== Copier, puis coller après l'étape 2 =====
   const first0 = steps().sort((x, y) => x.position - y.position)[0];

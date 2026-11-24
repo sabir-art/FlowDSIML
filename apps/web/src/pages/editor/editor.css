@@ -4232,3 +4232,15 @@
   border-top: 1px solid var(--fd-color-border);
   background: var(--fd-color-surface);
 }
+
+/* MEDIA-01 : remplacer la capture par dépôt. Pas de zone visible : la carte de l'étape ou le canevas
+   prennent le pointillé primary et le fond à 7 % pendant le survol avec un fichier */
+.mk .rail-li.is-file-over .step {
+  outline: 2px dashed var(--fd-color-primary);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface));
+}
+.mk .stage > .stage-drop {
+  inset: 8px;
+  z-index: 6;
+}

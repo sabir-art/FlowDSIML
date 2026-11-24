@@ -66,6 +66,7 @@ export function StepList({
   presence = {},
   presenceNames = {},
   onPlayFrom,
+  onReplaceImage,
   onEdit,
   collapsed = false,
 }: {
@@ -73,6 +74,8 @@ export function StepList({
   collapsed?: boolean;
   /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape. */
   onPlayFrom?: (i: number) => void;
+  /** MEDIA-01 : remplacer la capture d'une étape image (sans fichier : ouvrir le choix de fichier). */
+  onReplaceImage?: (i: number, file?: File) => void;
   /** P1-1 : « Modifier » choisit l'étape et ouvre le panneau Étape. */
   onEdit?: (i: number) => void;
   editor: DemoEditor;
@@ -104,6 +107,8 @@ export function StepList({
   const { current: ws } = useWorkspace();
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
+  /** Carte d'étape survolée avec un fichier (dépôt pour remplacer la capture) */
+  const [fileOver, setFileOver] = useState<number | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const chapterTitle = (id: string | null) => editor.chapters.find((c) => c.id === id)?.title;
 
@@ -173,6 +178,16 @@ export function StepList({
         end: kbd(t('editor.stepMenu.keyEnter')),
         onSelect: () => (onEdit ? onEdit(i) : onSelect(i)),
       },
+      // MEDIA-01 : pas de zone visible dans le panneau, l'entrée du menu ouvre le choix de fichier
+      ...(s.kind === 'image' && onReplaceImage && !readOnly
+        ? [
+            {
+              label: t('editor.stepMenu.replace'),
+              icon: <ImagePlus />,
+              onSelect: () => onReplaceImage(i),
+            },
+          ]
+        : []),
       ...(end
         ? []
         : [
@@ -525,8 +540,19 @@ export function StepList({
                 draggable={!readOnly}
                 onDragStart={() => setDragFrom(i)}
                 onDragOver={(e) => {
+                  // MEDIA-01 : un fichier glissé sur la carte d'une étape image remplace sa capture
+                  if (e.dataTransfer.types.includes('Files')) {
+                    if (s.kind !== 'image' || !onReplaceImage || readOnly) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                    setFileOver(i);
+                    return;
+                  }
                   e.preventDefault();
                   setOver(i);
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFileOver(null);
                 }}
                 onDragEnd={() => {
                   setDragFrom(null);
@@ -534,6 +560,12 @@ export function StepList({
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
+                  const dropped = e.dataTransfer.files[0];
+                  if (dropped && dragFrom === null) {
+                    setFileOver(null);
+                    if (s.kind === 'image' && onReplaceImage && !readOnly) onReplaceImage(i, dropped);
+                    return;
+                  }
                   if (dragFrom !== null && dragFrom !== i) {
                     void editor.moveStep(dragFrom, i);
                     onSelect(i);
@@ -541,7 +573,7 @@ export function StepList({
                   setDragFrom(null);
                   setOver(null);
                 }}
-                className="rail-li"
+                className={`rail-li${fileOver === i ? ' is-file-over' : ''}`}
               >
                 {showChapter && <div className="rail-chapter">{chapter}</div>}
                 {over === i && dragFrom !== null && dragFrom !== i && (

@@ -1942,12 +1942,14 @@
       "pasted": "Étape collée en position {{n}}",
       "duplicated": "Étape dupliquée en position {{n}}",
       "deleted": "Étape {{n}} supprimée",
-      "deletedToast": "Étape supprimée"
+      "deletedToast": "Étape supprimée",
+      "replace": "Remplacer la capture…"
     },
     "collapseSteps": "Replier les étapes",
     "expandSteps": "Déplier les étapes",
     "stepsWidth": "Largeur des étapes",
-    "stepPill": "Étape {{n}} : {{title}}"
+    "stepPill": "Étape {{n}} : {{title}}",
+    "replaceBadType": "Format non accepté : PNG, JPEG ou WebP."
   },
   "status": {
     "draft": "Brouillon",

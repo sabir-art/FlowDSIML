@@ -1942,12 +1942,14 @@
       "pasted": "Step pasted at position {{n}}",
       "duplicated": "Step duplicated at position {{n}}",
       "deleted": "Step {{n}} deleted",
-      "deletedToast": "Step deleted"
+      "deletedToast": "Step deleted",
+      "replace": "Replace the capture…"
     },
     "collapseSteps": "Collapse steps",
     "expandSteps": "Expand steps",
     "stepsWidth": "Steps width",
-    "stepPill": "Step {{n}}: {{title}}"
+    "stepPill": "Step {{n}}: {{title}}",
+    "replaceBadType": "Format not accepted: PNG, JPEG or WebP."
   },
   "status": {
     "draft": "Draft",
