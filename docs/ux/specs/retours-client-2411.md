@@ -124,6 +124,101 @@ Maquette : `pastilles-*`.
 - **Où** : cartes de la grille et colonne Type de la vue liste. La liste déroulante du filtre Type n'est pas concernée.
 - **Sur la vignette**, la pastille garde son fond opaque, pour rester lisible sur n'importe quelle capture.
 
+## 6. Paramètres : les rubriques « Bientôt » deviennent actives
+
+Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `notifs-*`, en 1440 et 390, clair et sombre). Le libellé « Bientôt » disparaît de la navigation des Paramètres pour ces trois rubriques.
+
+### 6.1 Marque › Page publique : le catalogue public de l'espace
+- **En-tête** : « Voir la page » (ExternalLink, nouvel onglet), « Annuler », « Enregistrer ».
+- **Page publique** :
+  - interrupteur ; désactivée, l'adresse affiche « Cette page n'est pas disponible » (l'écran L19b-05) ;
+  - **Adresse** : préfixe `tutoclick.example/c/`, lettres minuscules, chiffres et tirets, avec la copie dans le champ (CopyField, §4).
+- **En-tête de la page** :
+  - **Logo** : par défaut celui de l'espace, sinon « Choisir dans la médiathèque » (sélecteur §3.3) ;
+  - **Titre** ;
+  - **Phrase d'accueil** : facultative, compteur sur 160 caractères.
+- **Démos affichées** :
+  - radios « Toutes les démos publiées » (une démo publiée apparaît d'elle-même) ou « Démos choisies » ;
+  - avec « Démos choisies », la liste des démos publiées : poignée, case, nom, pastille de type (§5), flèches Monter / Descendre ;
+  - sous la liste : « 3 démos affichées, dans cet ordre. Glissez la poignée ou utilisez les flèches. »
+- **Pied** :
+  - **Lien de contact** : facultatif, e-mail ou https ;
+  - **Afficher « Fait avec TutoClick »** : interrupteur, activé par défaut.
+- **Moteur** : c'est le catalogue de démos déjà servi par le lecteur (`/c/{adresse}`, type « Catalogue de démos » du centre). Cette page en est le réglage, pas un deuxième catalogue.
+
+### 6.2 Connexions › Clés d'accès
+- **Qui** : propriétaires et administrateurs ; la rubrique est masquée pour les autres rôles.
+- **Phrase d'en-tête** : « Pour relier un outil de l'espace à TutoClick (API). Chaque clé donne les droits d'un administrateur : gardez-la comme un mot de passe. »
+- **Tableau** :
+  - **Nom**, avec « par {auteur} » dessous ;
+  - **Clé** : `tc_` puis des points et les 4 derniers caractères, jamais la clé entière ;
+  - **Créée** ;
+  - **Dernière utilisation** : « il y a 2 h », « Jamais utilisée », ou la pastille « Révoquée ».
+  - Le menu ⋯ propose Renommer et Révoquer.
+- **Liste vide** : « Aucune clé », avec le texte de la maquette et « Créer une clé ».
+- **Créer une clé** : fenêtre avec Nom (obligatoire) et Expiration (Jamais, 30 jours, 90 jours, 1 an ; 90 jours par défaut).
+- **Après la création** : fenêtre « Clé « {nom} » créée ».
+  - Encart d'avertissement : « Copiez-la maintenant : elle ne sera plus jamais affichée. »
+  - La clé entière s'affiche dans un CopyField. Après la copie, Check et « Clé copiée ».
+  - Case « J'ai copié la clé et l'ai rangée en lieu sûr ». « Terminé » reste désactivé tant qu'elle n'est pas cochée.
+  - Fermer la fenêtre (Échap, croix) demande la même case.
+- **Révoquer** : `alertdialog` « Révoquer « {nom} » ? » : « L'outil qui utilise cette clé perdra l'accès tout de suite. Cette action est définitive. », bouton danger « Révoquer la clé ».
+- **Côté serveur** : seul un condensé de la clé est stocké, elle ne peut pas être réaffichée. Chaque appel met à jour « Dernière utilisation ».
+
+### 6.3 Mon compte › Notifications
+- Les deux interrupteurs « Bientôt » du Profil partent ici.
+- **Tableau par événement**, avec les colonnes « Dans l'app » et « Par e-mail » :
+  - Mentions ;
+  - Réponses ;
+  - Commentaires sur mes démos ;
+  - Commentaires résolus ;
+  - Alertes d'Analytics ;
+  - Nouveaux leads.
+
+  Chaque ligne a un titre et une phrase d'aide ; à 390, l'aide est masquée et les deux colonnes restent.
+- **Lien entre les colonnes** : un événement coupé dans l'app ne part pas par e-mail. Son interrupteur e-mail est alors désactivé, gris.
+- **Aide sous le tableau** : « E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. »
+- **Sans la clé d'envoi d'e-mails** (emails §3.5) : la colonne « Par e-mail » reste visible, désactivée, avec « Bientôt » dans son en-tête. On ne la masque pas.
+- **Démos coupées** : la liste des démos dont la personne a coupé les notifications, avec « Réactiver ».
+
+## 7. Fenêtre « Nouvelle démo »
+
+Maquette : `lot2-demos/nouvelle-source-*`.
+- **« Partir d'une démo vide »** : il quitte le pied, où il ressemblait à un texte désactivé, et devient la **dernière ligne de la liste des sources**, comme les autres choix :
+  - icône FilePlus2, « Partir d'une démo vide », « Une démo sans étape, à remplir dans l'éditeur. » et un chevron ;
+  - même survol, même focus et même clic que les autres lignes.
+- **Pied** : il ne garde que « Retour » et « Annuler », ou « Créer la démo » quand des images sont choisies (§18.3).
+- **Tuile « + » de l'en-tête** : elle devient décorative.
+  - `aria-hidden`, sans bordure, sur fond prune-50 (prune-950 en sombre), icône prune ;
+  - aucun survol, curseur normal ;
+  - même tuile pour toutes les fenêtres à tuile (MODAL-01).
+
+## 8. Partage : « Sur invitation » et « Par domaine e-mail »
+
+- **Écrans** : ceux du propriétaire et du visiteur sont déjà spécifiés et maquettés (L11, `specs/l11-partage-securise.md`) :
+  - côté propriétaire : `reference/partage-securise.html?etat=invitation|modale|domaine`, à reprendre dans la page Partager actuelle (cartes radio de l'onglet Accès) ;
+  - côté visiteur : `refonte/l11-acces-visiteur.html?view=invitation|envoye|domaine|lien-perime`.
+- **Ajouté ici, l'e-mail reçu** (maquette `retours-2411/email-acces-*`) :
+  - de « {Espace} via TutoClick », objet « Votre lien d'accès à « {démo} » » ;
+  - logo et nom de l'espace en tête, titre, phrase (« Ce lien vous est personnel : ne le transférez pas. »), bouton « Ouvrir la démo » ;
+  - validité « Le lien est valable 1 heure et ne sert qu'une fois. » : **la durée affichée doit être celle du serveur** ;
+  - « Vous n'avez rien demandé ? Ignorez cet e-mail… » ;
+  - pied « Envoyé par TutoClick pour {Espace}… » ;
+  - 600 px, une colonne, sans pixel de suivi, mode sombre (charte des e-mails).
+- **Pourquoi « Bientôt » en ligne** : ces deux modes ont besoin de l'envoi d'e-mails. Tant que la clé d'envoi n'est pas configurée en production, ils restent « Bientôt » (règle L11 §4), et c'est normal. Ils s'activeront avec la clé, que le chef doit demander au client.
+
+## 9. Prise en main terminée
+
+Maquette : `lot2-demos/onb-fin-*`, variante B en place dans l'app.
+- **Bouton de l'en-tête** : « Prise en main 7/7 », anneau plein.
+- **Panneau** :
+  - barre pleine ;
+  - carte de succès (fond success-soft, tuile CircleCheck) : « Prise en main terminée », « Les 7 étapes sont faites. Votre espace est prêt : bonne création ! » ;
+  - bouton « Masquer la prise en main », et dessous « Vous la retrouverez dans le Centre d'aide. » ;
+  - « Terminées · 7 », dépliée, avec la liste cochée.
+- **Après « Masquer »** : le bouton quitte l'en-tête, et l'entrée « Prise en main » reste dans le Centre d'aide.
+- **Défaut transmis par le chef** : « Inviter » doit se cocher dès qu'une invitation est envoyée. Une invitation en attente suffit, sans attendre qu'elle soit acceptée.
+
 ## Recette
 - **Tests attendus** : `image-calques.e2e` (ajout, déplacement à la souris et au clavier, proportions, opacité, texte alternatif obligatoire, flou au-dessus, incrustation à la publication) ; `media.e2e`, à étendre (navigation, catégorie déduite et changée, sélecteur sur chaque point d'accès, « Utiliser ») ; `members.e2e` (CopyField) ; un contrôle de contraste des pastilles.
 - **Conditions** : clair et sombre, 1440 et 390 (hors éditeur), axe sans violation.
