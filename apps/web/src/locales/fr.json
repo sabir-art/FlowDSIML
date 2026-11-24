@@ -3963,6 +3963,7 @@
     "buttonHint_other": "({{count}} étapes sur {{total}})",
     "nextKicker": "Prochaine étape",
     "todo": "À faire ensuite",
+    "soonOnly": "Bientôt disponible",
     "doneList": "Terminées",
     "footShort": "Visible par les propriétaires et administrateurs.",
     "title": "Prise en main de votre espace",

@@ -42,20 +42,26 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // ===== ONB-01 : bouton d'entrée, panneau fermé par défaut =====
   await page.goto(`${BASE}/#/`);
-  const toggle = page.getByRole('button', { name: /^Prise en main 2\/6/ });
+  const toggle = page.getByRole('button', { name: /^Prise en main \d\/\d/ });
   await toggle.waitFor();
+  // Le total dépend de l'environnement : 7 étapes quand l'extension a sa fiche (site en ligne), 6 quand
+  // elle est en « Bientôt » (elle sort alors du total). Les étapes faites suivent : 3 sur 7, ou 2 sur 6.
+  const [, N, T] = sp(await toggle.innerText()).match(/(\d)\s*\/\s*(\d)/);
+  const published = T === '7';
+  const NT = `${N}/${T}`;
   const card = page.getByRole('complementary', { name: 'Prise en main' });
   ok(
     (await toggle.getAttribute('aria-expanded')) === 'false' && (await card.count()) === 0,
-    'bouton « Prise en main 2/6 » dans le PageHeader (l’extension en « Bientôt » sort du total), panneau fermé par défaut',
+    `bouton « Prise en main ${NT} » dans le PageHeader, panneau fermé par défaut`,
   );
   ok(
     sp(await toggle.innerText())
       .replace(/\s+/g, ' ')
-      .startsWith('Prise en main 2/6') &&
+      .startsWith(`Prise en main ${NT}`) &&
+      NT === (published ? '3/7' : '2/6') &&
       (await toggle.locator('svg.onb-ring').count()) === 1 &&
       (await toggle.evaluate((el) => !!el.closest('.fd-page-header__actions'))),
-    'libellé « Prise en main 2/6 » avec l’anneau de progression',
+    `libellé « Prise en main ${NT} » avec l’anneau de progression (extension ${published ? 'publiée' : 'en « Bientôt », hors total'})`,
   );
   ok((await page.locator('.onb-card').count()) === 0, 'plus de carte dans le flux de la page');
   const gridBefore = await page.locator('.demos-wrap').boundingBox();
@@ -81,9 +87,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       (await card.getAttribute('role')) === null,
     'filet à gauche, ni modale ni dialogue',
   );
-  ok(/2 étapes sur\s6\. Elles se cochent seules/.test(sp(await card.innerText())), '« 2 étapes sur 6 »');
+  ok(
+    new RegExp(`${N} étapes sur\\s${T}\\. Elles se cochent seules`).test(sp(await card.innerText())),
+    `« ${N} étapes sur ${T} »`,
+  );
   const bar = card.getByRole('progressbar');
-  ok(sp(await bar.getAttribute('aria-valuetext')) === '2 étapes sur 6', 'progression : aria-valuetext');
+  ok(sp(await bar.getAttribute('aria-valuetext')) === `${N} étapes sur ${T}`, 'progression : aria-valuetext');
   const next = card.locator('.onb-next');
   ok(
     /Prochaine étape/i.test(await next.innerText()) &&
@@ -97,28 +106,32 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok((await next.locator('.fd-btn--primary', { hasText: 'Voir comment' }).count()) === 1, 'bouton principal');
   ok((await card.locator('.fd-btn--primary').count()) === 1, 'une seule action principale dans le panneau');
   ok(
-    /À faire ensuite\s*4/.test(sp(await card.locator('.onb-h3').innerText())) &&
-      (await card.locator('.onb-rows:not(.onb-rows--done) li').count()) === 4,
-    '« À faire ensuite 4 » en lignes compactes',
+    new RegExp(`À faire ensuite\\s*${published ? 3 : 4}`).test(
+      sp(await card.locator('.onb-h3').innerText()),
+    ) && (await card.locator('.onb-rows:not(.onb-rows--done) li').count()) === (published ? 3 : 4),
+    `« À faire ensuite ${published ? 3 : 4} » en lignes compactes`,
   );
   const lastRow = card.locator('.onb-rows:not(.onb-rows--done) li').last();
-  ok(
-    /Installer l’extension/.test(await lastRow.innerText()) &&
-      (await lastRow.locator('.onb-soon', { hasText: 'Bientôt' }).count()) === 1 &&
-      (await lastRow.locator('button').count()) === 0,
-    'l’étape « Bientôt » vient en dernier, en gris, sans action',
-  );
+  if (published)
+    ok((await card.locator('.onb-soon').count()) === 0, 'extension publiée : aucune étape « Bientôt »');
+  else
+    ok(
+      /Installer l’extension/.test(await lastRow.innerText()) &&
+        (await lastRow.locator('.onb-soon', { hasText: 'Bientôt' }).count()) === 1 &&
+        (await lastRow.locator('button').count()) === 0,
+      'l’étape « Bientôt » vient en dernier, en gris, sans action',
+    );
   const doneBtn = card.getByRole('button', { name: /^Terminées/ });
   ok(
     (await doneBtn.getAttribute('aria-expanded')) === 'false' &&
       (await card.locator('.onb-rows--done').count()) === 0,
-    '« Terminées 2 » replié',
+    `« Terminées ${N} » replié`,
   );
   await doneBtn.click();
   ok(
-    (await card.locator('.onb-rows--done li').count()) === 2 &&
-      (await card.locator('.onb-rows--done .sr-only', { hasText: 'Fait' }).count()) === 2,
-    'déplié : 2 étapes faites (l’extension en « Bientôt » n’est pas cochée), « Fait » pour les lecteurs d’écran',
+    (await card.locator('.onb-rows--done li').count()) === Number(N) &&
+      (await card.locator('.onb-rows--done .sr-only', { hasText: 'Fait' }).count()) === Number(N),
+    `déplié : ${N} étapes faites, « Fait » pour les lecteurs d’écran`,
   );
   await doneBtn.click();
   ok((await page.locator('.gs-banner').count()) === 0, 'remplace « Premiers pas »');
@@ -281,6 +294,13 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
           `Prise en main terminée Les ${total} étapes sont faites. Votre espace est prêt : bonne création ! Masquer la prise en main Vous la retrouverez dans le Centre d’aide.`,
       'tout est fait : pastille en « n/n », carte « Prise en main terminée »',
     );
+    // Il ne reste que l'extension en « Bientôt » : la section ne se présente plus comme une tâche
+    if (!published)
+      ok(
+        /^Bientôt disponible\s*1$/.test(sp(await card.locator('.onb-h3').innerText()).replace(/\s+/g, ' ')) &&
+          !/À faire ensuite/.test(await card.innerText()),
+        'tout est fait : la section restante s’intitule « Bientôt disponible 1 »',
+      );
     ok(
       (await fin.evaluate((el) => {
         const probe = document.createElement('span');
@@ -358,8 +378,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await np.waitFor();
     ok(
       (await n.locator('#onb-toggle').getAttribute('aria-expanded')) === 'true' &&
-        /^Prise en main\s*0\/6/.test(await n.locator('#onb-toggle').textContent()),
-      'espace neuf (0/6) : panneau ouvert à la première visite du propriétaire',
+        new RegExp(`^Prise en main\\s*0/${T}`).test(await n.locator('#onb-toggle').textContent()),
+      `espace neuf (0/${T}) : panneau ouvert à la première visite du propriétaire`,
     );
     await np.getByRole('button', { name: 'Fermer le panneau' }).click();
     await n.reload();
@@ -383,7 +403,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     ok(
       Math.round(rb.width) === 44 &&
         Math.round(rb.height) === 44 &&
-        /^Prise en main\s*2\/6/.test(await ring.textContent()),
+        /^Prise en main\s*\d\/\d/.test(await ring.textContent()),
       `390 px : bouton réduit à l’anneau de 44 px, nom accessible gardé (${Math.round(rb.width)} × ${Math.round(rb.height)})`,
     );
     await ring.click();

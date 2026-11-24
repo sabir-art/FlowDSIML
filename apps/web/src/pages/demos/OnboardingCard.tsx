@@ -33,6 +33,7 @@ import { useHelp } from '../../help/HelpProvider';
 import { TourDialog } from '../../help/TourDialog';
 import { MODULE_TOUR, loadTours } from '../../help/tours';
 import { EXTENSION_URL } from '../../lib/env';
+import { modalOnTop } from '../../lib/modalOnTop';
 
 const STEPS = ['brand', 'extension', 'capture', 'pii', 'publish', 'invite', 'distribute'] as const;
 type Step = (typeof STEPS)[number];
@@ -262,6 +263,8 @@ export function OnboardingPanel({
     const el = panel.current;
     el?.querySelector<HTMLElement>('button')?.focus();
     const onKey = (e: KeyboardEvent) => {
+      // Une fenêtre modale ouverte par-dessus (« Nouvelle démo ») garde Échap et Tab
+      if (modalOnTop()) return;
       if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
@@ -404,8 +407,10 @@ export function OnboardingPanel({
 
       {later.length > 0 && (
         <>
+          {/* Il ne reste que des étapes « Bientôt » : la section ne se présente plus comme une tâche */}
           <h3 className="onb-h3">
-            {t('onb.todo')} <span className="onb-n">{later.length}</span>
+            {t(later.every(isSoon) ? 'onb.soonOnly' : 'onb.todo')}{' '}
+            <span className="onb-n">{later.length}</span>
           </h3>
           {/* §18.6 : lignes à filets de 44 px, l'écart est porté par leur hauteur */}
           <ul className="onb-rows" data-gap-exempt="">
