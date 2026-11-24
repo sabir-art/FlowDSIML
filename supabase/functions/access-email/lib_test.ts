@@ -196,7 +196,7 @@ Deno.test(
     assertEquals(sent.length, 1);
     assertEquals(sent[0]!.to, 'lea@nord.example');
     assertEquals(sent[0]!.senderName, 'Acme via TutoClick');
-    assertEquals(sent[0]!.subject, 'Votre lien d’accès à « Créer une fiche »');
+    assertEquals(sent[0]!.subject, 'Votre lien d’accès à « Créer une fiche »');
     assertStringIncludes(sent[0]!.html, `?acces=${DEMO}#lien-invite-lea@nord.example`);
   },
 );
@@ -227,7 +227,7 @@ Deno.test('e-mail d’accès : textes de la maquette, durée réelle, aucune ima
     ttlSeconds: 3600,
   });
   for (const s of [
-    'Vous avez demandé à ouvrir la démo « Démo CRM » partagée par Acme. Ce lien vous est personnel : ne le transférez pas.',
+    'Vous avez demandé à ouvrir la démo « Démo CRM » partagée par Acme. Ce lien vous est personnel : ne le transférez pas.',
     'Ouvrir la démo',
     'Le lien est valable 1 heure et ne sert qu’une fois.',
     'Vous n’avez rien demandé ? Ignorez cet e-mail : personne n’aura accès à la démo avec votre adresse.',
@@ -266,7 +266,7 @@ Deno.test('e-mail d’accès : un nom d’espace ou un titre hostile reste du te
   assertEquals(oneLine('  a\u0000b\n c  '), 'a b c');
 });
 
-Deno.test('envoi : expéditeur « {Espace} via TutoClick », clé en en-tête seulement', async () => {
+Deno.test('envoi : expéditeur « {Espace} via TutoClick », clé en en-tête seulement', async () => {
   let seen: { url: string; key: string | null; body: Record<string, unknown> } | null = null;
   const fetcher = ((url: string, init: RequestInit) => {
     seen = {

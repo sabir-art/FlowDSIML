@@ -60,7 +60,8 @@ function published() {
     await dlg.getByLabel('Adresses e-mail').fill('camille@nord.example, pas-une-adresse');
     await dlg.getByRole('button', { name: /^Inviter/ }).click();
     ok(
-      (await dlg.getByRole('alert').textContent()).includes('« pas-une-adresse »'),
+      // Guillemets français : espace fine insécable (U+202F), comme dans l'app
+      (await dlg.getByRole('alert').textContent()).includes('«\u202fpas-une-adresse\u202f»'),
       'modale : adresse invalide signalée',
     );
     ok(

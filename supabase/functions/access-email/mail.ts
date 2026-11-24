@@ -49,8 +49,8 @@ export function renderAccess(a: {
 }): AccessMail {
   const ws = oneLine(a.workspace, 60) || 'TutoClick';
   const demo = oneLine(a.demoTitle) || 'Démo';
-  const subject = `Votre lien d’accès à « ${demo} »`;
-  const lead = `Vous avez demandé à ouvrir la démo « ${demo} » partagée par ${ws}. Ce lien vous est personnel : ne le transférez pas.`;
+  const subject = `Votre lien d’accès à « ${demo} »`;
+  const lead = `Vous avez demandé à ouvrir la démo « ${demo} » partagée par ${ws}. Ce lien vous est personnel : ne le transférez pas.`;
   const valid = `Le lien est valable ${ttlText(a.ttlSeconds)} et ne sert qu’une fois.`;
   const ignore =
     'Vous n’avez rien demandé ? Ignorez cet e-mail : personne n’aura accès à la démo avec votre adresse.';
