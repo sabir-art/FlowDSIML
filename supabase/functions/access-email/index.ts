@@ -1,5 +1,6 @@
 // Edge Function `access-email` (L39, 086 et 088) : envoi des liens d'accès aux démos « Sur invitation » et
-// « Par domaine e-mail » par Supabase Auth (gabarits invite et magic_link, SMTP de l'espace TutoClick).
+// « Par domaine e-mail ». Avec BREVO_API_KEY et EMAIL_FROM : e-mail aux couleurs de l'espace (§8, mail.ts),
+// le lien venant toujours d'Auth. Sinon : gabarits invite et magic_link d'Auth, comme avant.
 // Déployée sans vérification JWT par la plateforme : les demandes de visiteurs sont anonymes ; les
 // actions d'équipe (invite, link) vérifient le JWT ici (auth.getUser). Droits, adresses et plafonds :
 // en base (access_email_reserve). PLAYER_URL : adresse publique du lecteur (lien de retour, à autoriser
@@ -7,7 +8,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { signAccessLink } from '../_shared/accessLink.ts';
-import { handle, type Deps, type Meta, type Reserve } from './lib.ts';
+import { handle, type Deps, type Mailer, type Meta, type Reserve } from './lib.ts';
+import { DEFAULT_TTL_SECONDS, sendAccessMail } from './mail.ts';
 
 const MAX_BODY = 8_000;
 const MIN_DELAY_MS = 600;
@@ -59,8 +61,30 @@ async function markVisitor(id: string, meta: Meta, isNew: boolean) {
   });
 }
 
+/** Service d'e-mail configuré (BREVO_API_KEY et EMAIL_FROM) : e-mail d'accès aux couleurs de l'espace. */
+function mailer(): Mailer | undefined {
+  const key = Deno.env.get('BREVO_API_KEY')?.trim();
+  const from = Deno.env.get('EMAIL_FROM')?.trim();
+  if (!key || !from) return undefined;
+  const ttl = Number(Deno.env.get('ACCESS_LINK_TTL_SECONDS'));
+  return {
+    ttlSeconds: Number.isFinite(ttl) && ttl >= 60 ? ttl : DEFAULT_TTL_SECONDS,
+    async link(kind, email, redirectTo, meta) {
+      const { data, error } = await admin.auth.admin.generateLink(
+        kind === 'invite'
+          ? { type: 'invite', email, options: { redirectTo, data: meta } }
+          : { type: 'magiclink', email, options: { redirectTo } },
+      );
+      const url = data?.properties?.action_link;
+      return error || !url || !data.user ? null : { url, userId: data.user.id };
+    },
+    send: (mail) => sendAccessMail(mail, key, from),
+  };
+}
+
 const deps = (playerUrl: string): Deps => ({
   playerUrl,
+  mailer: mailer(),
   async userOf(jwt) {
     const { data } = await admin.auth.getUser(jwt);
     return data.user ? { id: data.user.id } : null;

@@ -6,6 +6,8 @@
 //              limité à la démo et à l'adresse : il ne passe pas par Auth (ni compte, ni session).
 // Droits, adresses autorisées et plafonds sont décidés en base (access_email_reserve, access_link_check).
 
+import { renderAccess, type AccessMail } from './mail.ts';
+
 export type Reason = 'forbidden' | 'not_found' | 'not_allowed' | 'domain_refused' | 'rate_limited';
 export type Reserve =
   { ok: true; email: string; demoTitle: string; workspace: string } | { ok: false; reason: Reason };
@@ -38,6 +40,24 @@ export interface Deps {
   /** Jeton d'accès signé, limité à cette démo et à cette adresse (jamais un lien de session Auth). */
   signLink(demoId: string, email: string): Promise<string | null>;
   playerUrl: string;
+  /**
+   * §8 (retours du 24/11) : e-mail d'accès aux couleurs de l'espace, envoyé par le service d'e-mail.
+   * Absent (service non configuré) : les envois restent ceux d'Auth (invite, magicLink).
+   */
+  mailer?: Mailer;
+}
+
+export interface Mailer {
+  /** Validité du lien, en secondes, telle qu'Auth l'applique : c'est elle que l'e-mail annonce. */
+  ttlSeconds: number;
+  /** Lien d'accès créé par Auth sans envoi. `invite` crée le compte ; renvoie aussi son identifiant. */
+  link(
+    kind: 'invite' | 'magiclink',
+    email: string,
+    redirectTo: string,
+    meta: Meta,
+  ): Promise<{ url: string; userId: string } | null>;
+  send(mail: AccessMail): Promise<boolean>;
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -53,6 +73,23 @@ async function sendAccess(deps: Deps, r: Extract<Reserve, { ok: true }>, demoId:
   const to = redirectFor(deps.playerUrl, demoId);
   const meta: Meta = { demo_title: r.demoTitle, workspace_name: r.workspace };
   const acc = await deps.accountOf(r.email);
+  const m = deps.mailer;
+  if (m) {
+    // Le lien vient d'Auth (mêmes règles, même validité) ; seul l'e-mail change
+    const made = await m.link(acc ? 'magiclink' : 'invite', r.email, to, meta);
+    if (!made) return false;
+    if (!acc) await deps.markVisitor(made.userId, meta, true);
+    else if (acc.visitor) await deps.markVisitor(acc.id, meta, false);
+    return m.send(
+      renderAccess({
+        to: r.email,
+        demoTitle: r.demoTitle,
+        workspace: r.workspace,
+        url: made.url,
+        ttlSeconds: m.ttlSeconds,
+      }),
+    );
+  }
   if (!acc) {
     const id = await deps.invite(r.email, to, meta);
     if (!id) return false;
