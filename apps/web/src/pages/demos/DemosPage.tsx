@@ -38,9 +38,9 @@ import {
   Tag,
   Trash2,
   Users,
-  Map as MapIcon,
   Shapes,
   Upload,
+  Box,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Empty, PageHeader, Select, Status } from '@flowdsiml/ui';
@@ -1170,7 +1170,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
 
               {demos.length === 0 && sandbox ? (
                 <Empty
-                  icon={<MapIcon />}
+                  icon={<Box />}
                   title={t('sandboxPage.emptyTitle')}
                   body={t('sandboxPage.emptyBody')}
                   action={
