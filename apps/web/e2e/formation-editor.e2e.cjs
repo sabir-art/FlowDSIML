@@ -70,10 +70,36 @@ const N = ' ';
       };
     }),
   );
-  // Les titres sont les libellés de l'étape (« Avant » et « Maintenant » par défaut, modifiables)
+  // COMP-01 §18.3 : la pastille porte le libellé de l'étape ; le titre de la zone ne le répète pas
   ok(
-    zr[0].t === 'Avant' && zr[1].t === 'Maintenant' && zr[0].n === 'Avant' && zr[1].n === 'Maintenant',
-    `zones titrées par les libellés de l’étape (${zr.map((z) => z.t).join(', ')})`,
+    zr[0].t === 'Ajouter la capture' &&
+      zr[1].t === 'Ajouter la capture' &&
+      zr[0].n === `Capture «${N}Avant${N}»` &&
+      zr[1].n === `Capture «${N}Maintenant${N}»`,
+    `zones titrées « Ajouter la capture », nommées par leur côté (${zr.map((z) => z.n).join(', ')})`,
+  );
+  ok(
+    (await page.locator('.ba-canvas .ba-pill').allTextContents()).join('|') === 'Avant|Maintenant',
+    'pastilles : libellés de l’étape, une seule fois par côté',
+  );
+  // Panneau de 320 px : une capture vide tient sur une ligne, sans phrase d'aide
+  const slots = await page.locator('.ba-slot.is-empty').evaluateAll((els) =>
+    els.map((el) => {
+      const r = (q) => el.querySelector(q).getBoundingClientRect();
+      const mid = (b) => b.top + b.height / 2;
+      return {
+        text: el.querySelector('.ba-slot-text').textContent,
+        thumb: Math.round(r('.ba-thumb').width),
+        line: r('.ba-slot-text b').height < 24,
+        aligned: Math.abs(mid(r('.ba-thumb')) - mid(r('button'))) <= 1,
+        h: Math.round(el.getBoundingClientRect().height),
+      };
+    }),
+  );
+  ok(
+    slots.length === 2 &&
+      slots.every((x) => x.text === 'Aucune capture' && x.thumb === 40 && x.line && x.aligned && x.h <= 64),
+    `panneau : capture vide sur une ligne, vignette 40 px (${JSON.stringify(slots[0])})`,
   );
   ok(zr[0].y === zr[1].y && zr[0].h === zr[1].h && zr[0].x < zr[1].x, 'zones côte à côte, même hauteur');
   ok(
@@ -81,6 +107,32 @@ const N = ' ';
       (await zones.first().getByRole('button', { name: 'Importer…' }).count()) === 1,
     'zone : formats et poids dans l’aide, « Importer… »',
   );
+  // Les deux boutons d'une zone restent dans leur colonne (8 px au moins entre les deux zones)
+  const zb = await zones.evaluateAll((els) =>
+    els.map((el) => {
+      const z = el.getBoundingClientRect();
+      const inside = [...el.querySelectorAll('button')].every((b) => {
+        const r = b.getBoundingClientRect();
+        return r.left >= z.left + 8 && r.right <= z.right - 8;
+      });
+      return { l: z.left, r: z.right, inside };
+    }),
+  );
+  ok(
+    zb.every((z) => z.inside) && zb[1].l - zb[0].r >= 8,
+    `zones : boutons dans la zone, zones séparées (${Math.round(zb[1].l - zb[0].r)} px)`,
+  );
+  await shot('l17-02-zones-vides');
+  // « Choisir une étape… » dans la zone : même choix que le panneau
+  await zones.nth(1).getByRole('button', { name: 'Choisir une étape…' }).click();
+  const zp = page.getByRole('dialog', { name: `Capture «${N}Maintenant${N}»${N}: choisir une étape` });
+  await zp.waitFor();
+  ok(
+    (await zp.getByRole('button', { name: /Étape 1/ }).count()) === 1,
+    'zone : « Choisir une étape… » ouvre le choix',
+  );
+  await page.keyboard.press('Escape');
+  await zp.waitFor({ state: 'detached' });
   await page
     .locator('#ba-zone-before')
     .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
@@ -117,8 +169,8 @@ const N = ' ';
   await page.waitForSelector('.ba-canvas');
 
   // Capture « Avant » : copie de l'étape 1 (avec ses flous)
-  const before = page.getByRole('group', { name: `Capture «${N}Avant${N}»` });
-  await before.getByRole('button', { name: 'Choisir' }).click();
+  const before = page.locator('.ba-slot').first();
+  await before.getByRole('button', { name: 'Choisir', exact: true }).click();
   await page.getByRole('menuitem', { name: 'Choisir une étape de la démo' }).click();
   const picker = page.getByRole('dialog', { name: `Capture «${N}Avant${N}»${N}: choisir une étape` });
   await picker.waitFor();
@@ -136,8 +188,8 @@ const N = ' ';
   ok((await before.locator('.ba-slot-text b').textContent()) === 'Étape 1', 'Source « Étape 1 »');
 
   // Capture « Maintenant » : image importée
-  const after = page.getByRole('group', { name: `Capture «${N}Maintenant${N}»` });
-  await after.getByRole('button', { name: 'Choisir' }).click();
+  const after = page.locator('.ba-slot').nth(1);
+  await after.getByRole('button', { name: 'Choisir', exact: true }).click();
   const [chooser] = await Promise.all([
     page.waitForEvent('filechooser'),
     page.getByRole('menuitem', { name: 'Importer une image' }).click(),

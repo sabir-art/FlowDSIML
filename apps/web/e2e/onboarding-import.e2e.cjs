@@ -268,6 +268,18 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     'onboarding : zone large avec l’aide de « Nouvelle démo »',
   );
   ok((await page.locator('.obx-lines').count()) === 0, 'onboarding : la zone remplace le bloc extension');
+  // COMP-01 §18.3 : le titre et la phrase suivent le mode ; ni navigateurs ni illustration de l'extension
+  ok(
+    (await page.getByRole('heading', { level: 1 }).textContent()) === 'Importez vos captures' &&
+      (await page.locator('.obx-sub').textContent()) ===
+        'Une étape par image. Rien n’est publié avant que vous le décidiez.',
+    'onboarding : titre et phrase du mode import',
+  );
+  ok(
+    (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 0 &&
+      (await page.locator('.obx-browser').count()) === 0,
+    'onboarding : ligne des navigateurs et illustration masquées en mode import',
+  );
   ok(
     (await page.getByRole('button', { name: 'Capturer avec l’extension à la place' }).count()) === 1,
     'onboarding : lien de retour vers l’extension',

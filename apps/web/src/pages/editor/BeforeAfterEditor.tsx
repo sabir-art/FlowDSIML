@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ImagePlus, ListOrdered, TriangleAlert, X } from 'lucide-react';
+import { Button } from '@flowdsiml/ui';
 import { Menu } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { FileDropzone } from '../../components/FileDropzone';
@@ -65,6 +66,8 @@ export function BeforeAfterCanvas({
   // MEDIA-01 §18.3 : envoi d'une image depuis le canevas (zone vide, ou dépôt sur la capture en place)
   const [sending, setSending] = useState<'before' | 'after' | null>(null);
   const [errors, setErrors] = useState<{ before?: string; after?: string }>({});
+  const [picking, setPicking] = useState<'before' | 'after' | null>(null);
+  const hasSteps = editor.steps.some((s) => s.kind === 'image' && s.image_path);
   const send = async (side: 'before' | 'after', f: File | undefined) => {
     if (!f || readOnly) return;
     const fail = (msg: string) => setErrors((e) => ({ ...e, [side]: msg }));
@@ -118,8 +121,8 @@ export function BeforeAfterCanvas({
             // MEDIA-01 §18.3 : zone large, titrée « Avant » ou « Après », avec ses états
             <FileDropzone
               className="ba-zone"
-              label={side === 'before' ? lb : la}
-              title={side === 'before' ? lb : la}
+              label={t(side === 'before' ? 'editor.ba.captureBefore' : 'editor.ba.captureAfter')}
+              title={t('editor.ba.zoneTitle')}
               inputId={`ba-zone-${side}`}
               accept={TYPES.join(',')}
               icon={<ImagePlus />}
@@ -129,6 +132,16 @@ export function BeforeAfterCanvas({
               busyLabel={t('editor.ba.zoneSending')}
               error={errors[side]}
               onFiles={(files) => void send(side, files[0])}
+              extra={
+                // Cas le plus courant : reprendre une étape de la démo et ses flous (même choix que le panneau)
+                <Button
+                  icon={<ListOrdered />}
+                  disabled={sending !== null || !hasSteps}
+                  onClick={() => setPicking(side)}
+                >
+                  {t('editor.ba.zoneFromStep')}
+                </Button>
+              }
             />
           ),
         )}
@@ -154,6 +167,19 @@ export function BeforeAfterCanvas({
             </span>
           )}
         </div>
+      )}
+      {picking && (
+        <StepPicker
+          editor={editor}
+          current={step.id}
+          onClose={() => setPicking(null)}
+          onPick={(id) => {
+            const side = picking;
+            setPicking(null);
+            void editor.setBeforeAfterImage(step.id, side, { stepId: id });
+          }}
+          title={t(picking === 'before' ? 'editor.ba.captureBefore' : 'editor.ba.captureAfter')}
+        />
       )}
     </div>
   );
@@ -221,7 +247,8 @@ export function BeforeAfterFields({
           </span>
           <span className="ba-slot-text">
             <b>{label.title}</b>
-            {label.sub && <small>{label.sub}</small>}
+            {/* Capture vide : une seule ligne, l'aide est portée par la zone du canevas */}
+            {path && label.sub && <small>{label.sub}</small>}
           </span>
           {!readOnly && (
             <Menu
