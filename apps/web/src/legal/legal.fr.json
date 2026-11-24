@@ -141,50 +141,9 @@
     "title": "Déclaration d'accessibilité",
     "updated": "24 novembre 2026",
     "link": "Accessibilité : non conforme",
-    "draft": "Version de travail, en attente de validation par la personne référente accessibilité. Les mentions entre crochets restent à compléter par l'organisme.",
-    "fields": {
-      "organisme": {
-        "label": "Nom de l'organisme",
-        "value": ""
-      },
-      "schema": {
-        "label": "lien vers le schéma pluriannuel",
-        "value": ""
-      },
-      "service": {
-        "label": "adresse du service",
-        "value": ""
-      },
-      "derogations": {
-        "label": "Aucune, ou description du contenu, de la raison et de l'alternative proposée",
-        "value": ""
-      },
-      "date": {
-        "label": "JJ/MM/AAAA",
-        "value": ""
-      },
-      "contact": {
-        "label": "adresse e-mail dédiée",
-        "value": ""
-      },
-      "courrier": {
-        "label": "service et adresse postale",
-        "value": ""
-      },
-      "delai": {
-        "label": "n",
-        "value": ""
-      }
-    },
-    "intro": "{{organisme}} s'engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.",
+    "fields": {},
+    "intro": "TutoClick est un projet personnel, en cours de développement. Il suit le référentiel général d'amélioration de l'accessibilité (RGAA 4.1) comme référence.",
     "sections": [
-      {
-        "h": "Champ de la déclaration",
-        "p": [
-          "Schéma pluriannuel de mise en accessibilité : {{schema}}.",
-          "Cette déclaration d'accessibilité s'applique à TutoClick, plateforme de tutoriels interactifs et de formation de {{organisme}} : {{service}}."
-        ]
-      },
       {
         "h": "État de conformité",
         "p": [
@@ -221,11 +180,6 @@
         ]
       },
       {
-        "h": "Dérogations pour charge disproportionnée",
-        "level": 3,
-        "p": ["{{derogations}}"]
-      },
-      {
         "h": "Contenus non soumis à l'obligation d'accessibilité",
         "level": 3,
         "ul": [
@@ -234,7 +188,7 @@
       },
       {
         "h": "Établissement de cette déclaration d'accessibilité",
-        "p": ["Cette déclaration a été établie le {{date}}."]
+        "p": ["Cette déclaration a été établie le 24 novembre 2026."]
       },
       {
         "h": "Technologies utilisées pour la réalisation du site",
@@ -267,23 +221,10 @@
         ]
       },
       {
-        "h": "Retour d'information et contact",
+        "h": "Retour d'information",
         "p": [
-          "Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du service pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme :"
-        ],
-        "ul": ["envoyer un message à {{contact}} ;", "ou contacter {{courrier}}."],
-        "after": ["Nous essayons de répondre dans les {{delai}} jours ouvrés."]
-      },
-      {
-        "h": "Voies de recours",
-        "p": [
-          "Cette procédure est à utiliser dans le cas suivant : vous avez signalé au responsable du site internet un défaut d'accessibilité qui vous empêche d'accéder à un contenu ou à un des services du portail, et vous n'avez pas obtenu de réponse satisfaisante.",
-          "Vous pouvez :"
-        ],
-        "ul": [
-          "écrire un message au Défenseur des droits (formulaire en ligne sur defenseurdesdroits.fr) ;",
-          "contacter le délégué du Défenseur des droits dans votre région ;",
-          "envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) : Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07."
+          "Avec un compte : signalez un défaut d'accessibilité depuis l'aide de l'application : Centre d'aide, article « Accessibilité de TutoClick », puis « Cet article vous a aidé ? » et « Non ». Votre message est lu par l'équipe du projet.",
+          "Sans compte, pour un visiteur d'une démo : un moyen de contact pour les visiteurs est à venir."
         ]
       }
     ]
