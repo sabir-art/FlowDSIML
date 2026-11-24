@@ -142,21 +142,25 @@ Maquettes : `video-revue-*`, `video-pourquoi-*`, `video-demasque-*`, `video-sans
 ### 4.1 Catégorie « Vidéo »
 Même traitement que Captures, HTML et Sandbox (L48-G) : badge de type « Vidéo » (icône Video) sur la carte et la ligne de liste ; valeur « Vidéo » dans le filtre Type ; carte « Vidéo » dans l’étape 1 de « Nouvelle démo » (création en deux étapes), avec en étape 2 « Enregistrer avec l’extension » ou « Importer une vidéo » (zone large §18.1, MP4 ou WebM, 50 Mo au plus).
 
-### 4.2 Masquer en direct : un choix
-Dans le popup (type Vidéo) : interrupteur « Masquer en direct », activé par défaut, mémorisé ; aide dans le flux : « Floute les données personnelles pendant l’enregistrement. Vous pourrez démasquer ensuite. ». Désactivé, rien n’est masqué pendant l’enregistrement, mais les données sont repérées pour la revue.
+### 4.2 Masquer en direct : un choix, désactivé par défaut (décision du chef, voie A)
+Dans le popup (type Vidéo) : interrupteur « Masquer en direct », **désactivé par défaut**, mémorisé ; aide dans le flux : « Floute les données pendant l’enregistrement. Ces masques ne pourront plus être retirés. Désactivé, vous décidez de chaque zone avant l’envoi. »
+- Désactivé : l’image brute reste dans le navigateur ; les données sont repérées et proposées masquées à la revue ; les masques sont incrustés à l’envoi. Aucune donnée non masquée ne quitte le poste.
+- Activé : masques posés pendant l’enregistrement (utile quand on partage son écran) ; ils sont définitifs.
 
 ### 4.3 Rendu du masque (validé sur a4b809d)
 Masque porté par le contenu de la page : il défile avec elle à toute vitesse et passe sous un panneau ouvert par-dessus. Un élément entier : flou de 8 px. Une portion de texte (un nom dans une phrase) : aplat gris neutre #8f8f8f, texte transparent. Aucune couleur de marque. Un mot d’interface suivi d’un sigle (« Assistant IA », « Export PDF ») n’est pas un nom.
 
 ### 4.4 Revue après l’enregistrement « Vérifier la vidéo »
-- En-tête de 56 px, titre, phrase : « Les données repérées ont été masquées pendant l’enregistrement. Vérifiez chaque zone : vous pouvez démasquer une erreur ou masquer un oubli. »
+Maquettes : `video-revue-*`, `video-pourquoi-*`, `video-demasque-*` (direct désactivé), `video-direct-*` (direct activé), `video-prepa-*` (préparation avant l’envoi).
+- En-tête de 56 px, titre, phrase. Direct désactivé : « TutoClick a repéré 5 données et les masque. Vérifiez chaque zone : démasquez une erreur, masquez un oubli. Les masques sont appliqués à l’envoi, rien ne part sans eux. » Direct activé : « Les données repérées ont été masquées pendant l’enregistrement : ces masques sont définitifs. Vous pouvez en ajouter avant l’envoi. »
 - Deux colonnes (SPLIT-01) : lecteur à gauche (`minmax(0,1fr)`), liste de 440 px à droite ; une colonne sous 1 024 px de contenu.
-- Lecteur : la vidéo avec les masques ; la zone choisie est entourée d’un pointillé primary de 2 px ; sous l’image, une chronologie où chaque passage masqué est un segment (gris : masqué ; pointillé warning : non masqué), tête de lecture primary, temps « 0:07 / 1:02 ».
-- Liste « Zones masquées » (compteur « 5 sur 5 », « Ajouter un masque ») : une ligne par zone, colonnes type et valeur masquée (« Nom · « J*** D*** » », format de la vérification) avec le passage « 0:04 – 0:19 » · statut 100 px (« Masqué » neutre, « Non masqué » warning) · action 96 px (« Démasquer » / « Masquer ») ; dessous « Pourquoi masqué ? » qui déplie l’encart info : la raison de la détection (« Repéré comme un nom de personne : deux mots à majuscule dans le champ « Contact » de la fiche client. Si ce n’en est pas un, « Démasquer » rétablit l’image d’origine sur ce passage. »).
-- Cliquer une ligne amène la lecture au début du passage et sélectionne la zone ; glisser sur l’image crée un masque (raccourcis existants : flèches, Maj + flèches, Suppr).
-- Masquage désactivé (§4.2) : bandeau warning « 5 données repérées ne sont pas masquées. Elles seront visibles dans la démo si vous l’envoyez ainsi. », toutes les lignes en « Non masqué » avec « Masquer ». L’envoi reste possible.
-- Barre fixe : « Supprimer l’enregistrement » (danger), « Envoyer ».
-- À 390 : lecteur puis liste ; « Ajouter un masque » en pleine largeur sous le titre de la liste.
+- Lecteur : la vidéo avec les masques ; la zone choisie est entourée d’un pointillé primary de 2 px ; chronologie des passages (gris : masqué ; pointillé warning : non masqué), tête de lecture primary, « 0:07 / 1:02 ».
+- Liste « Zones masquées » (compteur, « Ajouter un masque ») : une ligne par zone, type et valeur masquée (« Nom · « J*** D*** » ») avec le passage · statut 100 px · action 96 px · « Pourquoi masqué ? » dessous, qui déplie la raison de la détection.
+  - Direct désactivé : statut « Masqué » / « Non masqué » (warning), action « Démasquer » / « Masquer ».
+  - Direct activé : statut « En direct », pas d’action (colonne vide) ; le « Pourquoi masqué ? » ajoute « Masqué pendant l’enregistrement : ce masque ne peut plus être retiré. »
+- Cliquer une ligne amène la lecture au passage ; glisser sur l’image crée un masque (flèches, Maj + flèches, Suppr).
+- Barre fixe : « Supprimer l’enregistrement » (danger), « Envoyer ». À l’envoi avec des masques à incruster : la barre affiche « Préparation de la vidéo… 40 % » et une barre de 6 px (`role="status"`), « Envoyer » désactivé, puis « Envoi… ». Ne pas fermer l’onglet : l’avertissement du navigateur s’affiche si on tente de le fermer.
+- À 390 : lecteur puis liste ; « Ajouter un masque » en pleine largeur.
 
 ## 6. Idées de l’éditeur de référence, à notre façon
 
