@@ -1600,11 +1600,37 @@
 .mk .th-panel .th-help-top {
   margin: -4px 0 8px;
 }
+/* MEDIA-01 §18.3 : logo en forme étroite (vignette carrée de 72 px, actions et aide à droite) */
 .mk .th-panel .logo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.mk .th-panel .logo-block .logo-preview {
+  width: 72px;
+  height: 72px;
+}
+.mk .logo-block__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mk .logo-block__acts {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+.mk .logo-block__acts .logo-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+.mk .logo-block__err {
+  font-size: 13px;
+  color: var(--fd-color-danger);
 }
 .mk .field-row {
   display: flex;

@@ -1,9 +1,9 @@
-import { Image as ImageIcon, ImageUp, Images, TriangleAlert, X } from 'lucide-react';
+import { Ellipsis, Image as ImageIcon, Images, Replace, Trash2, TriangleAlert, Upload } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FrameFields } from '../capture/FrameFields';
 import { themeSchema, type Theme } from '@flowdsiml/manifest';
-import { Alert, Select, ColorSwatch } from '@flowdsiml/ui';
+import { Select, ColorSwatch } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
 import { contrastRatio, darkenToContrast } from '../../../lib/contrast';
@@ -14,12 +14,17 @@ import { asSettings } from '../types';
 import { StylesSection } from '../styles/StylesSection';
 import { FONTS, SHAPES } from '../styles/presets';
 import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
+import { DropBlock, UploadBar } from '../../../components/DropBlock';
+import { Menu } from '../../../components/Menu';
 import { CUSTOM_FONT } from '@flowdsiml/player-core';
 import { useVarCatalog } from '../../../lib/varCatalog';
 
 type ColorKey = 'primary' | 'hotspot' | 'background' | 'surface' | 'text';
 
 /** Onglet Design de l'éditeur (maquette editeur.html, EDT-10). */
+const LOGO_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+const LOGO_MAX = 2 * 1024 * 1024;
+
 export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly: boolean }) {
   const { t } = useTranslation();
   const catalog = useVarCatalog(editor.variables);
@@ -28,6 +33,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
   // L18 : médiathèque ouverte pour le logo ou la police
   const [library, setLibrary] = useState<'logo' | 'font' | null>(null);
   const logoInput = useRef<HTMLInputElement>(null);
+  const [sending, setSending] = useState(false);
   const demo = editor.demo!;
   const settings = asSettings(demo.settings);
   const theme: Theme = themeSchema.parse(settings.theme ?? {});
@@ -36,9 +42,20 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
 
   async function uploadLogo(file: File) {
     setUploadError(null);
+    if (!LOGO_TYPES.includes(file.type)) return setUploadError(t('editor.design.logoBadType'));
+    if (file.size > LOGO_MAX) return setUploadError(t('editor.design.logoTooBig'));
+    setSending(true);
+    try {
+      await sendLogo(file);
+    } finally {
+      setSending(false);
+    }
+  }
+  async function sendLogo(file: File) {
     const path = `${demo.workspace_id}/logo-${crypto.randomUUID()}.${file.name.split('.').pop() ?? 'png'}`;
     const { error } = await supabase.storage.from('branding').upload(path, file, { contentType: file.type });
-    if (error) return setUploadError(error.message);
+    if (error) return setUploadError(t('editor.design.logoError'));
+    setLogoName(file.name);
     set({ logoUrl: `${SUPABASE_URL}/storage/v1/object/public/branding/${path}` });
   }
 
@@ -190,63 +207,102 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         <div className="sec-title">{t('editor.design.brand')}</div>
         {/* L45 (E12) : médiathèque → « Afficher Créé avec TutoClick » à 16 px */}
         <div className="fd-stack">
-          <div className="logo-row">
+          {/* MEDIA-01 §18.3 : forme étroite (vignette de 72 px, « Importer… », dépôt sur tout le bloc, ⋯) */}
+          <DropBlock
+            className="logo-row logo-block"
+            disabled={readOnly || sending}
+            onFile={(f) => void uploadLogo(f)}
+          >
             <span className="logo-preview">
               {theme.logoUrl ? (
                 <img src={theme.logoUrl} alt="" />
               ) : (
-                <ImageIcon size={18} aria-hidden="true" />
+                <ImageIcon size={20} aria-hidden="true" />
               )}
             </span>
-            {!readOnly && (
-              <>
-                <input
-                  ref={logoInput}
-                  id="th-logo"
-                  type="file"
-                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-                  className="sr-only"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      setLogoName(f.name);
-                      void uploadLogo(f);
-                    }
-                    e.target.value = '';
-                  }}
-                />
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  aria-controls="th-logo"
-                  onClick={() => logoInput.current?.click()}
-                >
-                  <ImageUp aria-hidden="true" />
-                  {theme.logoUrl ? t('editor.changeLogo') : t('editor.chooseLogo')}
-                </button>
-                {/* L18-03 : action stylée et alignée avec « Choisir un logo » */}
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setLibrary('logo')}>
-                  <Images aria-hidden="true" />
-                  {t('media.choose')}
-                </button>
-                {theme.logoUrl && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm btn-icon"
-                    aria-label={t('editor.removeLogo')}
-                    onClick={() => set({ logoUrl: null })}
-                  >
-                    <X aria-hidden="true" />
-                  </button>
-                )}
-              </>
-            )}
-          </div>
-          {logoName && <span className="help">{logoName}</span>}
-          {uploadError && <Alert kind="error">{uploadError}</Alert>}
+            <div className="logo-block__main">
+              {!readOnly && (
+                <div className="logo-block__acts">
+                  <input
+                    ref={logoInput}
+                    id="th-logo"
+                    type="file"
+                    /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+                    className="sr-only"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    aria-label={t('editor.design.logo')}
+                    accept={LOGO_TYPES.join(',')}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) void uploadLogo(f);
+                      e.target.value = '';
+                    }}
+                  />
+                  {theme.logoUrl ? (
+                    <>
+                      <span className="logo-name">{logoName ?? t('editor.design.logoSet')}</span>
+                      <Menu
+                        label={t('editor.design.logoMore')}
+                        icon={<Ellipsis />}
+                        items={[
+                          {
+                            label: t('dropzone.replace'),
+                            icon: <Replace />,
+                            onSelect: () => logoInput.current?.click(),
+                          },
+                          { label: t('media.choose'), icon: <Images />, onSelect: () => setLibrary('logo') },
+                          'separator',
+                          {
+                            label: t('editor.design.logoRemove'),
+                            icon: <Trash2 />,
+                            danger: true,
+                            onSelect: () => {
+                              setLogoName(null);
+                              set({ logoUrl: null });
+                            },
+                          },
+                        ]}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={sending}
+                        aria-controls="th-logo"
+                        aria-describedby="th-logo-h"
+                        onClick={() => logoInput.current?.click()}
+                      >
+                        <Upload aria-hidden="true" />
+                        {sending ? t('dropzone.sendingShort') : t('dropzone.import')}
+                      </button>
+                      {/* L18-03 : un logo déjà dans la médiathèque */}
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => setLibrary('logo')}
+                      >
+                        <Images aria-hidden="true" />
+                        {t('media.open')}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+              {sending && <UploadBar label={t('editor.design.logoSending')} />}
+              {uploadError ? (
+                <span className="logo-block__err" role="alert">
+                  {uploadError}
+                </span>
+              ) : (
+                <span className="help" id="th-logo-h">
+                  {t('editor.design.logoHelp')}
+                </span>
+              )}
+            </div>
+          </DropBlock>
           <div className="fd-stack fd-stack--help">
             <label className="check">
               <input

@@ -957,7 +957,16 @@
       "gradient": "Gradient background",
       "typography": "Typography",
       "brand": "Logo and brand",
-      "fontMedia": "Media library font"
+      "fontMedia": "Media library font",
+      "logo": "Logo",
+      "logoSet": "Logo in place",
+      "logoMore": "More logo actions",
+      "logoRemove": "Remove",
+      "logoSending": "Uploading the logo",
+      "logoHelp": "PNG, JPEG, WebP or SVG, 2 MB at most. Or drop the file on this block.",
+      "logoBadType": "Format not accepted: PNG, JPEG, WebP or SVG.",
+      "logoTooBig": "File too large: 2 MB at most.",
+      "logoError": "The logo could not be uploaded. Try again."
     },
     "settings": {
       "reading": "Playback",
