@@ -28,7 +28,7 @@ select is((select email_prefs from public.notification_settings where user_id = 
   'email_prefs vide par défaut');
 select lives_ok($$ update public.notification_settings set prefs = '{"alert": false, "reply": true}' where user_id = auth.uid() $$,
   'dans l''app : la clé « alert » est acceptée');
-select throws_ok($$ update public.notification_settings set prefs = '{"lead": true}' where user_id = auth.uid() $$,
+select throws_ok($$ update public.notification_settings set prefs = '{"inconnu": true}' where user_id = auth.uid() $$,
   '23514', null, 'dans l''app : clé inconnue refusée');
 select lives_ok($$ update public.notification_settings set email_prefs = '{"comment": false, "mention": true}' where user_id = auth.uid() $$,
   'e-mail : préférence par événement enregistrée');

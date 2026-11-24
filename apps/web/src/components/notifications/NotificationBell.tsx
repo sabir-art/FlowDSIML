@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { HelpButton } from '../../help/HelpButton';
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import {
+  Mail,
   ArrowLeft,
   AtSign,
   Bell,
@@ -32,7 +33,14 @@ import { useToast } from '../Toast';
 import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
-import { NOTIFICATION_KINDS, badge, bodyParts, grouped, notificationHref } from './notifications';
+import {
+  LEADS_FOCUS,
+  NOTIFICATION_KINDS,
+  badge,
+  bodyParts,
+  grouped,
+  notificationHref,
+} from './notifications';
 import './notifications.css';
 import { Empty } from '@flowdsiml/ui';
 
@@ -47,6 +55,7 @@ const KIND_ICON = {
   alert: BellRing,
   webhook_paused: Webhook,
   invite: UserPlus,
+  lead: Mail,
 };
 
 function BellPanel() {
@@ -422,7 +431,7 @@ function Row({
   const { t } = useTranslation();
   const Icon = KIND_ICON[x.kind];
   if (x.kind === 'invite') return <InviteRow item={x} onAnswered={onAnswered} onJoined={onJoined} />;
-  if (x.kind === 'alert' || x.kind === 'webhook_paused')
+  if (x.kind === 'alert' || x.kind === 'webhook_paused' || x.kind === 'lead')
     return <AlertRow item={x} icon={Icon} onOpen={onOpen} />;
   const actor = x.actorName || t('notifications.someone');
   const step = x.stepNumber ?? '?';
@@ -500,12 +509,15 @@ function AlertRow({
   const text =
     x.kind === 'webhook_paused'
       ? t('notifications.webhookPaused', { name: d.name || d.host || '?', host: d.host || '?' })
-      : t(`notifications.alert_${d.trigger ?? 'lead'}`, {
-          count: d.count ?? 0,
-          value: d.value ?? '?',
-          threshold: d.threshold ?? '?',
-          demo: x.demoTitle || t('notifications.allDemos'),
-        });
+      : x.kind === 'lead'
+        ? // Jamais l'adresse du visiteur : la démo seule, le lien mène à ses leads
+          t('notifications.k_lead', { demo: x.demoTitle || t('demos.untitled') })
+        : t(`notifications.alert_${d.trigger ?? 'lead'}`, {
+            count: d.count ?? 0,
+            value: d.value ?? '?',
+            threshold: d.threshold ?? '?',
+            demo: x.demoTitle || t('notifications.allDemos'),
+          });
   const digest = d.digest ? t(`notifications.digest_${d.digest}`) : null;
   return (
     <li className={x.read_at ? undefined : 'unread'}>
@@ -526,10 +538,13 @@ function AlertRow({
       <Link
         className="nb-cover"
         to={notificationHref(x)}
+        state={x.kind === 'lead' ? { focus: LEADS_FOCUS } : undefined}
         aria-label={
           x.kind === 'webhook_paused'
             ? t('notifications.open_webhook', { text })
-            : t('notifications.open_alert', { text })
+            : x.kind === 'lead'
+              ? t('notifications.open_lead', { text })
+              : t('notifications.open_alert', { text })
         }
         onClick={onOpen}
       />

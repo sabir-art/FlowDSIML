@@ -6,6 +6,7 @@ export const FR: Record<string, string> = {
   'notifications.k_comment': '{{actor}} a commenté « {{demo}} » · étape {{step}}',
   'notifications.k_resolved': '{{actor}} a résolu votre commentaire · « {{demo}} » · étape {{step}}',
   'notifications.k_invite': '{{actor}} vous invite à rejoindre « {{workspace}} »',
+  'notifications.k_lead': 'Nouveau lead sur « {{demo}} »',
   'notifications.someone': 'Un membre',
   'notifications.allDemos': 'toutes les démos',
   'notifications.alert_lead_one': '1 nouveau lead · {{demo}}',
