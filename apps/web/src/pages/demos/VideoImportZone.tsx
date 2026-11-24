@@ -33,6 +33,7 @@ export function VideoImportZone({
   userId,
   folderId,
   onBusy,
+  onStopRequest,
   onCreated,
   handle,
 }: {
@@ -41,6 +42,8 @@ export function VideoImportZone({
   folderId: string | null;
   /** Vrai pendant l'envoi : la fenêtre demande confirmation avant de se fermer. */
   onBusy: (busy: boolean) => void;
+  /** « Arrêter l'envoi » dans la zone : même confirmation que pour quitter la fenêtre. */
+  onStopRequest: () => void;
   onCreated: (demoId: string) => void;
   handle: Ref<VideoImportHandle>;
 }) {
@@ -216,8 +219,8 @@ export function VideoImportZone({
               {t('videoImport.resume')}
             </button>
           )}
-          <button type="button" className="fd-btn" onClick={stop}>
-            {t('common.cancel')}
+          <button type="button" className="fd-btn" onClick={onStopRequest}>
+            {t('videoImport.stop')}
           </button>
         </div>
       </div>
@@ -243,6 +246,7 @@ export function VideoImportZone({
             </Link>
           ) : (
             <button type="button" className="fd-btn" aria-controls={`${id}-f`} onClick={choose}>
+              <Upload aria-hidden="true" />
               {t('videoImport.pickOther')}
             </button>
           )}

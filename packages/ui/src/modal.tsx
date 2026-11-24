@@ -82,7 +82,14 @@ export function Modal({
       // Fermée, la modale n'a pas de contenu : ses références ARIA ne sont posées qu'à l'ouverture
       aria-labelledby={open ? (subtitle ? `${id}-t ${id}-s` : `${id}-t`) : undefined}
       aria-describedby={open ? describedBy : undefined}
-      onClose={onClose}
+      onClose={() => {
+        // Fermeture à confirmer : si le navigateur ferme quand même (deuxième Échap sans autre geste),
+        // la modale se rouvre aussitôt et la confirmation est demandée
+        if (onDismiss && open) {
+          ref.current?.showModal();
+          onDismiss();
+        } else onClose();
+      }}
       onCancel={(e) => {
         if (!dismissible) e.preventDefault();
         else if (onDismiss && e.target === ref.current) {
