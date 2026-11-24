@@ -6,7 +6,7 @@ Gravité : **P1** bloquant (texte faux, retour client non tenu, fonction absente
 ## Ordre proposé au dev
 
 1. **Textes faux et retours client non tenus (S, une passe)** : Centre « Demo Center » → « Catalogue de démos » ; invitation « invité·e » et « en tant que Éditeur » ; retrait de LinkedIn dans Partager (P1-5) ; Temps réel (sélecteur de démo en double, orange et noir hors palette, « Clics CTA » → « Clics sur le bouton de fin ») ; mention « gratuit » et « sans carte bancaire » à retirer (outil interne).
-2. **AUTH-ILL (M)** : la fenêtre de la page de connexion est toujours l'ancienne, avec la barre marine et les barres bleues refusées par le client le 21/11. Avec elle, les retouches du lot 7 en S : fond blanc à gauche, œil sur le mot de passe, saisie gardée après erreur, lien « Accessibilité : non évaluée » au pied.
+2. **AUTH-ILL (M)** : la fenêtre de la page de connexion est toujours l'ancienne, avec la barre marine et les barres bleues refusées par le client le 21/11. Avec elle, les retouches du lot 7 en S : fond blanc à gauche, œil sur le mot de passe, saisie gardée après erreur, lien « Accessibilité : non conforme » au pied (mention RGAA en l’absence d’audit).
 3. **MOTION-01 §2, FLIP de la scène (L)** : retour client de priorité haute, rien n'est codé ; puis panneau, menus et `mouvement.e2e`.
 4. **Éditeur P1 restants** : `PanelEmpty` (M), « Depuis une autre démo… » (M), puis la fenêtre Partager à navigation verticale (L, c'est aussi l'écart majeur du lot 4).
 5. **Données en couleur de la marque (S, une passe transverse)** : barres en primary dans Analytics (Sources, Étape par étape, Appareils, Parcours) et Formation (progression, modules), légende Nouveaux / Récurrents ; onglets en pilule dans Analytics et Apprenants.
@@ -81,7 +81,7 @@ Conforme : connexion et inscription (textes, Google, conditions), mot de passe o
 | 1 | AUTH-ILL | non livré : ancienne fenêtre, barre marine, barres bleues ; fond #2A0C1A au lieu de prune-900 en clair ; bulle « 2 / 6 » sans bouton ; pastille sans contour blanc ; pas de signature DSIML ; pas de fenêtre sur l'inscription | P1 | M |
 | 2 | Invitation | « Invitation » au lieu de « Rejoindre l'espace Acme » et de qui invite ; pas de récapitulatif (pour, rôle, valable jusqu'au) ; pas d'acceptation sur place ni « Ignorer » ; « invité·e » et « en tant que Éditeur » | P1 | M |
 | 3 | Lien envoyé | alerte au-dessus du formulaire au lieu de l'écran « Vérifiez votre boîte de réception » (adresse, validité, « Rien reçu ? », renvoi après 45 s) | P2 | M |
-| 4 | Toutes | fond gauche gris au lieu de blanc ; pas de lien « Accessibilité : non évaluée » | P2 | S |
+| 4 | Toutes | fond gauche gris au lieu de blanc ; pas de lien « Accessibilité : non conforme » | P2 | S |
 | 5 | Connexion | pas d'œil sur le mot de passe ; après une erreur, champ vidé et pas d'encadré en haut | P2 | S |
 | 6 | Désinscription | gabarit d'authentification avec illustration au lieu de la carte centrée (cloche barrée, adresse, « Annuler la désinscription », « Gérer mes notifications ») | P2 | M |
 | 7 | Pages légales | une colonne sans sommaire collant, sans version ni encart « En attente de validation par le DPO » | P2 | M |
