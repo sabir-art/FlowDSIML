@@ -55,7 +55,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       (await page.locator('.nt-table tbody').getByText('On me mentionne', { exact: false }).count()) === 0 &&
         (await page.getByRole('switch', { name: /^Mentions/ }).count()) === 0 &&
         (await page.locator('.nt-always').count()) === 0,
-      'mentions : plus de ligne ni d’interrupteur à l’écran',
+      'mentions : plus de ligne dans le tableau',
+    );
+    const mentionMail = page.getByRole('switch', { name: 'Recevoir aussi les mentions par e-mail' });
+    ok(
+      (await page.locator('.nt-mentions').textContent()) ===
+        'Les mentions (@) sont toujours notifiées dans l’app.' &&
+        (await mentionMail.isEnabled()) &&
+        !(await mentionMail.isChecked()),
+      'mentions : phrase au-dessus du tableau, e-mail par un interrupteur dessous (éteint par défaut)',
     );
     ok(await sw(page, 'Réponses, dans l’app').isChecked(), 'dans l’app : activé par défaut');
     ok(
@@ -101,6 +109,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     await sw(page, 'Commentaires sur mes démos, par e-mail').uncheck();
     ok(await until(() => row(state).email === false), 'dernier e-mail décoché : l’accord global est retiré');
+    await mentionMail.check({ force: true });
+    ok(
+      await until(() => row(state).email === true && row(state).email_prefs.mention === true),
+      'mentions par e-mail : accord enregistré',
+    );
+    await mentionMail.uncheck({ force: true });
+    ok(await until(() => row(state).email === false), 'mentions par e-mail coupées : accord global retiré');
 
     // Démos coupées
     const li = page.locator('.nt-muted li');
