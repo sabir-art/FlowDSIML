@@ -166,10 +166,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const { page, state } = await open(`/demos/${DEMO}/analytics?share=${MOBILE ? 'menu' : 'lien'}`);
     await dlg(page).waitFor();
     const d = dlg(page);
+    // La date de publication arrive avec la démo : on attend l'en-tête complet
+    await d.locator('.shd-head p', { hasText: /^Publiée le / }).waitFor();
     ok(
-      (await d.locator('#shd-title').textContent()) === 'Partager « Démo CRM »' &&
-        /^Publiée le /.test(await d.locator('.shd-head p').textContent()),
-      'en-tête : « Partager « Démo CRM » », « Publiée le … »',
+      (await d.locator('#shd-title').textContent()) === 'Partager «\u202fDémo CRM\u202f»' &&
+        (await d.locator('#shd-title').evaluate((el) => el.getBoundingClientRect().height)) < 24 &&
+        /^Publiée le 24 nov\.$/.test(await d.locator('.shd-head p').textContent()),
+      `en-tête : titre sur une ligne, « Publiée le 24 nov. » sans l’année (${await d.locator('.shd-head p').textContent()})`,
     );
     const names = (await d.locator('.shd-nav__item').allTextContents()).map((x) => x.trim());
     ok(

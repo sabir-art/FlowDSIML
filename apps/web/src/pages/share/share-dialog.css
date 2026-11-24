@@ -63,8 +63,11 @@
 }
 .mk .shd-head h2 {
   margin: 0;
+  /* Une ligne : un nom long est coupé par « … » (nom complet en infobulle), le volet ne grandit pas */
+  overflow: hidden;
   font: 600 15px/1.3 var(--fd-font-sans);
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .mk .shd-head p {
   margin: 2px 0 0;

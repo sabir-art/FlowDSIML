@@ -332,10 +332,21 @@ export function SharePanel({
             <Share2 />
           </span>
           <div className="shd-head__txt">
-            <h2 id="shd-title">{t('share.windowTitle', { title: demo.title })}</h2>
+            <h2 id="shd-title" title={t('share.windowTitle', { title: demo.title })}>
+              {t('share.windowTitle', { title: demo.title })}
+            </h2>
             <p>
               {published && publishedAt
-                ? t('share.publishedShort', { date: formatDate(publishedAt) })
+                ? t('share.publishedShort', {
+                    // Sans l'année pour l'année en cours (« Publiée le 24 nov. »), comme la barre de démo
+                    date: formatDate(publishedAt, {
+                      day: 'numeric',
+                      month: 'short',
+                      ...(new Date(publishedAt).getFullYear() === new Date().getFullYear()
+                        ? {}
+                        : { year: 'numeric' }),
+                    }),
+                  })
                 : t('share.notYetPublished')}
             </p>
           </div>
