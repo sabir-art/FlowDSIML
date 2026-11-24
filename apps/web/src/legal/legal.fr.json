@@ -3,14 +3,14 @@
   "updated": "21 novembre 2026",
   "privacy": {
     "title": "Politique de confidentialité",
-    "intro": "TutoClick est l'outil de démonstrations interactives et de formation du réseau des Missions Locales, porté par la DSI des Missions Locales (DSIML). Cette page explique quelles données personnelles TutoClick traite, pourquoi, combien de temps et comment exercer vos droits.",
+    "intro": "TutoClick est l’outil de démonstrations interactives et de formation du réseau des Missions Locales, porté par la DSI des Missions Locales (DSIML). Cette page explique quelles données personnelles TutoClick traite, pourquoi, combien de temps et comment exercer vos droits.",
     "sections": [
       {
         "h": "Qui est responsable",
         "p": [
           "Responsable de traitement pour les comptes et les espaces de travail : DSI des Missions Locales, [raison sociale, adresse].",
           "Délégué à la protection des données : [nom ou « non désigné »], [adresse de contact dédiée].",
-          "Pour les données que chaque espace de travail fait traiter par TutoClick (contenu des démos, statistiques de consultation, leads, apprenants), la structure propriétaire de l'espace est responsable de traitement et TutoClick agit comme sous-traitant."
+          "Pour les données que chaque espace de travail fait traiter par TutoClick (contenu des démos, statistiques de consultation, leads, apprenants), la structure propriétaire de l’espace est responsable de traitement et TutoClick agit comme sous-traitant."
         ]
       },
       {
@@ -18,58 +18,58 @@
         "ul": [
           "Compte : adresse e-mail, nom affiché, photo de profil si vous en ajoutez une, langue, préférences (thème, notifications), rôle dans chaque espace, dates de connexion.",
           "Connexion avec Google, si vous la choisissez : Google nous transmet votre nom, votre adresse e-mail et votre photo de profil. Nous ne demandons aucun autre accès à votre compte Google.",
-          "Collaboration : commentaires, mentions, notifications, présence dans l'éditeur (non conservée).",
-          "E-mails : invitations à rejoindre un espace, récapitulatif des notifications si vous l'activez, avec un lien de désinscription dans chaque message.",
-          "Sécurité : journal des actions sensibles et tentatives d'accès aux démos protégées. L'adresse IP sert seulement, en mémoire, à limiter les essais et n'est pas enregistrée.",
-          "Contenu des démos : captures d'écran et textes. Les données sensibles détectées sont floutées avant publication, et des données fictives sont recommandées.",
-          "Statistiques de consultation des démos : identifiant de visiteur pseudonyme, session, étapes vues, domaine d'origine, pays. Ni cookie tiers ni adresse IP enregistrée.",
-          "Leads (formulaires des démos) et apprenants (progression, quiz, attestations) : seulement ce que l'espace choisit de collecter."
+          "Collaboration : commentaires, mentions, notifications, présence dans l’éditeur (non conservée).",
+          "E-mails : invitations à rejoindre un espace, récapitulatif des notifications si vous l’activez, avec un lien de désinscription dans chaque message.",
+          "Sécurité : journal des actions sensibles et tentatives d’accès aux démos protégées. L’adresse IP sert seulement, en mémoire, à limiter les essais et n’est pas enregistrée.",
+          "Contenu des démos : captures d’écran et textes. Les données sensibles détectées sont floutées avant publication, et des données fictives sont recommandées.",
+          "Statistiques de consultation des démos : identifiant de visiteur pseudonyme, session, étapes vues, domaine d’origine, pays. Ni cookie tiers ni adresse IP enregistrée.",
+          "Leads (formulaires des démos) et apprenants (progression, quiz, attestations) : seulement ce que l’espace choisit de collecter."
         ]
       },
       {
         "h": "Pourquoi et sur quelle base",
         "ul": [
-          "Créer et gérer votre compte, vous authentifier, faire fonctionner les espaces de travail et la collaboration : exécution des conditions d'utilisation.",
-          "Aide intégrée, mesure de l'utilité des articles, sécurité et prévention des abus : intérêt légitime.",
+          "Créer et gérer votre compte, vous authentifier, faire fonctionner les espaces de travail et la collaboration : exécution des conditions d’utilisation.",
+          "Aide intégrée, mesure de l’utilité des articles, sécurité et prévention des abus : intérêt légitime.",
           "Récapitulatif des notifications par e-mail : votre choix, modifiable à tout moment dans les préférences de notification.",
-          "Assistance IA : uniquement si un administrateur de l'espace l'active ; elle est désactivée par défaut."
+          "Assistance IA : uniquement si un administrateur de l’espace l’active ; elle est désactivée par défaut."
         ]
       },
       {
         "h": "Qui reçoit les données",
         "p": [
-          "Les membres de votre espace voient votre nom, votre adresse e-mail, votre photo et votre rôle. Le personnel habilité de la DSIML y accède pour l'assistance et l'exploitation. TutoClick s'appuie sur les sous-traitants suivants :"
+          "Les membres de votre espace voient votre nom, votre adresse e-mail, votre photo et votre rôle. Le personnel habilité de la DSIML y accède pour l’assistance et l’exploitation. TutoClick s’appuie sur les sous-traitants suivants :"
         ],
         "ul": [
-          "Supabase : base de données, authentification, fichiers et fonctions serveur, hébergés dans l'Union européenne (Irlande).",
-          "GitHub Pages : hébergement des fichiers de l'application (aucune donnée de compte ; journaux techniques d'accès tenus par le fournisseur, États-Unis).",
+          "Supabase : base de données, authentification, fichiers et fonctions serveur, hébergés dans l’Union européenne (Irlande).",
+          "GitHub Pages : hébergement des fichiers de l’application (aucune donnée de compte ; journaux techniques d’accès tenus par le fournisseur, États-Unis).",
           "Brevo : envoi des e-mails transactionnels (invitations, récapitulatifs).",
-          "Google : connexion avec Google si vous la choisissez ; vérification Google Safe Browsing des liens externes ajoutés aux démos (seule l'adresse du lien est envoyée).",
-          "Anthropic et ElevenLabs (États-Unis) : seulement si l'espace active l'Assistance IA. Les données personnelles détectées sont remplacées avant l'envoi ; aucune image, aucun commentaire, lead ni donnée d'apprenant n'est envoyé.",
-          "Les transferts hors de l'Union européenne sont encadrés par les clauses contractuelles types de la Commission européenne [à vérifier pour chaque fournisseur]."
+          "Google : connexion avec Google si vous la choisissez ; vérification Google Safe Browsing des liens externes ajoutés aux démos (seule l’adresse du lien est envoyée).",
+          "Anthropic et ElevenLabs (États-Unis) : seulement si l’espace active l’Assistance IA. Les données personnelles détectées sont remplacées avant l’envoi ; aucune image, aucun commentaire, lead ni donnée d’apprenant n’est envoyé.",
+          "Les transferts hors de l’Union européenne sont encadrés par les clauses contractuelles types de la Commission européenne [à vérifier pour chaque fournisseur]."
         ]
       },
       {
         "h": "Combien de temps",
         "ul": [
           "Compte : pendant la vie du compte ; suppression immédiate quand vous utilisez « Supprimer mon compte ».",
-          "Statistiques brutes de consultation et leads : purgés automatiquement chaque nuit au-delà de la durée de conservation de l'espace (30 jours par défaut).",
-          "Liens d'accès aux démos : 1 heure ; accès accordé : 7 jours ; comptes visiteurs inactifs : supprimés après 90 jours.",
-          "Contenu des démos : jusqu'à sa suppression par l'espace.",
-          "Autres durées : [à fixer avec le DPO : invitations, notifications, journal d'audit, apprenants]."
+          "Statistiques brutes de consultation et leads : purgés automatiquement chaque nuit au-delà de la durée de conservation de l’espace (30 jours par défaut).",
+          "Liens d’accès aux démos : 1 heure ; accès accordé : 7 jours ; comptes visiteurs inactifs : supprimés après 90 jours.",
+          "Contenu des démos : jusqu’à sa suppression par l’espace.",
+          "Autres durées : [à fixer avec le DPO : invitations, notifications, journal d’audit, apprenants]."
         ]
       },
       {
         "h": "Cookies et stockage local",
         "p": [
-          "TutoClick n'utilise aucun cookie publicitaire ni outil de mesure d'audience tiers. Le navigateur conserve localement votre session de connexion, vos préférences (thème, langue, panneaux) et, dans le lecteur de démos, un identifiant de visiteur pseudonyme. Ces éléments sont nécessaires au service et ne servent pas à vous suivre sur d'autres sites."
+          "TutoClick n’utilise aucun cookie publicitaire ni outil de mesure d’audience tiers. Le navigateur conserve localement votre session de connexion, vos préférences (thème, langue, panneaux) et, dans le lecteur de démos, un identifiant de visiteur pseudonyme. Ces éléments sont nécessaires au service et ne servent pas à vous suivre sur d’autres sites."
         ]
       },
       {
         "h": "Vos droits",
         "p": [
-          "Vous disposez des droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité. Dans l'application, Paramètres › Profil › Mes données vous permet d'exporter vos données et de supprimer votre compte. Pour toute autre demande : [adresse de contact].",
-          "Pour les données collectées par un espace de travail (leads, apprenants, visiteurs des démos), adressez-vous à la structure concernée ; TutoClick l'aide à répondre.",
+          "Vous disposez des droits d’accès, de rectification, d’effacement, de limitation, d’opposition et de portabilité. Dans l’application, Paramètres › Profil › Mes données vous permet d’exporter vos données et de supprimer votre compte. Pour toute autre demande : [adresse de contact].",
+          "Pour les données collectées par un espace de travail (leads, apprenants, visiteurs des démos), adressez-vous à la structure concernée ; TutoClick l’aide à répondre.",
           "Vous pouvez aussi adresser une réclamation à la CNIL (cnil.fr)."
         ]
       },
@@ -82,47 +82,47 @@
     ]
   },
   "terms": {
-    "title": "Conditions d'utilisation",
-    "intro": "Ces conditions encadrent l'utilisation de TutoClick, outil interne du réseau des Missions Locales porté par la DSI des Missions Locales (DSIML). En créant un compte, vous les acceptez.",
+    "title": "Conditions d’utilisation",
+    "intro": "Ces conditions encadrent l’utilisation de TutoClick, outil interne du réseau des Missions Locales porté par la DSI des Missions Locales (DSIML). En créant un compte, vous les acceptez.",
     "sections": [
       {
         "h": "Le service",
         "p": [
-          "TutoClick permet de capturer des parcours dans des logiciels, d'en faire des démonstrations interactives et des formations, de les partager et d'en suivre l'usage. Le service est mis à disposition gratuitement des structures du réseau."
+          "TutoClick permet de capturer des parcours dans des logiciels, d’en faire des démonstrations interactives et des formations, de les partager et d’en suivre l’usage. Le service est mis à disposition gratuitement des structures du réseau."
         ]
       },
       {
         "h": "Votre compte",
         "ul": [
           "Vous utilisez une adresse e-mail professionnelle et gardez votre mot de passe confidentiel.",
-          "Les propriétaires et administrateurs d'un espace gèrent ses membres, leurs rôles et ses réglages.",
+          "Les propriétaires et administrateurs d’un espace gèrent ses membres, leurs rôles et ses réglages.",
           "Vous pouvez supprimer votre compte à tout moment depuis Paramètres › Profil."
         ]
       },
       {
         "h": "Bon usage",
         "ul": [
-          "Ne publiez pas de données personnelles réelles dans les démos : utilisez des données fictives et l'outil de floutage, et vérifiez le bilan proposé avant toute publication.",
-          "Ne publiez aucun contenu illicite, ni de contenu dont vous n'avez pas les droits.",
-          "Ne cherchez pas à contourner les protections du service ni à accéder aux données d'un autre espace."
+          "Ne publiez pas de données personnelles réelles dans les démos : utilisez des données fictives et l’outil de floutage, et vérifiez le bilan proposé avant toute publication.",
+          "Ne publiez aucun contenu illicite, ni de contenu dont vous n’avez pas les droits.",
+          "Ne cherchez pas à contourner les protections du service ni à accéder aux données d’un autre espace."
         ]
       },
       {
         "h": "Contenus",
         "p": [
-          "Les démos, formations et données de chaque espace appartiennent à la structure qui les crée. TutoClick les héberge et les diffuse uniquement pour fournir le service, selon les réglages de partage choisis par l'espace."
+          "Les démos, formations et données de chaque espace appartiennent à la structure qui les crée. TutoClick les héberge et les diffuse uniquement pour fournir le service, selon les réglages de partage choisis par l’espace."
         ]
       },
       {
         "h": "Assistance IA",
         "p": [
-          "Les propositions de l'Assistance IA (textes, traductions, voix) sont des suggestions : relisez-les avant de les publier. Elle n'est active que si un administrateur de l'espace l'a activée."
+          "Les propositions de l’Assistance IA (textes, traductions, voix) sont des suggestions : relisez-les avant de les publier. Elle n’est active que si un administrateur de l’espace l’a activée."
         ]
       },
       {
         "h": "Disponibilité et responsabilité",
         "p": [
-          "La DSIML s'efforce d'assurer un service continu et sécurisé, sans garantie de disponibilité permanente. Des interruptions peuvent avoir lieu pour maintenance. [Clause de responsabilité à valider par le service juridique.]"
+          "La DSIML s’efforce d’assurer un service continu et sécurisé, sans garantie de disponibilité permanente. Des interruptions peuvent avoir lieu pour maintenance. [Clause de responsabilité à valider par le service juridique.]"
         ]
       },
       {
@@ -132,34 +132,34 @@
       {
         "h": "Évolution des conditions",
         "p": [
-          "Ces conditions peuvent évoluer. La date de mise à jour figure en haut de la page ; en cas de changement important, les utilisateurs en sont informés dans l'application. Droit applicable : droit français."
+          "Ces conditions peuvent évoluer. La date de mise à jour figure en haut de la page ; en cas de changement important, les utilisateurs en sont informés dans l’application. Droit applicable : droit français."
         ]
       }
     ]
   },
   "accessibility": {
-    "title": "Déclaration d'accessibilité",
+    "title": "Déclaration d’accessibilité",
     "updated": "24 novembre 2026",
     "link": "Accessibilité : non conforme",
     "fields": {},
-    "intro": "TutoClick est un projet personnel, en cours de développement. Il suit le référentiel général d'amélioration de l'accessibilité (RGAA 4.1) comme référence.",
+    "intro": "TutoClick est un projet personnel, en cours de développement. Il suit le référentiel général d’amélioration de l’accessibilité (RGAA 4.1) comme référence.",
     "sections": [
       {
         "h": "État de conformité",
         "p": [
-          "TutoClick n'a pas encore fait l'objet d'un audit de conformité RGAA complet (106 critères, avec restitutions par des lecteurs d'écran). En l'absence de cet audit, le service est déclaré non conforme au sens du référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1. Aucun taux de conformité n'est publié.",
-          "Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent pas l'audit complet."
+          "TutoClick n’a pas encore fait l’objet d’un audit de conformité RGAA complet (106 critères, avec restitutions par des lecteurs d’écran). En l’absence de cet audit, le service est déclaré non conforme au sens du référentiel général d’amélioration de l’accessibilité (RGAA), version 4.1. Aucun taux de conformité n’est publié.",
+          "Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent pas l’audit complet."
         ]
       },
       {
         "h": "Vérifications réalisées",
         "p": ["Mises à jour le 20 novembre 2026."],
         "ul": [
-          "Audit automatique (axe-core) : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits. Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification du code.",
-          "Contrôles du clavier et du focus, automatisés (77 vérifications) : lien d'évitement, focus visible et jamais masqué, focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape, animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur et du lecteur.",
+          "Audit automatique (axe-core) : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de l’application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits. Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification du code.",
+          "Contrôles du clavier et du focus, automatisés (77 vérifications) : lien d’évitement, focus visible et jamais masqué, focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d’étape, animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l’éditeur et du lecteur.",
           "Audit manuel préliminaire : 14 écarts relevés, tous corrigés.",
           "Critères ajoutés par WCAG 2.2 : focus non masqué, alternative au glisser pour chaque action, taille des cibles, aide au même endroit, authentification sans test cognitif.",
-          "Documents PDF exportés (modes d'emploi, attestations de suivi) : balisés (structure, titres, ordre de lecture, texte alternatif des captures, langue)."
+          "Documents PDF exportés (modes d’emploi, attestations de suivi) : balisés (structure, titres, ordre de lecture, texte alternatif des captures, langue)."
         ]
       },
       {
@@ -170,24 +170,24 @@
         "h": "Non-conformité",
         "level": 3,
         "p": [
-          "Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l'audit manuel préliminaire (titres de page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés. La liste définitive sera établie par l'audit complet.",
+          "Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l’audit manuel préliminaire (titres de page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés. La liste définitive sera établie par l’audit complet.",
           "Points non vérifiés à ce jour :"
         ],
         "ul": [
-          "restitution par des lecteurs d'écran réels (NVDA, JAWS, VoiceOver) ;",
+          "restitution par des lecteurs d’écran réels (NVDA, JAWS, VoiceOver) ;",
           "validation des PDF par un outil spécialisé (PAC, veraPDF) ;",
-          "contenus créés par les auteurs des démonstrations : couleurs de marque, textes des bulles et titres d'étapes (l'éditeur vérifie le contraste de la couleur de marque et propose un texte alternatif par défaut pour chaque capture)."
+          "contenus créés par les auteurs des démonstrations : couleurs de marque, textes des bulles et titres d’étapes (l’éditeur vérifie le contraste de la couleur de marque et propose un texte alternatif par défaut pour chaque capture)."
         ]
       },
       {
-        "h": "Contenus non soumis à l'obligation d'accessibilité",
+        "h": "Contenus non soumis à l’obligation d’accessibilité",
         "level": 3,
         "ul": [
-          "Les captures d'écran de logiciels tiers affichées dans les tutoriels reproduisent l'interface de ces logiciels. Le texte de chaque étape (bulle) en donne l'information utile."
+          "Les captures d’écran de logiciels tiers affichées dans les tutoriels reproduisent l’interface de ces logiciels. Le texte de chaque étape (bulle) en donne l’information utile."
         ]
       },
       {
-        "h": "Établissement de cette déclaration d'accessibilité",
+        "h": "Établissement de cette déclaration d’accessibilité",
         "p": ["Cette déclaration a été établie le 24 novembre 2026."]
       },
       {
@@ -196,35 +196,35 @@
         "ul": ["HTML5", "CSS", "JavaScript", "WAI-ARIA", "SVG"]
       },
       {
-        "h": "Outils pour évaluer l'accessibilité",
+        "h": "Outils pour évaluer l’accessibilité",
         "level": 3,
         "ul": [
           "axe-core (audit automatique, intégré aux tests)",
           "Calcul de contraste sur les jetons de couleur",
-          "Inspecteur d'accessibilité du navigateur",
+          "Inspecteur d’accessibilité du navigateur",
           "Navigation au clavier seul"
         ]
       },
       {
-        "h": "Pages du site ayant fait l'objet de vérifications",
+        "h": "Pages du site ayant fait l’objet de vérifications",
         "level": 3,
         "ul": [
           "Connexion",
           "Tableau de bord (liste des démonstrations)",
-          "Éditeur d'une démonstration",
-          "Partage d'une démonstration",
+          "Éditeur d’une démonstration",
+          "Partage d’une démonstration",
           "Suivi des apprenants",
           "Réglages du centre de formation",
-          "Lecteur d'une démonstration (page publique)",
+          "Lecteur d’une démonstration (page publique)",
           "Centre de formation, accueil (page publique)",
-          "Centre de formation, page d'une formation (page publique)"
+          "Centre de formation, page d’une formation (page publique)"
         ]
       },
       {
-        "h": "Retour d'information",
+        "h": "Retour d’information",
         "p": [
-          "Avec un compte : signalez un défaut d'accessibilité depuis l'aide de l'application : Centre d'aide, article « Accessibilité de TutoClick », puis « Cet article vous a aidé ? » et « Non ». Votre message est lu par l'équipe du projet.",
-          "Sans compte, pour un visiteur d'une démo : un moyen de contact pour les visiteurs est à venir."
+          "Avec un compte : signalez un défaut d’accessibilité depuis l’aide de l’application : Centre d’aide, article « Accessibilité de TutoClick », puis « Cet article vous a aidé ? » et « Non ». Votre message est lu par l’équipe du projet.",
+          "Sans compte, pour un visiteur d’une démo : un moyen de contact pour les visiteurs est à venir."
         ]
       }
     ]
