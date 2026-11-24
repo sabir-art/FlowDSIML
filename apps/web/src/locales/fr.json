@@ -277,8 +277,6 @@
     "prefs": "Préférences",
     "uiLanguage": "Langue de l’interface",
     "appearance": "Apparence",
-    "notifLead": "E-mail quand un lead est collecté",
-    "notifWeekly": "Résumé hebdomadaire des vues",
     "photo": {
       "change": "Changer la photo de profil",
       "options": "Options pour la photo de profil",
@@ -5836,5 +5834,49 @@
       "body": "Supprimez des vidéos ou demandez plus d’espace à la DSI."
     },
     "stop": "Arrêter l’envoi"
+  },
+  "notifSettings": {
+    "title": "Notifications",
+    "sub": "Ce que vous recevez, et où. Ces choix ne valent que pour vous.",
+    "event": "Événement",
+    "inApp": "Dans l’app",
+    "byEmail": "Par e-mail",
+    "inAppFor": "{{name}}, dans l’app",
+    "byEmailFor": "{{name}}, par e-mail",
+    "events": {
+      "mention": {
+        "name": "Mentions",
+        "help": "Quelqu’un vous cite dans un commentaire."
+      },
+      "reply": {
+        "name": "Réponses",
+        "help": "Une réponse à un de vos commentaires."
+      },
+      "comment": {
+        "name": "Commentaires sur mes démos",
+        "help": "Un nouveau commentaire sur une démo que vous avez créée."
+      },
+      "resolved": {
+        "name": "Commentaires résolus",
+        "help": "Un fil que vous suivez est résolu."
+      },
+      "alert": {
+        "name": "Alertes d’Analytics",
+        "help": "Une alerte que vous avez créée se déclenche."
+      },
+      "lead": {
+        "name": "Nouveaux leads",
+        "help": "Un visiteur laisse son adresse sur une de vos démos."
+      }
+    },
+    "mentionHelp": "Les mentions sont toujours notifiées dans l’app.",
+    "emailHelp": "E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. Une notification coupée dans l’app ne part pas par e-mail.",
+    "mutedTitle": "Démos coupées",
+    "mutedSub": "Démos dont vous ne recevez plus aucune notification.",
+    "mutedNone": "Aucune démo coupée.",
+    "unmute": "Réactiver",
+    "unmuteFor": "Réactiver les notifications de {{title}}",
+    "unmuted": "Notifications de « {{title}} » réactivées.",
+    "saveError": "Le réglage n’a pas pu être enregistré."
   }
 }

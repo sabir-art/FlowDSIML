@@ -183,6 +183,9 @@ jobs:
       - name: Bulle « Afficher « Précédent » » (désactivé à l'étape 1, aperçu à l'étape 2, toutes les étapes)
         if: always()
         run: cd apps/web && node e2e/bulle-precedent.e2e.cjs
+      - name: Paramètres › Notifications (par événement, dans l'app et par e-mail, démos coupées)
+        if: always()
+        run: cd apps/web && node e2e/parametres-notifications.e2e.cjs
       - name: Finalité des champs personnels (RGAA 11.13, autocomplete et name)
         if: always()
         run: cd apps/web && node e2e/autocomplete.e2e.cjs

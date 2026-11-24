@@ -277,8 +277,6 @@
     "prefs": "Preferences",
     "uiLanguage": "Interface language",
     "appearance": "Appearance",
-    "notifLead": "Email when a lead is collected",
-    "notifWeekly": "Weekly views summary",
     "photo": {
       "change": "Change the profile photo",
       "options": "Options for the profile photo",
@@ -5836,5 +5834,49 @@
       "body": "Delete videos or ask IT for more space."
     },
     "stop": "Stop the upload"
+  },
+  "notifSettings": {
+    "title": "Notifications",
+    "sub": "What you receive, and where. These choices apply to you only.",
+    "event": "Event",
+    "inApp": "In the app",
+    "byEmail": "By email",
+    "inAppFor": "{{name}}, in the app",
+    "byEmailFor": "{{name}}, by email",
+    "events": {
+      "mention": {
+        "name": "Mentions",
+        "help": "Someone mentions you in a comment."
+      },
+      "reply": {
+        "name": "Replies",
+        "help": "A reply to one of your comments."
+      },
+      "comment": {
+        "name": "Comments on my demos",
+        "help": "A new comment on a demo you created."
+      },
+      "resolved": {
+        "name": "Resolved comments",
+        "help": "A thread you follow is resolved."
+      },
+      "alert": {
+        "name": "Analytics alerts",
+        "help": "An alert you created is triggered."
+      },
+      "lead": {
+        "name": "New leads",
+        "help": "A visitor leaves their address on one of your demos."
+      }
+    },
+    "mentionHelp": "Mentions are always notified in the app.",
+    "emailHelp": "Email: at most one summary per hour, grouping your unread notifications. Unsubscribe link in every email. A notification turned off in the app is not sent by email.",
+    "mutedTitle": "Muted demos",
+    "mutedSub": "Demos you no longer receive any notification from.",
+    "mutedNone": "No muted demo.",
+    "unmute": "Turn back on",
+    "unmuteFor": "Turn notifications back on for {{title}}",
+    "unmuted": "Notifications for “{{title}}” turned back on.",
+    "saveError": "The setting could not be saved."
   }
 }
