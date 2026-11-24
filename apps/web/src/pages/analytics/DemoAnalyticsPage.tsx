@@ -155,7 +155,9 @@ export function DemoAnalyticsPage() {
       ]
     : [];
   const pick = (d: Parameters<typeof dayValue>[0]) => dayValue(d, metric);
-  const SOURCES = ['embed', 'link', 'page', 'direct'] as const;
+  // Moyens de partage, dans l'ordre et sous les noms de la fenêtre Partager (« direct » est le lien
+  // public, « link » les liens personnalisés)
+  const SOURCES = ['direct', 'embed', 'link', 'page'] as const;
 
   function exportFunnel() {
     downloadText(
@@ -225,7 +227,7 @@ export function DemoAnalyticsPage() {
               const r = series?.cur?.bySource.find((x) => x.source === src);
               return {
                 id: src,
-                name: t(`kpi.sourceName.${src}`),
+                name: t(`demoViews.channelName.${src}`),
                 values: metricValues(r ?? { views: 0, visitors: 0, completions: 0, cta: 0, leads: 0 }),
               };
             })}

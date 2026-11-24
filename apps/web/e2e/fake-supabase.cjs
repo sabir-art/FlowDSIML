@@ -1064,8 +1064,13 @@ async function install(page, state = seed()) {
           const pubs = t.demos.filter(
             (d) => d.status === 'published' && !d.deleted_at && (!a.p_demo || d.id === a.p_demo),
           );
+          // Démo demandée non publiée : mêmes chiffres que demo_analytics (120 vues, 96 la période
+          // d'avant), pour que la courbe et la répartition suivent les indicateurs
+          const draft =
+            a.p_demo && !pubs.length ? t.demos.find((d) => d.id === a.p_demo && !d.deleted_at) : null;
+          if (draft) pubs.push(draft);
           const k = previous ? 0.85 : 1;
-          const views = Math.round(267 * pubs.length * k);
+          const views = draft ? (previous ? 96 : 120) : Math.round(267 * pubs.length * k);
           const end = Date.parse(a.p_to || new Date().toISOString());
           const days = Math.max(1, Math.round((end - Date.parse(a.p_from)) / 86400000));
           const row = (v) => ({

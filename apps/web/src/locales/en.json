@@ -2944,7 +2944,8 @@
     "deleteTitle_other": "Permanently delete these {{count}} leads?",
     "deleteBody": "Right to erasure (GDPR): the data is deleted and cannot be recovered.",
     "emptyTitle": "No leads yet",
-    "emptyBody": "Add a form to a demo to collect emails, or share personalised links to identify your prospects."
+    "emptyBody": "Add a form to a demo to collect emails, or share personalised links to identify your prospects.",
+    "emptyHintDemo": "Add a form to this demo to collect leads."
   },
   "demos": {
     "title": "Demos",
@@ -6211,6 +6212,13 @@
     },
     "byChannel": "By sharing channel",
     "channel": "Channel",
-    "backTo": "Back: {{name}}"
+    "backTo": "Back: {{name}}",
+    "notPublished": "Not published",
+    "channelName": {
+      "direct": "Link",
+      "embed": "Embed",
+      "link": "Personalised links",
+      "page": "Public page"
+    }
   }
 }

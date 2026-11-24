@@ -81,7 +81,7 @@ export function DemoViewShell() {
           ),
         })
       : t('status.published')
-    : t('editor.notPublished');
+    : t('demoViews.notPublished');
   const tabs: Array<{ id: 'edit' | 'preview' | DemoView; to: string; icon: ReactNode; label: string }> = [
     { id: 'edit', to: `/demos/${demoId}/edit`, icon: <Pencil />, label: t('editor.modeEdit') },
     { id: 'preview', to: `/demos/${demoId}/preview`, icon: <Play />, label: t('editor.preview') },

@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--fd-color-bg);
+  /* Fond du contenu de l'application, comme l'Analytics de l'espace */
+  background: var(--fd-color-content-bg);
   color: var(--fd-color-text);
 }
 .mk .dv-bar {
@@ -169,5 +170,23 @@
 @media (max-width: 639px) {
   .mk .dv-bar__r .fd-btn--primary {
     display: none;
+  }
+}
+
+/* À 390 px : indicateurs en grille 2 × 2, tous visibles sans geste (comme l'Analytics de l'espace) */
+@media (max-width: 639px) {
+  .mk.dv .kpi-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .mk.dv .kpi-tab {
+    flex: none;
+  }
+  .mk.dv .kpi-tab:nth-child(odd) {
+    border-left: 0;
+  }
+  .mk.dv .kpi-tab:nth-child(n + 3) {
+    border-top: 1px solid var(--fd-color-border);
   }
 }

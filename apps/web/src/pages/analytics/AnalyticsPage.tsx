@@ -664,6 +664,8 @@ export function Sessions({
   source,
   title,
   segment,
+  hideDemo = false,
+  sourceLabel,
 }: {
   wsId: string;
   days: number;
@@ -671,6 +673,10 @@ export function Sessions({
   source: Source | '';
   title: (id: string) => string;
   segment: unknown;
+  /** Vue « Visiteurs » d'une démo : la colonne Démo répéterait la démo courante. */
+  hideDemo?: boolean;
+  /** Nom du moyen de partage (dans une démo : ceux de la fenêtre Partager). */
+  sourceLabel?: (source: Source) => string;
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -719,7 +725,7 @@ export function Sessions({
           <thead>
             <tr>
               <th>{t('analytics.visitor')}</th>
-              <th>{t('leads.demo')}</th>
+              {!hideDemo && <th>{t('leads.demo')}</th>}
               <th>{t('analytics.source')}</th>
               <th className="r">{t('analytics.duration')}</th>
               <th className="r">{t('analytics.progress')}</th>
@@ -729,7 +735,7 @@ export function Sessions({
           <tbody>
             {res.rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={hideDemo ? 5 : 6} className="muted">
                   {res.tooSmall ? t('analytics.adv.seg.tooSmall') : t('analytics.noSessions')}
                 </td>
               </tr>
@@ -764,9 +770,11 @@ export function Sessions({
                       </div>
                     </div>
                   </td>
-                  <td>{title(s.demo_id)}</td>
+                  {!hideDemo && <td>{title(s.demo_id)}</td>}
                   <td>
-                    <span className="badge">{t(`analytics.src.${s.source}`)}</span>
+                    <span className="badge">
+                      {sourceLabel ? sourceLabel(s.source as Source) : t(`analytics.src.${s.source}`)}
+                    </span>
                   </td>
                   <td className="r">{dur(s.duration_s)}</td>
                   <td className="r">

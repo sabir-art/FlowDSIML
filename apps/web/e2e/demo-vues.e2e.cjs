@@ -70,8 +70,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(await noSidebar(), 'Analytics de la démo : pas de barre latérale de l’application');
   ok(
     (await page.locator('.dv-tt b').textContent()) === 'Démo CRM' &&
-      (await page.locator('.dv-state').textContent()).length > 0,
-    'barre : nom et état de la démo',
+      (await page.locator('.dv-state').textContent()) === 'Non publiée',
+    'barre : nom de la démo, état « Non publiée »',
   );
   ok((await h1().textContent()) === 'Analytics de « Démo CRM »', 'h1 de la vue (lu, non affiché)');
   if (!MOBILE) {
@@ -145,8 +145,24 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(
     (await page.getByRole('group', { name: 'Moyen de partage' }).getByRole('button').allTextContents()).join(
       '|',
-    ) === 'Tous|Lien|Intégration|Page publique|Direct',
-    'Visiteurs : filtre par moyen de partage',
+    ) === 'Tous|Lien|Intégration|Liens personnalisés|Page publique',
+    'Visiteurs : filtre par moyen de partage (mêmes noms que la fenêtre Partager)',
+  );
+  ok(
+    !(await page.getByRole('table').locator('thead th').allTextContents()).includes('Démo'),
+    'Visiteurs : pas de colonne « Démo » (c’est la démo courante)',
+  );
+  ok(
+    (await page.evaluate(() => getComputedStyle(document.querySelector('.mk.dv')).backgroundColor)) ===
+      (await page.evaluate(() => {
+        const x = document.createElement('i');
+        x.style.background = 'var(--fd-color-content-bg)';
+        document.body.appendChild(x);
+        const c = getComputedStyle(x).backgroundColor;
+        x.remove();
+        return c;
+      })),
+    'fond du contenu : --fd-color-content-bg',
   );
   ok(await noScroll(), 'Visiteurs : pas de défilement horizontal');
   await shot('demo-visiteurs');

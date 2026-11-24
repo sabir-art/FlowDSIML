@@ -4,7 +4,7 @@ import { PeriodPicker } from '../analytics/DemoAnalyticsPage';
 import { Sessions } from '../analytics/AnalyticsPage';
 import { useDemoView } from './DemoViewShell';
 
-const SOURCES = ['', 'link', 'embed', 'page', 'direct'] as const;
+const SOURCES = ['', 'direct', 'embed', 'link', 'page'] as const;
 type Source = (typeof SOURCES)[number];
 
 /**
@@ -23,7 +23,7 @@ export function DemoVisitorsView() {
         <div className="fd-segmented" role="group" aria-label={t('demoViews.sourceFilter')}>
           {SOURCES.map((s) => (
             <button key={s || 'all'} type="button" aria-pressed={source === s} onClick={() => setSource(s)}>
-              {s ? t(`kpi.sourceName.${s}`) : t('demoViews.allSources')}
+              {s ? t(`demoViews.channelName.${s}`) : t('demoViews.allSources')}
             </button>
           ))}
         </div>
@@ -35,6 +35,8 @@ export function DemoVisitorsView() {
         source={source}
         title={() => demo.title}
         segment={null}
+        hideDemo
+        sourceLabel={(s) => t(`demoViews.channelName.${s}`)}
       />
     </>
   );

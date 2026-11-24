@@ -2944,7 +2944,8 @@
     "deleteTitle_other": "Supprimer définitivement ces {{count}} leads ?",
     "deleteBody": "Droit à l’effacement (RGPD) : les données sont supprimées et ne peuvent pas être récupérées.",
     "emptyTitle": "Aucun lead pour l’instant",
-    "emptyBody": "Ajoutez un formulaire à une démo pour collecter des e-mails, ou partagez des liens personnalisés pour identifier vos prospects."
+    "emptyBody": "Ajoutez un formulaire à une démo pour collecter des e-mails, ou partagez des liens personnalisés pour identifier vos prospects.",
+    "emptyHintDemo": "Ajoutez un formulaire à cette démo pour collecter des leads."
   },
   "demos": {
     "title": "Démos",
@@ -6211,6 +6212,13 @@
     },
     "byChannel": "Par moyen de partage",
     "channel": "Moyen",
-    "backTo": "Retour : {{name}}"
+    "backTo": "Retour : {{name}}",
+    "notPublished": "Non publiée",
+    "channelName": {
+      "direct": "Lien",
+      "embed": "Intégration",
+      "link": "Liens personnalisés",
+      "page": "Page publique"
+    }
   }
 }
