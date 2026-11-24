@@ -21,6 +21,7 @@ export function Modal({
   closeLabel,
   className = '',
   dismissible = true,
+  onDismiss,
   role,
   describedBy,
   children,
@@ -48,6 +49,11 @@ export function Modal({
    * seule une action du pied ferme la modale.
    */
   dismissible?: boolean;
+  /**
+   * Fermeture à confirmer (ex. envoi en cours) : Échap, le voile et le bouton Fermer appellent cette
+   * fonction au lieu de fermer ; l'appelant ferme lui-même en passant `open` à `false`.
+   */
+  onDismiss?: () => void;
   /** `alertdialog` pour un message qui exige une réponse. */
   role?: 'alertdialog';
   /** Id du texte qui décrit la modale (aria-describedby). */
@@ -79,10 +85,14 @@ export function Modal({
       onClose={onClose}
       onCancel={(e) => {
         if (!dismissible) e.preventDefault();
+        else if (onDismiss && e.target === ref.current) {
+          e.preventDefault();
+          onDismiss();
+        }
       }}
       onClick={(e) => {
         // Clic sur le voile (la cible est le dialog lui-même) : ferme
-        if (dismissible && e.target === ref.current) ref.current?.close();
+        if (dismissible && e.target === ref.current) (onDismiss ?? (() => ref.current?.close()))();
       }}
     >
       {open && (
@@ -106,7 +116,7 @@ export function Modal({
                 type="button"
                 className="fd-modal__close"
                 aria-label={closeLabel}
-                onClick={() => ref.current?.close()}
+                onClick={() => (onDismiss ? onDismiss() : ref.current?.close())}
               >
                 <X size={16} aria-hidden="true" />
               </button>

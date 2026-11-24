@@ -631,6 +631,121 @@ button.nd-src:focus-visible {
 .nd-folder {
   margin: 0;
 }
+/* EXT-02 §4.1 bis : « ou » entre l'extension et l'import d'une vidéo */
+.nd-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--fd-color-text-muted);
+  font-size: 13px;
+}
+.nd-or::before,
+.nd-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--fd-color-border);
+}
+/* Zone large « Importer une vidéo » (MEDIA-01 §18.1) : tuile, titre et aide, action à droite */
+.nd-vz {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed var(--fd-color-border-strong, var(--fd-color-border-field));
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+.nd-vz.is-drag {
+  border-color: var(--fd-color-primary);
+  background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface));
+}
+.nd-vz.is-error {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  border: 1px solid var(--fd-color-danger);
+}
+.nd-vz__tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  color: var(--fd-color-text);
+}
+.nd-vz__tile > svg {
+  width: 18px;
+  height: 18px;
+}
+.nd-vz.is-drag .nd-vz__tile {
+  color: var(--fd-color-primary);
+}
+.nd-vz.is-error .nd-vz__tile,
+.nd-vz.is-error .nd-vz__txt > span {
+  color: var(--fd-color-danger);
+}
+.nd-vz__txt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.nd-vz__txt > b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.nd-vz__txt > span {
+  color: var(--fd-color-text-muted);
+}
+.nd-vz.is-error .nd-vz__txt {
+  flex-basis: calc(100% - 56px);
+}
+.nd-vz__bar {
+  display: block;
+  height: 6px;
+  margin-top: 4px;
+  border-radius: 3px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.nd-vz__bar > i {
+  display: block;
+  height: 100%;
+  background: var(--fd-color-primary);
+}
+.nd-vz.is-stalled .nd-vz__bar > i {
+  background: var(--fd-color-text-muted);
+}
+.nd-vz__acts {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+.nd-vz.is-error .nd-vz__acts {
+  margin-left: 52px;
+}
+@media (max-width: 640px) {
+  .nd-vz {
+    flex-wrap: wrap;
+  }
+  .nd-vz__txt {
+    flex-basis: calc(100% - 56px);
+  }
+  .nd-vz__acts,
+  .nd-vz.is-error .nd-vz__acts {
+    width: 100%;
+    margin-left: 0;
+  }
+  .nd-vz__acts > .fd-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
 /* Assistance IA coupée : « Ouvrir le réglage » en ghost sm à droite de la ligne (sous le texte sous 768 px) */
 .nd-ai {
   display: flex;

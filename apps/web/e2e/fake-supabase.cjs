@@ -2473,6 +2473,77 @@ async function install(page, state = seed()) {
       }
     }
 
+    // EXT-02 §4.1 bis : envoi avec reprise (protocole TUS). state.tus garde le fil des appels ;
+    // state.tusDown coupe la connexion (reprise) ; state.tusGate retient la réponse (envoi en cours).
+    if (p.startsWith('/storage/v1/upload/resumable')) {
+      const tus = (state.tus = state.tus || { offset: 0, length: 0, calls: [], meta: {} });
+      const h = req.headers();
+      tus.calls.push(method);
+      if (method === 'OPTIONS')
+        return route.fulfill({
+          status: 204,
+          headers: {
+            'access-control-allow-origin': '*',
+            'access-control-allow-headers': '*',
+            'access-control-allow-methods': 'POST, PATCH, HEAD, DELETE, OPTIONS',
+          },
+        });
+      if (state.tusDown) return route.abort('internetdisconnected');
+      const head = {
+        'access-control-allow-origin': '*',
+        'access-control-expose-headers': 'Location, Upload-Offset, Upload-Length, Tus-Resumable',
+        'tus-resumable': '1.0.0',
+      };
+      const size = (req.postDataBuffer() || Buffer.alloc(0)).length;
+      if (method === 'POST') {
+        tus.length = Number(h['upload-length'] || 0);
+        tus.meta = Object.fromEntries(
+          String(h['upload-metadata'] || '')
+            .split(',')
+            .filter(Boolean)
+            .map((kv) => {
+              const [k, v] = kv.trim().split(' ');
+              return [k, v ? Buffer.from(v, 'base64').toString() : ''];
+            }),
+        );
+        tus.auth = !!h.authorization;
+        if (state.tusGate) await state.tusGate;
+        if (state.tusDown) return route.abort('internetdisconnected');
+        // Corps binaire non transmis par Playwright : le fichier entier est compté comme reçu
+        tus.offset = size || tus.length;
+        state.storage[`${tus.meta.bucketName}/${tus.meta.objectName}`] = {
+          type: tus.meta.contentType,
+          data: Buffer.alloc(0),
+        };
+        return route.fulfill({
+          status: 201,
+          headers: {
+            ...head,
+            location: `${HOST}/storage/v1/upload/resumable/up1`,
+            'upload-offset': String(tus.offset),
+          },
+        });
+      }
+      if (method === 'PATCH') {
+        tus.offset = Math.min(tus.length, tus.offset + (size || tus.length));
+        return route.fulfill({ status: 204, headers: { ...head, 'upload-offset': String(tus.offset) } });
+      }
+      if (method === 'HEAD')
+        return route.fulfill({
+          status: 200,
+          headers: {
+            ...head,
+            'upload-offset': String(tus.offset),
+            'upload-length': String(tus.length),
+            'cache-control': 'no-store',
+          },
+        });
+      if (method === 'DELETE') {
+        tus.deleted = true;
+        return route.fulfill({ status: 204, headers: head });
+      }
+    }
+
     if (p.startsWith('/storage/v1/object/list/')) {
       const bucket = p.split('/')[5];
       const prefix = (body.prefix || '').replace(/\/$/, '');

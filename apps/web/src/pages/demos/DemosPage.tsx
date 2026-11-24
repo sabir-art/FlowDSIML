@@ -1395,6 +1395,11 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                     await createDemo(f);
                   }}
                   onImport={importImages}
+                  onVideo={(id) => {
+                    setNewOpen(false);
+                    toast(t('videoImport.created'));
+                    navigate(`/demos/${id}/edit`);
+                  }}
                   ws={ws.id}
                   onGenerate={(f) => {
                     setNewOpen(false);

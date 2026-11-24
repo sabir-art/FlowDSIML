@@ -5689,5 +5689,48 @@
     "done": "You will no longer receive notifications by email. To turn them back on, open TutoClick, click the notification bell, then “Preferences”.",
     "invalid": "This link is no longer valid. To turn off emails, open TutoClick, click the notification bell, then “Preferences”.",
     "open": "Open TutoClick"
+  },
+  "videoImport": {
+    "title": "Import a video",
+    "hint": "Drop the file here or choose it. MP4 or WebM, 50 MB and 10 min at most.",
+    "pick": "Choose a video…",
+    "pickOther": "Choose another video",
+    "seeUsage": "View usage",
+    "sending": "Uploading… {{pct}}% · {{sent}} of {{total}} MB",
+    "stalled": "Upload interrupted · {{pct}}%",
+    "resume": "Resume",
+    "progress": "Video upload",
+    "or": "or",
+    "created": "Video demo created",
+    "stopTitle": "Stop the upload?",
+    "stopBody": "The video will not be imported.",
+    "stopConfirm": "Stop",
+    "stopCancel": "Continue",
+    "extensionTitle": "Record with the extension",
+    "extensionBody": "Start recording from the extension: the video then opens for review, then in the editor.",
+    "badType": {
+      "title": "“{{name}}” is not accepted.",
+      "body": "Choose an MP4 or WebM video."
+    },
+    "tooBig": {
+      "title": "“{{name}}” weighs {{size}} MB.",
+      "body": "The limit is 50 MB: shorten or split the video."
+    },
+    "tooLong": {
+      "title": "“{{name}}” lasts {{min}} min.",
+      "body": "The limit is 10 min: split it into several demos."
+    },
+    "unreadable": {
+      "title": "“{{name}}” cannot be read.",
+      "body": "Choose an MP4 or WebM video."
+    },
+    "failed": {
+      "title": "“{{name}}” was not imported.",
+      "body": "The upload failed. Try again."
+    },
+    "quota": {
+      "title": "The workspace storage is full ({{used}} of {{total}}).",
+      "body": "Delete videos or ask IT for more space."
+    }
   }
 }
