@@ -180,11 +180,17 @@ function data() {
       (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
-  // §18.4 : extension non publiée (pas de VITE_EXTENSION_URL en test) : source visible, désactivée, « Bientôt »
-  const ext = nd.locator('.nd-src.is-soon[aria-disabled="true"]', { hasText: 'Capturer avec l’extension' });
+  // §18.4 : la source suit la publication de l'extension (VITE_EXTENSION_URL), le test ne la suppose pas :
+  // publiée, un bouton ; sinon, visible, désactivée, « Bientôt »
+  const ext = nd.locator('.nd-src', { hasText: 'Capturer avec l’extension' });
+  const published = (await ext.evaluate((el) => el.tagName)) === 'BUTTON';
   ok(
-    (await ext.innerText()).includes('Bientôt'),
-    '§18.4 : « Capturer avec l’extension » désactivée, « Bientôt »',
+    published
+      ? (await ext.isEnabled()) && !(await ext.innerText()).includes('Bientôt')
+      : (await ext.getAttribute('aria-disabled')) === 'true' && (await ext.innerText()).includes('Bientôt'),
+    published
+      ? '§18.4 : extension publiée, « Capturer avec l’extension » active'
+      : '§18.4 : « Capturer avec l’extension » désactivée, « Bientôt »',
   );
   await p.keyboard.press('Escape');
 
