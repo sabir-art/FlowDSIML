@@ -41,6 +41,8 @@ export type PopupRequest =
       streamId?: string;
       mic?: boolean;
       webcam?: boolean;
+      /** EXT-02 §4.2 : masquer les données dans la page pendant l'enregistrement (définitif). */
+      liveMask?: boolean;
       /** Format mobile : taille émulée. */
       viewport?: { w: number; h: number };
       /** L25-01 : taille de l'onglet le temps de la capture (null : taille actuelle). */
@@ -82,7 +84,18 @@ export type VideoBarRequest =
       zones?: Array<{ x: number; y: number; w: number; h: number }>;
     }
   | { type: 'fd:video-stop' }
-  | { type: 'fd:video-blurs'; count: number };
+  | { type: 'fd:video-blurs'; count: number }
+  /** EXT-02 §4 : données repérées (extrait masqué, origine) et leurs positions relevées dans la page. */
+  | {
+      type: 'fd:video-track';
+      live: boolean;
+      metas: Array<{ id: string; type: string; excerpt: string; by: string; label?: string }>;
+      samples: Array<{
+        id: string;
+        at: number;
+        rects: Array<{ x: number; y: number; w: number; h: number }>;
+      }>;
+    };
 
 /** A8 : barre de la capture HTML (content script) vers le service worker. */
 export type HtmlBarRequest =
@@ -114,6 +127,8 @@ export interface RecordingStatus {
   pausedMs?: number;
   micDenied?: boolean;
   blurredZones?: number;
+  /** EXT-02 §4.2 : « Masquer en direct » choisi au démarrage. */
+  liveMask?: boolean;
   /** A8 : capture HTML à faire au prochain chargement de page (après un clic qui navigue). */
   htmlAwait?: boolean;
   /** L25-01 : taille de l'onglet imposée pendant la capture (null : taille actuelle). */

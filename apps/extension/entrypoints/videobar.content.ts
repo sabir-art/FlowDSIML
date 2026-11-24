@@ -1,6 +1,7 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { elementLabel } from '@/lib/geometry';
+import { maskExcerpt } from '@flowdsiml/core';
 import { scanNodes } from '@/lib/scan';
 import type { RecordingStatus, VideoBarRequest } from '@/lib/messages';
 import { MAX_MS, WARN_MS, elapsed, timer } from '@/lib/video';
@@ -10,19 +11,25 @@ import { lang, strings } from '@/lib/i18n';
  * F7 (L21-02) : barre d'enregistrement vidéo dans l'onglet (shadow DOM, toujours au-dessus,
  * déplaçable). Chronomètre role=timer, Pause / Reprendre, Marquer une étape, Terminer ; raccourcis
  * Alt + Maj + P, M, S rappelés au survol ; « Plus qu'une minute » à 9 min, arrêt à 10 min.
- * Vérification des données (F1) pendant l'enregistrement : les données repérées sont masquées DANS LA
- * PAGE avant d'être filmées (flou porté par l'élément, ou surlignage de la portion de texte), sur tout
- * le document. Les clics sont horodatés (pauses-étapes proposées).
+ * Données personnelles (EXT-02 §4) : tout le document est analysé et chaque donnée repérée est suivie dans
+ * le temps (positions à l'écran), pour la revue « Vérifier la vidéo ».
+ *  - « Masquer en direct » activé : les données sont en plus masquées DANS LA PAGE avant d'être filmées
+ *    (flou porté par l'élément, ou surlignage de la portion de texte). Ce masque est définitif.
+ *  - Désactivé (par défaut) : la page n'est pas touchée, l'image est brute ; les masques sont choisis à la
+ *    revue et incrustés à l'envoi.
+ * Les clics sont horodatés (pauses-étapes proposées).
  */
 export default defineContentScript({
   matches: ['<all_urls>'],
   registration: 'runtime',
   main() {
-    const w = window as unknown as { __fdVideoBar?: boolean };
+    const w = window as unknown as { __fdVideoBar?: boolean; __fdLiveMask?: boolean };
     if (w.__fdVideoBar) return;
     w.__fdVideoBar = true;
     const s = strings;
     const send = (m: VideoBarRequest) => browser.runtime.sendMessage(m).catch(() => null);
+    /** « Masquer en direct » : posé par le service avant ce script (désactivé par défaut). */
+    const LIVE = w.__fdLiveMask === true;
 
     // ===== Masquage des données repérées, dans la page elle-même =====
     // Les données ne sont plus recouvertes par des rectangles posés au-dessus de la fenêtre : ceux-ci
@@ -47,38 +54,28 @@ export default defineContentScript({
     let maxZones = 0;
     // L21-01 : zones masquées à l'écran (relatives à la fenêtre), jointes à chaque repère
     let shown: Array<{ x: number; y: number; w: number; h: number }> = [];
-    function maskNow() {
-      const next = new Set<Element>();
-      const ranges: Range[] = [];
-      for (const d of scanNodes(document.body)) {
-        if (d.el.closest('[data-fd-ui]')) continue;
-        if (highlight && d.node && d.start !== undefined && d.end !== undefined) {
-          // Une donnée au milieu d'un texte plus long : seule sa portion est couverte
-          const total = (d.el.textContent ?? '').trim().length || 1;
-          if ((d.end - d.start) / total < 0.6) {
-            const r = document.createRange();
-            r.setStart(d.node, d.start);
-            r.setEnd(d.node, d.end);
-            ranges.push(r);
-            continue;
-          }
-        }
-        next.add(d.el);
-      }
-      for (const el of masked) if (!next.has(el)) el.removeAttribute(MASK);
-      for (const el of next) if (!el.hasAttribute(MASK)) el.setAttribute(MASK, '');
-      masked = next;
-      if (highlight) {
-        highlight.clear();
-        for (const r of ranges) highlight.add(r);
-      }
+
+    // ===== Suivi des données repérées (une ligne par donnée à la revue) =====
+    type Rect = { x: number; y: number; w: number; h: number };
+    type Meta = { id: string; type: string; excerpt: string; by: string; label?: string };
+    /** Ce qui porte chaque donnée dans la page, d'après la dernière analyse. */
+    let tracked = new Map<string, { els: Element[]; ranges: Range[] }>();
+    const known = new Set<string>();
+    const lastSent = new Map<string, string>();
+    let metas: Meta[] = [];
+    let samples: Array<{ id: string; at: number; rects: Rect[] }> = [];
+    const zoneIds = new WeakMap<Element, string>();
+    let zoneSeq = 0;
+    /** Empreinte de la valeur : elle sert d'identifiant, la valeur ne sort pas de la page. */
+    const hash = (v: string) => {
+      let h = 5381;
+      for (let i = 0; i < v.length; i++) h = ((h << 5) + h + v.charCodeAt(i)) >>> 0;
+      return h.toString(36);
+    };
+    const visibleRects = (list: DOMRect[]): Rect[] => {
       const W = innerWidth || 1;
       const H = innerHeight || 1;
-      const rects = [
-        ...[...next].map((el) => el.getBoundingClientRect()),
-        ...ranges.flatMap((r) => [...r.getClientRects()]),
-      ];
-      shown = rects
+      return list
         .filter((r) => r.width > 1 && r.height > 1 && r.bottom > 0 && r.right > 0 && r.top < H && r.left < W)
         .map((r) => ({
           x: Math.max(0, (r.left - 2) / W),
@@ -86,8 +83,105 @@ export default defineContentScript({
           w: Math.min(1, (r.width + 4) / W),
           h: Math.min(1, (r.height + 4) / H),
         }))
-        .slice(0, 40);
-      const count = next.size + ranges.length;
+        .slice(0, 8);
+    };
+    /** Relève la position de chaque donnée ; seuls les changements sont gardés. */
+    function sample() {
+      const at = Date.now();
+      const seen = new Set<string>();
+      for (const [id, t] of tracked) {
+        seen.add(id);
+        const rects = visibleRects([
+          ...t.els.map((el) => el.getBoundingClientRect()),
+          ...t.ranges.flatMap((r) => [...r.getClientRects()]),
+        ]);
+        const key = rects
+          .map((r) => `${r.x.toFixed(3)},${r.y.toFixed(3)},${r.w.toFixed(3)},${r.h.toFixed(3)}`)
+          .join(';');
+        if (lastSent.get(id) === key) continue;
+        lastSent.set(id, key);
+        samples.push({ id, at, rects });
+      }
+      // Donnée disparue de la page : elle n'est plus à l'écran
+      for (const [id, key] of lastSent)
+        if (!seen.has(id) && key !== '') {
+          lastSent.set(id, '');
+          samples.push({ id, at, rects: [] });
+        }
+    }
+    function flush() {
+      if (!metas.length && !samples.length) return;
+      void send({ type: 'fd:video-track', live: LIVE, metas, samples });
+      metas = [];
+      samples = [];
+    }
+    let sampling = 0;
+    const loop = () => {
+      sample();
+      sampling = requestAnimationFrame(loop);
+    };
+    sampling = requestAnimationFrame(loop);
+    const flushTimer = setInterval(flush, 400);
+
+    function maskNow() {
+      const next = new Set<Element>();
+      const ranges: Range[] = [];
+      const found = new Map<string, { els: Element[]; ranges: Range[] }>();
+      for (const d of scanNodes(document.body)) {
+        if (d.el.closest('[data-fd-ui]')) continue;
+        let id: string;
+        if (d.type === 'zone' || !d.value) {
+          id = zoneIds.get(d.el) ?? `z${++zoneSeq}`;
+          zoneIds.set(d.el, id);
+        } else id = `${d.type}-${hash(d.value)}`;
+        if (!known.has(id)) {
+          if (known.size >= 200) continue;
+          known.add(id);
+          metas.push({
+            id,
+            type: d.type,
+            excerpt: d.type === 'zone' ? '' : maskExcerpt(d.type, d.value),
+            by: d.by,
+            label: d.label,
+          });
+        }
+        const slot = found.get(id) ?? { els: [], ranges: [] };
+        found.set(id, slot);
+        let range: Range | null = null;
+        if (d.node && d.start !== undefined && d.end !== undefined) {
+          range = document.createRange();
+          range.setStart(d.node, d.start);
+          range.setEnd(d.node, d.end);
+        }
+        // En direct, une donnée au milieu d'un texte plus long : seule sa portion est couverte. Sans le
+        // direct, rien n'est posé dans la page : la portion de texte suffit toujours au suivi.
+        const total = (d.el.textContent ?? '').trim().length || 1;
+        const partial = range && (!LIVE || (highlight && (d.end! - d.start!) / total < 0.6)) ? range : null;
+        if (partial) {
+          ranges.push(partial);
+          slot.ranges.push(partial);
+        } else {
+          next.add(d.el);
+          slot.els.push(d.el);
+        }
+      }
+      tracked = found;
+      if (LIVE) {
+        for (const el of masked) if (!next.has(el)) el.removeAttribute(MASK);
+        for (const el of next) if (!el.hasAttribute(MASK)) el.setAttribute(MASK, '');
+        masked = next;
+        if (highlight) {
+          highlight.clear();
+          for (const r of ranges) highlight.add(r);
+        }
+        // Images des repères : ces zones sont déjà masquées dans l'image
+        shown = visibleRects([
+          ...[...next].map((el) => el.getBoundingClientRect()),
+          ...ranges.flatMap((r) => [...r.getClientRects()]),
+        ]).slice(0, 40);
+      }
+      sample();
+      const count = found.size;
       if (count > maxZones) {
         maxZones = count;
         void send({ type: 'fd:video-blurs', count: maxZones });
@@ -164,6 +258,8 @@ export default defineContentScript({
     function finish() {
       if (stopped) return;
       stopped = true;
+      sample();
+      flush();
       void send({ type: 'fd:video-stop' });
     }
     function flash(text: string, ms = 2500) {
@@ -245,6 +341,8 @@ export default defineContentScript({
       if ((msg as { type?: string })?.type === 'fd:recorder-stop') {
         clearInterval(tickTimer);
         clearInterval(scanTimer);
+        clearInterval(flushTimer);
+        cancelAnimationFrame(sampling);
         mo.disconnect();
         document.removeEventListener('pointerdown', onPointerDown, true);
         document.removeEventListener('input', onInput, true);

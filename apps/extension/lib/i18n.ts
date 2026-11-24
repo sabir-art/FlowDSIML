@@ -61,6 +61,9 @@ const fr = {
   optMic: 'Enregistrer ma voix',
   optWebcam: 'Webcam dans un coin',
   optCheck: 'Vérifier les données avant l’envoi (toujours actif)',
+  optLiveMask: 'Masquer en direct',
+  liveMaskHelp:
+    'Floute les données pendant l’enregistrement. Ces masques ne pourront plus être retirés. Désactivé, vous décidez de chaque zone avant l’envoi.',
   videoHelp: '10 minutes au plus. Seul cet onglet est enregistré, jamais l’écran entier.',
   startVideo: 'Démarrer l’enregistrement',
   startMobile: 'Redimensionner et capturer',
@@ -271,6 +274,9 @@ const en: typeof fr = {
   optMic: 'Record my voice',
   optWebcam: 'Webcam in a corner',
   optCheck: 'Check data before sending (always on)',
+  optLiveMask: 'Mask live',
+  liveMaskHelp:
+    'Blurs data while recording. These masks can no longer be removed. When off, you decide on each area before sending.',
   videoHelp: '10 minutes at most. Only this tab is recorded, never the whole screen.',
   startVideo: 'Start recording',
   startMobile: 'Resize and capture',

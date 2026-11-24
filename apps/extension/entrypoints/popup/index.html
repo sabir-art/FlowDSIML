@@ -116,8 +116,11 @@
             ><input type="checkbox" id="webcam" /><span data-i18n="optWebcam"></span
           ></label>
           <label class="check"
-            ><input type="checkbox" checked disabled /><span data-i18n="optCheck"></span
+            ><input type="checkbox" role="switch" id="live-mask" aria-describedby="live-mask-help" /><span
+              data-i18n="optLiveMask"
+            ></span
           ></label>
+          <p class="muted small" id="live-mask-help" data-i18n="liveMaskHelp"></p>
           <p class="muted small" data-i18n="videoHelp"></p>
         </div>
         <div id="opt-mobile" class="opts" hidden>

@@ -29,6 +29,17 @@ const os = require('os');
   const tabId = await popup.evaluate(
     async () => (await chrome.tabs.query({ url: 'http://localhost:54400/*' }))[0].id,
   );
+  // « Masquer en direct » activé : le service pose ce choix avant la barre (EXT-02 §4.2)
+  await popup.evaluate(
+    (id) =>
+      chrome.scripting.executeScript({
+        target: { tabId: id },
+        func: () => {
+          window.__fdLiveMask = true;
+        },
+      }),
+    tabId,
+  );
   await popup.evaluate(
     (id) =>
       chrome.scripting.executeScript({ target: { tabId: id }, files: ['/content-scripts/videobar.js'] }),

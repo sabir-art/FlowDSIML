@@ -1,4 +1,5 @@
 import type { Mark } from './video';
+import type { VideoMask } from './videoMasks';
 
 /**
  * F7 : enregistrement vidéo gardé dans le navigateur (IndexedDB de l'extension) jusqu'à l'écran de
@@ -16,6 +17,11 @@ export interface PendingVideo {
   micDenied: boolean;
   /** Zones floutées pendant l'enregistrement (nombre maximal à l'écran). */
   blurredZones: number;
+  /**
+   * EXT-02 §4 : données repérées et suivies pendant l'enregistrement. Absent des enregistrements faits
+   * avant la version 0.3.
+   */
+  masks?: VideoMask[];
   workspaceId: string;
   title: string;
   device: 'desktop' | 'mobile';

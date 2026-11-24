@@ -130,6 +130,12 @@ function viewport(): { w: number; h: number } {
     h: +$<HTMLInputElement>('vh').value || 844,
   });
 }
+// EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
+void browser.storage.local.get('fd.liveMask').then((r) => {
+  const box = $<HTMLInputElement>('live-mask');
+  box.checked = r['fd.liveMask'] === true;
+  box.addEventListener('change', () => void browser.storage.local.set({ 'fd.liveMask': box.checked }));
+});
 void browser.storage.local.get('fd.lastMode').then((r) => {
   const saved = r['fd.lastMode'] as string | undefined;
   const input = document.querySelector<HTMLInputElement>(`input[name="mode"][value="${saved}"]`);
@@ -490,6 +496,7 @@ async function startCapture(hasDebugger: boolean) {
       streamId,
       mic: m === 'video' && $<HTMLInputElement>('mic').checked,
       webcam: m === 'video' && $<HTMLInputElement>('webcam').checked,
+      liveMask: m === 'video' && $<HTMLInputElement>('live-mask').checked,
       viewport: m === 'mobile' ? viewport() : undefined,
       followTabs: m !== 'video' && $<HTMLInputElement>('follow').checked,
       fill:

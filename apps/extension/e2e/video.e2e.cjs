@@ -56,10 +56,26 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.click('.type-card:has(input[value=video])');
   ok(await popup.isVisible('#opt-video'), 'options vidéo affichées');
   ok(!(await popup.isChecked('#webcam')), 'webcam désactivée par défaut');
+  // EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
+  const live = popup.getByRole('switch', { name: 'Masquer en direct' });
   ok(
-    await popup.$eval('#opt-video input[disabled]', (i) => i.checked),
-    'vérification des données toujours active',
+    !(await live.isChecked()) &&
+      /Ces masques ne pourront plus être retirés\. Désactivé, vous décidez de chaque zone avant l’envoi\./.test(
+        await popup.textContent('#live-mask-help'),
+      ),
+    '« Masquer en direct » désactivé par défaut, avec son aide',
   );
+  await live.check();
+  await popup.waitForFunction(
+    async () => (await chrome.storage.local.get('fd.liveMask'))['fd.liveMask'] === true,
+  );
+  await live.uncheck();
+  await popup.waitForFunction(
+    async () => (await chrome.storage.local.get('fd.liveMask'))['fd.liveMask'] === false,
+  );
+  ok(true, '« Masquer en direct » : choix mémorisé');
+  // Le focus revient sur les cartes de type (suite : parcours au clavier)
+  await popup.focus('input[value=video]');
   ok(/enregistrement/.test(await popup.textContent('#start')), 'bouton « Démarrer l’enregistrement »');
   await popup.keyboard.press('ArrowDown');
   ok(await popup.isChecked('input[value=mobile]'), 'les cartes se parcourent au clavier');
@@ -117,6 +133,17 @@ const WS = '11111111-1111-1111-1111-111111111111';
   ok(capM && capM.len > 1000, 'capture mobile téléversée');
 
   // L21-02 : barre d'enregistrement et flou incrusté dans la page
+  // « Masquer en direct » activé : le service pose ce choix avant la barre (EXT-02 §4.2)
+  await popup.evaluate(
+    (id) =>
+      chrome.scripting.executeScript({
+        target: { tabId: id },
+        func: () => {
+          window.__fdLiveMask = true;
+        },
+      }),
+    tabId,
+  );
   await popup.evaluate(
     (tabId) => chrome.scripting.executeScript({ target: { tabId }, files: ['/content-scripts/videobar.js'] }),
     tabId,

@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { AUDIO_BPS, VIDEO_BPS, pickMime, type Mark, type Zone } from '@/lib/video';
+import { MAX_MASKS, addFrame, type MaskOrigin, type MaskRect, type VideoMask } from '@/lib/videoMasks';
 import { videoStore, type PendingVideo } from '@/lib/videoStore';
 
 /**
@@ -14,7 +15,16 @@ type Start = {
   webcam: boolean;
   meta: Omit<
     PendingVideo,
-    'id' | 'blob' | 'mime' | 'durationMs' | 'marks' | 'frames' | 'hasVoice' | 'micDenied' | 'blurredZones'
+    | 'id'
+    | 'blob'
+    | 'mime'
+    | 'durationMs'
+    | 'marks'
+    | 'frames'
+    | 'hasVoice'
+    | 'micDenied'
+    | 'blurredZones'
+    | 'masks'
   >;
 };
 type Msg =
@@ -23,6 +33,12 @@ type Msg =
   | { type: 'fd:rec-resume' }
   | { type: 'fd:rec-mark'; t: number; label: string; manual: boolean; zones?: Zone[] }
   | { type: 'fd:rec-stop'; durationMs: number; blurredZones: number }
+  | {
+      type: 'fd:rec-track';
+      live: boolean;
+      metas: Array<{ id: string; type: string; excerpt: string; by: string; label?: string }>;
+      samples: Array<{ id: string; t: number; rects: MaskRect[] }>;
+    }
   | { type: 'fd:rec-cancel' };
 
 let recorder: MediaRecorder | null = null;
@@ -30,6 +46,8 @@ let chunks: Blob[] = [];
 let tracks: MediaStreamTrack[] = [];
 let preview: HTMLVideoElement | null = null;
 let marks: Mark[] = [];
+/** EXT-02 §4 : données repérées pendant l'enregistrement, avec leurs positions dans le temps. */
+let masks = new Map<string, VideoMask>();
 let frames: Blob[] = [];
 let hasVoice = false;
 let micDenied = false;
@@ -48,6 +66,7 @@ async function frame(): Promise<Blob> {
 async function start(m: Start) {
   chunks = [];
   marks = [];
+  masks = new Map();
   frames = [];
   meta = m.meta;
   const tab = await navigator.mediaDevices.getUserMedia({
@@ -136,6 +155,8 @@ async function stop(durationMs: number, blurredZones: number) {
     hasVoice,
     micDenied,
     blurredZones,
+    // Une donnée jamais vue à l'écran n'a pas de ligne à la revue
+    masks: [...masks.values()].filter((x) => x.frames.length),
     ...meta,
   });
   return { ok: true, bytes: blob.size };
@@ -152,6 +173,27 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
       frames.push(b);
       return true;
     });
+  if (m.type === 'fd:rec-track') {
+    for (const x of m.metas) {
+      if (masks.has(x.id) || masks.size >= MAX_MASKS) continue;
+      masks.set(x.id, {
+        id: x.id,
+        type: x.type as VideoMask['type'],
+        excerpt: x.excerpt.slice(0, 80),
+        by: x.by as MaskOrigin,
+        label: x.label?.slice(0, 80),
+        live: m.live,
+        // Proposée masquée : à la revue, « Démasquer » retire le masque d'une donnée non masquée en direct
+        on: true,
+        frames: [],
+      });
+    }
+    for (const x of m.samples) {
+      const k = masks.get(x.id);
+      if (k) addFrame(k.frames, { t: x.t, rects: x.rects });
+    }
+    return Promise.resolve(true);
+  }
   if (m.type === 'fd:rec-stop') return stop(m.durationMs, m.blurredZones);
   if (m.type === 'fd:rec-cancel') {
     recorder?.stop();

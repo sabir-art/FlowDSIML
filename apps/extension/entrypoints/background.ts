@@ -50,6 +50,17 @@ async function setState(patch: Partial<RecordingStatus>): Promise<RecordingStatu
 
 async function inject(tabId: number, mode: RecordingStatus['mode'] = 'clicks') {
   try {
+    if (mode === 'video') {
+      // EXT-02 §4.2 : le choix « Masquer en direct » est posé avant la barre (même monde isolé)
+      const live = !!(await getState()).liveMask;
+      await browser.scripting.executeScript({
+        target: { tabId },
+        func: (v: boolean) => {
+          (window as unknown as { __fdLiveMask?: boolean }).__fdLiveMask = v;
+        },
+        args: [live],
+      });
+    }
     await browser.scripting.executeScript({
       target: { tabId },
       // F7 : la vidéo a sa barre d'enregistrement (et le flou des données pendant l'enregistrement)
@@ -357,6 +368,7 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
       pausedMs: 0,
       micDenied: !!r?.micDenied,
       blurredZones: 0,
+      liveMask: !!req.liveMask,
       viewport: null,
     });
     await inject(req.tabId, 'video');
@@ -409,6 +421,21 @@ async function onVideoBar(m: VideoBarRequest): Promise<unknown> {
   if (!s.recording || s.mode !== 'video') return null;
   if (m.type === 'fd:video-stop') return stopVideo();
   if (m.type === 'fd:video-blurs') return setState({ blurredZones: Math.max(s.blurredZones ?? 0, m.count) });
+  if (m.type === 'fd:video-track') {
+    // Positions relevées dans la page : horodatées en temps d'enregistrement (pauses exclues)
+    if (s.pausedAt) return null;
+    const clock = { startedAt: s.startedAt ?? Date.now(), pausedAt: null, pausedMs: s.pausedMs ?? 0 };
+    return browser.runtime
+      .sendMessage({
+        type: 'fd:rec-track',
+        live: m.live,
+        metas: m.metas.slice(0, 200),
+        samples: m.samples
+          .slice(0, 2000)
+          .map((x) => ({ id: x.id, t: elapsed(clock, x.at), rects: x.rects.slice(0, 8) })),
+      })
+      .catch(() => null);
+  }
   if (m.type === 'fd:video-pause') {
     if (s.pausedAt) {
       await browser.runtime.sendMessage({ type: 'fd:rec-resume' }).catch(() => undefined);

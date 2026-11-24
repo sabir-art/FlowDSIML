@@ -80,9 +80,14 @@ function rangeRects(node: Text, start: number, end: number): DOMRect[] {
 }
 
 /** Repérage brut : élément (champ, zone imposée) ou nœud texte avec la plage concernée. */
-type Hit =
+type Hit = (
   | { type: PiiType; el: HTMLElement; value: string }
-  | { type: PiiType; node: Text; start: number; end: number; value: string };
+  | { type: PiiType; node: Text; start: number; end: number; value: string }
+) & {
+  /** EXT-02 §4.4 : comment la donnée a été repérée (« Pourquoi masqué ? »), et le libellé qui a servi. */
+  by: 'field' | 'label' | 'pattern' | 'zone';
+  label?: string;
+};
 
 /**
  * Parcours commun : zones imposées, champs remplis, texte affiché. visibleOnly limite au viewport
@@ -92,7 +97,7 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
   const shown = (el: Element) => !visibleOnly || visible(el.getBoundingClientRect());
   // 1) Zones imposées et champs de formulaire
   for (const el of Array.from(root.querySelectorAll<HTMLElement>('[data-fd-blur]')))
-    if (shown(el)) emit({ type: 'zone', el, value: '' });
+    if (shown(el)) emit({ type: 'zone', el, value: '', by: 'zone' });
   for (const el of Array.from(root.querySelectorAll<HTMLElement>('input,textarea,select'))) {
     if (el.closest(SKIP)) continue;
     const input = el as HTMLInputElement;
@@ -114,19 +119,20 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
       continue;
     if (!shown(el)) continue;
     if (kind === 'password') {
-      emit({ type: 'zone', el, value: '' });
+      emit({ type: 'zone', el, value: '', by: 'zone' });
       continue;
     }
     const value =
       el instanceof HTMLSelectElement ? clean(el.selectedOptions[0]?.textContent) : clean(input.value);
     const byAc = autocompleteType(el.getAttribute('autocomplete'));
     if (byAc === 'zone') {
-      emit({ type: 'zone', el, value: '' });
+      emit({ type: 'zone', el, value: '', by: 'zone' });
       continue;
     }
     if (!value) continue; // champ vide : rien à cacher
-    const type = byAc ?? labelType(fieldLabel(el)) ?? matchText(value)[0]?.type ?? null;
-    if (type) emit({ type, el, value });
+    const label = fieldLabel(el);
+    const type = byAc ?? labelType(label) ?? matchText(value)[0]?.type ?? null;
+    if (type) emit({ type, el, value, by: 'field', label: clean(label).slice(0, 80) || undefined });
   }
 
   // 2) Texte affiché
@@ -153,13 +159,28 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
     const trimmed = text.trim();
     if (ctxType && trimmed.length <= 120 && !labelType(trimmed)) {
       const start = text.indexOf(trimmed);
-      emit({ type: ctxType, node, start, end: start + trimmed.length, value: trimmed });
+      emit({
+        type: ctxType,
+        node,
+        start,
+        end: start + trimmed.length,
+        value: trimmed,
+        by: 'label',
+        label: clean(ctx).slice(0, 80) || undefined,
+      });
       continue;
     }
     const inline = inlineLabelValue(text);
     const matches = inline ? [inline] : matchText(text, ctx);
     for (const m of matches)
-      emit({ type: m.type, node, start: m.start, end: m.end, value: text.slice(m.start, m.end) });
+      emit({
+        type: m.type,
+        node,
+        start: m.start,
+        end: m.end,
+        value: text.slice(m.start, m.end),
+        by: 'pattern',
+      });
   }
 }
 
@@ -212,13 +233,18 @@ export interface NodeDetection {
   node?: Text;
   start?: number;
   end?: number;
+  /** Valeur lue dans la page : elle n'en sort jamais telle quelle (extrait masqué, empreinte). */
+  value: string;
+  by: 'field' | 'label' | 'pattern' | 'zone';
+  label?: string;
 }
 export function scanNodes(root: ParentNode = document.body): NodeDetection[] {
   const out: NodeDetection[] = [];
   walk(root, false, (h) => {
-    if ('el' in h) out.push({ type: h.type, el: h.el });
+    const more = { value: h.value, by: h.by, label: h.label };
+    if ('el' in h) out.push({ type: h.type, el: h.el, ...more });
     else if (h.node.parentElement)
-      out.push({ type: h.type, el: h.node.parentElement, node: h.node, start: h.start, end: h.end });
+      out.push({ type: h.type, el: h.node.parentElement, node: h.node, start: h.start, end: h.end, ...more });
   });
   return out;
 }
