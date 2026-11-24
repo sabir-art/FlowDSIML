@@ -318,7 +318,7 @@ function measure() {
   }
 
   // Lien du pied « Accessibilité : non conforme » (mention du RGAA sans audit complet) sur chaque page
-  // d'accès ; la déclaration garde l'encart « en attente » tant qu'une valeur du client manque
+  // d'accès ; la déclaration est celle d'un projet personnel (aucune donnée d'organisme)
   for (const pg of PAGES) {
     const { p, ctx } = await open(pg, 'light', 1440);
     const link = p
@@ -338,15 +338,31 @@ function measure() {
         ) && !/non évaluée|partiellement conforme/.test(doc),
         'déclaration : état « non conforme », aucun taux',
       );
+      // Retours client du 24/11 §10 : projet personnel, sans aucune donnée d'organisme ni de personne
       ok(
-        (await p.getByRole('note').count()) === 1 &&
-          /\[Nom de l'organisme\]/.test(doc) &&
-          /\[adresse e-mail dédiée\]/.test(doc),
-        'déclaration : encart « en attente de validation », valeurs du client entre crochets (rien d’inventé)',
+        (await p.getByRole('note').count()) === 0 && !/[[\]]/.test(doc),
+        'déclaration : ni encart « en attente de validation », ni champ entre crochets',
+      );
+      ok(
+        doc.includes(
+          "TutoClick est un projet personnel, en cours de développement. Il suit le référentiel général d'amélioration de l'accessibilité (RGAA 4.1) comme référence.",
+        ) &&
+          doc.includes('Cette déclaration a été établie le 24 novembre 2026.') &&
+          doc.includes('Mise à jour : 24 novembre 2026'),
+        'déclaration : introduction du projet personnel, établie et mise à jour le 24 novembre 2026',
+      );
+      ok(
+        !/article 47|schéma pluriannuel|plan d.action|Voies de recours|Défenseur des droits|@/.test(doc),
+        'déclaration : ni article 47, ni schéma pluriannuel, ni voies de recours, ni adresse',
+      );
+      ok(
+        doc.includes("Centre d'aide, article « Accessibilité de TutoClick »") &&
+          /un moyen de contact pour les visiteurs est à venir\./i.test(doc),
+        'déclaration : retour par l’aide de l’application ; contact des visiteurs à venir',
       );
       ok(
         (await p.locator('main h2').allInnerTexts()).join(' | ') ===
-          "Champ de la déclaration | État de conformité | Vérifications réalisées | Contenus non accessibles | Établissement de cette déclaration d'accessibilité | Retour d'information et contact | Voies de recours",
+          "État de conformité | Vérifications réalisées | Contenus non accessibles | Établissement de cette déclaration d'accessibilité | Retour d'information",
         'déclaration : sections attendues',
       );
       if (SHOTS) await p.screenshot({ path: `${SHOTS}/legal-accessibilite.png`, fullPage: true });

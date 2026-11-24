@@ -25,7 +25,14 @@ describe('articles d’aide (L26-03)', () => {
     }
   });
   it('contenu minimal : un article par page principale, données personnelles, accessibilité', () => {
-    for (const s of ['flouter-donnees', 'accessibilite-demos', 'exporter-scorm', 'suivre-apprenants'])
+    for (const s of [
+      'flouter-donnees',
+      'accessibilite-demos',
+      // Déclaration d'accessibilité : le retour d'information passe par cet article
+      'accessibilite-tutoclick',
+      'exporter-scorm',
+      'suivre-apprenants',
+    ])
       expect(articleBySlug(s)).not.toBeNull();
     for (const a of ARTICLES) {
       expect(a.title.length).toBeGreaterThan(3);
