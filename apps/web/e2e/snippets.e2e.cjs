@@ -49,7 +49,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   });
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
-  await page.getByRole('tab', { name: 'Intégrer' }).click();
+  await page.locator('.shd-nav').getByRole('button', { name: 'Intégrer', exact: true }).click();
   const panel = page.locator('#sh-panel-embed');
   const where = panel.getByRole('radiogroup', { name: 'Où intégrer ?' });
   await where.waitFor();
@@ -135,7 +135,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // Choix mémorisé
   await page.reload();
-  await page.getByRole('tab', { name: 'Intégrer' }).click();
+  await page.locator('.shd-nav').getByRole('button', { name: 'Intégrer', exact: true }).click();
   await panel.getByRole('radiogroup', { name: 'Où intégrer ?' }).waitFor();
   ok(
     (await panel.getByRole('radio', { name: 'Notion' }).getAttribute('aria-checked')) === 'true',

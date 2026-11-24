@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Monitor } from 'lucide-react';
 import { Select } from '@flowdsiml/ui';
@@ -11,6 +11,7 @@ import { CommentsPanel } from './comments/CommentsPanel';
 import { useStepComments } from './comments/useStepComments';
 import { PreviewDialog } from './PreviewDialog';
 import './editor.css';
+import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 
 /**
  * Écran étroit : l'éditeur reste indisponible, mais on lit et on répond aux commentaires (commentaires.md §5).
@@ -21,14 +22,16 @@ export function EditorNarrowView({
   comments,
   index,
   setIndex,
+  onShare,
 }: {
   editor: DemoEditor;
   comments: ReturnType<typeof useStepComments>;
   index: number;
   setIndex: (i: number) => void;
+  /** §1 : ouvre la fenêtre Partager. */
+  onShare: () => void;
 }) {
   const { t } = useTranslation();
-  const { demoId = '' } = useParams();
   const { current: ws } = useWorkspace();
   const [params] = useSearchParams();
   const focusComment = params.get('comment');
@@ -55,9 +58,9 @@ export function EditorNarrowView({
           >
             {t('editor.comments.viewDemo')}
           </button>
-          <Link className="fd-btn" to={`/demos/${demoId}/share`}>
+          <button type="button" className="fd-btn" data-share-open="" onClick={onShare}>
             {t('editor.share')}
-          </Link>
+          </button>
         </div>
       </div>
       {step && (
@@ -97,6 +100,7 @@ export function EditorNarrowPage() {
   const { current: ws } = useWorkspace();
   const { user } = useAuth();
   const editor = useDemoEditor(demoId);
+  const share = useShareWindow();
   const comments = useStepComments(demoId, ws?.id, user?.id);
   const [params] = useSearchParams();
   const focusStep = params.get('step');
@@ -109,5 +113,24 @@ export function EditorNarrowPage() {
     if (i >= 0) setIndex(i);
     setApplied(true);
   }, [applied, focusStep, editor.steps]);
-  return <EditorNarrowView editor={editor} comments={comments} index={index} setIndex={setIndex} />;
+  return (
+    <>
+      <EditorNarrowView
+        editor={editor}
+        comments={comments}
+        index={index}
+        setIndex={setIndex}
+        onShare={share.open}
+      />
+      {share.view && (
+        <ShareDialog
+          demoId={demoId}
+          view={share.view}
+          onView={share.setView}
+          onClose={share.close}
+          justPublished={share.justPublished}
+        />
+      )}
+    </>
+  );
 }

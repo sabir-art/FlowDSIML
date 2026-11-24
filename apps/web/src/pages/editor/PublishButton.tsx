@@ -213,7 +213,7 @@ export function PublishButton({
       );
       await editor.reload();
       if (onPublished) onPublished(res.number);
-      else navigate(`/demos/${demo.id}/share?published=1`);
+      else navigate(`/demos/${demo.id}/edit?share=lien&published=1`);
     } catch (e) {
       setError(errorMessage(t, e));
     } finally {
@@ -254,7 +254,7 @@ export function PublishButton({
           onReviewStep?.(i);
         }}
         onSettings={() => navigate('/settings/workspace')}
-        onRestrict={() => navigate(`/demos/${demo.id}/share?tab=access`)}
+        onRestrict={() => navigate(`/demos/${demo.id}/edit?share=acces`)}
         onClose={() => setGdprOpen(false)}
       />
       {/* L27-08 : publication réservée aux administrateurs par les règles de l'espace */}

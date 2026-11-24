@@ -149,7 +149,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await dlg.getByLabel(/J’ai relu|J'ai relu/).check();
   await dlg.getByLabel(/fictives ou floutées/).check();
   await dlg.getByRole('button', { name: 'Publier en public' }).click();
-  await page.waitForURL(/share\?published=1/, { timeout: 15000 });
+  await page.waitForFunction(() => /share=lien&published=1/.test(location.hash), null, { timeout: 15000 });
   ok(true, 'n° 5 : avertissement non bloquant, la démo se publie');
 
   ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);

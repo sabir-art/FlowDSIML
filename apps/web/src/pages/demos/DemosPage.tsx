@@ -724,7 +724,11 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       disabled: !stepCounts[d.id],
       onSelect: () => navigate(`/demos/${d.id}/edit?present=1`),
     },
-    { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
+    {
+      label: t('editor.share'),
+      icon: <Share2 />,
+      onSelect: () => navigate(`/demos/${d.id}/edit?share=lien`),
+    },
     ...(can('demo.edit') && d.status !== 'archived'
       ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(d.id) }]
       : []),

@@ -45,9 +45,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     help === 'Remplacez la valeur par celle du destinataire, ou utilisez un lien personnalisé.',
     'aide : « Remplacez la valeur… »',
   );
-  const gif = page.getByRole('button', { name: 'GIF / vidéo' });
-  ok(!/Bientôt/.test(await gif.innerText()), '« GIF / vidéo » sans « Bientôt »');
-  // P1-5 : outil interne, aucun bouton de réseau social (on garde E-mail et « GIF / vidéo »)
+  // §1 : l'export (PDF, GIF, vidéo) est un mode de la fenêtre, sous « Fichiers », sans « Bientôt »
+  const exp = page.locator('.shd-nav').getByRole('button', { name: 'Exporter', exact: true });
+  ok(!/Bientôt/.test(await exp.innerText()), 'mode « Exporter » sans « Bientôt »');
+  // P1-5 : outil interne, aucun bouton de réseau social (on garde E-mail)
   ok(
     (await page.locator('#sh-panel-link a[href*="linkedin."], #sh-panel-link a[href*="x.com"]').count()) ===
       0 && (await page.locator('#sh-panel-link a[href^="mailto:"]').count()) === 1,
@@ -57,7 +58,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.mouse.move(0, 0);
     await page.locator('#sh-panel-link').screenshot({ path: `${SHOTS}/rev-10-partager${sfx}.png` });
   }
-  await gif.click();
+  await exp.click();
+  await page.locator('#sh-panel-export').getByRole('button', { name: 'Exporter (PDF, GIF)' }).click();
+  await page.locator('dialog.x15-dialog[open] input[type="radio"][value="gif"]').check({ force: true });
   // État final de l'export : démo chargée (aperçu prêt), GIF coché ; pas d'écran d'erreur
   const loaded = await page
     .waitForFunction(
@@ -75,8 +78,11 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       { timeout: 30000 },
     )
     .then((h) => h.jsonValue());
-  ok(loaded === 'gif', `« GIF / vidéo » ouvre l’export sur le GIF (${loaded})`);
+  ok(loaded === 'gif', `mode « Exporter » : la fenêtre d’export s’ouvre, GIF prêt (${loaded})`);
   await page.keyboard.press('Escape');
+  await page.locator('dialog.x15-dialog').waitFor({ state: 'detached' });
+  await page.locator('.shd-nav').getByRole('button', { name: 'Lien', exact: true }).click();
+  await page.locator('#sh-panel-link').waitFor();
 
   // Sans variable dans les textes : pas d'exemple inventé
   for (const h of t.hotspots) h.body = h.body.replace(/\{\{[^}]*\}\}/g, 'vous');

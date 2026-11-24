@@ -2534,6 +2534,26 @@
       "noPath": "No course in the workspace.",
       "toLearners": "Create a course in Learners",
       "scorm": "SCORM package for your learning platform"
+    },
+    "windowTitle": "Share “{{title}}”",
+    "publishedShort": "Published on {{date}}",
+    "notYetPublished": "Not published yet",
+    "backToModes": "Back to sharing modes",
+    "editAccess": "Edit",
+    "publishToEnable": "Publish the demo to enable the link.",
+    "exportHelp": "The file is not protected by the access setting.",
+    "group": {
+      "files": "Files",
+      "more": "Also"
+    },
+    "modeName": {
+      "lien": "Link",
+      "integrer": "Embed",
+      "perso": "Personalised links",
+      "acces": "Access",
+      "exporter": "Export",
+      "page": "Public page",
+      "formation": "Training"
     }
   },
   "analytics": {

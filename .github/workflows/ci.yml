@@ -240,6 +240,9 @@ jobs:
       - name: 'Vues d’une démo : Analytics, Leads, Visiteurs dans la démo, barre commune (retours du 24/11, 2e série §9)'
         if: always()
         run: cd apps/web && node e2e/demo-vues.e2e.cjs && THEME=dark node e2e/demo-vues.e2e.cjs && WIDTH=390 node e2e/demo-vues.e2e.cjs && THEME=dark WIDTH=390 node e2e/demo-vues.e2e.cjs
+      - name: 'Partager en fenêtre : ouverture, modes, pastille d’accès, non publiée, 390 px (retours du 24/11, 2e série §1)'
+        if: always()
+        run: cd apps/web && node e2e/partager.e2e.cjs && THEME=dark node e2e/partager.e2e.cjs && WIDTH=390 node e2e/partager.e2e.cjs && THEME=dark WIDTH=390 node e2e/partager.e2e.cjs
       - name: 'Mode présentateur complet : lancement, un seul écran, notes'
         if: always()
         run: cd apps/web && node e2e/presentateur-complet.e2e.cjs

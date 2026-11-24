@@ -493,7 +493,7 @@ export function LearnersPage() {
                   items={firstModules.map((p) => ({
                     label: p.title || t('learners.untitled'),
                     icon: <GraduationCap />,
-                    onSelect: () => nav(`/demos/${p.modules[0]!.demoId}/share?tab=perso`),
+                    onSelect: () => nav(`/demos/${p.modules[0]!.demoId}/edit?share=perso`),
                   }))}
                 />
               )}

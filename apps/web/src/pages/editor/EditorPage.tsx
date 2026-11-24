@@ -118,6 +118,7 @@ import '../../styles/maquette-peau.css';
 import { BackButton, Select } from '@flowdsiml/ui';
 import { ImagePanel } from './images/ImagePanel';
 import { asLayers, layerName } from './images/layers';
+import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -252,6 +253,21 @@ export function EditorPage() {
   const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
   const location = useLocation();
+  // §1 : fenêtre Partager au-dessus de l'éditeur ; « Publier » de son bandeau lance la publication d'ici
+  const share = useShareWindow();
+  const shareWindow = share.view && demoId && (
+    <ShareDialog
+      demoId={demoId}
+      view={share.view}
+      onView={share.setView}
+      onClose={share.close}
+      justPublished={share.justPublished}
+      onPublish={() => {
+        share.close();
+        requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.ed-publish button')?.click());
+      }}
+    />
+  );
   // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages
   const [panel, setPanelState] = useState<ToolId | null>(() =>
     params.get('tab') === 'settings' ? 'settings' : savedTool(),
@@ -587,7 +603,18 @@ export function EditorPage() {
   }, [ready, editor.steps.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (narrow)
-    return <EditorNarrowView editor={editor} comments={comments} index={index} setIndex={setIndex} />;
+    return (
+      <>
+        <EditorNarrowView
+          editor={editor}
+          comments={comments}
+          index={index}
+          setIndex={setIndex}
+          onShare={share.open}
+        />
+        {shareWindow}
+      </>
+    );
   const backToDemos = (primary = false) => (
     <Link to="/" className={`fd-btn${primary ? ' fd-btn--primary' : ''}`}>
       {t('loading.backToDemos')}
@@ -832,6 +859,7 @@ export function EditorPage() {
         <TranslateDialog editor={editor} ws={ws.id} onClose={() => setTranslating(false)} />
       )}
       <Suspense fallback={null}>
+        {shareWindow}
         {distributing && demoId && can('demo.edit') && (
           <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
         )}
@@ -1092,10 +1120,11 @@ export function EditorPage() {
                 : []),
             ]}
           />
-          <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
+          {/* §1 : Partager s'ouvre en fenêtre, au-dessus de la démo (?share=…) */}
+          <button type="button" className="btn btn-secondary btn-sm" data-share-open="" onClick={share.open}>
             <Share2 aria-hidden="true" />
             {t('editor.share')}
-          </Link>
+          </button>
           {can('demo.publish') && (
             <span className="ed-publish">
               <PublishButton

@@ -254,7 +254,7 @@ const N = ' ';
     .last()
     .click();
   await page.waitForFunction(
-    () => location.hash.includes('/share') || !!document.querySelector('.publish-error'),
+    () => location.hash.includes('share=') || !!document.querySelector('.publish-error'),
   );
   const v = state.tables.demo_versions.at(-1);
   const pubBa = v?.manifest.steps.find((s) => s.kind === 'before_after')?.beforeAfter;

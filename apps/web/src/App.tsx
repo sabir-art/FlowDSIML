@@ -4,7 +4,15 @@ import { useNarrow } from './lib/useNarrow';
 import { loadRestLocale, withRestLocale } from './i18n';
 import { ToastProvider } from './components/Toast';
 import { HelpProvider } from './help/HelpProvider';
-import { HashRouter, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import {
+  HashRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Alert } from '@flowdsiml/ui';
 import './app.css';
@@ -147,7 +155,6 @@ const DemoVisitorsView = lazyRest(() =>
 const AnalyticsPage = lazyRest(() =>
   import('./pages/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage })),
 );
-const SharePage = lazyRest(() => import('./pages/share/SharePage').then((m) => ({ default: m.SharePage })));
 /** §9 : #/demos/:id/preview ouvre l'éditeur sur l'aperçu. */
 function PreviewRedirect() {
   const { demoId } = useParams();
@@ -155,6 +162,19 @@ function PreviewRedirect() {
 }
 
 /** L16 : #/demos/:id/distribute ouvre la modale « Diffuser » au-dessus de l'éditeur. */
+/**
+ * §1 : l'ancienne page Partager est une fenêtre au-dessus de la démo. #/demos/:id/share redirige vers
+ * l'éditeur avec ?share=… (l'ancien ?tab= et ?published=1 sont repris).
+ */
+function ShareRedirect() {
+  const { demoId = '' } = useParams();
+  const [params] = useSearchParams();
+  const mode =
+    { embed: 'integrer', perso: 'perso', access: 'acces', page: 'page' }[params.get('tab') ?? ''] ?? 'lien';
+  const published = params.get('published') ? '&published=1' : '';
+  return <Navigate replace to={`/demos/${demoId}/edit?share=${mode}${published}`} />;
+}
+
 function DistributeRoute() {
   const { demoId = '' } = useParams();
   return <Navigate replace to={`/demos/${demoId}/edit?distribute=1`} />;
@@ -296,7 +316,7 @@ export function App() {
                   >
                     <Route index element={<DemosPage />} />
                     <Route path="/sandbox" element={<DemosPage key="sandbox" sandbox />} />
-                    <Route path="/demos/:demoId/share" element={<SharePage />} />
+                    <Route path="/demos/:demoId/share" element={<ShareRedirect />} />
                     <Route path="/demos/:demoId/distribute" element={<DistributeRoute />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/nouveautes" element={<NewsPage />} />

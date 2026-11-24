@@ -1,0 +1,303 @@
+/**
+ * Retours du 24/11 (2e série) §1 : Partager en fenêtre, au-dessus de la démo. Ouverture depuis la barre
+ * de chaque vue, depuis la carte d'une démo et par l'adresse (?share=…) ; focus piégé puis rendu au
+ * bouton ; chaque mode ; pastille d'accès présente partout sauf dans Accès, mise à jour après
+ * « Enregistrer » ; copie du lien ; export ; démo non publiée ; 390 px (liste des modes, puis le mode,
+ * retour) sans défilement horizontal ; axe. Données fictives.
+ * Usage : [THEME=dark] [WIDTH=390] [SHOTS_DIR=…] node e2e/partager.e2e.cjs
+ */
+const { chromium } = require('playwright');
+const { AxeBuilder } = require('@axe-core/playwright');
+const { install, seed } = require('./fake-supabase.cjs');
+const { sfx, themedContext } = require('./_theme.cjs');
+const APP = process.env.APP_URL || 'http://localhost:5173';
+const SHOTS = process.env.SHOTS_DIR;
+const WIDTH = Number(process.env.WIDTH || 1440);
+const MOBILE = WIDTH < 640;
+const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
+
+(async () => {
+  const b = await chromium.launch();
+  const errors = [];
+  const ok = (c, l) => {
+    console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
+    if (!c) process.exitCode = 1;
+  };
+  const open = async (path, prepare = () => {}) => {
+    const ctx = await themedContext(b, {
+      viewport: { width: WIDTH, height: MOBILE ? 844 : 900 },
+      permissions: ['clipboard-read', 'clipboard-write'],
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    const state = seed();
+    const demo = state.tables.demos.find((d) => d.id === DEMO);
+    // Démo publiée par défaut
+    demo.status = 'published';
+    demo.current_version_id = 'v-1';
+    state.tables.demo_versions.push({
+      id: 'v-1',
+      demo_id: DEMO,
+      number: 1,
+      manifest: { steps: [] },
+      published_at: '2026-11-24T10:12:00Z',
+      public_ack: null,
+    });
+    prepare(state, demo);
+    await install(page, state);
+    await page.goto(`${APP}/#${path}`);
+    return { page, state };
+  };
+  const dlg = (page) => page.locator('dialog.shd-dialog[open]');
+  const mode = async (page, name) => {
+    // À 390 px : retour à la liste des modes, puis le mode s'ouvre à sa place
+    if (MOBILE && (await page.locator('.shd.is-menu').count()) === 0) {
+      await dlg(page).locator('.shd-back').click();
+      await page.locator('.shd.is-menu').waitFor();
+    }
+    await dlg(page).locator('.shd-nav').getByRole('button', { name, exact: true }).click();
+    await page.waitForFunction(
+      (n) =>
+        !document.querySelector('.shd.is-menu') && document.querySelector('#shd-mode')?.textContent === n,
+      name,
+    );
+  };
+  const noScroll = (page) =>
+    page.evaluate(() => {
+      const body = document.querySelector('.shd-body');
+      return (
+        document.documentElement.scrollWidth <= window.innerWidth &&
+        (!body || body.scrollWidth <= body.clientWidth)
+      );
+    });
+  const settle = (page) =>
+    page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .every((a) => a.effect?.getComputedTiming().iterations === Infinity || a.playState !== 'running'),
+    );
+  const shot = async (page, name) => {
+    if (!SHOTS) return;
+    await settle(page);
+    await page.screenshot({ path: `${SHOTS}/${name}${sfx}-${WIDTH}.png` });
+  };
+  const axe = async (page, name) => {
+    const r = await new AxeBuilder({ page }).include('dialog.shd-dialog').analyze();
+    const bad = r.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
+    ok(
+      bad.length === 0,
+      `${name} : axe sans violation (${bad.map((v) => `${v.id} ${v.nodes[0]?.target}`).join(' ; ')})`,
+    );
+  };
+
+  // ===== Ouverture depuis la barre de chaque vue, focus piégé puis rendu =====
+  {
+    const { page } = await open(`/demos/${DEMO}/analytics`);
+    for (const view of ['analytics', 'leads', 'visitors']) {
+      await page.goto(`${APP}/#/demos/${DEMO}/${view}`);
+      const btn = page.locator('.dv-bar [data-share-open]');
+      await btn.waitFor();
+      await btn.click();
+      await dlg(page).waitFor();
+      ok(
+        new RegExp(`/demos/${DEMO}/${view}\\?share=${MOBILE ? 'menu' : 'lien'}$`).test(page.url()),
+        `${view} : « Partager » ouvre la fenêtre sur la vue (${page.url().split('#')[1]})`,
+      );
+      ok(
+        await page.evaluate(() => !!document.activeElement?.closest('dialog.shd-dialog')),
+        `${view} : le focus est dans la fenêtre`,
+      );
+      await page.keyboard.press('Escape');
+      await dlg(page).waitFor({ state: 'detached' });
+      ok(
+        !/share=/.test(page.url()) &&
+          (await page.evaluate(() => document.activeElement?.hasAttribute('data-share-open'))),
+        `${view} : Échap ferme, le focus revient à « Partager »`,
+      );
+    }
+    // Focus piégé : Tab ne sort pas de la fenêtre
+    await page.locator('.dv-bar [data-share-open]').click();
+    await dlg(page).waitFor();
+    let inside = true;
+    for (let i = 0; i < 25 && inside; i++) {
+      await page.keyboard.press('Tab');
+      inside = await page.evaluate(
+        () =>
+          !!document.activeElement?.closest('dialog.shd-dialog') || document.activeElement === document.body,
+      );
+    }
+    ok(inside, 'focus piégé dans la fenêtre (25 tabulations)');
+    // Fermeture par la croix
+    await dlg(page)
+      .locator(MOBILE ? '.shd-close--side' : '.shd-top .shd-close')
+      .click();
+    await dlg(page).waitFor({ state: 'detached' });
+    ok(true, 'la croix ferme la fenêtre');
+    await page.context().close();
+  }
+
+  // ===== Depuis l'éditeur et depuis la carte d'une démo ; ancienne adresse redirigée =====
+  if (!MOBILE) {
+    const { page } = await open(`/demos/${DEMO}/edit`);
+    await page.locator('.ed-bar [data-share-open]').click();
+    await dlg(page).waitFor();
+    ok(/\/edit\?share=lien$/.test(page.url()), 'éditeur : « Partager » ouvre la fenêtre (?share=lien)');
+    await page.keyboard.press('Escape');
+    await dlg(page).waitFor({ state: 'detached' });
+    await page.goto(`${APP}/#/`);
+    const card = page.locator('.demo-card, .dm-card, article').filter({ hasText: 'Démo CRM' }).first();
+    await card.waitFor();
+    await card
+      .getByRole('button', { name: /Actions|Plus/ })
+      .first()
+      .click();
+    await page.getByRole('menuitem', { name: 'Partager' }).click();
+    await dlg(page).waitFor();
+    ok(/\/edit\?share=lien$/.test(page.url()), 'carte d’une démo : menu ⋯ › Partager ouvre la fenêtre');
+    await page.goto(`${APP}/#/demos/${DEMO}/share?tab=access`);
+    await page.waitForFunction(() => /\/edit\?share=acces$/.test(location.hash));
+    await dlg(page).waitFor();
+    ok(true, 'ancienne adresse /share?tab=access : redirigée vers ?share=acces');
+    await page.context().close();
+  }
+
+  // ===== Les modes, la pastille d'accès, la copie =====
+  {
+    const { page, state } = await open(`/demos/${DEMO}/analytics?share=${MOBILE ? 'menu' : 'lien'}`);
+    await dlg(page).waitFor();
+    const d = dlg(page);
+    ok(
+      (await d.locator('#shd-title').textContent()) === 'Partager « Démo CRM »' &&
+        /^Publiée le /.test(await d.locator('.shd-head p').textContent()),
+      'en-tête : « Partager « Démo CRM » », « Publiée le … »',
+    );
+    const names = (await d.locator('.shd-nav__item').allTextContents()).map((x) => x.trim());
+    ok(
+      names.slice(0, 5).join('|') === 'Lien|Intégrer|Liens personnalisés|Accès|Exporter',
+      `modes : ${names.join(', ')}`,
+    );
+    if (MOBILE) {
+      ok(
+        (await d.locator('.shd-main').isHidden()) && (await noScroll(page)),
+        '390 : la liste des modes d’abord',
+      );
+      await shot(page, 'partager-menu');
+    }
+    await mode(page, 'Lien');
+    if (!MOBILE)
+      ok(
+        (await d.locator('.shd-nav__item[aria-current="page"]').textContent()).trim() === 'Lien',
+        'mode courant : aria-current',
+      );
+    const pill = d.locator('.shd-access');
+    ok(
+      (await pill.locator('.shd-access__txt').textContent()) === 'Toute personne avec le lien' &&
+        (await pill.getByRole('button', { name: 'Modifier' }).count()) === 1,
+      `Lien : pastille d’accès « Toute personne avec le lien » + « Modifier » (${JSON.stringify(await pill.innerText())})`,
+    );
+    ok((await d.locator('.shd-banner').count()) === 0, 'démo publiée : pas de bandeau');
+    // Copie du lien
+    const link = await d.locator('#sh-pub').inputValue();
+    await d
+      .locator('#sh-panel-link')
+      .getByRole('button', { name: /^Copier/ })
+      .first()
+      .click();
+    ok(
+      (await page.evaluate(() => navigator.clipboard.readText())) === link && /\/d\/|\/l\//.test(link),
+      'Lien : « Copier » met le lien public dans le presse-papiers',
+    );
+    ok(await noScroll(page), 'Lien : pas de défilement horizontal');
+    await shot(page, 'partager-lien');
+    await axe(page, 'Lien');
+
+    for (const m of ['Intégrer', 'Liens personnalisés', 'Exporter']) {
+      await mode(page, m);
+      ok((await d.locator('.shd-access').count()) === 1, `${m} : pastille d’accès présente`);
+      ok(await noScroll(page), `${m} : pas de défilement horizontal`);
+      await axe(page, m);
+      if (m === 'Intégrer') await shot(page, 'partager-integrer');
+    }
+    // Exporter : le fichier se prépare dans la fenêtre d'export
+    await d
+      .locator('#sh-panel-export')
+      .getByRole('button', { name: /^Exporter/ })
+      .click();
+    await page.locator('dialog.x15-dialog[open]').waitFor();
+    ok(
+      (await d.locator('#sh-panel-export').textContent()).includes(
+        'Le fichier n’est pas protégé par l’accès.',
+      ),
+      'Exporter : « Le fichier n’est pas protégé par l’accès. », la fenêtre d’export s’ouvre',
+    );
+    await page.keyboard.press('Escape');
+    await page.locator('dialog.x15-dialog').waitFor({ state: 'detached' });
+    ok((await dlg(page).count()) === 1, 'Échap ferme l’export, pas la fenêtre Partager');
+
+    // Accès : pas de pastille ; un mot de passe enregistré met la pastille à jour partout
+    await d.locator('.shd-access').getByRole('button', { name: 'Modifier' }).click();
+    await page.waitForFunction(() => document.querySelector('#shd-mode')?.textContent === 'Accès');
+    ok(/share=acces$/.test(page.url()), '« Modifier » ouvre le mode Accès');
+    ok((await d.locator('.shd-access').count()) === 0, 'Accès : pas de pastille d’accès');
+    await d.getByRole('radio', { name: /Avec un mot de passe/ }).check({ force: true });
+    await d.locator('input[type="password"]').first().fill('Fictif-2026!');
+    await shot(page, 'partager-acces');
+    await axe(page, 'Accès');
+    await d.getByRole('button', { name: 'Enregistrer le mot de passe' }).click();
+    await page.waitForFunction(() => true);
+    for (let i = 0; i < 50 && state.tables.demo_access[0]?.mode !== 'password'; i++)
+      await page.waitForTimeout(100);
+    ok(state.tables.demo_access[0]?.mode === 'password', 'Accès : mot de passe enregistré');
+    await mode(page, 'Lien');
+    await page.waitForFunction(
+      () => document.querySelector('.shd-access__txt')?.textContent === 'Avec un mot de passe',
+    );
+    ok(true, 'pastille d’accès mise à jour : « Avec un mot de passe »');
+    await mode(page, 'Intégrer');
+    ok(
+      (await d.locator('.shd-access__txt').textContent()) === 'Avec un mot de passe',
+      'la même pastille dans chaque mode',
+    );
+    if (MOBILE) {
+      await d.locator('.shd-back').click();
+      await d.locator('.shd.is-menu').waitFor();
+      ok(/share=menu$/.test(page.url()), '390 : « ← » revient à la liste des modes');
+    }
+    await page.context().close();
+  }
+
+  // ===== Démo non publiée =====
+  {
+    const { page } = await open(`/demos/${DEMO}/analytics?share=lien`, (state, demo) => {
+      demo.status = 'draft';
+      demo.current_version_id = null;
+      state.tables.demo_versions.length = 0;
+    });
+    const d = dlg(page);
+    await d.locator('.shd-banner').waitFor();
+    ok(
+      (await d.locator('.shd-banner').getAttribute('role')) === 'status' &&
+        (await d.locator('.shd-banner span').textContent()) === 'Publiez la démo pour activer le lien.' &&
+        (await d.locator('.shd-banner').getByRole('button', { name: 'Publier' }).count()) === 1,
+      'non publiée : bandeau « Publiez la démo pour activer le lien. » + « Publier »',
+    );
+    ok(
+      (await d.locator('.shd-head p').textContent()) === 'Pas encore publiée',
+      'en-tête : « Pas encore publiée »',
+    );
+    ok(await d.locator('#sh-pub').isDisabled(), 'non publiée : le lien est grisé');
+    ok((await d.locator('.shd-access').count()) === 1, 'non publiée : l’accès se règle déjà');
+    await shot(page, 'partager-nonpubliee');
+    await axe(page, 'Non publiée');
+    await d.locator('.shd-banner').getByRole('button', { name: 'Publier' }).click();
+    await page.waitForFunction((id) => location.hash.startsWith(`#/demos/${id}/edit`), DEMO);
+    ok(true, '« Publier » du bandeau mène à la publication, dans l’éditeur');
+    await page.context().close();
+  }
+
+  ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);
+  await b.close();
+})().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

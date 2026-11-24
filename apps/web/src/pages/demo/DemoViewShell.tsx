@@ -19,6 +19,7 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
+import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 import './demo-views.css';
 
 export type DemoView = 'analytics' | 'leads' | 'visitors';
@@ -39,6 +40,7 @@ export function DemoViewShell() {
   const { demoId = '' } = useParams();
   const loc = useLocation();
   const navigate = useNavigate();
+  const share = useShareWindow();
   const { can } = useWorkspace();
   const [demo, setDemo] = useState<Tables<'demos'> | null | undefined>(undefined);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
@@ -134,15 +136,17 @@ export function DemoViewShell() {
           />
         </div>
         <div className="dv-bar__r">
-          <Link
+          <button
+            type="button"
             className="fd-btn dv-share"
-            to={`/demos/${demoId}/share`}
+            data-share-open=""
             aria-label={t('editor.share')}
             title={t('editor.share')}
+            onClick={share.open}
           >
             <Share2 size={16} aria-hidden="true" />
             <span>{t('editor.share')}</span>
-          </Link>
+          </button>
           {can('demo.publish') && (
             <Link className="fd-btn fd-btn--primary" to={`/demos/${demoId}/edit`} state={{ publish: true }}>
               <Rocket size={16} aria-hidden="true" />
@@ -151,6 +155,15 @@ export function DemoViewShell() {
           )}
         </div>
       </header>
+      {share.view && (
+        <ShareDialog
+          demoId={demoId}
+          view={share.view}
+          onView={share.setView}
+          onClose={share.close}
+          justPublished={share.justPublished}
+        />
+      )}
       <main className="dv-main" id="main">
         <div className="dv-wrap">
           <h1 className="sr-only">{t(`demoViews.h1.${view}`, { title: demo.title })}</h1>

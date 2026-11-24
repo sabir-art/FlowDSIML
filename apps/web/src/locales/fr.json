@@ -2534,6 +2534,26 @@
       "noPath": "Aucune formation dans l’espace.",
       "toLearners": "Créer une formation dans Apprenants",
       "scorm": "Paquet SCORM pour votre plateforme de formation"
+    },
+    "windowTitle": "Partager « {{title}} »",
+    "publishedShort": "Publiée le {{date}}",
+    "notYetPublished": "Pas encore publiée",
+    "backToModes": "Retour aux modes de partage",
+    "editAccess": "Modifier",
+    "publishToEnable": "Publiez la démo pour activer le lien.",
+    "exportHelp": "Le fichier n’est pas protégé par l’accès.",
+    "group": {
+      "files": "Fichiers",
+      "more": "Aussi"
+    },
+    "modeName": {
+      "lien": "Lien",
+      "integrer": "Intégrer",
+      "perso": "Liens personnalisés",
+      "acces": "Accès",
+      "exporter": "Exporter",
+      "page": "Page publique",
+      "formation": "Formation"
     }
   },
   "analytics": {

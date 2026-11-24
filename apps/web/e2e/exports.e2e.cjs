@@ -236,7 +236,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Brouillon : l'export n'est pas proposé, un message explique pourquoi
   {
     const { p } = await open({ published: false }, `/#/demos/${DEMO}/share`);
-    await p.getByRole('button', { name: 'Exporter (PDF, GIF)' }).click();
+    // §1 : l'export est un mode de la fenêtre Partager
+    await p.locator('.shd-nav').getByRole('button', { name: 'Exporter', exact: true }).click();
+    await p.locator('#sh-panel-export').getByRole('button', { name: 'Exporter (PDF, GIF)' }).click();
     await p.waitForSelector('dialog.x15-dialog[open]');
     ok(
       /jamais été publiée/.test(await p.locator('dialog.x15-dialog').textContent()),
