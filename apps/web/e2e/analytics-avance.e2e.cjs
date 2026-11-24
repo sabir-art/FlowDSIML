@@ -181,6 +181,16 @@ const live = (n) => ({
       (await live.locator('select, [role="combobox"]').count()) === 0,
       'temps réel : pas de second sélecteur de démo',
     );
+    // Le direct ne dépend ni de la source ni de la période : seul le filtre Démo reste sur cet onglet
+    ok(
+      (await page.getByRole('radiogroup', { name: 'Période' }).count()) === 0 &&
+        (await page
+          .locator('.an-toolbar')
+          .getByRole('button', { name: /Source/ })
+          .count()) === 0 &&
+        (await page.locator('.an-toolbar').getByRole('button', { name: /Démo/ }).count()) === 1,
+      'temps réel : filtres Source et période masqués, filtre Démo gardé',
+    );
     ok(css.tile === css.other, `temps réel : première tuile sans aplat (${css.tile})`);
     ok(
       css.steps.length === 1 && css.steps[0] === css.primary,
@@ -431,23 +441,23 @@ const live = (n) => ({
     ok((await page.locator('.l19-saved li, .l19-saved tr').count()) >= 3, 'L19-04 : 3 segments enregistrés');
     await shot('l19-04-segments');
     // L19-04 (reprise UX) : sélecteur de critère ouvert, critères à venir désactivés avec « Bientôt ».
-    // Une liste déroulante native ne se capture pas ouverte : on l'affiche en liste (mêmes options).
+    // Le critère est un Select maison (COMP-01) : sa liste s'ouvre vraiment pour la capture.
     await page.getByRole('button', { name: 'Ajouter un filtre' }).click();
     const fdc = page.getByRole('dialog', { name: 'Ajouter un filtre' });
     const crit = fdc.getByLabel('Critère de la condition 1');
-    await crit.evaluate((el) => {
-      el.size = Math.min(14, el.options.length);
-      el.style.height = 'auto';
-      // Liste ouverte : chaque libellé et son « Bientôt » entiers (comme la liste native)
-      el.style.width = 'max-content';
-      el.style.minWidth = '100%';
-    });
     ok(
       (await optionsOf(crit, { disabled: true })).length > 0 &&
         (await optionsOf(crit, { disabled: true })).every((x) => /Bientôt/.test(x)),
       'L19-04 : critères indisponibles désactivés, badge « Bientôt »',
     );
-    await shot('l19-04-criteres');
+    {
+      await crit.click();
+      const list = page.locator('.fd-sel-pop [role="listbox"]');
+      await list.waitFor();
+      await shot('l19-04-criteres');
+      await page.keyboard.press('Escape');
+      await list.waitFor({ state: 'detached' });
+    }
     await fdc
       .getByRole('button', { name: /Annuler|Fermer/ })
       .first()

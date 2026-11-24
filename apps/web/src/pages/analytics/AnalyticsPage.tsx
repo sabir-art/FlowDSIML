@@ -349,15 +349,20 @@ export function AnalyticsPage() {
       {/* L48-D §2 : Démo, Source | période, Exporter */}
       <ListToolbar
         className="an-toolbar"
-        activeCount={(demo ? 1 : 0) + (source ? 1 : 0)}
+        // Temps réel : le direct ne dépend ni de la source ni de la période, seul le filtre Démo reste
+        activeCount={(demo ? 1 : 0) + (source && tab !== 'live' ? 1 : 0)}
         onReset={() => {
           setDemo('');
           setSource('');
         }}
-        status={t('analytics.filteredOn', {
-          demo: demo ? title(demo) : t('analytics.allDemos'),
-          source: source ? t(`analytics.src.${source}`) : t('analytics.allSources'),
-        })}
+        status={
+          tab === 'live'
+            ? t('analytics.filteredOnDemo', { demo: demo ? title(demo) : t('analytics.allDemos') })
+            : t('analytics.filteredOn', {
+                demo: demo ? title(demo) : t('analytics.allDemos'),
+                source: source ? t(`analytics.src.${source}`) : t('analytics.allSources'),
+              })
+        }
         filters={
           <>
             <FilterMenu
@@ -384,24 +389,26 @@ export function AnalyticsPage() {
                 })),
               ]}
             />
-            <FilterMenu
-              icon={<Link2 />}
-              label={t('analytics.sourceLabel')}
-              value={source ? t(`analytics.src.${source}`) : t('analytics.allSources')}
-              active={!!source}
-              items={[
-                {
-                  label: t('analytics.allSources'),
-                  icon: source ? <span /> : <Check />,
-                  onSelect: () => setSource(''),
-                },
-                ...(['direct', 'embed', 'link', 'page'] as Source[]).map((k) => ({
-                  label: t(`analytics.src.${k}`),
-                  icon: source === k ? <Check /> : <span />,
-                  onSelect: () => setSource(k),
-                })),
-              ]}
-            />
+            {tab !== 'live' && (
+              <FilterMenu
+                icon={<Link2 />}
+                label={t('analytics.sourceLabel')}
+                value={source ? t(`analytics.src.${source}`) : t('analytics.allSources')}
+                active={!!source}
+                items={[
+                  {
+                    label: t('analytics.allSources'),
+                    icon: source ? <span /> : <Check />,
+                    onSelect: () => setSource(''),
+                  },
+                  ...(['direct', 'embed', 'link', 'page'] as Source[]).map((k) => ({
+                    label: t(`analytics.src.${k}`),
+                    icon: source === k ? <Check /> : <span />,
+                    onSelect: () => setSource(k),
+                  })),
+                ]}
+              />
+            )}
             {FILTERED.includes(tab) && (
               <FilterBar
                 def={segId ? null : filters}
@@ -421,19 +428,21 @@ export function AnalyticsPage() {
         }
         end={
           <div className="an-toolbar__end">
-            <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
-              {PERIODS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  role="radio"
-                  aria-checked={days === p}
-                  onClick={() => setDays(p)}
-                >
-                  {t('analytics.daysShort', { count: p })}
-                </button>
-              ))}
-            </div>
+            {tab !== 'live' && (
+              <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
+                {PERIODS.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    role="radio"
+                    aria-checked={days === p}
+                    onClick={() => setDays(p)}
+                  >
+                    {t('analytics.daysShort', { count: p })}
+                  </button>
+                ))}
+              </div>
+            )}
             <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
               <Download aria-hidden="true" />
               {t('analytics.export')}
