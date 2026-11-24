@@ -338,3 +338,47 @@ export const EXT: Record<Mime, string> = {
   'image/svg+xml': 'svg',
   'font/woff2': 'woff2',
 };
+
+// ===== Logo pris dans la médiathèque (retours client du 24/11 §3.1) =====
+// Choisir un fichier de la médiathèque comme logo de l'espace ou du centre de formation en fait une COPIE
+// à l'emplacement habituel du logo (bucket « branding »), avec les mêmes règles qu'un téléversement.
+export type LogoTarget = 'workspace' | 'center';
+
+/** Types et poids acceptés par emplacement : ceux du téléversement direct (Marque, Parcours de formation). */
+export const LOGO_RULES: Record<LogoTarget, { mimes: Mime[]; maxBytes: number }> = {
+  workspace: { mimes: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'], maxBytes: 2 * 1024 * 1024 },
+  center: { mimes: ['image/png', 'image/webp', 'image/svg+xml'], maxBytes: 512 * 1024 },
+};
+
+/**
+ * Vérifie les octets du fichier avant la copie : la signature est relue (le type enregistré ne fait pas
+ * foi), le type et le poids doivent convenir à l'emplacement, un SVG est assaini de nouveau.
+ * Lève MediaError('BAD_TYPE' | 'TOO_BIG' | 'SVG_REJECTED').
+ */
+export function logoCopy(
+  bytes: Uint8Array,
+  target: LogoTarget,
+): { mime: Mime; ext: string; bytes: Uint8Array } {
+  const rules = LOGO_RULES[target];
+  const mime = sniff(bytes);
+  if (!mime || !rules.mimes.includes(mime)) throw new MediaError('BAD_TYPE');
+  let out = bytes;
+  if (mime === 'image/svg+xml') {
+    try {
+      out = new TextEncoder().encode(sanitizeSvg(new TextDecoder('utf-8', { fatal: true }).decode(bytes)));
+    } catch (e) {
+      throw new MediaError(e instanceof MediaError ? e.code : 'SVG_REJECTED');
+    }
+  }
+  if (out.length > rules.maxBytes) throw new MediaError('TOO_BIG');
+  return { mime, ext: EXT[mime], bytes: out };
+}
+
+/** Chemin du logo copié, au format attendu par chaque emplacement (voir center_draft_valid). */
+export function logoPath(ws: string, target: LogoTarget, ext: string, rand: () => string): string {
+  return target === 'workspace'
+    ? `${ws}/logo-${rand()}.${ext}`
+    : `${ws}/center-logo-${rand()
+        .replace(/[^0-9a-z]/g, '')
+        .slice(0, 12)}.${ext}`;
+}
