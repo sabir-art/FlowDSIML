@@ -117,130 +117,92 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await dragOn('dragleave');
   await block.locator('.fd-drop__veil').waitFor({ state: 'detached' });
   ok(/Déposer le fichier ici/.test(veil), 'logo : dépôt sur tout le bloc (voile)');
-  const open = block.getByRole('button', { name: 'Médiathèque' });
+  // §3.3 : la fenêtre de sélection, la même partout (« Choisir dans la médiathèque »)
+  const open = block.getByRole('button', { name: 'Choisir dans la médiathèque' });
   await open.click();
-  const dlg = page.getByRole('dialog', { name: 'Médiathèque' });
+  const dlg = page.getByRole('dialog', { name: 'Choisir un logo' });
   await dlg.waitFor();
+  const use = dlg.getByRole('button', { name: 'Utiliser ce logo' });
+  const tile = (name) => dlg.getByRole('radio', { name, exact: true });
+  const tiles = dlg.locator('.md-pick__card');
 
-  // L18-04 : vide
+  // Vide
   ok(
-    (await dlg.getByText('Importer votre premier fichier').count()) === 1,
-    'L18-04 : vide, la zone d’import en tête',
+    (await dlg.getByText('Importer un nouveau logo').first().isVisible()) &&
+      (await dlg.getByText('Aucun fichier pour le moment. Importez-en un ci-dessus.').count()) === 1,
+    'fenêtre de sélection vide : zone d’import en tête, « Aucun fichier pour le moment »',
+  );
+  ok(nb(await dlg.textContent()).includes('Logo de la démo «'), 'sous-titre : la destination du fichier');
+  ok(
+    (await use.getAttribute('aria-disabled')) === 'true',
+    '« Utiliser ce logo » inactif tant que rien n’est choisi',
   );
   ok(
-    (await dlg.getByRole('button', { name: 'Utiliser ce fichier' }).getAttribute('aria-disabled')) === 'true',
-    'L18-04 : « Utiliser ce fichier » inactif',
+    (await dlg.getByRole('radio', { name: 'Logos' }).getAttribute('aria-checked')) === 'true' &&
+      (await dlg.getByRole('radio', { name: 'Polices' }).getAttribute('aria-disabled')) === 'true',
+    'filtres réglés sur Logos ; Polices désactivé (un logo ne reçoit pas une police)',
   );
-  ok(
-    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).count()) === 0 &&
-      (await dlg.getByRole('radio', { name: 'Logos' }).count()) === 0,
-    'médiathèque vide : ni recherche ni filtres',
-  );
-  ok(/0\s?Ko sur\s500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Ko)');
   await shot('l18-04-media-vide');
 
   // Imports
-  const importVia = async (file, label) => {
+  const importVia = async (file) => {
     const [ch] = await Promise.all([
       page.waitForEvent('filechooser'),
-      dlg.getByRole('button', { name: label }).click(),
+      dlg.getByRole('button', { name: /^Importer/ }).click(),
     ]);
     await ch.setFiles(file);
   };
-  await importVia(logo, 'Importer…');
-  await dlg.getByRole('button', { name: 'logo-acme.png' }).waitFor();
+  await importVia(logo);
+  await tile('logo-acme.png').waitFor();
+  ok(state.tables.media_files[0].kind === 'logo', 'import par la fonction media (catégorie demandée : logo)');
   ok(
-    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).isEnabled()) &&
-      (await dlg.getByRole('radio', { name: 'Logos' }).isEnabled()),
-    'premier fichier : la recherche et les filtres apparaissent',
-  );
-  ok(state.tables.media_files[0].kind === 'logo', 'import par la fonction media (usage « logo »)');
-  ok(
-    (await dlg.getByRole('button', { name: 'logo-acme.png' }).getAttribute('aria-pressed')) === 'true',
-    'fichier importé sélectionné',
+    (await tile('logo-acme.png').isChecked()) && (await use.getAttribute('aria-disabled')) === null,
+    'fichier importé choisi d’office, « Utiliser ce logo » disponible',
   );
   // L18-03 : une image de fond s'importe sous le filtre « Images » (classée image, pas logo)
   await dlg.getByRole('radio', { name: 'Images' }).click();
-  await importVia(fond, 'Importer…');
-  await dlg.getByRole('button', { name: 'fond-accueil.png' }).waitFor();
+  await importVia(fond);
+  await tile('fond-accueil.png').waitFor();
   ok(
     state.tables.media_files.find((x) => x.name === 'fond-accueil.png')?.kind === 'image' &&
-      (await dlg.locator('.md-tile').count()) === 1,
-    'L18-03 : l’image importée est classée « Images »',
+      (await tiles.count()) === 1,
+    'L18-03 : l’image importée sous « Images » est classée « Images »',
   );
   ok(
-    /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-foot .md-sel-warn').textContent()) &&
-      (await dlg.getByRole('button', { name: 'fond-accueil.png' }).locator('.md-tile-warn').count()) === 1,
-    'L18-03 : avertissement rattaché à l’image importée (vignette et pied)',
+    /n’est pas vérifiée automatiquement/.test(await dlg.locator('.md-pick__unverified').textContent()) &&
+      (await tiles.first().locator('.md-pick__warn').count()) === 1,
+    'L18-03 : avertissement rattaché à l’image importée (carte et phrase)',
   );
-  {
-    // Taille réelle du fichier et total réel (Ko sous 1 Mo)
-    const foot = nb(await dlg.locator('.md-foot').textContent());
-    const kb = (n) => `${Math.max(1, Math.round(n / 1024))} Ko`;
-    const total = state.tables.media_files.reduce((n, x) => n + (x.size_bytes || 0), 0);
-    const own = state.tables.media_files.find((x) => x.name === 'fond-accueil.png').size_bytes;
-    ok(foot.includes(`${kb(own)} · ${kb(total)} sur 500 Mo`), `L18-03 : taille et total réels (${foot})`);
-  }
   await shot('l18-03-media');
 
   // Filtre et recherche
   await dlg.getByRole('radio', { name: 'Tout' }).click();
-  ok((await dlg.locator('.md-tile').count()) === 2, 'filtre « Tout » : 2 fichiers');
-  await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).fill('fond');
-  ok((await dlg.locator('.md-tile').count()) === 1, 'recherche');
+  ok((await tiles.count()) === 2, 'filtre « Tout » : 2 fichiers');
+  await dlg.getByRole('searchbox', { name: 'Rechercher' }).fill('fond');
+  ok((await tiles.count()) === 1, 'recherche');
   await dlg.getByRole('searchbox').fill('');
-  await dlg.getByRole('button', { name: 'logo-acme.png' }).click();
-  ok((await dlg.locator('.md-foot').textContent()).includes(`sur\u00a0500${N}Mo`), 'pied : quota sur 500 Mo');
-  ok((await dlg.locator('.md-sel-warn').count()) === 0, 'logo : pas d’avertissement (autre fichier)');
+  await tile('logo-acme.png').check();
+  ok((await dlg.locator('.md-pick__unverified').count()) === 0, 'logo : pas d’avertissement (autre fichier)');
+  ok(
+    (await tiles
+      .filter({ has: page.locator('input:checked') })
+      .evaluate((el) => el.classList.contains('is-sel'))) === true,
+    'carte choisie : contour de sélection',
+  );
   state.mediaReject = 'SVG_REJECTED';
-  await importVia(svg, /^Importer/);
+  await importVia(svg);
   await dlg.getByRole('alert').waitFor();
   ok((await dlg.getByRole('alert').textContent()).includes('éléments refusés'), 'SVG refusé : message');
   state.mediaReject = null;
 
   // Utiliser pour le logo
-  await dlg.getByRole('button', { name: 'Utiliser ce fichier' }).click();
-  await page.waitForTimeout(900);
-  const theme = state.tables.demos.find((d) => d.id === DEMO).settings.theme || {};
+  await use.click();
+  await dlg.waitFor({ state: 'detached' });
   ok(
-    (theme.logoUrl || '').includes('/storage/v1/object/public/media/'),
-    'logo de la démo pris dans la médiathèque',
-  );
-
-  // Suppression d'un fichier utilisé (depuis Paramètres › Marque) : le logo sert aussi à une 2e démo
-  {
-    const d1 = state.tables.demos.find((d) => d.id === DEMO);
-    state.tables.demos.push({
-      ...d1,
-      id: '0b5c1f0e-0000-4000-8000-0000000000c2',
-      title: 'Prendre un rendez-vous',
-      settings: JSON.parse(JSON.stringify(d1.settings)),
-    });
-  }
-  await page.goto(`${APP}/#/settings/brand`);
-  await page.getByRole('button', { name: 'Médiathèque' }).click();
-  const lib = page.getByRole('dialog', { name: 'Médiathèque' });
-  await lib.getByRole('button', { name: 'logo-acme.png' }).click();
-  ok((await lib.locator('.md-foot').textContent()).includes('Utilisé dans 2 démos'), 'usage : 2 démos');
-  ok(
-    (await lib.getByRole('button', { name: 'Utiliser ce fichier' }).count()) === 0,
-    'consultation : pas de « Utiliser »',
-  );
-  await lib.getByRole('button', { name: 'Supprimer' }).click();
-  const conf = page.getByRole('dialog', { name: `Supprimer «${N}logo-acme.png${N}»${N}?` });
-  await conf.waitFor();
-  ok(
-    (await conf.textContent()).includes(
-      'Ce fichier est utilisé dans 2 démos. Ces emplacements resteront vides.',
+    await saved(() =>
+      (demoRow().settings?.theme?.logoUrl || '').includes('/storage/v1/object/public/media/'),
     ),
-    'suppression : avertissement d’usage',
-  );
-  await shot('l18-03-suppression');
-  await conf.getByRole('button', { name: 'Supprimer' }).click();
-  await page.waitForTimeout(500);
-  ok(
-    state.mediaDeleted?.length === 1 && state.tables.media_files.length === 1,
-    'fichier et ligne supprimés (fonction media)',
+    'logo de la démo pris dans la médiathèque',
   );
 
   // ===== L48-B §5 : stockage presque plein, puis plein (page neuve) =====
@@ -254,8 +216,8 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   await qp.goto(`${APP}/#/demos/${DEMO}/edit`);
   await qp.waitForSelector('.canvas-frame img');
   await openTool(qp, 'design');
-  await qp.locator('.logo-block').getByRole('button', { name: 'Médiathèque' }).click();
-  const qd = qp.getByRole('dialog', { name: 'Médiathèque' });
+  await qp.locator('.logo-block').getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+  const qd = qp.getByRole('dialog', { name: 'Choisir un logo' });
   await qd.locator('.md-near').waitFor();
   ok(
     /Bientôt atteinte/.test(await qd.locator('.md-near').innerText()),

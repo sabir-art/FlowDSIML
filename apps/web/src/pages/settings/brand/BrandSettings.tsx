@@ -12,7 +12,6 @@ import { useAuth } from '../../../auth/AuthProvider';
 import { useToast } from '../../../components/Toast';
 import { Menu, type MenuItem } from '../../../components/Menu';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
-import { MediaLibrary } from '../../../components/media/MediaLibrary';
 import { PRESETS, asStyleTokens, type StyleTokens } from '../../editor/styles/presets';
 import { styleOk } from '../../editor/styles/styleCheck';
 import { STYLE_NAME_MAX, copyName, isHex, logoError, nameTaken } from './brand';
@@ -38,7 +37,6 @@ export function BrandSettings() {
   const toast = useToast();
   const ws = current!;
   const isAdmin = can('workspace.settings');
-  const [library, setLibrary] = useState(false);
   const saved: Colors = {
     primary: ws.brand_primary ?? DEFAULT_PRIMARY,
     accent: ws.brand_accent ?? DEFAULT_ACCENT,
@@ -84,24 +82,15 @@ export function BrandSettings() {
           <span>{t('brand.editorNote')}</span>
         </p>
       )}
-      <LogoSection ws={ws} isAdmin={isAdmin} onLibrary={() => setLibrary(true)} />
+      <LogoSection ws={ws} isAdmin={isAdmin} />
       <ColorsSection vals={vals} setVals={setVals} isAdmin={isAdmin} />
       <StylesSection wsId={ws.id} isAdmin={isAdmin} canCreate={can('demo.edit')} />
-      {library && <MediaLibrary wsId={ws.id} onClose={() => setLibrary(false)} />}
     </SettingsShell>
   );
 }
 
 // ===== §3.1 Logo =====
-function LogoSection({
-  ws,
-  isAdmin,
-  onLibrary,
-}: {
-  ws: Tables<'workspaces'>;
-  isAdmin: boolean;
-  onLibrary: () => void;
-}) {
+function LogoSection({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boolean }) {
   const { t } = useTranslation();
   const { reload } = useWorkspace();
   const [err, setErr] = useState<string | null>(null);
@@ -172,7 +161,6 @@ function LogoSection({
                 : null
             }
             onFiles={(files) => void upload(files[0]!)}
-            onLibrary={onLibrary}
             onRemove={() => void remove()}
             removeLabel={t('brand.logoRemove')}
           />

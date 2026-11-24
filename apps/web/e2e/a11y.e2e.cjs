@@ -734,15 +734,28 @@ const APP_PAGES = [
       d.tables.members[0].role = 'editor';
     },
   },
+  // §3.3 : fenêtre de sélection de la médiathèque, ouverte depuis un point d'accès (logo de la page publique)
   {
-    name: 'Médiathèque',
-    route: '/#/settings/brand',
+    name: 'Médiathèque (fenêtre de sélection)',
+    route: '/#/settings/brand/page',
+    seed: (d) => {
+      d.tables.media_files = [
+        {
+          id: 'm-1',
+          workspace_id: 'ws-1',
+          kind: 'logo',
+          name: 'logo-acme.svg',
+          path: 'ws-1/m-1.svg',
+          mime: 'image/svg+xml',
+          size_bytes: 4000,
+          created_at: '2026-11-01T09:00:00Z',
+        },
+      ];
+    },
     open: async (p) => {
-      await p
-        .getByRole('button', { name: /Médiathèque/ })
-        .first()
-        .click();
-      await p.waitForSelector('dialog[open]');
+      await p.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+      await p.getByRole('dialog', { name: 'Choisir un logo' }).waitFor();
+      await p.getByRole('radio', { name: 'logo-acme.svg' }).check();
     },
   },
   { name: 'Sécurité · règles de partage (plan)', route: '/#/settings/security' },
@@ -816,9 +829,9 @@ const APP_PAGES = [
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
   // §3.4 : Médiathèque (vide, puis avec des fichiers des trois catégories)
-  { name: 'Médiathèque (vide)', route: '/#/media' },
+  { name: 'Médiathèque (page vide)', route: '/#/media' },
   {
-    name: 'Médiathèque',
+    name: 'Médiathèque (page)',
     route: '/#/media',
     seed: (d) => {
       const file = (id, kind, name, ext, mime) => ({

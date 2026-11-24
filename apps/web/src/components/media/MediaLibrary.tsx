@@ -1,22 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileType, Search, Trash2, TriangleAlert, X } from 'lucide-react';
-import { FileDropzone } from '../FileDropzone';
-import { DropBlock } from '../DropBlock';
-import type { Tables } from '@flowdsiml/supabase-types';
-import { foldText } from '@flowdsiml/core';
-import { supabase } from '../../lib/supabase';
-import { useConfirm } from '../ConfirmDialog';
+import { FileType, Images, Search, TriangleAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button, Modal } from '@flowdsiml/ui';
+import { foldText } from '@flowdsiml/core';
+import { FileDropzone } from '../FileDropzone';
 import { QuotaDialog } from '../QuotaDialog';
+import { supabase } from '../../lib/supabase';
+import { MEDIA_QUOTA, useMedia, type MediaFile, type MediaFilter } from './useMedia';
+import type { MediaKind } from './mediaKind';
 import './media.css';
 
-export type MediaFile = Tables<'media_files'>;
-type Filter = 'all' | 'logo' | 'image' | 'font';
-
-export const MEDIA_QUOTA = 500 * 1024 * 1024;
-const MAX_BYTES = 5 * 1024 * 1024;
-const ACCEPT = '.png,.jpg,.jpeg,.svg,.woff2,image/png,image/jpeg,image/svg+xml,font/woff2';
+export { MEDIA_QUOTA, type MediaFile } from './useMedia';
 
 /** URL publique d'un fichier de la médiathèque (logo, image, police). */
 export const mediaUrl = (path: string) => supabase.storage.from('media').getPublicUrl(path).data.publicUrl;
@@ -25,325 +20,235 @@ export const mediaUrl = (path: string) => supabase.storage.from('media').getPubl
 export const sizeLabel = (n: number, locale: string) => {
   const fr = locale.startsWith('fr');
   return n < 1024 * 1024
-    ? `${Math.max(n > 0 ? 1 : 0, Math.round(n / 1024)).toLocaleString(locale)}${fr ? '\u202fKo' : ' KB'}`
-    : `${(n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: 1 })}${fr ? '\u202fMo' : ' MB'}`;
+    ? `${Math.max(n > 0 ? 1 : 0, Math.round(n / 1024)).toLocaleString(locale)}${fr ? ' Ko' : ' KB'}`
+    : `${(n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: 1 })}${fr ? ' Mo' : ' MB'}`;
 };
 
+const FILTERS: MediaFilter[] = ['all', 'logo', 'image', 'font'];
+/** Types de fichier proposés à l'import, selon ce qu'on choisit. */
+const ACCEPT: Record<MediaKind, string> = {
+  logo: '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml',
+  image: '.png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml',
+  font: '.woff2,font/woff2',
+};
+/** Un logo ou une image ne reçoit pas une police, et inversement. */
+const compatible = (wanted: MediaKind, f: MediaFilter | string) =>
+  f === 'all' || (wanted === 'font' ? f === 'font' : f !== 'font');
+
 /**
- * L18-03 / 04 : médiathèque du workspace (modale de 720 px). Recherche, filtre Tout / Logos / Images /
- * Polices, grille avec « Importer » en première case (glisser-déposer), sélection, pied avec usage et
- * quota. Les fichiers passent par la fonction media (type réel, SVG assaini, quota). Un SVG n'est
- * affiché qu'en <img>.
+ * Fenêtre de sélection de la médiathèque (retours client du 24/11 §3.3, maquette
+ * retours-2411/media-choisir) : la même partout où l'on choisit un fichier. Le titre dit ce qu'on choisit,
+ * le sous-titre où il ira. Zone d'import réduite (le fichier importé est choisi d'office), recherche,
+ * filtres réglés sur la catégorie demandée (les catégories incompatibles sont désactivées), cartes à choix
+ * unique, puis « Utiliser ce logo ». La gestion des fichiers (renommer, catégorie, suppression) est sur
+ * la page /media.
  */
 export function MediaLibrary({
   wsId,
   kind,
+  destination,
   onPick,
   onClose,
 }: {
   wsId: string;
-  /** Usage du champ qui ouvre la médiathèque (filtre initial et type importé). */
-  kind?: 'logo' | 'image' | 'font';
-  /** Absent : consultation (Paramètres › Marque), sans « Utiliser ce fichier ». */
-  onPick?: (file: MediaFile) => void;
+  /** Ce qu'on choisit : il règle le titre, le filtre de départ et le type importé. */
+  kind: MediaKind;
+  /** Où ira le fichier (« Logo de la démo « Démo CRM » »), sous le titre. */
+  destination?: string;
+  onPick: (file: MediaFile) => void;
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
-  const ref = useRef<HTMLDialogElement>(null);
-  const [dialog, ask] = useConfirm();
-  const [files, setFiles] = useState<MediaFile[] | null>(null);
-  const [usage, setUsage] = useState<Record<string, number>>({});
-  const [used, setUsed] = useState(0);
+  const id = useId();
+  const m = useMedia(wsId);
   const [q, setQ] = useState('');
-  const [filter, setFilter] = useState<Filter>(kind ?? 'all');
+  const [filter, setFilter] = useState<MediaFilter>(kind);
+  const [sel, setSel] = useState<string | null>(null);
+  const [upErr, setUpErr] = useState<string | null>(null);
+  const [full, setFull] = useState(false);
   // L18-03 : fichier importé non vérifié (l'avertissement lui est rattaché, pas en bandeau)
   const [warnId, setWarnId] = useState<string | null>(null);
-  const [sel, setSel] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  // Erreur du dernier import : affichée dans la zone d'envoi
-  const [upErr, setUpErr] = useState<string | null>(null);
-  // L48-B §5 : quota atteint (dialogue) ; à partir de 80 %, alerte discrète
-  const [full, setFull] = useState(false);
-
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
-
-  const load = useCallback(async () => {
-    const [f, u, s] = await Promise.all([
-      supabase
-        .from('media_files')
-        .select('*')
-        .eq('workspace_id', wsId)
-        .order('created_at', { ascending: false }),
-      supabase.rpc('media_usage', { p_ws: wsId }),
-      // L48-B : stockage de l'espace (médiathèque, vidéos, voix off), comme le quota côté serveur
-      supabase.rpc('workspace_usage', { p_workspace: wsId }),
-    ]);
-    setFiles(f.data ?? []);
-    const list = Array.isArray(u.data) ? (u.data as Array<{ id: string; demos: number }>) : [];
-    setUsage(Object.fromEntries(list.map((x) => [x.id, x.demos])));
-    const st = (s.data as { storage?: { media: number; videos: number; voices: number } } | null)?.storage;
-    setUsed(st ? st.media + st.videos + st.voices : 0);
-  }, [wsId]);
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const fq = foldText(q.trim());
   const shown = useMemo(
     () =>
-      (files ?? []).filter(
-        (f) => (filter === 'all' || f.kind === filter) && (!fq || foldText(f.name).includes(fq)),
+      (m.files ?? []).filter(
+        (f) =>
+          compatible(kind, f.kind) &&
+          (filter === 'all' || f.kind === filter) &&
+          (!fq || foldText(f.name).includes(fq)),
       ),
-    [files, filter, fq],
+    [m.files, kind, filter, fq],
   );
-  const selected = files?.find((f) => f.id === sel) ?? null;
+  const selected = shown.find((f) => f.id === sel) ?? null;
 
-  async function upload(list: FileList | File[]) {
+  const upload = async (list: FileList | File[]) => {
     const file = list[0];
     if (!file) return;
-    setErr(null);
     setUpErr(null);
-    if (file.size > MAX_BYTES) return setUpErr(t('media.tooBig'));
-    if (used + file.size > MEDIA_QUOTA) return setFull(true);
-    const font = /\.woff2$/i.test(file.name) || file.type === 'font/woff2';
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('ws', wsId);
-    // L18-03 : le filtre actif décide du type (« Images » : image, même ouverte pour un logo)
-    fd.append(
-      'kind',
-      font ? 'font' : filter === 'logo' || (filter !== 'image' && kind === 'logo') ? 'logo' : 'image',
-    );
-    fd.append('name', file.name.slice(0, 120));
-    setBusy(true);
-    const { data, error } = await supabase.functions.invoke('media', { body: fd });
-    setBusy(false);
-    if (error || !data?.id) {
-      const code = await readCode(error);
-      return setUpErr(
-        code === 'MEDIA_QUOTA'
-          ? (setFull(true), null)
-          : code === 'TOO_BIG'
-            ? t('media.tooBig')
-            : code === 'BAD_TYPE'
-              ? t('media.badType')
-              : code === 'SVG_REJECTED'
-                ? t('media.svgRejected')
-                : t('media.error'),
-      );
+    // Importé d'ici, le fichier prend la catégorie du filtre choisi, sinon celle qu'on demande
+    // (une police reste une police)
+    const r = await m.upload(file, filter === 'all' ? kind : filter);
+    if (!r.ok) {
+      if (r.error === 'quota') setFull(true);
+      else setUpErr(t(`media.${r.error === 'error' ? 'error' : r.error}`));
+      return;
     }
-    await load();
-    setSel(data.id as string);
+    if (!compatible(kind, r.file.kind)) return setUpErr(t(`media.wrongKind.${kind}`));
+    // Choisi d'office : visible (filtre sur sa catégorie, recherche vidée) et prêt pour « Utiliser »
+    setQ('');
+    setFilter(r.file.kind as MediaKind);
+    setSel(r.file.id);
     // L18-03 : une image importée n'est pas vérifiée automatiquement (données personnelles)
-    setWarnId(font ? null : (data.id as string));
-  }
-
-  async function remove(f: MediaFile) {
-    const n = usage[f.id] ?? 0;
-    const yes = await ask({
-      title: t('media.deleteTitle', { name: f.name }),
-      body: n ? t('media.inUse', { count: n }) : t('media.deleteBody'),
-      confirmLabel: t('media.delete'),
-      danger: true,
-    });
-    if (!yes) return;
-    const { error } = await supabase.functions.invoke('media', { method: 'DELETE', body: { id: f.id } });
-    if (error) return setErr(t('media.error'));
-    setSel(null);
-    await load();
-  }
-
-  const empty = files !== null && files.length === 0;
-  const quota = t('media.quota', { used: sizeLabel(used, i18n.language), total: '500' });
+    setWarnId(r.file.kind === 'font' ? null : r.file.id);
+  };
+  const use = (f: MediaFile | null) => {
+    if (!f) return;
+    onPick(f);
+    onClose();
+  };
+  const meta = (f: MediaFile) => {
+    const n = m.usage[f.id] ?? 0;
+    return `${t(`media.kind.${f.kind}`)} · ${n ? t('media.usedIn', { count: n }) : t('media.unused')}`;
+  };
 
   return (
-    <dialog ref={ref} className="mk md-dialog" aria-labelledby="md-title" onClose={onClose}>
-      {dialog}
-      <div className="modal-head">
-        <h2 id="md-title">{t('media.title')}</h2>
-        <button
-          type="button"
-          className="btn btn-ghost btn-icon btn-sm"
-          aria-label={t('common.close')}
-          onClick={() => ref.current?.close()}
-        >
-          <X aria-hidden="true" />
-        </button>
-      </div>
-      <div className="modal-body md-body">
-        {/* MEDIA-01 §18.3 : zone large en tête, pleine largeur, 120 px ; l'erreur d'import s'affiche dedans */}
+    <Modal
+      open
+      onClose={onClose}
+      size="lg"
+      className="md-pick"
+      icon={<Images />}
+      title={t(`media.pick.title.${kind}`)}
+      subtitle={destination}
+      closeLabel={t('common.close')}
+      footerLead={t('media.pick.dblclick')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('common.cancel')}</Button>
+          <Button variant="primary" aria-disabled={!selected || undefined} onClick={() => use(selected)}>
+            {t(`media.pick.use.${kind}`)}
+          </Button>
+        </>
+      }
+    >
+      <div className="md-pick__body">
         <FileDropzone
-          className="md-zone"
-          label={t('media.import')}
-          inputId="medialibrary-file"
-          accept={ACCEPT}
-          title={empty ? t('media.importFirst') : undefined}
-          hint={empty ? t('media.importHelp') : t('media.types')}
+          className="md-pick__zone"
+          label={t(`media.pick.import.${kind}`)}
+          inputId={`${id}-file`}
+          accept={ACCEPT[kind]}
+          title={t(`media.pick.import.${kind}`)}
+          hint={t(`media.pick.hint.${kind}`)}
           pickLabel={t('dropzone.import')}
-          busy={busy}
+          busy={m.busy}
           busyLabel={t('media.uploading')}
           error={upErr}
           onFiles={(list) => void upload(list)}
         />
-        {err && (
-          <div className="alert alert-danger" role="alert">
-            {err}
-          </div>
+        {full && (
+          <QuotaDialog
+            title={t('quota.title')}
+            body={t('usage.blocked.storage')}
+            figures={t('quota.storage', {
+              used: sizeLabel(m.used, i18n.language),
+              total: sizeLabel(MEDIA_QUOTA, i18n.language),
+            })}
+            onClose={() => setFull(false)}
+          />
         )}
-        {used / MEDIA_QUOTA >= 0.8 && (
+        {/* L48-B §5 : à partir de 80 % du stockage, alerte discrète */}
+        {m.used / MEDIA_QUOTA >= 0.8 && (
           <div className="alert alert-warning md-near" role="note">
             <TriangleAlert aria-hidden="true" />
             <span>
               {t('quota.near', {
-                used: sizeLabel(used, i18n.language),
+                used: sizeLabel(m.used, i18n.language),
                 total: sizeLabel(MEDIA_QUOTA, i18n.language),
               })}{' '}
               <Link to="/settings/usage">{t('quota.seeUsage')}</Link>
             </span>
           </div>
         )}
-        {full && (
-          <QuotaDialog
-            title={t('quota.title')}
-            body={t('usage.blocked.storage')}
-            figures={t('quota.storage', {
-              used: sizeLabel(used, i18n.language),
-              total: sizeLabel(MEDIA_QUOTA, i18n.language),
-            })}
-            onClose={() => setFull(false)}
-          />
-        )}
-        {/* MEDIA-01 §18.3 : médiathèque vide, ni recherche ni filtres (un filtre choisi sur une liste vide
-            laisserait croire qu'il cache des fichiers) ; ils apparaissent avec le premier fichier */}
-        {!empty && (
-          <div className="fd-toolbar md-tools">
-            <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
-              <label className="fd-toolbar__search md-search">
-                <span className="sr-only">{t('media.search')}</span>
-                <Search aria-hidden="true" />
-                <input
-                  className="fd-input"
-                  type="search"
-                  placeholder={t('media.search')}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                />
-              </label>
-              <div className="fd-segmented" role="radiogroup" aria-label={t('media.filter')}>
-                {(['all', 'logo', 'image', 'font'] as const).map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    role="radio"
-                    aria-checked={filter === f}
-                    onClick={() => setFilter(f)}
-                  >
-                    {t(`media.filter_${f}`)}
-                  </button>
-                ))}
-              </div>
+        <div className="fd-toolbar md-pick__tools">
+          <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
+            <label className="fd-toolbar__search md-pick__search">
+              <span className="sr-only">{t('media.pick.search')}</span>
+              <Search aria-hidden="true" />
+              <input
+                className="fd-input"
+                type="search"
+                placeholder={t('media.pick.search')}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </label>
+            <div className="fd-segmented" role="radiogroup" aria-label={t('media.category')}>
+              {FILTERS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  role="radio"
+                  aria-checked={filter === f}
+                  // Catégorie incompatible avec ce qu'on choisit : visible, non sélectionnable
+                  aria-disabled={!compatible(kind, f) || undefined}
+                  onClick={() => compatible(kind, f) && setFilter(f)}
+                >
+                  {t(`media.filter_${f}`)}
+                </button>
+              ))}
             </div>
-            <span className="sr-only" role="status">
-              {files ? t('media.count', { count: shown.length }) : ''}
-            </span>
+          </div>
+          <span className="sr-only" role="status">
+            {m.files ? t('media.count', { count: shown.length }) : ''}
+          </span>
+        </div>
+        {m.files !== null && shown.length === 0 ? (
+          <p className="md-pick__none">{t(m.files.length ? 'media.noMatch' : 'media.pick.empty')}</p>
+        ) : (
+          // Groupe de boutons radio : des div, pas une liste (un li n'a pas sa place dans un radiogroup)
+          <div className="md-pick__grid" role="radiogroup" aria-label={t('media.files')}>
+            {shown.map((f) => (
+              <label
+                key={f.id}
+                className={`md-pick__card${sel === f.id ? ' is-sel' : ''}`}
+                onDoubleClick={() => use(f)}
+              >
+                <input
+                  type="radio"
+                  name={`${id}-m`}
+                  checked={sel === f.id}
+                  aria-label={f.name}
+                  onChange={() => setSel(f.id)}
+                />
+                <span className="md-pick__thumb" aria-hidden="true">
+                  {f.kind === 'font' ? (
+                    <FileType />
+                  ) : (
+                    // SVG compris : toujours en <img>, jamais en ligne
+                    <img src={mediaUrl(f.path)} alt="" loading="lazy" />
+                  )}
+                </span>
+                <span className="md-pick__info" aria-hidden="true">
+                  <b title={f.name}>{f.name}</b>
+                  <span>{meta(f)}</span>
+                </span>
+                {warnId === f.id && (
+                  <span className="md-pick__warn" title={t('editor.importUnverified')}>
+                    <TriangleAlert aria-hidden="true" />
+                  </span>
+                )}
+              </label>
+            ))}
           </div>
         )}
-        {!empty && (
-          // Dépôt aussi sur toute la grille (voile « Déposer le fichier ici »)
-          <DropBlock onFile={(f) => void upload([f])} disabled={busy} className="md-gridwrap">
-            <ul className="md-grid" aria-label={t('media.files')}>
-              {shown.map((f) => (
-                <li key={f.id}>
-                  <button
-                    type="button"
-                    className="md-tile"
-                    aria-pressed={sel === f.id}
-                    title={f.name}
-                    onClick={() => {
-                      setSel(f.id);
-                      setErr(null);
-                    }}
-                    onDoubleClick={() => onPick && (onPick(f), ref.current?.close())}
-                  >
-                    <span className="md-thumb">
-                      {f.kind === 'font' ? (
-                        <FileType aria-hidden="true" />
-                      ) : (
-                        // SVG compris : toujours en <img>, jamais en ligne
-                        <img src={mediaUrl(f.path)} alt="" loading="lazy" />
-                      )}
-                    </span>
-                    <span className="md-name">{f.name}</span>
-                    {warnId === f.id && (
-                      <span className="md-tile-warn" title={t('editor.importUnverified')}>
-                        <TriangleAlert aria-hidden="true" />
-                      </span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </DropBlock>
+        {selected && warnId === selected.id && (
+          <p className="md-pick__unverified" role="status">
+            <TriangleAlert aria-hidden="true" />
+            {t('editor.importUnverified')}
+          </p>
         )}
       </div>
-      <div className="modal-foot md-foot">
-        <div className="md-info">
-          {selected ? (
-            <>
-              <b className="md-sel-name">{selected.name}</b>
-              <span className="help">
-                {t('media.usedIn', { count: usage[selected.id] ?? 0 })} ·{' '}
-                {sizeLabel(selected.size_bytes ?? 0, i18n.language)} · {quota}
-              </span>
-              {warnId === selected.id && (
-                <span className="md-sel-warn" role="status">
-                  <TriangleAlert aria-hidden="true" />
-                  {t('editor.importUnverified')}
-                </span>
-              )}
-            </>
-          ) : (
-            <span className="help">{quota}</span>
-          )}
-        </div>
-        {selected && (
-          <button type="button" className="btn btn-ghost btn-sm md-del" onClick={() => void remove(selected)}>
-            <Trash2 aria-hidden="true" />
-            {t('media.delete')}
-          </button>
-        )}
-        <button type="button" className="btn btn-secondary" onClick={() => ref.current?.close()}>
-          {onPick ? t('common.cancel') : t('common.close')}
-        </button>
-        {onPick && (
-          <button
-            type="button"
-            className="btn btn-primary"
-            aria-disabled={!selected}
-            onClick={() => {
-              if (!selected) return;
-              onPick(selected);
-              ref.current?.close();
-            }}
-          >
-            {t('media.use')}
-          </button>
-        )}
-      </div>
-    </dialog>
+    </Modal>
   );
-}
-
-/** Code d'erreur renvoyé par la fonction media (corps JSON de la réponse). */
-async function readCode(error: unknown): Promise<string | null> {
-  const ctx = (error as { context?: Response } | null)?.context;
-  try {
-    return ctx ? (((await ctx.json()) as { error?: string }).error ?? null) : null;
-  } catch {
-    return null;
-  }
 }

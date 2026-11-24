@@ -1536,6 +1536,17 @@
   align-items: center;
   gap: 8px;
 }
+/* « Choisir dans la médiathèque » est plus large que la colonne du panneau (320 px) : le bouton tient
+   dans sa colonne et son libellé passe à la ligne, il n'est jamais rogné */
+.mk .logo-block__acts .btn {
+  max-width: 100%;
+  height: auto;
+  min-height: 32px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  white-space: normal;
+  text-align: left;
+}
 .mk .logo-block__acts .logo-name {
   flex: 1;
   min-width: 0;

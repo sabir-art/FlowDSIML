@@ -96,9 +96,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     /Glissez un fichier ici/.test(sp(await zone.innerText())) &&
       (await zone.getByRole('button', { name: 'Choisir un fichier' }).count()) === 1 &&
-      (await zone.getByRole('button', { name: 'Médiathèque' }).count()) === 1 &&
+      // §3.1 : le bouton « Médiathèque » seul (gestion sans rien appliquer) a disparu d'ici
+      (await zone.getByRole('button', { name: 'Médiathèque' }).count()) === 0 &&
       (await zone.locator('.fd-dz__txt button').count()) === 0,
-    'logo : zone de dépôt (état vide), « Choisir un fichier » et « Médiathèque » en boutons',
+    'logo : zone de dépôt (état vide), « Choisir un fichier » en bouton, plus de « Médiathèque » seul',
   );
   {
     const zb = await zone.boundingBox();
