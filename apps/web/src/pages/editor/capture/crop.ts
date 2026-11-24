@@ -46,6 +46,12 @@ export function applyCrop(editor: DemoEditor, targets: StepRow[], next: CropRect
         { type?: string; field?: { x: number; y: number; w: number; h: number } | null } | undefined;
       if (anim?.type === 'typing' && anim.field)
         opts.animation = { ...anim, field: reframe(anim.field, from, to) };
+      // Images ajoutées : ramenées dans le nouveau cadre, comme les zones de flou
+      if (Array.isArray(raw.images))
+        opts.images = (raw.images as Array<{ x: number; y: number; w: number; h: number }>).map((l) => ({
+          ...l,
+          ...reframe({ x: l.x, y: l.y, w: l.w, h: l.h }, from, to),
+        }));
       const patch: Partial<StepRow> = { options: opts as StepRow['options'] };
       if (Array.isArray(s.blurs) && s.blurs.length)
         patch.blurs = (s.blurs as Array<{ x: number; y: number; w: number; h: number }>).map((b) =>

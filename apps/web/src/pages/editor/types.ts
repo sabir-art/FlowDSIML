@@ -103,7 +103,9 @@ export type Selection =
   /** EDT-08 : formulaire de lead sélectionné dans le rail (avant l'étape qu'il précède). */
   | { kind: 'form'; id: string }
   /** L25-02 : recadrage de la capture de l'étape. */
-  | { kind: 'crop' };
+  | { kind: 'crop' }
+  /** Retours client du 24/11 §1 : image ajoutée par-dessus la capture. */
+  | { kind: 'image'; id: string };
 export const asStepOptions = (v: unknown): StepOptions => stepOptionsSchema.parse(v ?? {});
 
 /** F2 : réponse d'une question (jsonb answers). */

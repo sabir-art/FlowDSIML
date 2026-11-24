@@ -259,6 +259,24 @@ export const branchSchema = z.object({
 });
 export type Branch = z.infer<typeof branchSchema>;
 
+/** Image ajoutée par-dessus la capture d'une étape (position et taille relatives au cadre). */
+export const imageLayerSchema = rectSchema.extend({
+  id: z.string().max(40).optional(),
+  path: z.string().optional(),
+  url: z.string().optional(),
+  name: z.string().max(120).optional(),
+  ratio: z.number().positive().optional(),
+  keep: z.boolean().optional(),
+  opacity: z.number().min(10).max(100).optional(),
+  rounded: z.boolean().optional(),
+  shadow: z.boolean().optional(),
+  alt: z.string().max(300).optional(),
+  decorative: z.boolean().optional(),
+  hidden: z.boolean().optional(),
+  group: z.string().max(40).optional(),
+});
+export type ImageLayer = z.infer<typeof imageLayerSchema>;
+
 /** F1 : options d'affichage d'une étape (pop-up, variante, menu de choix). */
 export const stepOptionsSchema = z
   .object({
@@ -315,6 +333,12 @@ export const stepOptionsSchema = z
       })
       .optional()
       .catch(undefined),
+    /**
+     * Retours client du 24/11 §1 : images ajoutées par-dessus la capture, du dessous vers le dessus.
+     * Éditeur : `path` (bucket captures) ; aperçu : `url` signée ; manifeste publié : les images sont
+     * incrustées dans la capture, seuls la place et le texte alternatif restent (lecteurs d'écran).
+     */
+    images: z.array(imageLayerSchema).max(10).optional().catch(undefined),
     /**
      * L25-04/05 : animation jouée à l'arrivée sur l'étape, avant la bulle. Une seule par étape.
      * Saisie : texte (variables possibles) écrit dans le champ repéré ; défilement : la capture pleine

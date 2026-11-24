@@ -32,6 +32,7 @@ import { VideoCanvas } from './video/VideoCanvas';
 import { HtmlCanvas } from './html/HtmlCanvas';
 import { AnimationMarks } from './capture/AnimationMarks';
 import { fieldAt } from './capture/animation';
+import { CanvasLayers } from './images/CanvasLayers';
 import {
   asAction,
   asCta,
@@ -65,6 +66,8 @@ interface Props {
   abPreview?: { hotspotId: string; title: string; body: string; cta: unknown } | null;
   /** EXT-02 §6.3 : outil « Projecteur » ouvert et activé : halo fixe sur le premier hotspot. */
   freeSpot?: { size: number; dim: number } | null;
+  /** Outil Image ouvert : les images ajoutées se choisissent et se déplacent sur le canevas. */
+  layersActive?: boolean;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -94,6 +97,7 @@ export function Canvas({
   hideHotspots = false,
   abPreview,
   freeSpot = null,
+  layersActive = false,
 }: Props) {
   const { t } = useTranslation();
   // L46 : variables remplacées par les exemples (ou les replis) dans le canevas, jamais de {{…}}
@@ -524,6 +528,19 @@ export function Canvas({
 
       {/* L25-04/05 : repères et aperçu de l'animation de l'étape */}
       <AnimationMarks step={step} urls={editor.imageUrls} />
+
+      {/* Images ajoutées : au-dessus de la capture, sous les flous, les hotspots, la bulle et le projecteur */}
+      {step.kind === 'image' && (
+        <CanvasLayers
+          editor={editor}
+          step={step}
+          frame={frame}
+          active={layersActive && tool === 'select'}
+          readOnly={readOnly}
+          selection={selection}
+          setSelection={setSelection}
+        />
+      )}
 
       {blurs.map((b, i) => (
         <div

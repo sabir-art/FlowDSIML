@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import type { ChapterRow, DemoRow, FormRow, HotspotRow, QuestionRow, StepRow, VariableRow } from './types';
 import { asVideo } from './video/videoModel';
 import { isMissingFunction } from '../demos/home';
+import { asLayers } from './images/layers';
 
 type Table = 'demos' | 'steps' | 'hotspots' | 'chapters' | 'forms' | 'variables' | 'quiz_questions';
 type Patch = Record<string, unknown>;
@@ -132,6 +133,8 @@ export function useDemoEditor(demoId: string) {
             ...Object.values(asVideo(s.video).frames),
             // L25-01 : capture pleine page (aperçu du défilement)
             (s.options as { fullPage?: { path?: string } } | null)?.fullPage?.path,
+            // Images ajoutées par-dessus la capture
+            ...asLayers(s.options).map((l) => l.path),
           ])
           .filter((p): p is string => !!p),
       ),
@@ -478,6 +481,7 @@ export function useDemoEditor(demoId: string) {
               element_meta: {
                 ...((steps.find((s) => s.id === stepId)?.element_meta as object) ?? {}),
                 imported: true,
+                fileName: file.name.slice(0, 120),
               },
             })
             .eq('id', stepId)
@@ -487,6 +491,19 @@ export function useDemoEditor(demoId: string) {
           await signImages([data]);
           setSteps((list) => list.map((s) => (s.id === stepId ? data : s)));
           return data;
+        }),
+
+      /** Image ajoutée par-dessus une capture : fichier déposé dans les captures de la démo. */
+      uploadLayer: (file: Blob) =>
+        run(async () => {
+          const ext = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp';
+          const path = `${demo!.workspace_id}/${demoId}/img-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+          const up = await supabase.storage.from('captures').upload(path, file, { contentType: file.type });
+          if (up.error) throw up.error;
+          const signed = await supabase.storage.from('captures').createSignedUrl(path, 3600);
+          if (signed.error) throw signed.error;
+          setImageUrls((prev) => ({ ...prev, [path]: signed.data.signedUrl }));
+          return path;
         }),
 
       addImageStep: (afterIndex: number, file: File) =>

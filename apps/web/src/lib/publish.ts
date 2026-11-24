@@ -8,6 +8,7 @@ import {
   type Mask,
 } from '@flowdsiml/manifest';
 import type { Json } from '@flowdsiml/supabase-types';
+import { LAYER_RADIUS, LAYER_SHADOW } from '../pages/editor/images/layers';
 import { supabase } from './supabase';
 
 interface PublishResult {
@@ -18,13 +19,30 @@ interface PublishResult {
       id: string;
       blurs: Mask[];
       image: { url: string } | null;
+      /** L25-02 : recadrage ; masques et images ajoutées sont relatifs au cadre recadré. */
+      options?: { crop?: Frame | null } | null;
       /** L17 : capture « Avant » d'une étape Avant / Après (flous incrustés comme blurs). */
       beforeAfter?: { before: { url: string }; beforeBlurs: Mask[] } | null;
     }>;
   };
   /** F7 / A8 : bucket source (captures par défaut ; videos ou html, copiés sans retouche). */
-  copies: Array<{ from: string; to: string; bucket?: 'videos' | 'html' | 'voices' }>;
+  copies: Array<{
+    from: string;
+    to: string;
+    bucket?: 'videos' | 'html' | 'voices';
+    /** Images ajoutées visibles de l'étape (chemins du bucket captures), du dessous vers le dessus. */
+    images?: Array<Frame & { path: string; opacity?: number; rounded?: boolean; shadow?: boolean }>;
+  }>;
 }
+
+type Frame = { x: number; y: number; w: number; h: number };
+/** Image ajoutée prête à être dessinée (retours client du 24/11 §1). */
+export type BurnLayer = Frame & {
+  image: CanvasImageSource;
+  opacity?: number;
+  rounded?: boolean;
+  shadow?: boolean;
+};
 
 /**
  * Masque réellement les zones sensibles dans les pixels (et pas seulement en CSS) :
@@ -33,9 +51,29 @@ interface PublishResult {
  * - Pixels (L12-01) : gros pixels nets ;
  * - Aplat (L12-01) : couleur pleine, texte facultatif ; rien de l'original n'est lisible.
  */
-export async function burnBlurs(
+export function burnBlurs(
   src: Blob,
   blurs: Array<Partial<Mask> & Pick<Mask, 'x' | 'y' | 'w' | 'h'>>,
+): Promise<Blob> {
+  return burnStep(src, { blurs });
+}
+
+/**
+ * Image publiée d'une étape : les images ajoutées sont dessinées sur la capture, puis les masques
+ * par-dessus (un masque couvre donc aussi une image ajoutée). Positions relatives au cadre de l'étape :
+ * avec un recadrage, elles sont ramenées dans l'image entière, que le lecteur recadre à l'affichage.
+ */
+export async function burnStep(
+  src: Blob,
+  {
+    blurs = [],
+    layers = [],
+    crop = null,
+  }: {
+    blurs?: Array<Partial<Mask> & Pick<Mask, 'x' | 'y' | 'w' | 'h'>>;
+    layers?: BurnLayer[];
+    crop?: Frame | null;
+  },
 ): Promise<Blob> {
   const bmp = await createImageBitmap(src);
   const canvas = document.createElement('canvas');
@@ -43,13 +81,45 @@ export async function burnBlurs(
   canvas.height = bmp.height;
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(bmp, 0, 0);
-  // EXT-02 §6.2 : les réglages sont donnés à l'échelle d'une capture de 1 280 px de large
-  const scale = bmp.width / 1280;
+  // Cadre de l'étape dans l'image (l'image entière sans recadrage)
+  const fx = (crop?.x ?? 0) * bmp.width;
+  const fy = (crop?.y ?? 0) * bmp.height;
+  const fw = (crop?.w ?? 1) * bmp.width;
+  const fh = (crop?.h ?? 1) * bmp.height;
+  // EXT-02 §6.2 : les réglages sont donnés à l'échelle d'un cadre de 1 280 px de large
+  const scale = fw / 1280;
+  for (const l of layers) {
+    const w = Math.max(1, Math.round(l.w * fw));
+    const h = Math.max(1, Math.round(l.h * fh));
+    const tile = document.createElement('canvas');
+    tile.width = w;
+    tile.height = h;
+    const tctx = tile.getContext('2d')!;
+    if (l.rounded) {
+      tctx.beginPath();
+      tctx.roundRect(0, 0, w, h, Math.min(LAYER_RADIUS * scale, w / 2, h / 2));
+      tctx.clip();
+    }
+    tctx.drawImage(l.image, 0, 0, w, h);
+    ctx.save();
+    // Rien hors du cadre de l'étape
+    ctx.beginPath();
+    ctx.rect(fx, fy, fw, fh);
+    ctx.clip();
+    ctx.globalAlpha = Math.min(100, Math.max(10, l.opacity ?? 100)) / 100;
+    if (l.shadow) {
+      ctx.shadowColor = LAYER_SHADOW.canvas;
+      ctx.shadowBlur = LAYER_SHADOW.blur * scale;
+      ctx.shadowOffsetY = LAYER_SHADOW.y * scale;
+    }
+    ctx.drawImage(tile, Math.round(fx + l.x * fw), Math.round(fy + l.y * fh));
+    ctx.restore();
+  }
   for (const b of blurs) {
-    const x = Math.floor(b.x * bmp.width);
-    const y = Math.floor(b.y * bmp.height);
-    const w = Math.max(1, Math.ceil(b.w * bmp.width));
-    const h = Math.max(1, Math.ceil(b.h * bmp.height));
+    const x = Math.floor(fx + b.x * fw);
+    const y = Math.floor(fy + b.y * fh);
+    const w = Math.max(1, Math.ceil(b.w * fw));
+    const h = Math.max(1, Math.ceil(b.h * fh));
     const style = b.style ?? 'blur';
     const tuned = typeof b.intensity === 'number';
     ctx.save();
@@ -172,23 +242,37 @@ export async function publishDemo(
     if (!file) continue;
     res.copies.push({ from: v.voice_path!, to: `${demoId}/assets/voice-${file}`, bucket: 'voices' });
   }
-  // Flous par chemin publié (<demo>/assets/…), pour les appliquer dans les pixels.
-  const blurByPath = new Map(
-    res.manifest.steps.filter((s) => s.image).map((s) => [`${demoId}/${s.image!.url}`, s.blurs ?? []]),
+  // Masques et recadrage par chemin publié (<demo>/assets/…), pour les appliquer dans les pixels.
+  const burnByPath = new Map<string, { blurs: Mask[]; crop: Frame | null }>(
+    res.manifest.steps
+      .filter((s) => s.image)
+      .map((s) => [`${demoId}/${s.image!.url}`, { blurs: s.blurs ?? [], crop: s.options?.crop ?? null }]),
   );
   // L17 : flous de la capture « Avant » incrustés de la même façon
   for (const s of res.manifest.steps)
     if (s.beforeAfter)
-      blurByPath.set(`${demoId}/${s.beforeAfter.before.url}`, s.beforeAfter.beforeBlurs ?? []);
+      burnByPath.set(`${demoId}/${s.beforeAfter.before.url}`, {
+        blurs: s.beforeAfter.beforeBlurs ?? [],
+        crop: null,
+      });
   const total = res.copies.length + 1;
   let done = 0;
 
   for (const c of res.copies) {
     if (!(await exists('published', c.to))) {
-      const blurs = c.bucket ? [] : (blurByPath.get(c.to) ?? []);
+      const burn = c.bucket ? undefined : burnByPath.get(c.to);
+      const blurs = burn?.blurs ?? [];
       const dl = await supabase.storage.from(c.bucket ?? 'captures').download(c.from);
       if (dl.error) throw dl.error;
-      const blob = blurs.length ? await burnBlurs(dl.data, blurs) : dl.data;
+      // Images ajoutées : lues dans les captures de la démo, dessinées sous les masques
+      const layers: BurnLayer[] = [];
+      for (const l of c.bucket ? [] : (c.images ?? [])) {
+        const img = await supabase.storage.from('captures').download(l.path);
+        if (img.error) throw img.error;
+        layers.push({ ...l, image: await createImageBitmap(img.data) });
+      }
+      const burned = blurs.length > 0 || layers.length > 0;
+      const blob = burned ? await burnStep(dl.data, { blurs, layers, crop: burn?.crop ?? null }) : dl.data;
       const up = await supabase.storage.from('published').upload(c.to, blob, {
         contentType:
           c.bucket === 'videos'
@@ -199,7 +283,7 @@ export async function publishDemo(
               ? dl.data.type || 'audio/webm'
               : c.bucket === 'html'
                 ? 'text/html'
-                : blurs.length
+                : burned
                   ? 'image/webp'
                   : dl.data.type || 'image/webp',
         cacheControl: '31536000',

@@ -326,7 +326,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.waitForSelector('.canvas-frame img');
   // L48-E : outil « Image » du rail
   await page.locator('.ed-rail [data-tool="image"][aria-pressed="false"]').click();
-  const rep = page.getByRole('button', { name: 'Remplacer l’image', exact: true });
+  // Retours du 24/11 §1 : « Remplacer… » ouvre un menu (Importer…, médiathèque, Recadrer)
+  const rep = page.getByRole('button', { name: 'Remplacer…', exact: true });
   ok((await rep.getAttribute('aria-disabled')) === null && (await rep.isEnabled()), 'outil image actif');
   const sel = t.steps
     .filter((s) => s.demo_id === DEMO && s.kind === 'image')

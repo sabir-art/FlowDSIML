@@ -1,0 +1,265 @@
+/* Retours client du 24/11 §1 : panneau Image et images ajoutées sur le canevas
+   (maquettes retours-2411/image-calque-*, image-vide-*). */
+.mk .imgp {
+  display: flex;
+  flex-direction: column;
+}
+.mk .imgp-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mk .ed-tool .imgp-sec > .sec-title {
+  margin-bottom: 0;
+  font: 600 13px var(--fd-font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  min-height: 32px;
+  color: var(--fd-color-text);
+}
+/* Capture de l'étape : vignette de 56 × 36, nom et taille, « Remplacer… » */
+.mk .imgp-cap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mk .imgp-cap__thumb {
+  flex: none;
+  width: 56px;
+  height: 36px;
+  overflow: hidden;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .imgp-cap__thumb img,
+.mk .imgp-row__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mk .imgp-row__thumb img {
+  object-fit: contain;
+}
+.mk .imgp-cap__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+}
+.mk .imgp-cap__text b {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .imgp-cap__text .muted {
+  font-size: 12px;
+}
+/* État vide : encart sunken, icône, texte, bouton */
+.mk .imgp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .imgp-empty > svg {
+  width: 20px;
+  height: 20px;
+  color: var(--fd-color-text-muted);
+}
+.mk .imgp-empty p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+/* Liste : une rangée de 44 px par image, du dessus vers le dessous */
+.mk .imgp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mk .imgp-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 4px 0 0;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.mk .imgp-row.is-on {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.mk .imgp-row__main {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 8px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--fd-color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mk .imgp-row__thumb {
+  flex: none;
+  width: 32px;
+  height: 24px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .imgp-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .imgp-row.is-off .imgp-row__thumb,
+.mk .imgp-row.is-off .imgp-row__name {
+  opacity: 0.55;
+}
+/* Réglages de l'image choisie : une seule section, 12 px entre les réglages */
+.mk .imgp-set > .sec {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.mk .imgp-set__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .imgp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mk .imgp-field > .label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.mk .imgp-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.mk .imgp-info {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.mk .imgp-info svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-top: 3px;
+}
+
+/* Canevas : image ajoutée, contour primary de 2 px et 8 poignées de 12 px quand elle est choisie */
+.canvas-frame .canvas-layer {
+  position: absolute;
+  pointer-events: none;
+}
+.canvas-frame .canvas-layer.is-live {
+  pointer-events: auto;
+  cursor: move;
+  touch-action: none;
+}
+.canvas-frame .canvas-layer .canvas-layer__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.canvas-frame .canvas-layer.is-on {
+  outline: 2px solid var(--fd-prune-600);
+}
+.canvas-frame .canvas-layer:focus-visible {
+  outline: 2px solid var(--fd-color-focus);
+  box-shadow: none;
+}
+.canvas-layer__h {
+  position: absolute;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--fd-prune-600);
+  border-radius: 3px;
+  background: #fff;
+}
+.canvas-layer__h--nw {
+  left: -7px;
+  top: -7px;
+  cursor: nwse-resize;
+}
+.canvas-layer__h--n {
+  left: calc(50% - 6px);
+  top: -7px;
+  cursor: ns-resize;
+}
+.canvas-layer__h--ne {
+  right: -7px;
+  top: -7px;
+  cursor: nesw-resize;
+}
+.canvas-layer__h--e {
+  right: -7px;
+  top: calc(50% - 6px);
+  cursor: ew-resize;
+}
+.canvas-layer__h--se {
+  right: -7px;
+  bottom: -7px;
+  cursor: nwse-resize;
+}
+.canvas-layer__h--s {
+  left: calc(50% - 6px);
+  bottom: -7px;
+  cursor: ns-resize;
+}
+.canvas-layer__h--sw {
+  left: -7px;
+  bottom: -7px;
+  cursor: nesw-resize;
+}
+.canvas-layer__h--w {
+  left: -7px;
+  top: calc(50% - 6px);
+  cursor: ew-resize;
+}
+/* Position et taille : même composant que la zone de flou, sans son titre ni son aide (l'aide du
+   panneau est en bas de section) ; le groupe garde son nom pour les lecteurs d'écran */
+.mk .ed-tool .imgp-set > .sec > .sec-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.mk .imgp-set > .sec > .help {
+  display: none;
+}

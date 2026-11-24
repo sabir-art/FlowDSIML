@@ -1,3 +1,4 @@
+import { asLayers, needsAlt } from './images/layers';
 /**
  * L38-5 (revue formation n° 5) : contenu à compléter avant publication, signalé dans la modale Publier sans
  * la bloquer : titre par défaut, étapes à capture sans titre, sans bulle ou à la bulle vide, quiz ouvert
@@ -6,6 +7,8 @@
 export type TodoItem =
   | { kind: 'demoTitle' }
   | { kind: 'untitled' | 'noBubble' | 'emptyBubble'; index: number }
+  /** Retours client du 24/11 §1 : image ajoutée sans texte alternatif ni mention « décorative ». */
+  | { kind: 'imageNoAlt'; index: number }
   | { kind: 'quizEmpty' }
   | { kind: 'deadLinks'; count: number }
   /** A8 : guide du Sandbox activé sans étape. */
@@ -20,7 +23,7 @@ const plain = (html: string | null | undefined) =>
 export function publishTodo(input: {
   title: string;
   defaultTitle: string;
-  steps: Array<{ id: string; kind: string; title: string }>;
+  steps: Array<{ id: string; kind: string; title: string; options?: unknown }>;
   hotspots: Array<{ step_id: string; title: string; body: string | null }>;
   /** Réglages du quiz posés (page Quiz ouverte). */
   quizOpened: boolean;
@@ -39,6 +42,7 @@ export function publishTodo(input: {
     if (!s.title.trim()) out.push({ kind: 'untitled', index });
     if (!hs.length) out.push({ kind: 'noBubble', index });
     else if (hs.some((h) => !h.title.trim() && !plain(h.body))) out.push({ kind: 'emptyBubble', index });
+    if (asLayers(s.options).some(needsAlt)) out.push({ kind: 'imageNoAlt', index });
   });
   if (input.quizOpened && input.questions === 0) out.push({ kind: 'quizEmpty' });
   if (input.deadLinks) out.push({ kind: 'deadLinks', count: input.deadLinks });

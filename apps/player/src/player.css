@@ -223,6 +223,13 @@ body {
   margin: 0;
   max-width: 36ch;
 }
+.p-layer {
+  position: absolute;
+  display: block;
+  object-fit: fill;
+  user-select: none;
+  pointer-events: none;
+}
 .p-blur {
   position: absolute;
   backdrop-filter: blur(12px);
