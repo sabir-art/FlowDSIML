@@ -8,6 +8,7 @@ import { asVideo } from './video/videoModel';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
 import {
+  AppWindow,
   TriangleAlert,
   ClipboardPaste,
   Copy,
@@ -119,7 +120,8 @@ export function StepList({
   live.current = editor;
   const mod = IS_MAC ? '⌘' : 'Ctrl';
   /** L'étape de fin (« Merci ! ») ne se copie pas, ne se coupe pas, ne se duplique pas et ne se supprime pas. */
-  const isEnd = (s: StepRow, i: number) => i === editor.steps.length - 1 && s.kind === 'text';
+  const isEnd = (s: StepRow, i: number) =>
+    i === editor.steps.length - 1 && s.kind === 'text' && asStepOptions(s.options).display !== 'window';
   const snapshot = (s: StepRow): StepClip => ({
     step: s,
     hotspots: editor.hotspots.filter((h) => h.step_id === s.id),
@@ -295,6 +297,15 @@ export function StepList({
       onSelect: () =>
         void editor
           .addTextStep(current, t('editor.advanced.stepTypes.popup'), { display: 'popup' })
+          .then(() => onSelect(current + 1)),
+    },
+    // EXT-02 §6.1 : fenêtre image + texte
+    {
+      label: t('editor.advanced.stepTypes.window'),
+      icon: <AppWindow />,
+      onSelect: () =>
+        void editor
+          .addTextStep(current, t('editor.window.newTitle'), { display: 'window' })
           .then(() => onSelect(current + 1)),
     },
     {
@@ -774,10 +785,13 @@ function StepBadges({
     !opts.choices.length &&
       step.kind === 'text' &&
       opts.display === 'popup' && { icon: <MessageCircle />, label: t('editor.advanced.stepTypes.popup') },
+    !opts.choices.length &&
+      step.kind === 'text' &&
+      opts.display === 'window' && { icon: <AppWindow />, label: t('editor.advanced.stepTypes.window') },
     // EDT-04 : icône de type pour l'étape de texte ou de fin
     !opts.choices.length &&
       step.kind === 'text' &&
-      opts.display !== 'popup' &&
+      opts.display === 'screen' &&
       (isLast
         ? { icon: <Flag />, label: t('editor.end.title') }
         : { icon: <Type />, label: t('editor.end.textTitle') }),

@@ -738,7 +738,8 @@
         "survey": "Sondage",
         "choice": "Menu de choix",
         "text": "Étape texte",
-        "image": "Image importée"
+        "image": "Image importée",
+        "window": "Fenêtre"
       },
       "popup": {
         "title": "Étape pop-up",
@@ -758,7 +759,8 @@
         "variantInfo": "Information",
         "variantInstruction": "Consigne",
         "buttonHelp": "Vide = « Suivant ».",
-        "buttonPlaceholder": "Suivant"
+        "buttonPlaceholder": "Suivant",
+        "displayWindow": "Fenêtre"
       },
       "checklist": {
         "title": "Checklist",
@@ -1990,7 +1992,24 @@
     "expandSteps": "Déplier les étapes",
     "stepsWidth": "Largeur des étapes",
     "stepPill": "Étape {{n}} : {{title}}",
-    "replaceBadType": "Format non accepté : PNG, JPEG ou WebP."
+    "replaceBadType": "Format non accepté : PNG, JPEG ou WebP.",
+    "window": {
+      "newTitle": "Fenêtre",
+      "displayHelp": "Une fenêtre avec une image et un texte, par-dessus l’écran précédent.",
+      "image": "Image",
+      "imageHelp": "PNG, JPEG ou WebP, 5 Mo au plus. Ou déposez le fichier sur ce bloc.",
+      "imageMore": "Plus d’actions sur l’image",
+      "replace": "Remplacer…",
+      "remove": "Retirer",
+      "sending": "Envoi de l’image",
+      "tooBig": "Image trop lourde : 5 Mo au plus.",
+      "alt": "Texte alternatif",
+      "altHelp": "Laissez vide si l’image est décorative.",
+      "stepOf": "Étape {{n}} sur {{total}}",
+      "esc": "Échap pour fermer",
+      "prev": "Précédent",
+      "button": "Libellé du bouton"
+    }
   },
   "status": {
     "draft": "Brouillon",
