@@ -234,7 +234,33 @@ Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur 
 
 ## À venir
 
-- **5. Captures** : étude de l’option à chaque clic (page, zone, élément).
+- **5. Captures** : étude ci-dessous (§5), à valider par le client avant maquette.
+
+## 5. Choisir ce qu’on capture à chaque clic (étude du 24/11)
+
+Besoin du client : à chaque clic, pouvoir garder la page, une zone ou seulement l’élément cliqué, pour des captures plus lisibles et moins de données à l’écran.
+
+Ce que fait l’extension aujourd’hui : à chaque clic, une capture de la partie visible de l’onglet (plus la page entière en Format mobile). Elle relève déjà le rectangle de l’élément cliqué (`element`), la taille de la fenêtre et la position du clic. L’éditeur sait déjà recadrer sans rien perdre (L25-02, `crop` relatif à l’image d’origine, hotspots et flous suivent le cadre).
+
+Principe retenu : **on capture toujours toute la partie visible, et le choix devient un recadrage non destructif posé par l’extension**. La personne peut élargir ou resserrer plus tard avec l’outil Recadrage ; la vérification avant envoi porte sur l’image entière ; l’image publiée ne montre que le cadre, donc moins de données exposées.
+
+Options étudiées :
+1. **Demander à chaque clic** (petite fenêtre Page / Zone / Élément) : écarté, cela casse le geste et double le nombre de clics.
+2. **Un choix dans le popup avant de démarrer** : simple, mais on ne peut plus changer en cours de route, alors qu’un même parcours mélange souvent des vues d’ensemble et des détails.
+3. **Un sélecteur dans la barre d’enregistrement, valable pour les clics suivants** : retenu. On change quand on veut, sans interrompre.
+
+Proposition :
+- **Barre d’enregistrement** : segmenté de trois icônes avec nom et infobulle : « Page » (Monitor, par défaut), « Élément » (SquareMousePointer), « Zone » (Crop). Le choix vaut pour les clics suivants et reste affiché ; il est annoncé à l’écran (« Cadre : élément »). Pas de raccourci clavier ajouté (Chrome limite les raccourcis déclarés, les trois existants restent).
+- **Page** : comportement actuel, pas de recadrage.
+- **Élément** : cadre = rectangle de l’élément cliqué, plus une marge de 48 px, élargi au minimum à 480 × 300 px (rapport conservé autour de l’élément), borné à l’image. Si l’élément couvre plus de 80 % de la vue, pas de recadrage (inutile).
+- **Zone** : en choisissant « Zone », un voile s’affiche sur la page et on trace un rectangle (souris ; au clavier, flèches pour déplacer, Maj + flèches pour redimensionner, Entrée pour valider, Échap pour annuler). La zone est gardée pour tous les clics suivants, relative à la fenêtre ; « Redessiner la zone » dans la barre. Un clic hors de la zone garde la page entière pour cette étape et le signale à la vérification (« Clic hors de la zone : page entière gardée »).
+- **Vérification avant envoi (§2)** : chaque capture porte une petite pastille de cadre (Page, Élément, Zone) et le cadre se change pour une capture donnée avant l’envoi (même segmenté), puisque l’image entière est gardée.
+- **Popup** : rien de plus (il reste minimal). Le cadre par défaut se règle dans « Réglages de l’extension » (Page par défaut).
+- **Éditeur et lecteur** : rien de nouveau ; l’étape arrive avec son recadrage, modifiable par l’outil Recadrage ; le lecteur affiche le cadre agrandi à la largeur disponible.
+
+Hors périmètre : la capture d’un élément qui dépasse de la vue (il faudrait défiler et assembler) ; la vidéo (§4) garde l’onglet entier.
+
+Questions pour le client : la marge et la taille minimale de l’élément conviennent-elles ? Le cadre par défaut doit-il être réglable par l’espace (règle de l’administrateur) ou seulement par la personne ?
 
 ## 7. Mot de passe et étape Formulaire
 
