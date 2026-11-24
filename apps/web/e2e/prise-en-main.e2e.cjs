@@ -224,16 +224,93 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'lecteur : ni bouton ni panneau',
   );
 
-  // ===== 7 sur 7 : le bouton disparaît =====
+  // ===== Retour client du 24/11 : « Inviter un membre » se coche dès l'envoi d'une invitation =====
   state.tables.members[0].role = 'owner';
-  state.onboarding = Object.fromEntries(Object.keys(state.onboarding).map((k) => [k, true]));
-  state.onboardingDoneAt = new Date(Date.now() - 2 * 864e5).toISOString();
+  const all = Object.keys(state.onboarding);
+  const inviteDone = async () =>
+    (
+      await card
+        .locator('#onb-done-list')
+        .innerText()
+        .catch(() => '')
+    ).includes('Inviter un membre');
+  {
+    // Toutes les étapes sont faites sauf l'invitation, déduite des données comme sur le serveur
+    state.onboarding = null;
+    state.onboardingPartial = Object.fromEntries(all.filter((k) => k !== 'invite').map((k) => [k, true]));
+    state.tables.members = state.tables.members.filter((m) => m.user_id === state.user.id);
+    state.tables.invitations = [];
+    await page.goto(`${BASE}/#/`);
+    await page.reload();
+    await card.waitFor();
+    ok(
+      /Inviter un membre de l’équipe/.test(sp(await card.locator('.onb-next').innerText())),
+      'seul dans l’espace, aucune invitation : « Inviter un membre de l’équipe » est la prochaine étape',
+    );
+    await card.locator('.onb-next').getByRole('button').first().click();
+    const modal = page.locator('dialog.fd-modal[open]');
+    await modal.waitFor();
+    await page.locator('#inv-email').fill('camille.martin@acme.example');
+    await modal.getByRole('button', { name: /^Envoyer/ }).click();
+    await page.getByText('Invitation envoyée', { exact: false }).first().waitFor();
+    ok(
+      state.tables.invitations.length === 1 && state.tables.members.length === 1,
+      'une invitation envoyée, pas encore acceptée (toujours un seul membre)',
+    );
+    await page.goto(`${BASE}/#/`);
+    await page.locator('#onb-toggle').waitFor();
+    ok(
+      /^Prise en main (\d+)\/\1/.test(sp(await page.locator('#onb-toggle').innerText()).replace(/\s+/g, ' ')),
+      `invitation envoyée : toutes les étapes sont faites (${sp(await page.locator('#onb-toggle').innerText()).replace(/\s+/g, ' ')})`,
+    );
+    await card.waitFor();
+    await card.getByRole('button', { name: /^Terminées/ }).click();
+    ok(await inviteDone(), 'invitation envoyée : « Inviter un membre de l’équipe » est dans « Terminées »');
+
+    // ===== Tout est fait : état terminé, puis « Ne plus afficher » =====
+    ok(
+      (await page.locator('#onb-toggle.is-done').count()) === 1 &&
+        /Votre espace est prêt/.test(await card.innerText()) &&
+        /Les \d étapes sont faites\. Retrouvez l’aide à tout moment avec F1\./.test(
+          sp(await card.innerText()),
+        ),
+      'tout est fait : pastille en « n/n », panneau « Votre espace est prêt »',
+    );
+    ok(
+      (await card.getByRole('progressbar').getAttribute('aria-valuenow')) ===
+        (await card.getByRole('progressbar').getAttribute('aria-valuemax')),
+      'tout est fait : barre de progression pleine',
+    );
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/onb-termine${sfx}.png` });
+    await card.getByRole('button', { name: 'Ne plus afficher', exact: true }).click();
+    await card.waitFor({ state: 'detached' });
+    await page.locator('#onb-toggle').waitFor({ state: 'detached' });
+    ok(
+      state.tables.onboarding_prefs.some(
+        (p) => p.workspace_id === state.tables.workspaces[0].id && p.hidden_at,
+      ),
+      '« Ne plus afficher » : préférence enregistrée, pastille et panneau disparus',
+    );
+    await page.reload();
+    await page.getByRole('heading', { name: 'Démos', level: 1 }).waitFor();
+    await page.locator('.demo-card, .fd-empty').first().waitFor();
+    ok(
+      (await card.count()) === 0 && (await page.locator('#onb-toggle').count()) === 0,
+      'rechargement : la prise en main reste masquée',
+    );
+    state.tables.onboarding_prefs = [];
+    state.onboardingPartial = null;
+  }
+
+  // ===== Tout est fait depuis plus de 7 jours : le bouton disparaît de lui-même =====
+  state.onboarding = Object.fromEntries(all.map((k) => [k, true]));
+  state.onboardingDoneAt = new Date(Date.now() - 8 * 864e5).toISOString();
   await page.reload();
   await page.getByRole('heading', { name: 'Démos', level: 1 }).waitFor();
   await page.locator('.demo-card, .fd-empty').first().waitFor();
   ok(
     (await card.count()) === 0 && (await page.locator('#onb-toggle').count()) === 0,
-    '7 sur 7 : le bouton et le panneau disparaissent',
+    '7 sur 7 depuis plus de 7 jours : le bouton et le panneau disparaissent',
   );
   await page.getByRole('button', { name: 'Aide', exact: true }).first().click();
   await drawer.getByRole('button', { name: /Reprendre la prise en main/ }).click();

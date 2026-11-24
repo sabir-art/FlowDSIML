@@ -1342,8 +1342,13 @@ async function install(page, state = seed()) {
             capture: t.steps.some((x) => x.workspace_id === ws && x.image_path),
             pii: false,
             publish: t.demos.some((d) => d.workspace_id === ws && d.status === 'published'),
-            invite: t.members.filter((m) => m.workspace_id === ws).length >= 2,
+            // Une invitation envoyée suffit (comme la fonction du serveur), sans attendre l'acceptation
+            invite:
+              t.members.filter((m) => m.workspace_id === ws).length >= 2 ||
+              (t.invitations || []).some((i) => i.workspace_id === ws),
             distribute: false,
+            // Étapes imposées par le test, les autres restant déduites des données
+            ...(state.onboardingPartial || {}),
           };
           const pref = t.onboarding_prefs.find((p) => p.workspace_id === ws);
           return json(route, 200, {

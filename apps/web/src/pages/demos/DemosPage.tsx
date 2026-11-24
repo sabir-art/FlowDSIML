@@ -681,9 +681,14 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
     );
 
   // ONB-01 : le panneau ne concerne que « Toutes les démos »
-  // Quand tout est fait, le bouton a disparu : le panneau ne revient que par « Reprendre » dans l'aide
+  // Tout est fait : le panneau reste proposé tant que l'état terminé l'est (7 jours, ou « Masquer ») ;
+  // ensuite il ne revient que par « Reprendre » dans l'aide
   const onbShown =
-    onbOpen && !sandbox && scope === 'all' && !!onbProgress && (!onbProgress.complete || onbResumed);
+    onbOpen &&
+    !sandbox &&
+    scope === 'all' &&
+    !!onbProgress &&
+    (!onbProgress.complete || onbProgress.finished || onbResumed);
 
   /** DSH-10 : publiée puis modifiée (changements non publiés). */
   const isModified = (d: Demo) =>
