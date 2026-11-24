@@ -282,9 +282,10 @@ function measure() {
     });
     ok(bg.got === bg.want, `connexion (${theme}) : formulaire sur le fond du contenu (${bg.got})`);
     await p.getByLabel('Adresse e-mail professionnelle').fill('camille.martin@example.com');
-    await p.locator('#password').fill('mot-de-passe-faux');
     const eye = p.getByRole('button', { name: 'Afficher le mot de passe' });
-    ok((await eye.count()) === 1, `connexion (${theme}) : œil sur le mot de passe`);
+    ok((await eye.count()) === 0, `connexion (${theme}) : pas d’œil tant que rien n’est tapé`);
+    await p.locator('#password').pressSequentially('mot-de-passe-faux');
+    ok((await eye.count()) === 1, `connexion (${theme}) : œil sur le mot de passe une fois tapé`);
     await p.getByRole('button', { name: 'Se connecter', exact: true }).click();
     const box = p.locator('.auth-alert');
     await box.waitFor();

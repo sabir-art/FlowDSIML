@@ -19,10 +19,32 @@ import { useTranslation } from 'react-i18next';
 import { PASSWORD_POLICY, passwordRules } from '../lib/passwordPolicy';
 import { passwordStrength } from '../lib/validation';
 
-/** Champ de mot de passe avec son œil. Un œil par champ, indépendant ; l'envoi du formulaire remasque. */
-export function PasswordInput({ className, ...input }: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>) {
+/**
+ * Champ de mot de passe avec son œil. Un œil par champ, indépendant ; l'envoi du formulaire remasque.
+ *
+ * EXT-02 §7.1 (sécurité, retour client du 24/11) : l'œil ne révèle jamais une valeur que la personne n'a
+ * pas saisie elle-même. Il n'apparaît qu'après une frappe (clavier, collage, dépôt) dans un champ parti
+ * de vide. Une valeur arrivée autrement (remplissage automatique du navigateur, gestionnaire de mots de
+ * passe, valeur posée par le code) reste masquée et sans œil jusqu'à ce que le champ soit vidé puis
+ * ressaisi. Quitter le champ remasque.
+ *  - `noEye` : jamais d'œil (mot de passe actuel) ;
+ *  - `guard` : champ en lecture seule tant qu'il n'a pas le focus, pour que le navigateur ne le
+ *    préremplisse pas à l'affichage.
+ */
+export function PasswordInput({
+  className,
+  noEye = false,
+  guard = false,
+  ...input
+}: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { noEye?: boolean; guard?: boolean }) {
   const { t } = useTranslation();
   const [shown, setShown] = useState(false);
+  // `own` : la valeur vient de la frappe de la personne ; `foreign` : une valeur est arrivée autrement
+  const [own, setOwn] = useState(false);
+  const foreign = useRef(false);
+  const gesture = useRef(false);
+  const seen = useRef('');
+  const [armed, setArmed] = useState(!guard);
   const ref = useRef<HTMLInputElement>(null);
   const caret = useRef<[number | null, number | null] | null>(null);
   // Changer le type du champ remet la sélection à zéro dans Chromium, parfois après le rendu : le
@@ -46,25 +68,91 @@ export function PasswordInput({ className, ...input }: Omit<InputHTMLAttributes<
     form.addEventListener('submit', hide);
     return () => form.removeEventListener('submit', hide);
   }, []);
+
+  // Gestes de la personne (frappe, effacement, collage, dépôt, saisie composée, clavier virtuel) : le
+  // navigateur les annonce par `beforeinput`. Un remplissage automatique n'en envoie pas, ou l'annonce
+  // comme un remplacement de texte.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const before = (e: Event) => {
+      const type = (e as InputEvent).inputType ?? '';
+      gesture.current = /^(insert(Text|CompositionText|FromPaste|FromDrop|FromYank)|delete)/.test(type);
+    };
+    el.addEventListener('beforeinput', before);
+    return () => el.removeEventListener('beforeinput', before);
+  }, []);
+
+  /** Classe la valeur du champ : saisie par la personne, ou arrivée d'ailleurs. */
+  const settle = (value: string, typed: boolean) => {
+    seen.current = value;
+    if (value === '') {
+      // Champ vidé : on repart de zéro, la prochaine frappe rendra l'œil
+      foreign.current = false;
+      setOwn(false);
+      setShown(false);
+    } else if (typed && !foreign.current) setOwn(true);
+    else {
+      foreign.current = true;
+      setOwn(false);
+      setShown(false);
+    }
+  };
+  // Valeur changée sans événement de saisie (posée par le code, restaurée par le navigateur)
+  useLayoutEffect(() => {
+    const value = ref.current?.value ?? '';
+    if (value !== seen.current) settle(value, false);
+  });
+
+  const eye = !noEye && own;
   return (
     // ALIGN-01 : le champ composé compte par son cadre (l'œil est son contenu)
-    <span className={`fd-pw${className ? ` ${className}` : ''}`} data-align-zone="">
-      <input {...input} ref={ref} className="fd-pw__input" type={shown ? 'text' : 'password'} />
-      <button
-        type="button"
-        className="fd-pw__eye"
-        aria-label={t('password.show')}
-        aria-pressed={shown}
-        // Le clic garde le focus et le curseur dans le champ
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => {
-          const el = ref.current;
-          if (el) caret.current = [el.selectionStart, el.selectionEnd];
-          setShown((s) => !s);
+    <span
+      className={`fd-pw${className ? ` ${className}` : ''}`}
+      data-align-zone=""
+      // Quitter le champ (et son œil) remasque
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setShown(false);
+      }}
+    >
+      <input
+        {...input}
+        ref={ref}
+        className="fd-pw__input"
+        type={shown && eye ? 'text' : 'password'}
+        readOnly={input.readOnly || !armed}
+        onFocus={(e) => {
+          setArmed(true);
+          input.onFocus?.(e);
         }}
-      >
-        {shown ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-      </button>
+        onPointerDown={(e) => {
+          setArmed(true);
+          input.onPointerDown?.(e);
+        }}
+        onInput={(e) => {
+          const typed = gesture.current;
+          gesture.current = false;
+          settle(e.currentTarget.value, typed);
+          input.onInput?.(e);
+        }}
+      />
+      {eye && (
+        <button
+          type="button"
+          className="fd-pw__eye"
+          aria-label={t('password.show')}
+          aria-pressed={shown}
+          // Le clic garde le focus et le curseur dans le champ
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            const el = ref.current;
+            if (el) caret.current = [el.selectionStart, el.selectionEnd];
+            setShown((s) => !s);
+          }}
+        >
+          {shown ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+        </button>
+      )}
     </span>
   );
 }

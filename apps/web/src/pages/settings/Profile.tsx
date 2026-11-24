@@ -44,6 +44,21 @@ export function Profile() {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null);
   const [current, setCurrent] = useState('');
   const [currentError, setCurrentError] = useState('');
+  // Sécurité (retour client du 24/11) : les champs n'existent qu'après « Mettre à jour le mot de passe »,
+  // vides, et tout est vidé à l'annulation comme à l'enregistrement
+  const [pwOpen, setPwOpen] = useState(false);
+  const closePassword = () => {
+    setPassword('');
+    setConfirm('');
+    setCurrent('');
+    setCurrentError('');
+    setMismatch(false);
+    setPwError('');
+    setPwFailed(false);
+    setPwTouched(false);
+    setPwOpen(false);
+    requestAnimationFrame(() => document.getElementById('pf-pw-open')?.focus());
+  };
   useEffect(() => {
     let alive = true;
     void supabase.rpc('account_deletion_check').then(({ data, error }) => {
@@ -116,11 +131,8 @@ export function Profile() {
       const refused = res.error && passwordErrorMessage(t, res.error, password);
       if (refused) return refusePassword(refused);
       check(res);
-      setPassword('');
-      setConfirm('');
-      setCurrent('');
       setHasPassword(true);
-      setPwTouched(false);
+      closePassword();
       toast(t('profile.passwordUpdated'));
     });
   }
@@ -276,17 +288,36 @@ export function Profile() {
             <p>{t('profile.passwordHint')}</p>
           </div>
           <div className="stg-sec__acts">
-            <Button type="submit" disabled={pwd.busy}>
-              {t(hasPassword === false ? 'profile.setPassword' : 'auth.updatePassword')}
-            </Button>
+            {pwOpen ? (
+              <>
+                <Button type="button" variant="ghost" disabled={pwd.busy} onClick={closePassword}>
+                  {t('common.cancel')}
+                </Button>
+                <Button type="submit" variant="primary" disabled={pwd.busy}>
+                  {t('profile.passwordSave')}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                id="pf-pw-open"
+                aria-expanded={false}
+                onClick={() => {
+                  setPwOpen(true);
+                  requestAnimationFrame(() => document.getElementById(hasPassword ? 'cp' : 'np')?.focus());
+                }}
+              >
+                {t(hasPassword === false ? 'profile.setPassword' : 'auth.updatePassword')}
+              </Button>
+            )}
           </div>
         </div>
-        {pwd.error && (
+        {pwOpen && pwd.error && (
           <div className="alert alert-danger" role="alert">
             {pwd.error}
           </div>
         )}
-        {hasPassword && (
+        {pwOpen && hasPassword && (
           <div className="stg-row">
             <div className="stg-text" data-gap-exempt="">
               <label className="stg-lab" htmlFor="cp">
@@ -294,8 +325,11 @@ export function Profile() {
               </label>
             </div>
             <div className="stg-ctl pf-pw">
+              {/* Pas d'œil sur le mot de passe actuel ; jamais prérempli à l'affichage */}
               <PasswordInput
                 id="cp"
+                noEye
+                guard
                 autoComplete="current-password"
                 name="current-password"
                 required
@@ -312,58 +346,64 @@ export function Profile() {
           </div>
         )}
         {/* EXT-02 §7 : œil, jauge de force, règles de la politique ; erreurs sous le champ */}
-        <div className="stg-row">
-          <div className="stg-text" data-gap-exempt="">
-            <label className="stg-lab" htmlFor="np">
-              {t('profile.passwordNew')}
-            </label>
-          </div>
-          <div className="stg-ctl pf-pw">
-            <PasswordInput
-              id="np"
-              autoComplete="new-password"
-              name="new-password"
-              required
-              value={password}
-              aria-invalid={pwError ? true : undefined}
-              aria-describedby={pwError ? 'np-error np-rules' : 'np-rules'}
-              onFocus={() => setPwTouched(true)}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setMismatch(false);
-                setPwError('');
-                setPwFailed(false);
-              }}
-            />
-            <PasswordMeter password={password} />
-            <PasswordError id="np-error">{pwError}</PasswordError>
-            {(pwTouched || password) && <PasswordRules id="np-rules" password={password} failed={pwFailed} />}
-          </div>
-        </div>
-        <div className="stg-row">
-          <div className="stg-text" data-gap-exempt="">
-            <label className="stg-lab" htmlFor="np2">
-              {t('password.confirmLabel')}
-            </label>
-          </div>
-          <div className="stg-ctl pf-pw">
-            <PasswordInput
-              id="np2"
-              autoComplete="new-password"
-              name="new-password-confirm"
-              required
-              value={confirm}
-              aria-invalid={mismatch || undefined}
-              aria-describedby={mismatch ? 'np2-error' : confirm ? 'np2-rule' : undefined}
-              onChange={(e) => {
-                setConfirm(e.target.value);
-                setMismatch(false);
-              }}
-            />
-            <PasswordError id="np2-error">{mismatch ? t('password.mismatch') : ''}</PasswordError>
-            {!mismatch && <PasswordMatch id="np2-rule" password={password} confirm={confirm} />}
-          </div>
-        </div>
+        {pwOpen && (
+          <>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="np">
+                  {t('profile.passwordNew')}
+                </label>
+              </div>
+              <div className="stg-ctl pf-pw">
+                <PasswordInput
+                  id="np"
+                  autoComplete="new-password"
+                  name="new-password"
+                  required
+                  value={password}
+                  aria-invalid={pwError ? true : undefined}
+                  aria-describedby={pwError ? 'np-error np-rules' : 'np-rules'}
+                  onFocus={() => setPwTouched(true)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setMismatch(false);
+                    setPwError('');
+                    setPwFailed(false);
+                  }}
+                />
+                <PasswordMeter password={password} />
+                <PasswordError id="np-error">{pwError}</PasswordError>
+                {(pwTouched || password) && (
+                  <PasswordRules id="np-rules" password={password} failed={pwFailed} />
+                )}
+              </div>
+            </div>
+            <div className="stg-row">
+              <div className="stg-text" data-gap-exempt="">
+                <label className="stg-lab" htmlFor="np2">
+                  {t('password.confirmLabel')}
+                </label>
+              </div>
+              <div className="stg-ctl pf-pw">
+                <PasswordInput
+                  id="np2"
+                  autoComplete="new-password"
+                  name="new-password-confirm"
+                  required
+                  value={confirm}
+                  aria-invalid={mismatch || undefined}
+                  aria-describedby={mismatch ? 'np2-error' : confirm ? 'np2-rule' : undefined}
+                  onChange={(e) => {
+                    setConfirm(e.target.value);
+                    setMismatch(false);
+                  }}
+                />
+                <PasswordError id="np2-error">{mismatch ? t('password.mismatch') : ''}</PasswordError>
+                {!mismatch && <PasswordMatch id="np2-rule" password={password} confirm={confirm} />}
+              </div>
+            </div>
+          </>
+        )}
       </form>
 
       {/* Mes données (export) et Zone de danger (suppression du compte) */}

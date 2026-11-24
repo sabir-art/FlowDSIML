@@ -38,7 +38,8 @@ const VALIDE = 'Acmedemo2026!';
     const cf = page.locator('#confirm');
     await pw.waitFor();
     const eyes = page.getByRole('button', { name: 'Afficher le mot de passe' });
-    ok((await eyes.count()) === 2, `${tag} : un œil par champ, nom fixe « Afficher le mot de passe »`);
+    // EXT-02 §7.1 : l'œil n'apparaît qu'une fois que la personne a tapé dans le champ
+    ok((await eyes.count()) === 0, `${tag} : champs vides, aucun œil avant la frappe`);
     ok((await page.locator('#password-rules').count()) === 0, `${tag} : règles masquées avant le focus`);
     ok(
       (await page.locator('.fd-pw-meter').count()) === 0,
@@ -82,7 +83,12 @@ const VALIDE = 'Acmedemo2026!';
     await page.getByRole('status').filter({ hasText: 'règles sur 5 respectées' }).waitFor();
     ok(true, `${tag} : « 3 règles sur 5 respectées » annoncé après la frappe`);
 
-    // Œil : affiche, garde le focus et le curseur ; indépendant de l'autre champ
+    // Œil : apparu avec la frappe ; affiche, garde le focus et le curseur ; indépendant de l'autre champ
+    ok(
+      (await eyes.count()) === 1 &&
+        (await eyes.first().getAttribute('aria-label')) === 'Afficher le mot de passe',
+      `${tag} : l’œil apparaît à la frappe, nom fixe « Afficher le mot de passe »`,
+    );
     await pw.evaluate((e) => e.setSelectionRange(3, 3));
     await eyes.first().click();
     // La bascule du type peut déplacer le curseur après le rendu : contrôle une image plus tard
@@ -105,9 +111,8 @@ const VALIDE = 'Acmedemo2026!';
     );
     await eyes.first().click();
     ok(
-      (await cf.getAttribute('type')) === 'password' &&
-        (await eyes.nth(1).getAttribute('aria-pressed')) === 'false',
-      `${tag} : l’œil de la confirmation est indépendant`,
+      (await cf.getAttribute('type')) === 'password' && (await eyes.count()) === 1,
+      `${tag} : la confirmation, encore vide, reste masquée et sans œil`,
     );
     const eye = await eyes.first().evaluate((e) => {
       const r = e.getBoundingClientRect();
@@ -126,6 +131,12 @@ const VALIDE = 'Acmedemo2026!';
       `${tag} : règle de confirmation masquée au départ`,
     );
     await cf.pressSequentially('Acme');
+    ok(
+      (await eyes.count()) === 2 &&
+        (await eyes.nth(1).getAttribute('aria-pressed')) === 'false' &&
+        (await pw.getAttribute('type')) === 'password',
+      `${tag} : un œil par champ, indépendants ; quitter le premier champ l’a remasqué`,
+    );
     ok(
       sp(await page.locator('#confirm-rule li').innerText()) ===
         'Les deux mots de passe sont identiques : non respectée',
@@ -280,17 +291,36 @@ const VALIDE = 'Acmedemo2026!';
     await page.goto(`${APP}/#/settings/profile`);
     const np = page.locator('#np');
     const cp = page.locator('#cp');
-    await cp.waitFor();
-    await np.focus();
+    const eyes = page.getByRole('button', { name: 'Afficher le mot de passe' });
+    // Sécurité (retour client du 24/11) : aucun champ de mot de passe tant qu'on n'a rien demandé
+    const openPw = page.getByRole('button', { name: 'Mettre à jour le mot de passe' });
+    await openPw.waitFor();
     ok(
-      (await page.locator('#np-rules li').count()) === 5 &&
-        (await page.getByRole('button', { name: 'Afficher le mot de passe' }).count()) === 3,
-      'Profil : « Mot de passe actuel », œil sur les trois champs, règles dès le focus',
+      (await page.locator('#cp, #np, #np2').count()) === 0 &&
+        (await page.locator('input[type=password]').count()) === 0,
+      'Profil : aucun champ de mot de passe avant « Mettre à jour le mot de passe »',
     );
+    await openPw.click();
+    await cp.waitFor();
+    ok(
+      (await cp.inputValue()) === '' &&
+        (await np.inputValue()) === '' &&
+        (await page.locator('#np2').inputValue()) === '' &&
+        (await cp.getAttribute('autocomplete')) === 'current-password' &&
+        (await np.getAttribute('autocomplete')) === 'new-password' &&
+        (await eyes.count()) === 0,
+      'Profil : trois champs vides à l’ouverture, sans œil',
+    );
+    ok(
+      (await page.evaluate(() => document.activeElement?.id)) === 'cp',
+      'Profil : focus sur « Mot de passe actuel »',
+    );
+    await np.focus();
+    ok((await page.locator('#np-rules li').count()) === 5, 'Profil : règles dès le focus');
     // L'œil garde le curseur ici aussi
     await np.pressSequentially(VALIDE);
     await np.evaluate((e) => e.setSelectionRange(4, 4));
-    await page.getByRole('button', { name: 'Afficher le mot de passe' }).nth(1).click();
+    await eyes.first().click();
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
     ok(
       (await np.getAttribute('type')) === 'text' && (await np.evaluate((e) => e.selectionStart)) === 4,
@@ -304,7 +334,11 @@ const VALIDE = 'Acmedemo2026!';
     });
     ok(al <= 1, `Profil : champ calé sur la fin de la ligne (${al})`);
     await page.locator('#np2').pressSequentially(VALIDE);
-    const save = page.getByRole('button', { name: 'Mettre à jour le mot de passe' });
+    const save = page.getByRole('button', { name: 'Enregistrer le mot de passe' });
+    ok(
+      (await np.getAttribute('type')) === 'password',
+      'Profil : quitter le champ remasque le nouveau mot de passe',
+    );
 
     // Mot de passe actuel : vide, puis incorrect ; rien n'est changé
     await save.click();
@@ -317,6 +351,11 @@ const VALIDE = 'Acmedemo2026!';
     );
     await cp.pressSequentially('Faux-2025!');
     ok((await page.locator('#cp-error').count()) === 0, 'Profil : l’erreur disparaît à la saisie');
+    ok(
+      (await cp.locator('xpath=..').getByRole('button').count()) === 0 &&
+        (await cp.getAttribute('type')) === 'password',
+      'Profil : jamais d’œil sur « Mot de passe actuel », même après une frappe',
+    );
     await save.click();
     await page.locator('#cp-error').waitFor();
     ok(
@@ -345,9 +384,33 @@ const VALIDE = 'Acmedemo2026!';
     state.passwordRefusal = null;
     await save.click();
     await page.getByText('Mot de passe mis à jour').first().waitFor();
+    await cp.waitFor({ state: 'detached' });
     ok(
-      (await np.inputValue()) === '' && (await cp.inputValue()) === '',
-      'Profil : mot de passe mis à jour, champs vidés',
+      (await page.locator('input[type=password], #np, #np2').count()) === 0 && (await openPw.count()) === 1,
+      'Profil : mot de passe mis à jour, formulaire refermé et vidé',
+    );
+    // Rouvert : rien ne reste de la saisie précédente ; « Annuler » vide et referme aussi
+    await openPw.click();
+    await cp.waitFor();
+    ok(
+      (await cp.inputValue()) === '' &&
+        (await np.inputValue()) === '' &&
+        (await page.locator('#np2').inputValue()) === '',
+      'Profil : rouvert après l’enregistrement, les trois champs sont vides',
+    );
+    await np.pressSequentially('Brouillon-1!');
+    await cp.pressSequentially('abc');
+    await page
+      .locator('#pf-sec-pwd')
+      .locator('xpath=ancestor::form')
+      .getByRole('button', { name: 'Annuler' })
+      .click();
+    await cp.waitFor({ state: 'detached' });
+    await openPw.click();
+    await cp.waitFor();
+    ok(
+      (await cp.inputValue()) === '' && (await np.inputValue()) === '' && (await eyes.count()) === 0,
+      'Profil : « Annuler » vide tout ; rien n’est gardé à la réouverture',
     );
     await page.close();
   }
@@ -366,20 +429,92 @@ const VALIDE = 'Acmedemo2026!';
         (await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).count()) === 0,
       'Compte sans mot de passe : « Définir un mot de passe », sans « Mot de passe actuel »',
     );
+    await set.click();
     await page.locator('#np').pressSequentially(VALIDE);
     await page.locator('#np2').pressSequentially(VALIDE);
-    await set.click();
+    await page.getByRole('button', { name: 'Enregistrer le mot de passe' }).click();
     await page.getByText('Mot de passe mis à jour').first().waitFor();
     ok(
       state.passwordUpdates === 1 && state.lastUpdateHadCurrent === false,
       'Compte sans mot de passe : mot de passe défini, aucun mot de passe actuel demandé',
     );
     // Le compte a maintenant un mot de passe : le champ apparaît pour la prochaine fois
+    await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).click();
     await page.locator('#cp').waitFor();
-    ok(
-      (await page.getByRole('button', { name: 'Mettre à jour le mot de passe' }).count()) === 1,
-      'Compte sans mot de passe : une fois défini, « Mot de passe actuel » est demandé',
+    ok(true, 'Compte sans mot de passe : une fois défini, « Mot de passe actuel » est demandé');
+    await page.close();
+  }
+
+  // ===== Sécurité : l'œil ne révèle jamais une valeur que la personne n'a pas tapée (EXT-02 §7.1) =====
+  for (const where of ['connexion', 'inscription', 'nouveau mot de passe']) {
+    const page = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+    const s = seed();
+    if (where !== 'nouveau mot de passe') s.signedOut = true;
+    await install(page, s);
+    await page.goto(
+      `${APP}/#/${where === 'connexion' ? 'login' : where === 'inscription' ? 'signup' : 'reset-password'}`,
     );
+    const pw = page.locator('#password');
+    await pw.waitFor();
+    const eye = pw.locator('xpath=..').getByRole('button', { name: 'Afficher le mot de passe' });
+    const SECRET = 'Enregistre-2024!';
+    // Remplissage par le navigateur ou un gestionnaire : la valeur arrive sans frappe
+    const autofill = () =>
+      pw.evaluate((el, v) => {
+        const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        set.call(el, v);
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      }, SECRET);
+    ok((await eye.count()) === 0, `${where} : champ vide, pas d’œil`);
+    await autofill();
+    await page.waitForFunction((v) => document.querySelector('#password').value === v, SECRET);
+    ok(
+      (await eye.count()) === 0 && (await pw.getAttribute('type')) === 'password',
+      `${where} : valeur autoremplie, masquée, sans œil`,
+    );
+    // Compléter la valeur au clavier ne rend pas l'œil : il faut vider puis ressaisir
+    await pw.focus();
+    await page.keyboard.press('End');
+    await page.keyboard.type('x');
+    ok(
+      (await eye.count()) === 0 && (await pw.getAttribute('type')) === 'password',
+      `${where} : compléter une valeur autoremplie ne rend pas l’œil`,
+    );
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Backspace');
+    await page.waitForFunction(() => document.querySelector('#password').value === '');
+    await page.keyboard.type('Tape-2026!');
+    await eye.waitFor();
+    await eye.click();
+    ok(
+      (await pw.getAttribute('type')) === 'text' && (await pw.inputValue()) === 'Tape-2026!',
+      `${where} : champ vidé puis ressaisi, l’œil revient et montre la frappe`,
+    );
+    // Une valeur autoremplie par-dessus une frappe affichée : remasquée aussitôt, œil retiré
+    await autofill();
+    await page.waitForFunction((v) => document.querySelector('#password').value === v, SECRET);
+    ok(
+      (await pw.getAttribute('type')) === 'password' && (await eye.count()) === 0,
+      `${where} : autoremplissage par-dessus une frappe affichée, remasqué, œil retiré`,
+    );
+    // Un collage est un geste de la personne
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Backspace');
+    await page.waitForFunction(() => document.querySelector('#password').value === '');
+    await pw.evaluate((el) => {
+      const dt = new DataTransfer();
+      dt.setData('text/plain', 'Colle-2026!');
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+    });
+    await page.keyboard.type('Z');
+    await eye.waitFor();
+    await eye.click();
+    ok((await pw.getAttribute('type')) === 'text', `${where} : saisie de la personne, l’œil fonctionne`);
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.waitForFunction(() => !document.activeElement?.closest('.fd-pw:has(#password)'));
+    ok((await pw.getAttribute('type')) === 'password', `${where} : quitter le champ remasque`);
     await page.close();
   }
   await b.close();

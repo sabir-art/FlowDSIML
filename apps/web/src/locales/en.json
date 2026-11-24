@@ -266,6 +266,7 @@
     "changePassword": "Password",
     "passwordUpdated": "Password updated.",
     "setPassword": "Set a password",
+    "passwordSave": "Save the password",
     "passwordCurrent": "Current password",
     "passwordCurrentRequired": "Enter your current password.",
     "passwordCurrentWrong": "The current password is incorrect.",
