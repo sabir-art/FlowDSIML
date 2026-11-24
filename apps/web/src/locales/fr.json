@@ -2939,6 +2939,7 @@
     "newImport": "Importer des images",
     "newImportBody": "Une étape par image, dans l’ordre des noms de fichiers. PNG, JPEG ou WebP.",
     "newEmpty": "Partir d’une démo vide",
+    "newEmptyBody": "Une démo sans étape, à remplir dans l’éditeur.",
     "gs": {
       "title": "Premiers pas · {{done}} sur {{total}}",
       "progress": "Progression des premiers pas",
@@ -4002,9 +4003,10 @@
     "footEditor": "Les étapes de création de démos. Les autres sont suivies par les administrateurs de l’espace.",
     "hide": "Masquer la prise en main",
     "hideShort": "Masquer",
-    "dismiss": "Ne plus afficher",
-    "ready": "Votre espace est prêt",
-    "readyBody": "Les {{total}} étapes sont faites. Retrouvez l’aide à tout moment avec F1.",
+    "close": "Fermer le panneau",
+    "finTitle": "Prise en main terminée",
+    "finBody": "Les {{total}} étapes sont faites. Votre espace est prêt : bonne création !",
+    "finHint": "Vous la retrouverez dans le Centre d’aide.",
     "resume": "Reprendre la prise en main",
     "resumeHint": "Les étapes de votre espace, sur la page Démos"
   },

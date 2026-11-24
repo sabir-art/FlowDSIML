@@ -2939,6 +2939,7 @@
     "newImport": "Import images",
     "newImportBody": "One step per image, in file name order. PNG, JPEG or WebP.",
     "newEmpty": "Start from an empty demo",
+    "newEmptyBody": "A demo with no steps, to fill in the editor.",
     "gs": {
       "title": "Getting started · {{done}} of {{total}}",
       "progress": "Getting started progress",
@@ -4002,9 +4003,10 @@
     "footEditor": "Demo creation steps. The others are followed by workspace admins.",
     "hide": "Hide getting started",
     "hideShort": "Hide",
-    "dismiss": "Don’t show again",
-    "ready": "Your workspace is ready",
-    "readyBody": "All {{total}} steps are done. Find help anytime with F1.",
+    "close": "Close the panel",
+    "finTitle": "Getting started complete",
+    "finBody": "All {{total}} steps are done. Your workspace is ready: happy creating!",
+    "finHint": "You will find it again in the Help Center.",
     "resume": "Resume getting started",
     "resumeHint": "Your workspace steps, on the Demos page"
   },

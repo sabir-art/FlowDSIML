@@ -195,7 +195,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.keyboard.press('Escape');
 
   // ===== Fermer par la croix, puis reprendre depuis l'aide =====
-  await card.getByRole('button', { name: 'Masquer la prise en main' }).click();
+  await card.getByRole('button', { name: 'Fermer le panneau' }).click();
   await card.waitFor({ state: 'detached' });
   ok((await toggle.getAttribute('aria-expanded')) === 'false', 'la croix ferme le panneau, le bouton reste');
   await page.reload();
@@ -264,17 +264,33 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       `invitation envoyée : toutes les étapes sont faites (${sp(await page.locator('#onb-toggle').innerText()).replace(/\s+/g, ' ')})`,
     );
     await card.waitFor();
-    await card.getByRole('button', { name: /^Terminées/ }).click();
-    ok(await inviteDone(), 'invitation envoyée : « Inviter un membre de l’équipe » est dans « Terminées »');
+    // §9 : « Terminées » est dépliée quand tout est fait
+    ok(
+      (await card.getByRole('button', { name: /^Terminées/ }).getAttribute('aria-expanded')) === 'true' &&
+        (await inviteDone()),
+      'invitation envoyée : « Inviter un membre de l’équipe » est dans « Terminées », dépliée',
+    );
 
-    // ===== Tout est fait : état terminé, puis « Ne plus afficher » =====
+    // ===== Tout est fait : état terminé (maquette onb-fin), puis « Masquer la prise en main » =====
+    const fin = card.locator('.onb-fin');
+    const total = await card.getByRole('progressbar').getAttribute('aria-valuemax');
     ok(
       (await page.locator('#onb-toggle.is-done').count()) === 1 &&
-        /Votre espace est prêt/.test(await card.innerText()) &&
-        /Les \d étapes sont faites\. Retrouvez l’aide à tout moment avec F1\./.test(
-          sp(await card.innerText()),
-        ),
-      'tout est fait : pastille en « n/n », panneau « Votre espace est prêt »',
+        (await fin.getAttribute('role')) === 'status' &&
+        sp(await fin.innerText()).replace(/\s+/g, ' ') ===
+          `Prise en main terminée Les ${total} étapes sont faites. Votre espace est prêt : bonne création ! Masquer la prise en main Vous la retrouverez dans le Centre d’aide.`,
+      'tout est fait : pastille en « n/n », carte « Prise en main terminée »',
+    );
+    ok(
+      (await fin.evaluate((el) => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--fd-color-success-soft)';
+        document.body.append(probe);
+        const want = getComputedStyle(probe).color;
+        probe.remove();
+        return getComputedStyle(el).backgroundColor === want;
+      })) && (await fin.locator('svg.lucide-circle-check').count()) === 1,
+      'tout est fait : carte sur success-soft, tuile CircleCheck',
     );
     ok(
       (await card.getByRole('progressbar').getAttribute('aria-valuenow')) ===
@@ -282,14 +298,14 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       'tout est fait : barre de progression pleine',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/onb-termine${sfx}.png` });
-    await card.getByRole('button', { name: 'Ne plus afficher', exact: true }).click();
+    await fin.getByRole('button', { name: 'Masquer la prise en main', exact: true }).click();
     await card.waitFor({ state: 'detached' });
     await page.locator('#onb-toggle').waitFor({ state: 'detached' });
     ok(
       state.tables.onboarding_prefs.some(
         (p) => p.workspace_id === state.tables.workspaces[0].id && p.hidden_at,
       ),
-      '« Ne plus afficher » : préférence enregistrée, pastille et panneau disparus',
+      '« Masquer la prise en main » : préférence enregistrée, pastille et panneau disparus',
     );
     await page.reload();
     await page.getByRole('heading', { name: 'Démos', level: 1 }).waitFor();
@@ -316,8 +332,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await drawer.getByRole('button', { name: /Reprendre la prise en main/ }).click();
   await card.waitFor();
   ok(
-    /Votre espace est prêt/.test(await card.innerText()),
-    '7 sur 7 : l’aide rouvre le panneau, « Votre espace est prêt »',
+    /Prise en main terminée/.test(await card.innerText()),
+    '7 sur 7 : l’aide rouvre le panneau, « Prise en main terminée »',
   );
 
   // ===== Espace tout neuf : panneau ouvert à la première visite du propriétaire =====
@@ -345,7 +361,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
         /^Prise en main\s*0\/6/.test(await n.locator('#onb-toggle').textContent()),
       'espace neuf (0/6) : panneau ouvert à la première visite du propriétaire',
     );
-    await np.getByRole('button', { name: 'Masquer la prise en main' }).click();
+    await np.getByRole('button', { name: 'Fermer le panneau' }).click();
     await n.reload();
     await n.locator('#onb-toggle').waitFor();
     ok((await np.count()) === 0, 'espace neuf : une fois fermé, il reste fermé (choix gardé)');

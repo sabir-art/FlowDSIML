@@ -538,9 +538,6 @@
 .new-demo-dialog .fd-modal__foot > .nd-back {
   margin-right: auto;
 }
-.new-demo-dialog .fd-modal__foot > .nd-back + .nd-empty {
-  margin-left: -4px;
-}
 @media (max-width: 479px) {
   .new-demo-dialog .fd-modal__foot {
     flex-wrap: wrap;
@@ -1917,13 +1914,6 @@ button.nd-src:focus-visible {
     row-gap: 8px;
     border-radius: 0;
   }
-  /* « Partir d'une démo vide » sur toute la largeur, au-dessus de Retour et Annuler */
-  .new-demo-dialog .fd-modal__foot > .nd-empty {
-    order: -1;
-    width: 100%;
-    margin: 0;
-    justify-content: center;
-  }
 }
 
 /* ---- ONB-01 (COMP-01 §17, variante B) : prise en main hors du flux, dans un panneau à droite ---- */
@@ -2031,6 +2021,34 @@ button.nd-src:focus-visible {
   border-radius: 10px;
   background: var(--fd-color-surface);
   color: var(--fd-color-text);
+}
+/* §9 : prise en main terminée (carte de succès, maquette lot2-demos/onb-fin) */
+.onb-fin {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--fd-color-success-soft);
+}
+.onb-fin > b {
+  font: 600 15px var(--fd-font-sans);
+}
+.onb-fin__t {
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
+.onb-fin > .fd-btn {
+  margin-top: 6px;
+}
+.onb-fin__h {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.onb-tile--ok {
+  border: 0;
+  color: var(--fd-color-success);
 }
 .onb-tile > svg {
   width: 20px;

@@ -19,7 +19,6 @@ import {
   EyeOff,
   Info,
   Palette,
-  PartyPopper,
   Play,
   Puzzle,
   Rocket,
@@ -253,7 +252,8 @@ export function OnboardingPanel({
     onClose();
   };
   const [tour, setTour] = useState<{ id: string; title: string } | null>(null);
-  const [showDone, setShowDone] = useState(false);
+  // « Terminées » : repliée pendant la prise en main, dépliée quand tout est fait (choix gardé ensuite)
+  const [doneChoice, setShowDone] = useState<boolean | null>(null);
   const panel = useRef<HTMLElement>(null);
 
   // Tiroir : focus dans le panneau à l'ouverture, piégé ; Échap ferme et rend le focus au bouton d'entrée
@@ -334,6 +334,7 @@ export function OnboardingPanel({
   const NextIcon = next ? ICONS[next] : null;
   const nextAction = next ? action(next) : null;
 
+  const showDone = doneChoice ?? p.complete;
   const content = (
     <aside
       ref={panel}
@@ -348,7 +349,7 @@ export function OnboardingPanel({
         <button
           type="button"
           className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-          aria-label={t('onb.hide')}
+          aria-label={t('onb.close')}
           onClick={onClose}
         >
           <X aria-hidden="true" />
@@ -365,19 +366,20 @@ export function OnboardingPanel({
       >
         <span style={{ width: `${(p.n / p.total) * 100}%` }} />
       </div>
-      <p className="onb-panel__sub">{t('onb.sub', { count: p.n, total: p.total })}</p>
+      {!p.complete && <p className="onb-panel__sub">{t('onb.sub', { count: p.n, total: p.total })}</p>}
 
       {p.complete && (
-        // Tout est fait : rouvert depuis l'aide, le panneau le dit et garde la liste des étapes
-        <div className="onb-next" data-gap-exempt="">
-          <span className="onb-tile" aria-hidden="true">
-            <PartyPopper />
+        // §9 (retours client du 24/11) : carte de succès, puis « Masquer la prise en main »
+        <div className="onb-fin" role="status" data-gap-exempt="">
+          <span className="onb-tile onb-tile--ok" aria-hidden="true">
+            <CircleCheck />
           </span>
-          <b>{t('onb.ready')}</b>
-          <span className="onb-next__h">{t('onb.readyBody', { total: p.total })}</span>
-          <button type="button" className="fd-btn" onClick={() => void hide()}>
-            {t('onb.dismiss')}
+          <b>{t('onb.finTitle')}</b>
+          <span className="onb-fin__t">{t('onb.finBody', { total: p.total })}</span>
+          <button type="button" className="fd-btn fd-btn--primary fd-btn--sm" onClick={() => void hide()}>
+            {t('onb.hide')}
           </button>
+          <span className="onb-fin__h">{t('onb.finHint')}</span>
         </div>
       )}
       {next && NextIcon && nextAction && (
@@ -443,7 +445,7 @@ export function OnboardingPanel({
             className="onb-done"
             aria-expanded={showDone}
             aria-controls={showDone ? 'onb-done-list' : undefined}
-            onClick={() => setShowDone((v) => !v)}
+            onClick={() => setShowDone(!showDone)}
           >
             {showDone ? <ChevronDown aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}
             {t('onb.doneList')} <span className="onb-n">{p.n}</span>
