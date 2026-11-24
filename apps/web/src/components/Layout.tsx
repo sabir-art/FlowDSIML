@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   UserRound,
   X,
+  Images,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
@@ -241,6 +242,8 @@ export function Layout() {
           {item('/sandbox', path === '/sandbox', <Box {...ICON} />, t('nav.sandbox'))}
           {/* L14 : parcours (centre de formation), propriétaires et admins (droits inchangés) */}
           {can('members.manage') && item('/center', path === '/center', <Route {...ICON} />, t('nav.paths'))}
+          {/* §3.1 : la Médiathèque de l'espace, entre Parcours de formation et Analytics */}
+          {item('/media', path === '/media', <Images {...ICON} />, t('nav.media'))}
           {/* Leads reste un onglet d'Analytics (?tab=leads) */}
           {item('/analytics', path === '/analytics', <ChartColumn {...ICON} />, t('nav.analytics'))}
           <div className="fd-nav__section">{t('nav.training')}</div>

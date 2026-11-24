@@ -27,6 +27,7 @@ function lazyRest<T extends ComponentType<any>>(load: () => Promise<{ default: T
 
 // Pages lourdes chargées à la demande (éditeur, analytics, partage).
 // L27 : chaque page est un morceau chargé à la demande (bundle initial réduit)
+const MediaPage = lazyRest(() => import('./pages/media/MediaPage').then((m) => ({ default: m.MediaPage })));
 const CenterSettings = lazyRest(() =>
   import('./pages/center/CenterSettings').then((m) => ({ default: m.CenterSettings })),
 );
@@ -271,6 +272,7 @@ export function App() {
                     <Route path="/nouveautes" element={<NewsPage />} />
                     <Route path="/learners" element={<LearnersPage />} />
                     <Route path="/center" element={<CenterSettings />} />
+                    <Route path="/media" element={<MediaPage />} />
                     <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
                     <Route path="/settings" element={<SettingsHome />} />
                     <Route path="/settings/profile" element={<Profile />} />

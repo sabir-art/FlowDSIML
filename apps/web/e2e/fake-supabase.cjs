@@ -1942,6 +1942,27 @@ async function install(page, state = seed()) {
           return json(route, 200, n);
         }
         // ===== L18 : médiathèque =====
+        // §3.2 : menu d'une carte de la médiathèque
+        case 'rename_media_file': {
+          const f = (t.media_files || []).find((x) => x.id === a.p_id);
+          if (f) f.name = a.p_name;
+          return json(route, 200, null);
+        }
+        case 'set_media_kind': {
+          const f = (t.media_files || []).find((x) => x.id === a.p_id);
+          if (f && f.kind !== 'font') f.kind = a.p_kind;
+          return json(route, 200, null);
+        }
+        case 'media_file_demos': {
+          const f = (t.media_files || []).find((x) => x.id === a.p_id);
+          return json(
+            route,
+            200,
+            t.demos
+              .filter((d) => f && !d.deleted_at && JSON.stringify(d.settings || {}).includes(f.path))
+              .map((d) => ({ id: d.id, title: d.title })),
+          );
+        }
         case 'media_usage':
           return json(
             route,

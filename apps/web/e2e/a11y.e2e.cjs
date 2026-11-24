@@ -815,6 +815,29 @@ const APP_PAGES = [
   // VB-03 : Sécurité (connexion unique « Bientôt » ; « Fonctions à venir » supprimée en L48-A)
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
+  // §3.4 : Médiathèque (vide, puis avec des fichiers des trois catégories)
+  { name: 'Médiathèque (vide)', route: '/#/media' },
+  {
+    name: 'Médiathèque',
+    route: '/#/media',
+    seed: (d) => {
+      const file = (id, kind, name, ext, mime) => ({
+        id,
+        workspace_id: 'ws-1',
+        kind,
+        name,
+        path: `ws-1/${id}.${ext}`,
+        mime,
+        size_bytes: 40000,
+        created_at: '2026-11-01T09:00:00Z',
+      });
+      d.tables.media_files = [
+        file('m-1', 'logo', 'logo-acme.svg', 'svg', 'image/svg+xml'),
+        file('m-2', 'image', 'fond-accueil.png', 'png', 'image/png'),
+        file('m-3', 'font', 'Inter-Regular.woff2', 'woff2', 'font/woff2'),
+      ];
+    },
+  },
   // §6.2 : Clés d'accès (liste vide et section « Utiliser l'API »), puis avec des clés
   { name: 'Clés d’accès (vide)', route: '/#/settings/keys' },
   {

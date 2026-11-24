@@ -73,7 +73,8 @@
     "sandbox": "Sandbox",
     "homeLogo": "Démos, accueil de TutoClick",
     "collapseSidebar": "Replier la barre latérale",
-    "expandSidebar": "Déplier la barre latérale"
+    "expandSidebar": "Déplier la barre latérale",
+    "media": "Médiathèque"
   },
   "roles": {
     "owner": "Propriétaire",
@@ -4661,7 +4662,34 @@
     "svgRejected": "Ce SVG contient des éléments refusés (script, entité, lien externe).",
     "error": "L’import n’a pas abouti. Réessayez.",
     "open": "Médiathèque",
-    "choose": "Choisir dans la médiathèque"
+    "choose": "Choisir dans la médiathèque",
+    "category": "Catégorie",
+    "kind": {
+      "logo": "Logo",
+      "image": "Image",
+      "font": "Police"
+    },
+    "unused": "Non utilisé",
+    "dropHere": "Glissez des fichiers ici",
+    "pageHint": "PNG, JPG, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
+    "imported": "« {{name}} » importé dans {{category}}.",
+    "change": "Changer",
+    "reason": {
+      "font": "",
+      "svg": "Fichier SVG : rangé avec les logos.",
+      "transparentSquare": "Fond transparent et format carré : rangé avec les logos."
+    },
+    "actionsFor": "Actions pour {{name}}",
+    "rename": "Renommer",
+    "renameTitle": "Renommer le fichier",
+    "name": "Nom",
+    "download": "Télécharger",
+    "seeDemos": "Voir les démos qui l’utilisent",
+    "demosTitle": "Démos qui utilisent « {{name}} »",
+    "demosNone": "Aucune démo n’utilise ce fichier.",
+    "kindChanged": "« {{name}} » est maintenant dans {{category}}.",
+    "noMatch": "Aucun fichier ne correspond.",
+    "noneYet": "La médiathèque est vide."
   },
   "soon": {
     "badge": "Bientôt disponible",

@@ -1,0 +1,108 @@
+/* /media : la Médiathèque (maquettes retours-2411/media-page-*) */
+.mp {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mp-tools {
+  align-items: center;
+}
+.mp-search {
+  min-width: 220px;
+}
+.mp-n {
+  margin-left: 4px;
+  color: var(--fd-color-text-muted);
+  font-weight: 400;
+}
+.mp-quota {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
+.mp-none {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mp-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 4px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+/* Aperçu de 112 px, sur fond neutre (un logo blanc reste visible) */
+.mp-thumb {
+  display: grid;
+  grid-column: 1 / -1;
+  place-items: center;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+/* L'image entière tient dans l'aperçu, sans rognage ni déformation */
+.mp-thumb img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  object-fit: contain;
+}
+.mp-thumb svg {
+  width: 32px;
+  height: 32px;
+}
+.mp-card__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.mp-card__info b {
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mp-card__info span {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.mp-demos {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mp-demos-none {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+@media (max-width: 767px) {
+  .mp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .mp-quota {
+    margin-left: 0;
+  }
+  .mp-search {
+    min-width: 0;
+  }
+}

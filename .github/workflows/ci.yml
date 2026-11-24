@@ -192,6 +192,9 @@ jobs:
       - name: Paramètres › Page publique (catalogue public, démos choisies, refus, centre de formation, lecteur)
         if: always()
         run: cd apps/web && node e2e/page-publique.e2e.cjs
+      - name: Médiathèque /media (catégorie déduite à l'import, filtres, menu d'une carte, rôle lecteur)
+        if: always()
+        run: cd apps/web && node e2e/media-page.e2e.cjs
       - name: Résumé par e-mail (préférence, « Bientôt » sans service d'envoi, désinscription)
         if: always()
         run: cd apps/web && node e2e/email-digest.e2e.cjs
