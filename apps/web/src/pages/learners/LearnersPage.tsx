@@ -534,7 +534,7 @@ function filterSummary(t: TFn, d: ProgressData, f: Filters): string {
     );
   if (f.group) parts.push(f.group === 'none' ? t('learners.noGroup') : f.group);
   if (f.module) parts.push(d.paths.flatMap((p) => p.modules).find((m) => m.demoId === f.module)?.title ?? '');
-  if (f.q.trim()) parts.push(`« ${f.q.trim()} »`);
+  if (f.q.trim()) parts.push(`« ${f.q.trim()} »`);
   return parts.filter(Boolean).join(', ');
 }
 
