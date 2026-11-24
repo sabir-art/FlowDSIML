@@ -795,6 +795,8 @@ const APP_PAGES = [
   // VB-03 : Sécurité (connexion unique « Bientôt » ; « Fonctions à venir » supprimée en L48-A)
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
+  // §6.3 : Notifications (tableau par événement, colonne e-mail « Bientôt » sans service d'envoi)
+  { name: 'Notifications (paramètres)', route: '/#/settings/notifications' },
   // L30-01 : Assistance IA désactivée, puis activée (quota, fonctions)
   { name: 'Assistance IA (désactivée)', route: '/#/settings/ai' },
   {

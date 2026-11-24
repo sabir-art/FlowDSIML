@@ -87,7 +87,7 @@ const GROUPS: Array<{ key: string; entries: Entry[] }> = [
     key: 'account',
     entries: [
       { label: 'settings.profile', icon: CircleUser, to: '/settings/profile' },
-      { label: 'settings.notifications', icon: Bell },
+      { label: 'settings.notifications', icon: Bell, to: '/settings/notifications' },
     ],
   },
 ];

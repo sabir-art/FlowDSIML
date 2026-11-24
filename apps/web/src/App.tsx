@@ -43,6 +43,9 @@ const AcceptInvite = lazyRest(() =>
 );
 const Unsubscribe = lazyRest(() => import('./pages/Unsubscribe').then((m) => ({ default: m.Unsubscribe })));
 const Profile = lazyRest(() => import('./pages/settings/Profile').then((m) => ({ default: m.Profile })));
+const NotificationSettings = lazyRest(() =>
+  import('./pages/settings/NotificationSettings').then((m) => ({ default: m.NotificationSettings })),
+);
 const SettingsHome = lazyRest(() =>
   import('./pages/settings/SettingsShell').then((m) => ({ default: m.SettingsHome })),
 );
@@ -268,6 +271,7 @@ export function App() {
                     <Route path="/leads" element={<Navigate to="/analytics?tab=leads" replace />} />
                     <Route path="/settings" element={<SettingsHome />} />
                     <Route path="/settings/profile" element={<Profile />} />
+                    <Route path="/settings/notifications" element={<NotificationSettings />} />
                     <Route path="/settings/members" element={<Members />} />
                     <Route path="/settings/workspace" element={<WorkspaceSettings />} />
                     <Route path="/settings/usage" element={<UsagePage />} />

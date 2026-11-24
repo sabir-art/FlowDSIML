@@ -73,7 +73,6 @@ export function Profile() {
   }, [user?.id]);
   const info = useAction();
   const pwd = useAction();
-  const soon = <span className="stg-soon">{t('shell.soon')}</span>;
 
   const reset = () => {
     if (!profile) return;
@@ -241,32 +240,6 @@ export function Profile() {
               </div>
               <div className="stg-ctl">
                 <ThemeSwitcher withLabels className="stg-seg" />
-              </div>
-            </div>
-            <div className="stg-row stg-row--inline">
-              <div className="stg-text">
-                <div className="stg-lab" id="pf-n1">
-                  {t('profile.notifLead')} {soon}
-                </div>
-              </div>
-              <div className="stg-ctl">
-                <label className="fd-switch">
-                  <input type="checkbox" role="switch" disabled aria-labelledby="pf-n1" />
-                  <span className="fd-switch__track" aria-hidden="true" />
-                </label>
-              </div>
-            </div>
-            <div className="stg-row stg-row--inline">
-              <div className="stg-text">
-                <div className="stg-lab" id="pf-n2">
-                  {t('profile.notifWeekly')} {soon}
-                </div>
-              </div>
-              <div className="stg-ctl">
-                <label className="fd-switch">
-                  <input type="checkbox" role="switch" disabled aria-labelledby="pf-n2" />
-                  <span className="fd-switch__track" aria-hidden="true" />
-                </label>
               </div>
             </div>
           </div>

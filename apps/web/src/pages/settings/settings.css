@@ -1005,3 +1005,81 @@ fieldset.stg-row {
     margin-left: auto;
   }
 }
+
+/* Paramètres › Notifications (maquette lot1-parametres/notifs) : tableau par événement, deux colonnes
+   d'interrupteurs centrées ; lignes de 64 px ; à 390 px l'aide d'une ligne est masquée */
+.nt-table .nt-c {
+  width: 120px;
+  text-align: center;
+}
+.nt-table td,
+.nt-table tbody th {
+  height: 64px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.nt-table tbody th {
+  font: inherit;
+  color: var(--fd-color-text);
+  text-align: left;
+  white-space: normal;
+}
+.nt-ev b {
+  display: block;
+  font-weight: 600;
+}
+.nt-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--fd-color-text-muted);
+}
+.nt-table .fd-switch {
+  display: inline-flex;
+  vertical-align: middle;
+}
+.nt-soon {
+  margin-left: 8px;
+}
+.nt-help {
+  margin: 12px 0 0;
+}
+.nt-muted {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nt-muted li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.nt-none {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--fd-color-border);
+}
+/* « Bientôt » de l'en-tête e-mail : sous le libellé, la colonne garde sa largeur */
+.nt-table thead .nt-soon {
+  display: block;
+  margin-left: 0;
+  font-size: 12px;
+}
+@media (max-width: 767px) {
+  /* Les en-têtes restent : sans eux, rien ne dit quelle colonne est l'e-mail */
+  .nt-table thead {
+    display: table-header-group;
+  }
+  .nt-table th.nt-c {
+    padding: 12px 0;
+  }
+  .nt-table .nt-c {
+    width: 72px;
+  }
+  .nt-sub {
+    display: none;
+  }
+}
