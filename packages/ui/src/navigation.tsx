@@ -56,13 +56,17 @@ export function Breadcrumb({
   crumbs,
   current,
   as: L,
+  heading = true,
 }: {
   /** Nom du repère, « Fil d'Ariane ». */
   label: string;
   crumbs: Crumb[];
   current: string;
   as: NavLinkComponent;
+  /** `false` : la page porte son h1 dans son contenu (Paramètres) ; la page courante est un texte. */
+  heading?: boolean;
 }) {
+  const Current = heading ? 'h1' : 'span';
   return (
     <nav className="fd-crumb" aria-label={label}>
       <ol>
@@ -75,9 +79,9 @@ export function Breadcrumb({
           </li>
         ))}
         <li>
-          <h1 aria-current="page" title={current}>
+          <Current className="fd-crumb__current" aria-current="page" title={current}>
             {current}
-          </h1>
+          </Current>
         </li>
       </ol>
     </nav>
@@ -99,7 +103,13 @@ export function PageHeader({
   tools,
   labels,
   as,
+  headingInPage = false,
 }: {
+  /**
+   * Exception à PAGE-01 pour les Paramètres : le h1 est dans l'en-tête de page, sous la barre ; la
+   * barre garde le fil d'Ariane (ou le titre) en simple texte.
+   */
+  headingInPage?: boolean;
   title: string;
   /** PAGE-01 §16.1 : à côté du titre, le statut de l'objet (badge) ou un compte (13 px, atténué). */
   after?: ReactNode;
@@ -119,7 +129,15 @@ export function PageHeader({
         <BackButton {...mobileBack} label="" iconOnly className="fd-page-header__mback" as={as} />
       )}
       {crumbs.length ? (
-        <Breadcrumb label={labels.breadcrumb} crumbs={crumbs} current={title} as={as} />
+        <Breadcrumb
+          label={labels.breadcrumb}
+          crumbs={crumbs}
+          current={title}
+          as={as}
+          heading={!headingInPage}
+        />
+      ) : headingInPage ? (
+        <span className="fd-page-header__title">{title}</span>
       ) : (
         <h1 className="fd-page-header__title">{title}</h1>
       )}

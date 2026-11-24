@@ -91,10 +91,17 @@ function measure() {
         m.bars === 1 && m.top === top && m.sticky === 'sticky' && m.rule >= 1,
         `${name} (${width} px) : une barre en haut, collante, avec son filet (${m.bars} barre, haut ${m.top}, ${m.sticky}, filet ${m.rule})`,
       );
-      ok(
-        m.h1In === 1 && m.h1Out.length === 0,
-        `${name} (${width} px) : un seul h1, dans la barre${m.h1Out.length ? ` (hors barre : ${m.h1Out.join(' | ')})` : ''}`,
-      );
+      // §6 (exception à PAGE-01) : dans les Paramètres, le h1 est dans l'en-tête de page, sous la barre
+      if (route.startsWith('/settings'))
+        ok(
+          m.h1In === 0 && m.h1Out.length === 1 && (await p.locator('.stg-page h1').count()) === 1,
+          `${name} (${width} px) : un seul h1, dans l’en-tête de page (${m.h1In} dans la barre, ${m.h1Out.join(' | ')})`,
+        );
+      else
+        ok(
+          m.h1In === 1 && m.h1Out.length === 0,
+          `${name} (${width} px) : un seul h1, dans la barre${m.h1Out.length ? ` (hors barre : ${m.h1Out.join(' | ')})` : ''}`,
+        );
       await p.context().close();
     }
   for (const [name, route, platformRole] of EDITORS) {

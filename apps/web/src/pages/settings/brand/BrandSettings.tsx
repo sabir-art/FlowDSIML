@@ -146,12 +146,11 @@ function LogoSection({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boole
         </div>
       </div>
       <div className="stg-row">
-        <div className="stg-text" data-gap-exempt="">
-          <div className="stg-lab">{t('brand.logoTitle')}</div>
-          <div id="br-logo-formats" className="stg-help">
-            {t('brand.logoFormats')}
-          </div>
-        </div>
+        {/* §6 : la section n'a qu'un réglage, son titre n'est pas répété en libellé (les formats sont
+            dans la zone de dépôt ; ils restent décrits pour les lecteurs d'écran) */}
+        <span id="br-logo-formats" className="sr-only">
+          {t('brand.logoFormats')}
+        </span>
         <div className="stg-ctl">
           {/* MEDIA-01 §18.1 : zone de dépôt sur toute la ligne ; une source par bouton */}
           <FileDropzone

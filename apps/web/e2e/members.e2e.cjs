@@ -39,7 +39,7 @@ const SHOTS = process.env.SHOTS_DIR;
   ok(
     (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===
       'Espace Équipe' &&
-      (await page.locator('.fd-crumb h1[aria-current="page"]').textContent()) === 'Équipe' &&
+      (await page.locator('.fd-crumb [aria-current="page"]').textContent()) === 'Équipe' &&
       (await page.getByRole('heading', { level: 1 }).count()) === 1,
     'fil d’Ariane « Espace › Équipe », h1 unique « Équipe »',
   );

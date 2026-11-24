@@ -1101,3 +1101,35 @@ fieldset.stg-row {
 .nt-mention-mail {
   margin-top: 16px;
 }
+
+/* §6 (retours du 24/11, 2e série) : en-tête de page des Paramètres. Seul changement de mise en page :
+   le titre de la page (h1, 24 px en 700) et sa description (14 px, atténuée) se détachent des sections
+   (16 px en 600), avec 24 px avant la première. */
+.stg-page {
+  margin: 0 0 24px;
+}
+.stg-page h1 {
+  margin: 0;
+  font: 700 24px / 1.25 var(--fd-font-sans);
+  color: var(--fd-color-text);
+  overflow-wrap: anywhere;
+}
+.stg-page h1:focus {
+  outline: none;
+}
+.stg-page p {
+  max-width: 620px;
+  margin: 4px 0 0;
+  font: 400 14px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+/* Première section au titre de la page : son intitulé n'est pas répété (ses actions restent) */
+.stg-sec__head[data-page-title] > div:first-child {
+  display: none;
+}
+.stg-sec__head[data-page-title]:not(:has(.stg-sec__acts)) {
+  display: none;
+}
+.stg-sec__head[data-page-title]:has(.stg-sec__acts) {
+  justify-content: flex-end;
+}

@@ -3126,6 +3126,17 @@
       "content": "Contenu",
       "connections": "Connexions",
       "account": "Mon compte"
+    },
+    "desc": {
+      "workspace": "Le nom, l’adresse et les réglages communs de l’espace.",
+      "members": "Les personnes de l’espace, leurs rôles et les invitations en cours.",
+      "usage": "Ce que consomme l’espace, et ses limites.",
+      "security": "Les règles de capture, de partage et de connexion de l’espace.",
+      "privacy": "Ce que l’espace mesure chez les visiteurs de vos démos.",
+      "brand": "Le logo et les couleurs de l’espace, dans l’app, le centre de formation et les pages publiques.",
+      "integrations": "Reliez vos démos aux outils de l’espace.",
+      "profile": "Vos informations, vos préférences et votre mot de passe.",
+      "keys": "Pour qu’un outil de l’espace (CRM, intranet, tableau de bord) lise vos démos, leurs statistiques ou leurs leads. Une clé ne modifie rien. Gardez-la comme un mot de passe."
     }
   },
   "toast": {

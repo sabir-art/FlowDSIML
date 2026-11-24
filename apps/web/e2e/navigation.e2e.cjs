@@ -57,7 +57,7 @@ const TOKENS = {
       for (const [route, group, title] of PAGES) {
         const who = `${title} (${theme})`;
         await p.goto(`${APP}/#${route}`);
-        await p.locator('.fd-page-header h1').waitFor();
+        await p.locator('.fd-page-header [aria-current="page"]').waitFor();
         const m = await p.evaluate(() => {
           const cs = (el) => (el ? getComputedStyle(el) : null);
           const header = document.querySelector('.fd-page-header');
@@ -77,7 +77,9 @@ const TOKENS = {
             headerBg: cs(header).backgroundColor,
             h1Count: h1s.length,
             h1Text: h1s[0]?.textContent.trim(),
-            h1Current: h1s[0]?.getAttribute('aria-current'),
+            // §6 : le h1 est dans l'en-tête de page ; la page courante du fil d'Ariane est un texte
+            h1Current: crumb.querySelector('[aria-current]')?.getAttribute('aria-current'),
+            h1InPage: !!h1s[0]?.closest('.stg-page'),
             h1InCrumb: !!h1s[0]?.closest('nav.fd-crumb'),
             crumbLabel: crumb.getAttribute('aria-label'),
             parents: links.map((a) => ({
@@ -136,10 +138,11 @@ const TOKENS = {
           `${who} : PageHeader fixe de 56 px, filet en bas, fond content-bg (${m.headerH}, ${m.headerPos})`,
         );
         ok(
-          m.h1Count === 1 && m.h1Text === title && m.h1Current === 'page' && m.h1InCrumb,
-          `${who} : un seul h1, élément courant du fil d'Ariane (${m.h1Count}, « ${m.h1Text} »)`,
+          m.h1Count === 1 && m.h1Text === title && m.h1Current === 'page' && m.h1InPage,
+          `${who} : un seul h1, dans l'en-tête de page ; la page courante du fil d'Ariane est un texte (${m.h1Count}, « ${m.h1Text} »)`,
         );
-        ok(m.bigTitles === 0, `${who} : pas de grand titre qui répète le fil d'Ariane`);
+        // §6 (retours du 24/11, 2e série) : le titre de la page est le h1 de 24 px de l'en-tête de page
+        ok(m.bigTitles === 1, `${who} : un seul grand titre, celui de l'en-tête de page (${m.bigTitles})`);
         ok(
           m.crumbLabel === 'Fil d’Ariane' &&
             m.parents[0]?.text === group &&
@@ -223,7 +226,7 @@ const TOKENS = {
       const p = await ctx.newPage();
       await install(p, seed());
       await p.goto(`${APP}/#/settings/workspace`);
-      await p.locator('.fd-page-header h1').waitFor();
+      await p.locator('.fd-page-header [aria-current="page"]').waitFor();
       const m = await p.evaluate(() => {
         const vis = (el) =>
           !!el && el.getBoundingClientRect().width > 0 && getComputedStyle(el).visibility !== 'hidden';

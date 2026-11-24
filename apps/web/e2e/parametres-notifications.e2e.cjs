@@ -27,7 +27,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     prepare(state);
     await install(page, state);
     await page.goto(`${BASE}/#/settings/notifications`);
-    await page.getByRole('heading', { name: 'Notifications', level: 2 }).waitFor();
+    await page.getByRole('heading', { name: 'Notifications', level: 1 }).waitFor();
     await page.locator('section[aria-labelledby="nt-title"]:not([aria-busy])').waitFor();
     return { page, state };
   };
