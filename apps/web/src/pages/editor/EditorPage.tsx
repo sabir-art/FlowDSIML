@@ -22,7 +22,15 @@ import {
   Lightbulb,
   Pencil,
 } from 'lucide-react';
-import { EditorRail, TOOL_KEY, TOOL_ORDER, ToolPanel, savedTool, type ToolId } from './EditorRail';
+import {
+  EditorRail,
+  SHORTCUT_ORDER,
+  TOOL_KEY,
+  TOOL_ORDER,
+  ToolPanel,
+  savedTool,
+  type ToolId,
+} from './EditorRail';
 import { HotspotsTool } from './panels/HotspotsTool';
 import { BlurModal } from './BlurModal';
 import { SpotlightPanel } from './panels/SpotlightPanel';
@@ -485,7 +493,7 @@ export function EditorPage() {
       }
       // L48-E §2 : Alt + 1 à 9 ouvre les outils du rail (jamais pendant la saisie, vérifié plus haut)
       if (e.altKey && !mod && /^Digit[1-9]$/.test(e.code)) {
-        const id = railOrder[Number(e.code.slice(5)) - 1];
+        const id = railOrder.filter((x) => SHORTCUT_ORDER.includes(x))[Number(e.code.slice(5)) - 1];
         if (id) {
           e.preventDefault();
           document.querySelector<HTMLButtonElement>(`.ed-rail button[data-tool="${id}"]`)?.click();

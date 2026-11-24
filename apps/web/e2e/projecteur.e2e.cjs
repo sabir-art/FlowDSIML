@@ -64,12 +64,25 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
     'rail : icône Flashlight, nom « Projecteur »',
   );
   ok((await page.locator('.canvas-freespot').count()) === 0, 'outil fermé : pas de voile dans le canevas');
+  // Les raccourcis déjà connus ne bougent pas : « Projecteur » n'a pas d'Alt + chiffre
+  const keys = await page
+    .locator('.ed-rail button[data-tool]')
+    .evaluateAll((els) =>
+      Object.fromEntries(els.map((e) => [e.dataset.tool, e.getAttribute('aria-keyshortcuts')])),
+    );
+  ok(
+    keys.spotlight === null && keys.zoom === 'Alt+7' && keys.crop === 'Alt+8' && keys.image === 'Alt+9',
+    `raccourcis inchangés : Zoom Alt+7, Recadrage Alt+8, Image Alt+9, Projecteur sans raccourci`,
+  );
+  await page.keyboard.press('Alt+Digit9');
+  await page.locator('[data-tool-panel="image"]').waitFor();
+  ok(true, 'Alt + 9 ouvre toujours « Image »');
   const panel = await openTool(page, 'spotlight');
   const on = panel.getByRole('switch', { name: 'Projecteur libre' });
   ok((await on.isChecked()) === false, 'désactivé par défaut');
   ok(
     (await panel.locator('#sp-help').textContent()) ===
-      'Un halo suit le pointeur du visiteur sur la capture ; le reste est assombri. Au clavier et sur écran tactile, le halo se place sur l’élément de l’étape. Sur les étapes capture.',
+      'Un halo suit le pointeur du visiteur sur la capture, le reste est assombri. Au clavier et sur écran tactile, le halo se place sur l’élément de l’étape. Sur les étapes capture.',
     'aide du panneau',
   );
   const size = panel.getByRole('slider', { name: /Taille du halo/ });

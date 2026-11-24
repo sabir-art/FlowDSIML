@@ -132,9 +132,9 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
     'L18-04 : « Utiliser ce fichier » inactif',
   );
   ok(
-    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).isDisabled()) &&
-      (await dlg.getByRole('radio', { name: 'Logos' }).isDisabled()),
-    'L18-04 : recherche et filtre présents, inactifs',
+    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).count()) === 0 &&
+      (await dlg.getByRole('radio', { name: 'Logos' }).count()) === 0,
+    'médiathèque vide : ni recherche ni filtres',
   );
   ok(/0\s?Ko sur\s500/.test(await dlg.textContent()), 'L18-04 : quota réel (0 Ko)');
   await shot('l18-04-media-vide');
@@ -149,6 +149,11 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   };
   await importVia(logo, 'Importer…');
   await dlg.getByRole('button', { name: 'logo-acme.png' }).waitFor();
+  ok(
+    (await dlg.getByRole('searchbox', { name: 'Rechercher un fichier' }).isEnabled()) &&
+      (await dlg.getByRole('radio', { name: 'Logos' }).isEnabled()),
+    'premier fichier : la recherche et les filtres apparaissent',
+  );
   ok(state.tables.media_files[0].kind === 'logo', 'import par la fonction media (usage « logo »)');
   ok(
     (await dlg.getByRole('button', { name: 'logo-acme.png' }).getAttribute('aria-pressed')) === 'true',
