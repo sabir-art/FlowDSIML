@@ -6,7 +6,7 @@ import { MEDIA_MAX_BYTES, useMedia, type MediaFile } from '../../../components/m
 import { mediaUrl } from '../../../components/media/MediaLibrary';
 import type { DemoEditor } from '../useDemoEditor';
 import type { Selection, StepRow } from '../types';
-import { MAX_LAYERS, asLayers, moveRect, placeNew, type ImageLayer } from './layers';
+import { asLayers, isFull, moveRect, placeNew, type ImageLayer } from './layers';
 import { toRaster } from './raster';
 
 export const LAYER_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
@@ -80,7 +80,7 @@ export function useLayerEdit(editor: DemoEditor, step: StepRow, setSelection: (s
         for (const s of editor.steps) {
           if (s.id === step.id || !isCapture(s)) continue;
           const list = asLayers(s.options);
-          if (list.length < MAX_LAYERS && !list.some((x) => x.group === group))
+          if (!isFull(list) && !list.some((x) => x.group === group))
             write(s, [...list, { ...copy, id: list.some((x) => x.id === copy.id) ? newId() : copy.id }]);
         }
       } else if (l.group) {
@@ -108,7 +108,7 @@ export function useLayerEdit(editor: DemoEditor, step: StepRow, setSelection: (s
   };
 
   const duplicate = (l: ImageLayer) => {
-    if (layers.length >= MAX_LAYERS) return;
+    if (isFull(layers)) return;
     const copy = clean({ ...l, ...moveRect(l, 0.02, 0.02), id: newId(), group: undefined });
     const i = layers.findIndex((x) => x.id === l.id);
     setLayers([...layers.slice(0, i + 1), copy, ...layers.slice(i + 1)]);
@@ -133,7 +133,7 @@ export function useLayerImport(
 
   /** Copie le fichier dans les captures de la démo (SVG converti en image) et pose l'image au centre. */
   const addBlob = async (blob: Blob, name: string): Promise<boolean> => {
-    if (layers.length >= MAX_LAYERS) {
+    if (isFull(layers)) {
       toast(t('editor.image.full'), undefined, { tone: 'warning' });
       return false;
     }
@@ -174,7 +174,7 @@ export function useLayerImport(
       toast(t('editor.image.tooBig'), undefined, { tone: 'warning' });
       return;
     }
-    if (layers.length >= MAX_LAYERS) {
+    if (isFull(layers)) {
       toast(t('editor.image.full'), undefined, { tone: 'warning' });
       return;
     }

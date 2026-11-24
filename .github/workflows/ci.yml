@@ -237,6 +237,9 @@ jobs:
       - name: 'Toasts : fermés par une navigation décidée par la personne, gardés sur la page'
         if: always()
         run: cd apps/web && node e2e/toasts-navigation.e2e.cjs
+      - name: 'Mode présentateur complet : lancement, un seul écran, notes'
+        if: always()
+        run: cd apps/web && node e2e/presentateur-complet.e2e.cjs
       - name: 'Projecteur libre : outil du rail, halo du lecteur, moins d’animations (EXT-02 §6.3)'
         if: always()
         run: cd apps/web && node e2e/projecteur.e2e.cjs

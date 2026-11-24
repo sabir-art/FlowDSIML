@@ -1877,7 +1877,8 @@
       "restore": "Go back to the original images",
       "restoring": "Going back to the original images…",
       "restored_one": "{{count}} step is back to its original image.",
-      "restored_other": "{{count}} steps are back to their original images."
+      "restored_other": "{{count}} steps are back to their original images.",
+      "checkImages": "Check the position of the added images on the steps."
     },
     "voice": {
       "title": "Voice-over",

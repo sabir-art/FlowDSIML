@@ -56,7 +56,7 @@ const ARROW =
   await panel.waitFor();
   const cap = panel.getByRole('region', { name: 'Capture de l’étape' });
   ok(
-    /Capture/.test(await cap.innerText()) && /1\s100\u00a0×\u00a0750/.test(await cap.innerText()),
+    /Capture/.test(await cap.innerText()) && /1\u202f100\u00a0×\u00a0750/.test(await cap.innerText()),
     `capture : nom et taille (${(await cap.innerText()).replace(/\s+/g, ' ')})`,
   );
   const added = panel.locator('section[aria-labelledby="imgp-list"]');
@@ -70,6 +70,12 @@ const ARROW =
     (await page.locator('.canvas-hint').textContent()).trim() ===
       'Déposez une image sur la capture pour l’ajouter.',
     'sous le canevas : « Déposez une image sur la capture pour l’ajouter. »',
+  );
+  // Capture après le fondu d'ouverture du panneau
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every((a) => a.effect?.getComputedTiming().iterations === Infinity || a.playState !== 'running'),
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/image-vide${sfx}-1440.png` });
 
@@ -498,6 +504,51 @@ const ARROW =
       !/img-[0-9a-f]{8}\.|fleche\.svg|logo-acme/.test(JSON.stringify(manifest)),
       'manifeste : aucun chemin ni nom de fichier',
     );
+  }
+
+  // ===== Limite : 10 images par étape, « Ajouter » désactivé avec sa raison =====
+  {
+    const page2 = await ctx.newPage();
+    page2.on('pageerror', (e) => errors.push(e.message));
+    const state2 = seed();
+    const s1 = state2.tables.steps.find((s) => s.id === 's1');
+    s1.options = {
+      ...(s1.options || {}),
+      images: Array.from({ length: 10 }, (_, i) => ({
+        id: `n${i}`,
+        path: `ws-1/${DEMO}/img-0000000${i}.webp`,
+        name: `image-${i + 1}.png`,
+        x: 0.05 * i,
+        y: 0.05 * i,
+        w: 0.1,
+        h: 0.1,
+        decorative: true,
+      })),
+    };
+    await install(page2, state2);
+    await page2.goto(`${APP}/#/demos/${DEMO}/edit`);
+    await page2.waitForSelector('.canvas-frame img');
+    // L'outil ouvert est mémorisé : on ne clique que s'il est fermé
+    const closed = page2.locator('.ed-rail button[data-tool="image"][aria-pressed="false"]');
+    if (await closed.count()) await closed.click();
+    const list = page2.locator('.ed-tool section[aria-labelledby="imgp-list"]');
+    await list.waitFor();
+    const add = list.getByRole('button', { name: 'Ajouter', exact: true });
+    const why = await add.getAttribute('aria-describedby');
+    ok(
+      (await list.locator('.imgp-row').count()) === 10 &&
+        (await add.getAttribute('aria-disabled')) === 'true' &&
+        (await page2.locator(`#${why}`).textContent()).trim() ===
+          '10 images au plus par étape. Retirez-en une pour en ajouter.',
+      '10 images : « Ajouter » désactivé, la raison est dite',
+    );
+    await add.click({ force: true });
+    ok((await page2.getByRole('menu').count()) === 0, '« Ajouter » désactivé : aucun menu');
+    await list.locator('.fd-menu-trigger, [aria-haspopup="menu"]').first().click();
+    const dup = page2.getByRole('menuitem', { name: 'Dupliquer' });
+    ok((await dup.getAttribute('aria-disabled')) === 'true', '« Dupliquer » indisponible à 10 images');
+    await page2.keyboard.press('Escape');
+    await page2.close();
   }
 
   ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);

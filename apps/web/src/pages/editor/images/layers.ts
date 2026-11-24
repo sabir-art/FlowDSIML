@@ -27,6 +27,8 @@ export type ImageLayer = Rect & {
 };
 
 export const MAX_LAYERS = 10;
+/** 10 images par étape au plus : au-delà, « Ajouter » et « Dupliquer » sont indisponibles. */
+export const isFull = (list: readonly unknown[]) => list.length >= MAX_LAYERS;
 export const LAYER_OPACITY = { min: 10, max: 100, step: 5 } as const;
 /** Arrondi et ombre à l'échelle d'une capture de 1 280 px de large (comme les zones de flou). */
 export const LAYER_RADIUS = 12;
