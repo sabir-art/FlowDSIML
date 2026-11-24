@@ -640,6 +640,7 @@ export function PublicPage() {
         <MediaLibrary
           wsId={ws}
           kind="logo"
+          destination={t('media.dest.publicPage')}
           onClose={() => setPicking(false)}
           onPick={(file) => {
             setPicking(false);

@@ -390,6 +390,7 @@ export function HtmlCanvas({
         <MediaLibrary
           wsId={step.workspace_id}
           kind="image"
+          destination={t('media.dest.stepImage')}
           onClose={() => setHtmlEdit({ library: null })}
           onPick={(f) => {
             const target = ed.library;

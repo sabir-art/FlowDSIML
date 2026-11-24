@@ -285,7 +285,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
                         onClick={() => setLibrary('logo')}
                       >
                         <Images aria-hidden="true" />
-                        {t('media.open')}
+                        {t('media.choose')}
                       </button>
                     </>
                   )}
@@ -321,6 +321,7 @@ export function ThemePanel({ editor, readOnly }: { editor: DemoEditor; readOnly:
         <MediaLibrary
           wsId={demo.workspace_id}
           kind={library}
+          destination={t(`media.dest.${library === 'font' ? 'demoFont' : 'demoLogo'}`, { title: demo.title })}
           onClose={() => setLibrary(null)}
           onPick={(f) => {
             if (library === 'font' && f.kind === 'font')

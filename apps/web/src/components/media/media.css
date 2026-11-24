@@ -153,3 +153,160 @@
 .md-gridwrap {
   min-height: 0;
 }
+
+/* ---- Fenêtre de sélection (retours client du 24/11 §3.3, maquette retours-2411/media-choisir) ---- */
+.md-pick__body {
+  display: grid;
+  gap: 16px;
+}
+.md-pick__tools {
+  align-items: center;
+}
+.md-pick__search {
+  min-width: 200px;
+}
+.md-pick__none {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+}
+.md-pick__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Carte à choix unique : rond radio en haut à gauche, contour primary de 2 px quand elle est choisie */
+.md-pick__card {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  cursor: pointer;
+}
+.md-pick__card.is-sel {
+  border-color: var(--fd-color-primary);
+  box-shadow: inset 0 0 0 1px var(--fd-color-primary);
+}
+.md-pick__card:has(input:focus-visible) {
+  outline: 2px solid var(--fd-color-primary);
+  outline-offset: 2px;
+}
+.md-pick__card input[type='radio'] {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid var(--fd-color-border-field);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  cursor: pointer;
+  outline: none;
+}
+.md-pick__card input[type='radio']::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  transform: scale(0);
+}
+.md-pick__card input[type='radio']:checked {
+  border-color: var(--fd-color-primary);
+}
+.md-pick__card input[type='radio']:checked::after {
+  transform: scale(1);
+}
+.md-pick__thumb {
+  display: grid;
+  place-items: center;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.md-pick__thumb img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  object-fit: contain;
+}
+.md-pick__thumb svg {
+  width: 28px;
+  height: 28px;
+}
+.md-pick__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.md-pick__info b {
+  overflow: hidden;
+  font-weight: 600;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.md-pick__info span {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.md-pick .fd-segmented [aria-disabled='true'] {
+  color: var(--fd-color-text-disabled, var(--fd-color-text-muted));
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+@media (max-width: 479px) {
+  .md-pick__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .md-pick__search {
+    min-width: 0;
+  }
+}
+
+/* Image importée non vérifiée : repère sur la carte, phrase sous la grille */
+.md-pick__warn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+}
+.md-pick__warn svg {
+  width: 14px;
+  height: 14px;
+}
+.md-pick__unverified {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
+.md-pick__unverified svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: var(--fd-color-warning);
+}

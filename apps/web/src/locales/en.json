@@ -4689,7 +4689,43 @@
     "demosNone": "No demo uses this file.",
     "kindChanged": "“{{name}}” is now in {{category}}.",
     "noMatch": "No file matches.",
-    "noneYet": "The media library is empty."
+    "noneYet": "The media library is empty.",
+    "pick": {
+      "title": {
+        "logo": "Choose a logo",
+        "image": "Choose an image",
+        "font": "Choose a font"
+      },
+      "import": {
+        "logo": "Import a new logo",
+        "image": "Import a new image",
+        "font": "Import a new font"
+      },
+      "hint": {
+        "logo": "PNG, JPG or SVG, 5 MB at most. It will be selected automatically.",
+        "image": "PNG, JPG or SVG, 5 MB at most. It will be selected automatically.",
+        "font": "WOFF2, 5 MB at most. It will be selected automatically."
+      },
+      "use": {
+        "logo": "Use this logo",
+        "image": "Use this image",
+        "font": "Use this font"
+      },
+      "search": "Search",
+      "dblclick": "Double-click to use directly.",
+      "empty": "No file yet. Import one above."
+    },
+    "wrongKind": {
+      "logo": "This file is a font: choose an image.",
+      "image": "This file is a font: choose an image.",
+      "font": "This file is not a font: choose a WOFF2 file."
+    },
+    "dest": {
+      "demoLogo": "Logo of the demo “{{title}}”",
+      "demoFont": "Font of the demo “{{title}}”",
+      "stepImage": "Image of this step’s page",
+      "publicPage": "Logo of the public page"
+    }
   },
   "soon": {
     "badge": "Coming soon",

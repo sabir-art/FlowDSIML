@@ -4689,7 +4689,43 @@
     "demosNone": "Aucune démo n’utilise ce fichier.",
     "kindChanged": "« {{name}} » est maintenant dans {{category}}.",
     "noMatch": "Aucun fichier ne correspond.",
-    "noneYet": "La médiathèque est vide."
+    "noneYet": "La médiathèque est vide.",
+    "pick": {
+      "title": {
+        "logo": "Choisir un logo",
+        "image": "Choisir une image",
+        "font": "Choisir une police"
+      },
+      "import": {
+        "logo": "Importer un nouveau logo",
+        "image": "Importer une nouvelle image",
+        "font": "Importer une nouvelle police"
+      },
+      "hint": {
+        "logo": "PNG, JPG ou SVG, 5 Mo au plus. Il sera choisi d’office.",
+        "image": "PNG, JPG ou SVG, 5 Mo au plus. Elle sera choisie d’office.",
+        "font": "WOFF2, 5 Mo au plus. Elle sera choisie d’office."
+      },
+      "use": {
+        "logo": "Utiliser ce logo",
+        "image": "Utiliser cette image",
+        "font": "Utiliser cette police"
+      },
+      "search": "Rechercher",
+      "dblclick": "Double-clic pour utiliser directement.",
+      "empty": "Aucun fichier pour le moment. Importez-en un ci-dessus."
+    },
+    "wrongKind": {
+      "logo": "Ce fichier est une police : choisissez une image.",
+      "image": "Ce fichier est une police : choisissez une image.",
+      "font": "Ce fichier n’est pas une police : choisissez un fichier WOFF2."
+    },
+    "dest": {
+      "demoLogo": "Logo de la démo « {{title}} »",
+      "demoFont": "Police de la démo « {{title}} »",
+      "stepImage": "Image de la page de cette étape",
+      "publicPage": "Logo de la page publique"
+    }
   },
   "soon": {
     "badge": "Bientôt disponible",
