@@ -44,7 +44,7 @@ Règle de fond, valable partout : **une action n'est pas forcément un bouton** 
 
 ### 1.2 Deux volets (maquettes `partager2-*`)
 - **À gauche (232 px)**, sur fond `surface-sunken` : en-tête (tuile Share2, « Partager « Démo CRM » », « Publiée le 24 nov. » ou « Pas encore publiée »), puis la liste des modes (`nav`, lien actif en `aria-current`) :
-  - **Lien** · **Intégrer** · **Liens personnalisés** · **Accès** ;
+  - **Lien** · **Intégrer** · **Liens personnalisés** · **Page de la démo** · **Accès** ;
   - groupe « Fichiers » : **Exporter** (PDF, GIF, vidéo).
   Pas de réseaux sociaux (retirés à la demande du client).
 - **À droite** : en-tête du mode (h3, nom du mode) ; **pastille d'accès** « Toute personne avec le lien · Modifier » (icône Globe) (icône du mode d'accès, bouton « Modifier » qui ouvre le mode Accès) ; croix de fermeture. Puis le contenu du mode, qui défile seul.
@@ -54,9 +54,13 @@ Règle de fond, valable partout : **une action n'est pas forcément un bouton** 
 - **Lien** : CopyField du lien (copie en bouton icône) + bouton icône « Ouvrir » ; une ligne de trois boutons icône avec infobulle (E-mail, message prêt à copier, QR code) ; vignette (aperçu 200 × 112, « Changer », bouton icône « Télécharger ») ; deux lignes repliables « Adresse personnalisée » et « Paramètres d'URL ». Aucun encadré d'explication : la pastille d'accès suffit.
 - **Intégrer** : formats en cartes radio (Encadré · Bouton · Plein écran) ; code (`pre`, monospace, passe à la ligne) ; « Copier le code » ; aperçu du format choisi.
 - **Liens personnalisés** : recherche, liste (destinataire, date, vues), « Créer un lien » en bas de la liste, « Importer (CSV) ».
-- **Accès** : une ligne « Vaut pour le lien, l'intégration et les liens personnalisés. » ; cartes radio (Toute personne avec le lien · Avec un mot de passe · Sur invitation · Par domaine e-mail) avec leurs champs ; seuls les modes autorisés par l'espace ; « Enregistrer ».
+- **Page de la démo** (la page publique propre à une démo, L19b, table `demo_pages` ; à ne pas confondre avec le catalogue de l'espace) : interrupteur « Activer la page de la démo » ; quand elle est active, CopyField de son adresse + bouton icône « Ouvrir » ; Titre (70) et Description (200) ; Bouton d'action (libellé + lien https) ; Style en choix segmenté (Démo · Clair · Sombre) ; puis une ligne repliable « Plus de réglages » (Autres démos, Indexation par les moteurs de recherche). Un seul « Enregistrer ». Elle suit l'accès de la démo, comme les autres moyens. Les liens personnalisés peuvent toujours pointer vers elle (inchangé).
+- **Accès** : une ligne « Vaut pour le lien, l'intégration, les liens personnalisés et la page de la démo. » ; cartes radio (Toute personne avec le lien · Avec un mot de passe · Sur invitation · Par domaine e-mail) avec leurs champs ; seuls les modes autorisés par l'espace ; « Enregistrer ».
 - **Exporter** : trois cartes radio (PDF · GIF · Vidéo MP4), réglages du fichier choisi (langue, format ; pour GIF et vidéo : résolution, délai), une ligne d'aide « Le fichier n'est pas protégé par l'accès. » à gauche du seul bouton « Exporter ».
-- La **page publique** n'est plus un mode : son réglage par démo passe dans le menu ⋯ de la démo et dans Paramètres › Page publique.
+- **Deux « pages publiques », deux noms** :
+  - le **catalogue de l'espace** (Paramètres › Page publique) n'est pas un mode de Partager. L'ajout ou le retrait d'une démo se fait par « Afficher sur la page publique » (case à cocher) dans le menu ⋯ de la barre de démo et de la carte. La case est désactivée, avec la raison affichée, si l'accès est restreint ou si la démo n'est pas publiée ;
+  - la **page propre à une démo** est le mode « Page de la démo » ci-dessus.
+- **Formation** va dans Diffuser, en première section. « Retirer la publication… » (avec confirmation) va dans le menu ⋯ de la barre de démo ; le mode Lien n'a plus d'interrupteur.
 
 ### 1.4 Démo non publiée (maquette `partager2-nonpubliee-*`)
 Bandeau `role="status"` en haut du volet droit : « Publiez la démo pour activer le lien. » + « Publier ». Lien grisé, « Ouvrir » désactivé avec la raison ; l'accès et l'export restent disponibles.
