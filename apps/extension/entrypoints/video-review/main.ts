@@ -192,13 +192,31 @@ async function main() {
     el.style.width = `${r.w * 100}%`;
     el.style.height = `${r.h * 100}%`;
   };
+  /** Zones affichées, par masque et rang : mises à jour sur place (le focus et un glissement tiennent). */
+  const shownMasks = new Map<string, HTMLElement>();
   function renderMasks() {
     const t = now();
-    const kids: HTMLElement[] = [];
+    const seen = new Set<string>();
     for (const m of masks) {
-      const rects = rectsAt(m, t, 0);
+      // Petite marge : après un déplacement, la lecture se cale parfois juste avant l'instant demandé
+      const rects = rectsAt(m, t, 80);
       rects.forEach((r, i) => {
-        const cls = [
+        const key = `${m.id}:${i}`;
+        seen.add(key);
+        const manual = m.type === 'manual' && i === 0;
+        let el = shownMasks.get(key);
+        // Pendant l'envoi, un masque ajouté n'est plus modifiable : sa zone est redessinée sans poignée
+        if (el && manual && busy === el.hasAttribute('tabindex')) {
+          el.remove();
+          el = undefined;
+        }
+        if (!el) {
+          el = h('div', { 'data-mask': m.id });
+          shownMasks.set(key, el);
+          layer.append(el);
+          if (manual && !busy) editable(el, m);
+        }
+        el.className = [
           'vmask',
           m.live ? 'is-live' : m.on ? '' : 'is-off',
           m.id === selected ? 'is-sel' : '',
@@ -206,18 +224,14 @@ async function main() {
         ]
           .filter(Boolean)
           .join(' ');
-        const el = h('div', { class: cls, 'data-mask': m.id });
         place(el, r);
-        if (m.type === 'manual' && i === 0 && !busy) editable(el, m);
-        kids.push(el);
       });
     }
-    // Le masque en cours de déplacement garde le focus : on ne le remplace pas
-    const active = document.activeElement as HTMLElement | null;
-    const keep = active?.closest<HTMLElement>('.vmask.is-manual');
-    const id = keep?.dataset.mask;
-    layer.replaceChildren(...kids);
-    if (id) layer.querySelector<HTMLElement>(`.vmask.is-manual[data-mask="${id}"]`)?.focus();
+    for (const [key, el] of shownMasks)
+      if (!seen.has(key)) {
+        el.remove();
+        shownMasks.delete(key);
+      }
   }
 
   /** Masque ajouté : déplaçable (souris, flèches), redimensionnable (poignée, Maj + flèches), retirable. */
