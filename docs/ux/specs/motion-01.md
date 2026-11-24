@@ -24,7 +24,7 @@
 
 ### 2.1 Ce qui bouge
 
-- **La scène** est l'élément qui contient le cadre de navigateur, la capture et tout ce qui est posé dessus : hotspots, bulle, zones de flou, cadre de zoom, poignées. Aujourd'hui, c'est `.canvas-frame` dans `.editor-center`. Tout ce qui est dans la scène suit automatiquement, puisque c'est le même sous-arbre.
+- **La scène** est l'élément qui contient le cadre de navigateur, la capture et tout ce qui est posé dessus : hotspots, bulle, zones de flou, cadre de zoom, poignées. C'est `.frame` (cadre de navigateur et capture), parent de `.canvas-frame`, dans `.editor-center` : c'est `.frame` qui porte le transform ; la largeur se lit sur `.canvas-frame` (précision du 24/11, recette 48f3be7 conforme). Tout ce qui est dans la scène suit automatiquement, puisque c'est le même sous-arbre.
 - **Déclencheurs** :
   - ouverture et fermeture d'un panneau du rail d'outils (Étape, Bouton d'action, Points d'intérêt, Voix off…) ;
   - changement de panneau : aucune animation de la scène, puisque la largeur disponible ne change pas ; seul le contenu du panneau passe en fondu ;
