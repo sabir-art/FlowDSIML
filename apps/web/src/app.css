@@ -2283,8 +2283,9 @@ button.fd-nav__item:hover {
   border: 1px solid var(--fd-color-border);
 }
 .fd-dz__pre--img > img {
-  max-width: 100%;
-  max-height: 100%;
+  /* Image entière dans la tuile, quelle que soit sa forme (un logo carré n'est jamais coupé) */
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 .fd-dz.is-drag .fd-dz__pre {
