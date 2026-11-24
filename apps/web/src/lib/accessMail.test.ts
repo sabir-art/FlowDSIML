@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_TTL_SECONDS } from '../../../../supabase/functions/access-email/mail';
 
@@ -9,10 +9,8 @@ import { DEFAULT_TTL_SECONDS } from '../../../../supabase/functions/access-email
  */
 describe('e-mail d’accès : durée de validité', () => {
   it('égale à otp_expiry de la configuration d’Auth', () => {
-    const toml = readFileSync(
-      fileURLToPath(new URL('../../../../supabase/config.toml', import.meta.url)),
-      'utf8',
-    );
+    // Les tests tournent depuis apps/web
+    const toml = readFileSync(resolve(process.cwd(), '../../supabase/config.toml'), 'utf8');
     const m = /^otp_expiry\s*=\s*(\d+)/m.exec(toml);
     expect(m, 'otp_expiry présent dans config.toml').not.toBeNull();
     expect(DEFAULT_TTL_SECONDS).toBe(Number(m![1]));
