@@ -1735,8 +1735,13 @@ button.nd-src:focus-visible {
 .nd-type.is-off {
   cursor: not-allowed;
 }
+/* Pas d'opacité : le grisé passe par les jetons, le texte reste à 4,5:1 */
 .nd-type.is-off .nd-type__tile {
-  opacity: 0.55;
+  color: var(--fd-color-text-muted);
+  background: var(--fd-color-surface-sunken);
+}
+.nd-type.is-off .nd-type__txt b {
+  color: var(--fd-color-text-muted);
 }
 .nd-type__off {
   font-size: 13px;

@@ -28,9 +28,17 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     return page;
   };
   const axe = async (page, label) => {
+    // Une fenêtre qui s'ouvre en fondu fausse la mesure des contrastes : on attend la fin des animations
+    await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'));
     const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
     const bad = r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
-    ok(bad.length === 0, `axe ${label} : ${bad.map((v) => v.id).join(', ') || '0 violation grave'}`);
+    // En cas d'échec : l'élément et la mesure, pour corriger sans relancer
+    const detail = bad
+      .map(
+        (v) => `${v.id} → ${v.nodes.map((n) => `${n.target.join(' ')} (${n.failureSummary})`).join(' ; ')}`,
+      )
+      .join(' | ');
+    ok(bad.length === 0, `axe ${label} : ${detail || '0 violation grave'}`);
   };
 
   // ===== Propriétaire : réglage =====

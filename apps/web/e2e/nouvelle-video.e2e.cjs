@@ -238,7 +238,17 @@ const SHOTS = process.env.SHOTS_DIR;
     // Fermer pendant l'envoi : confirmation, « Continuer » garde l'envoi
     await page.keyboard.press('Escape');
     const stop = page.getByRole('dialog', { name: 'Arrêter l’envoi ?' });
-    await stop.waitFor();
+    // En cas d'échec : l'état des fenêtres et du focus, pour distinguer une instabilité d'une régression
+    await stop.waitFor().catch(async (e) => {
+      const st = await page.evaluate(() => ({
+        ouvertes: [...document.querySelectorAll('dialog[open]')].map((d) => d.className),
+        focus: `${document.activeElement?.tagName}.${document.activeElement?.className}`,
+        envoi: !!document.querySelector('.nd-vz [role=progressbar]'),
+        bulle: !!document.querySelector('.fd-tooltip'),
+      }));
+      console.log(`# ${tag} Échap sans confirmation : ${JSON.stringify(st)}`);
+      throw e;
+    });
     await stop.getByRole('button', { name: 'Continuer' }).click();
     await stop.waitFor({ state: 'hidden' });
     ok(await bar.isVisible(), `${tag} « Continuer » : l’envoi se poursuit`);
