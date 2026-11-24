@@ -27,6 +27,8 @@ import './keys.css';
 const SCOPES = ['demos', 'stats', 'leads'] as const;
 type Scope = (typeof SCOPES)[number];
 /** Expiration en jours ; « never » : sans expiration. */
+/** Clés actives au plus par espace (même plafond que create_api_key). */
+const MAX_ACTIVE = 20;
 const EXPIRES = ['never', '30', '90', '365'] as const;
 type Expires = (typeof EXPIRES)[number];
 
@@ -209,6 +211,11 @@ export function AccessKeys() {
       {creating && ws && (
         <CreateKey
           ws={ws}
+          full={
+            (keys ?? []).filter(
+              (k) => !k.revoked_at && !(k.expires_at && new Date(k.expires_at).getTime() <= Date.now()),
+            ).length >= MAX_ACTIVE
+          }
           onClose={() => setCreating(false)}
           onCreated={(name, key) => {
             setCreating(false);
@@ -349,10 +356,13 @@ function ApiGuide() {
 
 function CreateKey({
   ws,
+  full,
   onClose,
   onCreated,
 }: {
   ws: string;
+  /** L'espace a déjà le nombre maximal de clés actives. */
+  full: boolean;
   onClose: () => void;
   onCreated: (name: string, key: string) => void;
 }) {
@@ -364,6 +374,8 @@ function CreateKey({
   const [scopes, setScopes] = useState<Scope[]>(['demos']);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Limite connue à l'ouverture, ou signalée par le serveur (clé créée entre-temps par quelqu'un d'autre)
+  const [tooMany, setTooMany] = useState(full);
   const none = scopes.length === 0;
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -381,11 +393,26 @@ function CreateKey({
     setBusy(false);
     const key = (data as { key?: string } | null)?.key;
     if (err || !key) {
-      setError(err?.message === 'TROP_DE_CLES' ? t('accessKeys.tooMany') : errorMessage(t, err));
+      if (err?.message === 'TROP_DE_CLES') setTooMany(true);
+      else setError(errorMessage(t, err));
       return;
     }
     onCreated(clean, key);
   };
+  if (tooMany)
+    return (
+      <Modal
+        open
+        onClose={onClose}
+        size="md"
+        icon={<KeyRound />}
+        title={t('accessKeys.createTitle')}
+        closeLabel={t('common.close')}
+        footer={<Button onClick={onClose}>{t('common.close')}</Button>}
+      >
+        <p className="ak-full">{t('accessKeys.tooMany')}</p>
+      </Modal>
+    );
   return (
     <Modal
       open
@@ -497,7 +524,8 @@ function CreatedKey({ name, secret, onDone }: { name: string; secret: string; on
       role="alertdialog"
       dismissible={false}
       describedBy={`${id}-d`}
-      icon={<Check />}
+      icon={<KeyRound />}
+      tone="success"
       title={t('accessKeys.createdTitle', { name })}
       closeLabel={t('common.close')}
       footer={

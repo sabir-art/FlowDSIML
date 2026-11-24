@@ -119,6 +119,14 @@ const MOBILE = WIDTH < 768;
     // Clé affichée une seule fois
     const done = page.getByRole('alertdialog', { name: 'Clé « Intranet RH » créée' });
     await done.waitFor();
+    ok(
+      (await done.evaluate(
+        (el) =>
+          el.closest('.fd-modal')?.classList.contains('fd-modal--success') ??
+          el.classList.contains('fd-modal--success'),
+      )) && (await done.locator('.fd-modal__tile svg.lucide-key-round').count()) === 1,
+      'fenêtre « Clé créée » : ton succès, icône de clé',
+    );
     const key = await done.getByLabel('Clé « Intranet RH »').inputValue();
     ok(/^tc_/.test(key) && key.length > 10, 'la clé entière est affichée dans un champ à copier');
     ok(
@@ -202,6 +210,38 @@ const MOBILE = WIDTH < 768;
       'clé révoquée : plus de « Révoquer » dans le menu',
     );
     await page.keyboard.press('Escape');
+    await page.context().close();
+  }
+
+  // 1 bis. Vingt clés actives : la fenêtre dit pourquoi, sans formulaire, avec « Fermer » seul
+  {
+    const { page } = await open((s) => {
+      s.tables.api_keys = Array.from({ length: 20 }, (_, i) => ({
+        id: `k-${i}`,
+        workspace_id: 'ws-1',
+        created_by: s.user.id,
+        name: `Outil ${i + 1}`,
+        scopes: ['demos'],
+        last4: String(i).padStart(4, '0'),
+        created_at: new Date(Date.UTC(2026, 9, 1 + i)).toISOString(),
+        expires_at: null,
+        revoked_at: null,
+        last_used_at: null,
+      }));
+    });
+    await page.locator('.ak-table tbody tr').first().waitFor();
+    await page.getByRole('button', { name: 'Créer une clé' }).first().click();
+    const dlg = page.getByRole('dialog', { name: 'Créer une clé d’accès' });
+    await dlg.waitFor();
+    ok(
+      (await dlg.textContent()).includes(
+        'L’espace a déjà 20 clés actives. Révoquez-en une avant d’en créer une autre.',
+      ) &&
+        (await dlg.getByRole('textbox').count()) === 0 &&
+        (await dlg.getByRole('button', { name: 'Créer la clé' }).count()) === 0 &&
+        (await dlg.locator('.fd-modal__foot, footer').getByRole('button', { name: 'Fermer' }).count()) === 1,
+      '20 clés actives : message à la place du formulaire, un seul bouton « Fermer »',
+    );
     await page.context().close();
   }
 

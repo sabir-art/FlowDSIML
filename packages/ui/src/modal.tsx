@@ -37,8 +37,9 @@ export function Modal({
   footerLead?: ReactNode;
   /** sm = 400 px, md = 560 px, lg = 720 px, xl = 960 px ; plein écran sous 480 px. */
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  /** `danger` : tuile en rouge (suppression). */
-  tone?: 'default' | 'danger';
+  /** `danger` : tuile en rouge (suppression). `success` : tuile en vert, réservée aux fenêtres qui
+   * confirment une création réussie (MODAL-01). */
+  tone?: 'default' | 'danger' | 'success';
   /** Boutons du pied, alignés à droite : Annuler, puis l'action principale. */
   footer?: ReactNode;
   /** Nom accessible du bouton Fermer (« Fermer »). */
@@ -77,7 +78,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      className={`fd-modal fd-modal--${size}${tone === 'danger' ? ' fd-modal--danger' : ''} ${className}`.trim()}
+      className={`fd-modal fd-modal--${size}${tone === 'default' ? '' : ` fd-modal--${tone}`} ${className}`.trim()}
       role={role}
       // Fermée, la modale n'a pas de contenu : ses références ARIA ne sont posées qu'à l'ouverture
       aria-labelledby={open ? (subtitle ? `${id}-t ${id}-s` : `${id}-t`) : undefined}
