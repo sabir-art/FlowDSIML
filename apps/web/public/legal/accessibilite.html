@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Déclaration d'accessibilité · TutoClick</title>
+    <meta name="description" content="[Nom de l'organisme] s'engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005." />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <style>
+      :root { --bg: #ffffff; --text: #14171c; --muted: #556070; --border: #dde2e8; --link: #a3195b; --note: #fdf0dc; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #0f1216; --text: #eef1f5; --muted: #a7b0bc; --border: #2a313a; --link: #f08ab0; --note: #3a2a12; }
+      }
+      body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+      main { max-width: 760px; margin: 0 auto; padding: 40px 20px 64px; }
+      h1 { font-size: 32px; line-height: 1.2; margin: 0 0 8px; }
+      h2 { font-size: 20px; line-height: 1.3; margin: 32px 0 8px; }
+      h3 { font-size: 17px; line-height: 1.3; margin: 20px 0 8px; }
+      p, ul { margin: 0 0 12px; }
+      ul { padding-left: 20px; }
+      li { margin-bottom: 6px; }
+      a { color: var(--link); }
+      .meta { color: var(--muted); }
+      .note { background: var(--note); border-radius: 10px; padding: 12px 16px; }
+      nav { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; gap: 16px; flex-wrap: wrap; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Déclaration d'accessibilité</h1>
+      <p class="meta">TutoClick, porté par la DSIML · Mise à jour : 21 novembre 2026</p>
+      <p class="note">Version de travail, en attente de validation par la personne référente accessibilité. Les mentions entre crochets restent à compléter par l'organisme.</p>
+      <p>[Nom de l'organisme] s'engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.</p>
+      <h2>Champ de la déclaration</h2>
+      <p>Schéma pluriannuel de mise en accessibilité : [lien vers le schéma pluriannuel].</p>
+      <p>Cette déclaration d'accessibilité s'applique à TutoClick, plateforme de tutoriels interactifs et de formation de [Nom de l'organisme] : [adresse du service].</p>
+      <h2>État de conformité</h2>
+      <p>TutoClick n'a pas encore fait l'objet d'un audit de conformité RGAA complet (106 critères, avec restitutions par des lecteurs d'écran). En l'absence de cet audit, le service est déclaré non conforme au sens du référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1. Aucun taux de conformité n'est publié.</p>
+      <p>Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent pas l'audit complet.</p>
+      <h2>Vérifications réalisées</h2>
+      <p>Mises à jour le 20/11/2026.</p>
+      <ul>
+        <li>Audit automatique (axe-core) : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits. Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification du code.</li>
+        <li>Contrôles du clavier et du focus, automatisés (77 vérifications) : lien d'évitement, focus visible et jamais masqué, focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape, animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur et du lecteur.</li>
+        <li>Audit manuel préliminaire : 14 écarts relevés, tous corrigés.</li>
+        <li>Critères ajoutés par WCAG 2.2 : focus non masqué, alternative au glisser pour chaque action, taille des cibles, aide au même endroit, authentification sans test cognitif.</li>
+        <li>Documents PDF exportés (modes d'emploi, attestations de suivi) : balisés (structure, titres, ordre de lecture, texte alternatif des captures, langue).</li>
+      </ul>
+      <h2>Contenus non accessibles</h2>
+      <h3>Non-conformité</h3>
+      <p>Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l'audit manuel préliminaire (titres de page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés. La liste définitive sera établie par l'audit complet.</p>
+      <p>Points non vérifiés à ce jour :</p>
+      <ul>
+        <li>restitution par des lecteurs d'écran réels (NVDA, JAWS, VoiceOver) ;</li>
+        <li>validation des PDF par un outil spécialisé (PAC, veraPDF) ;</li>
+        <li>contenus créés par les auteurs des démonstrations : couleurs de marque, textes des bulles et titres d'étapes (l'éditeur vérifie le contraste de la couleur de marque et propose un texte alternatif par défaut pour chaque capture).</li>
+      </ul>
+      <h3>Dérogations pour charge disproportionnée</h3>
+      <p>[Aucune, ou description du contenu, de la raison et de l'alternative proposée]</p>
+      <h3>Contenus non soumis à l'obligation d'accessibilité</h3>
+      <ul>
+        <li>Les captures d'écran de logiciels tiers affichées dans les tutoriels reproduisent l'interface de ces logiciels. Le texte de chaque étape (bulle) en donne l'information utile.</li>
+      </ul>
+      <h2>Établissement de cette déclaration d'accessibilité</h2>
+      <p>Cette déclaration a été établie le [JJ/MM/AAAA].</p>
+      <h3>Technologies utilisées pour la réalisation du site</h3>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS</li>
+        <li>JavaScript</li>
+        <li>WAI-ARIA</li>
+        <li>SVG</li>
+      </ul>
+      <h3>Outils pour évaluer l'accessibilité</h3>
+      <ul>
+        <li>axe-core (audit automatique, intégré aux tests)</li>
+        <li>Calcul de contraste sur les jetons de couleur</li>
+        <li>Inspecteur d'accessibilité du navigateur</li>
+        <li>Navigation au clavier seul</li>
+      </ul>
+      <h3>Pages du site ayant fait l'objet de vérifications</h3>
+      <ul>
+        <li>Connexion</li>
+        <li>Tableau de bord (liste des démonstrations)</li>
+        <li>Éditeur d'une démonstration</li>
+        <li>Partage d'une démonstration</li>
+        <li>Suivi des apprenants</li>
+        <li>Réglages du centre de formation</li>
+        <li>Lecteur d'une démonstration (page publique)</li>
+        <li>Centre de formation, accueil (page publique)</li>
+        <li>Centre de formation, page d'une formation (page publique)</li>
+      </ul>
+      <h2>Retour d'information et contact</h2>
+      <p>Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du service pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme :</p>
+      <ul>
+        <li>envoyer un message à [adresse e-mail dédiée] ;</li>
+        <li>ou contacter [service et adresse postale].</li>
+      </ul>
+      <p>Nous essayons de répondre dans les [n] jours ouvrés.</p>
+      <h2>Voies de recours</h2>
+      <p>Cette procédure est à utiliser dans le cas suivant : vous avez signalé au responsable du site internet un défaut d'accessibilité qui vous empêche d'accéder à un contenu ou à un des services du portail, et vous n'avez pas obtenu de réponse satisfaisante.</p>
+      <p>Vous pouvez :</p>
+      <ul>
+        <li>écrire un message au Défenseur des droits (formulaire en ligne sur defenseurdesdroits.fr) ;</li>
+        <li>contacter le délégué du Défenseur des droits dans votre région ;</li>
+        <li>envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) : Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07.</li>
+      </ul>
+      <nav aria-label="Autres documents">
+        <a href="confidentialite.html">Politique de confidentialité</a>
+        <a href="conditions.html">Conditions d'utilisation</a>
+        <a href="../">Ouvrir TutoClick</a>
+      </nav>
+    </main>
+  </body>
+</html>

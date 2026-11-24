@@ -62,7 +62,7 @@ export function AuthLayout({
   aside?: ReactNode;
   /** Logo plus proche du titre (inscription : 40 px au lieu de 48) */
   compact?: boolean;
-  /** Pied de page langue / liens légaux (absent de la maquette d'inscription) */
+  /** Bouton de langue du pied (absent de l'inscription) ; les liens légaux restent partout */
   footer?: boolean;
   children: ReactNode;
 }) {
@@ -88,8 +88,9 @@ export function AuthLayout({
           <h1>{title}</h1>
           {subtitle && <p className="muted t-lg auth-sub">{subtitle}</p>}
           {children}
-          {footer && (
-            <div className="row auth-footer">
+          {/* Pied : la langue (sauf sur l'inscription) et les liens légaux, sur toutes les pages d'accès */}
+          <div className="row auth-footer">
+            {footer && (
               <button type="button" className="btn btn-ghost btn-sm" onClick={() => void setLocale(other)}>
                 <Globe aria-hidden="true" />
                 {/* Nom accessible = texte visible précédé de l'action (RGAA 11.2) */}
@@ -98,17 +99,20 @@ export function AuthLayout({
                   {i18n.language === 'en' ? 'English' : 'Français'}
                 </span>
               </button>
-              {/* Pages légales pas encore rédigées : liens vers une page « Bientôt » */}
-              <span className="row auth-legal">
-                <Link className="t-caption subtle" to="/legal/privacy">
-                  {t('auth.privacy')}
-                </Link>
-                <Link className="t-caption subtle" to="/legal/terms">
-                  {t('auth.terms')}
-                </Link>
-              </span>
-            </div>
-          )}
+            )}
+            <span className="row auth-legal">
+              <Link className="t-caption subtle" to="/legal/privacy">
+                {t('auth.privacy')}
+              </Link>
+              <Link className="t-caption subtle" to="/legal/terms">
+                {t('auth.terms')}
+              </Link>
+              {/* Mention imposée par le RGAA tant qu'aucun audit complet n'est fait */}
+              <Link className="t-caption subtle" to="/legal/accessibility">
+                {t('auth.accessibility')}
+              </Link>
+            </span>
+          </div>
         </main>
         {aside ?? <DemoAside />}
       </div>
