@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@flowdsiml/ui';
+import { Button, Switch } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -20,8 +20,8 @@ import { SettingsShell } from './SettingsShell';
 /** Événements réglables, dans l'ordre du tableau. */
 const EVENTS = ['mention', 'reply', 'comment', 'resolved', 'alert', 'lead'] as const;
 /**
- * Événements réglables à l'écran. La mention n'y figure plus (retour client) : elle reste toujours
- * notifiée dans l'app, règle tenue en base ; son e-mail n'est plus proposé.
+ * Événements du tableau. La mention n'y figure plus (retours du 24/11, 2e série §4) : elle est toujours
+ * notifiée dans l'app (règle tenue en base) ; son e-mail se règle par l'interrupteur sous le tableau.
  */
 const SHOWN = EVENTS.filter((k) => k !== 'mention');
 type EventKey = (typeof EVENTS)[number];
@@ -110,10 +110,7 @@ export function NotificationSettings() {
   const toggleEmail = async (k: EventKey, on: boolean) => {
     const before = { email, emailPrefs };
     // Chaque événement est écrit : l'état affiché devient l'état enregistré, sans valeur implicite
-    // L'e-mail des mentions n'est plus proposé : il est écrit désactivé, jamais laissé actif sans réglage
-    const next = Object.fromEntries(
-      EVENTS.map((e) => [e, e === 'mention' ? false : e === k ? on : byEmail(e)]),
-    ) as Flags;
+    const next = Object.fromEntries(EVENTS.map((e) => [e, e === k ? on : byEmail(e)])) as Flags;
     const any = EVENTS.some((e) => next[e]);
     setEmailPrefs(next);
     setEmail(any);
@@ -137,6 +134,7 @@ export function NotificationSettings() {
             <p>{t('notifSettings.sub')}</p>
           </div>
         </div>
+        <p className="stg-help nt-mentions">{t('notifSettings.mentionsAlways')}</p>
         <table className="stg-table nt-table">
           <thead>
             <tr>
@@ -190,6 +188,13 @@ export function NotificationSettings() {
             })}
           </tbody>
         </table>
+        <Switch
+          className="nt-mention-mail"
+          label={t('notifSettings.mentionsEmail')}
+          checked={emailAvailable && byEmail('mention')}
+          disabled={!emailAvailable || !ready}
+          onChange={(e) => void toggleEmail('mention', e.target.checked)}
+        />
         <p className="stg-help nt-help">{t('notifSettings.emailHelp')}</p>
       </section>
 

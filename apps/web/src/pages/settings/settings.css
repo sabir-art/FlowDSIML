@@ -1092,3 +1092,12 @@ fieldset.stg-row {
     display: none;
   }
 }
+
+/* Notifications (retours du 24/11, 2e série §4) : phrase sur les mentions au-dessus du tableau,
+   interrupteur de leur e-mail dessous */
+.nt-mentions {
+  margin: 0 0 12px;
+}
+.nt-mention-mail {
+  margin-top: 16px;
+}

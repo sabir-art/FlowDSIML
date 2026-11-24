@@ -6009,7 +6009,9 @@
     "unmuteFor": "Turn notifications back on for {{title}}",
     "unmuted": "Notifications for “{{title}}” turned back on.",
     "saveError": "The setting could not be saved.",
-    "always": "Always"
+    "always": "Always",
+    "mentionsAlways": "Mentions (@) are always notified in the app.",
+    "mentionsEmail": "Also receive mentions by email"
   },
   "accessKeys": {
     "title": "Access keys",
