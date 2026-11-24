@@ -37,6 +37,7 @@ import { useNewsUnseen, usePlatformRole } from '../pages/console/platform';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 import { THEME_OPTIONS, chooseTheme } from './ThemeSwitcher';
 import { useTheme, type ThemePref } from '../lib/theme';
+import { modalOnTop } from '../lib/modalOnTop';
 
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const;
 
@@ -101,6 +102,7 @@ export function Layout() {
     focusables()[0]?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (document.querySelector('#fd-portal [role=menu]')) return; // un menu ouvert gère sa propre touche Échap
+      if (modalOnTop()) return; // une fenêtre modale ouverte par-dessus garde Échap et Tab
       if (e.key === 'Escape') {
         e.preventDefault();
         setOpen(false);
