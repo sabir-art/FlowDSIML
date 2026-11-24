@@ -9,9 +9,15 @@ import { errorMessage } from '../../../lib/errors';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings } from '../types';
 import { OUT_WIDTHS, type FitMode, type FormatId } from './format';
-import { applyFormat, formatSteps, planStep, renderPlan, type FormatChoice } from './applyFormat';
+import {
+  applyFormat,
+  formatSteps,
+  layersUntracked,
+  planStep,
+  renderPlan,
+  type FormatChoice,
+} from './applyFormat';
 import { Select } from '@flowdsiml/ui';
-import { asLayers } from '../images/layers';
 
 const FORMATS: FormatId[] = ['original', '16:9', '16:10', '4:3', 'custom'];
 const MIN = 640;
@@ -119,8 +125,9 @@ export function FormatSection({ editor, readOnly }: { editor: DemoEditor; readOn
         label: t('editor.format.undo'),
         onClick: () => editor.undo(),
       });
-      // Les images ajoutées gardent leur place en % du cadre : à vérifier après un changement de format
-      if (plans.some((p) => asLayers(p.step.options).length > 0))
+      // Les images ajoutées suivent le format ; seules celles d'une étape mise au format avant que la
+      // disposition soit gardée restent à vérifier
+      if (plans.some((p) => layersUntracked(p.step)))
         toast(t('editor.format.checkImages'), undefined, { tone: 'warning' });
     } catch (e) {
       toast(errorMessage(t, e), undefined, { tone: 'warning' });
@@ -133,7 +140,7 @@ export function FormatSection({ editor, readOnly }: { editor: DemoEditor; readOn
     try {
       const { data, error } = await supabase.rpc('restore_original_sizes', { p_demo: editor.demo!.id });
       if (error) throw error;
-      const hadImages = editor.steps.some((s) => asLayers(s.options).length > 0);
+      const hadImages = editor.steps.some(layersUntracked);
       await editor.reload();
       toast(t('editor.format.restored', { count: data ?? 0 }));
       if (hadImages) toast(t('editor.format.checkImages'), undefined, { tone: 'warning' });

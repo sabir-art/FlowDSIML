@@ -61,6 +61,29 @@ export function layout(
   return { tw: target.w, th: target.h, ox, oy, dw, dh };
 }
 
+/** Inverse de mapRect : rectangle relatif au cadre de sortie → rectangle relatif à l'image d'origine. */
+export function unmapRect<T extends Rect>(r: T, l: Layout): T {
+  return {
+    ...r,
+    x: (r.x * l.tw - l.ox) / l.dw,
+    y: (r.y * l.th - l.oy) / l.dh,
+    w: (r.w * l.tw) / l.dw,
+    h: (r.h * l.th) / l.dh,
+  };
+}
+
+/**
+ * Image ajoutée ramenée dans le cadre : réduite en gardant ses proportions si elle le dépasse, puis
+ * replacée à l'intérieur (4 décimales, comme les autres positions de l'éditeur).
+ */
+export function fitInside<T extends Rect>(r: T): T {
+  const k = Math.min(1, 1 / r.w, 1 / r.h);
+  const w = r.w * k;
+  const h = r.h * k;
+  const r4 = (v: number) => Math.round(v * 10000) / 10000;
+  return { ...r, w: r4(w), h: r4(h), x: r4(clamp(r.x, 0, 1 - w)), y: r4(clamp(r.y, 0, 1 - h)) };
+}
+
 /** Rectangle relatif à l'image d'origine → rectangle relatif au cadre de sortie. */
 export function mapRect<T extends Rect>(r: T, l: Layout): T {
   return {

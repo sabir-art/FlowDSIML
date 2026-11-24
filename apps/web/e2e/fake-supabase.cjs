@@ -1210,6 +1210,28 @@ async function install(page, state = seed()) {
         case 'restore_original_sizes': {
           // L28-04 : retour aux images d'origine (image, taille, flous, zoom, recadrage, repères)
           let n = 0;
+          // Images ajoutées ramenées sur l'image d'origine (inverse de la disposition), comme en base
+          const unformat = (opts, l) => {
+            if (!l || !Array.isArray(opts.images)) return opts;
+            const r4 = (v) => Math.round(v * 10000) / 10000;
+            return {
+              ...opts,
+              images: opts.images.map((i) => {
+                const w0 = (i.w * l.tw) / l.dw;
+                const h0 = (i.h * l.th) / l.dh;
+                const k = Math.min(1, 1 / w0, 1 / h0);
+                const w = w0 * k;
+                const h = h0 * k;
+                return {
+                  ...i,
+                  x: r4(Math.min(1 - w, Math.max(0, (i.x * l.tw - l.ox) / l.dw))),
+                  y: r4(Math.min(1 - h, Math.max(0, (i.y * l.th - l.oy) / l.dh))),
+                  w: r4(w),
+                  h: r4(h),
+                };
+              }),
+            };
+          };
           for (const st of t.steps.filter((x) => x.demo_id === a.p_demo && x.original)) {
             const o = st.original;
             Object.assign(st, {
@@ -1218,9 +1240,10 @@ async function install(page, state = seed()) {
               image_height: o.image_height,
               blurs: o.blurs || [],
               zoom: o.zoom || null,
-              options: o.crop
-                ? { ...(st.options || {}), crop: o.crop }
-                : (({ crop, ...r }) => r)(st.options || {}),
+              options: unformat(
+                o.crop ? { ...(st.options || {}), crop: o.crop } : (({ crop, ...r }) => r)(st.options || {}),
+                o.layout,
+              ),
               original: null,
             });
             for (const h of o.hotspots || []) {
