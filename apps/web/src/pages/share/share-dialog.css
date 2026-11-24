@@ -288,3 +288,7 @@
     flex: 1;
   }
 }
+
+.mk .shd-scope {
+  margin: 0 0 16px;
+}

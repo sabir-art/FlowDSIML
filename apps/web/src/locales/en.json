@@ -2450,7 +2450,7 @@
       "title": "Personalised page",
       "help": "A page like the public page, with your message, for this recipient. Not indexed.",
       "off": "The demo's public page is turned off.",
-      "enablePublic": "Turn on the public page",
+      "enablePublic": "Enable the demo page",
       "pageTitle": "Title",
       "titlePlaceholder": "Your demo, {{company}}",
       "preview": "Preview: {{title}}",
@@ -2544,8 +2544,7 @@
     "publishToEnable": "Publish the demo to enable the link.",
     "exportHelp": "The file is not protected by the access setting.",
     "group": {
-      "files": "Files",
-      "more": "Also"
+      "files": "Files"
     },
     "modeName": {
       "lien": "Link",
@@ -2553,12 +2552,13 @@
       "perso": "Personalised links",
       "acces": "Access",
       "exporter": "Export",
-      "page": "Public page"
+      "page": "Demo page"
     },
     "unpublishMenu": "Unpublish…",
     "unpublishTitle": "Unpublish “{{title}}”?",
     "unpublishBody": "The link, the embed and the personalised links will stop working. You can publish again at any time.",
-    "unpublishConfirm": "Unpublish"
+    "unpublishConfirm": "Unpublish",
+    "accessScope": "Applies to the link, the embed, the personalised links and the demo page."
   },
   "analytics": {
     "title": "Analytics",

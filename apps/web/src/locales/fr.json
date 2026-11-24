@@ -2450,7 +2450,7 @@
       "title": "Page personnalisée",
       "help": "Une page à l'image de la page publique, avec votre message, pour ce destinataire. Non référencée.",
       "off": "La page publique de la démo est désactivée.",
-      "enablePublic": "Activer la page publique",
+      "enablePublic": "Activer la page de la démo",
       "pageTitle": "Titre",
       "titlePlaceholder": "Votre démo, {{company}}",
       "preview": "Aperçu : {{title}}",
@@ -2544,8 +2544,7 @@
     "publishToEnable": "Publiez la démo pour activer le lien.",
     "exportHelp": "Le fichier n’est pas protégé par l’accès.",
     "group": {
-      "files": "Fichiers",
-      "more": "Aussi"
+      "files": "Fichiers"
     },
     "modeName": {
       "lien": "Lien",
@@ -2553,12 +2552,13 @@
       "perso": "Liens personnalisés",
       "acces": "Accès",
       "exporter": "Exporter",
-      "page": "Page publique"
+      "page": "Page de la démo"
     },
     "unpublishMenu": "Retirer la publication…",
     "unpublishTitle": "Retirer la publication de « {{title}} » ?",
     "unpublishBody": "Le lien, l’intégration et les liens personnalisés cesseront de fonctionner. Vous pourrez republier à tout moment.",
-    "unpublishConfirm": "Retirer la publication"
+    "unpublishConfirm": "Retirer la publication",
+    "accessScope": "Vaut pour le lien, l’intégration, les liens personnalisés et la page de la démo."
   },
   "analytics": {
     "title": "Analytics",
@@ -3134,7 +3134,7 @@
     "desc": {
       "workspace": "Le nom, l’adresse et les réglages communs de l’espace.",
       "members": "Les personnes de l’espace, leurs rôles et les invitations en cours.",
-      "usage": "Ce que consomme l’espace, et ses limites.",
+      "usage": "Ce que l’espace utilise, et ses limites.",
       "security": "Les règles de capture, de partage et de connexion de l’espace.",
       "privacy": "Ce que l’espace mesure chez les visiteurs de vos démos.",
       "brand": "Le logo et les couleurs de l’espace, dans l’app, le centre de formation et les pages publiques.",

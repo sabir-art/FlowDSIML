@@ -176,7 +176,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     const names = (await d.locator('.shd-nav__item').allTextContents()).map((x) => x.trim());
     ok(
-      names.slice(0, 5).join('|') === 'Lien|Intégrer|Liens personnalisés|Accès|Exporter',
+      names.join('|') === 'Lien|Intégrer|Liens personnalisés|Page de la démo|Accès|Exporter',
       `modes : ${names.join(', ')}`,
     );
     if (MOBILE) {
@@ -220,7 +220,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await shot(page, 'partager-lien');
     await axe(page, 'Lien');
 
-    for (const m of ['Intégrer', 'Liens personnalisés', 'Exporter']) {
+    for (const m of ['Intégrer', 'Liens personnalisés', 'Page de la démo', 'Exporter']) {
       await mode(page, m);
       ok((await d.locator('.shd-access').count()) === 1, `${m} : pastille d’accès présente`);
       ok(await noScroll(page), `${m} : pas de défilement horizontal`);
@@ -248,6 +248,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.waitForFunction(() => document.querySelector('#shd-mode')?.textContent === 'Accès');
     ok(/share=acces$/.test(page.url()), '« Modifier » ouvre le mode Accès');
     ok((await d.locator('.shd-access').count()) === 0, 'Accès : pas de pastille d’accès');
+    ok(
+      (await d.locator('.shd-scope').textContent()) ===
+        'Vaut pour le lien, l’intégration, les liens personnalisés et la page de la démo.',
+      'Accès : « Vaut pour le lien, l’intégration, les liens personnalisés et la page de la démo. »',
+    );
     await d.getByRole('radio', { name: /Avec un mot de passe/ }).check({ force: true });
     await d.locator('input[type="password"]').first().fill('Fictif-2026!');
     await shot(page, 'partager-acces');

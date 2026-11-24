@@ -54,13 +54,13 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await sw.waitFor();
   ok((await sw.isDisabled()) && !(await sw.isChecked()), 'page publique désactivée : section désactivée');
   ok(
-    (await page.getByRole('button', { name: 'Activer la page publique' }).count()) === 1,
+    (await page.getByRole('button', { name: 'Activer la page de la démo' }).count()) === 1,
     'lien « Activer la page publique »',
   );
-  await page.getByRole('button', { name: 'Activer la page publique' }).click();
+  await page.getByRole('button', { name: 'Activer la page de la démo' }).click();
   ok(
     await page
-      .locator('.shd-nav button[aria-current="page"]', { hasText: 'Page publique' })
+      .locator('.shd-nav button[aria-current="page"]', { hasText: 'Page de la démo' })
       .waitFor({ timeout: 5000 })
       .then(() => true)
       .catch(() => false),

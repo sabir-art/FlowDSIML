@@ -62,7 +62,7 @@ import { Status, Select } from '@flowdsiml/ui';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
 /** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
-export const SHARE_MODES = ['lien', 'integrer', 'perso', 'acces', 'exporter', 'page'] as const;
+export const SHARE_MODES = ['lien', 'integrer', 'perso', 'page', 'acces', 'exporter'] as const;
 export type ShareMode = (typeof SHARE_MODES)[number];
 /** `menu` : à 390 px, la liste des modes seule (premier écran de la feuille). */
 export type ShareView = ShareMode | 'menu';
@@ -297,12 +297,11 @@ export function SharePanel({
         : access.access.mode === 'domain'
           ? AtSign
           : Globe;
-  // « Fichiers » : l'export produit un fichier, hors de l'accès ; les deux derniers modes attendent leur
-  // nouvelle place (menu de la démo, Diffuser)
+  // « Page de la démo » : la page propre à la démo (à ne pas confondre avec le catalogue public de
+  // l'espace) ; « Fichiers » : l'export produit un fichier, hors de l'accès
   const groups: Array<{ label?: string; modes: ShareMode[] }> = [
-    { modes: ['lien', 'integrer', 'perso', 'acces'] },
+    { modes: ['lien', 'integrer', 'perso', 'page', 'acces'] },
     { label: t('share.group.files'), modes: ['exporter'] },
-    { label: t('share.group.more'), modes: ['page'] },
   ];
 
   return (
@@ -767,7 +766,12 @@ export function SharePanel({
               </section>
             )}
 
-            {tab === 'access' && <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />}
+            {tab === 'access' && (
+              <>
+                <p className="help shd-scope">{t('share.accessScope')}</p>
+                <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />
+              </>
+            )}
             {tab === 'page' && (
               <section id="sh-panel-page" aria-labelledby="shd-mode">
                 <PublicPagePanel
