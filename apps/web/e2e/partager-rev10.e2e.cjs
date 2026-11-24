@@ -47,6 +47,12 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
   const gif = page.getByRole('button', { name: 'GIF / vidéo' });
   ok(!/Bientôt/.test(await gif.innerText()), '« GIF / vidéo » sans « Bientôt »');
+  // P1-5 : outil interne, aucun bouton de réseau social (on garde E-mail et « GIF / vidéo »)
+  ok(
+    (await page.locator('#sh-panel-link a[href*="linkedin."], #sh-panel-link a[href*="x.com"]').count()) ===
+      0 && (await page.locator('#sh-panel-link a[href^="mailto:"]').count()) === 1,
+    'Partager : ni LinkedIn ni X, « E-mail » gardé',
+  );
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await page.locator('#sh-panel-link').screenshot({ path: `${SHOTS}/rev-10-partager${sfx}.png` });

@@ -2558,7 +2558,7 @@
         "resume": "Resume",
         "now": "Visitors right now",
         "views30": "Views · last 30 minutes",
-        "ctaToday": "CTA clicks today",
+        "ctaToday": "End button clicks today",
         "leadsToday": "Leads today",
         "active": "Active visitors",
         "count_one": "{{count}} visitor",
@@ -3748,7 +3748,7 @@
     "demo": {
       "kind": "Center type",
       "kind_training": "Training center",
-      "kind_demo": "Demo Center",
+      "kind_demo": "Demo catalogue",
       "kindHelp_training": "Learners, progress, courses and certificate.",
       "kindHelp_demo": "Public hub of demos, without account or progress.",
       "heroTitle": "Hero title",

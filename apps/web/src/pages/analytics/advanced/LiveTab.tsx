@@ -6,7 +6,7 @@ import { supabase } from '../../../lib/supabase';
 import { formatNumber, formatRelativeShort } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
 import { Loading } from '../../../components/guards';
-import { Empty, Select } from '@flowdsiml/ui';
+import { Empty } from '@flowdsiml/ui';
 import { Radio } from 'lucide-react';
 
 interface LiveVisitor {
@@ -123,20 +123,7 @@ export function LiveTab({
       <div className="row between wrap l19-livehead">
         {/* L19-01 / 02 : la démo est toujours nommée en tête de ligne (« Démo CRM · actualisé… ») */}
         <div className="l19-livehead-l">
-          {!demo && (
-            <Select
-              size="sm"
-              aria-label={t('analytics.adv.live.demo')}
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-            >
-              {demos.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.title}
-                </option>
-              ))}
-            </Select>
-          )}
+          {/* Un seul sélecteur de démo, celui de la page ; sans choix, la démo la plus vue du jour */}
           <p className="muted">
             <b>{title}</b> · {t('analytics.adv.live.refresh')}
           </p>
@@ -155,8 +142,8 @@ export function LiveTab({
         {announce}
       </span>
       <div className="kpis">
-        <div className="card kpi l19-hero">
-          <span className="t-caption">
+        <div className="card kpi l19-now">
+          <span className="t-caption muted">
             <span className="live-dot" aria-hidden="true" /> {t('analytics.adv.live.now')}
           </span>
           <div className="value">{formatNumber(k.live)}</div>
