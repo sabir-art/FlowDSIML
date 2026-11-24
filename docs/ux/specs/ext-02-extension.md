@@ -219,6 +219,7 @@ Précisions (réponses au dev, 24/11) :
 - **Panneau de 320 px** : un libellé long passe sur deux lignes, l’interrupteur reste à droite, centré verticalement (maquette `popup-projecteur-*` mise à jour).
 - **Bouton du visiteur** : dans la barre du lecteur, bouton icône 36 px (44 px au toucher), Flashlight, nom « Projecteur », `aria-pressed`, à gauche du bouton des sous-titres. Il n’existe que si le projecteur est activé. Le choix du visiteur vaut pour la session de lecture.
 - **Aperçu dans l’éditeur** : quand l’outil Projecteur est ouvert, halo fixe sur le premier hotspot de l’étape affichée, avec la taille et l’assombrissement réglés. Outil fermé : pas de voile dans le canevas. Le suivi du pointeur se voit dans « Aperçu ».
+- **Recette a55e0ea (conforme, clair et sombre, éditeur 1440, lecteur 1280 et 390)**. Bouton de la barre du lecteur à 40 px (44 au toucher), comme ses voisins de la pilule : validé, il remplace les 36 px. Un hotspot au style Spotlight retrouve son rendu quand le visiteur coupe le projecteur. Deux retouches : l’aide garde la virgule de la maquette (« sur la capture, le reste est assombri »), sans « ; » ; l’outil Projecteur n’a pas de raccourci Alt + chiffre, les raccourcis existants ne bougent pas (Recadrage et Image gardent les leurs).
 
 ### 6.4 Voix off dans le panneau de 320 px (réponse au §18.2 « Voix » et « Sous-titres »)
 Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur `lecteur-voix-*`.
