@@ -1041,6 +1041,15 @@ fieldset.stg-row {
 .nt-soon {
   margin-left: 8px;
 }
+/* Mentions, « Dans l'app » : toujours notifiées, pas d'interrupteur (spec §6.3, précisions) */
+.nt-always {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
 .nt-help {
   margin: 12px 0 0;
 }

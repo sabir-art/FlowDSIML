@@ -5846,7 +5846,7 @@
     "events": {
       "mention": {
         "name": "Mentions",
-        "help": "Someone mentions you in a comment."
+        "help": "Always notified in the app. You can choose email."
       },
       "reply": {
         "name": "Replies",
@@ -5869,7 +5869,6 @@
         "help": "A visitor leaves their address on one of your demos."
       }
     },
-    "mentionHelp": "Mentions are always notified in the app.",
     "emailHelp": "Email: at most one summary per hour, grouping your unread notifications. Unsubscribe link in every email. A notification turned off in the app is not sent by email.",
     "mutedTitle": "Muted demos",
     "mutedSub": "Demos you no longer receive any notification from.",
@@ -5877,6 +5876,7 @@
     "unmute": "Turn back on",
     "unmuteFor": "Turn notifications back on for {{title}}",
     "unmuted": "Notifications for “{{title}}” turned back on.",
-    "saveError": "The setting could not be saved."
+    "saveError": "The setting could not be saved.",
+    "always": "Always"
   }
 }

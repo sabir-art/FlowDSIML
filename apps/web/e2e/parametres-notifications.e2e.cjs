@@ -50,10 +50,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         'Événement|Dans l’app|Par e-mail',
       'colonnes « Événement », « Dans l’app », « Par e-mail »',
     );
+    const mention = page.locator('.nt-table tbody tr').first();
     ok(
-      (await sw(page, 'Mentions, dans l’app').isChecked()) &&
-        (await sw(page, 'Mentions, dans l’app').isDisabled()),
-      'les mentions restent notifiées dans l’app',
+      (await mention.locator('td').first().textContent()).trim() === 'Toujours' &&
+        (await mention.locator('td').first().getByRole('switch').count()) === 0,
+      'mentions : « Toujours » dans l’app, sans interrupteur',
+    );
+    ok(
+      (await mention.locator('.nt-sub').textContent()) ===
+        'Toujours notifiées dans l’app. Vous pouvez choisir l’e-mail.',
+      'mentions : aide de la ligne',
     );
     ok(await sw(page, 'Réponses, dans l’app').isChecked(), 'dans l’app : activé par défaut');
     ok(!(await sw(page, 'Mentions, par e-mail').isChecked()), 'par e-mail : rien n’est activé par défaut');
