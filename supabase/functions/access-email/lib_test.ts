@@ -239,6 +239,8 @@ Deno.test('e-mail d’accès : textes de la maquette, durée réelle, aucune ima
   assert(!/<img|<script|<link/i.test(m.html));
   assertStringIncludes(m.html, 'prefers-color-scheme: dark');
   assertStringIncludes(m.html, 'width="600"');
+  // Bouton en pilule, comme les boutons de l'app
+  assertStringIncludes(m.html, 'text-decoration:none;border-radius:999px;');
   // La durée annoncée suit celle du serveur
   assertStringIncludes(renderAccess({ ...argsOf(m), ttlSeconds: 1800 }).text, 'valable 30 minutes');
   assertEquals([ttlText(60), ttlText(7200), ttlText(5400)], ['1 minute', '2 heures', '90 minutes']);
