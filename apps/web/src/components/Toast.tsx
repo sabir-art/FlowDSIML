@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, TriangleAlert, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../styles/maquette.css';
@@ -49,6 +49,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [close],
   );
+  // Une navigation décidée par la personne (lien de l'application, Précédent ou Suivant du navigateur)
+  // ferme les toasts affichés : ils parlent de la page qu'elle quitte. Une redirection qui suit une
+  // action (navigate() après une création, un import…) garde son toast : rien n'est fermé ici.
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (leavesPage(e, window.location.hash)) setToasts([]);
+    };
+    const onPop = () => setToasts([]);
+    document.addEventListener('click', onClick, true);
+    window.addEventListener('popstate', onPop);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      window.removeEventListener('popstate', onPop);
+    };
+  }, []);
   return (
     <Ctx.Provider value={show}>
       {children}
@@ -97,3 +112,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 }
 
 export const useToast = () => useContext(Ctx);
+
+/**
+ * Clic qui mène à une autre page de l'application : lien interne (`#/…`) vers une autre adresse,
+ * ouvert dans la même fenêtre, hors de la pile de toasts.
+ */
+export function leavesPage(
+  e: Pick<
+    MouseEvent,
+    'target' | 'button' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'altKey' | 'defaultPrevented'
+  >,
+  currentHash: string,
+): boolean {
+  if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return false;
+  const el = e.target instanceof Element ? e.target : null;
+  const link = el?.closest('a[href]');
+  if (!link || el?.closest('.toasts')) return false;
+  const href = link.getAttribute('href') ?? '';
+  if (!href.startsWith('#/') || link.getAttribute('target') === '_blank' || link.hasAttribute('download'))
+    return false;
+  return href !== (currentHash || '#/');
+}

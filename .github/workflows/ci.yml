@@ -234,6 +234,9 @@ jobs:
       - name: 'Images ajoutées par-dessus la capture : panneau Image, canevas, incrustation à la publication (retours du 24/11 §1)'
         if: always()
         run: cd apps/web && node e2e/image-calques.e2e.cjs && THEME=dark node e2e/image-calques.e2e.cjs
+      - name: 'Toasts : fermés par une navigation décidée par la personne, gardés sur la page'
+        if: always()
+        run: cd apps/web && node e2e/toasts-navigation.e2e.cjs
       - name: 'Projecteur libre : outil du rail, halo du lecteur, moins d’animations (EXT-02 §6.3)'
         if: always()
         run: cd apps/web && node e2e/projecteur.e2e.cjs
