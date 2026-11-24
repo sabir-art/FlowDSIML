@@ -284,6 +284,70 @@ const SHOTS = process.env.SHOTS_DIR;
       (await page.getByRole('button', { name: /^Copier le lien de / }).count()) === 2,
     'confirmation : « Invitation envoyée » et « Copier le lien » pour chaque adresse',
   );
+  // Retours client du 24/11 §4 (maquette retours-2411/invitations) : CopyField sous chaque adresse
+  {
+    const row = modal.locator('.inv-results > li').first();
+    const field = row.locator('.fd-copy__input');
+    const email = (await row.locator('.inv-results__email').innerText()).trim();
+    const btn = row.getByRole('button', { name: `Copier le lien de ${email}`, exact: true });
+    const g = await row.evaluate((li) => {
+      const input = li.querySelector('.fd-copy__input');
+      const b = li.querySelector('.fd-copy__btn');
+      const cs = getComputedStyle(input);
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-color-surface-sunken)';
+      document.body.append(probe);
+      const sunken = getComputedStyle(probe).color;
+      probe.remove();
+      const ri = input.getBoundingClientRect();
+      const rb = b.getBoundingClientRect();
+      return {
+        h: ri.height,
+        readOnly: input.readOnly,
+        sunken: cs.backgroundColor === sunken,
+        font: cs.fontFamily === getComputedStyle(li).fontFamily,
+        btn: `${rb.width}x${rb.height}`,
+        inside: rb.left >= ri.left && rb.right <= ri.right && rb.top >= ri.top && rb.bottom <= ri.bottom,
+        right: Math.round(ri.right - rb.right),
+        label: li.querySelector(`label[for="${input.id}"]`)?.textContent,
+        status: li.querySelector('.inv-results__status svg')?.getAttribute('class') || '',
+      };
+    });
+    ok(
+      g.h === 40 && g.readOnly && g.sunken && g.font && g.btn === '32x32' && g.inside && g.right === 4,
+      `CopyField : champ de 40 px en lecture seule sur surface-sunken, bouton de 32 px dans le champ, à droite (${JSON.stringify(g)})`,
+    );
+    ok(
+      g.label === `Lien d’invitation pour ${email}` &&
+        /circle-check/.test(g.status) &&
+        (await btn.count()) === 1,
+      'CopyField : libellé masqué « Lien d’invitation pour … », bouton « Copier le lien de … », état en CircleCheck',
+    );
+    ok(/#\/invite\//.test(await field.inputValue()), 'CopyField : le champ porte le lien d’invitation');
+    await field.click();
+    ok(
+      await field.evaluate((el) => el.selectionStart === 0 && el.selectionEnd === el.value.length),
+      'CopyField : le clic dans le champ sélectionne tout le lien',
+    );
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await btn.click();
+    const status = row.getByRole('status');
+    await status.filter({ hasText: 'Lien copié' }).waitFor();
+    ok(
+      (await page.evaluate(() => navigator.clipboard.readText())) === (await field.inputValue()) &&
+        (await btn.locator('svg.lucide-check').count()) === 1 &&
+        (await row.locator('.fd-copy__ok').evaluate((el) => getComputedStyle(el).fontSize)) === '12px',
+      'CopyField : lien copié, l’icône devient Check, « Lien copié » annoncé (12 px sous le champ)',
+    );
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/invitations-copyfield.png` });
+    // La coche revient à Copy d'elle-même (2 s) : on attend l'état, sans délai fixe
+    await btn.locator('svg.lucide-copy').waitFor({ timeout: 6000 });
+    // Vide, la région d'annonce n'est plus affichée : on la lit par sa classe
+    ok(
+      (await row.locator('.fd-copy__ok').textContent()).trim() === '',
+      'CopyField : après 2 s, retour à l’icône Copy, annonce effacée',
+    );
+  }
   await modal.locator('.fd-modal__foot').getByRole('button', { name: 'Terminé' }).click();
   await modal.waitFor({ state: 'detached' });
 

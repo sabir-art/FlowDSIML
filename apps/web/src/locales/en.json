@@ -377,6 +377,8 @@
     "resultCount_other": "{{count}} members or invitations",
     "removeEmail": "Remove {{email}}",
     "copyLinkFor": "Copy the link for {{email}}",
+    "inviteLinkFor": "Invitation link for {{email}}",
+    "linkCopiedShort": "Link copied",
     "inviteStatus": {
       "sent": "Invitation sent",
       "failed": "Email not sent",
