@@ -177,7 +177,7 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
 
   Chaque ligne a un titre et une phrase d'aide ; à 390, l'aide est masquée et les deux colonnes restent.
 - **Lien entre les colonnes** : un événement coupé dans l'app ne part pas par e-mail. Son interrupteur e-mail est alors désactivé, gris.
-- **Aide sous le tableau** : « E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. »
+- **Aide sous le tableau** : « E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. Une notification coupée dans l'app ne part pas par e-mail. » (troisième phrase reprise de la maquette, gardée)
 - **Sans la clé d'envoi d'e-mails** (emails §3.5) : la colonne « Par e-mail » reste visible, désactivée, avec « Bientôt » dans son en-tête. On ne la masque pas.
 - **Démos coupées** : la liste des démos dont la personne a coupé les notifications, avec « Réactiver ».
 
@@ -254,3 +254,4 @@ Le client développe TutoClick seul, sans entreprise ni organisme. La page `/leg
 ## Recette
 - **Tests attendus** : `image-calques.e2e` (ajout, déplacement à la souris et au clavier, proportions, opacité, texte alternatif obligatoire, flou au-dessus, incrustation à la publication) ; `media.e2e`, à étendre (navigation, catégorie déduite et changée, sélecteur sur chaque point d'accès, « Utiliser ») ; `members.e2e` (CopyField) ; un contrôle de contraste des pastilles.
 - **Conditions** : clair et sombre, 1440 et 390 (hors éditeur), axe sans violation.
+- §6.3 Notifications : recette de 4694e57 (dev-mvp), conforme à notifs-*, en clair et en sombre, à 1440 et 390. parametres-notifications 22/22 dans les quatre cas. « Toujours » pour les mentions ; colonne e-mail désactivée avec « Bientôt » sans service d'envoi ; « Nouveaux leads » en « Bientôt » ; en-têtes de colonne gardés à 390.
