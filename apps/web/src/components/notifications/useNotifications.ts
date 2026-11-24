@@ -42,13 +42,28 @@ export const emailDigestAvailable = () =>
     .then(({ data, error }) => !error && data?.available === true)
     .catch(() => false));
 
+/** Dernière liste chargée par espace et par compte (clé par compte : jamais montrée à un autre). */
+const lastItems = new Map<string, NotificationItem[]>();
+
 export function useNotifications() {
   const { user } = useAuth();
   const { current } = useWorkspace();
   const ws = current?.id;
   const me = user?.id;
-  const [items, setItems] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  // La cloche est remontée quand la page passe de son squelette à son contenu : elle repart de la
+  // dernière liste connue, sinon la pastille disparaît puis revient (libellé instable pour les lecteurs d'écran)
+  const key = ws && me ? `${ws}:${me}` : '';
+  const [items, setItemsState] = useState<NotificationItem[]>(() => lastItems.get(key) ?? []);
+  const setItems = useCallback(
+    (next: NotificationItem[] | ((list: NotificationItem[]) => NotificationItem[])) =>
+      setItemsState((list) => {
+        const value = typeof next === 'function' ? next(list) : next;
+        if (key) lastItems.set(key, value);
+        return value;
+      }),
+    [key],
+  );
+  const [loading, setLoading] = useState(() => !lastItems.has(key));
   const [prefs, setPrefsState] = useState<NotificationPrefs>(() => readPrefs(null));
   const seq = useRef(0);
 
@@ -116,11 +131,13 @@ export function useNotifications() {
         })),
     );
     setLoading(false);
-  }, [ws, me]);
+  }, [ws, me, setItems]);
 
   useEffect(() => {
     if (!ws || !me) return;
-    setLoading(true);
+    const known = lastItems.get(`${ws}:${me}`);
+    if (known) setItemsState(known);
+    else setLoading(true);
     void reload();
     // La pastille se met à jour sans recharger ; rien n'est annoncé (seul le nombre change)
     const channel = supabase
@@ -174,13 +191,16 @@ export function useNotifications() {
       });
   }, [me]);
 
-  const markRead = useCallback(async (ids?: string[]) => {
-    const at = new Date().toISOString();
-    setItems((list) =>
-      list.map((n) => (!ids || ids.includes(n.id) ? { ...n, read_at: n.read_at ?? at } : n)),
-    );
-    await supabase.rpc('mark_notifications_read', ids ? { p_ids: ids } : {});
-  }, []);
+  const markRead = useCallback(
+    async (ids?: string[]) => {
+      const at = new Date().toISOString();
+      setItems((list) =>
+        list.map((n) => (!ids || ids.includes(n.id) ? { ...n, read_at: n.read_at ?? at } : n)),
+      );
+      await supabase.rpc('mark_notifications_read', ids ? { p_ids: ids } : {});
+    },
+    [setItems],
+  );
 
   const setPref = useCallback(
     async (kind: NotificationKind, on: boolean) => {
