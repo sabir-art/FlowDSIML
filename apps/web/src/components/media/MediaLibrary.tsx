@@ -217,41 +217,41 @@ export function MediaLibrary({
             onClose={() => setFull(false)}
           />
         )}
-        {/* L18-04 : recherche et filtre toujours présents (inactifs quand la médiathèque est vide) */}
-        {/* L40 : barre de liste (recherche puis filtre de type, 40 px) */}
-        <div className="fd-toolbar md-tools">
-          <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
-            <label className="fd-toolbar__search md-search">
-              <span className="sr-only">{t('media.search')}</span>
-              <Search aria-hidden="true" />
-              <input
-                className="fd-input"
-                type="search"
-                placeholder={t('media.search')}
-                value={q}
-                disabled={empty}
-                onChange={(e) => setQ(e.target.value)}
-              />
-            </label>
-            <div className="fd-segmented" role="radiogroup" aria-label={t('media.filter')}>
-              {(['all', 'logo', 'image', 'font'] as const).map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  role="radio"
-                  aria-checked={filter === f}
-                  disabled={empty}
-                  onClick={() => setFilter(f)}
-                >
-                  {t(`media.filter_${f}`)}
-                </button>
-              ))}
+        {/* MEDIA-01 §18.3 : médiathèque vide, ni recherche ni filtres (un filtre choisi sur une liste vide
+            laisserait croire qu'il cache des fichiers) ; ils apparaissent avec le premier fichier */}
+        {!empty && (
+          <div className="fd-toolbar md-tools">
+            <div className="fd-toolbar__group" role="group" aria-label={t('toolbar.filters')}>
+              <label className="fd-toolbar__search md-search">
+                <span className="sr-only">{t('media.search')}</span>
+                <Search aria-hidden="true" />
+                <input
+                  className="fd-input"
+                  type="search"
+                  placeholder={t('media.search')}
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                />
+              </label>
+              <div className="fd-segmented" role="radiogroup" aria-label={t('media.filter')}>
+                {(['all', 'logo', 'image', 'font'] as const).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    role="radio"
+                    aria-checked={filter === f}
+                    onClick={() => setFilter(f)}
+                  >
+                    {t(`media.filter_${f}`)}
+                  </button>
+                ))}
+              </div>
             </div>
+            <span className="sr-only" role="status">
+              {files ? t('media.count', { count: shown.length }) : ''}
+            </span>
           </div>
-          <span className="sr-only" role="status">
-            {files ? t('media.count', { count: shown.length }) : ''}
-          </span>
-        </div>
+        )}
         {!empty && (
           // Dépôt aussi sur toute la grille (voile « Déposer le fichier ici »)
           <DropBlock onFile={(f) => void upload([f])} disabled={busy} className="md-gridwrap">

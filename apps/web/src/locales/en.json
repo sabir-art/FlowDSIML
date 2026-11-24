@@ -2035,7 +2035,7 @@
     },
     "spotlight": {
       "enable": "Free spotlight",
-      "help": "A halo follows the visitor’s pointer on the screenshot; the rest is dimmed. With the keyboard and on touch screens, the halo sits on the step’s element. On screenshot steps.",
+      "help": "A halo follows the visitor’s pointer on the screenshot, the rest is dimmed. With the keyboard and on touch screens, the halo sits on the step’s element. On screenshot steps.",
       "size": "Halo size",
       "dim": "Dimming",
       "fixed": "Fixed halo if the visitor prefers reduced motion",

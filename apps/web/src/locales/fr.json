@@ -2035,7 +2035,7 @@
     },
     "spotlight": {
       "enable": "Projecteur libre",
-      "help": "Un halo suit le pointeur du visiteur sur la capture ; le reste est assombri. Au clavier et sur écran tactile, le halo se place sur l’élément de l’étape. Sur les étapes capture.",
+      "help": "Un halo suit le pointeur du visiteur sur la capture, le reste est assombri. Au clavier et sur écran tactile, le halo se place sur l’élément de l’étape. Sur les étapes capture.",
       "size": "Taille du halo",
       "dim": "Assombrissement",
       "fixed": "Halo fixe si le visiteur préfère moins d’animations",

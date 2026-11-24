@@ -49,6 +49,11 @@ export const TOOL_GROUPS: Array<{ key: string; tools: ToolId[] }> = [
 ];
 /** Ordre du rail (raccourcis Alt + 1 à 9 sur les 9 premiers). */
 export const TOOL_ORDER: ToolId[] = [...TOOL_GROUPS.flatMap((g) => g.tools), 'settings'];
+/**
+ * Outils qui portent un raccourci Alt + chiffre, dans l'ordre. « Projecteur » (EXT-02 §6.3) n'en a pas :
+ * les raccourcis déjà connus ne bougent pas (Recadrage et Image gardent les leurs).
+ */
+export const SHORTCUT_ORDER: ToolId[] = TOOL_ORDER.filter((x) => x !== 'spotlight');
 
 const ICONS: Record<ToolId, LucideIcon> = {
   step: Type,
@@ -114,6 +119,8 @@ export function EditorRail({
     const label = t(`editor.rail.${id}`);
     const reason = disabled[id];
     const n = shown.indexOf(id);
+    // Rang du raccourci Alt + chiffre (-1 : pas de raccourci)
+    const k = SHORTCUT_ORDER.filter((x) => !hidden.includes(x)).indexOf(id);
     return (
       <button
         key={id}
@@ -124,9 +131,9 @@ export function EditorRail({
         aria-pressed={active === id}
         aria-disabled={reason ? 'true' : undefined}
         aria-describedby={reason ? `rail-why-${id}` : undefined}
-        aria-keyshortcuts={n < 9 ? `Alt+${n + 1}` : undefined}
+        aria-keyshortcuts={k >= 0 && k < 9 ? `Alt+${k + 1}` : undefined}
         data-tip={reason ? `${label} · ${reason}` : undefined}
-        data-tip-shortcut={n < 9 ? `Alt ${n + 1}` : undefined}
+        data-tip-shortcut={k >= 0 && k < 9 ? `Alt ${k + 1}` : undefined}
         tabIndex={(active ? active === id : n === 0) ? 0 : -1}
         onClick={() => !reason && onToggle(id)}
       >
