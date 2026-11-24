@@ -188,6 +188,8 @@ Précisions (réponses au dev, 24/11) :
 - **Sans image** : pas de colonne image ni de fond teinté ; la fenêtre fait 480 px au plus, texte sur toute la largeur. (L’icône sur fond teinté de la maquette tient lieu d’image d’exemple.)
 - **Image** : cadrée en « cover » dans la colonne de 280 px (hauteur 240 px au moins, celle du texte au-delà), centrée ; en mobile, 160 px de haut au-dessus du texte.
 - **Première étape sans capture** : fond uni comme la pop-up actuelle (couleur de fond du thème de la démo), pas de voile.
+- **Pied** (recette e68c0b8) : les boutons restent sur une ligne, calés à droite, « Suivant » en dernier. Sous 640 px : pas de « Échap pour fermer », « Précédent » et « Suivant » à largeur égale. Colonne étroite au-dessus de 640 px (canevas de l’éditeur) : « Échap pour fermer » passe sous les boutons, en 12 px. La pilule « Rouvrir la fenêtre » se place dans la barre du lecteur, à gauche de « Suivant ».
+- Validé : section « Question à choix » masquée pour une fenêtre ; une fenêtre en dernière étape n’est pas un écran de fin (« Suivant » termine la démo) ; « Titre » et « Texte » sont les champs du haut du panneau ; libellé d’affichage « Plein écran / Pop-up / Fenêtre ».
 
 ### 6.2 Flou stylé
 Panneau « Flou » : Forme (Rectangle, Arrondi, Ellipse), Effet (Flou, Pixels, Aplat), Intensité (2 à 24 px, curseur avec valeur), Teinte (Aucune, Gris, Encre, Prune, Bleu, Blanc ; à 30 % par-dessus) et « Appliquer à toutes les étapes ». Aide : « Le texte masqué n’est jamais lisible, quelle que soit la teinte. » (intensité minimale garantie côté rendu).
