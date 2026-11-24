@@ -1877,7 +1877,8 @@
       "restore": "Revenir aux images d’origine",
       "restoring": "Retour aux images d’origine…",
       "restored_one": "{{count}} étape revenue à son image d’origine.",
-      "restored_other": "{{count}} étapes revenues à leur image d’origine."
+      "restored_other": "{{count}} étapes revenues à leur image d’origine.",
+      "checkImages": "Vérifiez la place des images ajoutées sur les étapes."
     },
     "voice": {
       "title": "Voix off",

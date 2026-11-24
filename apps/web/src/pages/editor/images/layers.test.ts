@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MAX_LAYERS,
   asLayers,
+  isFull,
   fitRect,
   frameToImage,
   growRect,
@@ -79,6 +81,13 @@ describe('images ajoutées', () => {
     expect(fitRect(base, { ...base, h: 0.1 }, 2)).toEqual({ x: 0.4, y: 0.4, w: 0.2, h: 0.1 });
     expect(fitRect(base, { ...base, x: 0.1 }, 2)).toEqual({ ...pos(base), x: 0.1 });
     expect(fitRect(base, { ...base, w: 0.3 }, null)).toEqual({ x: 0.4, y: 0.4, w: 0.3, h: 0.2 });
+  });
+
+  it('limite à 10 images par étape', () => {
+    expect(MAX_LAYERS).toBe(10);
+    expect(isFull(Array.from({ length: 9 }))).toBe(false);
+    expect(isFull(Array.from({ length: 10 }))).toBe(true);
+    expect(isFull(Array.from({ length: 11 }))).toBe(true);
   });
 
   it('monte et descend une image dans la liste', () => {

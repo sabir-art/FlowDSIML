@@ -31,7 +31,7 @@ import type { DemoEditor } from '../useDemoEditor';
 import type { Selection, StepRow } from '../types';
 import {
   LAYER_OPACITY,
-  MAX_LAYERS,
+  isFull,
   asLayers,
   fitRect,
   fractionRatio,
@@ -109,11 +109,12 @@ export function ImagePanel({
       importRef.current = null;
     };
   });
-  const full = layers.length >= MAX_LAYERS;
+  const full = isFull(layers);
   const frameRatio = act.frameRatio;
   const captureUrl = step.image_path ? editor.imageUrls[step.image_path] : undefined;
   const fileName =
     (step.element_meta as { fileName?: string } | null)?.fileName?.trim() || t('editor.image.captureName');
+  // Milliers groupés avec l'espace fine de la langue (« 1 100 »)
   const nf = new Intl.NumberFormat(i18n.language);
   const name = (l: ImageLayer) => layerName(l, t('editor.image.untitled'));
 

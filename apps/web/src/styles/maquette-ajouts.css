@@ -1544,6 +1544,8 @@
 }
 .mk .logo-block__acts--stack > .btn {
   justify-content: center;
+  /* Boutons secondaires en pilule, comme ailleurs */
+  border-radius: 999px;
   width: 100%;
 }
 .mk .logo-block__acts .logo-name {
