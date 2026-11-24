@@ -136,5 +136,155 @@
         ]
       }
     ]
+  },
+  "accessibility": {
+    "title": "Déclaration d'accessibilité",
+    "link": "Accessibilité : non conforme",
+    "draft": "Version de travail, en attente de validation par la personne référente accessibilité. Les mentions entre crochets restent à compléter par l'organisme.",
+    "fields": {
+      "organisme": {
+        "label": "Nom de l'organisme",
+        "value": ""
+      },
+      "schema": {
+        "label": "lien vers le schéma pluriannuel",
+        "value": ""
+      },
+      "service": {
+        "label": "adresse du service",
+        "value": ""
+      },
+      "derogations": {
+        "label": "Aucune, ou description du contenu, de la raison et de l'alternative proposée",
+        "value": ""
+      },
+      "date": {
+        "label": "JJ/MM/AAAA",
+        "value": ""
+      },
+      "contact": {
+        "label": "adresse e-mail dédiée",
+        "value": ""
+      },
+      "courrier": {
+        "label": "service et adresse postale",
+        "value": ""
+      },
+      "delai": {
+        "label": "n",
+        "value": ""
+      }
+    },
+    "intro": "{{organisme}} s'engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.",
+    "sections": [
+      {
+        "h": "Champ de la déclaration",
+        "p": [
+          "Schéma pluriannuel de mise en accessibilité : {{schema}}.",
+          "Cette déclaration d'accessibilité s'applique à TutoClick, plateforme de tutoriels interactifs et de formation de {{organisme}} : {{service}}."
+        ]
+      },
+      {
+        "h": "État de conformité",
+        "p": [
+          "TutoClick n'a pas encore fait l'objet d'un audit de conformité RGAA complet (106 critères, avec restitutions par des lecteurs d'écran). En l'absence de cet audit, le service est déclaré non conforme au sens du référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1. Aucun taux de conformité n'est publié.",
+          "Les vérifications déjà faites sont décrites ci-dessous. Elles ne remplacent pas l'audit complet."
+        ]
+      },
+      {
+        "h": "Vérifications réalisées",
+        "p": ["Mises à jour le 20/11/2026."],
+        "ul": [
+          "Audit automatique (axe-core) : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits. Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification du code.",
+          "Contrôles du clavier et du focus, automatisés (77 vérifications) : lien d'évitement, focus visible et jamais masqué, focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape, animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur et du lecteur.",
+          "Audit manuel préliminaire : 14 écarts relevés, tous corrigés.",
+          "Critères ajoutés par WCAG 2.2 : focus non masqué, alternative au glisser pour chaque action, taille des cibles, aide au même endroit, authentification sans test cognitif.",
+          "Documents PDF exportés (modes d'emploi, attestations de suivi) : balisés (structure, titres, ordre de lecture, texte alternatif des captures, langue)."
+        ]
+      },
+      {
+        "h": "Contenus non accessibles",
+        "p": []
+      },
+      {
+        "h": "Non-conformité",
+        "level": 3,
+        "p": [
+          "Aucune non-conformité connue à ce jour parmi les points vérifiés. Les écarts relevés lors de l'audit manuel préliminaire (titres de page, focus, lecteur, contrastes, hiérarchie des titres, références ARIA, PDF non balisés) ont été corrigés. La liste définitive sera établie par l'audit complet.",
+          "Points non vérifiés à ce jour :"
+        ],
+        "ul": [
+          "restitution par des lecteurs d'écran réels (NVDA, JAWS, VoiceOver) ;",
+          "validation des PDF par un outil spécialisé (PAC, veraPDF) ;",
+          "contenus créés par les auteurs des démonstrations : couleurs de marque, textes des bulles et titres d'étapes (l'éditeur vérifie le contraste de la couleur de marque et propose un texte alternatif par défaut pour chaque capture)."
+        ]
+      },
+      {
+        "h": "Dérogations pour charge disproportionnée",
+        "level": 3,
+        "p": ["{{derogations}}"]
+      },
+      {
+        "h": "Contenus non soumis à l'obligation d'accessibilité",
+        "level": 3,
+        "ul": [
+          "Les captures d'écran de logiciels tiers affichées dans les tutoriels reproduisent l'interface de ces logiciels. Le texte de chaque étape (bulle) en donne l'information utile."
+        ]
+      },
+      {
+        "h": "Établissement de cette déclaration d'accessibilité",
+        "p": ["Cette déclaration a été établie le {{date}}."]
+      },
+      {
+        "h": "Technologies utilisées pour la réalisation du site",
+        "level": 3,
+        "ul": ["HTML5", "CSS", "JavaScript", "WAI-ARIA", "SVG"]
+      },
+      {
+        "h": "Outils pour évaluer l'accessibilité",
+        "level": 3,
+        "ul": [
+          "axe-core (audit automatique, intégré aux tests)",
+          "Calcul de contraste sur les jetons de couleur",
+          "Inspecteur d'accessibilité du navigateur",
+          "Navigation au clavier seul"
+        ]
+      },
+      {
+        "h": "Pages du site ayant fait l'objet de vérifications",
+        "level": 3,
+        "ul": [
+          "Connexion",
+          "Tableau de bord (liste des démonstrations)",
+          "Éditeur d'une démonstration",
+          "Partage d'une démonstration",
+          "Suivi des apprenants",
+          "Réglages du centre de formation",
+          "Lecteur d'une démonstration (page publique)",
+          "Centre de formation, accueil (page publique)",
+          "Centre de formation, page d'une formation (page publique)"
+        ]
+      },
+      {
+        "h": "Retour d'information et contact",
+        "p": [
+          "Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du service pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme :"
+        ],
+        "ul": ["envoyer un message à {{contact}} ;", "ou contacter {{courrier}}."],
+        "after": ["Nous essayons de répondre dans les {{delai}} jours ouvrés."]
+      },
+      {
+        "h": "Voies de recours",
+        "p": [
+          "Cette procédure est à utiliser dans le cas suivant : vous avez signalé au responsable du site internet un défaut d'accessibilité qui vous empêche d'accéder à un contenu ou à un des services du portail, et vous n'avez pas obtenu de réponse satisfaisante.",
+          "Vous pouvez :"
+        ],
+        "ul": [
+          "écrire un message au Défenseur des droits (formulaire en ligne sur defenseurdesdroits.fr) ;",
+          "contacter le délégué du Défenseur des droits dans votre région ;",
+          "envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) : Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07."
+        ]
+      }
+    ]
   }
 }

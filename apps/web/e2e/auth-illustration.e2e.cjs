@@ -316,6 +316,43 @@ function measure() {
     await ctx.close();
   }
 
+  // Lien du pied « Accessibilité : non conforme » (mention du RGAA sans audit complet) sur chaque page
+  // d'accès ; la déclaration garde l'encart « en attente » tant qu'une valeur du client manque
+  for (const pg of PAGES) {
+    const { p, ctx } = await open(pg, 'light', 1440);
+    const link = p
+      .locator('.auth-legal')
+      .getByRole('link', { name: 'Accessibilité : non conforme', exact: true });
+    ok((await link.count()) === 1, `${pg.name} : lien « Accessibilité : non conforme » au pied`);
+    if (pg.name === 'connexion') {
+      await link.click();
+      await p
+        .getByRole('heading', { level: 1, name: 'Déclaration d’accessibilité' })
+        .or(p.getByRole('heading', { level: 1, name: "Déclaration d'accessibilité" }))
+        .waitFor();
+      const doc = (await p.locator('main').innerText()).replace(/\s+/g, ' ');
+      ok(
+        /déclaré non conforme au sens du référentiel général d'amélioration de l'accessibilité \(RGAA\), version 4\.1/.test(
+          doc,
+        ) && !/non évaluée|partiellement conforme/.test(doc),
+        'déclaration : état « non conforme », aucun taux',
+      );
+      ok(
+        (await p.getByRole('note').count()) === 1 &&
+          /\[Nom de l'organisme\]/.test(doc) &&
+          /\[adresse e-mail dédiée\]/.test(doc),
+        'déclaration : encart « en attente de validation », valeurs du client entre crochets (rien d’inventé)',
+      );
+      ok(
+        (await p.locator('main h2').allInnerTexts()).join(' | ') ===
+          "Champ de la déclaration | État de conformité | Vérifications réalisées | Contenus non accessibles | Établissement de cette déclaration d'accessibilité | Retour d'information et contact | Voies de recours",
+        'déclaration : sections attendues',
+      );
+      if (SHOTS) await p.screenshot({ path: `${SHOTS}/legal-accessibilite.png`, fullPage: true });
+    }
+    await ctx.close();
+  }
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

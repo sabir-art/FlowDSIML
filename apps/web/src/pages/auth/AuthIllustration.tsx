@@ -12,7 +12,11 @@ import './auth-illustration.css';
 const STEP_MS = 4000;
 const FADE_MS = 120;
 
-/** Fenêtre de l'app et bulle. `step` fige l'étape (tests, captures). */
+/**
+ * Fenêtre de l'app et bulle. `step` fige l'étape (tests, captures).
+ * `data-gap-exempt` (§18.6) : ce sont les traits d'un dessin décoratif aux cotes de la spec AUTH-ILL
+ * (barres de 5 px espacées de 4 px…), pas des éléments d'interface.
+ */
 function AppWindow({ step: fixed }: { step?: 1 | 2 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -50,7 +54,7 @@ function AppWindow({ step: fixed }: { step?: 1 | 2 }) {
   return (
     <div className="auth-ill__win" data-step={step} ref={ref}>
       <div className="auth-ill__nav">
-        <div className="auth-ill__logo">
+        <div className="auth-ill__logo" data-gap-exempt="">
           <i />
           <span />
         </div>
@@ -68,16 +72,16 @@ function AppWindow({ step: fixed }: { step?: 1 | 2 }) {
         </div>
         <div className="auth-ill__cards">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="auth-ill__card">
+            <div key={i} className="auth-ill__card" data-gap-exempt="">
               <div className="auth-ill__thumb" />
-              <div className="auth-ill__meta">
+              <div className="auth-ill__meta" data-gap-exempt="">
                 <span />
                 <span />
               </div>
             </div>
           ))}
         </div>
-        <div className="auth-ill__rows">
+        <div className="auth-ill__rows" data-gap-exempt="">
           {[0, 1, 2, 3, 4].map((i) => (
             <span key={i} />
           ))}
@@ -97,7 +101,7 @@ function AppWindow({ step: fixed }: { step?: 1 | 2 }) {
 /** Signature : un trait, puis les quatre points de la DSIML (décoratifs, comme sur le logo). */
 function Signature() {
   return (
-    <div className="auth-ill__dots">
+    <div className="auth-ill__dots" data-gap-exempt="">
       <i />
       <i />
       <i />

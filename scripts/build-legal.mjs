@@ -10,27 +10,43 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const legal = JSON.parse(readFileSync(join(root, 'apps/web/src/legal/legal.fr.json'), 'utf8'));
 const esc = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const FILES = { privacy: 'confidentialite.html', terms: 'conditions.html' };
+const FILES = {
+  privacy: 'confidentialite.html',
+  terms: 'conditions.html',
+  accessibility: 'accessibilite.html',
+};
+
+/**
+ * Valeurs de configuration d'un document (`fields`) : `{{cle}}` devient la valeur fournie par le client,
+ * ou sa mention entre crochets tant qu'elle manque. Aucune valeur n'est inventée ici.
+ */
+export const fill = (d, text) =>
+  text.replace(/\{\{(\w+)\}\}/g, (_, k) => d.fields?.[k]?.value || `[${d.fields?.[k]?.label ?? k}]`);
+/** Encart « En attente de validation » : toujours pour un document sans champs, sinon tant qu'il en manque un. */
+export const pending = (d) => !d.fields || Object.values(d.fields).some((f) => !f.value);
 
 export function render(key) {
   const d = legal[key];
-  const other = key === 'privacy' ? 'terms' : 'privacy';
+  const others = Object.keys(FILES).filter((k) => k !== key);
+  const f = (x) => esc(fill(d, x));
   const body = d.sections
     .map((s) => {
-      const p = (s.p ?? []).map((x) => `      <p>${esc(x)}</p>`).join('\n');
+      const para = (list) => (list ?? []).map((x) => `      <p>${f(x)}</p>`).join('\n');
       const ul = s.ul
-        ? `      <ul>\n${s.ul.map((x) => `        <li>${esc(x)}</li>`).join('\n')}\n      </ul>`
+        ? `      <ul>\n${s.ul.map((x) => `        <li>${f(x)}</li>`).join('\n')}\n      </ul>`
         : '';
-      return [`      <h2>${esc(s.h)}</h2>`, p, ul].filter(Boolean).join('\n');
+      const tag = s.level === 3 ? 'h3' : 'h2';
+      return [`      <${tag}>${esc(s.h)}</${tag}>`, para(s.p), ul, para(s.after)].filter(Boolean).join('\n');
     })
     .join('\n');
+  const note = pending(d) ? `\n      <p class="note">${esc(d.draft ?? legal.draft)}</p>` : '';
   return `<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${esc(d.title)} · TutoClick</title>
-    <meta name="description" content="${esc(d.intro)}" />
+    <meta name="description" content="${f(d.intro)}" />
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <style>
       :root { --bg: #ffffff; --text: #14171c; --muted: #556070; --border: #dde2e8; --link: #a3195b; --note: #fdf0dc; }
@@ -41,6 +57,7 @@ export function render(key) {
       main { max-width: 760px; margin: 0 auto; padding: 40px 20px 64px; }
       h1 { font-size: 32px; line-height: 1.2; margin: 0 0 8px; }
       h2 { font-size: 20px; line-height: 1.3; margin: 32px 0 8px; }
+      h3 { font-size: 17px; line-height: 1.3; margin: 20px 0 8px; }
       p, ul { margin: 0 0 12px; }
       ul { padding-left: 20px; }
       li { margin-bottom: 6px; }
@@ -53,12 +70,11 @@ export function render(key) {
   <body>
     <main>
       <h1>${esc(d.title)}</h1>
-      <p class="meta">TutoClick, porté par la DSIML · Mise à jour : ${esc(legal.updated)}</p>
-      <p class="note">${esc(legal.draft)}</p>
-      <p>${esc(d.intro)}</p>
+      <p class="meta">TutoClick, porté par la DSIML · Mise à jour : ${esc(legal.updated)}</p>${note}
+      <p>${f(d.intro)}</p>
 ${body}
       <nav aria-label="Autres documents">
-        <a href="${FILES[other]}">${esc(legal[other].title)}</a>
+${others.map((k) => `        <a href="${FILES[k]}">${esc(legal[k].title)}</a>`).join('\n')}
         <a href="../">Ouvrir TutoClick</a>
       </nav>
     </main>

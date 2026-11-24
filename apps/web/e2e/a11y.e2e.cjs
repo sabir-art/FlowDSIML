@@ -854,6 +854,7 @@ const APP_PAGES = [
   // L34 : routes et états ajoutés depuis L24
   { name: 'Mentions légales', route: '/#/legal/terms', signedOut: true },
   { name: 'Confidentialité (page légale)', route: '/#/legal/privacy', signedOut: true },
+  { name: 'Accessibilité (page légale)', route: '/#/legal/accessibility', signedOut: true },
   { name: 'Nouveau mot de passe', route: '/#/reset-password' },
   { name: 'Invitation', route: '/#/invite/jeton-invitation-a11y' },
   { name: 'Écran public du présentateur', route: `/#/present/${DEMO}/screen` },
