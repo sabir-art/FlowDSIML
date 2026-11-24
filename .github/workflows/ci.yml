@@ -43,11 +43,11 @@ jobs:
           VITE_SUPABASE_ANON_KEY: test
           WXT_SUPABASE_URL: https://api.tutoclick.example
           WXT_SUPABASE_ANON_KEY: test
-      - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest, de l'Assistance IA, d'access-email, d'invite-email et de notify-email)
+      - name: Edge Functions (deno check de toutes les fonctions + tests du dispatch des webhooks, de la médiathèque, de html-ingest, de l'Assistance IA, d'access-email, d'invite-email, de notify-email et de l'API publique)
         working-directory: supabase/functions
         run: |
           npx -y deno@2.5.6 check --no-lock */index.ts
-          npx -y deno@2.5.6 test --no-lock --allow-net=127.0.0.1 webhooks-dispatch/ media/ ai/ access-email/ invite-email/ notify-email/
+          npx -y deno@2.5.6 test --no-lock --allow-net=127.0.0.1 webhooks-dispatch/ media/ ai/ access-email/ invite-email/ notify-email/ api/
           npx -y deno@2.5.6 test --no-lock --allow-env html-ingest/ html-recheck/
 
   secrets:
