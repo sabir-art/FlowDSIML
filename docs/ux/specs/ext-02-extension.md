@@ -207,6 +207,19 @@ Précisions (réponses au dev, 24/11) :
 ### 6.3 Projecteur libre (aujourd’hui « Bientôt »)
 Panneau « Projecteur » : interrupteur « Projecteur libre », taille du halo (120 à 400 px), assombrissement (20 à 80 %), « Désactivé si le visiteur préfère moins d’animations ». Dans le lecteur : halo net autour du pointeur, bord adouci de 12 px, reste assombri ; au clavier et au toucher, le halo se place sur l’élément de l’étape. C’est le seul dégradé permis, parce qu’il est la fonction elle-même. Tant qu’il n’est pas livré, l’entrée reste « Bientôt », grise, jamais masquée.
 
+Précisions (réponses au dev, 24/11) :
+- **Entrée** : un outil du rail de l’éditeur, groupe « Écran », après Zoom, icône Flashlight, libellé « Projecteur ». Il ouvre le panneau de 320 px.
+- **Portée** : un réglage pour toute la démo, sans « Appliquer à toutes les étapes ».
+- **Étapes concernées** : les étapes capture (image) seulement. Pas de projecteur sur Avant / Après (le curseur de comparaison suit déjà le pointeur), ni sur les étapes HTML, vidéo ou texte. Le texte d’aide du panneau le dit : « Sur les étapes capture. »
+- **Superposition** : la pastille et la bulle restent au-dessus du voile. Projecteur libre activé : le style « Spotlight » des hotspots est ignoré, et le panneau du hotspot l’annonce sous le choix du style (info, 13 px) : « Ignoré tant que le projecteur libre est activé. »
+- **Clavier, toucher et avant le premier mouvement du pointeur** : halo centré sur le premier hotspot de l’étape, à la taille réglée. Étape sans hotspot : pas de voile.
+- **Pointeur hors de la capture** : le halo revient sur l’élément de l’étape (sans hotspot, le voile disparaît). Transition de 200 ms, aucune avec la préférence moins d’animations.
+- **Moins d’animations** : interrupteur « Halo fixe si le visiteur préfère moins d’animations », activé par défaut. Nom accessible identique au libellé visible. Avec la préférence : le voile reste, le halo est fixe sur l’élément de l’étape, sans suivi ni transition. Interrupteur éteint : le halo suit le pointeur même avec la préférence.
+- **Taille** : en px à l’échelle d’une capture de 1 280 px de large, le halo rétrécit avec la capture, au moins 64 px à l’écran. Défauts : 220 px et 55 %.
+- **Panneau de 320 px** : un libellé long passe sur deux lignes, l’interrupteur reste à droite, centré verticalement (maquette `popup-projecteur-*` mise à jour).
+- **Bouton du visiteur** : dans la barre du lecteur, bouton icône 36 px (44 px au toucher), Flashlight, nom « Projecteur », `aria-pressed`, à gauche du bouton des sous-titres. Il n’existe que si le projecteur est activé. Le choix du visiteur vaut pour la session de lecture.
+- **Aperçu dans l’éditeur** : quand l’outil Projecteur est ouvert, halo fixe sur le premier hotspot de l’étape affichée, avec la taille et l’assombrissement réglés. Outil fermé : pas de voile dans le canevas. Le suivi du pointeur se voit dans « Aperçu ».
+
 ### 6.4 Voix off dans le panneau de 320 px (réponse au §18.2 « Voix » et « Sous-titres »)
 Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur `lecteur-voix-*`.
 - **Sans voix** : segmenté « Générer », « Enregistrer », « Importer ».
