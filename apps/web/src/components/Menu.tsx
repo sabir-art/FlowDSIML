@@ -343,7 +343,8 @@ export function Menu({
               ),
             )}
           </div>,
-          getPortal(),
+          // Dans une fenêtre ouverte (dialog modal), le menu se rend dans la fenêtre : au-dessus d'elle
+          getPortal(btn.current),
         )}
     </div>
   );
