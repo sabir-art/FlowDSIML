@@ -175,6 +175,20 @@ function tipGeometry(sel) {
         }
         return [];
       });
+    // Déclencheur retiré de la page (toast fermé, menu démonté) : l'infobulle part avec lui, même si le
+    // pointeur n'a pas bougé (aucun pointerout dans ce cas)
+    await playerPage(b, PLAYER_PAGES[0], 'light', async (p) => {
+      await p.setViewportSize({ width: 1280, height: 800 });
+      const btn = p.getByRole('button', { name: 'Plein écran', exact: false }).last();
+      await btn.hover();
+      await p.waitForSelector('.fd-tooltip');
+      await btn.evaluate((el) => el.remove());
+      const gone = await p
+        .waitForSelector('.fd-tooltip', { state: 'detached', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
+      ok(gone, 'déclencheur retiré de la page : l’infobulle disparaît avec lui');
+    });
   }
 
   // ===== Inventaire =====

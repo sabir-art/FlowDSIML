@@ -2808,6 +2808,7 @@
       "saveError": "Saving failed. Try again."
     },
     "filteredOn": "Statistics: {{demo}}, {{source}}",
+    "filteredOnDemo": "Statistics: {{demo}}",
     "demoLabel": "Demo",
     "sourceLabel": "Source",
     "more": "More",

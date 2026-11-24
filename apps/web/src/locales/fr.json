@@ -2808,6 +2808,7 @@
       "saveError": "L'enregistrement a échoué. Réessayez."
     },
     "filteredOn": "Statistiques : {{demo}}, {{source}}",
+    "filteredOnDemo": "Statistiques : {{demo}}",
     "demoLabel": "Démo",
     "sourceLabel": "Source",
     "more": "Plus",

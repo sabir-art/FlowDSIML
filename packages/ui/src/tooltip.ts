@@ -183,6 +183,8 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
 
   function open(el: HTMLElement) {
     clearTimers();
+    // Ouverture différée : le déclencheur a pu disparaître entre-temps
+    if (!el.isConnected) return;
     const label = tipLabel(el);
     if (!label) return;
     if (anchor === el && bubble) return;
@@ -318,6 +320,10 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
       if (r.type === 'attributes') sweep(r.target as Element);
       else r.addedNodes.forEach((n) => n.nodeType === 1 && sweep(n as Element));
     }
+    // Déclencheur retiré de la page (toast fermé, menu démonté) : aucun pointerout n'arrive, l'infobulle
+    // part avec lui au lieu de rester orpheline
+    if (anchor && !anchor.isConnected) close();
+    if (pressed && !pressed.isConnected) pressed = null;
   });
   observer.observe(doc.documentElement, {
     subtree: true,
