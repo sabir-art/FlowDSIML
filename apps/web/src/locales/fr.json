@@ -5881,5 +5881,102 @@
     "unmuted": "Notifications de « {{title}} » réactivées.",
     "saveError": "Le réglage n’a pas pu être enregistré.",
     "always": "Toujours"
+  },
+  "accessKeys": {
+    "title": "Clés d’accès",
+    "sub": "Pour qu’un outil de l’espace (CRM, intranet, tableau de bord) lise vos démos, leurs statistiques ou leurs leads. Une clé ne modifie rien. Gardez-la comme un mot de passe.",
+    "noAccess": "Les clés d’accès sont réservées aux propriétaires et administrateurs.",
+    "create": "Créer une clé",
+    "caption": "Clés d’accès de l’espace",
+    "colName": "Nom",
+    "colScopes": "Accès",
+    "colKey": "Clé",
+    "colCreated": "Créée",
+    "colLast": "Dernière utilisation",
+    "colActions": "Actions",
+    "by": "par {{name}}",
+    "neverUsed": "Jamais utilisée",
+    "revokedPill": "Révoquée",
+    "expiredPill": "Expirée",
+    "actionsFor": "Actions pour la clé {{name}}",
+    "rename": "Renommer",
+    "revoke": "Révoquer",
+    "note": "Une clé révoquée cesse de fonctionner tout de suite. Seuls les propriétaires et administrateurs voient cette page.",
+    "emptyTitle": "Aucune clé",
+    "emptyBody": "Créez une clé pour relier un outil de l’espace à TutoClick. Elle ne s’affiche qu’une fois, à la création.",
+    "createTitle": "Créer une clé d’accès",
+    "createConfirm": "Créer la clé",
+    "name": "Nom",
+    "nameHelp": "Pour la reconnaître dans la liste, par exemple l’outil qui l’utilise.",
+    "nameError": "Donnez un nom à la clé.",
+    "expires": "Expiration",
+    "expiresHelp": "Jamais, 30 jours, 90 jours ou 1 an.",
+    "expiresIn": {
+      "never": "Jamais",
+      "30": "30 jours",
+      "90": "90 jours",
+      "365": "1 an"
+    },
+    "scopesLegend": "Ce que la clé peut lire",
+    "scopesNone": "Choisissez au moins un accès.",
+    "scope": {
+      "demos": {
+        "name": "Démos",
+        "help": "Titre, statut et lien de chaque démo."
+      },
+      "stats": {
+        "name": "Statistiques",
+        "help": "Vues, visiteurs et taux de complétion."
+      },
+      "leads": {
+        "name": "Leads",
+        "help": "Adresses e-mail laissées par les visiteurs. À réserver à un outil de confiance, comme votre CRM."
+      }
+    },
+    "tooMany": "L’espace a déjà 20 clés actives. Révoquez-en une avant d’en créer une autre.",
+    "createdTitle": "Clé « {{name}} » créée",
+    "createdWarn": "Copiez-la maintenant : elle ne sera plus jamais affichée. En cas de perte, révoquez-la et créez-en une autre.",
+    "keyLabel": "Clé « {{name}} »",
+    "copyKey": "Copier la clé",
+    "keyCopied": "Clé copiée",
+    "keptCheck": "J’ai copié la clé et l’ai rangée en lieu sûr",
+    "done": "Terminé",
+    "renameTitle": "Renommer la clé",
+    "renameConfirm": "Enregistrer",
+    "revokeTitle": "Révoquer « {{name}} » ?",
+    "revokeBody": "L’outil qui utilise cette clé perdra l’accès tout de suite. Cette action est définitive.",
+    "revokeConfirm": "Révoquer la clé",
+    "revoked": "Clé « {{name}} » révoquée.",
+    "api": {
+      "title": "Utiliser l’API",
+      "sub": "Lecture seule. Chaque demande porte la clé ; elle ne voit que les données de cet espace.",
+      "base": "Adresse de l’API",
+      "copyBase": "Copier l’adresse",
+      "baseCopied": "Adresse copiée",
+      "example": "Exemple : lister les démos",
+      "copyExample": "Copier l’exemple",
+      "exampleCopied": "Exemple copié",
+      "placeholder": "tc_votre_cle",
+      "caption": "Ce que l’API permet de lire",
+      "colWhat": "Ce que vous lisez",
+      "colPath": "Adresse",
+      "colScope": "Accès requis",
+      "what": {
+        "demos": {
+          "name": "La liste des démos",
+          "help": "Titre, statut, lien."
+        },
+        "stats": {
+          "name": "Les statistiques d’une démo",
+          "help": "Vues, visiteurs, complétion, sur 30 jours par défaut."
+        },
+        "leads": {
+          "name": "Les leads d’une démo",
+          "help": "Adresse e-mail et date."
+        }
+      },
+      "csv": "En CSV avec",
+      "errors": "Si la clé manque ou est révoquée, la réponse est 401. Si elle n’a pas l’accès demandé, 403. En cas de trop nombreuses demandes, 429 : réessayez une minute plus tard."
+    }
   }
 }

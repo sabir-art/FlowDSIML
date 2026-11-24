@@ -1,0 +1,115 @@
+/* Paramètres › Clés d'accès (maquettes lot1-parametres/cles-*) */
+
+/* Accès d'une clé : pastilles neutres de 24 px */
+.ak-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ak-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text);
+  white-space: nowrap;
+}
+/* « Révoquée », « Expirée » : pastille neutre à filet, 22 px */
+.ak-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 11px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+/* Chasse fixe réservée au code : clé masquée, adresses, exemple */
+.ak-code {
+  font: 12px/1.5 var(--fd-font-mono);
+  color: var(--fd-color-text);
+  white-space: nowrap;
+}
+.ak-table .is-revoked b,
+.ak-table .is-revoked .ak-code {
+  color: var(--fd-color-text-muted);
+}
+.ak-note {
+  max-width: none;
+  margin: 12px 0 0;
+}
+
+/* « Utiliser l'API » */
+.ak-example {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--fd-color-border);
+}
+/* 16 px entre l'exemple et le tableau des adresses */
+.ak-routes {
+  margin-top: 16px;
+}
+.ak-pre {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  font: 12px/1.5 var(--fd-font-mono);
+  color: var(--fd-color-text);
+  white-space: pre;
+}
+.ak-routes td {
+  height: 64px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.ak-routes .stg-table__sub .ak-code {
+  white-space: nowrap;
+}
+
+/* Fenêtre « Créer une clé » : groupe « Ce que la clé peut lire » */
+.ak-scopes {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.ak-scopes legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font: 600 14px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.ak-scopes > .stg-error:empty,
+.ak-scopes > .stg-help:empty {
+  display: none;
+}
+/* Fenêtre « Clé créée » */
+.ak-created {
+  display: grid;
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  /* Les en-têtes restent : trois colonnes au plus, lisibles */
+  .ak-routes thead {
+    display: table-header-group;
+  }
+  .ak-routes .ak-routes__path {
+    display: none;
+  }
+}

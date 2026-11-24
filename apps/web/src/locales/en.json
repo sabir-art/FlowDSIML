@@ -5881,5 +5881,102 @@
     "unmuted": "Notifications for “{{title}}” turned back on.",
     "saveError": "The setting could not be saved.",
     "always": "Always"
+  },
+  "accessKeys": {
+    "title": "Access keys",
+    "sub": "So that a tool of the workspace (CRM, intranet, dashboard) can read your demos, their statistics or their leads. A key changes nothing. Keep it like a password.",
+    "noAccess": "Access keys are reserved for owners and administrators.",
+    "create": "Create a key",
+    "caption": "Access keys of the workspace",
+    "colName": "Name",
+    "colScopes": "Access",
+    "colKey": "Key",
+    "colCreated": "Created",
+    "colLast": "Last used",
+    "colActions": "Actions",
+    "by": "by {{name}}",
+    "neverUsed": "Never used",
+    "revokedPill": "Revoked",
+    "expiredPill": "Expired",
+    "actionsFor": "Actions for the key {{name}}",
+    "rename": "Rename",
+    "revoke": "Revoke",
+    "note": "A revoked key stops working right away. Only owners and administrators see this page.",
+    "emptyTitle": "No key",
+    "emptyBody": "Create a key to connect a tool of the workspace to TutoClick. It is shown only once, when created.",
+    "createTitle": "Create an access key",
+    "createConfirm": "Create the key",
+    "name": "Name",
+    "nameHelp": "To recognise it in the list, for example the tool that uses it.",
+    "nameError": "Give the key a name.",
+    "expires": "Expiry",
+    "expiresHelp": "Never, 30 days, 90 days or 1 year.",
+    "expiresIn": {
+      "never": "Never",
+      "30": "30 days",
+      "90": "90 days",
+      "365": "1 year"
+    },
+    "scopesLegend": "What the key can read",
+    "scopesNone": "Choose at least one access.",
+    "scope": {
+      "demos": {
+        "name": "Demos",
+        "help": "Title, status and link of each demo."
+      },
+      "stats": {
+        "name": "Statistics",
+        "help": "Views, visitors and completion rate."
+      },
+      "leads": {
+        "name": "Leads",
+        "help": "Email addresses left by visitors. Keep it for a trusted tool, such as your CRM."
+      }
+    },
+    "tooMany": "The workspace already has 20 active keys. Revoke one before creating another.",
+    "createdTitle": "Key “{{name}}” created",
+    "createdWarn": "Copy it now: it will never be shown again. If you lose it, revoke it and create another.",
+    "keyLabel": "Key “{{name}}”",
+    "copyKey": "Copy the key",
+    "keyCopied": "Key copied",
+    "keptCheck": "I copied the key and stored it somewhere safe",
+    "done": "Done",
+    "renameTitle": "Rename the key",
+    "renameConfirm": "Save",
+    "revokeTitle": "Revoke “{{name}}”?",
+    "revokeBody": "The tool using this key will lose access right away. This cannot be undone.",
+    "revokeConfirm": "Revoke the key",
+    "revoked": "Key “{{name}}” revoked.",
+    "api": {
+      "title": "Use the API",
+      "sub": "Read-only. Every request carries the key; it only sees the data of this workspace.",
+      "base": "API address",
+      "copyBase": "Copy the address",
+      "baseCopied": "Address copied",
+      "example": "Example: list the demos",
+      "copyExample": "Copy the example",
+      "exampleCopied": "Example copied",
+      "placeholder": "tc_your_key",
+      "caption": "What the API lets you read",
+      "colWhat": "What you read",
+      "colPath": "Address",
+      "colScope": "Access required",
+      "what": {
+        "demos": {
+          "name": "The list of demos",
+          "help": "Title, status, link."
+        },
+        "stats": {
+          "name": "The statistics of a demo",
+          "help": "Views, visitors, completion, over 30 days by default."
+        },
+        "leads": {
+          "name": "The leads of a demo",
+          "help": "Email address and date."
+        }
+      },
+      "csv": "As CSV with",
+      "errors": "If the key is missing or revoked, the answer is 401. If it lacks the requested access, 403. With too many requests, 429: try again a minute later."
+    }
   }
 }

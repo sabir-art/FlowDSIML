@@ -315,9 +315,10 @@ const TOKENS = {
         `Accueil des Paramètres (${theme}) : lignes de 52 px, icône de 20 px, 15 px, rayon de 12 px (${h.minH}, ${h.icon}, ${h.font})`,
       );
       ok(
-        // « Bientôt » ne reste que sur ce qui n'est pas encore livré (Notifications livré le 24/11)
+        // « Bientôt » ne reste que sur ce qui n'est pas encore livré (Notifications et Clés d'accès livrés le 24/11)
         !h.soon.includes('Notifications') &&
-          h.soon.every((x) => ['Page publique', 'Clés d’accès'].includes(x)),
+          !h.soon.includes('Clés d’accès') &&
+          h.soon.every((x) => x === 'Page publique'),
         `Accueil des Paramètres (${theme}) : « Bientôt » sur ${h.soon.join(', ')}`,
       );
       ok(h.overflow <= 0, `Accueil des Paramètres (${theme}) : aucun défilement horizontal`);

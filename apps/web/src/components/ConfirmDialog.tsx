@@ -13,6 +13,7 @@ export function ConfirmDialog({
   body,
   confirmLabel,
   danger,
+  alert,
   requireText,
   secondary,
   requireLabel,
@@ -25,6 +26,8 @@ export function ConfirmDialog({
   body?: ReactNode;
   confirmLabel: string;
   danger?: boolean;
+  /** Action définitive qui demande une réponse : annoncée comme `alertdialog`, avec son texte. */
+  alert?: boolean;
   requireText?: string;
   /** Action secondaire à la place de « Annuler » (ex. « Voir les plans ») ; Échap annule toujours. */
   secondary?: { label: string; onSelect: () => void };
@@ -53,6 +56,8 @@ export function ConfirmDialog({
       title={title}
       closeLabel={t('common.close')}
       className="dialog-confirm"
+      role={alert ? 'alertdialog' : undefined}
+      describedBy={alert && body ? `${formId}-b` : undefined}
       footer={
         <>
           {secondary ? (
@@ -93,7 +98,11 @@ export function ConfirmDialog({
           }
         }}
       >
-        {body && <div className="dialog-body">{body}</div>}
+        {body && (
+          <div className="dialog-body" id={`${formId}-b`}>
+            {body}
+          </div>
+        )}
         {requireText !== undefined && (
           <div className="fd-modal__field dialog-require">
             <label htmlFor={`${formId}-t`}>
@@ -118,6 +127,7 @@ interface AskOptions {
   body?: ReactNode;
   confirmLabel: string;
   danger?: boolean;
+  alert?: boolean;
   requireText?: string;
   requireLabel?: ReactNode;
   secondary?: { label: string; onSelect: () => void };
@@ -137,6 +147,7 @@ export function useConfirm(): [ReactNode, (o: AskOptions) => Promise<boolean>] {
       body={state?.body}
       confirmLabel={state?.confirmLabel ?? ''}
       danger={state?.danger}
+      alert={state?.alert}
       requireText={state?.requireText}
       requireLabel={state?.requireLabel}
       secondary={state?.secondary}
