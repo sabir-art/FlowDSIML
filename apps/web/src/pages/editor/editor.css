@@ -3341,6 +3341,10 @@
 .blurm-zones > li > .sp-item {
   flex: 1;
 }
+/* Libellés « Flou 1… » calés à gauche (remarque de recette) */
+.blurm-zones > li > .sp-item > .grow {
+  text-align: left;
+}
 .blurm-zones > li.is-selected > .sp-item {
   background: var(--fd-color-surface-sunken);
 }

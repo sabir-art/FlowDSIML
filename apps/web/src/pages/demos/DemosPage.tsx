@@ -40,6 +40,7 @@ import {
   Users,
   Map as MapIcon,
   Shapes,
+  Upload,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Empty, PageHeader, Select, Status } from '@flowdsiml/ui';
@@ -396,6 +397,12 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   ]);
 
   const [newOpen, setNewOpen] = useState(false);
+  // Images déposées sur la page (voile plein contenu), passées à « Nouvelle démo »
+  const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
+  const [fileOver, setFileOver] = useState(false);
+  const fileDepth = useRef(0);
+  const canDropFiles = (e: DragEvent) =>
+    editable && !sandbox && !newOpen && [...e.dataTransfer.types].includes('Files');
   const [generating, setGenerating] = useState<{ folder: string | null } | null>(null);
   // REV-04 : « Démarrer » de l'onboarding arrive ici avec ?new=1 et ouvre « Nouvelle démo »
   useEffect(() => {
@@ -904,7 +911,43 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
           />
         </div>
       )}
-      <div className={`demos-main${onbShown ? ' demos-main--onb' : ''}`}>
+      <div
+        className={`demos-main${onbShown ? ' demos-main--onb' : ''}${fileOver ? ' is-file-over' : ''}`}
+        // MEDIA-01 §18.3 : pas de zone visible ; des images glissées sur la page affichent un voile
+        onDragEnter={(e) => {
+          if (!canDropFiles(e)) return;
+          e.preventDefault();
+          fileDepth.current++;
+          setFileOver(true);
+        }}
+        onDragOver={(e) => {
+          if (!canDropFiles(e)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        }}
+        onDragLeave={() => {
+          if (!fileOver) return;
+          fileDepth.current = Math.max(0, fileDepth.current - 1);
+          if (fileDepth.current === 0) setFileOver(false);
+        }}
+        onDrop={(e) => {
+          if (!canDropFiles(e)) return;
+          e.preventDefault();
+          fileDepth.current = 0;
+          setFileOver(false);
+          const files = [...e.dataTransfer.files];
+          if (!files.length) return;
+          // La fenêtre « Nouvelle démo » s'ouvre déjà remplie
+          setDroppedFiles(files);
+          setNewOpen(true);
+        }}
+      >
+        {fileOver && (
+          <div className="demos-drop" aria-hidden="true">
+            <Upload />
+            {t('demos.dropToCreate')}
+          </div>
+        )}
         {pageHead(false)}
         <div className="demos-row">
           <div className={`stack page-wide demos-wrap${scopeName ? ' demos-wrap--scoped' : ''}`}>
@@ -1388,8 +1431,12 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   open={newOpen}
                   folders={folders}
                   defaultFolder={folder !== 'all' && folder !== 'none' ? folder : null}
-                  onClose={() => setNewOpen(false)}
+                  onClose={() => {
+                    setNewOpen(false);
+                    setDroppedFiles([]);
+                  }}
                   initialType={sandbox ? 'sandbox' : undefined}
+                  initialFiles={droppedFiles}
                   onEmpty={async (f) => {
                     setNewOpen(false);
                     await createDemo(f);

@@ -138,7 +138,7 @@ function data() {
     'étape 2 : « Nouveau Sandbox »',
   );
   ok(
-    (await nd.getByRole('button', { name: /Importer des images/ }).count()) === 0 &&
+    (await nd.getByRole('group', { name: 'Importer des images' }).count()) === 0 &&
       (await nd.getByRole('button', { name: /Générer avec/ }).count()) === 0 &&
       (await nd.getByRole('button', { name: /démo vide/ }).count()) === 0,
     'Sandbox : ni images, ni IA, ni démo vide',
@@ -160,15 +160,18 @@ function data() {
   await nd.getByRole('button', { name: 'Continuer', exact: true }).click();
   ok((await picked(nd.getByLabel('Dossier'))) === folderVal, 'Retour : dossier conservé');
   ok(
-    (await nd.getByRole('button', { name: /Importer des images/ }).count()) === 1 &&
+    (await nd.getByRole('group', { name: 'Importer des images' }).count()) === 1 &&
       (await nd.getByRole('button', { name: /Partir d’un modèle/ }).count()) === 1,
     'Captures : images et modèle',
   );
   ok(
-    // Images et modèle ont un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt »)
+    // Le modèle a un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt ») ;
+    // les images sont une zone d'envoi (MEDIA-01 §18.3), sans chevron
     (await nd.locator('.nd-sources .nd-src__go').count()) +
       (await nd.locator('.nd-sources .nd-ai .nd-src[aria-disabled="true"]').count()) ===
-      3 && (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
+      2 &&
+      (await nd.locator('.nd-sources .nd-zone .fd-dz').count()) === 1 &&
+      (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
   // §18.4 : extension non publiée (pas de VITE_EXTENSION_URL en test) : source visible, désactivée, « Bientôt »

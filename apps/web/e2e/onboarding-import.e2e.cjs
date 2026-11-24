@@ -166,17 +166,44 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await nd.getByRole('button', { name: 'Continuer', exact: true }).click();
 
   // ===== Nouvelle démo > Importer des images =====
-  const imp = nd.getByRole('button', { name: /Importer des images/ });
+  // MEDIA-01 §18.3 : zone large dans la carte de choix, compteur après dépôt, puis « Créer la démo »
+  const zone = nd.getByRole('group', { name: 'Importer des images' });
+  const imp = zone.getByRole('button', { name: 'Choisir des images…' });
+  ok((await imp.isEnabled()) && !/Bientôt/.test(await zone.innerText()), 'import actif');
   ok(
-    (await imp.getAttribute('aria-disabled')) === null && !/Bientôt/.test(await imp.innerText()),
-    'import actif',
+    /Importer des images/.test(await zone.innerText()) &&
+      /Une étape par image, dans l’ordre des noms de fichiers\. PNG, JPEG ou WebP\./.test(
+        await zone.innerText(),
+      ),
+    'zone large : titre, aide (formats)',
+  );
+  ok(
+    (await nd.getByRole('button', { name: 'Créer la démo' }).count()) === 0,
+    'pas de « Créer la démo » sans image',
   );
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await nd.screenshot({ path: `${SHOTS}/rev-06-nouvelle-demo${sfx}.png` });
   }
   const before = t.demos.length;
-  await nd.locator('input[type=file]').setInputFiles(files);
+  await nd.locator('#newdemodialog-file').setInputFiles({
+    name: 'notes.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('x'),
+  });
+  ok(
+    (await zone.getByRole('alert').textContent()) === 'Format non accepté : PNG, JPEG ou WebP.',
+    'fichier refusé : erreur dans la zone',
+  );
+  await nd.locator('#newdemodialog-file').setInputFiles(files);
+  await zone.getByText('2 images', { exact: true }).waitFor();
+  ok(t.demos.length === before, 'compteur « 2 images » : rien n’est créé avant « Créer la démo »');
+  ok(
+    (await nd.getByRole('button', { name: /démo vide/ }).count()) === 0,
+    'images choisies : plus de « démo vide »',
+  );
+  if (SHOTS) await nd.screenshot({ path: `${SHOTS}/rev-06-nouvelle-demo-images${sfx}.png` });
+  await nd.getByRole('button', { name: 'Créer la démo' }).click();
   await page.waitForURL(/\/edit\?guide=1$/);
   ok(t.demos.length === before + 1, 'démo créée');
   const id = page.url().match(/demos\/([^/]+)\/edit/)[1];
@@ -282,6 +309,64 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     t.workspaces.some((w) => w.name === 'Globex formation'),
     'Nouvel espace : espace créé, retour à Démos',
   );
+
+  // ===== MEDIA-01 §18.3 : images glissées sur la liste des Démos =====
+  await page.goto(`${APP}/#/`);
+  // Contenu chargé (le squelette n'accepte pas de dépôt)
+  await page.locator('.demos-main .demos-row').waitFor();
+  await page
+    .locator('dialog.new-demo-dialog[open]')
+    .waitFor({ state: 'detached' })
+    .catch(() => undefined);
+  const drag = (type) =>
+    page.evaluate(
+      ({ type, b64 }) => {
+        const el = document.querySelector('.demos-main');
+        const dt = new DataTransfer();
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        for (const n of ['ecran-10.png', 'ecran-2.png', 'ecran-1.png'])
+          dt.items.add(new File([bytes], n, { type: 'image/png' }));
+        el.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: dt }));
+      },
+      { type, b64: files[0].buffer.toString('base64') },
+    );
+  ok((await page.locator('.demos-drop').count()) === 0, 'liste des Démos : pas de zone visible au repos');
+  await drag('dragenter');
+  const veil = page.locator('.demos-drop');
+  await veil.waitFor();
+  ok(
+    (await veil.textContent()) === 'Déposer pour créer une démo à partir des images',
+    'fichier glissé sur la page : voile « Déposer pour créer une démo à partir des images »',
+  );
+  ok(
+    await veil.evaluate((el) => {
+      const c = getComputedStyle(el);
+      return c.borderTopStyle === 'dashed' && c.borderTopWidth === '2px' && c.pointerEvents === 'none';
+    }),
+    'voile : pointillé de 2 px, il ne gêne pas le dépôt',
+  );
+  await drag('drop');
+  const filled = page.locator('dialog.new-demo-dialog[open]');
+  await filled.getByRole('heading', { name: 'Nouvelle démo par captures' }).waitFor();
+  ok((await veil.count()) === 0, 'au dépôt : le voile disparaît');
+  ok(
+    (await filled
+      .getByRole('group', { name: 'Importer des images' })
+      .getByText('3 images', { exact: true })
+      .count()) === 1,
+    'au dépôt : « Nouvelle démo » s’ouvre à l’étape 2, déjà remplie (3 images)',
+  );
+  ok(
+    /ecran-1\.png, ecran-2\.png, ecran-10\.png/.test(await filled.locator('.nd-zone').innerText()),
+    'images rangées dans l’ordre des noms (1, 2, 10)',
+  );
+  await filled.getByRole('button', { name: 'Retirer les images' }).click();
+  ok(
+    (await filled.getByRole('button', { name: 'Choisir des images…' }).count()) === 1 &&
+      (await filled.getByRole('button', { name: 'Créer la démo' }).count()) === 0,
+    '« Retirer les images » : la zone revient à vide',
+  );
+  await filled.getByRole('button', { name: 'Annuler' }).click();
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
