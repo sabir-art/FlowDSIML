@@ -4692,3 +4692,18 @@
 .hs-free-note {
   font-size: 13px;
 }
+
+/* MEDIA-01 §18.3 : Avant / Après, deux zones larges côte à côte, même hauteur ; une colonne sous 640 px */
+.ba-canvas {
+  container: bacanvas / inline-size;
+}
+.ba-pic > .ba-zone {
+  flex: 1;
+  align-self: stretch;
+  align-content: center;
+}
+@container bacanvas (max-width: 639px) {
+  .ba-cols {
+    grid-template-columns: 1fr;
+  }
+}

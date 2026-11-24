@@ -1274,7 +1274,9 @@
       "missingAfter": "“Now” capture to choose",
       "pickTitle": "{{name}}: choose a step",
       "pickHelp": "The capture is copied with its blurs: editing the step later does not change the Before / After.",
-      "incomplete": "Step {{n}} Before / After does not have both captures."
+      "incomplete": "Step {{n}} Before / After does not have both captures.",
+      "zoneHint": "PNG, JPEG or WebP, 10 MB at most.",
+      "zoneSending": "Uploading the image"
     },
     "styles": {
       "title": "Choose a style",

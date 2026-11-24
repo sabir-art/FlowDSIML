@@ -55,7 +55,42 @@ const N = ' ';
       .count()) === 3,
     'L48-E : points, flou et zoom désactivés dans le rail',
   );
-  ok((await page.locator('.ba-missing').count()) === 2, 'Deux captures à choisir sur le canevas');
+  // MEDIA-01 §18.3 : deux zones larges côte à côte, titrées « Avant » et « Après », même hauteur
+  const zones = page.locator('.ba-canvas .ba-zone');
+  ok((await zones.count()) === 2, 'Deux zones d’envoi sur le canevas');
+  const zr = await zones.evaluateAll((els) =>
+    els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        x: Math.round(r.left),
+        y: Math.round(r.top),
+        h: Math.round(r.height),
+        t: el.querySelector('b').textContent,
+        n: el.getAttribute('aria-label'),
+      };
+    }),
+  );
+  // Les titres sont les libellés de l'étape (« Avant » et « Maintenant » par défaut, modifiables)
+  ok(
+    zr[0].t === 'Avant' && zr[1].t === 'Maintenant' && zr[0].n === 'Avant' && zr[1].n === 'Maintenant',
+    `zones titrées par les libellés de l’étape (${zr.map((z) => z.t).join(', ')})`,
+  );
+  ok(zr[0].y === zr[1].y && zr[0].h === zr[1].h && zr[0].x < zr[1].x, 'zones côte à côte, même hauteur');
+  ok(
+    /PNG, JPEG ou WebP, 10 Mo au plus\./.test(await zones.first().innerText()) &&
+      (await zones.first().getByRole('button', { name: 'Importer…' }).count()) === 1,
+    'zone : formats et poids dans l’aide, « Importer… »',
+  );
+  await page
+    .locator('#ba-zone-before')
+    .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+  await zones.first().getByRole('alert').waitFor();
+  ok(
+    /^Format non accepté\s: PNG, JPEG ou WebP\.$/.test(
+      await zones.first().getByRole('alert').textContent(),
+    ) && (await zones.nth(1).getByRole('alert').count()) === 0,
+    'fichier refusé : erreur dans la zone concernée seulement',
+  );
 
   // Publication bloquée
   await page
@@ -88,7 +123,7 @@ const N = ' ';
   const picker = page.getByRole('dialog', { name: `Capture «${N}Avant${N}»${N}: choisir une étape` });
   await picker.waitFor();
   await picker.getByRole('button', { name: /Étape 1/ }).click();
-  await page.waitForFunction(() => !document.querySelector('.ba-pic.is-old .ba-missing'));
+  await page.waitForFunction(() => !document.querySelector('.ba-pic.is-old .ba-zone'));
   ok(
     state.copies?.length === 1 && state.copies[0].from === state.tables.steps[0].image_path,
     'Capture copiée dans le stockage (indépendante de l’étape source)',
@@ -112,7 +147,7 @@ const N = ' ';
     mimeType: 'image/png',
     buffer: fs.readFileSync(path.join(__dirname, 'fixture.png')),
   });
-  await page.waitForFunction(() => document.querySelectorAll('.ba-missing').length === 0);
+  await page.waitForFunction(() => document.querySelectorAll('.ba-canvas .ba-zone').length === 0);
   ok(
     ba.image_path && ba.options.beforeAfter.sources.after.kind === 'upload',
     'Image importée pour « Maintenant »',
