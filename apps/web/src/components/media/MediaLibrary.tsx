@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileType, Search, Trash2, TriangleAlert, Upload, X } from 'lucide-react';
+import { FileType, Search, Trash2, TriangleAlert, X } from 'lucide-react';
+import { FileDropzone } from '../FileDropzone';
+import { DropBlock } from '../DropBlock';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { foldText } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
@@ -48,7 +50,6 @@ export function MediaLibrary({
 }) {
   const { t, i18n } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
-  const input = useRef<HTMLInputElement>(null);
   const [dialog, ask] = useConfirm();
   const [files, setFiles] = useState<MediaFile[] | null>(null);
   const [usage, setUsage] = useState<Record<string, number>>({});
@@ -60,9 +61,10 @@ export function MediaLibrary({
   const [sel, setSel] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Erreur du dernier import : affichée dans la zone d'envoi
+  const [upErr, setUpErr] = useState<string | null>(null);
   // L48-B §5 : quota atteint (dialogue) ; à partir de 80 %, alerte discrète
   const [full, setFull] = useState(false);
-  const [drag, setDrag] = useState(false);
 
   useEffect(() => {
     const d = ref.current;
@@ -104,7 +106,8 @@ export function MediaLibrary({
     const file = list[0];
     if (!file) return;
     setErr(null);
-    if (file.size > MAX_BYTES) return setErr(t('media.tooBig'));
+    setUpErr(null);
+    if (file.size > MAX_BYTES) return setUpErr(t('media.tooBig'));
     if (used + file.size > MEDIA_QUOTA) return setFull(true);
     const font = /\.woff2$/i.test(file.name) || file.type === 'font/woff2';
     const fd = new FormData();
@@ -121,7 +124,7 @@ export function MediaLibrary({
     setBusy(false);
     if (error || !data?.id) {
       const code = await readCode(error);
-      return setErr(
+      return setUpErr(
         code === 'MEDIA_QUOTA'
           ? (setFull(true), null)
           : code === 'TOO_BIG'
@@ -154,11 +157,6 @@ export function MediaLibrary({
     await load();
   }
 
-  const onDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setDrag(false);
-    if (e.dataTransfer.files.length) void upload(e.dataTransfer.files);
-  };
   const empty = files !== null && files.length === 0;
   const quota = t('media.quota', { used: sizeLabel(used, i18n.language), total: '500' });
 
@@ -177,19 +175,19 @@ export function MediaLibrary({
         </button>
       </div>
       <div className="modal-body md-body">
-        <input
-          ref={input}
-          type="file"
-          /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-          id="medialibrary-file"
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden="true"
+        {/* MEDIA-01 §18.3 : zone large en tête, pleine largeur, 120 px ; l'erreur d'import s'affiche dedans */}
+        <FileDropzone
+          className="md-zone"
+          label={t('media.import')}
+          inputId="medialibrary-file"
           accept={ACCEPT}
-          onChange={(e) => {
-            if (e.target.files) void upload(e.target.files);
-            e.target.value = '';
-          }}
+          title={empty ? t('media.importFirst') : undefined}
+          hint={empty ? t('media.importHelp') : t('media.types')}
+          pickLabel={t('dropzone.import')}
+          busy={busy}
+          busyLabel={t('media.uploading')}
+          error={upErr}
+          onFiles={(list) => void upload(list)}
         />
         {err && (
           <div className="alert alert-danger" role="alert">
@@ -254,46 +252,10 @@ export function MediaLibrary({
             {files ? t('media.count', { count: shown.length }) : ''}
           </span>
         </div>
-        {empty ? (
-          <button
-            type="button"
-            className={`md-drop md-drop--first${drag ? ' is-over' : ''}`}
-            disabled={busy}
-            aria-controls="medialibrary-file"
-            onClick={() => input.current?.click()}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDrag(true);
-            }}
-            onDragLeave={() => setDrag(false)}
-            onDrop={onDrop}
-          >
-            <Upload aria-hidden="true" />
-            <b>{t('media.importFirst')}</b>
-            <span className="help">{t('media.importHelp')}</span>
-          </button>
-        ) : (
-          <>
+        {!empty && (
+          // Dépôt aussi sur toute la grille (voile « Déposer le fichier ici »)
+          <DropBlock onFile={(f) => void upload([f])} disabled={busy} className="md-gridwrap">
             <ul className="md-grid" aria-label={t('media.files')}>
-              <li>
-                <button
-                  type="button"
-                  className={`md-drop${drag ? ' is-over' : ''}`}
-                  disabled={busy}
-                  aria-controls="medialibrary-file"
-                  onClick={() => input.current?.click()}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDrag(true);
-                  }}
-                  onDragLeave={() => setDrag(false)}
-                  onDrop={onDrop}
-                >
-                  <Upload aria-hidden="true" />
-                  <b>{busy ? t('media.uploading') : t('media.import')}</b>
-                  <span className="help">{t('media.types')}</span>
-                </button>
-              </li>
               {shown.map((f) => (
                 <li key={f.id}>
                   <button
@@ -325,7 +287,7 @@ export function MediaLibrary({
                 </li>
               ))}
             </ul>
-          </>
+          </DropBlock>
         )}
       </div>
       <div className="modal-foot md-foot">
