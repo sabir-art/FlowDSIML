@@ -384,7 +384,8 @@ export function AnalyticsPage() {
                 ...demos.map((d) => ({
                   label: d.title,
                   icon: demo === d.id ? <Check /> : <span />,
-                  end: types[d.id] ? <TypeBadge type={types[d.id]!} /> : undefined,
+                  // Pastille colorée par type, aux jetons --fd-type-* (comme les cartes Démos)
+                  end: types[d.id] ? <TypeBadge type={types[d.id]!} tone /> : undefined,
                   onSelect: () => setDemo(d.id),
                 })),
               ]}
