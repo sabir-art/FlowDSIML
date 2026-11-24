@@ -38,6 +38,9 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await nd
     .locator('input[type=file]')
     .setInputFiles([1, 2, 3].map((n) => ({ name: `ecran-${n}.png`, mimeType: 'image/png', buffer: png })));
+  // MEDIA-01 §18.3 : les images sont comptées dans la zone, la démo est créée avec « Créer la démo »
+  await nd.getByText('3 images', { exact: true }).waitFor();
+  await nd.getByRole('button', { name: 'Créer la démo' }).click();
 
   // ===== n° 8 : guidage après l'import =====
   await page.waitForURL(/\/edit\?guide=1$/);

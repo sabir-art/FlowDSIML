@@ -155,7 +155,10 @@ const SHOTS = process.env.SHOTS_DIR;
   ok(
     // L48-C : seule l'extension peut être « Bientôt » (non installable en e2e local), jamais l'import
     (await d2.locator('.nd-src.is-soon', { hasText: 'Importer des images' }).count()) === 0 &&
-      (await d2.getByRole('button', { name: /Importer des images/ }).isEnabled()),
+      (await d2
+        .getByRole('group', { name: 'Importer des images' })
+        .getByRole('button', { name: 'Choisir des images…' })
+        .isEnabled()),
     'DSH-06 / DSH-07 (REV-06) : import d’images actif',
   );
   await d2.getByRole('button', { name: 'Partir d’une démo vide' }).click();

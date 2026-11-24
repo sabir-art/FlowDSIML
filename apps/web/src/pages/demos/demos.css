@@ -558,6 +558,11 @@
 .nd-sources > li + li {
   border-top: 1px solid var(--fd-color-border);
 }
+/* MEDIA-01 §18.3 : zone large « Importer des images » dans la carte de choix */
+.nd-sources > li.nd-zone {
+  padding: 12px;
+  background: var(--fd-color-surface);
+}
 .nd-src {
   display: flex;
   align-items: center;
@@ -2245,4 +2250,29 @@ button.onb-row:focus-visible {
     width: 100%;
     border-radius: var(--fd-radius-lg) var(--fd-radius-lg) 0 0;
   }
+}
+
+/* MEDIA-01 §18.3 : images glissées sur la liste des Démos, voile plein contenu */
+.demos-main {
+  position: relative;
+}
+.demos-drop {
+  position: absolute;
+  inset: 8px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--fd-color-primary);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fd-color-primary) 7%, var(--fd-color-surface));
+  color: var(--fd-color-text);
+  font-weight: 600;
+  pointer-events: none;
+}
+.demos-drop > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--fd-color-primary);
 }

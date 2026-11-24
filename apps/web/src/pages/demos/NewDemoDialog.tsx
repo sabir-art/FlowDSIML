@@ -7,7 +7,7 @@ import { aiBlock, useAiStatus } from '../../lib/ai';
 import { useBlockText } from '../../components/ai/AiWrite';
 import { Link } from 'react-router-dom';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { IMAGE_ACCEPT } from './importImages';
+import { IMAGE_ACCEPT, orderImages } from './importImages';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
 import { TYPE_ICON } from '../../components/TypeBadge';
@@ -17,6 +17,7 @@ import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
 import { Modal, Select } from '@flowdsiml/ui';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { VideoImportZone, type VideoImportHandle } from './VideoImportZone';
+import { FileDropzone } from '../../components/FileDropzone';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -39,6 +40,7 @@ export function NewDemoDialog({
   ws,
   onClose,
   initialType,
+  initialFiles,
 }: {
   open: boolean;
   folders: Tables<'folders'>[];
@@ -58,11 +60,12 @@ export function NewDemoDialog({
   onClose: () => void;
   /** L48-G §4 : « Nouveau Sandbox » ouvre directement l'étape 2 avec ce type. */
   initialType?: ContentType;
+  /** MEDIA-01 §18.3 : images déposées sur la liste des Démos ; la fenêtre s'ouvre déjà remplie. */
+  initialFiles?: File[];
 }) {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const extSoon = !EXTENSION_URL && !profile?.extension_seen_at;
-  const picker = useRef<HTMLInputElement>(null);
   const cards = useRef<HTMLDivElement>(null);
   const last = user?.user_metadata?.content_type as unknown;
   const remembered: ContentType = CONTENT_TYPES.includes(last as ContentType)
@@ -81,6 +84,22 @@ export function NewDemoDialog({
   const [step, setStep] = useState<1 | 2>(initialType ? 2 : 1);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
   const [busy, setBusy] = useState(false);
+  // Images choisies ou déposées : la démo n'est créée qu'avec « Créer la démo »
+  const [images, setImages] = useState<File[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const pickImages = (list: File[]) => {
+    const kept = orderImages(list);
+    setImageError(kept.length ? null : t('demos.newImportBadType'));
+    if (kept.length) setImages(kept);
+  };
+  const createFromImages = async () => {
+    setBusy(true);
+    try {
+      await onImport(images, folder || null);
+    } finally {
+      setBusy(false);
+    }
+  };
   // Import vidéo en cours : quitter la fenêtre ou l'étape demande confirmation
   const [sending, setSending] = useState(false);
   const video = useRef<VideoImportHandle>(null);
@@ -110,8 +129,12 @@ export function NewDemoDialog({
   useEffect(() => {
     if (!open) return;
     setFolder(defaultFolder ?? '');
-    setType(firstType());
-    setStep(initialType && usable(initialType) ? 2 : 1);
+    const dropped = orderImages(initialFiles ?? []);
+    setImages(dropped);
+    setImageError(null);
+    // Images déposées sur la page : type « Démo par captures », étape 2 déjà remplie
+    setType(dropped.length ? 'captures' : firstType());
+    setStep(dropped.length || (initialType && usable(initialType)) ? 2 : 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- à l'ouverture seulement
   }, [open, defaultFolder]);
 
@@ -189,10 +212,20 @@ export function NewDemoDialog({
                 <ArrowLeft aria-hidden="true" />
                 {t('common.back')}
               </button>
-              {emptyBtn}
+              {!images.length && emptyBtn}
               <button type="button" className="fd-btn" onClick={() => void leave(onClose)}>
                 {t('common.cancel')}
               </button>
+              {type === 'captures' && images.length > 0 && (
+                <button
+                  type="button"
+                  className="fd-btn fd-btn--primary"
+                  disabled={busy}
+                  onClick={() => void createFromImages()}
+                >
+                  {t('demos.newImportCreate')}
+                </button>
+              )}
             </>
           )
         }
@@ -321,45 +354,31 @@ export function NewDemoDialog({
                 )}
               </li>
               {type === 'captures' && (
-                <li>
-                  <button
-                    type="button"
-                    className="nd-src"
-                    disabled={busy}
-                    aria-controls="newdemodialog-file"
-                    onClick={() => picker.current?.click()}
-                  >
-                    <span className="nd-src__tile" aria-hidden="true">
-                      <ImagePlus />
-                    </span>
-                    <span className="nd-src__txt">
-                      <b>{t('demos.newImport')}</b>
-                      <span>{t('demos.newImportBody')}</span>
-                    </span>
-                    <ChevronRight className="nd-src__go" aria-hidden="true" />
-                  </button>
-                  <input
-                    ref={picker}
-                    type="file"
+                // MEDIA-01 §18.3 : zone large dans la carte de choix ; plusieurs images, compteur après dépôt
+                <li className="nd-zone">
+                  <FileDropzone
+                    label={t('demos.newImport')}
+                    inputId="newdemodialog-file"
                     accept={IMAGE_ACCEPT}
                     multiple
-                    /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-                    id="newdemodialog-file"
-                    className="sr-only"
-                    tabIndex={-1}
-                    aria-hidden="true"
-                    aria-label={t('demos.newImport')}
-                    onChange={async (e) => {
-                      const files = [...(e.target.files ?? [])];
-                      e.target.value = '';
-                      if (!files.length) return;
-                      setBusy(true);
-                      try {
-                        await onImport(files, folder || null);
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
+                    icon={<ImagePlus />}
+                    title={t('demos.newImport')}
+                    hint={t('demos.newImportBody')}
+                    pickLabel={t('demos.newImportPick')}
+                    file={
+                      images.length
+                        ? {
+                            name: t('demos.newImportCount', { count: images.length }),
+                            meta: images.map((f) => f.name).join(', '),
+                          }
+                        : null
+                    }
+                    busy={busy && images.length > 0}
+                    busyLabel={t('demos.newImportSending')}
+                    error={imageError}
+                    onFiles={pickImages}
+                    onRemove={() => setImages([])}
+                    removeLabel={t('demos.newImportRemove')}
                   />
                 </li>
               )}

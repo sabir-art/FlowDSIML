@@ -2923,7 +2923,15 @@
       "folderAction": "New demo in this folder",
       "example": "See an example"
     },
-    "newShort": "New"
+    "newShort": "New",
+    "newImportPick": "Choose images…",
+    "newImportCount_one": "{{count}} image",
+    "newImportCount_other": "{{count}} images",
+    "newImportSending": "Creating the demo",
+    "newImportRemove": "Remove the images",
+    "newImportBadType": "Format not accepted: PNG, JPEG or WebP.",
+    "newImportCreate": "Create the demo",
+    "dropToCreate": "Drop to create a demo from the images"
   },
   "a11y": {
     "skip": "Skip to content"
