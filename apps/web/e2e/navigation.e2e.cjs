@@ -8,7 +8,7 @@
  *  - un seul <h1> par page ; c'est l'élément courant du fil d'Ariane (aria-current="page") ;
  *  - fil d'Ariane : parents sans soulignement, séparateur ChevronRight de 14 px ;
  *  - Aide et Notifications dans la barre, après un filet vertical (32 px, icônes de 16 px) ;
- *  - aucune entrée « Domaine » ; « Page publique » garde son lien et porte « Bientôt » ;
+ *  - aucune entrée « Domaine » ; « Page publique » est un lien, sans « Bientôt » ;
  *  - à 390 px : le fil d'Ariane devient un bouton de retour « Retour à Paramètres », la navigation
  *    n'est plus dans la page, Menu, Aide et Notifications sont dans la barre mobile (cibles de 44 px) ;
  *  - accueil des Paramètres (/settings sous 768 px) : groupes en listes de lignes de 52 px.
@@ -184,8 +184,8 @@ const TOKENS = {
         if (route === '/settings/workspace') {
           ok(!m.navTexts.some((x) => /^Domaine/.test(x)), `${who} : aucune entrée « Domaine »`);
           ok(
-            m.publicPage?.tag === 'A' && m.publicPage.soon === 'Bientôt',
-            `${who} : « Page publique » est un lien et porte « Bientôt »`,
+            m.publicPage?.tag === 'A' && m.publicPage.soon !== 'Bientôt',
+            `${who} : « Page publique » est un lien, sans « Bientôt » (livrée le 24/11)`,
           );
           // Titres de groupe : 24 px au-dessus, mesurés (décision UX du 22/11)
           const gaps = await p.evaluate(() =>
@@ -316,10 +316,8 @@ const TOKENS = {
       );
       ok(
         // « Bientôt » ne reste que sur ce qui n'est pas encore livré (Notifications et Clés d'accès livrés le 24/11)
-        !h.soon.includes('Notifications') &&
-          !h.soon.includes('Clés d’accès') &&
-          h.soon.every((x) => x === 'Page publique'),
-        `Accueil des Paramètres (${theme}) : « Bientôt » sur ${h.soon.join(', ')}`,
+        h.soon.length === 0,
+        `Accueil des Paramètres (${theme}) : plus aucun « Bientôt » (${h.soon.join(', ')})`,
       );
       ok(h.overflow <= 0, `Accueil des Paramètres (${theme}) : aucun défilement horizontal`);
       await p.getByRole('link', { name: 'Équipe' }).click();

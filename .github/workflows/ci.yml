@@ -189,6 +189,9 @@ jobs:
       - name: Paramètres › Clés d'accès (création, clé affichée une fois, révocation, section « Utiliser l'API »)
         if: always()
         run: cd apps/web && node e2e/cles-acces.e2e.cjs
+      - name: Paramètres › Page publique (catalogue public, démos choisies, refus, centre de formation, lecteur)
+        if: always()
+        run: cd apps/web && node e2e/page-publique.e2e.cjs
       - name: Résumé par e-mail (préférence, « Bientôt » sans service d'envoi, désinscription)
         if: always()
         run: cd apps/web && node e2e/email-digest.e2e.cjs

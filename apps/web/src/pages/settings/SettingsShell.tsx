@@ -56,7 +56,8 @@ const GROUPS: Array<{ key: string; entries: Entry[] }> = [
     key: 'brand',
     entries: [
       { label: 'settings.brandTheme', icon: Palette, to: '/settings/brand' },
-      { label: 'settings.publicPage', icon: Globe, to: '/settings/brand/page', soon: true },
+      // §6.1 : réglage du catalogue public, propriétaires et admins seulement
+      { label: 'settings.publicPage', icon: Globe, to: '/settings/brand/page', perm: 'workspace.settings' },
     ],
   },
   {
