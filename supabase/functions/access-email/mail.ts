@@ -87,8 +87,8 @@ export function renderAccess(a: {
     <h1 class="em-text" style="margin:0 0 16px;${FONT}font-size:24px;line-height:32px;font-weight:700;color:#080808;">${esc(subject)}</h1>
     <p class="em-text" style="margin:0 0 24px;${FONT}font-size:16px;line-height:24px;color:#080808;">${esc(lead)}</p>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
-      <tr><td align="center" bgcolor="#A3195B" style="border-radius:10px;background-color:#A3195B;">
-        <a href="${esc(a.url)}" style="display:inline-block;padding:14px 28px;${FONT}font-size:16px;line-height:20px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:10px;background-color:#A3195B;">${esc(cta)}</a>
+      <tr><td align="center" bgcolor="#A3195B" style="border-radius:999px;background-color:#A3195B;">
+        <a href="${esc(a.url)}" style="display:inline-block;padding:14px 28px;${FONT}font-size:16px;line-height:20px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:999px;background-color:#A3195B;">${esc(cta)}</a>
       </td></tr>
     </table>
     <p class="em-muted" style="margin:0 0 8px;${FONT}font-size:14px;line-height:20px;color:#4F5966;">${esc(valid)}</p>
