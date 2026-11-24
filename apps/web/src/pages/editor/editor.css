@@ -4296,7 +4296,26 @@
   color: var(--fd-color-danger-text, var(--fd-color-danger));
 }
 .vo-notice {
+  margin: 0;
+  font-size: 13px;
   color: var(--fd-color-text-muted);
+}
+.vo-voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vo-voice > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.vo-voice .btn.vo-sample {
+  flex: none;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
 }
 .vo-busy .vo-help {
   margin: 0 0 8px;
