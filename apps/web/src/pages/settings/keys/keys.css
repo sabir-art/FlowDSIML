@@ -117,3 +117,11 @@
     display: none;
   }
 }
+/* Sous 640 px, l'exemple passe à la ligne : aucun défilement horizontal (le bouton copie la commande entière) */
+@media (max-width: 639px) {
+  .ak-pre {
+    overflow-x: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
