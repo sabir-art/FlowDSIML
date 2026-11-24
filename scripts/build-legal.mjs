@@ -70,7 +70,7 @@ export function render(key) {
   <body>
     <main>
       <h1>${esc(d.title)}</h1>
-      <p class="meta">TutoClick, porté par la DSIML · Mise à jour : ${esc(legal.updated)}</p>${note}
+      <p class="meta">TutoClick, porté par la DSIML · Mise à jour : ${esc(d.updated ?? legal.updated)}</p>${note}
       <p>${f(d.intro)}</p>
 ${body}
       <nav aria-label="Autres documents">

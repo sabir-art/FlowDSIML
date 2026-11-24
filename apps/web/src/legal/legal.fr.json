@@ -139,6 +139,7 @@
   },
   "accessibility": {
     "title": "Déclaration d'accessibilité",
+    "updated": "24 novembre 2026",
     "link": "Accessibilité : non conforme",
     "draft": "Version de travail, en attente de validation par la personne référente accessibilité. Les mentions entre crochets restent à compléter par l'organisme.",
     "fields": {
@@ -193,7 +194,7 @@
       },
       {
         "h": "Vérifications réalisées",
-        "p": ["Mises à jour le 20/11/2026."],
+        "p": ["Mises à jour le 20 novembre 2026."],
         "ul": [
           "Audit automatique (axe-core) : règles WCAG 2.0, 2.1 et 2.2 de niveaux A et AA, sur 94 écrans de l'application, du lecteur et du centre de formation, en thème clair et sombre, soit 188 audits. Résultat : aucune violation, quel que soit son niveau de gravité. Cet audit tourne à chaque modification du code.",
           "Contrôles du clavier et du focus, automatisés (77 vérifications) : lien d'évitement, focus visible et jamais masqué, focus enfermé dans les fenêtres modales puis rendu, annonces des messages et des changements d'étape, animations réduites, zoom à 200 % sans défilement horizontal, parcours complets au clavier de l'éditeur et du lecteur.",
