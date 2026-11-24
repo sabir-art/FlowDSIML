@@ -1837,6 +1837,43 @@ async function install(page, state = seed()) {
           c.published_at = new Date().toISOString();
           return json(route, 200, c.published_at);
         }
+        // §6.1 : page publique de l'espace (catalogue), réglée à part du centre de formation
+        case 'public_page_info': {
+          const ws = t.workspaces.find((w) => w.id === a.p_ws);
+          const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);
+          const open = (d) => {
+            const acc = (t.demo_access || []).find((x) => x.demo_id === d.id);
+            return !acc || acc.mode === 'link';
+          };
+          return json(route, 200, {
+            publicLinks: !!ws && ws.public_links_enabled !== false,
+            demos: t.demos
+              .filter(
+                (d) => d.workspace_id === a.p_ws && d.status === 'published' && !d.deleted_at && open(d),
+              )
+              .map((d) => ({ id: d.id, title: d.title, kind: d.kind || 'guided' })),
+            centre:
+              c && c.published && (c.published.kind || 'training') !== 'demo'
+                ? { title: c.published.title || ws.name }
+                : null,
+          });
+        }
+        case 'save_public_page': {
+          if ((state.takenSlugs || []).includes(a.p_slug))
+            return json(route, 400, { code: 'P0001', message: 'SLUG_TAKEN' });
+          const list = (t.training_centers ||= []);
+          let c = list.find((x) => x.workspace_id === a.p_ws);
+          const centre = c && c.published && (c.published.kind || 'training') !== 'demo';
+          if (a.p_enabled && centre && !c.public_page_enabled && !a.p_replace)
+            return json(route, 400, { code: 'P0001', message: 'CENTER_PUBLISHED' });
+          if (!c) {
+            c = { workspace_id: a.p_ws, draft: {}, published: null, published_at: null, access_mode: 'link' };
+            list.push(c);
+          }
+          Object.assign(c, { slug: a.p_slug, public_page: a.p_page, public_page_enabled: !!a.p_enabled });
+          (state.publicPageSaves ||= []).push({ replace: !!a.p_replace, enabled: !!a.p_enabled });
+          return json(route, 200, null);
+        }
         case 'set_center_access': {
           const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);
           if (c) c.access_mode = a.p_mode;

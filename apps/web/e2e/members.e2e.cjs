@@ -32,9 +32,9 @@ const SHOTS = process.env.SHOTS_DIR;
     // Notifications et Clés d'accès livrés le 24/11 : ce sont des liens ; « Bientôt » ne reste que sur ce qui n'est pas livré
     links >= 13 &&
       soon.length === 0 &&
-      soonLinks.every((x) => x.startsWith('Page publique')) &&
+      soonLinks.length === 0 &&
       !(await page.locator('.st-nav').innerText()).includes('Domaine'),
-    `Paramètres : sections, « Bientôt » limité à Page publique, pas de Domaine (${links} ; ${soon.join(', ')} ; ${soonLinks.join(', ')})`,
+    `Paramètres : sections, plus aucun « Bientôt », pas de Domaine (${links} ; ${soon.join(', ')} ; ${soonLinks.join(', ')})`,
   );
   ok(
     (await page.getByRole('navigation', { name: 'Fil d’Ariane' }).innerText()).replace(/\s+/g, ' ').trim() ===
@@ -371,13 +371,13 @@ const SHOTS = process.env.SHOTS_DIR;
   await page.waitForTimeout(400);
   ok(!state.tables.members.some((m) => m.user_id === 'u-5'), 'membre retiré');
 
-  // L48-A : la page publique a sa propre entrée (Marque > Page publique), toujours « Bientôt »
+  // §6.1 : la page publique a sa propre entrée (Marque > Page publique), active (voir page-publique.e2e)
   await page.getByRole('link', { name: /^Page publique/ }).click();
-  const pp = page.getByRole('region', { name: 'En-tête de la page publique' });
-  await pp.waitFor();
+  await page.getByRole('heading', { name: 'Démos affichées', level: 2 }).waitFor();
   ok(
-    (await pp.locator('input:disabled').count()) >= 4 && /Bientôt/.test(await pp.innerText()),
-    'PRM-07 : page publique toujours « Bientôt »',
+    (await page.getByRole('switch', { name: 'Page publique' }).count()) === 1 &&
+      !/Bientôt/.test(await page.locator('main').innerText()),
+    'PRM-07 : page publique active, sans « Bientôt »',
   );
 
   // PRM-08 (variables) : couvert par variables.e2e (L46)

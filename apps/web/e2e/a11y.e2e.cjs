@@ -685,6 +685,26 @@ const APP_PAGES = [
   { name: 'Utilisation', route: '/#/settings/usage' },
   { name: 'Marque', route: '/#/settings/brand' },
   { name: 'Page publique', route: '/#/settings/brand/page' },
+  // §6.1 : démos choisies (liste, flèches) et bandeau du centre de formation en ligne à la même adresse
+  {
+    name: 'Page publique (démos choisies)',
+    route: '/#/settings/brand/page',
+    seed: (d) => {
+      const published = d.tables.demos.filter((x) => x.status === 'published').map((x) => x.id);
+      d.tables.training_centers = [
+        {
+          workspace_id: 'ws-1',
+          slug: 'acme',
+          draft: { title: 'Se former chez Acme', paths: [] },
+          published: { title: 'Se former chez Acme', paths: [] },
+          published_at: '2026-11-01T09:00:00Z',
+          access_mode: 'link',
+          public_page: { title: 'Les démos d’Acme', demos: published, contact: 'formation@acme.example' },
+          public_page_enabled: false,
+        },
+      ];
+    },
+  },
   {
     name: 'Marque · modifier le style',
     route: '/#/settings/brand',

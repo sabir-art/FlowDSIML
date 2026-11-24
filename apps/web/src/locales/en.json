@@ -5978,5 +5978,70 @@
       "csv": "As CSV with",
       "errors": "If the key is missing or revoked, the answer is 401. If it lacks the requested access, 403. With too many requests, 429: try again a minute later."
     }
+  },
+  "publicPage": {
+    "title": "Public page",
+    "sub": "The public catalogue of the workspace: your published demos, on one page, without signing in.",
+    "noAccess": "The public page is reserved for owners and administrators.",
+    "view": "View the page",
+    "newTab": " (new tab)",
+    "viewOff": "The page is not online.",
+    "enabledHelp": "Visible to anyone who has the address. When turned off, the address shows “This page is not available”.",
+    "refusal": {
+      "links": "Cannot be turned on: public links are turned off for the workspace.",
+      "demos": "Cannot be turned on: no demo is published with open access (“Anyone with the link”)."
+    },
+    "refusalFix": {
+      "links": "Open Security",
+      "demos": "See the demos"
+    },
+    "address": "Address",
+    "addressHelp": "Lowercase letters, digits and hyphens.",
+    "addressError": "3 to 48 characters: lowercase letters, digits and hyphens, no hyphen at the start or end.",
+    "addressTaken": "This address is already taken. Choose another one.",
+    "copyAddress": "Copy the address",
+    "addressCopied": "Address copied",
+    "header": "Header",
+    "headerSub": "What the visitor sees on arrival.",
+    "logo": "Logo",
+    "logoHelp": "The workspace logo by default. PNG or SVG, 2 MB at most.",
+    "logoSpace": "Workspace logo",
+    "logoChosen": "Logo chosen from the media library",
+    "logoReset": "Back to the workspace logo",
+    "pageTitle": "Title",
+    "tagline": "Welcome sentence",
+    "taglineHelp": "Optional, 160 characters at most.",
+    "demos": "Demos shown",
+    "demosSub": "Only published demos can appear here.",
+    "mode": {
+      "all": {
+        "name": "All published demos",
+        "help": "A newly published demo appears by itself."
+      },
+      "chosen": {
+        "name": "Chosen demos",
+        "help": "You choose the demos and their order."
+      }
+    },
+    "pickLabel": "Published demos",
+    "show": "Show {{title}}",
+    "moveUp": "Move {{title}} up",
+    "moveDown": "Move {{title}} down",
+    "picked_one": "{{count}} demo shown. Drag the handle or use the arrows.",
+    "picked_other": "{{count}} demos shown, in this order. Drag the handle or use the arrows.",
+    "pickNone": "Choose at least one demo.",
+    "noDemo": "No demo is published with open access for now.",
+    "footer": "Footer",
+    "contact": "Contact link",
+    "contactHelp": "Optional: email or https address.",
+    "contactError": "Enter an email address or an address starting with https://.",
+    "madeWith": "Show “Made with TutoClick”",
+    "centreNow": "This address currently shows your training centre “{{title}}”.",
+    "centreNext": "If you save the public page, it takes its place at {{address}}. The training centre and its courses stay in Training courses.",
+    "replaceTitle": "Replace the training centre at this address?",
+    "replaceBody": "{{address}} will show the catalogue of your demos instead of the training centre “{{title}}”. Visitors with the old link will see the catalogue. You can put the training centre back from Training courses.",
+    "replaceConfirm": "Replace and save",
+    "savedOn": "Public page saved. It is online.",
+    "savedOff": "Public page saved. It is not visible."
   }
 }

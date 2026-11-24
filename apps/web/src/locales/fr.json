@@ -5978,5 +5978,70 @@
       "csv": "En CSV avec",
       "errors": "Si la clé manque ou est révoquée, la réponse est 401. Si elle n’a pas l’accès demandé, 403. En cas de trop nombreuses demandes, 429 : réessayez une minute plus tard."
     }
+  },
+  "publicPage": {
+    "title": "Page publique",
+    "sub": "Le catalogue public de l’espace : vos démos publiées, sur une seule page, sans connexion.",
+    "noAccess": "La page publique est réservée aux propriétaires et administrateurs.",
+    "view": "Voir la page",
+    "newTab": " (nouvel onglet)",
+    "viewOff": "La page n’est pas en ligne.",
+    "enabledHelp": "Visible par toute personne qui a l’adresse. Désactivée, l’adresse affiche « Cette page n’est pas disponible ».",
+    "refusal": {
+      "links": "Impossible de l’activer : les liens publics sont coupés pour l’espace.",
+      "demos": "Impossible de l’activer : aucune démo n’est publiée en accès ouvert (« Toute personne avec le lien »)."
+    },
+    "refusalFix": {
+      "links": "Ouvrir Sécurité",
+      "demos": "Voir les démos"
+    },
+    "address": "Adresse",
+    "addressHelp": "Lettres minuscules, chiffres et tirets.",
+    "addressError": "De 3 à 48 caractères : lettres minuscules, chiffres et tirets, sans tiret au début ni à la fin.",
+    "addressTaken": "Cette adresse est déjà prise. Choisissez-en une autre.",
+    "copyAddress": "Copier l’adresse",
+    "addressCopied": "Adresse copiée",
+    "header": "En-tête",
+    "headerSub": "Ce que le visiteur voit en arrivant.",
+    "logo": "Logo",
+    "logoHelp": "Celui de l’espace par défaut. PNG ou SVG, 2 Mo au plus.",
+    "logoSpace": "Logo de l’espace",
+    "logoChosen": "Logo choisi dans la médiathèque",
+    "logoReset": "Revenir au logo de l’espace",
+    "pageTitle": "Titre",
+    "tagline": "Phrase d’accueil",
+    "taglineHelp": "Facultative, 160 caractères au plus.",
+    "demos": "Démos affichées",
+    "demosSub": "Seules les démos publiées peuvent apparaître ici.",
+    "mode": {
+      "all": {
+        "name": "Toutes les démos publiées",
+        "help": "Une nouvelle démo publiée apparaît d’elle-même."
+      },
+      "chosen": {
+        "name": "Démos choisies",
+        "help": "Vous choisissez les démos et leur ordre."
+      }
+    },
+    "pickLabel": "Démos publiées",
+    "show": "Afficher {{title}}",
+    "moveUp": "Monter {{title}}",
+    "moveDown": "Descendre {{title}}",
+    "picked_one": "{{count}} démo affichée. Glissez la poignée ou utilisez les flèches.",
+    "picked_other": "{{count}} démos affichées, dans cet ordre. Glissez la poignée ou utilisez les flèches.",
+    "pickNone": "Choisissez au moins une démo.",
+    "noDemo": "Aucune démo n’est publiée en accès ouvert pour le moment.",
+    "footer": "Pied de page",
+    "contact": "Lien de contact",
+    "contactHelp": "Facultatif : e-mail ou adresse https.",
+    "contactError": "Saisissez une adresse e-mail ou une adresse qui commence par https://.",
+    "madeWith": "Afficher « Fait avec TutoClick »",
+    "centreNow": "Cette adresse affiche aujourd’hui votre centre de formation « {{title}} ».",
+    "centreNext": "Si vous enregistrez la page publique, elle prend sa place à {{address}}. Le centre de formation et ses parcours restent dans Parcours de formation.",
+    "replaceTitle": "Remplacer le centre de formation à cette adresse ?",
+    "replaceBody": "{{address}} affichera le catalogue de vos démos au lieu du centre de formation « {{title}} ». Les visiteurs qui ont l’ancien lien verront le catalogue. Vous pourrez remettre le centre de formation depuis Parcours de formation.",
+    "replaceConfirm": "Remplacer et enregistrer",
+    "savedOn": "Page publique enregistrée. Elle est en ligne.",
+    "savedOff": "Page publique enregistrée. Elle n’est pas visible."
   }
 }

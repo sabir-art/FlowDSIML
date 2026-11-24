@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } 
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, Copy, Info, Pencil, Plus, Star, Trash2, TriangleAlert } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
-import { APP_NAME } from '@flowdsiml/core';
 import { Button, ColorSwatch } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
@@ -621,71 +620,5 @@ function StylesSection({ wsId, isAdmin, canCreate }: { wsId: string; isAdmin: bo
         }}
       />
     </section>
-  );
-}
-
-/**
- * L48-A §4, lot 1 de la refonte (maquette lot1-parametres/page-publique) : Paramètres › Page publique.
- * Réglages visibles mais pas encore actifs : bandeau d'information, champs et interrupteur désactivés.
- */
-export function BrandPublicPage() {
-  const { t } = useTranslation();
-  const soon = <span className="stg-soon">{t('shell.soon')}</span>;
-  const cta = (n: 1 | 2) => (
-    <div className="stg-row">
-      <div className="stg-text" data-gap-exempt="">
-        <label className="stg-lab" htmlFor={`br-c${n}`}>
-          {t(`brand.cta${n}`)} {soon}
-        </label>
-        {n === 2 && <div className="stg-help">{t('brand.optional')}</div>}
-      </div>
-      <div className="stg-ctl">
-        <div className="stg-two">
-          <input id={`br-c${n}`} className="fd-input" disabled placeholder={t('brand.ctaLabel')} />
-          <input className="fd-input" disabled placeholder="https://…" aria-label={t(`brand.cta${n}Url`)} />
-        </div>
-      </div>
-    </div>
-  );
-  return (
-    <SettingsShell
-      legacy={false}
-      actions={
-        <>
-          <Button disabled>{t('common.cancel')}</Button>
-          <Button variant="primary" disabled>
-            {t('common.save')}
-          </Button>
-        </>
-      }
-    >
-      <p className="stg-banner" role="note">
-        <Info size={16} aria-hidden="true" />
-        <span>{t('brand.pageSoon')}</span>
-      </p>
-      <section className="stg-sec" aria-labelledby="br-pp-t">
-        <div className="stg-sec__head">
-          <div>
-            <h2 id="br-pp-t">{t('brand.pageHead')}</h2>
-            <p>{t('brand.pageHelp')}</p>
-          </div>
-        </div>
-        {cta(1)}
-        {cta(2)}
-        <div className="stg-row stg-row--inline">
-          <div className="stg-text" data-gap-exempt="">
-            <div className="stg-lab" id="br-wm">
-              {t('brand.hideBranding', { app: APP_NAME })} {soon}
-            </div>
-          </div>
-          <div className="stg-ctl">
-            <label className="fd-switch">
-              <input type="checkbox" role="switch" disabled aria-labelledby="br-wm" />
-              <span className="fd-switch__track" aria-hidden="true" />
-            </label>
-          </div>
-        </div>
-      </section>
-    </SettingsShell>
   );
 }

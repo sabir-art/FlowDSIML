@@ -101,8 +101,8 @@ const BrandSettings = lazyRest(() =>
 const VariablesSettings = lazyRest(() =>
   import('./pages/settings/SoonSections').then((m) => ({ default: m.VariablesSettings })),
 );
-const BrandPublicPage = lazyRest(() =>
-  import('./pages/settings/brand/BrandSettings').then((m) => ({ default: m.BrandPublicPage })),
+const PublicPage = lazyRest(() =>
+  import('./pages/settings/brand/PublicPage').then((m) => ({ default: m.PublicPage })),
 );
 const SecuritySettings = lazyRest(() =>
   import('./pages/settings/SecuritySettings').then((m) => ({ default: m.SecuritySettings })),
@@ -284,7 +284,7 @@ export function App() {
                     <Route path="/settings/tags" element={<TagsSettings />} />
                     <Route path="/settings/soon" element={<Navigate to="/settings/workspace" replace />} />
                     <Route path="/settings/brand" element={<BrandSettings />} />
-                    <Route path="/settings/brand/page" element={<BrandPublicPage />} />
+                    <Route path="/settings/brand/page" element={<PublicPage />} />
                     <Route path="/settings/variables" element={<VariablesSettings />} />
                     <Route path="/settings/glossary" element={<GlossarySettings />} />
                     <Route path="/settings/security" element={<SecuritySettings />} />
