@@ -164,7 +164,9 @@ export async function publishDemo(
       const up = await supabase.storage.from('published').upload(c.to, blob, {
         contentType:
           c.bucket === 'videos'
-            ? 'video/webm'
+            ? c.to.endsWith('.mp4')
+              ? 'video/mp4'
+              : 'video/webm'
             : c.bucket === 'voices'
               ? dl.data.type || 'audio/webm'
               : c.bucket === 'html'
