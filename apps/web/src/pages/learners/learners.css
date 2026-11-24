@@ -99,9 +99,8 @@
   height: 12px;
 }
 .l13-table input[type='checkbox'] {
-  accent-color: var(--fd-color-primary);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin: 0;
 }
 .l13-name {
@@ -531,9 +530,8 @@
 }
 .l13-checks input,
 .l13-radio input {
-  accent-color: var(--fd-color-primary);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin: 0;
   flex: none;
 }

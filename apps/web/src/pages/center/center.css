@@ -327,8 +327,8 @@
 }
 .vis input {
   accent-color: var(--fd-color-primary);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin: 0;
 }
 .vis li.off {
@@ -353,16 +353,10 @@
   background: var(--fd-color-primary-soft);
 }
 .acc input {
-  accent-color: var(--fd-color-primary);
-  width: 16px;
-  height: 16px;
-  margin: 2px 0 0;
-}
-/* COMP-01 §7 : le radio dessiné fait 18 px */
-.acc input[type='radio'] {
+  /* COMP-01 §7 : case et radio dessinés de 18 px */
   width: 18px;
   height: 18px;
-  margin-top: 1px;
+  margin: 1px 0 0;
 }
 .acc small {
   display: block;

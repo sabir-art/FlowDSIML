@@ -433,16 +433,10 @@
   cursor: pointer;
 }
 .mk .check input {
-  width: 16px;
-  height: 16px;
-  margin: 2px 0 0;
-  accent-color: var(--fd-color-primary);
-}
-/* COMP-01 §7 : le radio dessiné fait 18 px */
-.mk .check input[type='radio'] {
+  /* COMP-01 §7 : case et radio dessinés de 18 px */
   width: 18px;
   height: 18px;
-  margin-top: 1px;
+  margin: 1px 0 0;
 }
 .mk .switch {
   position: relative;

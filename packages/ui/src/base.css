@@ -372,30 +372,34 @@ input[type='range'] {
 }
 input[type='checkbox'],
 input[type='radio'] {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin: 0;
   flex: none;
 }
-/* Case à cocher dessinée (COMP-01, FIELD-01 §11.1) : plus de case native ; bordure des champs, cochée en
-   prune avec la coche en on-primary ; invalide : bordure rouge ; focus clavier : trait intérieur */
+/* Case à cocher dessinée (COMP-01 §7, FIELD-01 §11.1) : plus de case native ; 18 px, rayon de 5 px, bordure
+   de 1,5 px des champs ; cochée en prune avec la coche en on-primary ; indéterminée : un trait ; invalide :
+   bordure rouge ; focus clavier : trait intérieur */
 :root {
   --fd-check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-6.5' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --fd-check-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 :root[data-theme='dark'] {
   --fd-check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-6.5' fill='none' stroke='%23080808' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --fd-check-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='%23080808' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --fd-check-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-6.5' fill='none' stroke='%23080808' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --fd-check-dash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='%23080808' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
   }
 }
 input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   display: inline-grid;
-  border: 1px solid var(--fd-color-border-field);
-  border-radius: 4px;
+  border: 1.5px solid var(--fd-color-border-field);
+  border-radius: 5px;
   background: var(--fd-color-surface) center / 14px no-repeat;
   cursor: pointer;
   transition:
@@ -409,6 +413,9 @@ input[type='checkbox']:is(:checked, :indeterminate) {
   border-color: var(--fd-color-primary);
   background-color: var(--fd-color-primary);
   background-image: var(--fd-check-mark);
+}
+input[type='checkbox']:indeterminate {
+  background-image: var(--fd-check-dash);
 }
 input[type='checkbox'][aria-invalid='true'] {
   border-color: var(--fd-color-danger);

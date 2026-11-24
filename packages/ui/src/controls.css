@@ -46,8 +46,8 @@
 }
 .fd-check input {
   margin: 0;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   flex: none;
 }
 .fd-check__hint {

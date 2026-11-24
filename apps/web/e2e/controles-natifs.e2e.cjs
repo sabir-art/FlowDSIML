@@ -20,7 +20,7 @@ const { install, seed } = require('./fake-supabase.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 
 /** Dans la page : contrôles natifs visibles et champs fichier mal masqués ou sans bouton. */
-function natives() {
+function natives(app) {
   const out = [];
   const shown = (el) => {
     const r = el.getBoundingClientRect();
@@ -52,6 +52,18 @@ function natives() {
     if (el.closest('[data-comp-internal]') || !shown(el) || srOnly(el) || cs.opacity === '0') continue;
     if (cs.appearance !== 'none' || cs.webkitAppearance !== 'none')
       out.push({ name: name(el), why: `input[type=${el.type}] natif visible (non dessiné)` });
+    // COMP-01 §7 : case et radio dessinés font 18 px (l'interrupteur a sa propre piste)
+    const r = el.getBoundingClientRect();
+    // Le lecteur public a ses propres tailles (cibles tactiles) : la règle vaut pour l'app
+    if (
+      app &&
+      el.getAttribute('role') !== 'switch' &&
+      (Math.round(r.width) !== 18 || Math.round(r.height) !== 18)
+    )
+      out.push({
+        name: name(el),
+        why: `input[type=${el.type}] de ${Math.round(r.width)} × ${Math.round(r.height)} px (attendu : 18 × 18)`,
+      });
   }
   for (const el of document.querySelectorAll('input[type=file]')) {
     const cs = getComputedStyle(el);
@@ -90,7 +102,7 @@ function natives() {
     for (const s of pages) {
       let m;
       try {
-        const check = (p) => p.evaluate(natives);
+        const check = (p) => p.evaluate(natives, s.kind === 'app');
         m = s.kind === 'app' ? await appPage(b, s, theme, check) : await playerPage(b, s, theme, check);
       } catch (e) {
         console.log(`NOT OK - ${s.name} (${theme}) : contrôle impossible (${e.message.split('\n')[0]})`);
