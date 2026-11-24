@@ -1,6 +1,6 @@
 /**
  * Test e2e L17-06 à 08 : Paramètres › Glossaire (vide, ajout, unicité, tableau, recherche, modification,
- * suppression confirmée, import CSV avec aperçu, export, réglage « Souligner les termes »).
+ * suppression confirmée, import CSV avec aperçu, export, réglage «\u202fSouligner les termes\u202f»).
  * Données fictives (faux Supabase). Usage : SHOTS_DIR=… [THEME=dark] node e2e/glossary.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -80,7 +80,10 @@ const SHOTS = process.env.SHOTS_DIR;
   await dlg.getByLabel('Nouveau terme').fill('RENDEZ-VOUS');
   await dlg.getByLabel('Définition').fill('Doublon.');
   await dlg.getByRole('button', { name: 'Ajouter', exact: true }).click();
-  ok((await dlg.getByText('Ce terme existe déjà.').count()) === 1, 'L17-08 : « Ce terme existe déjà »');
+  ok(
+    (await dlg.getByText('Ce terme existe déjà.').count()) === 1,
+    'L17-08 : «\u202fCe terme existe déjà\u202f»',
+  );
   await dlg.getByRole('button', { name: 'Annuler' }).click();
 
   // Import CSV : aperçu puis import
@@ -104,12 +107,12 @@ const SHOTS = process.env.SHOTS_DIR;
     .setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: Buffer.from('pas un csv') });
   ok(
     (await zone.getByRole('alert').innerText()) ===
-      '« photo.png » n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
+      '«\u202fphoto.png\u202f» n’est pas un fichier CSV. Choisissez un fichier .csv ou partez du modèle.' &&
       (await imp.getByRole('status').count()) === 0 &&
       (await imp.getByRole('button', { name: 'Importer', exact: true }).isDisabled()),
-    'Import : fichier non CSV refusé dans la zone, aucun aperçu, « Importer » désactivé',
+    'Import : fichier non CSV refusé dans la zone, aucun aperçu, «\u202fImporter\u202f» désactivé',
   );
-  // MEDIA-01 : le champ fichier est dans la zone de dépôt « Fichier CSV »
+  // MEDIA-01 : le champ fichier est dans la zone de dépôt «\u202fFichier CSV\u202f»
   await imp.getByRole('group', { name: 'Fichier CSV' }).locator('input[type=file]').setInputFiles(file);
   const prev = imp.getByRole('status');
   await prev.waitFor();
@@ -158,7 +161,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await ed.getByLabel('Nouveau terme').fill('Rendez-vous');
   await ed.getByRole('button', { name: 'Enregistrer' }).click();
   await ed.waitFor({ state: 'detached' });
-  // L17-06 : capture avec la donnée alignée (« Rendez-vous »)
+  // L17-06 : capture avec la donnée alignée («\u202fRendez-vous\u202f»)
   await page.getByRole('rowheader', { name: 'Rendez-vous', exact: true }).waitFor();
   await closeToasts();
   await shot('l17-06-glossaire');
@@ -166,7 +169,7 @@ const SHOTS = process.env.SHOTS_DIR;
   // Suppression confirmée
   await page.getByRole('button', { name: 'Actions pour Nouveau rapport' }).click();
   await page.getByRole('menuitem', { name: 'Supprimer' }).click();
-  const conf = page.getByRole('dialog', { name: 'Supprimer « Nouveau rapport » ?' });
+  const conf = page.getByRole('dialog', { name: 'Supprimer «\u202fNouveau rapport\u202f» ?' });
   await conf.waitFor();
   ok(
     (await conf.textContent()).includes('Il ne sera plus souligné dans les démos.'),
@@ -187,7 +190,7 @@ const SHOTS = process.env.SHOTS_DIR;
     `Export CSV (${JSON.stringify(out.slice(0, 60))})`,
   );
 
-  // Réglage « Souligner les termes »
+  // Réglage «\u202fSouligner les termes\u202f»
   const sw = page.getByRole('switch', { name: /Souligner les termes dans le lecteur/ });
   ok(await sw.isChecked(), 'Soulignement activé par défaut');
   await sw.uncheck();

@@ -1,9 +1,9 @@
 /**
  * Recette L49 P1 (docs/ux/specs/l49-securite-html.md §2, §6, §7). Données fictives (example).
  *  - Paramètres › Sécurité › Captures HTML : 3 radios, domaines (invalide refusé, joker, retrait), mention,
- *    « Enregistrer » désactivé tant que rien n'a changé, RPC et journal ;
- *  - lecture seule pour un éditeur (« Modifiable par un admin ») ;
- *  - désactivées : Démo HTML et Sandbox visibles, désactivés, avec la raison, dans « Nouvelle démo » ;
+ *    «\u202fEnregistrer\u202f» désactivé tant que rien n'a changé, RPC et journal ;
+ *  - lecture seule pour un éditeur («\u202fModifiable par un admin\u202f») ;
+ *  - désactivées : Démo HTML et Sandbox visibles, désactivés, avec la raison, dans «\u202fNouvelle démo\u202f» ;
  *  - autorisées : mention d'autorisation à l'étape 2 des types HTML ; axe ; 390 px sans défilement.
  * Usage : node e2e/l49-reglage.e2e.cjs
  */
@@ -47,7 +47,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   const p = await open(s, '/settings/security');
   const card = p.locator('.hc-card');
   await card.waitFor();
-  ok((await card.locator('h2').innerText()) === 'Captures HTML', 'section « Captures HTML »');
+  ok((await card.locator('h2').innerText()) === 'Captures HTML', 'section «\u202fCaptures HTML\u202f»');
   ok(
     (await p.locator('.st-wrap section').first().getAttribute('class')).includes('hc-card'),
     'première section de Sécurité',
@@ -67,7 +67,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   ok(await radio('Autorisées').isChecked(), 'par défaut : Autorisées');
   ok(
     await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).isDisabled(),
-    '« Enregistrer » désactivé sans changement',
+    '«\u202fEnregistrer\u202f» désactivé sans changement',
   );
   ok((await card.locator('.hc-notice').innerText()).includes(NOTICE), 'mention d’autorisation, sans encadré');
   ok(
@@ -79,7 +79,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   );
   ok(
     (await card.innerText()).includes('Appliqué par l’app, l’extension et le serveur.'),
-    'pied « Appliqué par… »',
+    'pied «\u202fAppliqué par…\u202f»',
   );
 
   await radio('Seulement sur ces domaines').check();
@@ -87,7 +87,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await input.fill('https://crm.partenaire.example/chemin');
   await card.getByRole('button', { name: 'Ajouter le domaine' }).click();
   ok(
-    (await card.getByRole('alert').innerText()).includes('sans « https:// » ni chemin'),
+    (await card.getByRole('alert').innerText()).includes('sans «\u202fhttps://\u202f» ni chemin'),
     'domaine invalide refusé avec un message',
   );
   await input.fill('  App.Example.com ');
@@ -108,7 +108,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     .nth(2)
     .waitFor({ state: 'detached' })
     .catch(() => {});
-  ok((await card.locator('.hc-chip').count()) === 2, '« Retirer vieux.example.org »');
+  ok((await card.locator('.hc-chip').count()) === 2, '«\u202fRetirer vieux.example.org\u202f»');
   await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
   await p.waitForFunction(
     () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
@@ -165,12 +165,12 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
         (await nd.locator('.nd-type.is-off', { hasText: name }).innerText()).includes(
           'Désactivé par un admin (Sécurité > Captures HTML)',
         ),
-      `désactivées : « ${name} » visible, désactivé, avec la raison`,
+      `désactivées : «\u202f${name}\u202f» visible, désactivé, avec la raison`,
     );
   }
   ok(
     await nd.getByRole('radio', { name: /captures/ }).isChecked(),
-    'désactivées : « Démo par captures » choisie',
+    'désactivées : «\u202fDémo par captures\u202f» choisie',
   );
   await axe(p, 'Nouvelle démo (types HTML désactivés)');
   await p.context().close();
@@ -187,7 +187,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await c2.waitFor();
   ok(
     (await c2.locator('.hc-ro').innerText()) === 'Modifiable par un admin',
-    'éditeur : « Modifiable par un admin »',
+    'éditeur : «\u202fModifiable par un admin\u202f»',
   );
   // Le réglage arrive après la carte : on attend le choix enregistré avant de lire les autres
   await c2
@@ -203,7 +203,7 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     (await c2.getByRole('button', { name: 'Enregistrer' }).count()) === 0 &&
       (await c2.getByRole('button', { name: /^Retirer/ }).count()) === 0 &&
       (await c2.locator('.hc-chip').innerText()).includes('app.example.com'),
-    'éditeur : ni « Enregistrer » ni « Retirer », domaines affichés',
+    'éditeur : ni «\u202fEnregistrer\u202f» ni «\u202fRetirer\u202f», domaines affichés',
   );
   await c2.getByRole('radio', { name: /^Désactivées/ }).click({ force: true });
   ok(

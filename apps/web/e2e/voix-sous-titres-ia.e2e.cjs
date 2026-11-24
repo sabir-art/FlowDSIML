@@ -1,7 +1,7 @@
 /**
  * Test e2e L30b (065 / 066) : voix de synthèse (panneau Voix off) et sous-titres automatiques (étape
  * vidéo, voix enregistrée), ElevenLabs simulé. Texte modifiable, 6 voix avec extrait, vitesse, aperçu,
- * confirmation avant de remplacer, toast « Annuler » ; modale avant chaque envoi d'audio ; limite de
+ * confirmation avant de remplacer, toast «\u202fAnnuler\u202f» ; modale avant chaque envoi d'audio ; limite de
  * 2 min ; quotas (L30-13) et fonction désactivée. Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] node e2e/voix-sous-titres-ia.e2e.cjs
  */
@@ -143,7 +143,7 @@ function prepare(over = {}) {
   });
   await open(state);
   const s1 = () => state.tables.steps.find((s) => s.demo_id === DEMO && s.position === 0);
-  // EXT-02 §6.4 : « Générer » dans le panneau, sans fenêtre à part
+  // EXT-02 §6.4 : «\u202fGénérer\u202f» dans le panneau, sans fenêtre à part
   const toGenerate = async () => {
     await sec.getByRole('button', { name: 'Remplacer…' }).click();
     await sec.getByRole('tab', { name: 'Générer' }).click();
@@ -166,7 +166,7 @@ function prepare(over = {}) {
     'Le texte lu sert aussi de transcription',
   );
   ok(
-    /Les variables sont lues avec leur valeur par défaut \(\{\{company\}\} → « votre entreprise »\)/.test(
+    /Les variables sont lues avec leur valeur par défaut \(\{\{company\}\} → «\u202fvotre entreprise\u202f»\)/.test(
       await panel.textContent(),
     ),
     'Aide : variables lues avec leur valeur par défaut',
@@ -188,7 +188,7 @@ function prepare(over = {}) {
     'Rien n’est envoyé à l’ouverture (liste des voix seulement)',
   );
   const v0 = await voices();
-  ok(v0.names.length === 6 && /^Claire/.test(v0.names[0]), 'Six voix, « Claire » en premier');
+  ok(v0.names.length === 6 && /^Claire/.test(v0.names[0]), 'Six voix, «\u202fClaire\u202f» en premier');
   await v0.list.getByRole('option', { name: /Antoine/ }).click();
   const used0 = state.ai.used;
   await panel.getByRole('button', { name: 'Écouter un exemple' }).click();
@@ -197,7 +197,7 @@ function prepare(over = {}) {
   ok(sample.input.voice === 'antoine' && !('text' in sample.input), 'Exemple de la voix choisie, sans texte');
   ok(state.ai.used === used0, 'L’exemple ne consomme pas de quota');
   const sb = await panel.getByRole('button', { name: 'Écouter un exemple' }).boundingBox();
-  ok(sb.width === 36 && sb.height === 36, 'Bouton d’exemple de 36 px à droite de « Voix »');
+  ok(sb.width === 36 && sb.height === 36, 'Bouton d’exemple de 36 px à droite de «\u202fVoix\u202f»');
   await shot('l30-10-voix-panneau');
   await panel.getByRole('button', { name: 'Générer la voix' }).click();
   await panel.getByRole('button', { name: 'Utiliser' }).waitFor();
@@ -217,17 +217,17 @@ function prepare(over = {}) {
   ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
   ok((await panel.locator('audio[controls]').count()) === 0, 'Pas de lecteur natif');
   const two = await panel.locator('.vo-two button').allTextContents();
-  ok(two.join('|') === 'Régénérer|Utiliser', '« Régénérer » et « Utiliser » côte à côte');
-  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant « Utiliser »');
+  ok(two.join('|') === 'Régénérer|Utiliser', '«\u202fRégénérer\u202f» et «\u202fUtiliser\u202f» côte à côte');
+  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant «\u202fUtiliser\u202f»');
   await shot('l30-10-voix-apercu');
-  // Accessibilité et espacements du panneau « Générer » (aperçu affiché)
+  // Accessibilité et espacements du panneau «\u202fGénérer\u202f» (aperçu affiché)
   const axe = await new AxeBuilder({ page })
     .include('.voice-sec')
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
   ok(
     axe.violations.length === 0,
-    `Panneau « Générer » : aucune violation axe (${axe.violations.map((v) => v.id).join(', ')})`,
+    `Panneau «\u202fGénérer\u202f» : aucune violation axe (${axe.violations.map((v) => v.id).join(', ')})`,
   );
   const tight = await page.evaluate(() => {
     const out = [];
@@ -243,7 +243,10 @@ function prepare(over = {}) {
     if (document.documentElement.scrollWidth > innerWidth) out.push('défilement horizontal');
     return out;
   });
-  ok(tight.length === 0, `Panneau « Générer » : 8 px au moins entre les blocs (${tight.join(' ; ')})`);
+  ok(
+    tight.length === 0,
+    `Panneau «\u202fGénérer\u202f» : 8 px au moins entre les blocs (${tight.join(' ; ')})`,
+  );
   await panel.getByRole('button', { name: 'Utiliser' }).click();
   const confirm = page.getByRole('dialog', {
     name: 'Remplacer votre enregistrement par la voix de synthèse ?',
@@ -264,13 +267,13 @@ function prepare(over = {}) {
   await page.getByText('Voix appliquée.').waitFor();
   ok(
     (await page.locator('.rail-li .rail-ai[aria-label="Voix off générée par l’IA"]').count()) === 1,
-    'Liste des étapes : icône voix avec repère « IA »',
+    'Liste des étapes : icône voix avec repère «\u202fIA\u202f»',
   );
   await shot('l30-10-voix-appliquee', true);
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
   ok(
     await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice),
-    '« Annuler » rétablit l’enregistrement',
+    '«\u202fAnnuler\u202f» rétablit l’enregistrement',
   );
 
   // ===== L30-11 : transcription de la voix enregistrée =====
@@ -287,7 +290,7 @@ function prepare(over = {}) {
   await shot('l30-11-envoi-audio');
   const n0 = state.aiCalls.length;
   await ask.getByRole('button', { name: 'Annuler' }).click();
-  ok(state.aiCalls.length === n0, '« Annuler » : rien n’est envoyé');
+  ok(state.aiCalls.length === n0, '«\u202fAnnuler\u202f» : rien n’est envoyé');
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
   await ask.getByRole('button', { name: 'Envoyer' }).click();
   const tr = sec.getByRole('group', { name: 'Proposition' });
@@ -306,7 +309,7 @@ function prepare(over = {}) {
 
   // ===== L30-11 : sous-titres d'une vidéo =====
   await railTo('Saisie de la fiche');
-  // L48-E : les sous-titres de la vidéo sont dans l'outil « Étape »
+  // L48-E : les sous-titres de la vidéo sont dans l'outil «\u202fÉtape\u202f»
   await openTool(page, 'step');
   await page.getByRole('button', { name: 'Transcription automatique' }).click();
   await ask.waitFor();
@@ -333,7 +336,7 @@ function prepare(over = {}) {
     'Sous-titres appliqués',
   );
   await page.getByText('Sous-titres appliqués.').waitFor();
-  // Deuxième demande : « Ne plus demander », puis remplacement confirmé
+  // Deuxième demande : «\u202fNe plus demander\u202f», puis remplacement confirmé
   await page.getByRole('button', { name: 'Transcription automatique' }).click();
   await ask.getByRole('checkbox', { name: 'Ne plus demander pour cette démo' }).check();
   await ask.getByRole('button', { name: 'Envoyer' }).click();
@@ -349,12 +352,15 @@ function prepare(over = {}) {
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
   ok(
     await until(() => vid().captions[0]?.text === 'Ouvrez la fiche du jeune.'),
-    '« Annuler » rétablit les sous-titres',
+    '«\u202fAnnuler\u202f» rétablit les sous-titres',
   );
   const n1 = state.aiCalls.length;
   await page.getByRole('button', { name: 'Transcription automatique' }).click();
   await dlg.waitFor();
-  ok(state.aiCalls.length === n1 + 1 && (await ask.count()) === 0, '« Ne plus demander » : envoi direct');
+  ok(
+    state.aiCalls.length === n1 + 1 && (await ask.count()) === 0,
+    '«\u202fNe plus demander\u202f» : envoi direct',
+  );
   await dlg.getByRole('button', { name: 'Ignorer' }).click();
   // Vidéo de plus de 2 min
   await railTo('Visite complète');
@@ -418,7 +424,10 @@ function prepare(over = {}) {
   await open(state);
   await sec.getByRole('button', { name: 'Remplacer…' }).click();
   const entry = sec.getByRole('tab', { name: 'Générer' });
-  ok((await entry.getAttribute('aria-disabled')) === 'true', 'Voix désactivée : onglet « Générer » grisé');
+  ok(
+    (await entry.getAttribute('aria-disabled')) === 'true',
+    'Voix désactivée : onglet «\u202fGénérer\u202f» grisé',
+  );
   ok(
     (await sec.locator('#vo-gen-off').textContent()) === 'Générer : désactivé par l’espace.',
     'Raison affichée sous les onglets',

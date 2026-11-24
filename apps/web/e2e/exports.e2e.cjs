@@ -50,7 +50,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await openFromMenu(p);
     const d = p.locator('dialog.x15-dialog');
     ok(
-      (await d.locator('h2').textContent()).includes('Exporter « Créer une fiche usager »'),
+      (await d.locator('h2').textContent()).includes('Exporter «\u202fCréer une fiche usager\u202f»'),
       'L15-01 : titre de la modale',
     );
     await p.waitForFunction(() =>
@@ -59,12 +59,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(/^8 pages/.test(await help(p)), 'L15-01 : 7 étapes + couverture = 8 pages');
     ok(!/balisé/.test(await help(p)), 'L15-01 : aucune promesse de PDF balisé');
     ok(await p.getByRole('radio', { name: /PDF/ }).first().isChecked(), 'L15-01 : PDF choisi par défaut');
-    // L25-11 : la carte MP4 est active ; « Hors ligne » reste « Bientôt »
+    // L25-11 : la carte MP4 est active ; «\u202fHors ligne\u202f» reste «\u202fBientôt\u202f»
     const zip = p.getByRole('radio', { name: /Hors ligne/ });
     ok(
       (await zip.isDisabled()) &&
         /Bientôt/.test(await p.locator('label.exp-format', { has: zip }).textContent()),
-      'L15-01 : hors ligne « Bientôt »',
+      'L15-01 : hors ligne «\u202fBientôt\u202f»',
     );
     ok(!(await p.getByRole('radio', { name: /Vidéo MP4/ }).isDisabled()), 'L25-11 : MP4 sélectionnable');
     ok((await p.locator('.x15-svg').count()) === 1, 'L15-01 : aperçu rendu');
@@ -96,7 +96,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(
       (await txt.isDisabled()) &&
         /au moins les captures ou le texte/.test(await p.locator('.x15-main').textContent()),
-      'L15-01 : « Il faut au moins les captures ou le texte »',
+      'L15-01 : «\u202fIl faut au moins les captures ou le texte\u202f»',
     );
     ok(/^2 pages/.test(await help(p)), 'L15-01 : sans captures, couverture + liste');
     await p.getByRole('switch', { name: /Captures d'écran/ }).click();
@@ -150,7 +150,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await pick(p.getByLabel('Taille'), '640');
     ok(
       (await p.locator('.gif-meta span').textContent()).startsWith('Étape'),
-      'L15-02 : barre « Étape n sur N »',
+      'L15-02 : barre «\u202fÉtape n sur N\u202f»',
     );
     const [g] = await Promise.all([
       p.waitForEvent('download', { timeout: 60000 }),

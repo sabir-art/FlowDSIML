@@ -38,7 +38,7 @@ async function invite(page, emails) {
   };
 
   // Recette 1 (révisée le 21/11) : deux adresses, plus de case, l'e-mail part toujours ; confirmation
-  // dans la modale, « Invitation envoyée » et « Copier le lien » par adresse
+  // dans la modale, «\u202fInvitation envoyée\u202f» et «\u202fCopier le lien\u202f» par adresse
   {
     const state = admin();
     const page = await open(state);
@@ -46,11 +46,11 @@ async function invite(page, emails) {
     ok(
       (await page.getByLabel('Envoyer l’invitation par e-mail').count()) === 0 &&
         (await page.locator('dialog.fd-modal[open] input[type=checkbox]').count()) === 0,
-      'plus de case « Envoyer l’invitation par e-mail »',
+      'plus de case «\u202fEnvoyer l’invitation par e-mail\u202f»',
     );
     ok(
       (await page.getByRole('button', { name: 'Envoyer 2 invitations' }).count()) === 1,
-      'bouton « Envoyer 2 invitations »',
+      'bouton «\u202fEnvoyer 2 invitations\u202f»',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-modale.png` });
     await page
@@ -62,7 +62,7 @@ async function invite(page, emails) {
       (await page.locator('.inv-results > li').count()) === 2 &&
         (await page.locator('.inv-results__status.is-sent').count()) === 2 &&
         (await page.getByRole('button', { name: 'Copier le lien de marie@acme.example' }).count()) === 1,
-      'confirmation dans la modale : « Invitation envoyée » et « Copier le lien » par adresse',
+      'confirmation dans la modale : «\u202fInvitation envoyée\u202f» et «\u202fCopier le lien\u202f» par adresse',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-01-confirmation.png` });
     await page
@@ -84,12 +84,12 @@ async function invite(page, emails) {
       ),
       'e-mail : nom de l’espace, nom de l’invitant et lien d’acceptation seulement',
     );
-    // « Copier le lien » reste dans la liste des invitations en attente
+    // «\u202fCopier le lien\u202f» reste dans la liste des invitations en attente
     await page.getByRole('button', { name: 'Actions pour marie@acme.example' }).click();
     ok(
       (await page.getByRole('menuitem', { name: 'Copier le lien' }).count()) === 1 &&
         (await page.getByRole('menuitem', { name: 'Renvoyer l’invitation' }).isDisabled()),
-      'en attente : « Copier le lien » ; déjà envoyée : pas de second envoi',
+      'en attente : «\u202fCopier le lien\u202f» ; déjà envoyée : pas de second envoi',
     );
     await page.close();
   }
@@ -132,7 +132,7 @@ async function invite(page, emails) {
         !(state.inviteEmails || []).length &&
         (await page.locator('.inv-results__status').innerText()) === 'Plafond horaire atteint' &&
         /^20 invitations par heure au plus/.test(await page.getByRole('alert').innerText()),
-      'invitation créée, aucun e-mail, « Plafond horaire atteint » et lien à copier',
+      'invitation créée, aucun e-mail, «\u202fPlafond horaire atteint\u202f» et lien à copier',
     );
     await page.close();
   }
@@ -162,7 +162,7 @@ async function invite(page, emails) {
     await page.close();
   }
 
-  // Recette 8 : ligne Utilisation « 150 sur 150 », sans jauge
+  // Recette 8 : ligne Utilisation «\u202f150 sur 150\u202f», sans jauge
   {
     const state = admin({ emailBudget: 150 });
     const page = await open(state);
@@ -172,11 +172,11 @@ async function invite(page, emails) {
     ok(
       // Lot 1 (maquette Utilisation) : une rangée comme les autres quotas, avec sa jauge
       (await line.locator('.stg-lab').innerText()) === 'E-mails envoyés aujourd’hui' &&
-        // NUM-01 : espaces insécables autour de « sur »
+        // NUM-01 : espaces insécables autour de «\u202fsur\u202f»
         (await line.locator('.us-val').innerText()).replace(/[\u00a0\u202f]/g, ' ').trim() ===
           '150 sur 150' &&
         (await line.getByRole('meter').getAttribute('aria-valuenow')) === '100',
-      'Utilisation : rangée « E-mails envoyés aujourd’hui », « 150 sur 150 », jauge à 100 %',
+      'Utilisation : rangée «\u202fE-mails envoyés aujourd’hui\u202f», «\u202f150 sur 150\u202f», jauge à 100 %',
     );
     await page.close();
   }
@@ -200,7 +200,7 @@ async function invite(page, emails) {
     // Confidentialité : même réponse, même message et même budget, l'admin ne sait pas qui a un compte
     ok(
       body.results.every((r) => r.status === 'sent') && state.emailBudget === 2,
-      'compte existant et nouvelle adresse : réponse « sent » identique, budget compté pareil',
+      'compte existant et nouvelle adresse : réponse «\u202fsent\u202f» identique, budget compté pareil',
     );
     await page.close();
   }
@@ -229,15 +229,17 @@ async function invite(page, emails) {
     const row = page.locator('.nb-list li', { hasText: 'vous invite à rejoindre' });
     await row.waitFor();
     ok(
-      (await row.locator('.nb-text').innerText()).startsWith('Olga Exemple vous invite à rejoindre « Acme »'),
-      'notification « Olga Exemple vous invite à rejoindre « Acme » »',
+      (await row.locator('.nb-text').innerText()).startsWith(
+        'Olga Exemple vous invite à rejoindre «\u202fAcme\u202f»',
+      ),
+      'notification «\u202fOlga Exemple vous invite à rejoindre «\u202fAcme\u202f»\u202f»',
     );
     ok(
       (await row.getByRole('button', { name: 'Accepter' }).count()) === 1 &&
         (await row.getByRole('button', { name: 'Refuser' }).count()) === 1,
       'Accepter et Refuser',
     );
-    // Retour UX : « Accepter » d'abord (petit bouton principal), puis « Refuser » en lien discret
+    // Retour UX : «\u202fAccepter\u202f» d'abord (petit bouton principal), puis «\u202fRefuser\u202f» en lien discret
     ok(
       (await row.locator('.nb-actions button').allTextContents()).join('|') === 'Accepter|Refuser' &&
         (await row.getByRole('button', { name: 'Accepter' }).getAttribute('class')).includes(

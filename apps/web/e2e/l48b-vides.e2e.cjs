@@ -1,8 +1,8 @@
 /**
  * Recette L48-B (spec docs/ux/specs/l48b-etats-vides.md §4 et §6). Données fictives.
  *  - espace neuf : pas d'indicateurs, prise en main fermée (bouton du PageHeader), pas de barre ; état vide avec une seule action
- *    principale (« Nouvelle démo » au centre, pas dans l'en-tête), sans tuiles, « Voir un exemple » désactivé ;
- *  - recherche « zzz » avec 2 filtres : variante search annoncée, « Réinitialiser les filtres ».
+ *    principale («\u202fNouvelle démo\u202f» au centre, pas dans l'en-tête), sans tuiles, «\u202fVoir un exemple\u202f» désactivé ;
+ *  - recherche «\u202fzzz\u202f» avec 2 filtres : variante search annoncée, «\u202fRéinitialiser les filtres\u202f».
  * Usage : node e2e/l48b-vides.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -43,7 +43,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   );
   ok(
     (await empty.getByRole('heading', { level: 2 }).textContent()) === 'Créez votre première démo',
-    'titre « Créez votre première démo »',
+    'titre «\u202fCréez votre première démo\u202f»',
   );
   ok((await empty.locator('.demos-start__tile, .demos-start').count()) === 0, 'B1 : pas de tuiles de départ');
   ok(
@@ -55,11 +55,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   ok(
     (await example.getAttribute('aria-disabled')) === 'true' &&
       (await empty.locator('.demos-example .soon-text').textContent()) === 'Bientôt',
-    'B3 : « Voir un exemple » en lien désactivé, « Bientôt » en texte',
+    'B3 : «\u202fVoir un exemple\u202f» en lien désactivé, «\u202fBientôt\u202f» en texte',
   );
   await empty.getByRole('button', { name: 'Nouvelle démo' }).click();
   await p.locator('dialog[open]').first().waitFor();
-  ok(true, '« Nouvelle démo » ouvre la création');
+  ok(true, '«\u202fNouvelle démo\u202f» ouvre la création');
   await p.keyboard.press('Escape');
   const axe = await new AxeBuilder({ page: p }).analyze();
   const bad = axe.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
@@ -77,7 +77,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await nm.waitFor();
   ok(
     (await nm.getAttribute('role')) === 'status' &&
-      (await nm.getByRole('heading').textContent()) === 'Aucune démo ne correspond à « zzz »' &&
+      (await nm.getByRole('heading').textContent()) === 'Aucune démo ne correspond à «\u202fzzz\u202f»' &&
       /2 filtres actifs/.test(await nm.innerText()),
     'recherche : variante search annoncée, saisie et 2 filtres actifs',
   );
@@ -86,7 +86,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   ok(
     (await q.locator('.demo-card').count()) > 0 &&
       (await q.getByRole('searchbox', { name: 'Rechercher une démo' }).inputValue()) === '',
-    '« Réinitialiser les filtres » remet tout',
+    '«\u202fRéinitialiser les filtres\u202f» remet tout',
   );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

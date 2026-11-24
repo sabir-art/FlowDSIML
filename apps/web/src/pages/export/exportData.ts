@@ -54,7 +54,7 @@ export async function loadExportSource(demoId: string): Promise<ExportSource> {
       logo: null,
       version: v.data.number ?? 1,
       url: publicDemoUrl(demoId),
-      context: path ? `Formation « ${path} »` : '',
+      context: path ? `Formation «\u202f${path}\u202f»` : '',
       // L48-A : plus de mention imposée par l'offre (fonctions ouvertes à tous)
       showBranding: false,
       device: m.device === 'mobile' ? 'mobile' : 'desktop',

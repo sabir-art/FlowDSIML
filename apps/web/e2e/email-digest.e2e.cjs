@@ -1,7 +1,7 @@
 /**
- * E-mails P2 (spec emails-notifications-invitations, recettes 7 et 9, côté app) : option « Recevoir aussi
- * par e-mail », « Bientôt » sans BREVO_API_KEY, désinscription sans connexion, lien « Ouvrir les
- * notifications ». Aucun envoi réel (faux Supabase) ; le regroupement et l'envoi sont testés en base
+ * E-mails P2 (spec emails-notifications-invitations, recettes 7 et 9, côté app) : option «\u202fRecevoir aussi
+ * par e-mail\u202f», «\u202fBientôt\u202f» sans BREVO_API_KEY, désinscription sans connexion, lien «\u202fOuvrir les
+ * notifications\u202f». Aucun envoi réel (faux Supabase) ; le regroupement et l'envoi sont testés en base
  * (email_digest.test.sql) et dans la fonction (notify-email/lib_test.ts, faux serveur Brevo).
  */
 const { chromium } = require('playwright');
@@ -39,17 +39,17 @@ async function prefsOf(page) {
     return page;
   };
 
-  // Recette 9 : sans la clé, l'option reste « Bientôt », désactivée
+  // Recette 9 : sans la clé, l'option reste «\u202fBientôt\u202f», désactivée
   {
     const page = await open(seed());
     const prefs = await prefsOf(page);
     const sw = prefs.getByRole('switch', { name: /Recevoir aussi par e-mail/ });
     ok(
       (await sw.isDisabled()) && /Bientôt/.test(await prefs.innerText()),
-      'sans BREVO_API_KEY : « Bientôt », désactivée',
+      'sans BREVO_API_KEY : «\u202fBientôt\u202f», désactivée',
     );
-    // Règle X4 : « Bientôt » en texte gris, sans point d'état (aussi pour « Résumé quotidien »)
-    ok((await prefs.locator('.fd-status').count()) === 0, '« Bientôt » sans point d’état');
+    // Règle X4 : «\u202fBientôt\u202f» en texte gris, sans point d'état (aussi pour «\u202fRésumé quotidien\u202f»)
+    ok((await prefs.locator('.fd-status').count()) === 0, '«\u202fBientôt\u202f» sans point d’état');
     await page.close();
   }
 
@@ -81,7 +81,7 @@ async function prefsOf(page) {
     await page.close();
   }
 
-  // « Ouvrir les notifications » du résumé : #/?notifications=1 ouvre le panneau
+  // «\u202fOuvrir les notifications\u202f» du résumé : #/?notifications=1 ouvre le panneau
   {
     const page = await open(seed());
     await page.goto(`${APP}/#/?notifications=1`);
@@ -101,7 +101,7 @@ async function prefsOf(page) {
     await page.getByText('Vous ne recevrez plus de notifications par e-mail.').waitFor();
     ok(
       (await page.locator('main, body').first().innerText()).includes(
-        'Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».',
+        'Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur «\u202fPréférences\u202f».',
       ) && state.tables.notification_settings[0].email === false,
       'désinscription : option désactivée, confirmation affichée',
     );

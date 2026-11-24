@@ -1,6 +1,6 @@
 /**
  * Paramètres › Notifications (retours client §6.3, maquette lot1-parametres/notifs) : un tableau par
- * événement, « Dans l'app » et « Par e-mail », puis les démos coupées. Données fictives.
+ * événement, «\u202fDans l'app\u202f» et «\u202fPar e-mail\u202f», puis les démos coupées. Données fictives.
  * Usage : SHOTS_DIR=… [THEME=dark] [WIDTH=390] node e2e/parametres-notifications.e2e.cjs
  */
 const { chromium } = require('playwright');
@@ -48,13 +48,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(
       (await page.locator('.nt-table thead th').allTextContents()).join('|') ===
         'Événement|Dans l’app|Par e-mail',
-      'colonnes « Événement », « Dans l’app », « Par e-mail »',
+      'colonnes «\u202fÉvénement\u202f», «\u202fDans l’app\u202f», «\u202fPar e-mail\u202f»',
     );
     const mention = page.locator('.nt-table tbody tr').first();
     ok(
       (await mention.locator('td').first().textContent()).trim() === 'Toujours' &&
         (await mention.locator('td').first().getByRole('switch').count()) === 0,
-      'mentions : « Toujours » dans l’app, sans interrupteur',
+      'mentions : «\u202fToujours\u202f» dans l’app, sans interrupteur',
     );
     ok(
       (await mention.locator('.nt-sub').textContent()) ===
@@ -67,7 +67,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       (await sw(page, 'Nouveaux leads, dans l’app').isChecked()) &&
         (await sw(page, 'Nouveaux leads, par e-mail').isEnabled()) &&
         (await page.locator('.nt-table tbody .nt-soon').count()) === 0,
-      'nouveaux leads : réglable, sans « Bientôt »',
+      'nouveaux leads : réglable, sans «\u202fBientôt\u202f»',
     );
     await shot(page, 'notifs');
 
@@ -104,24 +104,27 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok((await li.count()) === 1 && (await li.textContent()).includes(title), 'démo coupée listée');
     await page.getByRole('button', { name: `Réactiver les notifications de ${title}` }).click();
     await page.getByText('Aucune démo coupée.').waitFor();
-    ok((state.tables.notification_mutes || []).length === 0, '« Réactiver » retire la coupure');
+    ok((state.tables.notification_mutes || []).length === 0, '«\u202fRéactiver\u202f» retire la coupure');
     await page.context().close();
   }
 
-  // 2. Sans service d'e-mail : colonne visible, désactivée, « Bientôt » dans l'en-tête
+  // 2. Sans service d'e-mail : colonne visible, désactivée, «\u202fBientôt\u202f» dans l'en-tête
   {
     const { page } = await open(() => {});
     await page.locator('.nt-table thead .nt-soon').waitFor();
     ok(
       (await page.locator('.nt-table thead th').nth(2).textContent()).includes('Bientôt'),
-      'sans service d’e-mail : « Bientôt » dans l’en-tête',
+      'sans service d’e-mail : «\u202fBientôt\u202f» dans l’en-tête',
     );
     const all = page.locator('.nt-table tbody td:nth-child(3) input');
     const n = await all.count();
     let disabled = 0;
     for (let i = 0; i < n; i++) if (await all.nth(i).isDisabled()) disabled++;
     ok(n === 6 && disabled === 6, 'sans service d’e-mail : toute la colonne est désactivée');
-    ok(await sw(page, 'Réponses, dans l’app').isEnabled(), 'la colonne « Dans l’app » reste réglable');
+    ok(
+      await sw(page, 'Réponses, dans l’app').isEnabled(),
+      'la colonne «\u202fDans l’app\u202f» reste réglable',
+    );
     ok(
       (await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)) === true,
       'pas de défilement horizontal',
@@ -134,7 +137,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.context().close();
   }
 
-  // 3. Cloche : « Nouveau lead sur « {démo} » », sans donnée du visiteur ; le lien mène aux leads de la démo
+  // 3. Cloche : «\u202fNouveau lead sur «\u202f{démo}\u202f»\u202f», sans donnée du visiteur ; le lien mène aux leads de la démo
   {
     const { page, state } = await open((s) => {
       s.tables.leads = [
@@ -170,7 +173,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const item = page.getByRole('dialog').locator('.nb-list li');
     await item.first().waitFor();
     const text = (await item.first().locator('.nb-text').textContent()).replace(/\u00a0/g, ' ');
-    ok(text.startsWith(`Nouveau lead sur « ${title} »`), `cloche : « Nouveau lead sur « ${title} » »`);
+    ok(
+      text.startsWith(`Nouveau lead sur «\u202f${title}\u202f»`),
+      `cloche : «\u202fNouveau lead sur «\u202f${title}\u202f»\u202f»`,
+    );
     ok(
       !/visiteur|exemple|Fictif/i.test(await item.first().innerHTML()),
       'cloche : aucune donnée du visiteur',
@@ -185,7 +191,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       const r = el?.getBoundingClientRect();
       return el?.id === 'da-leads' && r.top >= 0 && r.bottom <= window.innerHeight;
     });
-    ok(await h.isVisible(), 'le lien mène aux leads de la démo, titre « Leads » à l’écran, avec le focus');
+    ok(
+      await h.isVisible(),
+      'le lien mène aux leads de la démo, titre «\u202fLeads\u202f» à l’écran, avec le focus',
+    );
     await page.context().close();
   }
 

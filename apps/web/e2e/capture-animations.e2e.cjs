@@ -105,7 +105,7 @@ ${Array.from({ length: 9 }, (_, i) => `<div class="row">Rapport ${i + 1} · Équ
   await radio('Saisie').click();
   await page.waitForTimeout(500);
   ok(
-    (await sec.textContent()).includes('Champ « Nom du rapport », repéré à la capture'),
+    (await sec.textContent()).includes('Champ «\u202fNom du rapport\u202f», repéré à la capture'),
     'champ repéré à la capture',
   );
   const typed = sec.getByLabel('Texte saisi');
