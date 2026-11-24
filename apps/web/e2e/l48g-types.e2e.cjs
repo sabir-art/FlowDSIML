@@ -198,8 +198,72 @@ function data() {
   const titles = async () => p.locator('.demo-card h3').allInnerTexts();
   ok(!(await titles()).includes('Portail à explorer'), 'Démos : pas de Sandbox');
   const card = (title) => p.locator('.demo-card', { hasText: title });
-  ok((await card('Fiche usager HTML').locator('.ct-badge').innerText()).includes('HTML'), 'badge « HTML »');
+  ok(
+    (await card('Fiche usager HTML').locator('.ct-badge').innerText()).includes('HTML guidée'),
+    'badge « HTML guidée »',
+  );
   ok((await card('Onboarding').locator('.ct-badge').innerText()).includes('Captures'), 'badge « Captures »');
+  // Retours client du 24/11 §5 (maquette retours-2411/pastilles) : pastilles colorées par type, aux
+  // jetons --fd-type-*, 24 px, rayon 12, icône 16, libellé 12 en 600, bordure de 1 px, fond opaque
+  {
+    const tone = (title) =>
+      card(title)
+        .locator('.ct-badge')
+        .evaluate((el) => {
+          const cs = getComputedStyle(el);
+          const type = [...el.classList]
+            .find((c) => /^ct-badge--(captures|video|html|sandbox)$/.test(c))
+            ?.slice(10);
+          const probe = (v) => {
+            const s = document.createElement('span');
+            s.style.color = `var(${v})`;
+            document.body.append(s);
+            const c = getComputedStyle(s).color;
+            s.remove();
+            return c;
+          };
+          const rgb = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+          const lum = ([r, g, b]) => {
+            const f = (v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+            return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+          };
+          const [hi, lo] = [lum(rgb(cs.color)), lum(rgb(cs.backgroundColor))].sort((a, b) => b - a);
+          const svg = el.querySelector('svg');
+          return {
+            type,
+            tokens:
+              cs.backgroundColor === probe(`--fd-type-${type}-bg`) &&
+              cs.color === probe(`--fd-type-${type}-fg`) &&
+              cs.borderTopColor === probe(`--fd-type-${type}-border`),
+            opaque: rgb(cs.backgroundColor).length === 3,
+            ratio: Math.round(((hi + 0.05) / (lo + 0.05)) * 10) / 10,
+            h: el.getBoundingClientRect().height,
+            radius: cs.borderTopLeftRadius,
+            border: cs.borderTopWidth,
+            font: `${cs.fontSize} ${cs.fontWeight}`,
+            icon: svg.getBoundingClientRect().width,
+            lucide: [...svg.classList].find((c) => c.startsWith('lucide-')),
+            label: el.querySelector('span[aria-hidden]').textContent,
+          };
+        });
+    const want = [
+      ['Onboarding', 'captures', 'Captures', /^lucide-images$/],
+      ['Fiche usager HTML', 'html', 'HTML guidée', /^lucide-code/],
+      ['Visite filmée', 'video', 'Vidéo', /^lucide-video$/],
+    ];
+    for (const [title, type, label, icon] of want) {
+      const g = await tone(title);
+      ok(
+        g.type === type && g.tokens && g.opaque && g.label === label && icon.test(g.lucide),
+        `pastille « ${label} » : jetons --fd-type-${type}-*, fond opaque, icône ${g.lucide}`,
+      );
+      ok(
+        g.h === 24 && g.radius === '12px' && g.border === '1px' && g.font === '12px 600' && g.icon === 16,
+        `pastille « ${label} » : 24 px, rayon 12, bordure 1 px, 12 px en 600, icône 16 (${JSON.stringify(g)})`,
+      );
+      ok(g.ratio >= 5.3, `pastille « ${label} » : contraste ${g.ratio}:1 (5,3 au moins)`);
+    }
+  }
   ok(
     (await card('Visite filmée').locator('.ct-badge').innerText()).includes('Vidéo') &&
       (await card('Visite filmée').locator('.ct-badge svg.lucide-video').count()) === 1,

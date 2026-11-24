@@ -536,6 +536,46 @@ export const legacyAliases = {
 //   --fd-radius-* : rayons agrandis à la refonte DSI (md 12px, lg 16px, 2xl 24px pour les cartes)
 
 /* ------------------------------------------------------------------ */
+/* 7 bis. Pastilles de type de contenu (retours client du 24/11 §5)    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Couleurs des pastilles de type sur les cartes Démos : fond, texte et icône, bordure. Jetons à part
+ * (`--fd-type-*`) : les couleurs sémantiques restent réservées aux statuts, même si les teintes de base
+ * sont proches. Contrastes texte sur fond : 5,3:1 au moins en clair, 6,6:1 au moins en sombre.
+ */
+export const type = {
+  light: {
+    'captures-bg': '#fbf0f5',
+    'captures-fg': '#85164b',
+    'captures-border': '#f3d3e2',
+    'video-bg': '#edf6fc',
+    'video-fg': '#1e6a95',
+    'video-border': '#d3eaf7',
+    'html-bg': '#f5f9e8',
+    'html-fg': '#557014',
+    'html-border': '#e6f0c7',
+    'sandbox-bg': '#fff6e8',
+    'sandbox-fg': '#8f5300',
+    'sandbox-border': '#fde9cc',
+  },
+  dark: {
+    'captures-bg': '#2a0c1a',
+    'captures-fg': '#cf86a9',
+    'captures-border': '#480f2a',
+    'video-bg': '#0e2231',
+    'video-fg': '#7abfe5',
+    'video-border': '#195475',
+    'html-bg': '#1c2409',
+    'html-fg': '#aed054',
+    'html-border': '#435812',
+    'sandbox-bg': '#2b1a03',
+    'sandbox-fg': '#f8bb61',
+    'sandbox-border': '#855104',
+  },
+} as const;
+
+/* ------------------------------------------------------------------ */
 /* 8. Helpers                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -545,6 +585,7 @@ export const cssVar = (group: string, name: string): string => `var(--fd-${group
 export const tokens = {
   palette,
   colors,
+  type,
   fontFamily,
   fontWeight,
   textStyles,
