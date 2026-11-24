@@ -66,6 +66,7 @@ import {
   tabsAt,
   type BranchMemory,
   quizAnswerPayload,
+  maskStyle,
 } from './logic';
 import type { ComponentChildren } from 'preact';
 import { Checklist } from './Checklist';
@@ -1823,6 +1824,7 @@ function ImageStep({
               top: `${b.y * 100}%`,
               width: `${b.w * 100}%`,
               height: `${b.h * 100}%`,
+              ...maskStyle(b, img.width / img.height),
               ...(b.style === 'solid' ? { background: b.color } : {}),
             }}
           >

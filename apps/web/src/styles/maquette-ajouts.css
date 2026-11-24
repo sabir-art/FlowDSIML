@@ -2518,10 +2518,73 @@
   flex: none;
   border: 1px solid var(--fd-color-border);
 }
-.mk .blur-scope {
+/* EXT-02 §6.2 : Forme, Effet, Intensité, Teinte, « Appliquer à toutes les étapes » */
+.mk .blur-panel .blur-field > .label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mk .blur-seg {
   display: flex;
-  flex-direction: column;
+  width: 100%;
+}
+.mk .blur-seg > button {
+  flex: 1;
+}
+.mk .blur-val {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+}
+.mk .blur-tints {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
+}
+/* Couleurs de la capture : identiques en thème sombre (pas de jetons de thème) */
+.mk .blur-tints > button {
+  display: grid;
+  place-items: center;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: 8px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  cursor: pointer;
+}
+.mk .blur-tints > button > svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .blur-tints > button[aria-checked='true'] {
+  outline: 2px solid var(--fd-color-primary);
+  outline-offset: 2px;
+}
+.mk .blur-tints > button:focus-visible {
+  outline: 2px solid var(--fd-color-focus);
+  outline-offset: 2px;
+}
+.mk .blur-tints + .help {
+  margin: 6px 0 0;
+}
+.mk .blur-all {
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.mk .blur-all .fd-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.mk .blur-all svg {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: -3px;
 }
 .mk .canvas-blur.canvas-blur--solid {
   backdrop-filter: none;

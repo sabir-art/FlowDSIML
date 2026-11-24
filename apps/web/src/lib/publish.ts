@@ -1,4 +1,12 @@
-import { DEFAULT_FRAME, type Mask } from '@flowdsiml/manifest';
+import {
+  DEFAULT_FRAME,
+  MASK_RADIUS,
+  MASK_TINT_ALPHA,
+  maskIntensity,
+  maskPixelBlock,
+  maskTintColor,
+  type Mask,
+} from '@flowdsiml/manifest';
 import type { Json } from '@flowdsiml/supabase-types';
 import { supabase } from './supabase';
 
@@ -35,18 +43,30 @@ export async function burnBlurs(
   canvas.height = bmp.height;
   const ctx = canvas.getContext('2d')!;
   ctx.drawImage(bmp, 0, 0);
+  // EXT-02 §6.2 : les réglages sont donnés à l'échelle d'une capture de 1 280 px de large
+  const scale = bmp.width / 1280;
   for (const b of blurs) {
     const x = Math.floor(b.x * bmp.width);
     const y = Math.floor(b.y * bmp.height);
     const w = Math.max(1, Math.ceil(b.w * bmp.width));
     const h = Math.max(1, Math.ceil(b.h * bmp.height));
     const style = b.style ?? 'blur';
+    const tuned = typeof b.intensity === 'number';
+    ctx.save();
+    // Forme : tout ce qui suit est limité à la zone (arrondi, ellipse inscrite, ou rectangle d'une zone
+    // réglée). Une zone d'avant ce réglage est rendue comme avant, sans découpe.
+    if (b.shape === 'ellipse' || b.shape === 'rounded' || tuned) {
+      ctx.beginPath();
+      if (b.shape === 'ellipse') ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+      else if (b.shape === 'rounded') ctx.roundRect(x, y, w, h, Math.min(MASK_RADIUS * scale, w / 2, h / 2));
+      else ctx.rect(x, y, w, h);
+      ctx.clip();
+    }
     if (style === 'solid') {
-      ctx.save();
       ctx.fillStyle = /^#[0-9a-fA-F]{6}$/.test(b.color ?? '') ? b.color! : '#2A2F3A';
       ctx.fillRect(x, y, w, h);
       if (b.text) {
-        const size = Math.max(10, Math.min(h * 0.45, 28 * (bmp.width / 1280)));
+        const size = Math.max(10, Math.min(h * 0.45, 28 * scale));
         ctx.font = `600 ${size}px system-ui, sans-serif`;
         ctx.fillStyle = textOn(ctx.fillStyle as string);
         ctx.textAlign = 'center';
@@ -56,21 +76,29 @@ export async function burnBlurs(
       ctx.restore();
       continue;
     }
-    // Réduction puis agrandissement sans lissage (gros pixels), suivi d'un flou pour « Flou »
-    const factor = style === 'pixels' ? 12 : 16;
+    // Réduction puis agrandissement : c'est elle qui rend le texte illisible, quel que soit le réglage.
+    // Pavés : agrandissement sans lissage. Flou : agrandissement lissé, puis flou de l'intensité choisie.
+    // Une zone sans réglage garde le rendu d'origine (pavés de 12 px, réduction par 16 et flou de 6 px).
+    const factor = style === 'pixels' ? (tuned ? Math.max(8, maskPixelBlock(b) * scale) : 12) : 16;
     const small = document.createElement('canvas');
     small.width = Math.max(1, Math.round(w / factor));
     small.height = Math.max(1, Math.round(h / factor));
     const sctx = small.getContext('2d')!;
     sctx.drawImage(canvas, x, y, w, h, 0, 0, small.width, small.height);
-    ctx.save();
     if (style === 'pixels') {
       ctx.imageSmoothingEnabled = false;
     } else {
       ctx.imageSmoothingEnabled = true;
-      ctx.filter = 'blur(6px)';
+      ctx.filter = tuned ? `blur(${Math.max(1, maskIntensity(b) * scale)}px)` : 'blur(6px)';
     }
     ctx.drawImage(small, 0, 0, small.width, small.height, x, y, w, h);
+    ctx.filter = 'none';
+    const tint = maskTintColor({ ...b, style });
+    if (tint) {
+      ctx.globalAlpha = MASK_TINT_ALPHA;
+      ctx.fillStyle = tint;
+      ctx.fillRect(x, y, w, h);
+    }
     ctx.restore();
   }
   bmp.close();

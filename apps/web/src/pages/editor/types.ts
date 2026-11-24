@@ -7,6 +7,9 @@ import {
   type StepOptions,
   type Theme,
   type Zoom,
+  type MaskShape,
+  type MaskTint,
+  maskPreviewStyle,
 } from '@flowdsiml/manifest';
 
 export type DemoRow = Tables<'demos'>;
@@ -62,11 +65,25 @@ export const asRects = (v: unknown): Rect[] => (Array.isArray(v) ? (v as Rect[])
 /** L12-01 : zones masquées (flou, pixels, aplat) telles qu'enregistrées dans steps.blurs. */
 export type MaskRect = Rect & {
   style?: 'blur' | 'pixels' | 'solid';
+  /** EXT-02 §6.2 : forme, intensité (absente : rendu d'origine) et teinte. */
+  shape?: MaskShape;
+  intensity?: number;
+  tint?: MaskTint;
   color?: string;
   text?: string;
   group?: string;
 };
 export const asMasks = (v: unknown): MaskRect[] => (Array.isArray(v) ? (v as MaskRect[]) : []);
+/** Aperçu d'une zone dans l'éditeur : arrondi, filtre de fond et teinte (EXT-02 §6.2). */
+export function maskCss(m: MaskRect, ratio: number) {
+  const p = maskPreviewStyle(m, ratio);
+  return {
+    borderRadius: p.borderRadius,
+    backdropFilter: p.backdropFilter,
+    WebkitBackdropFilter: p.backdropFilter,
+    ...(p.background ? { background: p.background } : {}),
+  };
+}
 export const asZoom = (v: unknown): Zoom | null => (v && typeof v === 'object' ? (v as Zoom) : null);
 export const asCta = (v: unknown): Cta | null =>
   v && typeof v === 'object' && 'url' in (v as object) ? (v as Cta) : null;

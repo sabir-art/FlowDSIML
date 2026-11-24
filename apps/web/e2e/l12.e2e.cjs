@@ -142,13 +142,13 @@ const SHOTS = process.env.SHOTS_DIR;
     'L12-01 : étiquette « Masque » sur le canevas',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l12-mask.png` });
-  await page.getByLabel('Toutes les étapes, même position').check();
+  await page.getByRole('switch', { name: 'Appliquer à toutes les étapes' }).check();
   await page.waitForTimeout(900);
   ok(
     (st('s2').blurs || []).some((b) => b.style === 'solid' && b.text === 'Donnée masquée'),
     'L12-01 : masque copié sur les autres étapes, même position',
   );
-  await page.getByLabel('Cette étape seulement').check();
+  await page.getByRole('switch', { name: 'Appliquer à toutes les étapes' }).uncheck();
   await page.waitForTimeout(900);
   ok(!(st('s2').blurs || []).some((b) => b.text === 'Donnée masquée'), 'L12-01 : copies retirées');
   await blurDlg.getByRole('button', { name: 'Appliquer le flou' }).click();

@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ChevronLeft, Info, Trash2 } from 'lucide-react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
+import { MASK_INTENSITY, MASK_SHAPES, MASK_TINTS, maskIntensity, type MaskTint } from '@flowdsiml/manifest';
+import { Slider, Switch } from '@flowdsiml/ui';
+import { Ban, ChevronLeft, Info, Layers, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RectFields } from './RectFields';
 import type { DemoEditor } from '../useDemoEditor';
@@ -12,6 +14,25 @@ const SWATCHES = [
   { key: 'white', color: '#FFFFFF' },
 ] as const;
 const HEX = /^#[0-9a-fA-F]{6}$/;
+const TINTS = Object.keys(MASK_TINTS) as MaskTint[];
+
+/** Groupe de boutons radio : les flèches changent le choix et déplacent le focus (COMP-01). */
+function radioKey<T>(e: KeyboardEvent<HTMLElement>, list: readonly T[], i: number, pick: (v: T) => void) {
+  const d =
+    e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      ? 1
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+        ? -1
+        : 0;
+  if (!d) return;
+  e.preventDefault();
+  // Les flèches règlent le masque, pas l'étape (raccourci de l'éditeur)
+  e.stopPropagation();
+  const n = (i + d + list.length) % list.length;
+  pick(list[n]!);
+  const group = e.currentTarget.parentElement;
+  requestAnimationFrame(() => (group?.children[n] as HTMLElement | undefined)?.focus());
+}
 
 /** Couleur moyenne d'une bande de quelques pixels autour de la zone (masque discret). */
 async function detectColor(url: string, m: MaskRect): Promise<string | null> {
@@ -94,6 +115,10 @@ export function BlurPanel({
   }, [url, m?.style, m?.x, m?.y, m?.w, m?.h]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!m) return null;
   const style: Style = m.style ?? 'blur';
+  const shape = m.shape ?? 'rect';
+  const tint: MaskTint = m.tint && m.tint in MASK_TINTS ? m.tint : 'none';
+  // Valeur réellement rendue : une zone d'avant ce réglage montre son rendu d'origine, pas 12
+  const intensity = maskIntensity(m);
   const grouped =
     !!m.group &&
     editor.steps.some((s) => s.id !== step.id && asMasks(s.blurs).some((x) => x.group === m.group));
@@ -166,21 +191,106 @@ export function BlurPanel({
             </button>
           )}
         </div>
-        <div className="segmented blur-styles" role="radiogroup" aria-label={t('editor.blur.style')}>
-          {styles.map((s) => (
-            <button
-              key={s}
-              type="button"
-              role="radio"
-              aria-checked={style === s}
-              disabled={readOnly}
-              onClick={() => patch({ style: s })}
-            >
-              {t(`editor.blur.${s === 'solid' ? 'solid' : s === 'pixels' ? 'pixels' : 'blur'}`)}
-            </button>
-          ))}
+        {/* EXT-02 §6.2 : Forme, Effet, Intensité, Teinte */}
+        <div className="blur-field">
+          <span className="label" id="mk-shape">
+            {t('editor.blur.shape')}
+          </span>
+          <div className="fd-segmented blur-seg" role="radiogroup" aria-labelledby="mk-shape">
+            {MASK_SHAPES.map((sh, i) => (
+              <button
+                key={sh}
+                type="button"
+                role="radio"
+                aria-checked={shape === sh}
+                tabIndex={shape === sh ? 0 : -1}
+                disabled={readOnly}
+                onClick={() => patch({ shape: sh })}
+                onKeyDown={(e) => radioKey(e, MASK_SHAPES, i, (v) => patch({ shape: v }))}
+              >
+                {t(`editor.blur.shape_${sh}`)}
+              </button>
+            ))}
+          </div>
         </div>
-        <p className="help blur-help">{t(`editor.blur.help_${style}`)}</p>
+        <div className="blur-field">
+          <span className="label" id="mk-style">
+            {t('editor.blur.effect')}
+          </span>
+          <div className="fd-segmented blur-seg blur-styles" role="radiogroup" aria-labelledby="mk-style">
+            {styles.map((st, i) => (
+              <button
+                key={st}
+                type="button"
+                role="radio"
+                aria-checked={style === st}
+                tabIndex={style === st ? 0 : -1}
+                disabled={readOnly}
+                onClick={() => patch({ style: st })}
+                onKeyDown={(e) => radioKey(e, styles, i, (v) => patch({ style: v }))}
+              >
+                {t(`editor.blur.${st}`)}
+              </button>
+            ))}
+          </div>
+          <p className="help blur-help">{t(`editor.blur.help_${style}`)}</p>
+        </div>
+        {style !== 'solid' && (
+          <>
+            <div
+              className="blur-field"
+              // Les touches du curseur règlent l'intensité, pas l'étape (raccourcis de l'éditeur)
+              onKeyDown={(e) => {
+                if (/^(Arrow|Home$|End$|Page)/.test(e.key)) e.stopPropagation();
+              }}
+            >
+              <span className="label" id="mk-int">
+                {t('editor.blur.intensity')} <span className="blur-val">· {intensity} px</span>
+              </span>
+              <Slider
+                aria-labelledby="mk-int"
+                min={MASK_INTENSITY.min}
+                max={MASK_INTENSITY.max}
+                value={intensity}
+                valueText={`${intensity} px`}
+                disabled={readOnly}
+                onChange={(v) => patch({ intensity: v })}
+              />
+            </div>
+            <div className="blur-field">
+              <span className="label" id="mk-tint">
+                {t('editor.blur.tint')}
+              </span>
+              <div
+                className="blur-tints"
+                role="radiogroup"
+                aria-labelledby="mk-tint"
+                aria-describedby="mk-tint-h"
+              >
+                {TINTS.map((k, i) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="radio"
+                    aria-checked={tint === k}
+                    aria-label={t(`editor.blur.tint_${k}`)}
+                    title={t(`editor.blur.tint_${k}`)}
+                    tabIndex={tint === k ? 0 : -1}
+                    disabled={readOnly}
+                    style={MASK_TINTS[k] ? { background: MASK_TINTS[k]! } : undefined}
+                    onClick={() => patch({ tint: k })}
+                    onKeyDown={(e) => radioKey(e, TINTS, i, (v) => patch({ tint: v }))}
+                  >
+                    {k === 'none' && <Ban aria-hidden="true" />}
+                  </button>
+                ))}
+              </div>
+              <p className="help" id="mk-tint-h">
+                {t('editor.blur.tintHelp')}
+              </p>
+            </div>
+          </>
+        )}
 
         {style === 'solid' && (
           <>
@@ -257,30 +367,18 @@ export function BlurPanel({
         />
       )}
 
-      <div className="sec">
-        <div className="sec-title">{t('editor.blur.applyTo')}</div>
-        <div role="radiogroup" aria-label={t('editor.blur.applyTo')} className="blur-scope">
-          <label className="check">
-            <input
-              type="radio"
-              name="mscope"
-              checked={!grouped}
-              disabled={readOnly}
-              onChange={() => setScope(false)}
-            />
-            {t('editor.blur.thisStep')}
-          </label>
-          <label className="check">
-            <input
-              type="radio"
-              name="mscope"
-              checked={grouped}
-              disabled={readOnly}
-              onChange={() => setScope(true)}
-            />
-            {t('editor.blur.allStepsSame')}
-          </label>
-        </div>
+      <div className="blur-all">
+        <Switch
+          label={
+            <>
+              <Layers aria-hidden="true" />
+              {t('editor.blur.allSteps')}
+            </>
+          }
+          checked={grouped}
+          disabled={readOnly}
+          onChange={(e) => setScope(e.target.checked)}
+        />
       </div>
       <div className="alert alert-info blur-info">
         <Info aria-hidden="true" />

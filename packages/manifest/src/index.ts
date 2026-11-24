@@ -17,9 +17,36 @@ export const rectSchema = z.object({
 });
 export type Rect = z.infer<typeof rectSchema>;
 
+/** EXT-02 §6.2 : teintes d'un masque (couleurs de la capture, identiques en thème sombre), posées à 30 %. */
+export const MASK_TINTS = {
+  none: null,
+  gray: '#8f8f8f',
+  ink: '#1a1f26',
+  plum: '#a3195b',
+  blue: '#2f6fed',
+  white: '#ffffff',
+} as const;
+export type MaskTint = keyof typeof MASK_TINTS;
+export const MASK_TINT_ALPHA = 0.3;
+export const MASK_SHAPES = ['rect', 'rounded', 'ellipse'] as const;
+export type MaskShape = (typeof MASK_SHAPES)[number];
+/** Intensité (px à l'échelle d'une capture de 1 280 px) : bornes du curseur et valeur d'une nouvelle zone. */
+export const MASK_INTENSITY = { min: 2, max: 24, initial: 12 } as const;
+/** Rayon d'une zone « Arrondi », à l'échelle d'une capture de 1 280 px. */
+export const MASK_RADIUS = 12;
+
 /** L12-01 : zone masquée d'une capture (flou, pixels ou aplat de couleur, texte facultatif). */
 export const maskSchema = rectSchema.extend({
   style: z.enum(['blur', 'pixels', 'solid']).default('blur').catch('blur'),
+  /** EXT-02 §6.2 : forme de la zone (l'ellipse est inscrite dans le rectangle). */
+  shape: z.enum(MASK_SHAPES).default('rect').catch('rect'),
+  /** Douceur du flou ou taille des pavés ; absente : rendu d'origine (zones d'avant ce réglage). */
+  intensity: z.number().int().min(MASK_INTENSITY.min).max(MASK_INTENSITY.max).optional().catch(undefined),
+  /** Teinte posée par-dessus le flou ou les pavés (jamais sur un aplat). */
+  tint: z
+    .enum(Object.keys(MASK_TINTS) as [MaskTint, ...MaskTint[]])
+    .default('none')
+    .catch('none'),
   color: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
@@ -30,6 +57,61 @@ export const maskSchema = rectSchema.extend({
   group: z.string().max(40).optional().catch(undefined),
 });
 export type Mask = z.infer<typeof maskSchema>;
+
+type MaskLook = { style?: string; shape?: string; intensity?: number; tint?: string };
+/**
+ * Intensité réellement rendue : le réglage, sinon celle du rendu d'origine (flou d'environ 6 px, pavés de
+ * 12 px). Le curseur n'affiche jamais autre chose que ce qui est rendu.
+ */
+export function maskIntensity(m: MaskLook): number {
+  if (typeof m.intensity === 'number')
+    return Math.min(MASK_INTENSITY.max, Math.max(MASK_INTENSITY.min, Math.round(m.intensity)));
+  return m.style === 'pixels' ? 12 : 6;
+}
+/**
+ * Côté d'un pavé (px à l'échelle 1 280). Jamais sous 8 px : même au réglage le plus fin, un texte de
+ * capture ne se relit pas. Une zone d'avant ce réglage garde ses pavés de 12 px.
+ */
+export function maskPixelBlock(m: MaskLook): number {
+  return typeof m.intensity === 'number' ? 6 + maskIntensity(m) : 12;
+}
+/** Couleur de la teinte (null : aucune, ou aplat). */
+export function maskTintColor(m: MaskLook): string | null {
+  if (m.style === 'solid') return null;
+  return MASK_TINTS[(m.tint ?? 'none') as MaskTint] ?? null;
+}
+/**
+ * Arrondi d'une zone pour un aperçu en CSS, en pourcentages de la zone elle-même (l'aperçu suit ainsi la
+ * taille affichée de la capture). `ratio` : largeur / hauteur de la capture.
+ */
+export function maskRadiusCss(m: MaskLook & { w: number; h: number }, ratio: number): string | undefined {
+  if (m.shape === 'ellipse') return '50%';
+  if (m.shape !== 'rounded' || !(m.w > 0) || !(m.h > 0)) return undefined;
+  const r = MASK_RADIUS / 1280;
+  const pct = (v: number) => `${Math.min(50, Math.round(v * 1000) / 10)}%`;
+  return `${pct(r / m.w)} / ${pct((r * ratio) / m.h)}`;
+}
+/** Aperçu d'un masque (éditeur, lecteur avant publication) : arrondi, filtre de fond et teinte. */
+export function maskPreviewStyle(
+  m: MaskLook & { w: number; h: number; color?: string },
+  ratio: number,
+): { borderRadius?: string; backdropFilter?: string; background?: string } {
+  const borderRadius = maskRadiusCss(m, ratio);
+  if (m.style === 'solid') return { borderRadius, backdropFilter: 'none', background: m.color };
+  const i = maskIntensity(m);
+  const tint = maskTintColor(m);
+  return {
+    borderRadius,
+    // Pavés : le navigateur ne sait pas pixelliser un fond ; flou court et contraste en tiennent lieu
+    backdropFilter:
+      m.style === 'pixels' ? `blur(${Math.max(3, Math.round(i / 2))}px) contrast(1.2)` : `blur(${i}px)`,
+    background: tint
+      ? `${tint}${Math.round(MASK_TINT_ALPHA * 255)
+          .toString(16)
+          .padStart(2, '0')}`
+      : undefined,
+  };
+}
 
 export const placementSchema = z.enum(['auto', 'top', 'bottom', 'left', 'right']);
 

@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
-import { themeSchema } from '@flowdsiml/manifest';
+import { themeSchema, MASK_INTENSITY } from '@flowdsiml/manifest';
 import {
   beaconCenter,
   boxStyle,
@@ -34,6 +34,7 @@ import {
   asAction,
   asCta,
   asMasks,
+  maskCss,
   asSettings,
   asStepOptions,
   asZoom,
@@ -220,7 +221,14 @@ export function Canvas({
 
   function onUp() {
     if (drag?.kind === 'draw' && drag.rect.w > 0.01 && drag.rect.h > 0.01) {
-      const r = { x: r4(drag.rect.x), y: r4(drag.rect.y), w: r4(drag.rect.w), h: r4(drag.rect.h) };
+      // EXT-02 §6.2 : une nouvelle zone part de l'intensité par défaut (12 px)
+      const r = {
+        x: r4(drag.rect.x),
+        y: r4(drag.rect.y),
+        w: r4(drag.rect.w),
+        h: r4(drag.rect.h),
+        intensity: MASK_INTENSITY.initial,
+      };
       editor.updateStep(step.id, { blurs: [...blurs, r] });
       setSelection({ kind: 'blur', index: blurs.length });
       setTool('select');
@@ -506,6 +514,7 @@ export function Canvas({
             top: `${b.y * 100}%`,
             width: `${b.w * 100}%`,
             height: `${b.h * 100}%`,
+            ...maskCss(b, (step.image_width ?? 16) / (step.image_height ?? 10)),
             ...(b.style === 'solid'
               ? { background: b.color ?? '#2A2F3A', color: textOn(b.color ?? '#2A2F3A') }
               : {}),
