@@ -143,7 +143,7 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
   - sous la liste : « 3 démos affichées, dans cet ordre. Glissez la poignée ou utilisez les flèches. »
 - **Pied** :
   - **Lien de contact** : facultatif, e-mail ou https ;
-  - **Afficher « Fait avec TutoClick »** : interrupteur, activé par défaut.
+  - **Afficher « Créé avec TutoClick »** : interrupteur, activé par défaut.
 - **Moteur** : c'est le catalogue de démos déjà servi par le lecteur (`/c/{adresse}`, type « Catalogue de démos » du centre). Cette page en est le réglage, pas un deuxième catalogue.
 
 **Précisions (questions du dev, 24/11)**
@@ -159,6 +159,19 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
   Les autres réglages restent modifiables et enregistrables.
 - **« Enregistrer »** : enregistre et publie d'un coup quand l'interrupteur est activé, il n'y a pas de bouton « Publier » à part. Toast après l'enregistrement : « Page publique enregistrée. Elle est en ligne. » avec l'action « Voir la page » ; interrupteur coupé : « Page publique enregistrée. Elle n'est pas visible. »
 - **Lien de contact** : celui du pied de page (« Aide », e-mail ou https), pas le bouton d'en-tête (https seulement).
+
+**Recette de 53ca2fc (24/11) : réponses au dev**
+- **Adresse** : préfixe réel `{lecteur}/#/c/`, tronqué par « … » à 390, copie entière : validé.
+- **Mobile (390)** : l'en-tête ne garde qu'« Enregistrer ». « Voir la page » passe sous le champ Adresse, en lien avec ExternalLink (nouvel onglet). « Annuler » n'a pas d'équivalent : le retour (chevron) demande « Quitter sans enregistrer ? » s'il y a des modifications, comme les autres réglages.
+- **« Voir la page »** désactivé tant que la page n'est pas en ligne : validé, en `aria-disabled` avec l'infobulle « La page n'est pas en ligne. »
+- **Logo** (« Logo de l'espace » / « Logo choisi dans la médiathèque », « Revenir au logo de l'espace », tuile à l'initiale sans logo) : validé.
+- **Liste** : cochées en haut dans leur ordre, décochées dessous sans poignée ni flèches ; aucune cochée → « Choisissez au moins une démo. » et enregistrement impossible si la page est activée : validé.
+- **Type** en texte neutre, masqué à 390 ; **adresse prise** (« Cette adresse est déjà prise. Choisissez-en une autre. ») ; **lecteur** « Cette page n'est pas disponible » + « Elle a été désactivée ou son adresse a changé. Si quelqu'un vous a envoyé ce lien, demandez-lui la nouvelle adresse. », aussi pour un centre introuvable : validés.
+- **Mention** : on garde le texte existant du lecteur, « Créé avec TutoClick » ; le réglage devient « Afficher « Créé avec TutoClick » » (spec et maquettes mises à jour).
+- **Parcours de formation** : oui, un bandeau, même modèle que `page-publique-centre` (neutre, `role="status"`, icône Info) quand la page publique occupe l'adresse : « **Votre centre de formation n'est plus affiché à {adresse}.** La page publique des démos l'a remplacé. » avec le bouton secondaire « Remettre le centre de formation », qui ouvre un `alertdialog` « Remettre le centre de formation à cette adresse ? » (« La page publique des démos sera désactivée. Ses réglages sont conservés. », boutons « Annuler » et « Remettre le centre », primaire).
+- **À corriger** :
+  1. le titre de l'`alertdialog` « Remplacer le centre de formation à cette adresse ? » est coupé par « … » à 1440 : un titre de fenêtre passe à la ligne, il n'est jamais tronqué (MODAL-01) ;
+  2. le motif de refus de l'interrupteur est en rouge ; il doit être en couleur de texte, avec l'icône CircleAlert en `text-muted` : ce n'est pas une erreur de saisie (maquettes `page-publique-refus-*`).
 
 ### 6.2 Connexions › Clés d'accès
 - **Qui** : propriétaires et administrateurs ; la rubrique est masquée pour les autres rôles.
