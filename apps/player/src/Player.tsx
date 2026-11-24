@@ -1888,6 +1888,29 @@ function ImageStep({
             <span class="sr-only">{typed}</span>
           </>
         )}
+        {/* Images ajoutées : dessinées dans l'aperçu ; incrustées dans la capture une fois publiées, il
+            n'en reste alors que la place et le texte alternatif pour les lecteurs d'écran */}
+        {(step.options.images ?? []).map((l, i) =>
+          l.hidden ? null : l.url ? (
+            <img
+              key={`l${i}`}
+              class="p-layer"
+              src={l.url}
+              alt={l.decorative ? '' : (l.alt ?? '')}
+              draggable={false}
+              style={{
+                ...boxStyle(l),
+                opacity: (l.opacity ?? 100) / 100,
+                borderRadius: l.rounded
+                  ? `${Math.min(50, (12 / 1280 / l.w) * 100)}% / ${Math.min(50, ((12 / 1280) * (shown.width / shown.height) * 100) / l.h)}%`
+                  : undefined,
+                filter: l.shadow ? 'drop-shadow(0 4px 12px rgb(16 24 40 / 0.18))' : undefined,
+              }}
+            />
+          ) : l.alt && !l.decorative ? (
+            <span key={`l${i}`} class="p-layer" role="img" aria-label={l.alt} style={boxStyle(l)} />
+          ) : null,
+        )}
         {step.blurs.map((b, i) => (
           <div
             key={i}

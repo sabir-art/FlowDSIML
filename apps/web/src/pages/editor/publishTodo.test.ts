@@ -68,4 +68,25 @@ describe('publishTodo', () => {
       { key: 'quizEmpty', kinds: ['quizEmpty'] },
     ]);
   });
+  it('image ajoutée visible sans texte alternatif ni mention décorative', () => {
+    const img = { id: 'i1', path: 'ws/demo/a.webp', x: 0, y: 0, w: 0.2, h: 0.2 };
+    const step = (images: unknown[]) => ({ id: 's1', kind: 'image', title: 'Accueil', options: { images } });
+    const hotspots = [{ step_id: 's1', title: 'Cliquez', body: '' }];
+    expect(publishTodo({ ...base, steps: [step([img])], hotspots })).toEqual([
+      { kind: 'imageNoAlt', index: 0 },
+    ]);
+    expect(
+      publishTodo({
+        ...base,
+        steps: [
+          step([
+            { ...img, alt: 'Flèche' },
+            { ...img, id: 'i2', decorative: true },
+            { ...img, id: 'i3', hidden: true },
+          ]),
+        ],
+        hotspots,
+      }),
+    ).toEqual([]);
+  });
 });

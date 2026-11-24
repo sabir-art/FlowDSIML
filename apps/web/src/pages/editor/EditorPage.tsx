@@ -8,7 +8,6 @@ import {
   LayoutTemplate,
   Download,
   ListChecks,
-  ImagePlus,
   Upload,
   Keyboard,
   PenLine,
@@ -98,6 +97,7 @@ import { ShortcutsDialog, isMac } from './ShortcutsDialog';
 import type { Manifest } from '@flowdsiml/manifest';
 import '@flowdsiml/player-core/player-core.css';
 import './editor.css';
+import './images/images.css';
 import { Menu } from '../../components/Menu';
 import { SaveTemplateDialog } from './SaveTemplateDialog';
 import { LoadError, LoadStatus, SlowLine, useSkeleton } from '../../components/Skeleton';
@@ -112,6 +112,8 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { BackButton, Select } from '@flowdsiml/ui';
+import { ImagePanel } from './images/ImagePanel';
+import { asLayers, layerName } from './images/layers';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -145,6 +147,8 @@ export function EditorPage() {
   const replacePicker = useRef<HTMLInputElement>(null);
   /** Étape dont on remplace la capture (menu de l'étape) ; à défaut, l'étape affichée. */
   const replaceTarget = useRef<string | null>(null);
+  // Retours client du 24/11 §1 : import d'une image ajoutée (outil Image ouvert), appelé par le dépôt
+  const layerImport = useRef<((file: File) => void) | null>(null);
   const [stageDrop, setStageDrop] = useState(false);
   /** Mes dernières modifications par ligne et champ (pour signaler un écrasement). */
   const myEdits = useRef(new Map<string, number>());
@@ -351,6 +355,10 @@ export function EditorPage() {
   const freeSpot = freeSpotlightOf(asSettings(editor.demo?.settings));
   // MEDIA-01 : remplacer la capture d'une étape (menu, bouton du panneau, dépôt sur la carte ou le canevas)
   const canDropImage = !readOnly && step?.kind === 'image';
+  const selectedLayer =
+    selection.kind === 'image' && step
+      ? asLayers(step.options).find((l) => l.id === selection.id)
+      : undefined;
   const replaceImage = (stepId: string, file: File) => {
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
       toast(t('editor.replaceBadType'), undefined, { tone: 'warning' });
@@ -447,6 +455,7 @@ export function EditorPage() {
   useEffect(() => {
     if (selection.kind === 'hotspot') setPanelState('hotspots');
     else if (selection.kind === 'crop') setPanelState('crop');
+    else if (selection.kind === 'image') setPanelState('image');
     else if (selection.kind === 'blur') {
       setBlurOpen({ index: selection.index });
       setSelection({ kind: 'step' });
@@ -672,7 +681,8 @@ export function EditorPage() {
     if (id === 'assistant') setSuggesting(false);
     if (id === 'blur') return setBlurOpen({});
     if (id === panel && !selectedForm) return closePanel();
-    if (selectedForm || panel === 'crop' || panel === 'hotspots') setSelection({ kind: 'step' });
+    if (selectedForm || panel === 'crop' || panel === 'hotspots' || panel === 'image')
+      setSelection({ kind: 'step' });
     setTool(id === 'hotspots' ? 'hotspot' : 'select');
     if (id === 'crop' && step) {
       setCropDraft(cropDraftFor(step));
@@ -746,26 +756,28 @@ export function EditorPage() {
       panel === 'cta' || panel === 'voice' || panel === 'next' || panel === 'zoom' || panel === 'image'
         ? panel
         : 'step';
+    if (panel === 'image' && ws)
+      return (
+        <ImagePanel
+          editor={editor}
+          step={step}
+          wsId={ws.id}
+          readOnly={readOnly}
+          selection={selection}
+          setSelection={setSelection}
+          importRef={layerImport}
+          onImportCapture={() => {
+            replaceTarget.current = null;
+            replacePicker.current?.click();
+          }}
+          onCaptureFile={(f) => replaceImage(step.id, f)}
+          onCrop={() => toggleTool('crop')}
+        >
+          <StepPanel editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} section="image" />
+        </ImagePanel>
+      );
     return (
-      <>
-        {panel === 'image' && (
-          <div className="sec">
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              aria-controls="editorpage-file"
-              onClick={() => {
-                replaceTarget.current = null;
-                replacePicker.current?.click();
-              }}
-            >
-              <ImagePlus aria-hidden="true" />
-              {t('editor.toolReplace')}
-            </button>
-          </div>
-        )}
-        <StepPanel editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} section={section} />
-      </>
+      <StepPanel editor={editor} step={step} index={index} readOnly={readOnly} ab={ab} section={section} />
     );
   }
 
@@ -1160,13 +1172,16 @@ export function EditorPage() {
             if (!canDropImage || !e.dataTransfer.files.length) return;
             e.preventDefault();
             setStageDrop(false);
-            if (step) replaceImage(step.id, e.dataTransfer.files[0]!);
+            // Outil Image ouvert : le fichier déposé s'ajoute par-dessus la capture
+            if (panel === 'image' && layerImport.current) layerImport.current(e.dataTransfer.files[0]!);
+            else if (step) replaceImage(step.id, e.dataTransfer.files[0]!);
           }}
         >
           {stageDrop && (
             <span className="fd-drop__veil stage-drop" aria-hidden="true">
               <Upload />
-              {t('dropzone.dropBlock')}
+              {/* Le dépôt dit ce qu'il fera : ajouter une image (outil Image ouvert) ou remplacer la capture */}
+              {t(panel === 'image' ? 'editor.image.dropAdd' : 'editor.image.dropReplace')}
             </span>
           )}
           <div className="row stage-head">
@@ -1299,6 +1314,7 @@ export function EditorPage() {
                           }
                           hideFormChip={!!selectedForm}
                           freeSpot={panel === 'spotlight' && freeSpot.enabled ? freeSpot : null}
+                          layersActive={panel === 'image'}
                           abPreview={
                             ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
                               ? {
@@ -1320,6 +1336,15 @@ export function EditorPage() {
                 <div className="muted">{t('editor.empty')}</div>
               )}
               {tool !== 'select' && <p className="muted canvas-hint">{t(`editor.hint_${tool}`)}</p>}
+              {tool === 'select' && panel === 'image' && step?.kind === 'image' && !readOnly && (
+                <p className="muted canvas-hint" role="status">
+                  {selectedLayer
+                    ? t('editor.image.selectedHint', {
+                        name: layerName(selectedLayer, t('editor.image.untitled')),
+                      })
+                    : t('editor.image.dropHint')}
+                </p>
+              )}
             </div>
           </div>
           <CommentsDock

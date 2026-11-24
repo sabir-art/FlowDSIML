@@ -1609,6 +1609,16 @@ async function install(page, state = seed()) {
             return json(route, 400, { message: `BEFORE_AFTER_INCOMPLETE:${baBad + 1}`, code: 'P0001' });
           const versionId = crypto.randomUUID();
           const number = t.demo_versions.filter((v) => v.demo_id === d.id).length + 1;
+          // Images ajoutées visibles ; la copie publiée change de nom avec elles (comme publish_demo)
+          const visibleImages = (s) => (s.options?.images || []).filter((i) => !i.hidden);
+          const pubName = (s) =>
+            visibleImages(s).length
+              ? `${s.id}-${crypto
+                  .createHash('md5')
+                  .update(JSON.stringify([visibleImages(s), s.blurs || [], s.options?.crop || null]))
+                  .digest('hex')
+                  .slice(0, 8)}`
+              : s.id;
           const manifest = {
             schemaVersion: 1,
             demoId: d.id,
@@ -1638,8 +1648,24 @@ async function install(page, state = seed()) {
               chapterId: null,
               kind: s.kind,
               image: s.image_path
-                ? { url: `assets/${s.id}.webp`, width: s.image_width, height: s.image_height }
+                ? { url: `assets/${pubName(s)}.webp`, width: s.image_width, height: s.image_height }
                 : null,
+              // Comme publish_demo : recadrage, et images ajoutées réduites à leur place et à leur
+              // texte alternatif (elles sont incrustées par l'app, leur chemin n'est jamais publié)
+              ...(s.options?.crop || visibleImages(s).length
+                ? {
+                    options: {
+                      ...(s.options?.crop ? { crop: s.options.crop } : {}),
+                      ...(visibleImages(s).length
+                        ? {
+                            images: visibleImages(s)
+                              .filter((i) => !i.decorative && (i.alt || '').trim())
+                              .map((i) => ({ x: i.x, y: i.y, w: i.w, h: i.h, alt: i.alt })),
+                          }
+                        : {}),
+                    },
+                  }
+                : {}),
               snapshotUrl: null,
               // L17 : comme publish_demo (capture « Avant », sans les sources)
               beforeAfter:
@@ -1694,7 +1720,11 @@ async function install(page, state = seed()) {
             copies: [
               ...steps
                 .filter((s) => s.image_path)
-                .map((s) => ({ from: s.image_path, to: `${d.id}/assets/${s.id}.webp` })),
+                .map((s) => ({
+                  from: s.image_path,
+                  to: `${d.id}/assets/${pubName(s)}.webp`,
+                  ...(visibleImages(s).length ? { images: visibleImages(s) } : {}),
+                })),
               ...steps
                 .filter((s) => s.kind === 'before_after' && s.before_image_path)
                 .map((s) => ({ from: s.before_image_path, to: `${d.id}/assets/${s.id}-b.webp` })),

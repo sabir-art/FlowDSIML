@@ -125,7 +125,12 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
       gateFormId: s.gate_form_id,
       // L25-01 : page entière par son adresse signée (aperçu du défilement), jamais son chemin
       options: (() => {
-        const o = asStepOptions(s.options);
+        const parsed = asStepOptions(s.options);
+        // Images ajoutées visibles, par leur adresse signée (jamais leur chemin)
+        const images = (parsed.images ?? [])
+          .filter((l) => !l.hidden && l.path && ed.imageUrls[l.path])
+          .map((l) => ({ ...l, path: undefined, name: undefined, url: ed.imageUrls[l.path!] }));
+        const o = { ...parsed, images: images.length ? images : undefined };
         const fp = o.fullPage;
         return fp
           ? {
