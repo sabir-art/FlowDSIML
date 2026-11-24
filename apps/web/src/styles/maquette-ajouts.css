@@ -2496,13 +2496,18 @@
   width: 16px;
   height: 16px;
 }
+/* Sélection en box-shadow inset (un liseré de surface la détache de la teinte) ; le focus clavier passe
+   par l'anneau commun, sans outline en plus (FIELD-01 : un seul indicateur) */
 .mk .blur-tints > button[aria-checked='true'] {
-  outline: 2px solid var(--fd-color-primary);
-  outline-offset: 2px;
+  box-shadow:
+    inset 0 0 0 2px var(--fd-color-primary),
+    inset 0 0 0 3px var(--fd-color-surface);
 }
 .mk .blur-tints > button:focus-visible {
-  outline: 2px solid var(--fd-color-focus);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px var(--fd-color-focus),
+    inset 0 0 0 3px var(--fd-color-surface);
 }
 .mk .blur-tints + .help {
   margin: 6px 0 0;
