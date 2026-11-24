@@ -83,6 +83,18 @@
     color: var(--fd-color-danger);
   }
 }
+/* Création réussie : même tuile, aux couleurs du succès */
+.fd-modal--success .fd-modal__tile,
+[data-theme='dark'] .fd-modal--success .fd-modal__tile {
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .fd-modal--success .fd-modal__tile {
+    background: var(--fd-color-success-soft);
+    color: var(--fd-color-success);
+  }
+}
 .fd-modal__head h2 {
   flex: 1;
   min-width: 0;

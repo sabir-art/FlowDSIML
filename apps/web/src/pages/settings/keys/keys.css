@@ -98,6 +98,10 @@
 .ak-scopes > .stg-help:empty {
   display: none;
 }
+/* Limite de clés atteinte : le message remplace le formulaire */
+.ak-full {
+  margin: 0;
+}
 /* Fenêtre « Clé créée » */
 .ak-created {
   display: grid;
