@@ -119,7 +119,19 @@ const N = ' ';
     /dans la bulle de 2 étapes, à partir de l’étape 2/.test((await dlg.innerText()).replace(/\s+/g, ' ')),
     'toutes les étapes : la confirmation annonce 2 étapes, à partir de l’étape 2',
   );
-  if (SHOTS) await page.screenshot({ path: `${SHOTS}/precedent-toutes.png` });
+  if (SHOTS) {
+    // Capture après la fin de l'ouverture de la fenêtre (retour UX : fenêtre saisie en plein fondu)
+    await page.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          // Les animations sans fin (indicateurs) ne se terminent jamais : on ne les attend pas
+          .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => {})),
+      ),
+    );
+    await page.screenshot({ path: `${SHOTS}/precedent-toutes.png` });
+  }
   await dlg.getByRole('button', { name: 'Appliquer à 2 étapes' }).click();
   await page.locator('.toast').filter({ hasText: 'Option appliquée' }).waitFor();
   ok(
