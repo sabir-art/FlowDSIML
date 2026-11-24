@@ -51,10 +51,20 @@ const MOBILE = WIDTH < 768;
   // 1. Liste vide, puis création
   {
     const { page, state } = await open();
-    await page.getByRole('heading', { name: 'Aucune clé', level: 3 }).waitFor();
+    await page.getByRole('heading', { name: 'Aucune clé pour l’instant', level: 3 }).waitFor();
     ok(
-      (await page.getByText('Elle ne s’affiche qu’une fois, à la création.').count()) === 1,
-      'liste vide : « Aucune clé » et son texte',
+      (await page
+        .getByText(
+          'Une clé permet à un outil de l’espace (CRM, intranet) de lire vos démos, leurs statistiques ou leurs leads.',
+        )
+        .count()) === 1,
+      'liste vide : « Aucune clé pour l’instant » et sa phrase',
+    );
+    // §3 (retours du 24/11, 2e série) : une seule « Créer une clé », dans l'en-tête de la page
+    ok(
+      (await page.getByRole('button', { name: 'Créer une clé' }).count()) === 1 &&
+        (await page.locator('.stg-empty').getByRole('button').count()) === 0,
+      'liste vide : une seule « Créer une clé », dans l’en-tête (aucun bouton dans l’état vide)',
     );
     // « Utiliser l'API » est visible aussi sans clé
     const api = page.locator('section.ak-api');
