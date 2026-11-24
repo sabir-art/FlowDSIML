@@ -281,7 +281,8 @@ export function Player({
   // première occurrence de chaque terme dans l'étape (corps, bulles, notes Avant / Après, dans cet ordre).
   const glossary = useMemo(() => m.glossary ?? [], [m.glossary]);
   const needles = useMemo(() => buildNeedles(glossary, escapeHtml), [glossary]);
-  const marked = (s: string) => richTextToHtml(applyVariables(s, values, defaults, [VAR_OPEN, VAR_CLOSE]));
+  // Les variables sont remplacées par le rendu lui-même : une valeur reste du texte, jamais un lien
+  const marked = (s: string) => richTextToHtml(s, { values, defaults, wrap: [VAR_OPEN, VAR_CLOSE] });
   const stepTerms = useMemo(() => {
     const byText = new Map<string, Set<number>>();
     if (!needles.length) return byText;
@@ -304,7 +305,7 @@ export function Player({
   }, [needles, index, values, defaults]);
   const html = (s: string) => {
     const own = stepTerms.get(s);
-    if (!own || !own.size) return richTextToHtml(sub(s));
+    if (!own || !own.size) return richTextToHtml(s, { values, defaults });
     const skip = new Set(glossary.map((_, i) => i).filter((i) => !own.has(i)));
     return markTermsInHtml(marked(s), needles, skip);
   };
@@ -625,7 +626,7 @@ export function Player({
   function follow(action: (typeof choices)[number]['action']) {
     const target = choiceTarget(m, action, index);
     if (!target) return;
-    if (target.kind === 'url') openExternal(target.url, '_blank');
+    if (target.kind === 'url') openExternal(applyUrlVariables(target.url, values, defaults), '_blank');
     else if (target.kind === 'end') {
       markSeen(index);
       setEnded(true);
@@ -639,7 +640,7 @@ export function Player({
   function onHotspot(h: Hotspot) {
     tracker.track('hotspot_click', { stepId: step.id, hotspotId: h.id, stepIndex: index });
     if (h.action.type === 'url') {
-      openExternal(h.action.url, h.action.newTab ? '_blank' : '_top');
+      openExternal(applyUrlVariables(h.action.url, values, defaults), h.action.newTab ? '_blank' : '_top');
       return;
     }
     if (h.action.type === 'next' && ruleTarget(m, index, { ...memory.current, vars: values, variant }))
@@ -1463,7 +1464,7 @@ export function Player({
               workspaceName={m.workspaceName}
               t={t}
               sub={sub}
-              rich={(x) => richTextToHtml(sub(x))}
+              rich={(x) => richTextToHtml(x, { values, defaults })}
               onSkip={() => markGate(gateForm.id)}
               onSubmit={async (data) => {
                 await onLead(gateForm, data);

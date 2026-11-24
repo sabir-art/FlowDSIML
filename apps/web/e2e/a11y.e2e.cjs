@@ -563,7 +563,8 @@ const APP_PAGES = [
     open: async (p) => {
       await p.getByRole('button', { name: /^2 Écran 2/ }).click();
       await p.locator('.canvas-blur').first().click({ force: true });
-      await p.getByRole('radiogroup', { name: 'Style de masquage' }).waitFor();
+      // EXT-02 §6.2 : le groupe s'appelle « Effet » (Forme, Effet, Intensité, Teinte)
+      await p.getByRole('radiogroup', { name: 'Effet' }).waitFor();
     },
   },
   {

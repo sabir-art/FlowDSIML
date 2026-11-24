@@ -44,7 +44,7 @@ export function varPreview(
     text: (s: string) => applyVariables(s, values, m === 'fallbacks' ? defaults : {}),
     /** Texte riche (HTML) avec les valeurs surlignées. */
     html: (s: string) =>
-      marked(richTextToHtml(applyVariables(s, values, m === 'fallbacks' ? defaults : {}, [OPEN, CLOSE]))),
+      marked(richTextToHtml(s, { values, defaults: m === 'fallbacks' ? defaults : {}, wrap: [OPEN, CLOSE] })),
     /** Texte simple échappé, valeurs surlignées. */
     plainHtml: (s: string) =>
       marked(escapeHtml(applyVariables(s, values, m === 'fallbacks' ? defaults : {}, [OPEN, CLOSE]))),

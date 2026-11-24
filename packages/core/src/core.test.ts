@@ -121,3 +121,74 @@ describe('divers', () => {
     expect(withinLimit(3, 3)).toBe(false);
   });
 });
+
+describe('texte riche et variables', () => {
+  const html = (src: string, values: Record<string, string>, defaults: Record<string, string> = {}) =>
+    richTextToHtml(src, { values, defaults });
+  it('garde la valeur d’une variable comme du texte', () => {
+    const out = html('Bonjour {{first_name}} !', { first_name: '[ici](https://exemple.test) **x** *y*' });
+    expect(out).not.toContain('<a ');
+    expect(out).not.toContain('<strong>');
+    expect(out).not.toContain('<em>');
+    expect(out).toBe('Bonjour [ici](https://exemple.test) **x** *y* !');
+  });
+  it('échappe le HTML d’une valeur', () => {
+    expect(html('{{company}}', { company: '<img src=x onerror=1>' })).toBe('&lt;img src=x onerror=1&gt;');
+  });
+  it('encode une valeur qui complète une adresse', () => {
+    const out = html('[Ouvrir](https://exemple.test/fiche?nom={{first_name}})', {
+      first_name: 'a/b?c=d&e #f',
+    });
+    expect(out).toBe(
+      '<a href="https://exemple.test/fiche?nom=a%2Fb%3Fc%3Dd%26e%20%23f" target="_blank" rel="noopener noreferrer">Ouvrir</a>',
+    );
+  });
+  it('n’accepte une adresse faite d’une seule variable qu’en http, https ou mailto', () => {
+    const link = '[Suite]({{lien}})';
+    expect(html(link, { lien: 'https://exemple.test/a?b=1' })).toContain('href="https://exemple.test/a?b=1"');
+    expect(html(link, { lien: 'mailto:contact@exemple.test' })).toContain(
+      'href="mailto:contact@exemple.test"',
+    );
+    for (const bad of ['javascript:alert(1)', 'data:text/html,x', 'file:///etc/hosts', '//exemple.test', ''])
+      expect(html(link, { lien: bad })).toBe('Suite');
+  });
+  it('ne laisse pas une valeur changer l’hôte d’un lien', () => {
+    const out = html('[Aide](https://exemple.test/{{page}})', { page: '@autre.test/x' });
+    expect(out).toContain('href="https://exemple.test/%40autre.test%2Fx"');
+  });
+  it('place les bornes du glossaire autour des valeurs du texte, pas dans les adresses', () => {
+    const out = richTextToHtml('{{company}} [x](https://exemple.test/?c={{company}})', {
+      values: { company: 'Acme' },
+      wrap: ['‹', '›'],
+    });
+    expect(out).toBe(
+      '‹Acme› <a href="https://exemple.test/?c=Acme" target="_blank" rel="noopener noreferrer">x</a>',
+    );
+  });
+});
+
+describe('texte riche : liens et mise en forme', () => {
+  it('ne retouche jamais l’adresse d’un lien (astérisques dans l’adresse)', () => {
+    const out = richTextToHtml('[doc](https://exemple.test/**a**/*b*) et **gras**');
+    expect(out).toBe(
+      '<a href="https://exemple.test/**a**/*b*" target="_blank" rel="noopener noreferrer">doc</a> et <strong>gras</strong>',
+    );
+  });
+  it('garde un lien entier dans du gras, et le gras dans le libellé d’un lien', () => {
+    expect(richTextToHtml('**voir [la page](https://exemple.test/a) ici**')).toBe(
+      '<strong>voir <a href="https://exemple.test/a" target="_blank" rel="noopener noreferrer">la page</a> ici</strong>',
+    );
+    expect(richTextToHtml('[**important**](https://exemple.test/a)')).toBe(
+      '<a href="https://exemple.test/a" target="_blank" rel="noopener noreferrer"><strong>important</strong></a>',
+    );
+  });
+  it('deux liens autour de gras restent deux liens', () => {
+    const out = richTextToHtml('[a](https://exemple.test/1*) **b** [c](https://exemple.test/2*)');
+    expect(out.match(/<a /g)?.length).toBe(2);
+    expect(out).toContain('<strong>b</strong>');
+    expect(out).not.toContain('<em>');
+  });
+  it('ignore des caractères privés glissés dans la saisie', () => {
+    expect(richTextToHtml('a\uE1000\uE101b')).toBe('a0b');
+  });
+});
