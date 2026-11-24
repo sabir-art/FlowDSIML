@@ -9,6 +9,9 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import type { FieldErrors } from '../../lib/validation';
+import { DemoAside } from './AuthIllustration';
+
+export { DemoAside, StepsAside } from './AuthIllustration';
 
 /** Message d'erreur de champ au format de la maquette (`.error-msg`). */
 export function MkFieldError({ id, errors }: { id: string; errors: FieldErrors }) {
@@ -39,83 +42,6 @@ export function GoogleMark() {
         d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"
       />
     </svg>
-  );
-}
-
-/** Faux écran capturé de la maquette (`data-fake="dashboard"`), purement décoratif. */
-function FakeDashboard() {
-  return (
-    <div className="fake" aria-hidden="true">
-      <div className="f-side">
-        <div className="f-logo" />
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className={`f-nav${i === 1 ? ' on' : ''}`} />
-        ))}
-      </div>
-      <div className="f-main">
-        <div className="f-top">
-          <div className="f-h" />
-          <div className="f-btn" style={{ height: 'auto' }} />
-        </div>
-        <div className="f-cards">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="f-card">
-              <i />
-              <b />
-            </div>
-          ))}
-        </div>
-        <div className="f-table">
-          {['', 'w70', '', 'w50', '', 'w70'].map((c, i) => (
-            <div key={i} className={`f-line ${c}`} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Panneau illustré de la connexion (maquette connexion.html) : aperçu de démo + accroche. */
-export function DemoAside() {
-  const { t } = useTranslation();
-  return (
-    <aside className="auth-aside" aria-hidden="true">
-      <div className="aside-demo">
-        <FakeDashboard />
-        <span className="hs" />
-        <div className="tip">
-          <div className="tip-count">2 / 6</div>
-          <b>{t('auth.asideTipTitle')}</b>
-          {t('auth.asideTipBody')}
-        </div>
-      </div>
-      <div className="quote">
-        <p className="t-display">{t('auth.asideQuote')}</p>
-        <p className="t-lg">{t('auth.asideQuoteSub')}</p>
-      </div>
-    </aside>
-  );
-}
-
-/** Panneau de l'inscription (maquette inscription.html) : accroche + trois étapes. */
-export function StepsAside() {
-  const { t } = useTranslation();
-  return (
-    <aside className="auth-aside auth-aside--steps" aria-hidden="true">
-      <p className="t-display aside-title">{t('auth.stepsTitle')}</p>
-      <ol className="aside-list">
-        {[1, 2, 3].map((n) => (
-          <li key={n}>
-            <span className="n">{n}</span>
-            <div>
-              <b>{t(`auth.step${n}Title`)}</b>
-              <br />
-              {t(`auth.step${n}Body`)}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </aside>
   );
 }
 

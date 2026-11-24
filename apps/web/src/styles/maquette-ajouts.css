@@ -23,56 +23,6 @@
 }
 
 /* ---- Connexion / inscription (CNX-01, INS-01) : styles de page et styles en ligne de connexion.html ---- */
-.mk .aside-demo {
-  position: absolute;
-  inset: 64px 48px auto 64px;
-  aspect-ratio: 16/10;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
-  background: #f6f7fb;
-}
-.mk .aside-demo .hs {
-  position: absolute;
-  left: 76%;
-  top: 15%;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--fd-ember-500);
-  box-shadow: 0 0 0 6px rgba(232, 84, 31, 0.25);
-}
-.mk .aside-demo .tip {
-  position: absolute;
-  left: 52%;
-  top: 24%;
-  width: 42%;
-  background: #fff;
-  color: var(--fd-stone-900);
-  border-radius: 12px;
-  padding: 12px 14px;
-  box-shadow: var(--fd-shadow-lg);
-  font-size: 12px;
-}
-.mk .aside-demo .tip-count {
-  color: var(--fd-stone-600);
-  font-size: 11px;
-}
-.mk .aside-demo .tip b {
-  display: block;
-  margin: 2px 0 4px;
-}
-.mk .quote {
-  max-width: 440px;
-}
-.mk .quote .t-display {
-  color: #fff;
-  font-size: 2rem;
-}
-.mk .quote .t-lg {
-  color: var(--fd-lagoon-200);
-  margin-top: 12px;
-}
 .mk .auth-logo-link {
   display: inline-flex;
   align-self: flex-start;
@@ -155,45 +105,6 @@
 }
 
 /* ---- Inscription (INS-01) : styles de page et styles en ligne d'inscription.html ---- */
-.mk .aside-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 40px;
-  display: grid;
-  gap: 20px;
-  max-width: 420px;
-}
-.mk .aside-list li {
-  display: flex;
-  gap: 14px;
-  color: var(--fd-lagoon-100);
-}
-.mk .aside-list li b {
-  color: #fff;
-}
-.mk .aside-list .n {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: grid;
-  place-items: center;
-  font: 700 13px var(--fd-font-display);
-  color: #fff;
-}
-.mk .aside-list li:last-child .n {
-  background: var(--fd-ember-500);
-}
-.mk .auth-aside--steps {
-  justify-content: center;
-}
-.mk .aside-title {
-  color: #fff;
-  font-size: 2rem;
-  max-width: 440px;
-  margin-bottom: 40px;
-}
 .mk .auth-logo-link--compact {
   margin-bottom: 40px;
 }

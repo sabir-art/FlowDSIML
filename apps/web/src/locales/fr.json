@@ -128,9 +128,14 @@
     "changeLanguage": "Changer de langue",
     "privacy": "Confidentialité",
     "terms": "Conditions",
-    "asideTipTitle": "Créez un rapport en un clic",
-    "asideTipBody": "Vos équipes suivent la procédure pas à pas, sans installation.",
-    "asideQuote": "Montrez la procédure. Laissez-la guider.",
+    "ill": {
+      "tip1Title": "Créez votre première démo",
+      "tip1Body": "Cliquez sur « Nouvelle démo », puis capturez la procédure.",
+      "tip2Title": "Ouvrez la démo Acme CRM",
+      "tip2Body": "Ajoutez une bulle sur le bouton à cliquer.",
+      "next": "Suivant"
+    },
+    "asideQuote": "Montrez la procédure. Laissez‑la guider.",
     "asideQuoteSub": "Capturez un parcours, guidez-le, diffusez-le, et suivez qui l’a terminé.",
     "googleSignup": "S’inscrire avec Google",
     "namePlaceholder": "Camille Martin",
@@ -146,9 +151,9 @@
     "step1Title": "Capturez",
     "step1Body": "Cliquez dans le logiciel, l’extension enregistre chaque écran.",
     "step2Title": "Guidez",
-    "step2Body": "Ajoutez des bulles, floutez les données personnelles, adaptez les textes avec des variables.",
+    "step2Body": "Ajoutez des bulles, floutez les données personnelles.",
     "step3Title": "Diffusez",
-    "step3Body": "Une démo par procédure, un lien, un paquet SCORM ou l’intranet.",
+    "step3Body": "Un lien, un paquet SCORM ou l’intranet.",
     "googleConsent": "En continuant avec Google, vous acceptez les <terms>conditions d’utilisation</terms> et la <privacy>politique de confidentialité</privacy>."
   },
   "onboarding": {
