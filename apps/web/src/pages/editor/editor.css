@@ -4583,12 +4583,25 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   margin-top: auto;
   padding-top: 12px;
 }
 .canvas-window__foot > .canvas-window__mu {
   margin-right: auto;
+}
+.canvas-window__btns {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  max-width: 100%;
+}
+.canvas-window__foot.is-stacked > .canvas-window__mu {
+  order: 2;
+  flex-basis: 100%;
+  margin-right: 0;
+  font-size: 12px;
 }
 .canvas-window__foot .p-btn {
   min-height: 36px;

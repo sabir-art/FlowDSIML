@@ -95,6 +95,7 @@ import {
   croppedSize,
   scrollOffset,
   scrollPlan,
+  stackWindowHint,
 } from '@flowdsiml/player-core';
 import { fmt, strings, type Dict } from './i18n';
 import type { QuizResult, TrackerLike } from './api';
@@ -238,6 +239,7 @@ export function Player({
   const [winClosed, setWinClosed] = useState(false);
   const winBox = useRef<HTMLDivElement>(null);
   const winPill = useRef<HTMLButtonElement>(null);
+  const winFoot = useRef<HTMLDivElement>(null);
   const completed = useRef(false);
   const touchX = useRef<number | null>(null);
   const step = m.steps[index]!;
@@ -344,6 +346,16 @@ export function Player({
     );
     return () => cancelAnimationFrame(id);
   }, [winOpen, index]);
+  // Pied de la fenêtre : si « Échap pour fermer » ne tient pas à côté des boutons, il passe dessous (12 px)
+  useEffect(() => {
+    const foot = winFoot.current;
+    if (!winOpen || !foot) return;
+    const fit = () => stackWindowHint(foot);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(foot);
+    return () => ro.disconnect();
+  }, [winOpen, index, locale]);
   const endText = !visual && !win && last && step.options.display !== 'popup' && !m.quiz && !choices.length;
   const popup = !visual && (step.options.display === 'popup' || endText);
   const bgBlur = popup && (endText || step.options.background === 'blur');
@@ -1256,21 +1268,23 @@ export function Player({
                         <div class="p-rich" dangerouslySetInnerHTML={{ __html: html(step.body) }} />
                       )}
                       <VoiceLine />
-                      <div class="p-win__foot">
+                      <div class="p-win__foot" ref={winFoot}>
                         <span class="p-win__hint">{t.escToClose}</span>
-                        {index > 0 && (
-                          <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
-                            {t.prev}
+                        <div class="p-win__btns">
+                          {index > 0 && (
+                            <button class="p-btn p-btn-ghost" onClick={() => go(index - 1)}>
+                              {t.prev}
+                            </button>
+                          )}
+                          <button
+                            class="p-btn p-btn-primary"
+                            onClick={() => (last ? (m.quiz ? openQuiz() : finish()) : next())}
+                            autoFocus
+                          >
+                            {step.options.buttonLabel ? sub(step.options.buttonLabel) : t.next}
+                            <ChevronRight {...ICON} size={16} />
                           </button>
-                        )}
-                        <button
-                          class="p-btn p-btn-primary"
-                          onClick={() => (last ? (m.quiz ? openQuiz() : finish()) : next())}
-                          autoFocus
-                        >
-                          {step.options.buttonLabel ? sub(step.options.buttonLabel) : t.next}
-                          <ChevronRight {...ICON} size={16} />
-                        </button>
+                        </div>
                       </div>
                     </div>
                   </div>

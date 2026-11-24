@@ -17,6 +17,7 @@ import {
   asCrop,
   cropImageStyle,
   croppedSize,
+  stackWindowHint,
 } from '@flowdsiml/player-core';
 import { ChevronRight, ImagePlus, ClipboardList, ExternalLink, Info, Move, RotateCcw } from 'lucide-react';
 import type { Rect } from '@flowdsiml/manifest';
@@ -338,13 +339,21 @@ export function Canvas({
               </span>
               <h2>{vp.text(step.title) || t('editor.untitled')}</h2>
               <div dangerouslySetInnerHTML={{ __html: vp.html(step.body) }} />
-              <div className="canvas-window__foot">
+              <div
+                className="canvas-window__foot"
+                // Même règle que le lecteur : l'aide passe sous les boutons quand la ligne est trop courte
+                ref={(el) => {
+                  if (el) stackWindowHint(el);
+                }}
+              >
                 <span className="canvas-window__mu">{t('editor.window.esc')}</span>
-                {here > 0 && <span className="p-btn p-btn-ghost">{t('editor.window.prev')}</span>}
-                <span className="p-btn p-btn-primary">
-                  {vp.text(opts.buttonLabel) || t('editor.advanced.popup.buttonPlaceholder')}
-                  <ChevronRight size={16} aria-hidden="true" />
-                </span>
+                <div className="canvas-window__btns">
+                  {here > 0 && <span className="p-btn p-btn-ghost">{t('editor.window.prev')}</span>}
+                  <span className="p-btn p-btn-primary">
+                    {vp.text(opts.buttonLabel) || t('editor.advanced.popup.buttonPlaceholder')}
+                    <ChevronRight size={16} aria-hidden="true" />
+                  </span>
+                </div>
               </div>
             </div>
           </div>

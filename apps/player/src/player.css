@@ -3395,12 +3395,27 @@ h1.p-title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   margin-top: auto;
   padding-top: 12px;
 }
 .p-win__hint {
   margin-right: auto;
+}
+/* Boutons toujours sur une ligne, calés à droite, « Suivant » en dernier */
+.p-win__btns {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  max-width: 100%;
+}
+/* Colonne étroite : l'aide passe sous les boutons, en 12 px */
+.p-win__foot.is-stacked .p-win__hint {
+  order: 2;
+  flex-basis: 100%;
+  margin-right: 0;
+  font-size: 12px;
 }
 /* Boutons du pied : 36 px, pour tenir sur une ligne à côté de « Échap pour fermer » */
 .p-win__foot .p-btn {
@@ -3442,6 +3457,17 @@ h1.p-title {
 .is-compact .p-win__body {
   padding: 20px;
   overflow: visible;
+}
+/* Écran tactile : pas d'aide clavier ; « Précédent » et « Suivant » à largeur égale sur toute la ligne */
+.is-compact .p-win__hint {
+  display: none;
+}
+.is-compact .p-win__btns {
+  flex: 1;
+}
+.is-compact .p-win__btns .p-btn {
+  flex: 1;
+  justify-content: center;
 }
 .is-compact .p-win-reopen > span {
   display: none;

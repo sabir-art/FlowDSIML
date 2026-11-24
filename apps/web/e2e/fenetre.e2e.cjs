@@ -132,6 +132,23 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
   await page.getByLabel('Libellé du bouton').fill('Continuer');
   ok(await until(() => win().options?.buttonLabel === 'Continuer'), 'libellé du bouton enregistré');
   await canvas.getByText('Continuer').waitFor();
+  // Colonne étroite : boutons sur une ligne à droite, « Échap pour fermer » dessous en 12 px
+  const cf = await canvas.locator('.canvas-window__foot').evaluate((el) => {
+    const b = [...el.querySelectorAll('.p-btn')].map((x) => x.getBoundingClientRect());
+    const h = el.querySelector('.canvas-window__mu');
+    const hr = h.getBoundingClientRect();
+    return {
+      oneLine: Math.round(b[0].top) === Math.round(b[1].top),
+      right: Math.round(b[1].right) === Math.round(el.getBoundingClientRect().right),
+      below: hr.top >= b[0].bottom,
+      size: getComputedStyle(h).fontSize,
+      stacked: el.classList.contains('is-stacked'),
+    };
+  });
+  ok(
+    cf.oneLine && cf.right && (!cf.stacked || (cf.below && cf.size === '12px')),
+    `canevas : boutons sur une ligne à droite${cf.stacked ? ', « Échap pour fermer » dessous en 12 px' : ''}`,
+  );
   await axe(page, '.win-img', 'panneau avec image');
   await axe(page, '.canvas-window', 'canevas');
   ok(
@@ -248,6 +265,24 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
       (await dlg.locator('h2').evaluate((el) => getComputedStyle(el).fontSize)) === '22px',
       `${tag} titre de 22 px`,
     );
+    const btns = await dlg.locator('.p-win__btns .p-btn').evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { y: Math.round(r.top), w: Math.round(r.width), r: Math.round(r.right), t: el.textContent };
+      }),
+    );
+    const footRight = Math.round(
+      await dlg.locator('.p-win__foot').evaluate((el) => el.getBoundingClientRect().right),
+    );
+    ok(
+      btns.length === 2 && btns[0].y === btns[1].y && btns[1].t === 'Suivant' && btns[1].r === footRight,
+      `${tag} boutons sur une ligne, calés à droite, « Suivant » en dernier`,
+    );
+    if (width < 640)
+      ok(
+        (await dlg.locator('.p-win__hint').isVisible()) === false && Math.abs(btns[0].w - btns[1].w) <= 1,
+        `${tag} mobile : pas de « Échap pour fermer », boutons à largeur égale sur toute la ligne`,
+      );
     if (width >= 640) {
       const ys = await dlg
         .locator('.p-win__foot > *')
@@ -257,9 +292,9 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
       ok(new Set(ys).size === 1, `${tag} pied sur une seule ligne`);
     }
     ok(
-      (await dlg.locator('.p-win__hint').textContent()) === 'Échap pour fermer' &&
+      (width < 640 || (await dlg.locator('.p-win__hint').textContent()) === 'Échap pour fermer') &&
         (await dlg.getByRole('button').allTextContents()).join('|') === 'Précédent|Suivant',
-      `${tag} pied : « Échap pour fermer », « Précédent », « Suivant »`,
+      `${tag} pied : « Précédent », « Suivant »${width < 640 ? '' : ' et « Échap pour fermer »'}`,
     );
     ok(
       await until(() => pl.evaluate(() => document.activeElement?.textContent === 'Suivant')),
