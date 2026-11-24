@@ -8,7 +8,7 @@
  *  - L'interrupteur dit pourquoi il refuse : liens publics coupés, ou aucune démo en accès ouvert.
  */
 import { useCallback, useEffect, useId, useRef, useState, type DragEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowDown,
@@ -79,6 +79,7 @@ export function PublicPage() {
   const { current, can } = useWorkspace();
   const toast = useToast();
   const [dialog, ask] = useConfirm();
+  const navigate = useNavigate();
   const ws = current?.id;
   const allowed = can('workspace.settings');
   const [form, setForm] = useState<Form | null>(null);
@@ -131,6 +132,27 @@ export function PublicPage() {
   useEffect(() => {
     if (allowed) void load();
   }, [allowed, load]);
+
+  // Sous 768 px il n'y a pas de bouton « Annuler » : le retour demande confirmation s'il reste des
+  // modifications. Le bouton de retour appartient au PageHeader : son clic est intercepté ici.
+  const unsaved = !!form && !!saved && !same(form, saved);
+  useEffect(() => {
+    if (!unsaved) return;
+    const onClick = (e: MouseEvent) => {
+      const back = (e.target as Element).closest?.('.fd-page-header__mback');
+      if (!back) return;
+      e.preventDefault();
+      e.stopPropagation();
+      void ask({
+        title: t('publicPage.leaveTitle'),
+        body: t('publicPage.leaveBody'),
+        confirmLabel: t('publicPage.leaveConfirm'),
+      }).then((yes) => yes && navigate('/settings'));
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unsaved]);
 
   if (!allowed)
     return (
@@ -258,7 +280,7 @@ export function PublicPage() {
               <span className="sr-only">{t('publicPage.newTab')}</span>
             </a>
           ) : (
-            <Button icon={<ExternalLink size={16} />} disabled title={t('publicPage.viewOff')}>
+            <Button icon={<ExternalLink size={16} />} aria-disabled="true" data-tip={t('publicPage.viewOff')}>
               {t('publicPage.view')}
             </Button>
           )}
@@ -294,7 +316,7 @@ export function PublicPage() {
               {t('publicPage.title')}
             </div>
             {refusal ? (
-              <div className="stg-error pp-refusal" id={`${id}-onh`}>
+              <div className="stg-help pp-refusal" id={`${id}-onh`}>
                 <CircleAlert size={14} aria-hidden="true" />
                 <span>
                   {t(`publicPage.refusal.${refusal}`)}{' '}
@@ -340,7 +362,7 @@ export function PublicPage() {
               )}
             </div>
           </div>
-          <div className="stg-ctl">
+          <div className="stg-ctl pp-ctl-addr">
             <div className="fd-copy pp-addr">
               {/* §18.6 : le préfixe et la fin de l'adresse se lisent d'un seul tenant, sans écart */}
               <div className="fd-copy__field pp-addr__field" data-align-zone="" data-gap-exempt="">
@@ -375,6 +397,19 @@ export function PublicPage() {
                 {copied ? t('publicPage.addressCopied') : ''}
               </span>
             </div>
+            {/* Sous 768 px l'en-tête ne garde que « Enregistrer » : le lien vers la page est ici */}
+            {saved.enabled && (
+              <a
+                className="pp-view-m"
+                href={centerUrl(PLAYER_URL, saved.slug)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+                {t('publicPage.view')}
+                <span className="sr-only">{t('publicPage.newTab')}</span>
+              </a>
+            )}
           </div>
         </div>
       </section>

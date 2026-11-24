@@ -95,14 +95,13 @@
     color: var(--fd-color-success);
   }
 }
+/* MODAL-01 : un titre de fenêtre passe à la ligne, il n'est jamais tronqué */
 .fd-modal__head h2 {
   flex: 1;
   min-width: 0;
   margin: 0;
-  overflow: hidden;
-  font: 500 18px var(--fd-font-sans);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font: 500 18px/1.35 var(--fd-font-sans);
+  overflow-wrap: anywhere;
 }
 .fd-modal__close {
   display: grid;

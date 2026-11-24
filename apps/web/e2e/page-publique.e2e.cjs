@@ -175,7 +175,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       'contact : ni e-mail ni https, erreur dite et enregistrement impossible',
     );
     await contact.fill('formation@acme.example');
-    await page.getByRole('switch', { name: 'Afficher « Fait avec TutoClick »' }).uncheck();
+    await page.getByRole('switch', { name: 'Afficher « Créé avec TutoClick »' }).uncheck();
     await sw(page).check();
     await shot(page, 'page-publique');
     ok(
@@ -206,6 +206,26 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
           (await view.getAttribute('target')) === '_blank',
         '« Voir la page » ouvre l’adresse dans un nouvel onglet',
       );
+    }
+    if (MOBILE) {
+      const link = page.locator('a.pp-view-m');
+      ok(
+        (await link.isVisible()) && /\/#\/c\/acme$/.test(await link.getAttribute('href')),
+        '390 : « Voir la page » sous le champ Adresse',
+      );
+      await page.getByLabel('Titre', { exact: true }).fill('Titre non enregistré');
+      await page.locator('.fd-page-header__mback').click();
+      const leave = page.getByRole('dialog', { name: 'Quitter sans enregistrer ?' });
+      await leave.waitFor();
+      await leave.getByRole('button', { name: 'Annuler' }).click();
+      await leave.waitFor({ state: 'detached' });
+      ok(
+        /#\/settings\/brand\/page$/.test(page.url()),
+        '390 : retour avec des modifications, « Quitter sans enregistrer ? » ; Annuler reste sur la page',
+      );
+      await page.getByLabel('Titre', { exact: true }).fill('Les démos d’Acme');
+    } else {
+      ok(!(await page.locator('a.pp-view-m').isVisible()), '1440 : « Voir la page » reste dans l’en-tête');
     }
     // Coupée de nouveau
     await sw(page).uncheck();
@@ -241,6 +261,23 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
         (await sw(page).isDisabled()) &&
         !(await sw(page).isChecked()),
       'liens publics coupés : interrupteur désactivé, motif et lien « Ouvrir Sécurité »',
+    );
+    const tone = await why.evaluate((el) => {
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-color-text)';
+      el.appendChild(probe);
+      const text = getComputedStyle(probe).color;
+      probe.style.color = 'var(--fd-color-text-muted)';
+      const muted = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        text: getComputedStyle(el).color === text,
+        icon: getComputedStyle(el.querySelector('svg')).color === muted,
+      };
+    });
+    ok(
+      tone.text && tone.icon,
+      'motif de refus : couleur du texte, icône atténuée (ce n’est pas une erreur de saisie)',
     );
     await page.getByLabel('Titre', { exact: true }).fill('Titre');
     ok(await save(page).isEnabled(), 'les autres réglages restent modifiables et enregistrables');
@@ -306,6 +343,11 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
           .evaluate((el) => el.classList.contains('fd-btn--primary'))),
       'confirmation : texte de la maquette, bouton primaire (rien n’est supprimé)',
     );
+    const h2 = await dlg.locator('h2').evaluate((el) => ({
+      clipped: el.scrollWidth > el.clientWidth + 1,
+      nowrap: getComputedStyle(el).whiteSpace === 'nowrap',
+    }));
+    ok(!h2.clipped && !h2.nowrap, 'titre de la fenêtre : entier, jamais tronqué (MODAL-01)');
     await shot(page, 'page-publique-remplacer');
     await dlg.getByRole('button', { name: 'Annuler' }).click();
     await dlg.waitFor({ state: 'detached' });
@@ -322,6 +364,37 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
       'remplacement confirmé : page en ligne, réglages du centre de formation intacts',
     );
     await page.locator('.pp-banner').waitFor({ state: 'detached' });
+
+    // Parcours de formation : le bandeau dit que la page publique a pris l'adresse, et permet le retour
+    await page.goto(`${BASE}/#/center`);
+    const notice = page.locator('.pp-banner--act');
+    await notice.waitFor();
+    ok(
+      (await notice.getAttribute('role')) === 'status' &&
+        /Votre centre de formation n’est plus affiché à .+\/#\/c\/acme\. La page publique des démos l’a remplacé\./.test(
+          await notice.textContent(),
+        ),
+      'Parcours de formation : bandeau « Votre centre de formation n’est plus affiché à… »',
+    );
+    await shot(page, 'page-publique-parcours');
+    await notice.getByRole('button', { name: 'Remettre le centre de formation' }).click();
+    const back = page.getByRole('alertdialog', { name: 'Remettre le centre de formation à cette adresse ?' });
+    await back.waitFor();
+    ok(
+      (await back.textContent()).includes(
+        'La page publique des démos sera désactivée. Ses réglages sont conservés.',
+      ),
+      'confirmation du retour : texte de la spec',
+    );
+    await back.getByRole('button', { name: 'Remettre le centre', exact: true }).click();
+    await notice.waitFor({ state: 'detached' });
+    const after = row(state);
+    ok(
+      after.public_page_enabled === false &&
+        after.public_page.demos === 'all' &&
+        after.published.title === 'Se former chez Acme',
+      '« Remettre le centre » : page publique coupée, ses réglages et ceux du centre conservés',
+    );
     await page.context().close();
   }
 
