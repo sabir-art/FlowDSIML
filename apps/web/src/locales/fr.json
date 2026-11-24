@@ -203,7 +203,8 @@
     "capture2": "Cliquez sur l’icône TutoClick, puis sur Démarrer",
     "capture3": "Faites la tâche, puis cliquez sur Terminer",
     "openSpace": "Ouvrir mon espace",
-    "seeSample": "Voir une démo d’exemple"
+    "seeSample": "Voir une démo d’exemple",
+    "extInstead": "Capturer avec l’extension à la place"
   },
   "invite": {
     "pendingTitle": "Invitations en attente",
