@@ -181,6 +181,20 @@ Maquettes : `maquettes/refonte/lot1-parametres/` (`page-publique-*`, `cles-*`, `
 - **Sans la clé d'envoi d'e-mails** (emails §3.5) : la colonne « Par e-mail » reste visible, désactivée, avec « Bientôt » dans son en-tête. On ne la masque pas.
 - **Démos coupées** : la liste des démos dont la personne a coupé les notifications, avec « Réactiver ».
 
+**Précisions (réponses au dev, 24/11)**
+- **Mentions, colonne « Dans l'app »** : la règle L28 reste, une mention est toujours notifiée. La cellule n'a donc pas d'interrupteur, même désactivé. Elle montre l'icône `Check` (16 px, couleur `text-muted`) suivie de « Toujours », et l'aide de la ligne dit « Toujours notifiées dans l'app. Vous pouvez choisir l'e-mail. » L'interrupteur e-mail des mentions reste actif.
+- **Valeurs par défaut** :
+  - dans l'app, tout est activé ;
+  - par e-mail, tout est coupé, car l'e-mail se demande (opt-in).
+  
+  La maquette montre un compte déjà réglé, pas les valeurs par défaut.
+- **Comptes existants** : celui qui avait activé l'interrupteur e-mail global du Profil garde ses e-mails. La migration coche l'e-mail pour les événements que le résumé horaire couvrait déjà, et seulement ceux-là. Personne ne perd un e-mail qu'il avait demandé, et personne n'en reçoit un qu'il n'a pas demandé.
+- **Alertes d'Analytics** : un réglage dans l'app, activé par défaut, ajouté dans la même migration.
+- **Nouveaux leads** : la ligne est visible et désactivée, avec « Bientôt », tant que la notification n'existe pas. Elle arrive dans un second lot :
+  - la personne prévenue est le créateur de la démo ;
+  - le texte dans la cloche est « Nouveau lead sur « {démo} » » ;
+  - la notification ne contient pas l'adresse du visiteur ; le lien mène à Analytics › Leads de cette démo.
+
 ## 7. Fenêtre « Nouvelle démo »
 
 Maquette : `lot2-demos/nouvelle-source-*`.
