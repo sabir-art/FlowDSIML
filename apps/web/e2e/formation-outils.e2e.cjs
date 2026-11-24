@@ -59,20 +59,23 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       return !!(v && body && body.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING);
     });
     ok(order, 'n° 10 : placée après le texte de la bulle');
-    // Retour Lead UX : « Supprimer » en bouton aligné avec « Réenregistrer » et « Remplacer »
-    const row = await voice
-      .locator('.voice-actions > .btn')
-      .evaluateAll((els) =>
-        els.map((e) => [
-          e.getAttribute('aria-label') || e.textContent.trim(),
-          Math.round(e.getBoundingClientRect().top),
-        ]),
-      );
+    // EXT-02 §6.4 : voix en place = carte (durée, écoute, « Remplacer… »), « Supprimer » dans le menu ⋯
+    const card = voice.locator('.vo-card');
+    const more = card.getByRole('button', { name: 'Plus d’actions sur la voix' });
     ok(
-      row.map((r) => r[0]).join('|') === 'Réenregistrer|Remplacer|Supprimer la voix off' &&
-        new Set(row.map((r) => r[1])).size === 1,
-      `Lead UX : Réenregistrer, Remplacer, Supprimer alignés (${JSON.stringify(row)})`,
+      (await card.count()) === 1 &&
+        /\d+:\d{2}/.test(await card.locator('.vo-card__txt').innerText()) &&
+        (await card.getByRole('button', { name: /^Écouter/ }).count()) === 1 &&
+        (await card.getByRole('button', { name: 'Remplacer…' }).count()) === 1 &&
+        (await more.count()) === 1,
+      'Lead UX §6.4 : carte de la voix (durée, Écouter, Remplacer…, menu ⋯)',
     );
+    await more.click();
+    ok(
+      (await page.getByRole('menuitem', { name: 'Supprimer la voix off' }).count()) === 1,
+      'Lead UX §6.4 : « Supprimer la voix off » dans le menu',
+    );
+    await page.keyboard.press('Escape');
     await voice.getByRole('button', { name: 'Étape suivante' }).click();
     await page.waitForTimeout(300);
     ok(
