@@ -210,6 +210,9 @@ jobs:
       - name: 'Projecteur libre : outil du rail, halo du lecteur, moins d’animations (EXT-02 §6.3)'
         if: always()
         run: cd apps/web && node e2e/projecteur.e2e.cjs
+      - name: 'Texte riche du lecteur : liens, variables et mise en forme'
+        if: always()
+        run: cd apps/web && node e2e/liens-variables.e2e.cjs
       - name: 'Voix off : panneau en trois sources, lecteur dans la bulle (EXT-02 §6.4)'
         if: always()
         run: cd apps/web && node e2e/voix-off.e2e.cjs
