@@ -142,8 +142,8 @@ function withNotifications() {
   const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
   await prefs.waitFor();
   ok(
-    (await prefs.getByRole('switch').count()) === 7,
-    'L22-05 : 4 types + alertes (L19) + e-mail + résumé quotidien (L28-06)',
+    (await prefs.getByRole('switch').count()) === 8,
+    'L22-05 : 4 types + alertes (L19) + nouveaux leads (§6.3) + e-mail + résumé quotidien (L28-06)',
   );
   const mentionSw = prefs.getByRole('switch', { name: /On me mentionne/ });
   ok(

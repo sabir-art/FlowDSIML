@@ -18,11 +18,9 @@ import { useToast } from '../../components/Toast';
 import { emailDigestAvailable } from '../../components/notifications/useNotifications';
 import { SettingsShell } from './SettingsShell';
 
-/** Événements réglables, dans l'ordre du tableau. « lead » : notification à venir (lot suivant). */
+/** Événements réglables, dans l'ordre du tableau. */
 const EVENTS = ['mention', 'reply', 'comment', 'resolved', 'alert', 'lead'] as const;
 type EventKey = (typeof EVENTS)[number];
-/** Événements qui ont une notification aujourd'hui. */
-const LIVE: EventKey[] = ['mention', 'reply', 'comment', 'resolved', 'alert'];
 type Flags = Partial<Record<EventKey, boolean>>;
 
 const asFlags = (raw: unknown): Flags =>
@@ -108,8 +106,8 @@ export function NotificationSettings() {
   const toggleEmail = async (k: EventKey, on: boolean) => {
     const before = { email, emailPrefs };
     // Chaque événement est écrit : l'état affiché devient l'état enregistré, sans valeur implicite
-    const next = Object.fromEntries(LIVE.map((e) => [e, e === k ? on : byEmail(e)])) as Flags;
-    const any = LIVE.some((e) => next[e]);
+    const next = Object.fromEntries(EVENTS.map((e) => [e, e === k ? on : byEmail(e)])) as Flags;
+    const any = EVENTS.some((e) => next[e]);
     setEmailPrefs(next);
     setEmail(any);
     if (!(await save({ email: any, email_prefs: next }))) {
@@ -147,15 +145,11 @@ export function NotificationSettings() {
           </thead>
           <tbody>
             {EVENTS.map((k) => {
-              const soon = !LIVE.includes(k);
               const name = t(`notifSettings.events.${k}.name`);
               return (
                 <tr key={k}>
                   <th scope="row" className="nt-ev">
-                    <b>
-                      {name}
-                      {soon && <span className="stg-soon nt-soon">{t('shell.soon')}</span>}
-                    </b>
+                    <b>{name}</b>
                     <span className="nt-sub">{t(`notifSettings.events.${k}.help`)}</span>
                   </th>
                   <td className="nt-c">
@@ -170,8 +164,8 @@ export function NotificationSettings() {
                           type="checkbox"
                           role="switch"
                           aria-label={t('notifSettings.inAppFor', { name })}
-                          checked={!soon && inApp(k)}
-                          disabled={soon || !ready}
+                          checked={inApp(k)}
+                          disabled={!ready}
                           onChange={(e) => void toggleApp(k, e.target.checked)}
                         />
                         <span className="fd-switch__track" aria-hidden="true" />
@@ -184,8 +178,8 @@ export function NotificationSettings() {
                         type="checkbox"
                         role="switch"
                         aria-label={t('notifSettings.byEmailFor', { name })}
-                        checked={!soon && emailAvailable && byEmail(k)}
-                        disabled={soon || !emailAvailable || !inApp(k) || !ready}
+                        checked={emailAvailable && byEmail(k)}
+                        disabled={!emailAvailable || !inApp(k) || !ready}
                         onChange={(e) => void toggleEmail(k, e.target.checked)}
                       />
                       <span className="fd-switch__track" aria-hidden="true" />

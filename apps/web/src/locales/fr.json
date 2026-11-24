@@ -4350,7 +4350,10 @@
     "digest_weekly": "Résumé hebdomadaire",
     "open_alert": "Voir les alertes : {{text}}",
     "webhookPaused": "Le webhook « {{name}} » est en pause après 6 échecs d’envoi ({{host}}).",
-    "open_webhook": "Ouvrir les intégrations : {{text}}"
+    "open_webhook": "Ouvrir les intégrations : {{text}}",
+    "k_lead": "Nouveau lead sur « {{demo}} »",
+    "p_lead": "Un visiteur laisse son adresse sur une de mes démos",
+    "open_lead": "Voir les leads : {{text}}"
   },
   "presence": {
     "someone": "Un membre",

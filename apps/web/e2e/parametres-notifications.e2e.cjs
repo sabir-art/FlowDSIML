@@ -64,9 +64,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(await sw(page, 'Réponses, dans l’app').isChecked(), 'dans l’app : activé par défaut');
     ok(!(await sw(page, 'Mentions, par e-mail').isChecked()), 'par e-mail : rien n’est activé par défaut');
     ok(
-      (await sw(page, 'Nouveaux leads, dans l’app').isDisabled()) &&
-        (await sw(page, 'Nouveaux leads, par e-mail').isDisabled()),
-      'nouveaux leads : à venir, non réglable',
+      (await sw(page, 'Nouveaux leads, dans l’app').isChecked()) &&
+        (await sw(page, 'Nouveaux leads, par e-mail').isEnabled()) &&
+        (await page.locator('.nt-table tbody .nt-soon').count()) === 0,
+      'nouveaux leads : réglable, sans « Bientôt »',
     );
     await shot(page, 'notifs');
 
@@ -130,6 +131,61 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.goto(`${BASE}/#/settings/profile`);
     await page.locator('#pf-pw-open').waitFor();
     ok((await page.getByText('Résumé hebdomadaire').count()) === 0, 'profil : plus d’interrupteur factice');
+    await page.context().close();
+  }
+
+  // 3. Cloche : « Nouveau lead sur « {démo} » », sans donnée du visiteur ; le lien mène aux leads de la démo
+  {
+    const { page, state } = await open((s) => {
+      s.tables.leads = [
+        {
+          id: 'lead-1',
+          workspace_id: 'ws-1',
+          demo_id: DEMO,
+          email: 'visiteur.fictif@exemple.example',
+          fields: { nom: 'Visiteur Fictif' },
+          consent: true,
+          created_at: new Date().toISOString(),
+        },
+      ];
+      s.tables.notifications = [
+        {
+          id: 'n-lead',
+          workspace_id: 'ws-1',
+          user_id: s.user.id,
+          kind: 'lead',
+          demo_id: DEMO,
+          step_id: null,
+          comment_id: null,
+          alert_id: null,
+          actor_id: null,
+          data: {},
+          created_at: new Date().toISOString(),
+          read_at: null,
+        },
+      ];
+    });
+    const title = state.tables.demos.find((d) => d.id === DEMO).title;
+    await page.locator('.nb-bell[aria-label="Notifications, 1 non lue"]').click();
+    const item = page.getByRole('dialog').locator('.nb-list li');
+    await item.first().waitFor();
+    const text = (await item.first().locator('.nb-text').textContent()).replace(/\u00a0/g, ' ');
+    ok(text.startsWith(`Nouveau lead sur « ${title} »`), `cloche : « Nouveau lead sur « ${title} » »`);
+    ok(
+      !/visiteur|exemple|Fictif/i.test(await item.first().innerHTML()),
+      'cloche : aucune donnée du visiteur',
+    );
+    await shot(page, 'notifs-cloche-lead');
+    await item.first().getByRole('link').click();
+    await page.waitForURL(new RegExp(`/demos/${DEMO}/analytics`));
+    const h = page.getByRole('heading', { name: 'Leads', level: 2 });
+    await h.waitFor();
+    await page.waitForFunction(() => {
+      const el = document.activeElement;
+      const r = el?.getBoundingClientRect();
+      return el?.id === 'da-leads' && r.top >= 0 && r.bottom <= window.innerHeight;
+    });
+    ok(await h.isVisible(), 'le lien mène aux leads de la démo, titre « Leads » à l’écran, avec le focus');
     await page.context().close();
   }
 

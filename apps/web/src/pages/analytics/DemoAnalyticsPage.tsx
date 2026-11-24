@@ -288,7 +288,10 @@ export function DemoAnalyticsPage() {
                 <span className="fd-icon-chip" aria-hidden="true">
                   <Mail />
                 </span>
-                <h2 className="fd-card__title">{t('analytics.leads')}</h2>
+                {/* Cible de la notification « Nouveau lead » (state.focus, voir routeFocus) */}
+                <h2 className="fd-card__title" id="da-leads" tabIndex={-1} data-route-focus="">
+                  {t('analytics.leads')}
+                </h2>
               </div>
               <LeadsTable demoId={demoId} />
             </Card>

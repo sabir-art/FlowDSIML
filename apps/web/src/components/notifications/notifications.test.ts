@@ -41,8 +41,14 @@ describe('L22-05 : centre de notifications', () => {
       comment: true,
       resolved: true,
       alert: true,
+      lead: true,
     });
     expect(readPrefs(null).mention).toBe(true);
+  });
+  it('nouveau lead : lien vers les leads de la démo', () => {
+    expect(notificationHref({ kind: 'lead', demo_id: 'd', step_id: null, comment_id: null })).toBe(
+      '/demos/d/analytics',
+    );
   });
   it('lien vers l’étape avec le fil ouvert', () => {
     expect(notificationHref({ kind: 'reply', demo_id: 'd', step_id: 's', comment_id: 'c' })).toBe(
