@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import { resumableUpload, type ResumableUpload } from '../../lib/tusUpload';
 
 /** EXT-02 §4.1 : formats acceptés à l'import d'une vidéo, et limites des vidéos enregistrées. */
 export const VIDEO_ACCEPT = 'video/mp4,video/webm';
@@ -67,10 +68,20 @@ export function readVideoMeta(file: File): Promise<{ durationMs: number; w: numb
   });
 }
 
+/** Poids lisible pour une vidéo : mégaoctets entiers (« 48 »). */
+export const megabytes = (bytes: number) => Math.max(1, Math.round(bytes / (1024 * 1024)));
+
+export interface VideoImport {
+  /** Identifiant de la démo créée. Rejetée avec « ABORTED » si l'envoi est arrêté. */
+  done: Promise<string>;
+  resume: () => void;
+  abort: () => void;
+}
+
 /**
- * Crée une démo d'une seule étape vidéo à partir d'un fichier. L'étape est marquée « importée » :
- * aucune détection automatique n'a eu lieu, elle compte au bilan RGPD. Si l'étape est refusée (quota,
- * fichier absent), la vidéo déposée et la démo sont retirées. Renvoie l'identifiant de la démo.
+ * Crée une démo d'une seule étape vidéo à partir d'un fichier, envoyé avec reprise. L'étape est marquée
+ * « importée » : aucune détection automatique n'a eu lieu, elle compte au bilan RGPD. Si l'envoi est
+ * arrêté ou l'étape refusée (quota, fichier absent), la vidéo déposée et la démo sont retirées.
  */
 export async function createDemoFromVideo(opts: {
   workspaceId: string;
@@ -78,7 +89,9 @@ export async function createDemoFromVideo(opts: {
   folderId: string | null;
   file: File;
   durationMs: number;
-}): Promise<string> {
+  onProgress: (sent: number, total: number) => void;
+  onStall: () => void;
+}): Promise<VideoImport> {
   const ext = videoExt(opts.file);
   if (!ext) throw new Error('BAD_TYPE');
   const title = titleFromFile(opts.file.name);
@@ -98,35 +111,48 @@ export async function createDemoFromVideo(opts: {
     await supabase.storage.from('videos').remove([path]);
     await supabase.from('demos').delete().eq('id', demo.id);
   };
-  const up = await supabase.storage
-    .from('videos')
-    .upload(path, opts.file, { contentType: ext === 'mp4' ? 'video/mp4' : 'video/webm' });
-  if (up.error) {
+  let up: ResumableUpload;
+  try {
+    up = await resumableUpload({
+      bucket: 'videos',
+      path,
+      file: opts.file,
+      contentType: ext === 'mp4' ? 'video/mp4' : 'video/webm',
+      onProgress: opts.onProgress,
+      onStall: opts.onStall,
+    });
+  } catch (e) {
     await drop();
-    throw up.error;
+    throw e;
   }
-  const ins = await supabase.from('steps').insert({
-    id: crypto.randomUUID(),
-    demo_id: demo.id,
-    workspace_id: opts.workspaceId,
-    position: 0,
-    kind: 'video',
-    title: (title || 'Vidéo').slice(0, 200),
-    video_path: path,
-    video_duration_ms: Math.max(1, Math.min(VIDEO_MAX_MS, Math.round(opts.durationMs))),
-    video: {
-      pauses: [],
-      frames: {},
-      captions: [],
-      hasVoice: false,
-      captionsDefault: false,
-      autoplayMuted: true,
-    },
-    element_meta: { imported: true, file_name: opts.file.name.slice(0, 120) },
-  });
-  if (ins.error) {
-    await drop();
-    throw ins.error;
-  }
-  return demo.id as string;
+  const done = (async () => {
+    try {
+      await up.done;
+      const ins = await supabase.from('steps').insert({
+        id: crypto.randomUUID(),
+        demo_id: demo.id,
+        workspace_id: opts.workspaceId,
+        position: 0,
+        kind: 'video',
+        title: (title || 'Vidéo').slice(0, 200),
+        video_path: path,
+        video_duration_ms: Math.max(1, Math.min(VIDEO_MAX_MS, Math.round(opts.durationMs))),
+        video: {
+          pauses: [],
+          frames: {},
+          captions: [],
+          hasVoice: false,
+          captionsDefault: false,
+          autoplayMuted: true,
+        },
+        element_meta: { imported: true, file_name: opts.file.name.slice(0, 120) },
+      });
+      if (ins.error) throw ins.error;
+      return demo.id as string;
+    } catch (e) {
+      await drop();
+      throw e;
+    }
+  })();
+  return { done, resume: up.resume, abort: up.abort };
 }

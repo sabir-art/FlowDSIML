@@ -15,6 +15,8 @@ import { EXTENSION_URL } from '../../lib/env';
 import { useHtmlCapture } from '../../lib/htmlCapture';
 import { HtmlCaptureNotice } from '../../components/HtmlCaptureNotice';
 import { Modal, Select } from '@flowdsiml/ui';
+import { useConfirm } from '../../components/ConfirmDialog';
+import { VideoImportZone, type VideoImportHandle } from './VideoImportZone';
 
 /**
  * DSH-06, L48-G §3 : « Nouvelle démo » en deux étapes.
@@ -33,6 +35,7 @@ export function NewDemoDialog({
   onImport,
   onGenerate,
   onExtension,
+  onVideo,
   ws,
   onClose,
   initialType,
@@ -49,6 +52,8 @@ export function NewDemoDialog({
   onGenerate: (folderId: string | null) => void;
   /** L48-G §3 : « Capturer avec l'extension » ouvre la fenêtre de l'extension (installation, lancement). */
   onExtension: () => void;
+  /** EXT-02 §4.1 bis : vidéo importée, démo créée. */
+  onVideo: (demoId: string) => void;
   ws: string;
   onClose: () => void;
   /** L48-G §4 : « Nouveau Sandbox » ouvre directement l'étape 2 avec ce type. */
@@ -66,7 +71,8 @@ export function NewDemoDialog({
   // L49 P1 : captures HTML désactivées par un admin : Démo HTML et Sandbox visibles, désactivés, avec la raison
   const htmlCapture = useHtmlCapture(ws);
   const htmlOff = htmlCapture.mode === 'disabled';
-  const usable = (k: ContentType) => !htmlOff || k === 'captures';
+  // La vidéo n'est pas une capture HTML : le réglage ne la concerne pas
+  const usable = (k: ContentType) => !htmlOff || k === 'captures' || k === 'video';
   const firstType = (): ContentType => {
     const want = initialType ?? remembered;
     return usable(want) ? want : 'captures';
@@ -75,6 +81,24 @@ export function NewDemoDialog({
   const [step, setStep] = useState<1 | 2>(initialType ? 2 : 1);
   const [folder, setFolder] = useState<string>(defaultFolder ?? '');
   const [busy, setBusy] = useState(false);
+  // Import vidéo en cours : quitter la fenêtre ou l'étape demande confirmation
+  const [sending, setSending] = useState(false);
+  const video = useRef<VideoImportHandle>(null);
+  const [confirmDialog, ask] = useConfirm();
+  const leave = async (then: () => void) => {
+    if (sending) {
+      const ok = await ask({
+        title: t('videoImport.stopTitle'),
+        body: t('videoImport.stopBody'),
+        confirmLabel: t('videoImport.stopConfirm'),
+        secondary: { label: t('videoImport.stopCancel'), onSelect: () => undefined },
+        danger: true,
+      });
+      if (!ok) return;
+      video.current?.stop();
+    }
+    then();
+  };
   const { status: ai } = useAiStatus(open ? ws : undefined);
   const blockText = useBlockText();
   // Règle 4 : désactivée (espace, fonction, rôle) ; quota atteint : la carte reste active (message dans l'aperçu)
@@ -133,232 +157,288 @@ export function NewDemoDialog({
     </button>
   );
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      size="md"
-      className="new-demo-dialog"
-      icon={<Plus />}
-      title={step === 1 ? t('demos.newTitle') : t(`ctype.newTitle.${type}`)}
-      subtitle={
-        <>
-          {t('ctype.stepOf', { n: step, total: 2 })} · {step === 1 ? t('ctype.step1') : t('ctype.step2')}
-        </>
-      }
-      closeLabel={t('common.close')}
-      footerLead={step === 1 ? t('ctype.nextHint') : undefined}
-      footer={
-        step === 1 ? (
+    <>
+      <Modal
+        open={open}
+        onClose={onClose}
+        onDismiss={sending ? () => void leave(onClose) : undefined}
+        size="md"
+        className="new-demo-dialog"
+        icon={<Plus />}
+        title={step === 1 ? t('demos.newTitle') : t(`ctype.newTitle.${type}`)}
+        subtitle={
           <>
-            <button type="button" className="fd-btn" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-            <button type="button" className="fd-btn fd-btn--primary" onClick={next}>
-              {t('common.continue')}
-            </button>
+            {t('ctype.stepOf', { n: step, total: 2 })} · {step === 1 ? t('ctype.step1') : t('ctype.step2')}
+          </>
+        }
+        closeLabel={t('common.close')}
+        footerLead={step === 1 ? t('ctype.nextHint') : undefined}
+        footer={
+          step === 1 ? (
+            <>
+              <button type="button" className="fd-btn" onClick={onClose}>
+                {t('common.cancel')}
+              </button>
+              <button type="button" className="fd-btn fd-btn--primary" onClick={next}>
+                {t('common.continue')}
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="fd-btn nd-back" onClick={() => void leave(() => setStep(1))}>
+                <ArrowLeft aria-hidden="true" />
+                {t('common.back')}
+              </button>
+              {emptyBtn}
+              <button type="button" className="fd-btn" onClick={() => void leave(onClose)}>
+                {t('common.cancel')}
+              </button>
+            </>
+          )
+        }
+      >
+        {step === 1 ? (
+          <fieldset className="nd-types">
+            <legend className="nd-legend">{t('ctype.question')}</legend>
+            {/* MODAL-01 : un choix par ligne (tuile, nom, phrase, bouton radio) ; l'écart est porté par la grille */}
+            <div ref={cards} className="nd-types__grid" data-gap-exempt="">
+              {CONTENT_TYPES.map((k) => {
+                const Icon = TYPE_ICON[k];
+                return (
+                  <label
+                    key={k}
+                    className={`nd-type${type === k ? ' is-selected' : ''}${usable(k) ? '' : ' is-off'}`}
+                  >
+                    <span className="nd-type__tile" aria-hidden="true">
+                      <Icon />
+                    </span>
+                    <span className="nd-type__txt">
+                      <b>{t(`ctype.name.${k}`)}</b>
+                      <span>{t(`ctype.line.${k}`)}</span>
+                      {!usable(k) && (
+                        <span className="nd-type__off" id={`nd-off-${k}`}>
+                          {t('htmlCapture.blockedByAdmin')}
+                        </span>
+                      )}
+                    </span>
+                    <input
+                      type="radio"
+                      name="nd-type"
+                      value={k}
+                      checked={type === k}
+                      disabled={!usable(k)}
+                      aria-describedby={usable(k) ? undefined : `nd-off-${k}`}
+                      onChange={() => setType(k)}
+                      onKeyDown={onCardKey}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        ) : type === 'video' ? (
+          <>
+            <ul className="nd-sources" aria-label={t('ctype.step2')}>
+              <li>
+                {extSoon ? (
+                  <div className="nd-src is-soon" aria-disabled="true">
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <Puzzle />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('videoImport.extensionTitle')}</b>
+                      <span>{t('extension.soonBody')}</span>
+                    </span>
+                    <span className="nd-src__soon">{t('shell.soon')}</span>
+                  </div>
+                ) : (
+                  <button type="button" className="nd-src" onClick={() => void leave(onExtension)}>
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <Puzzle />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('videoImport.extensionTitle')}</b>
+                      <span>{t('videoImport.extensionBody')}</span>
+                    </span>
+                    <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  </button>
+                )}
+              </li>
+            </ul>
+            <p className="nd-or">
+              <span>{t('videoImport.or')}</span>
+            </p>
+            <VideoImportZone
+              ws={ws}
+              userId={user?.id ?? ''}
+              folderId={folder || null}
+              onBusy={setSending}
+              onCreated={onVideo}
+              handle={video}
+            />
+            <label className="fd-field nd-folder">
+              <span className="fd-label">{t('demos.colFolder')}</span>
+              <Select value={folder} disabled={sending} onChange={(e) => setFolder(e.target.value)}>
+                <option value="">{t('demos.noFolder')}</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </Select>
+            </label>
           </>
         ) : (
           <>
-            <button type="button" className="fd-btn nd-back" onClick={() => setStep(1)}>
-              <ArrowLeft aria-hidden="true" />
-              {t('common.back')}
-            </button>
-            {emptyBtn}
-            <button type="button" className="fd-btn" onClick={onClose}>
-              {t('common.cancel')}
-            </button>
-          </>
-        )
-      }
-    >
-      {step === 1 ? (
-        <fieldset className="nd-types">
-          <legend className="nd-legend">{t('ctype.question')}</legend>
-          {/* MODAL-01 : un choix par ligne (tuile, nom, phrase, bouton radio) ; l'écart est porté par la grille */}
-          <div ref={cards} className="nd-types__grid" data-gap-exempt="">
-            {CONTENT_TYPES.map((k) => {
-              const Icon = TYPE_ICON[k];
-              return (
-                <label
-                  key={k}
-                  className={`nd-type${type === k ? ' is-selected' : ''}${usable(k) ? '' : ' is-off'}`}
-                >
-                  <span className="nd-type__tile" aria-hidden="true">
-                    <Icon />
-                  </span>
-                  <span className="nd-type__txt">
-                    <b>{t(`ctype.name.${k}`)}</b>
-                    <span>{t(`ctype.line.${k}`)}</span>
-                    {!usable(k) && (
-                      <span className="nd-type__off" id={`nd-off-${k}`}>
-                        {t('htmlCapture.blockedByAdmin')}
-                      </span>
-                    )}
-                  </span>
-                  <input
-                    type="radio"
-                    name="nd-type"
-                    value={k}
-                    checked={type === k}
-                    disabled={!usable(k)}
-                    aria-describedby={usable(k) ? undefined : `nd-off-${k}`}
-                    onChange={() => setType(k)}
-                    onKeyDown={onCardKey}
-                  />
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-      ) : (
-        <>
-          <ul className="nd-sources" aria-label={t('ctype.step2')}>
-            <li>
-              {extSoon ? (
-                // §18.4 : extension pas encore publiée : source visible, désactivée, « Bientôt »
-                <div className="nd-src is-soon" aria-disabled="true">
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <Puzzle />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('demos.newExtension')}</b>
-                    <span>{t('extension.soonBody')}</span>
-                  </span>
-                  <span className="nd-src__soon">{t('shell.soon')}</span>
-                </div>
-              ) : (
-                <button type="button" className="nd-src" onClick={onExtension}>
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <Puzzle />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('demos.newExtension')}</b>
-                    <span>
-                      {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
-                    </span>
-                  </span>
-                  <ChevronRight className="nd-src__go" aria-hidden="true" />
-                </button>
-              )}
-            </li>
-            {type === 'captures' && (
+            <ul className="nd-sources" aria-label={t('ctype.step2')}>
               <li>
-                <button
-                  type="button"
-                  className="nd-src"
-                  disabled={busy}
-                  aria-controls="newdemodialog-file"
-                  onClick={() => picker.current?.click()}
-                >
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <ImagePlus />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('demos.newImport')}</b>
-                    <span>{t('demos.newImportBody')}</span>
-                  </span>
-                  <ChevronRight className="nd-src__go" aria-hidden="true" />
-                </button>
-                <input
-                  ref={picker}
-                  type="file"
-                  accept={IMAGE_ACCEPT}
-                  multiple
-                  /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-                  id="newdemodialog-file"
-                  className="sr-only"
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  aria-label={t('demos.newImport')}
-                  onChange={async (e) => {
-                    const files = [...(e.target.files ?? [])];
-                    e.target.value = '';
-                    if (!files.length) return;
-                    setBusy(true);
-                    try {
-                      await onImport(files, folder || null);
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                />
-              </li>
-            )}
-            <li>
-              {type === 'captures' ? (
-                <button type="button" className="nd-src" onClick={() => onTemplate(folder || null)}>
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <LayoutTemplate />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('templates.title')}</b>
-                    <span>{t('templates.cardBody')}</span>
-                  </span>
-                  <ChevronRight className="nd-src__go" aria-hidden="true" />
-                </button>
-              ) : (
-                // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt » en texte
-                <div className="nd-src is-soon" aria-disabled="true">
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <LayoutTemplate />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('templates.title')}</b>
-                    <span>{t(`ctype.noTemplate.${type}`)}</span>
-                  </span>
-                  <span className="nd-src__soon">{t('shell.soon')}</span>
-                </div>
-              )}
-            </li>
-            {type === 'captures' && (
-              <li className="nd-ai">
-                <button
-                  type="button"
-                  className="nd-src ai-entry"
-                  aria-disabled={aiDisabled || undefined}
-                  aria-describedby={aiDisabled ? 'nd-ai-why' : undefined}
-                  onClick={() => !aiDisabled && onGenerate(folder || null)}
-                >
-                  <span className="nd-src__tile" aria-hidden="true">
-                    <WandSparkles />
-                  </span>
-                  <span className="nd-src__txt">
-                    <b>{t('ai.generate.card')}</b>
-                    <span>{t('ai.generate.cardBody')}</span>
-                    {/* Recette UX (E1) : la raison est écrite sous l'aide, pas dans une infobulle ; avec
-                        « Ouvrir le réglage » à droite, elle reste lue mais n'est pas affichée */}
-                    {aiDisabled && (
-                      <span className={aiLink ? 'sr-only' : 'nd-src__why'} id="nd-ai-why">
-                        {blockText(aiOff, ai)}
+                {extSoon ? (
+                  // §18.4 : extension pas encore publiée : source visible, désactivée, « Bientôt »
+                  <div className="nd-src is-soon" aria-disabled="true">
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <Puzzle />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('demos.newExtension')}</b>
+                      <span>{t('extension.soonBody')}</span>
+                    </span>
+                    <span className="nd-src__soon">{t('shell.soon')}</span>
+                  </div>
+                ) : (
+                  <button type="button" className="nd-src" onClick={onExtension}>
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <Puzzle />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('demos.newExtension')}</b>
+                      <span>
+                        {type === 'captures' ? t('demos.newExtensionBody') : t(`ctype.extensionBody.${type}`)}
                       </span>
-                    )}
-                  </span>
-                  {/* Ligne désactivée : pas de chevron, comme les lignes « Bientôt » */}
-                  {!aiDisabled && <ChevronRight className="nd-src__go" aria-hidden="true" />}
-                </button>
-                {aiLink && (
-                  <Link className="fd-btn fd-btn--ghost fd-btn--sm nd-ai__link" to="/settings/ai">
-                    {t('ai.disabledAdmin')}
-                  </Link>
+                    </span>
+                    <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  </button>
                 )}
               </li>
-            )}
-          </ul>
-          {/* L49 §6 : mention d'autorisation pour les types HTML et Sandbox */}
-          {type !== 'captures' && <HtmlCaptureNotice className="nd-notice" />}
-          <label className="fd-field nd-folder">
-            <span className="fd-label">{t('demos.colFolder')}</span>
-            <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
-              <option value="">{t('demos.noFolder')}</option>
-              {folders.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}
-                </option>
-              ))}
-            </Select>
-          </label>
-        </>
-      )}
-    </Modal>
+              {type === 'captures' && (
+                <li>
+                  <button
+                    type="button"
+                    className="nd-src"
+                    disabled={busy}
+                    aria-controls="newdemodialog-file"
+                    onClick={() => picker.current?.click()}
+                  >
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <ImagePlus />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('demos.newImport')}</b>
+                      <span>{t('demos.newImportBody')}</span>
+                    </span>
+                    <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  </button>
+                  <input
+                    ref={picker}
+                    type="file"
+                    accept={IMAGE_ACCEPT}
+                    multiple
+                    /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
+                    id="newdemodialog-file"
+                    className="sr-only"
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    aria-label={t('demos.newImport')}
+                    onChange={async (e) => {
+                      const files = [...(e.target.files ?? [])];
+                      e.target.value = '';
+                      if (!files.length) return;
+                      setBusy(true);
+                      try {
+                        await onImport(files, folder || null);
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  />
+                </li>
+              )}
+              <li>
+                {type === 'captures' ? (
+                  <button type="button" className="nd-src" onClick={() => onTemplate(folder || null)}>
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <LayoutTemplate />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('templates.title')}</b>
+                      <span>{t('templates.cardBody')}</span>
+                    </span>
+                    <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  </button>
+                ) : (
+                  // Aucun modèle HTML ni Sandbox pour l'instant : visible, désactivé, « Bientôt » en texte
+                  <div className="nd-src is-soon" aria-disabled="true">
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <LayoutTemplate />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('templates.title')}</b>
+                      <span>{t(`ctype.noTemplate.${type}`)}</span>
+                    </span>
+                    <span className="nd-src__soon">{t('shell.soon')}</span>
+                  </div>
+                )}
+              </li>
+              {type === 'captures' && (
+                <li className="nd-ai">
+                  <button
+                    type="button"
+                    className="nd-src ai-entry"
+                    aria-disabled={aiDisabled || undefined}
+                    aria-describedby={aiDisabled ? 'nd-ai-why' : undefined}
+                    onClick={() => !aiDisabled && onGenerate(folder || null)}
+                  >
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <WandSparkles />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('ai.generate.card')}</b>
+                      <span>{t('ai.generate.cardBody')}</span>
+                      {/* Recette UX (E1) : la raison est écrite sous l'aide, pas dans une infobulle ; avec
+                        « Ouvrir le réglage » à droite, elle reste lue mais n'est pas affichée */}
+                      {aiDisabled && (
+                        <span className={aiLink ? 'sr-only' : 'nd-src__why'} id="nd-ai-why">
+                          {blockText(aiOff, ai)}
+                        </span>
+                      )}
+                    </span>
+                    {/* Ligne désactivée : pas de chevron, comme les lignes « Bientôt » */}
+                    {!aiDisabled && <ChevronRight className="nd-src__go" aria-hidden="true" />}
+                  </button>
+                  {aiLink && (
+                    <Link className="fd-btn fd-btn--ghost fd-btn--sm nd-ai__link" to="/settings/ai">
+                      {t('ai.disabledAdmin')}
+                    </Link>
+                  )}
+                </li>
+              )}
+            </ul>
+            {/* L49 §6 : mention d'autorisation pour les types HTML et Sandbox */}
+            {type !== 'captures' && <HtmlCaptureNotice className="nd-notice" />}
+            <label className="fd-field nd-folder">
+              <span className="fd-label">{t('demos.colFolder')}</span>
+              <Select value={folder} onChange={(e) => setFolder(e.target.value)}>
+                <option value="">{t('demos.noFolder')}</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          </>
+        )}
+      </Modal>
+      {confirmDialog}
+    </>
   );
 }

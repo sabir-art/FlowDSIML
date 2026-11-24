@@ -198,6 +198,15 @@ jobs:
       - name: Types de contenu L48-G (création en deux étapes, Sandbox, filtre Type)
         if: always()
         run: cd apps/web && node e2e/l48g-types.e2e.cjs
+      - name: 'Nouvelle démo vidéo : import MP4 ou WebM (envoi avec reprise, erreurs, arrêt)'
+        if: always()
+        run: cd apps/web && node e2e/nouvelle-video.e2e.cjs
+      - name: 'Voix off : panneau en trois sources, lecteur dans la bulle (EXT-02 §6.4)'
+        if: always()
+        run: cd apps/web && node e2e/voix-off.e2e.cjs
+      - name: 'Voix de synthèse dans le panneau et sous-titres automatiques (L30b, EXT-02 §6.4)'
+        if: always()
+        run: cd apps/web && node e2e/voix-sous-titres-ia.e2e.cjs
       - name: 'Guide optionnel du Sandbox A8 (lecteur : bulle, pause, reprise, fin, 390 px)'
         if: always()
         run: cd apps/web && node e2e/guide-sandbox.e2e.cjs

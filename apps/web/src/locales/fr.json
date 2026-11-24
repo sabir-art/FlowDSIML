@@ -5689,5 +5689,48 @@
     "done": "Vous ne recevrez plus de notifications par e-mail. Pour les réactiver, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
     "invalid": "Ce lien n’est plus valable. Pour couper les e-mails, ouvrez TutoClick, cliquez sur la cloche des notifications, puis sur « Préférences ».",
     "open": "Ouvrir TutoClick"
+  },
+  "videoImport": {
+    "title": "Importer une vidéo",
+    "hint": "Déposez le fichier ici ou choisissez-le. MP4 ou WebM, 50 Mo et 10 min au plus.",
+    "pick": "Choisir une vidéo…",
+    "pickOther": "Choisir une autre vidéo",
+    "seeUsage": "Voir l’utilisation",
+    "sending": "Envoi… {{pct}} % · {{sent}} sur {{total}} Mo",
+    "stalled": "Envoi interrompu · {{pct}} %",
+    "resume": "Reprendre",
+    "progress": "Envoi de la vidéo",
+    "or": "ou",
+    "created": "Démo vidéo créée",
+    "stopTitle": "Arrêter l’envoi ?",
+    "stopBody": "La vidéo ne sera pas importée.",
+    "stopConfirm": "Arrêter",
+    "stopCancel": "Continuer",
+    "extensionTitle": "Enregistrer avec l’extension",
+    "extensionBody": "Lancez l’enregistrement depuis l’extension : la vidéo s’ouvre ensuite pour vérification, puis dans l’éditeur.",
+    "badType": {
+      "title": "« {{name}} » n’est pas accepté.",
+      "body": "Choisissez une vidéo MP4 ou WebM."
+    },
+    "tooBig": {
+      "title": "« {{name}} » pèse {{size}} Mo.",
+      "body": "La limite est de 50 Mo : raccourcissez ou découpez la vidéo."
+    },
+    "tooLong": {
+      "title": "« {{name}} » dure {{min}} min.",
+      "body": "La limite est de 10 min : découpez-la en plusieurs démos."
+    },
+    "unreadable": {
+      "title": "« {{name}} » ne peut pas être lu.",
+      "body": "Choisissez une vidéo MP4 ou WebM."
+    },
+    "failed": {
+      "title": "« {{name}} » n’a pas été importé.",
+      "body": "L’envoi a échoué. Réessayez."
+    },
+    "quota": {
+      "title": "Le stockage de l’espace est plein ({{used}} sur {{total}}).",
+      "body": "Supprimez des vidéos ou demandez plus d’espace à la DSI."
+    }
   }
 }
