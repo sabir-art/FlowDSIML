@@ -10,6 +10,8 @@ type Field = { label: string; value: string };
 type Doc = {
   title: string;
   intro: string;
+  /** Date propre au document (sinon celle de l'ensemble). */
+  updated?: string;
   draft?: string;
   fields?: Record<string, Field>;
   sections: Section[];
@@ -47,7 +49,7 @@ export function LegalPage() {
       </header>
       <main className="legal__doc" id="main" lang="fr">
         <h1>{d.title}</h1>
-        <p className="legal__meta">Mise à jour : {legal.updated}</p>
+        <p className="legal__meta">Mise à jour : {d.updated ?? legal.updated}</p>
         {/* Encart « En attente de validation » tant qu'une valeur du client manque */}
         {pending(d) && (
           <p className="legal__draft" role="note">
