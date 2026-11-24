@@ -211,3 +211,9 @@
     flex-basis: calc(100% - 68px);
   }
 }
+/* FIELD-01 : l'indicateur de focus est porté par le cadre du champ, jamais par l'input intérieur */
+.pp-addr__field .pp-addr__input:focus,
+.pp-addr__field .pp-addr__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
