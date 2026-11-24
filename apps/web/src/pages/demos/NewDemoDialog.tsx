@@ -273,6 +273,7 @@ export function NewDemoDialog({
               userId={user?.id ?? ''}
               folderId={folder || null}
               onBusy={setSending}
+              onStopRequest={() => void leave(() => undefined)}
               onCreated={onVideo}
               handle={video}
             />

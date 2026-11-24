@@ -5750,6 +5750,7 @@
     "quota": {
       "title": "Le stockage de l’espace est plein ({{used}} sur {{total}}).",
       "body": "Supprimez des vidéos ou demandez plus d’espace à la DSI."
-    }
+    },
+    "stop": "Arrêter l’envoi"
   }
 }

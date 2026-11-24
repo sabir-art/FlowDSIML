@@ -5750,6 +5750,7 @@
     "quota": {
       "title": "The workspace storage is full ({{used}} of {{total}}).",
       "body": "Delete videos or ask IT for more space."
-    }
+    },
+    "stop": "Stop the upload"
   }
 }

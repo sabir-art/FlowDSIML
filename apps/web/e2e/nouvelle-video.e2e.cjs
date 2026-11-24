@@ -129,8 +129,10 @@ const SHOTS = process.env.SHOTS_DIR;
       `${tag} format refusé : message`,
     );
     ok(
-      (await zone.getByRole('button', { name: 'Choisir une autre vidéo' }).count()) === 1 &&
-        (await zone.evaluate((el) => getComputedStyle(el).borderStyle)) === 'solid',
+      (await zone
+        .getByRole('button', { name: 'Choisir une autre vidéo' })
+        .locator('svg.lucide-upload')
+        .count()) === 1 && (await zone.evaluate((el) => getComputedStyle(el).borderStyle)) === 'solid',
       `${tag} format refusé : bord plein et « Choisir une autre vidéo »`,
     );
     await axe('erreur');
@@ -213,6 +215,25 @@ const SHOTS = process.env.SHOTS_DIR;
     await axe('envoi');
     await noScroll('envoi');
     await shot('nouvelle-video-envoi');
+
+    // « Arrêter l'envoi » dans la zone (pas un second « Annuler ») : même confirmation
+    ok(
+      (await zone.getByRole('button').allTextContents()).join('|') === 'Arrêter l’envoi',
+      `${tag} envoi : bouton « Arrêter l’envoi » dans la zone`,
+    );
+    await zone.getByRole('button', { name: 'Arrêter l’envoi' }).click();
+    const stop0 = page.getByRole('dialog', { name: 'Arrêter l’envoi ?' });
+    await stop0.waitFor();
+    await stop0.getByRole('button', { name: 'Continuer' }).click();
+    await stop0.waitFor({ state: 'hidden' });
+    // La confirmation est vraiment refermée et le focus revenu dans la fenêtre avant la touche suivante
+    await page.waitForFunction(
+      () =>
+        !document.querySelector('dialog.dialog-confirm[open]') &&
+        !!document.activeElement?.closest('dialog.new-demo-dialog') &&
+        document.getAnimations().every((x) => x.playState !== 'running'),
+    );
+    ok(await bar.isVisible(), `${tag} zone, « Continuer » : l’envoi se poursuit`);
 
     // Fermer pendant l'envoi : confirmation, « Continuer » garde l'envoi
     await page.keyboard.press('Escape');
