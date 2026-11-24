@@ -85,7 +85,6 @@
     "loginTitle": "Welcome back",
     "loginSubtitle": "Sign in to get back to your demos.",
     "signupTitle": "Create your account",
-    "signupSubtitle": "Free, no credit card.",
     "withPassword": "Password",
     "withMagicLink": "Magic link",
     "email": "Email",
@@ -115,7 +114,7 @@
     "strength_2": "good",
     "strength_3": "strong",
     "workEmail": "Work email",
-    "signupLink": "Create a free account",
+    "signupLink": "Create an account",
     "usePassword": "Sign in with a password",
     "hasAccount": "Already have an account?",
     "loginLink": "Sign in",
@@ -212,7 +211,14 @@
   "invite": {
     "pendingTitle": "Pending invitations",
     "title": "Invitation",
-    "body": "You have been invited to join “{{workspace}}” as {{role}}.",
+    "body": "You have been invited to join the “{{workspace}}” workspace {{as}}.",
+    "bodyFrom": "{{inviter}} invites you to join the “{{workspace}}” workspace {{as}}.",
+    "as": {
+      "owner": "as an owner",
+      "admin": "as an admin",
+      "editor": "as an editor",
+      "viewer": "as a viewer"
+    },
     "loginFirst": "Sign in or create an account with {{email}} to accept.",
     "accept": "Accept invitation"
   },

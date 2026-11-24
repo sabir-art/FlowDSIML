@@ -332,7 +332,8 @@
   background: var(--fd-color-primary);
 }
 .obx-file__name {
-  font: 500 13px var(--fd-font-mono);
+  /* Police de l'interface : le monospace est réservé au code */
+  font: 400 12px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
 }
 .obx-browser {

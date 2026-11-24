@@ -85,7 +85,6 @@
     "loginTitle": "Bon retour parmi nous",
     "loginSubtitle": "Connectez-vous pour retrouver vos démos.",
     "signupTitle": "Créez votre compte",
-    "signupSubtitle": "Gratuit, sans carte bancaire.",
     "withPassword": "Mot de passe",
     "withMagicLink": "Lien magique",
     "email": "E-mail",
@@ -115,7 +114,7 @@
     "strength_2": "bonne",
     "strength_3": "forte",
     "workEmail": "Adresse e-mail professionnelle",
-    "signupLink": "Créer un compte gratuit",
+    "signupLink": "Créer un compte",
     "usePassword": "Se connecter avec un mot de passe",
     "hasAccount": "Déjà inscrit ?",
     "loginLink": "Se connecter",
@@ -212,7 +211,14 @@
   "invite": {
     "pendingTitle": "Invitations en attente",
     "title": "Invitation",
-    "body": "Vous êtes invité·e à rejoindre « {{workspace}} » en tant que {{role}}.",
+    "body": "Vous avez reçu une invitation à rejoindre l’espace « {{workspace}} » {{as}}.",
+    "bodyFrom": "{{inviter}} vous invite à rejoindre l’espace « {{workspace}} » {{as}}.",
+    "as": {
+      "owner": "en tant que propriétaire",
+      "admin": "en tant qu’administrateur",
+      "editor": "en tant qu’éditeur",
+      "viewer": "en tant que lecteur"
+    },
     "loginFirst": "Connectez-vous ou créez un compte avec l'adresse {{email}} pour accepter.",
     "accept": "Accepter l'invitation"
   },

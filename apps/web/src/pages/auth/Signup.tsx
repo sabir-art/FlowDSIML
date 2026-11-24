@@ -62,13 +62,7 @@ export function Signup() {
   }
 
   return (
-    <AuthLayout
-      title={t('auth.signupTitle')}
-      subtitle={t('auth.signupSubtitle')}
-      aside={<StepsAside />}
-      compact
-      footer={false}
-    >
+    <AuthLayout title={t('auth.signupTitle')} aside={<StepsAside />} compact footer={false}>
       {sentTo ? (
         <div className="alert alert-success auth-sent" role="status">
           <Mail aria-hidden="true" />

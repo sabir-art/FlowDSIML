@@ -16,6 +16,8 @@ interface InviteInfo {
   role: string;
   expired: boolean;
   accepted: boolean;
+  /** Nom de la personne qui invite, quand le serveur le donne. */
+  inviter_name?: string | null;
 }
 
 export function AcceptInvite() {
@@ -39,7 +41,14 @@ export function AcceptInvite() {
       {!info && <Alert kind="error">{t('errors.inviteNotFound')}</Alert>}
       {info && (
         <>
-          <p>{t('invite.body', { workspace: info.workspace_name, role: t(`roles.${info.role}`) })}</p>
+          {/* Sans accord ni écriture inclusive ; le nom de la personne qui invite s'il est connu */}
+          <p>
+            {t(info.inviter_name ? 'invite.bodyFrom' : 'invite.body', {
+              inviter: info.inviter_name,
+              workspace: info.workspace_name,
+              as: t(`invite.as.${info.role}`, { defaultValue: t('invite.as.viewer') }),
+            })}
+          </p>
           {info.expired && <Alert kind="error">{t('errors.inviteExpired')}</Alert>}
           {info.accepted && <Alert kind="error">{t('errors.inviteUsed')}</Alert>}
           {error && <Alert kind="error">{error}</Alert>}

@@ -40,6 +40,8 @@ const PAGES = [
   { name: 'Nouveau mot de passe', route: '/#/reset-password' },
   { name: 'Invitation (non connecté)', route: '/#/invite/jeton-acme', signedOut: true, invitation: true },
   { name: 'Invitation (connecté)', route: '/#/invite/jeton-acme', invitation: true },
+  // Le nom de la personne qui invite, quand le serveur le donne
+  { name: 'Invitation (de la part de)', route: '/#/invite/jeton-acme', invitation: true, inviter: true },
   { name: 'Désinscription', route: '/#/unsubscribe/jeton-desinscription' },
 ];
 
@@ -120,7 +122,8 @@ function measure() {
       const errors = [];
       p.on('pageerror', (e) => errors.push(e.message));
       const state = { ...seed(), signedOut: !!pg.signedOut };
-      if (pg.invitation) state.invitation = INVITATION;
+      if (pg.invitation)
+        state.invitation = pg.inviter ? { ...INVITATION, inviter_name: 'Alice Exemple' } : INVITATION;
       state.unsubTokens = { 'jeton-desinscription': state.user?.id ?? 'u-alice' };
       await install(p, state);
       await p.goto(`${APP}${pg.route}`);
@@ -128,6 +131,26 @@ function measure() {
       if (pg.open) await pg.open(p);
       await p.waitForTimeout(500);
       const tag = `${pg.name} (${theme})`;
+      // État des lieux UX du 24/11 : outil interne (ni « gratuit » ni « carte bancaire »), invitation
+      // sans accord ni écriture inclusive
+      if (theme === 'light') {
+        const text = (await p.locator('body').innerText()).replace(/[\u00a0\u202f]/g, ' ');
+        ok(!/gratuit|carte bancaire|invité·e/i.test(text), `${tag} : ni « gratuit » ni « carte bancaire »`);
+        if (pg.route === '/#/login')
+          ok(
+            (await p.getByRole('link', { name: 'Créer un compte', exact: true }).count()) === 1,
+            `${tag} : lien « Créer un compte »`,
+          );
+        if (pg.invitation)
+          ok(
+            text.includes(
+              pg.inviter
+                ? 'Alice Exemple vous invite à rejoindre l’espace « Acme Formation » en tant qu’éditeur.'
+                : 'Vous avez reçu une invitation à rejoindre l’espace « Acme Formation » en tant qu’éditeur.',
+            ),
+            `${tag} : phrase d’invitation, rôle en minuscule avec l’élision`,
+          );
+      }
       // Identifiant de chaque bouton visible, pour le survoler et le focaliser ensuite
       const n = await p.evaluate(() => {
         let i = 0;
