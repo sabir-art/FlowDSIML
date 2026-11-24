@@ -101,6 +101,7 @@ Tous les composants vivent dans `packages/ui`. Leur popover est le même pour to
 
 - **Case** : 18 px, rayon de 5 px, bordure de 1,5 px `border-field`. Cochée : fond `primary` et `Check` blanc (noir en sombre, selon `on-primary`). État indéterminé : un trait.
 - **Radio** : 18 px, rond. Choisi : bordure `primary` et point central de 8 px.
+- **Lecteur public** : cases et radios à 20 px (cibles tactiles du consentement et du quiz) ; le reste de l’app est à 18 px.
 - **Interrupteur** :
   - 36 × 20 px, piste en `border-field`, et en `primary` quand il est activé ;
   - bouton rond de 16 px ;
