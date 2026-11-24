@@ -186,6 +186,9 @@ jobs:
       - name: Paramètres › Notifications (par événement, dans l'app et par e-mail, démos coupées)
         if: always()
         run: cd apps/web && node e2e/parametres-notifications.e2e.cjs
+      - name: Paramètres › Clés d'accès (création, clé affichée une fois, révocation, section « Utiliser l'API »)
+        if: always()
+        run: cd apps/web && node e2e/cles-acces.e2e.cjs
       - name: Résumé par e-mail (préférence, « Bientôt » sans service d'envoi, désinscription)
         if: always()
         run: cd apps/web && node e2e/email-digest.e2e.cjs

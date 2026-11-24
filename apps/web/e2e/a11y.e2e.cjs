@@ -795,6 +795,40 @@ const APP_PAGES = [
   // VB-03 : Sécurité (connexion unique « Bientôt » ; « Fonctions à venir » supprimée en L48-A)
   { name: 'Sécurité', route: '/#/settings/security' },
   { name: 'Confidentialité', route: '/#/settings/privacy' },
+  // §6.2 : Clés d'accès (liste vide et section « Utiliser l'API »), puis avec des clés
+  { name: 'Clés d’accès (vide)', route: '/#/settings/keys' },
+  {
+    name: 'Clés d’accès',
+    route: '/#/settings/keys',
+    seed: (d) => {
+      d.tables.api_keys = [
+        {
+          id: 'k-1',
+          workspace_id: 'ws-1',
+          created_by: d.user.id,
+          name: 'Intranet RH',
+          scopes: ['demos', 'stats'],
+          last4: '0001',
+          created_at: '2026-11-18T09:00:00Z',
+          expires_at: null,
+          revoked_at: null,
+          last_used_at: null,
+        },
+        {
+          id: 'k-2',
+          workspace_id: 'ws-1',
+          created_by: d.user.id,
+          name: 'Ancien script',
+          scopes: ['demos'],
+          last4: '0002',
+          created_at: '2026-09-12T09:00:00Z',
+          expires_at: null,
+          revoked_at: '2026-10-01T09:00:00Z',
+          last_used_at: null,
+        },
+      ];
+    },
+  },
   // §6.3 : Notifications (tableau par événement, colonne e-mail « Bientôt » sans service d'envoi)
   { name: 'Notifications (paramètres)', route: '/#/settings/notifications' },
   // L30-01 : Assistance IA désactivée, puis activée (quota, fonctions)

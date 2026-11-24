@@ -2225,6 +2225,36 @@ async function install(page, state = seed()) {
         case 'demo_embed_views':
           return json(route, 200, state.embedViews || []);
         // ===== L23 : webhooks =====
+        // §6.2 : clés d'accès. La clé factice n'a pas le format d'une vraie clé (aucun secret dans le dépôt).
+        case 'create_api_key': {
+          const key = 'tc_EXEMPLE-cle-factice-' + String((t.api_keys || []).length + 1).padStart(4, '0');
+          const k = {
+            id: crypto.randomUUID(),
+            workspace_id: a.p_workspace,
+            created_by: state.user.id,
+            name: a.p_name,
+            scopes: ['demos', 'stats', 'leads'].filter((x) => (a.p_scopes || []).includes(x)),
+            last4: key.slice(-4),
+            created_at: new Date().toISOString(),
+            expires_at: a.p_expires_days
+              ? new Date(Date.now() + a.p_expires_days * 86400_000).toISOString()
+              : null,
+            revoked_at: null,
+            last_used_at: null,
+          };
+          (t.api_keys ||= []).push(k);
+          return json(route, 200, { id: k.id, key });
+        }
+        case 'rename_api_key': {
+          const k = (t.api_keys || []).find((x) => x.id === a.p_id);
+          if (k) k.name = a.p_name;
+          return json(route, 200, null);
+        }
+        case 'revoke_api_key': {
+          const k = (t.api_keys || []).find((x) => x.id === a.p_id);
+          if (k) k.revoked_at = new Date().toISOString();
+          return json(route, 200, null);
+        }
         case 'webhook_create': {
           const n = (t.webhooks || []).filter((w) => w.workspace_id === a.p_ws).length;
           if (n >= (state.webhookLimit ?? 3))

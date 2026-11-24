@@ -80,7 +80,8 @@ const GROUPS: Array<{ key: string; entries: Entry[] }> = [
         to: '/settings/integrations',
         perm: 'integrations.manage',
       },
-      { label: 'settings.keys', icon: KeyRound },
+      // §6.2 : clés d'accès de l'API, propriétaires et admins seulement
+      { label: 'settings.keys', icon: KeyRound, to: '/settings/keys', perm: 'integrations.manage' },
     ],
   },
   {
