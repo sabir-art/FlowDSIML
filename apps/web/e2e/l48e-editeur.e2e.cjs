@@ -60,11 +60,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(
     (await rail
       .locator('button[data-tool="assistant"]')
-      .evaluate((el) => Math.round(el.getBoundingClientRect().top))) === 490,
-    'P7 : « Assistant » à y 490',
+      .evaluate((el) => Math.round(el.getBoundingClientRect().top))) === 530,
+    // EXT-02 §6.3 : « Projecteur » ajouté au groupe Écran, un cran de 40 px plus bas
+    'P7 : « Assistant » à y 530',
   );
   // Retours client 21/11 §1 : Commentaires sortis du rail (panneau sous le canevas)
-  ok((await rail.locator('button[data-tool]').count()) === 12, '12 outils');
+  ok((await rail.locator('button[data-tool]').count()) === 13, '13 outils (dont « Projecteur »)');
   ok((await p.locator('.ed-tool').count()) === 1, 'un panneau ouvert (Étape par défaut)');
   ok((await p.locator('#ed-tool-title').innerText()) === 'Étape', 'panneau « Étape »');
   ok((await p.locator('.stage-head + * .floatbar, .floatbar').count()) === 0, 'plus de barre flottante');

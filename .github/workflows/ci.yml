@@ -207,6 +207,9 @@ jobs:
       - name: 'Flou stylé : forme, intensité, teinte, rendu incrusté (EXT-02 §6.2)'
         if: always()
         run: cd apps/web && node e2e/flou-style.e2e.cjs
+      - name: 'Projecteur libre : outil du rail, halo du lecteur, moins d’animations (EXT-02 §6.3)'
+        if: always()
+        run: cd apps/web && node e2e/projecteur.e2e.cjs
       - name: 'Voix off : panneau en trois sources, lecteur dans la bulle (EXT-02 §6.4)'
         if: always()
         run: cd apps/web && node e2e/voix-off.e2e.cjs

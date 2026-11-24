@@ -10,6 +10,7 @@ import {
   type MaskShape,
   type MaskTint,
   maskPreviewStyle,
+  FREE_SPOTLIGHT,
 } from '@flowdsiml/manifest';
 
 export type DemoRow = Tables<'demos'>;
@@ -32,6 +33,8 @@ export type DemoSettings = {
    * dans la bulle (par défaut) ou boutons de la barre du lecteur.
    */
   voice?: { autoplay?: boolean; captions?: boolean; player?: 'bubble' | 'bar' };
+  /** EXT-02 §6.3 : projecteur libre, réglage de toute la démo. */
+  spotlight?: { enabled?: boolean; size?: number; dim?: number; fixedOnReducedMotion?: boolean };
   theme?: Partial<Theme>;
   cta?: Cta | null;
   /** F1 : mode de lecture de toute la démo (visite guidée = pastille + bulle). */
@@ -134,3 +137,16 @@ export const beforeAfterComplete = (s: {
   image_path: string | null;
   before_image_path: string | null;
 }) => s.kind !== 'before_after' || (!!s.image_path && !!s.before_image_path);
+
+/** EXT-02 §6.3 : projecteur libre de la démo, avec ses valeurs par défaut (220 px, 55 %, halo fixe). */
+export function freeSpotlightOf(settings: DemoSettings) {
+  const v = settings.spotlight ?? {};
+  const within = (n: unknown, r: { min: number; max: number; initial: number }) =>
+    typeof n === 'number' && Number.isFinite(n) ? Math.min(r.max, Math.max(r.min, Math.round(n))) : r.initial;
+  return {
+    enabled: v.enabled === true,
+    size: within(v.size, FREE_SPOTLIGHT.size),
+    dim: within(v.dim, FREE_SPOTLIGHT.dim),
+    fixedOnReducedMotion: v.fixedOnReducedMotion !== false,
+  };
+}

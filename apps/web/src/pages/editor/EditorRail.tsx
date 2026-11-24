@@ -7,6 +7,7 @@
 import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Flashlight,
   Crop,
   Droplet,
   GitBranch,
@@ -31,6 +32,7 @@ export type ToolId =
   | 'next'
   | 'blur'
   | 'zoom'
+  | 'spotlight'
   | 'crop'
   | 'image'
   | 'design'
@@ -39,7 +41,8 @@ export type ToolId =
 
 export const TOOL_GROUPS: Array<{ key: string; tools: ToolId[] }> = [
   { key: 'content', tools: ['step', 'cta', 'hotspots', 'voice', 'next'] },
-  { key: 'screen', tools: ['blur', 'zoom', 'crop', 'image'] },
+  // EXT-02 §6.3 : « Projecteur » après Zoom
+  { key: 'screen', tools: ['blur', 'zoom', 'spotlight', 'crop', 'image'] },
   // Retours client 21/11 §1 : les Commentaires sont dans le panneau sous le canevas, plus dans le rail
   // Recette du lot 3 (P7) : Design et Assistant forment un groupe, comme dans la maquette
   { key: 'look', tools: ['design', 'assistant'] },
@@ -55,6 +58,7 @@ const ICONS: Record<ToolId, LucideIcon> = {
   next: GitBranch,
   blur: Droplet,
   zoom: ZoomIn,
+  spotlight: Flashlight,
   crop: Crop,
   image: ImageIcon,
   design: Palette,

@@ -227,3 +227,41 @@
     transition: none;
   }
 }
+
+/* EXT-02 §6.3 : projecteur libre. Halo net, bord adouci de 12 px, reste assombri. C'est le seul dégradé
+   permis : il est la fonction elle-même. La position est animée (200 ms) quand le halo revient sur
+   l'élément de l'étape, jamais pendant le suivi du pointeur. */
+@property --fx {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 50%;
+}
+@property --fy {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 50%;
+}
+.p-freespot {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle var(--fr) at var(--fx) var(--fy),
+    transparent 0 calc(var(--fr) - 12px),
+    rgb(10 12 16 / var(--fd)) var(--fr)
+  );
+  transition:
+    --fx 200ms ease-out,
+    --fy 200ms ease-out;
+}
+.p-freespot.is-follow,
+.p-freespot.is-fixed {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-freespot {
+    transition: none;
+  }
+}

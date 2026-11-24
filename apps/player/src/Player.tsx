@@ -4,8 +4,10 @@ import { ModalBox } from './modalFocus';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   DEFAULT_FRAME,
+  freeSpotlightRadius,
   themeSchema,
   type Frame,
+  type FreeSpotlight,
   type Hotspot,
   type LeadForm as LeadFormT,
   type Manifest,
@@ -35,6 +37,7 @@ import {
   ClipboardList,
   Expand,
   ExternalLink,
+  Flashlight,
   Globe,
   Info,
   ListChecks,
@@ -238,6 +241,8 @@ export function Player({
   const [menu, setMenu] = useState(false);
   // Fenêtre fermée par Échap : la capture n'est plus voilée, « Rouvrir la fenêtre » reste dans la barre
   const [winClosed, setWinClosed] = useState(false);
+  // Projecteur libre coupé par le visiteur
+  const [spotOff, setSpotOff] = useState(false);
   const winBox = useRef<HTMLDivElement>(null);
   const winPill = useRef<HTMLButtonElement>(null);
   const winFoot = useRef<HTMLDivElement>(null);
@@ -1187,6 +1192,7 @@ export function Player({
                   tapHere={t.mobile.tapHere}
                   missing={{ text: t.imgMissing, retry: t.retry }}
                   autoZoom={autoZoom && !fullShot}
+                  free={spotOff ? null : m.spotlight}
                 />
               </TabWindow>
               {autoZoom && (
@@ -1565,6 +1571,17 @@ export function Player({
               <Volume2 {...ICON} />
             </button>
           )}
+          {m.spotlight && (
+            // EXT-02 §6.3 : le visiteur peut couper le projecteur (choix gardé pour la session de lecture)
+            <button
+              class="p-icon-btn p-icon-btn--ghost p-freespot-btn"
+              onClick={() => setSpotOff(!spotOff)}
+              aria-pressed={!spotOff}
+              aria-label={t.spotlight}
+            >
+              <Flashlight {...ICON} />
+            </button>
+          )}
           {voice && !voiceHosted && (
             <button
               class="p-icon-btn p-icon-btn--ghost p-cc"
@@ -1640,8 +1657,11 @@ function ImageStep({
   tapHere,
   missing,
   autoZoom,
+  free = null,
 }: {
   step: Step;
+  /** EXT-02 §6.3 : projecteur libre de la démo (null : désactivé, ou coupé par le visiteur). */
+  free?: FreeSpotlight | null;
   /** L38-11 : cadrage automatique autour du hotspot (petit écran) ; la bascule est sous la capture. */
   autoZoom?: boolean;
   /** L36 : capture introuvable (démo supprimée, réseau coupé) : message et bouton Réessayer. */
@@ -1751,10 +1771,48 @@ function ImageStep({
   }, []);
   const playing = phase !== 'done';
 
+  // EXT-02 §6.3 : projecteur libre. Le halo suit le pointeur (souris) ; au clavier, au toucher, avant le
+  // premier mouvement et quand le pointeur quitte la capture, il se place sur l'élément de l'étape.
+  // Étape sans hotspot : pas de voile. Le style Spotlight des hotspots est alors ignoré.
+  const stage = useRef<HTMLDivElement>(null);
+  const [ptr, setPtr] = useState<{ x: number; y: number } | null>(null);
+  const [stageW, setStageW] = useState(0);
+  const target = step.hotspots[0] ? screen(step.hotspots[0]) : null;
+  const freeOn = !!free && !dimmed && !playing && !!target;
+  useEffect(() => {
+    const el = stage.current;
+    if (!freeOn || !el) return;
+    const fit = () => setStageW(el.clientWidth);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [freeOn]);
+  const fixed = !!free?.fixedOnReducedMotion && reduced;
+  const at =
+    freeOn && !fixed && ptr
+      ? ptr
+      : target
+        ? { x: target.x + target.w / 2, y: target.y + target.h / 2 }
+        : null;
+  const isSpot = (h: Hotspot) => !freeOn && h.style === 'spotlight';
+
   return (
     <div
+      ref={stage}
       class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
       style={{ '--ratio': String(shown.width / shown.height) }}
+      onPointerMove={
+        freeOn && !fixed
+          ? (e) => {
+              if (e.pointerType !== 'mouse') return;
+              const r = e.currentTarget.getBoundingClientRect();
+              if (r.width && r.height)
+                setPtr({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
+            }
+          : undefined
+      }
+      onPointerLeave={freeOn ? () => setPtr(null) : undefined}
     >
       <div
         class={`p-zoom${zoom?.transition === 'instant' ? ' is-instant' : ''}`}
@@ -1832,18 +1890,27 @@ function ImageStep({
           </div>
         ))}
       </div>
-      {!dimmed && !playing && step.hotspots.some((h) => h.style === 'spotlight') && (
+      {freeOn && at && (
+        <div
+          class={`p-freespot${ptr && !fixed ? ' is-follow' : ''}${fixed ? ' is-fixed' : ''}`}
+          style={{
+            '--fx': `${Math.round(at.x * 10000) / 100}%`,
+            '--fy': `${Math.round(at.y * 10000) / 100}%`,
+            '--fr': `${Math.round(freeSpotlightRadius(free!.size, stageW || 1280))}px`,
+            '--fd': String(free!.dim / 100),
+          }}
+          aria-hidden="true"
+        />
+      )}
+      {!dimmed && !playing && step.hotspots.some(isSpot) && (
         <svg class="p-veil" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          <path
-            fill-rule="evenodd"
-            d={spotlightVeilPath(step.hotspots.filter((h) => h.style === 'spotlight').map(screen))}
-          />
+          <path fill-rule="evenodd" d={spotlightVeilPath(step.hotspots.filter(isSpot).map(screen))} />
         </svg>
       )}
       {!dimmed &&
         !playing &&
         step.hotspots.map((h) =>
-          h.style === 'spotlight' ? (
+          isSpot(h) ? (
             <button
               key={h.id}
               class="p-spotlight"
@@ -1864,7 +1931,7 @@ function ImageStep({
       {!dimmed && !playing && tip && (tip.h.title || tip.h.body || tip.h.cta) && (
         <Tooltip
           {...tip}
-          {...(tip.h.style === 'spotlight'
+          {...(isSpot(tip.h)
             ? (() => {
                 const a = spotlightAnchor(screen(tip.h), tip.h.placement);
                 return { h: { ...a.box, placement: a.placement } };

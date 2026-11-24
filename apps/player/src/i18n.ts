@@ -23,6 +23,8 @@ const dict = {
     stepOf: 'Étape {{n}} sur {{total}}',
     escToClose: 'Échap pour fermer',
     reopenWindow: 'Rouvrir la fenêtre',
+    /** EXT-02 §6.3 : bouton de la barre (aria-pressed) qui coupe ou remet le projecteur libre. */
+    spotlight: 'Projecteur',
     start: 'Commencer',
     /** L16 : couverture «\u202fDémarrer au clic\u202f» d'une intégration. */
     launch: 'Lancer la démo',
@@ -451,6 +453,7 @@ const dict = {
     stepOf: 'Step {{n}} of {{total}}',
     escToClose: 'Esc to close',
     reopenWindow: 'Reopen the window',
+    spotlight: 'Spotlight',
     start: 'Start',
     launch: 'Launch the demo',
     restart: 'Restart',

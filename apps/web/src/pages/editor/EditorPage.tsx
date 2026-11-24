@@ -25,6 +25,7 @@ import {
 import { EditorRail, TOOL_KEY, TOOL_ORDER, ToolPanel, savedTool, type ToolId } from './EditorRail';
 import { HotspotsTool } from './panels/HotspotsTool';
 import { BlurModal } from './BlurModal';
+import { SpotlightPanel } from './panels/SpotlightPanel';
 import { AssistantPanel } from '../../components/ai/AssistantPanel';
 import { SuggestionsPanel } from '../../components/ai/SuggestionsPanel';
 import { TranslateDialog } from '../../components/ai/TranslateDialog';
@@ -64,7 +65,7 @@ import { StepPanel } from './panels/StepPanel';
 import { AbCanvasSwitch, asVariantB, useAbTest } from './ab/AbTest';
 import { fontFaceCss } from '@flowdsiml/player-core';
 import { themeSchema } from '@flowdsiml/manifest';
-import { asSettings, asStepOptions } from './types';
+import { asSettings, asStepOptions, freeSpotlightOf } from './types';
 import { ThemePanel } from './panels/ThemePanel';
 import { buildDraftManifest, sandboxOf } from './draftManifest';
 import type { Selection } from './types';
@@ -337,6 +338,8 @@ export function EditorPage() {
   }, [versionId]);
 
   const step = editor.steps[Math.min(index, editor.steps.length - 1)];
+  // EXT-02 §6.3 : projecteur libre de la démo (aperçu dans le canevas quand l'outil est ouvert)
+  const freeSpot = freeSpotlightOf(asSettings(editor.demo?.settings));
   // MEDIA-01 : remplacer la capture d'une étape (menu, bouton du panneau, dépôt sur la carte ou le canevas)
   const canDropImage = !readOnly && step?.kind === 'image';
   const replaceImage = (stepId: string, file: File) => {
@@ -677,6 +680,7 @@ export function EditorPage() {
         />
       );
     if (panel === 'design') return <ThemePanel editor={editor} readOnly={readOnly} />;
+    if (panel === 'spotlight') return <SpotlightPanel editor={editor} readOnly={readOnly} />;
     if (panel === 'assistant')
       return ws && can('demo.edit') ? (
         <AssistantPanel
@@ -1279,6 +1283,7 @@ export function EditorPage() {
                             step.gate_form_id && setSelection({ kind: 'form', id: step.gate_form_id })
                           }
                           hideFormChip={!!selectedForm}
+                          freeSpot={panel === 'spotlight' && freeSpot.enabled ? freeSpot : null}
                           abPreview={
                             ab.test && ab.view === 'B' && ab.test.step_id === step.id && ab.test.hotspot_id
                               ? {
