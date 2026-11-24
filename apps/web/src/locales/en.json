@@ -203,7 +203,8 @@
     "capture2": "Click the TutoClick icon, then Start",
     "capture3": "Do the task, then click Finish",
     "openSpace": "Open my workspace",
-    "seeSample": "See a sample demo"
+    "seeSample": "See a sample demo",
+    "extInstead": "Capture with the extension instead"
   },
   "invite": {
     "pendingTitle": "Pending invitations",

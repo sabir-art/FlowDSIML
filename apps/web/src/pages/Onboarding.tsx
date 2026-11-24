@@ -7,6 +7,7 @@ import {
   ExternalLink,
   FileText,
   GraduationCap,
+  ImagePlus,
   Megaphone,
   Puzzle,
   Pin,
@@ -22,7 +23,8 @@ import { useWorkspace } from '../workspace/WorkspaceProvider';
 import { BrandMark } from '../components/BrandMark';
 import { useHelp } from '../help/HelpProvider';
 import { useToast } from '../components/Toast';
-import { createDemoFromImages, IMAGE_ACCEPT } from './demos/importImages';
+import { createDemoFromImages, IMAGE_ACCEPT, orderImages } from './demos/importImages';
+import { FileDropzone } from '../components/FileDropzone';
 import { orderedCategories, type UseCase } from './demos/templates';
 import './onboarding.css';
 import { PendingInvites } from '../components/PendingInvites';
@@ -86,7 +88,9 @@ export function Onboarding() {
   const { busy, error, run } = useAction();
   const heading = useRef<HTMLHeadingElement>(null);
   const nameInput = useRef<HTMLInputElement>(null);
-  const picker = useRef<HTMLInputElement>(null);
+  // MEDIA-01 §18.3 : « Importer des captures à la place » remplace le bloc extension par une zone d'envoi
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const step = steps[index]!;
 
   // Reprise : étape atteinte et réponses gardées pour un rechargement
@@ -343,7 +347,28 @@ export function Onboarding() {
         ) : (
           <p className="obx-sub">{t('onboarding.extSubtitle')}</p>
         )}
-        {!EXTENSION_URL && !extSeen ? null : narrow ? (
+        {importing ? (
+          // MEDIA-01 §18.3 : zone large à la place du bloc extension, même aide que « Nouvelle démo »
+          <FileDropzone
+            className="obx-zone"
+            label={t('demos.newImport')}
+            inputId="onboarding-file"
+            accept={IMAGE_ACCEPT}
+            multiple
+            icon={<ImagePlus />}
+            title={t('demos.newImport')}
+            hint={t('demos.newImportBody')}
+            pickLabel={t('demos.newImportPick')}
+            busy={busy}
+            busyLabel={t('demos.newImportSending')}
+            error={importError}
+            onFiles={(files) => {
+              const kept = orderImages(files);
+              setImportError(kept.length ? null : t('demos.newImportBadType'));
+              if (kept.length) void importImages(kept);
+            }}
+          />
+        ) : !EXTENSION_URL && !extSeen ? null : narrow ? (
           <p className="obx-note">{t('onboarding.extDesktop')}</p>
         ) : (
           <ol className="obx-lines">
@@ -388,31 +413,17 @@ export function Onboarding() {
             type="button"
             className="link-button"
             disabled={busy}
-            aria-controls="onboarding-file"
-            onClick={() => picker.current?.click()}
+            aria-expanded={importing}
+            onClick={() => {
+              setImporting(!importing);
+              setImportError(null);
+            }}
           >
-            {t('onboarding.importInstead')}
+            {importing ? t('onboarding.extInstead') : t('onboarding.importInstead')}
           </button>
           <button type="button" className="link-button" onClick={() => setIndex(index + 1)}>
             {t('onboarding.extSkip')}
           </button>
-          <input
-            ref={picker}
-            type="file"
-            accept={IMAGE_ACCEPT}
-            multiple
-            /* COMP-01 §5 : le champ reste dans la page, masqué à l'œil et relié à son bouton */
-            id="onboarding-file"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden="true"
-            aria-label={t('onboarding.importInstead')}
-            onChange={(e) => {
-              const files = [...(e.target.files ?? [])];
-              e.target.value = '';
-              void importImages(files);
-            }}
-          />
         </p>
         {/* Navigateurs pris en charge : seulement quand l'extension peut s'installer */}
         {(EXTENSION_URL || extSeen) && <p className="obx-foot">{t('onboarding.browsersShort')}</p>}

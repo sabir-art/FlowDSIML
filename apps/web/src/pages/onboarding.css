@@ -453,3 +453,9 @@
 .pi-actions .pi-decline:hover {
   color: var(--fd-color-text-muted);
 }
+
+/* MEDIA-01 §18.3 : zone d'import à la place du bloc extension */
+.obx-zone {
+  margin: 16px 0;
+  text-align: left;
+}

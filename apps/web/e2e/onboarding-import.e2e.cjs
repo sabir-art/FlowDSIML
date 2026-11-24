@@ -253,7 +253,34 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.getByRole('button', { name: 'Continuer', exact: true }).click();
   await page.getByRole('heading', { name: 'Installez l’extension' }).waitFor();
   const n = t.demos.length;
-  await page.locator('.obx-links input[type=file]').setInputFiles(files.slice(1));
+  // MEDIA-01 §18.3 : zone large à la place du bloc extension, même aide que « Nouvelle démo »
+  ok(
+    (await page.getByRole('group', { name: 'Importer des images' }).count()) === 0,
+    'onboarding : pas de zone avant le choix',
+  );
+  await page.getByRole('button', { name: 'Importer des captures à la place' }).click();
+  const oz = page.getByRole('group', { name: 'Importer des images' });
+  await oz.waitFor();
+  ok(
+    /Une étape par image, dans l’ordre des noms de fichiers\. PNG, JPEG ou WebP\./.test(
+      await oz.innerText(),
+    ) && (await oz.getByRole('button', { name: 'Choisir des images…' }).count()) === 1,
+    'onboarding : zone large avec l’aide de « Nouvelle démo »',
+  );
+  ok((await page.locator('.obx-lines').count()) === 0, 'onboarding : la zone remplace le bloc extension');
+  ok(
+    (await page.getByRole('button', { name: 'Capturer avec l’extension à la place' }).count()) === 1,
+    'onboarding : lien de retour vers l’extension',
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/onboarding-import-zone${sfx}.png` });
+  await page
+    .locator('#onboarding-file')
+    .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+  ok(
+    (await oz.getByRole('alert').textContent()) === 'Format non accepté : PNG, JPEG ou WebP.',
+    'onboarding : fichier refusé, erreur dans la zone',
+  );
+  await page.locator('#onboarding-file').setInputFiles(files.slice(1));
   await page.waitForURL(/\/edit\?guide=1$/);
   ok(t.demos.length === n + 1, 'onboarding : « Importer des captures à la place » crée une démo');
 
