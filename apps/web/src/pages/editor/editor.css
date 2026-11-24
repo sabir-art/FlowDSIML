@@ -4726,3 +4726,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* MOTION-01 §2.3 : entrée du panneau d'outil (transform et opacity seulement), en même temps que la
+   scène ; au changement de panneau, seul le contenu passe en fondu. Durées par les jetons : 0 ms en
+   mouvement réduit. */
+.mk .ed-tool.is-entering {
+  animation: ed-tool-in var(--fd-motion-duration-slow) var(--fd-motion-ease-standard) both;
+}
+.mk .ed-tool.is-entering > .ed-tool__body {
+  animation: ed-tool-fade var(--fd-motion-duration-fast) var(--fd-motion-ease-standard) both;
+}
+@keyframes ed-tool-in {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+}
+@keyframes ed-tool-fade {
+  from {
+    opacity: 0;
+  }
+}

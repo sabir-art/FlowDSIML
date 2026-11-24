@@ -178,16 +178,23 @@ export function ToolPanel({
   id,
   title,
   onClose,
+  enter = false,
   children,
 }: {
   id: ToolId | 'form';
   title: string;
   onClose: () => void;
+  /** MOTION-01 §2.3 : le panneau entre en glissant (après un geste, jamais au premier affichage). */
+  enter?: boolean;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
   return (
-    <aside className="ed-tool fd-dense" aria-labelledby="ed-tool-title" data-tool-panel={id}>
+    <aside
+      className={`ed-tool fd-dense${enter ? ' is-entering' : ''}`}
+      aria-labelledby="ed-tool-title"
+      data-tool-panel={id}
+    >
       <header className="ed-tool__head">
         <h2 id="ed-tool-title" tabIndex={-1}>
           {title}
@@ -201,7 +208,10 @@ export function ToolPanel({
           <X aria-hidden="true" />
         </button>
       </header>
-      <div className="ed-tool__body">{children}</div>
+      {/* Changement de panneau : seul le contenu passe en fondu, le cadre ne bouge pas */}
+      <div key={id} className="ed-tool__body">
+        {children}
+      </div>
     </aside>
   );
 }

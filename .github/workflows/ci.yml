@@ -177,6 +177,9 @@ jobs:
       - name: AUTH-ILL panneau illustré des pages d'accès (couleurs de la marque, contrastes, fenêtre, bulle, mouvement réduit)
         if: always()
         run: cd apps/web && node e2e/auth-illustration.e2e.cjs
+      - name: MOTION-01 la scène de l'éditeur suit les panneaux (FLIP en transform seul, 0,32 s, mouvement réduit)
+        if: always()
+        run: cd apps/web && node e2e/mouvement.e2e.cjs
       - name: Finalité des champs personnels (RGAA 11.13, autocomplete et name)
         if: always()
         run: cd apps/web && node e2e/autocomplete.e2e.cjs
