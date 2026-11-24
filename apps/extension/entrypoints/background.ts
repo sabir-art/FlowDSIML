@@ -16,6 +16,14 @@ import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
 import { APP_URL, DEBUGGER } from '@/lib/config';
+import {
+  ASSET_MAX_BYTES,
+  ASSET_TIMEOUT_MS,
+  assetDecision,
+  assetTooLong,
+  assetTypeAllowed,
+  type AssetKind,
+} from '@/lib/assetPolicy';
 import { ATTACH_TTL_MS, originOf, parseAttach, type PendingAttach } from '@/lib/external';
 
 /**
@@ -466,23 +474,67 @@ async function onVideoBar(m: VideoBarRequest): Promise<unknown> {
 
 /** Fin de capture : ouvre l'écran de vérification (rien n'a encore été envoyé). */
 // ===== A8 : capture HTML =====
-const ASSET_MAX = 3 * 1024 * 1024;
 async function toDataUrl(blob: Blob): Promise<string> {
   const buf = new Uint8Array(await blob.arrayBuffer());
   let bin = '';
   for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
   return `data:${blob.type || 'application/octet-stream'};base64,${btoa(bin)}`;
 }
-/** Ressource de la page (cookies du site inclus, comme à l'affichage) : image en WebP, police, CSS. */
-async function fetchAsset(url: string, kind: 'image' | 'font' | 'css'): Promise<string | null> {
-  if (!/^https?:/.test(url)) return null;
+/** Corps lu par morceaux, abandonné dès que la limite est dépassée (la longueur annoncée peut manquer). */
+async function readBounded(res: Response, max: number): Promise<Uint8Array<ArrayBuffer> | null> {
+  const reader = res.body?.getReader();
+  if (!reader) return null;
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      void reader.cancel().catch(() => undefined);
+      return null;
+    }
+    parts.push(value);
+  }
+  const out = new Uint8Array(new ArrayBuffer(size));
+  let at = 0;
+  for (const p of parts) {
+    out.set(p, at);
+    at += p.byteLength;
+  }
+  return out;
+}
+/**
+ * Ressource de la page capturée : image en WebP, police, CSS. La demande suit la règle de
+ * lib/assetPolicy (adresse, hôte, cookies du site capturé seulement), y compris après une redirection ;
+ * le type et la taille de la réponse sont contrôlés avant tout retour à la page.
+ */
+async function fetchAsset(
+  rawUrl: unknown,
+  kind: unknown,
+  pageUrl: string | undefined,
+): Promise<string | null> {
+  const ask = assetDecision(rawUrl, kind, pageUrl);
+  if (!ask) return null;
+  const k = kind as AssetKind;
+  const stop = new AbortController();
+  const timer = setTimeout(() => stop.abort(), ASSET_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { credentials: 'include' });
+    const res = await fetch(ask.url, {
+      credentials: ask.credentials,
+      redirect: 'follow',
+      signal: stop.signal,
+    });
     if (!res.ok) return null;
-    const blob = await res.blob();
-    if (blob.size > ASSET_MAX) return null;
-    if (kind === 'css') return (await blob.text()).slice(0, ASSET_MAX);
-    if (kind === 'font') return toDataUrl(blob);
+    // Redirection : l'adresse finale doit satisfaire la même règle
+    if (res.url && res.url !== ask.url && !assetDecision(res.url, k, pageUrl)) return null;
+    const type = res.headers.get('content-type');
+    if (!assetTypeAllowed(k, type) || assetTooLong(res.headers.get('content-length'))) return null;
+    const bytes = await readBounded(res, ASSET_MAX_BYTES);
+    if (!bytes) return null;
+    const blob = new Blob([bytes], { type: (type ?? '').split(';')[0]!.trim() });
+    if (k === 'css') return await blob.text();
+    if (k === 'font') return toDataUrl(blob);
     if (/svg/.test(blob.type)) return toDataUrl(new Blob([blob], { type: 'image/svg+xml' }));
     try {
       const bmp = await createImageBitmap(blob);
@@ -490,17 +542,28 @@ async function fetchAsset(url: string, kind: 'image' | 'font' | 'css'): Promise<
       c.getContext('2d')!.drawImage(bmp, 0, 0);
       return toDataUrl(await c.convertToBlob({ type: 'image/webp', quality: 0.82 }));
     } catch {
-      return /^image\//.test(blob.type) ? toDataUrl(blob) : null;
+      return toDataUrl(blob);
     }
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
-async function onHtmlBar(m: HtmlBarRequest): Promise<unknown> {
-  if (m.type === 'fd:fetch-asset') return fetchAsset(m.url, m.kind);
+async function onHtmlBar(
+  m: HtmlBarRequest,
+  sender?: { tab?: { id?: number; url?: string }; frameId?: number; url?: string },
+): Promise<unknown> {
   const s = await getState();
   if (!s.recording || s.mode !== 'html') return null;
+  // Ressources : seulement pour l'onglet en cours de capture, depuis son cadre principal
+  if (m.type === 'fd:fetch-asset') {
+    if (sender?.tab?.id === undefined || sender.tab.id !== s.tabId || (sender.frameId ?? 0) !== 0)
+      return null;
+    // Adresse du cadre principal qui demande (toujours connue), sinon celle de l'onglet
+    return fetchAsset(m.url, m.kind, sender.url ?? sender.tab.url);
+  }
   if (m.type === 'fd:html-ready') {
     if (s.htmlAwait) await setState({ htmlAwait: false });
     return { capture: !!s.htmlAwait, pages: s.steps };
@@ -654,7 +717,8 @@ export default defineBackground(() => {
     const m = msg as ClickPayload | PopupRequest | VideoBarRequest | { type: string };
     if (m.type.startsWith('fd:rec-')) return undefined; // messages destinés au document hors écran
     if (m.type.startsWith('fd:video-')) return onVideoBar(m as VideoBarRequest);
-    if (m.type.startsWith('fd:html-') || m.type === 'fd:fetch-asset') return onHtmlBar(m as HtmlBarRequest);
+    if (m.type.startsWith('fd:html-') || m.type === 'fd:fetch-asset')
+      return onHtmlBar(m as HtmlBarRequest, sender);
     if (m.type === 'fd:click') {
       // On répond après la capture : le badge REC reste masqué jusque-là (il n'apparaît pas à l'image)
       if (sender.tab?.windowId !== undefined)
