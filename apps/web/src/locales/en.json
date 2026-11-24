@@ -3144,7 +3144,9 @@
     "deleteTitle": "Delete “{{name}}”?",
     "deleteBody": "Demos that applied it keep their look. The style disappears from the list for the whole workspace.",
     "deleted": "Style deleted.",
-    "picker": "Color picker: {{label}}"
+    "picker": "Color picker: {{label}}",
+    "logoFromMediaHelp": "A logo chosen from the media library is copied here: changing or deleting it in the media library does not change this logo.",
+    "logoFromMediaError": "This file is not suitable as a logo: PNG, JPEG, WebP or SVG, 2 MB at most."
   },
   "vars": {
     "new": "New variable",
@@ -3798,7 +3800,9 @@
     "restoreTitle": "Put the training centre back at this address?",
     "restoreBody": "The public page of demos will be turned off. Its settings are kept.",
     "restoreConfirm": "Put the centre back",
-    "restored": "The training centre is shown at this address again."
+    "restored": "The training centre is shown at this address again.",
+    "logoFromMediaHelp": "A logo chosen from the media library is copied here.",
+    "logoFromMediaError": "This file is not suitable as the centre logo: PNG, SVG or WebP, 512 KB at most."
   },
   "export": {
     "menu": "Export (PDF, GIF)",
@@ -4724,7 +4728,9 @@
       "demoLogo": "Logo of the demo “{{title}}”",
       "demoFont": "Font of the demo “{{title}}”",
       "stepImage": "Image of this step’s page",
-      "publicPage": "Logo of the public page"
+      "publicPage": "Logo of the public page",
+      "workspaceLogo": "Workspace logo",
+      "centerLogo": "Training centre logo"
     },
     "clearSearch": "Clear the search"
   },

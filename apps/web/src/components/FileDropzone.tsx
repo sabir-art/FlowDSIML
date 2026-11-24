@@ -181,7 +181,7 @@ export function FileDropzone({
           )}
           {onLibrary && (
             <Button icon={<Images />} onClick={onLibrary}>
-              {t('media.open')}
+              {t('media.choose')}
             </Button>
           )}
           {extra}

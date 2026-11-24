@@ -3144,7 +3144,9 @@
     "deleteTitle": "Supprimer « {{name}} » ?",
     "deleteBody": "Les démos qui l’ont appliqué gardent leur apparence. Le style disparaît de la liste pour tout l’espace.",
     "deleted": "Style supprimé.",
-    "picker": "Nuancier : {{label}}"
+    "picker": "Nuancier : {{label}}",
+    "logoFromMediaHelp": "Un logo choisi dans la médiathèque est copié ici : le modifier ou le supprimer dans la médiathèque ne change pas ce logo.",
+    "logoFromMediaError": "Ce fichier ne convient pas comme logo : PNG, JPEG, WebP ou SVG, 2 Mo au plus."
   },
   "vars": {
     "new": "Nouvelle variable",
@@ -3798,7 +3800,9 @@
     "restoreTitle": "Remettre le centre de formation à cette adresse ?",
     "restoreBody": "La page publique des démos sera désactivée. Ses réglages sont conservés.",
     "restoreConfirm": "Remettre le centre",
-    "restored": "Le centre de formation est de nouveau affiché à cette adresse."
+    "restored": "Le centre de formation est de nouveau affiché à cette adresse.",
+    "logoFromMediaHelp": "Un logo choisi dans la médiathèque est copié ici.",
+    "logoFromMediaError": "Ce fichier ne convient pas comme logo du centre : PNG, SVG ou WebP, 512 Ko au plus."
   },
   "export": {
     "menu": "Exporter (PDF, GIF)",
@@ -4724,7 +4728,9 @@
       "demoLogo": "Logo de la démo « {{title}} »",
       "demoFont": "Police de la démo « {{title}} »",
       "stepImage": "Image de la page de cette étape",
-      "publicPage": "Logo de la page publique"
+      "publicPage": "Logo de la page publique",
+      "workspaceLogo": "Logo de l’espace",
+      "centerLogo": "Logo du centre de formation"
     },
     "clearSearch": "Effacer la recherche"
   },

@@ -660,6 +660,22 @@ async function install(page, state = seed()) {
         (state.mediaDeleted ||= []).push(row.id);
         return json(route, 200, { deleted: row.id });
       }
+      // §3.1 : logo de l'espace ou du centre pris dans la médiathèque (copie côté serveur)
+      if (body?.action === 'logo') {
+        const row = list.find((x) => x.id === body.id);
+        if (!row || row.kind === 'font')
+          return json(route, row ? 415 : 404, { error: row ? 'BAD_TYPE' : 'NOT_FOUND' });
+        const ext = row.path.split('.').pop();
+        if (body.target === 'center' && !['png', 'svg', 'webp'].includes(ext))
+          return json(route, 415, { error: 'BAD_TYPE' });
+        const path =
+          body.target === 'workspace'
+            ? `${row.workspace_id}/logo-${crypto.randomUUID()}.${ext}`
+            : `${row.workspace_id}/center-logo-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+        if (body.target === 'workspace') t.workspaces.find((w) => w.id === row.workspace_id).logo_path = path;
+        (state.logoCopies ||= []).push({ from: row.path, to: path, target: body.target });
+        return json(route, 200, { path });
+      }
       const raw = (req.postDataBuffer() || Buffer.alloc(0)).toString('latin1');
       const field = (n) => new RegExp(`name="${n}"\\r\\n\\r\\n([^\\r]*)`).exec(raw)?.[1] ?? '';
       const fname = /filename="([^"]*)"/.exec(raw)?.[1] ?? field('name');

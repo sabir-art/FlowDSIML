@@ -235,6 +235,61 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   );
   ok(!/\bplan\b|offre/i.test(await full.innerText()), 'aucun badge ni nom d’offre');
 
+  // ===== §3.1 : logo du centre de formation pris dans la médiathèque (copie côté serveur) =====
+  {
+    const cp = await ctx.newPage();
+    cp.on('pageerror', (e) => errors.push(e.message));
+    const cs = seed();
+    const file = (id, name, ext, mime) => ({
+      id,
+      workspace_id: 'ws-1',
+      kind: 'logo',
+      name,
+      path: `ws-1/${id}.${ext}`,
+      mime,
+      size_bytes: 4000,
+      created_at: '2026-11-01T09:00:00Z',
+    });
+    cs.tables.media_files = [
+      file('m-webp', 'logo-centre.webp', 'webp', 'image/webp'),
+      file('m-jpg', 'photo.jpg', 'jpg', 'image/jpeg'),
+    ];
+    await install(cp, cs);
+    await cp.goto(`${APP}/#/center`);
+    const group = cp.getByRole('group', { name: 'Logo' });
+    await group.waitFor();
+    ok(
+      /Un logo choisi dans la médiathèque est copié ici\./.test(nb(await group.innerText())),
+      'centre : l’aide dit qu’un logo de la médiathèque est copié',
+    );
+    const choose = async (name) => {
+      await group.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+      const pick = cp.getByRole('dialog', { name: 'Choisir un logo' });
+      await pick.waitFor();
+      await pick.getByRole('radio', { name }).check();
+      await pick.getByRole('button', { name: 'Utiliser ce logo' }).click();
+      await pick.waitFor({ state: 'detached' });
+    };
+    // JPEG : refusé pour le centre, comme au téléversement direct
+    await choose('photo.jpg');
+    await cp.getByText('Ce fichier ne convient pas comme logo du centre', { exact: false }).waitFor();
+    ok(!(cs.logoCopies || []).length, 'centre : un JPEG de la médiathèque est refusé, rien n’est copié');
+    await choose('logo-centre.webp');
+    await cp.getByText('Aucun logo', { exact: false }).waitFor({ state: 'detached' });
+    const copied = (cs.logoCopies || [])[0];
+    const draftLogo = () => (cs.tables.training_centers || [])[0]?.draft?.logoPath;
+    for (let i = 0; i < 200 && draftLogo() !== copied?.to; i++)
+      await cp.evaluate(() => new Promise(requestAnimationFrame));
+    ok(
+      !!copied &&
+        copied.target === 'center' &&
+        /^ws-1\/center-logo-[0-9a-z]{4,24}\.webp$/.test(copied.to) &&
+        draftLogo() === copied.to,
+      'centre : logo copié depuis la médiathèque, chemin enregistré dans le brouillon du centre',
+    );
+    await cp.close();
+  }
+
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();
 })().catch((e) => {

@@ -4,6 +4,7 @@ import { CircleAlert, Copy, Info, Pencil, Plus, Star, Trash2, TriangleAlert } fr
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Button, ColorSwatch } from '@flowdsiml/ui';
 import { SettingsShell } from '../SettingsShell';
+import { MediaLibrary, type MediaFile } from '../../../components/media/MediaLibrary';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
 import { contrastRatio, darkenToContrast, ratioText } from '../../../lib/contrast';
@@ -95,6 +96,18 @@ function LogoSection({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boole
   const { reload } = useWorkspace();
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [library, setLibrary] = useState(false);
+  /** §3.1 : logo pris dans la médiathèque. Le serveur le copie à l'emplacement du logo de l'espace. */
+  async function pickMediaFile(file: MediaFile) {
+    setErr(null);
+    setBusy(true);
+    const { error } = await supabase.functions.invoke('media', {
+      body: { action: 'logo', id: file.id, target: 'workspace' },
+    });
+    setBusy(false);
+    if (error) return setErr(t('brand.logoFromMediaError'));
+    await reload();
+  }
   const url = ws.logo_path
     ? supabase.storage.from('branding').getPublicUrl(ws.logo_path).data.publicUrl
     : null;
@@ -161,11 +174,22 @@ function LogoSection({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boole
                 : null
             }
             onFiles={(files) => void upload(files[0]!)}
+            onLibrary={isAdmin ? () => setLibrary(true) : undefined}
             onRemove={() => void remove()}
             removeLabel={t('brand.logoRemove')}
           />
+          <span className="stg-help br-logo-copy">{t('brand.logoFromMediaHelp')}</span>
         </div>
       </div>
+      {library && (
+        <MediaLibrary
+          wsId={ws.id}
+          kind="logo"
+          destination={t('media.dest.workspaceLogo')}
+          onClose={() => setLibrary(false)}
+          onPick={(f) => void pickMediaFile(f)}
+        />
+      )}
     </section>
   );
 }

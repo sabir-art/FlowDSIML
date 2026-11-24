@@ -96,10 +96,11 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     /Glissez un fichier ici/.test(sp(await zone.innerText())) &&
       (await zone.getByRole('button', { name: 'Choisir un fichier' }).count()) === 1 &&
-      // §3.1 : le bouton « Médiathèque » seul (gestion sans rien appliquer) a disparu d'ici
-      (await zone.getByRole('button', { name: 'Médiathèque' }).count()) === 0 &&
+      // §3.1 : plus de bouton « Médiathèque » seul ; « Choisir dans la médiathèque » applique le fichier
+      (await zone.getByRole('button', { name: 'Médiathèque', exact: true }).count()) === 0 &&
+      (await zone.getByRole('button', { name: 'Choisir dans la médiathèque' }).count()) === 1 &&
       (await zone.locator('.fd-dz__txt button').count()) === 0,
-    'logo : zone de dépôt (état vide), « Choisir un fichier » en bouton, plus de « Médiathèque » seul',
+    'logo : zone de dépôt (état vide), « Choisir un fichier » et « Choisir dans la médiathèque » en boutons',
   );
   {
     const zb = await zone.boundingBox();
@@ -108,6 +109,47 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       Math.abs(zb.x - rb.x) <= 1 && Math.abs(zb.x + zb.width - (rb.x + rb.width)) <= 1,
       'logo : la zone prend toute la largeur de la ligne, jusqu’à la fin du filet',
     );
+  }
+  // §3.1 : logo de l'espace pris dans la médiathèque (le serveur le copie à l'emplacement du logo)
+  {
+    t.media_files = [
+      {
+        id: 'm-logo',
+        workspace_id: 'ws-1',
+        kind: 'logo',
+        name: 'logo-acme.png',
+        path: 'ws-1/m-logo.png',
+        mime: 'image/png',
+        size_bytes: 4000,
+        created_at: '2026-11-01T09:00:00Z',
+      },
+    ];
+    ok(
+      /Un logo choisi dans la médiathèque est copié ici/.test(sp(await logo.innerText())),
+      'logo : l’aide dit qu’un logo de la médiathèque est copié',
+    );
+    await zone.getByRole('button', { name: 'Choisir dans la médiathèque' }).click();
+    const pick = page.getByRole('dialog', { name: 'Choisir un logo' });
+    await pick.waitFor();
+    ok(
+      sp(await pick.textContent()).includes('Logo de l’espace'),
+      'fenêtre de sélection : destination « Logo de l’espace »',
+    );
+    await pick.getByRole('radio', { name: 'logo-acme.png' }).check();
+    await pick.getByRole('button', { name: 'Utiliser ce logo' }).click();
+    await pick.waitFor({ state: 'detached' });
+    await logo.getByRole('button', { name: 'Retirer le logo' }).waitFor();
+    const copy = (state.logoCopies || [])[0];
+    ok(
+      !!copy &&
+        copy.target === 'workspace' &&
+        copy.from === 'ws-1/m-logo.png' &&
+        /^ws-1\/logo-[0-9a-f-]{36}\.png$/.test(t.workspaces[0].logo_path) &&
+        t.media_files.length === 1,
+      'logo de l’espace : copié depuis la médiathèque à l’emplacement du logo, le fichier d’origine reste',
+    );
+    await logo.getByRole('button', { name: 'Retirer le logo' }).click();
+    await zone.getByRole('button', { name: 'Choisir un fichier' }).waitFor();
   }
   ok(
     await header.getByRole('button', { name: 'Enregistrer' }).isDisabled(),
