@@ -62,7 +62,7 @@ export function SysFrame({
   );
 }
 
-export type SysKind = 'notFound' | 'expired' | 'blocked' | 'network';
+export type SysKind = 'notFound' | 'expired' | 'blocked' | 'network' | 'pageOff';
 
 /**
  * Écran système : démo introuvable, lien expiré (L11-12 : date, workspace, site), intégration refusée,
@@ -91,6 +91,8 @@ export function SysScreen({
     : null;
   const view = {
     notFound: { Icon: SearchX, title: t.notFoundTitle, text: t.notFound },
+    // Page publique d'un espace (/c/{adresse}) coupée ou inconnue
+    pageOff: { Icon: SearchX, title: t.pageOffTitle, text: t.pageOff },
     expired: {
       Icon: Clock,
       title: t.expiredTitle,

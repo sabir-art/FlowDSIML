@@ -50,6 +50,10 @@ export interface CenterInfo {
   heroTitle?: string;
   heroSubtitle?: string;
   cta?: { label: string; url?: string; formId?: string } | null;
+  /** Page publique de l'espace (§6.1) : logo choisi dans la médiathèque (sinon logoPath, logo de l'espace). */
+  logoMedia?: string | null;
+  /** Page publique : « Créé avec TutoClick » affiché (absent : affiché, comme avant). */
+  madeWith?: boolean;
 }
 
 /** A8 : démo d'un Demo Center (ouverte, sans compte ni progression). */

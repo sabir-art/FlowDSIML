@@ -81,6 +81,9 @@ const dict = {
     expired:
       'Ce lien a expiré ou a été désactivé. Contactez l’organisation qui vous l’a transmis pour en recevoir un nouveau.',
     notFoundTitle: 'Démo introuvable',
+    pageOffTitle: 'Cette page n’est pas disponible',
+    pageOff:
+      'Elle a été désactivée ou son adresse a changé. Si quelqu’un vous a envoyé ce lien, demandez-lui la nouvelle adresse.',
     networkTitle: 'Connexion impossible',
     network: 'La démo n’a pas pu être chargée. Vérifiez votre connexion à Internet, puis réessayez.',
     retry: 'Réessayer',
@@ -505,6 +508,9 @@ const dict = {
     expired:
       'This link has expired or was disabled. Contact the organization that sent it to you for a new one.',
     notFoundTitle: 'Demo not found',
+    pageOffTitle: 'This page is not available',
+    pageOff:
+      'It was turned off or its address changed. If someone sent you this link, ask them for the new address.',
     networkTitle: 'Unable to connect',
     network: 'The demo could not be loaded. Check your Internet connection, then try again.',
     retry: 'Try again',
