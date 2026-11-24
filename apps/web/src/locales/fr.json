@@ -5846,7 +5846,7 @@
     "events": {
       "mention": {
         "name": "Mentions",
-        "help": "Quelqu’un vous cite dans un commentaire."
+        "help": "Toujours notifiées dans l’app. Vous pouvez choisir l’e-mail."
       },
       "reply": {
         "name": "Réponses",
@@ -5869,7 +5869,6 @@
         "help": "Un visiteur laisse son adresse sur une de vos démos."
       }
     },
-    "mentionHelp": "Les mentions sont toujours notifiées dans l’app.",
     "emailHelp": "E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. Une notification coupée dans l’app ne part pas par e-mail.",
     "mutedTitle": "Démos coupées",
     "mutedSub": "Démos dont vous ne recevez plus aucune notification.",
@@ -5877,6 +5876,7 @@
     "unmute": "Réactiver",
     "unmuteFor": "Réactiver les notifications de {{title}}",
     "unmuted": "Notifications de « {{title}} » réactivées.",
-    "saveError": "Le réglage n’a pas pu être enregistré."
+    "saveError": "Le réglage n’a pas pu être enregistré.",
+    "always": "Toujours"
   }
 }

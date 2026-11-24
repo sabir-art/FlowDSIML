@@ -2,13 +2,14 @@
  * Paramètres › Mon compte › Notifications (retours client du 24/11 §6.3, maquette lot1-parametres/notifs).
  * Un tableau par événement, « Dans l'app » et « Par e-mail », puis les démos coupées. Chaque choix est
  * enregistré tout de suite et ne vaut que pour la personne (RLS : chacun sa ligne).
- *  - une mention est toujours notifiée dans l'app (L28) : son interrupteur reste activé ;
+ *  - une mention est toujours notifiée dans l'app (L28) : pas d'interrupteur, « Toujours » ;
  *  - un événement coupé dans l'app ne part pas par e-mail : son interrupteur e-mail est désactivé ;
  *  - l'e-mail est un accord de la personne : rien ne part tant qu'elle n'a rien activé ;
  *  - sans service d'envoi configuré, la colonne e-mail reste visible, désactivée, avec « Bientôt ».
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
@@ -158,18 +159,24 @@ export function NotificationSettings() {
                     <span className="nt-sub">{t(`notifSettings.events.${k}.help`)}</span>
                   </th>
                   <td className="nt-c">
-                    <label className="fd-switch">
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        aria-label={t('notifSettings.inAppFor', { name })}
-                        aria-describedby={k === 'mention' ? 'nt-mention' : undefined}
-                        checked={!soon && inApp(k)}
-                        disabled={soon || k === 'mention' || !ready}
-                        onChange={(e) => void toggleApp(k, e.target.checked)}
-                      />
-                      <span className="fd-switch__track" aria-hidden="true" />
-                    </label>
+                    {k === 'mention' ? (
+                      <span className="nt-always">
+                        <Check size={16} aria-hidden="true" />
+                        {t('notifSettings.always')}
+                      </span>
+                    ) : (
+                      <label className="fd-switch">
+                        <input
+                          type="checkbox"
+                          role="switch"
+                          aria-label={t('notifSettings.inAppFor', { name })}
+                          checked={!soon && inApp(k)}
+                          disabled={soon || !ready}
+                          onChange={(e) => void toggleApp(k, e.target.checked)}
+                        />
+                        <span className="fd-switch__track" aria-hidden="true" />
+                      </label>
+                    )}
                   </td>
                   <td className="nt-c">
                     <label className="fd-switch">
@@ -189,9 +196,6 @@ export function NotificationSettings() {
             })}
           </tbody>
         </table>
-        <p className="stg-help nt-help" id="nt-mention">
-          {t('notifSettings.mentionHelp')}
-        </p>
         <p className="stg-help nt-help">{t('notifSettings.emailHelp')}</p>
       </section>
 
