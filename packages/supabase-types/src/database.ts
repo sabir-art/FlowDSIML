@@ -2359,6 +2359,7 @@ export type Database = {
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
       public_page_info: { Args: { p_ws: string }; Returns: Json };
+      media_file_demos: { Args: { p_id: string }; Returns: Json };
       rename_media_file: { Args: { p_id: string; p_name: string }; Returns: undefined };
       set_media_kind: { Args: { p_id: string; p_kind: string }; Returns: undefined };
       save_public_page: {

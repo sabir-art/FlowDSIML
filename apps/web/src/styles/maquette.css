@@ -797,8 +797,11 @@
   flex-direction: column;
   gap: 8px;
   z-index: var(--fd-z-toast);
+  /* Seuls les toasts reçoivent les clics : l'espace entre eux laisse passer vers la page */
+  pointer-events: none;
 }
 .mk .toast {
+  pointer-events: auto;
   width: 360px;
   max-width: calc(100vw - 32px);
   display: flex;

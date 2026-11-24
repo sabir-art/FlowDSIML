@@ -73,7 +73,8 @@
     "sandbox": "Sandbox",
     "homeLogo": "Demos, TutoClick home",
     "collapseSidebar": "Collapse the sidebar",
-    "expandSidebar": "Expand the sidebar"
+    "expandSidebar": "Expand the sidebar",
+    "media": "Media library"
   },
   "roles": {
     "owner": "Owner",
@@ -4661,7 +4662,34 @@
     "svgRejected": "This SVG contains rejected content (script, entity, external link).",
     "error": "The import failed. Try again.",
     "open": "Media library",
-    "choose": "Choose from the media library"
+    "choose": "Choose from the media library",
+    "category": "Category",
+    "kind": {
+      "logo": "Logo",
+      "image": "Image",
+      "font": "Font"
+    },
+    "unused": "Not used",
+    "dropHere": "Drop files here",
+    "pageHint": "PNG, JPG, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
+    "imported": "“{{name}}” imported into {{category}}.",
+    "change": "Change",
+    "reason": {
+      "font": "",
+      "svg": "SVG file: filed with the logos.",
+      "transparentSquare": "Transparent background and square format: filed with the logos."
+    },
+    "actionsFor": "Actions for {{name}}",
+    "rename": "Rename",
+    "renameTitle": "Rename the file",
+    "name": "Name",
+    "download": "Download",
+    "seeDemos": "See the demos that use it",
+    "demosTitle": "Demos using “{{name}}”",
+    "demosNone": "No demo uses this file.",
+    "kindChanged": "“{{name}}” is now in {{category}}.",
+    "noMatch": "No file matches.",
+    "noneYet": "The media library is empty."
   },
   "soon": {
     "badge": "Coming soon",

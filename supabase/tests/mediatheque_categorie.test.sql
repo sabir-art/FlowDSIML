@@ -2,7 +2,7 @@
 -- (20261201200000_mediatheque_categorie.sql). Données fictives.
 begin;
 set search_path = public, extensions;
-select plan(14);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000360a1', 'olga-md@acme.example'),
@@ -64,6 +64,26 @@ select throws_ok($$ select public.set_media_kind('00000000-0000-0000-0000-000000
 select lives_ok($$ select public.rename_media_file('00000000-0000-0000-0000-0000000360f1', '  Logo Acme blanc  ') $$, 'renommage par un éditeur');
 select is(pg_temp.f('name'), 'Logo Acme blanc', 'nom enregistré sans espaces autour');
 select throws_ok($$ select public.rename_media_file('00000000-0000-0000-0000-0000000360f1', '   ') $$, '22023', null, 'nom vide refusé');
+
+-- ===== Démos qui utilisent le fichier (20261201210000_mediatheque_usages.sql) =====
+reset role;
+insert into public.demos (id, workspace_id, title, created_by, settings) values
+  ('00000000-0000-0000-0000-0000000360d1', (select ws from ctx), 'Démo CRM', '00000000-0000-0000-0000-0000000360a1',
+   jsonb_build_object('theme', jsonb_build_object('logoUrl', 'https://x.example/storage/v1/object/public/media/' || (select ws from ctx)::text || '/00000000-0000-0000-0000-0000000360f1.png'))),
+  ('00000000-0000-0000-0000-0000000360d2', (select ws from ctx), 'Sans logo', '00000000-0000-0000-0000-0000000360a1', '{}'),
+  ('00000000-0000-0000-0000-0000000360d3', (select ws from ctx), 'Supprimée', '00000000-0000-0000-0000-0000000360a1',
+   jsonb_build_object('logo', (select ws from ctx)::text || '/00000000-0000-0000-0000-0000000360f1.png'));
+update public.demos set deleted_at = now() where id = '00000000-0000-0000-0000-0000000360d3';
+select pg_temp.login('00000000-0000-0000-0000-0000000360a3');
+select is(public.media_file_demos('00000000-0000-0000-0000-0000000360f1'),
+  '[{"id": "00000000-0000-0000-0000-0000000360d1", "title": "Démo CRM"}]'::jsonb,
+  'démos qui utilisent le fichier : la démo concernée, pas la supprimée, lisible par un lecteur');
+select is(public.media_file_demos('00000000-0000-0000-0000-0000000360f2'), '[]'::jsonb, 'fichier non utilisé : liste vide');
+select is((select (x ->> 'demos')::int from jsonb_array_elements(public.media_usage((select ws from ctx))) x
+            where x ->> 'id' = '00000000-0000-0000-0000-0000000360f1'), 1, 'même décompte que media_usage');
+select pg_temp.login('00000000-0000-0000-0000-0000000360a4');
+select throws_ok($$ select public.media_file_demos('00000000-0000-0000-0000-0000000360f1') $$, '42501', null,
+  'autre espace : refusé');
 
 select * from finish();
 rollback;
