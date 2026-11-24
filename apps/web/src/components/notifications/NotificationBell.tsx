@@ -33,7 +33,7 @@ import { useToast } from '../Toast';
 import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
-import { bellState } from './bellState';
+import { bellStore, useBellOpen } from './bellState';
 import {
   LEADS_FOCUS,
   NOTIFICATION_KINDS,
@@ -63,24 +63,20 @@ function BellPanel() {
   const { t } = useTranslation();
   const id = useId();
   const n = useNotifications();
-  // Ouverture gardée d'un montage à l'autre (bellState) : un clic pendant le chargement n'est pas perdu
-  const [open, setOpenState] = useState(bellState.open);
-  const setOpen = useCallback((next: boolean) => {
-    bellState.open = next;
-    setOpenState(next);
-  }, []);
+  // Ouverture dans un store partagé (bellState) : un clic pendant le chargement n'est pas perdu
+  const open = useBellOpen();
   // E-mails P2 : « Ouvrir les notifications » du résumé mène à #/?notifications=1, panneau ouvert. Le
   // paramètre est retiré de l'adresse sans navigation (une navigation remonterait la page et le panneau).
   const location = useLocation();
   useEffect(() => {
     if (new URLSearchParams(location.search).get('notifications') !== '1') return;
-    setOpen(true);
+    bellStore.set(true);
     window.history.replaceState(
       window.history.state,
       '',
       window.location.href.replace(/[?&]notifications=1/, ''),
     );
-  }, [location.search, setOpen]);
+  }, [location.search]);
   const [view, setView] = useState<'list' | 'prefs'>('list');
   const [filter, setFilter] = useState<Filter>('all');
   // Cloche placée à gauche (barre d'Analytics) : le panneau s'ouvre vers la droite, jamais sous la barre latérale
@@ -94,14 +90,11 @@ function BellPanel() {
   const pop = useRef<HTMLDivElement>(null);
   const tabs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const close = useCallback(
-    (refocus = true) => {
-      setOpen(false);
-      setView('list');
-      if (refocus) btn.current?.focus();
-    },
-    [setOpen],
-  );
+  const close = useCallback((refocus = true) => {
+    bellStore.set(false);
+    setView('list');
+    if (refocus) btn.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -168,7 +161,7 @@ function BellPanel() {
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={open ? `${id}-pop` : undefined}
-          onClick={() => (open ? close() : setOpen(true))}
+          onClick={() => (open ? close() : bellStore.set(true))}
         >
           <Bell aria-hidden="true" />
           {n.unread > 0 && (

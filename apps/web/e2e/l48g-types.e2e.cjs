@@ -164,13 +164,18 @@ function data() {
       (await nd.getByRole('button', { name: /Partir d’un modèle/ }).count()) === 1,
     'Captures : images et modèle',
   );
+  // §18.4 : la source « Capturer avec l'extension » suit la publication de l'extension
+  // (VITE_EXTENSION_URL) ; le test lit cet état au lieu de le supposer
+  const ext = nd.locator('.nd-src', { hasText: 'Capturer avec l’extension' });
+  const published = (await ext.evaluate((el) => el.tagName)) === 'BUTTON';
   ok(
     // Le modèle a un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt ») ;
     // « Partir d'une démo vide » aussi (dernière ligne, retours client du 24/11 §7) ;
-    // les images sont une zone d'envoi (MEDIA-01 §18.3), sans chevron
+    // les images sont une zone d'envoi (MEDIA-01 §18.3), sans chevron ; l'extension en a un
+    // quand elle est publiée (sinon c'est une ligne « Bientôt », sans chevron)
     (await nd.locator('.nd-sources .nd-src__go').count()) +
       (await nd.locator('.nd-sources .nd-ai .nd-src[aria-disabled="true"]').count()) ===
-      3 &&
+      (published ? 4 : 3) &&
       (await nd
         .locator('.nd-sources > li')
         .last()
@@ -180,10 +185,7 @@ function data() {
       (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',
   );
-  // §18.4 : la source suit la publication de l'extension (VITE_EXTENSION_URL), le test ne la suppose pas :
-  // publiée, un bouton ; sinon, visible, désactivée, « Bientôt »
-  const ext = nd.locator('.nd-src', { hasText: 'Capturer avec l’extension' });
-  const published = (await ext.evaluate((el) => el.tagName)) === 'BUTTON';
+  // §18.4 : publiée, un bouton ; sinon, visible, désactivée, « Bientôt »
   ok(
     published
       ? (await ext.isEnabled()) && !(await ext.innerText()).includes('Bientôt')
