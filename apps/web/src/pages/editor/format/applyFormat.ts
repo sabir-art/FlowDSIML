@@ -1,15 +1,18 @@
 import type { Json } from '@flowdsiml/supabase-types';
 import { supabase } from '../../../lib/supabase';
 import type { DemoEditor } from '../useDemoEditor';
+import { asLayers } from '../images/layers';
 import { asStepOptions, type HotspotRow, type StepRow } from '../types';
 import {
   clipRect,
+  fitInside,
   keepInside,
   layout,
   mapPoint,
   mapRect,
   outside,
   targetSize,
+  unmapRect,
   type FitMode,
   type FormatId,
   type Layout,
@@ -31,7 +34,22 @@ interface Original {
   zoom: (Record<string, unknown> & { x: number; y: number }) | null;
   crop: Rect | null;
   hotspots: Array<{ id: string; x: number; y: number; w: number; h: number }>;
+  /** Disposition appliquée par le dernier changement de format (place de l'origine dans le cadre). */
+  layout?: Layout;
 }
+
+/**
+ * Images ajoutées d'une étape dans le nouveau cadre : ramenées d'abord sur l'image d'origine (inverse
+ * de la disposition précédente, si l'étape a déjà été mise au format), puis placées comme les autres
+ * repères. Elles restent entières, dans le cadre.
+ */
+export function mapLayers<T extends Rect>(layers: T[], prev: Layout | null | undefined, next: Layout): T[] {
+  return layers.map((x) => fitInside(mapRect(prev ? unmapRect(x, prev) : x, next)));
+}
+
+/** Étape déjà mise au format avant que la disposition soit gardée : ses images ne peuvent pas suivre. */
+export const layersUntracked = (step: StepRow) =>
+  asLayers(step.options).length > 0 && !!step.original && !(step.original as unknown as Original).layout;
 
 /** Étapes concernées : les captures (étapes image avec leur fichier). */
 export const formatSteps = (steps: StepRow[]) =>
@@ -135,6 +153,9 @@ export async function applyFormat(
       const crop = base.crop ? clipRect(mapRect(base.crop, l)) : null;
       if (crop) opts.crop = crop;
       else delete opts.crop;
+      // Images ajoutées : elles suivent l'image dans le nouveau cadre
+      const layers = asLayers(step.options);
+      if (layers.length) opts.images = mapLayers(layers, step.original ? (base.layout ?? null) : null, l);
       editor.updateStep(step.id, {
         image_path: path,
         image_width: l.tw,
@@ -143,7 +164,11 @@ export async function applyFormat(
         blurs: base.blurs.map((b) => clipRect(mapRect(b, l))).filter(Boolean) as unknown as NonNullable<Json>,
         zoom: base.zoom ? (mapPoint(base.zoom, l) as unknown as Json) : null,
         options: opts as unknown as StepRow['options'],
-        original: (step.original ?? base) as unknown as Json,
+        // L'origine garde la disposition appliquée : le prochain changement repart de l'image d'origine
+        original: {
+          ...((step.original as unknown as Original | null) ?? base),
+          layout: l,
+        } as unknown as Json,
       });
       for (const h of base.hotspots) {
         const r = keepInside(mapRect(h, l));

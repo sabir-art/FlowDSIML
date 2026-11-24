@@ -42,6 +42,16 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const imgs = () => t.steps.filter((s) => s.demo_id === DEMO && s.kind === 'image');
   const h1 = () => t.hotspots.find((h) => h.id === 'h1');
   const before = { x: h1().x, y: h1().y, path: imgs()[0].image_path };
+  // Retours du 24/11 §1 : une image ajoutée par-dessus la capture suit le changement de format
+  const LAYER = { x: 0.5, y: 0.5, w: 0.2, h: 0.2 };
+  imgs()[0].options = {
+    ...(imgs()[0].options || {}),
+    images: [
+      { id: 'i1', path: `ws-1/${DEMO}/img-00000001.webp`, name: 'logo.png', decorative: true, ...LAYER },
+    ],
+  };
+  const layer = () => imgs()[0].options?.images?.[0];
+  const same = (a, b) => ['x', 'y', 'w', 'h'].every((k) => Math.abs(a[k] - b[k]) < 0.001);
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/edit`);
   await openTool(page, 'settings');
@@ -95,6 +105,17 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     `repère recalculé (x ${h1().x.toFixed(4)} ≈ ${exp.toFixed(4)})`,
   );
   ok(Math.abs(h1().y - before.y) < 0.002, 'repère : y inchangé (pas de bande en hauteur)');
+  {
+    const want = { x: (112 + LAYER.x * 1056) / 1280, y: LAYER.y, w: (LAYER.w * 1056) / 1280, h: LAYER.h };
+    ok(
+      (await until(() => same(layer(), want))) && !!imgs()[0].original?.layout,
+      `image ajoutée recalée sur le même pixel (${JSON.stringify(layer())}), disposition gardée avec l’origine`,
+    );
+    ok(
+      (await page.getByText('Vérifiez la place des images ajoutées sur les étapes.').count()) === 0,
+      'aucun avertissement : l’image a suivi',
+    );
+  }
 
   // Annuler (toast)
   await page.getByRole('button', { name: 'Annuler' }).last().click();
@@ -104,6 +125,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     ),
     'Annuler : image, origine et repère d’avant',
   );
+  ok(same(layer(), LAYER), 'Annuler : image ajoutée à sa place d’avant');
 
   // Recadrer en 4:3 avec un repère au bord : signalé avant d'appliquer
   t.hotspots.find((h) => h.id === 'h1');
@@ -138,6 +160,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
     imgs().every((s) => s.image_width === 1100 && !s.original) && Math.abs(h1().x - before.x) < 1e-5,
     'Revenir aux images d’origine : tailles et repères d’origine',
+  );
+  ok(
+    same(layer(), LAYER),
+    `Revenir aux images d’origine : image ajoutée à sa place (${JSON.stringify(layer())})`,
   );
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

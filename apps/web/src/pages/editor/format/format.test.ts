@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { clipRect, keepInside, layout, mapRect, outside, targetSize } from './format';
+import { clipRect, fitInside, keepInside, layout, mapRect, outside, targetSize, unmapRect } from './format';
+import { mapLayers } from './applyFormat';
 
 const near = (a: number, b: number) => expect(a).toBeCloseTo(b, 6);
 
@@ -46,5 +47,36 @@ describe('format des écrans', () => {
     near(c.w, 0.2);
     near(c.h, 0.1);
     expect(clipRect({ x: -0.5, y: 0.2, w: 0.3, h: 0.1 })).toBeNull();
+  });
+
+  it('images ajoutées : aller et retour entre l’origine et le cadre', () => {
+    const l = layout({ w: 1440, h: 900 }, { w: 1280, h: 720 }, 'fit');
+    const r = { x: 0.5, y: 0.5, w: 0.2, h: 0.2, id: 'i1' };
+    const back = unmapRect(mapRect(r, l), l);
+    near(back.x, r.x);
+    near(back.y, r.y);
+    near(back.w, r.w);
+    near(back.h, r.h);
+    expect(back.id).toBe('i1');
+  });
+
+  it('images ajoutées : gardées entières dans le cadre', () => {
+    expect(fitInside({ x: 0.9, y: -0.2, w: 0.2, h: 0.2 })).toEqual({ x: 0.8, y: 0, w: 0.2, h: 0.2 });
+    // plus grande que le cadre : réduite en gardant ses proportions
+    expect(fitInside({ x: 0, y: 0, w: 2, h: 1 })).toEqual({ x: 0, y: 0, w: 1, h: 0.5 });
+  });
+
+  it('images ajoutées : un deuxième changement de format repart de l’image d’origine', () => {
+    const src = { w: 1440, h: 900 };
+    const first = layout(src, { w: 1280, h: 720 }, 'fit');
+    const second = layout(src, { w: 1000, h: 1000 }, 'fit');
+    const r = { x: 0.5, y: 0.5, w: 0.2, h: 0.2 };
+    const once = mapLayers([r], null, first);
+    const twice = mapLayers(once, first, second)[0]!;
+    const direct = mapLayers([r], null, second)[0]!;
+    expect(twice.x).toBeCloseTo(direct.x, 3);
+    expect(twice.y).toBeCloseTo(direct.y, 3);
+    expect(twice.w).toBeCloseTo(direct.w, 3);
+    expect(twice.h).toBeCloseTo(direct.h, 3);
   });
 });
