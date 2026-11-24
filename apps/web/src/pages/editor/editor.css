@@ -4646,3 +4646,49 @@
   font-size: 13px;
   color: var(--fd-color-text-muted);
 }
+
+/* EXT-02 §6.3 : panneau « Projecteur » */
+.sp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+.sp-card {
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+/* Libellé sur deux lignes si besoin, interrupteur à droite, centré verticalement */
+.sp-card .fd-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.sp-card svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  vertical-align: -3px;
+}
+.sp-help {
+  margin: 0;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.sp-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.sp-val {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+}
+.hs-free-note {
+  font-size: 13px;
+}

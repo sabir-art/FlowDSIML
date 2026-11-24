@@ -565,6 +565,25 @@ export const voiceSettingsSchema = z.object({
 });
 export type VoiceSettings = z.infer<typeof voiceSettingsSchema>;
 
+/**
+ * EXT-02 §6.3 : projecteur libre (réglage de toute la démo, absent s'il est désactivé). `size` : diamètre du
+ * halo en px à l'échelle d'une capture de 1 280 px ; `dim` : assombrissement du reste, en % ;
+ * `fixedOnReducedMotion` : halo fixe sur l'élément de l'étape si le visiteur préfère moins d'animations.
+ */
+export const FREE_SPOTLIGHT = {
+  size: { min: 120, max: 400, initial: 220 },
+  dim: { min: 20, max: 80, initial: 55 },
+} as const;
+export const freeSpotlightSchema = z.object({
+  size: z.number().min(120).max(400).default(220).catch(220),
+  dim: z.number().min(20).max(80).default(55).catch(55),
+  fixedOnReducedMotion: z.boolean().default(true).catch(true),
+});
+export type FreeSpotlight = z.infer<typeof freeSpotlightSchema>;
+/** Rayon du halo à l'écran : il rétrécit avec la capture, jamais sous 64 px de diamètre. */
+export const freeSpotlightRadius = (size: number, shotWidth: number) =>
+  Math.max(32, (size / 2) * (shotWidth / 1280));
+
 export const stepSchema = z.object({
   id: z.string(),
   chapterId: z.string().nullable().default(null),
@@ -737,6 +756,7 @@ export const manifestSchema = z.object({
   voice: voiceSettingsSchema
     .default({ captions: true, player: 'bubble' })
     .catch({ captions: true, player: 'bubble' }),
+  spotlight: freeSpotlightSchema.nullable().default(null).catch(null),
   title: z.string(),
   locale: z.string().default('fr'),
   publishedAt: z.string(),

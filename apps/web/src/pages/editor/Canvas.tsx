@@ -3,10 +3,12 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
+  useEffect,
+  type CSSProperties,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
-import { themeSchema, MASK_INTENSITY } from '@flowdsiml/manifest';
+import { freeSpotlightRadius, themeSchema, MASK_INTENSITY } from '@flowdsiml/manifest';
 import {
   beaconCenter,
   boxStyle,
@@ -34,6 +36,7 @@ import {
   asAction,
   asCta,
   asMasks,
+  freeSpotlightOf,
   maskCss,
   asSettings,
   asStepOptions,
@@ -60,6 +63,8 @@ interface Props {
   hideHotspots?: boolean;
   /** L18-02 : variante B affichée sur le canevas (texte de la bulle testée remplacé). */
   abPreview?: { hotspotId: string; title: string; body: string; cta: unknown } | null;
+  /** EXT-02 §6.3 : outil « Projecteur » ouvert et activé : halo fixe sur le premier hotspot. */
+  freeSpot?: { size: number; dim: number } | null;
 }
 
 const clamp = (v: number, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -88,12 +93,24 @@ export function Canvas({
   hideFormChip,
   hideHotspots = false,
   abPreview,
+  freeSpot = null,
 }: Props) {
   const { t } = useTranslation();
   // L46 : variables remplacées par les exemples (ou les replis) dans le canevas, jamais de {{…}}
   const varCatalog = useVarCatalog(editor.variables);
   const vp = varPreview(varCatalog, editor.variables, usePreviewMode());
   const frame = useRef<HTMLDivElement>(null);
+  // EXT-02 §6.3 : largeur affichée de la capture, pour le rayon du halo d'aperçu
+  const [frameW, setFrameW] = useState(0);
+  useEffect(() => {
+    const el = frame.current;
+    if (!freeSpot || !el) return;
+    const fit = () => setFrameW(el.clientWidth);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [freeSpot]);
   const [drag, setDrag] = useState<Drag | null>(null);
   const hotspots = hideHotspots ? [] : editor.hotspots.filter((h) => h.step_id === step.id);
   const blurs = asMasks(step.blurs);
@@ -447,7 +464,9 @@ export function Canvas({
     );
   }
   const spotlightMode = asSettings(editor.demo?.settings).mode === 'spotlight';
-  const isSpot = (h: { style: string }) => spotlightMode || h.style === 'spotlight';
+  // Projecteur libre activé : le style Spotlight des hotspots est ignoré, comme dans le lecteur
+  const freeEnabled = freeSpotlightOf(asSettings(editor.demo?.settings)).enabled;
+  const isSpot = (h: { style: string }) => !freeEnabled && (spotlightMode || h.style === 'spotlight');
 
   const url = editor.imageUrls[step.image_path];
   // Aperçu WYSIWYG (ED2) : mêmes classes et même thème que le player.
@@ -644,6 +663,20 @@ export function Canvas({
       <span className="sr-only" aria-live="polite">
         {announce}
       </span>
+      {freeSpot && hotspots[0] && (
+        <span
+          className="p-freespot is-fixed canvas-freespot"
+          style={
+            {
+              '--fx': `${(hotspots[0].x + hotspots[0].w / 2) * 100}%`,
+              '--fy': `${(hotspots[0].y + hotspots[0].h / 2) * 100}%`,
+              '--fr': `${Math.round(freeSpotlightRadius(freeSpot.size, frameW || 1280))}px`,
+              '--fd': String(freeSpot.dim / 100),
+            } as CSSProperties
+          }
+          aria-hidden="true"
+        />
+      )}
       {hotspots.some(isSpot) && (
         <svg className="p-veil" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <path fillRule="evenodd" d={spotlightVeilPath(hotspots.filter(isSpot))} />

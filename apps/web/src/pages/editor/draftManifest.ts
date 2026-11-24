@@ -14,6 +14,7 @@ import {
   asSettings,
   asStepOptions,
   asZoom,
+  freeSpotlightOf,
 } from './types';
 import { asVideo } from './video/videoModel';
 import { guideStepsOf } from './html/sandboxGuide';
@@ -41,6 +42,12 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
     sandbox: demo.kind === 'sandbox' ? sandboxOf(demo.sandbox, ed.steps) : null,
     locale: settings.locale ?? 'fr',
     // EXT-02 §6.4 : réglages de la voix pour toute la démo (mêmes défauts que la publication)
+    spotlight: (() => {
+      const sp = freeSpotlightOf(settings);
+      return sp.enabled
+        ? { size: sp.size, dim: sp.dim, fixedOnReducedMotion: sp.fixedOnReducedMotion }
+        : null;
+    })(),
     voice: {
       captions: settings.voice?.captions !== false,
       player: settings.voice?.player === 'bar' ? 'bar' : 'bubble',

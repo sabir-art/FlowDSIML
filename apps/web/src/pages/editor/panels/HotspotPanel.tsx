@@ -14,6 +14,7 @@ import {
   type HotspotRow,
   type Selection,
   type StepRow,
+  freeSpotlightOf,
 } from '../types';
 import { VarTextField } from '../vars/VarTextField';
 import { useVarCatalog } from '../../../lib/varCatalog';
@@ -136,6 +137,9 @@ export function HotspotPanel({
             <span className="soon-text">{t('shell.soon')}</span>
           </button>
         </div>
+        {freeSpotlightOf(asSettings(editor.demo!.settings)).enabled && (
+          <p className="help hs-free-note">{t('editor.spotlight.ignored')}</p>
+        )}
         <p className="help">
           {demoSpotlight
             ? t('editor.hs.forcedByDemo')

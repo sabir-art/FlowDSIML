@@ -1062,7 +1062,8 @@
         "zoomHtml": "Pas de zoom sur une page HTML",
         "cropHtml": "Pas de recadrage sur une page HTML",
         "readOnly": "Lecture seule"
-      }
+      },
+      "spotlight": "Projecteur"
     },
     "railLabel": "Étapes, réordonnables avec Espace puis les flèches",
     "blur": {
@@ -2031,6 +2032,14 @@
       "esc": "Échap pour fermer",
       "prev": "Précédent",
       "button": "Libellé du bouton"
+    },
+    "spotlight": {
+      "enable": "Projecteur libre",
+      "help": "Un halo suit le pointeur du visiteur sur la capture ; le reste est assombri. Au clavier et sur écran tactile, le halo se place sur l’élément de l’étape. Sur les étapes capture.",
+      "size": "Taille du halo",
+      "dim": "Assombrissement",
+      "fixed": "Halo fixe si le visiteur préfère moins d’animations",
+      "ignored": "Ignoré tant que le projecteur libre est activé."
     }
   },
   "status": {

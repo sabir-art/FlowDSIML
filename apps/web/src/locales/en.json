@@ -1062,7 +1062,8 @@
         "zoomHtml": "No zoom on an HTML page",
         "cropHtml": "No crop on an HTML page",
         "readOnly": "Read only"
-      }
+      },
+      "spotlight": "Spotlight"
     },
     "railLabel": "Steps, reorder with Space then the arrows",
     "blur": {
@@ -2031,6 +2032,14 @@
       "esc": "Esc to close",
       "prev": "Back",
       "button": "Button label"
+    },
+    "spotlight": {
+      "enable": "Free spotlight",
+      "help": "A halo follows the visitor’s pointer on the screenshot; the rest is dimmed. With the keyboard and on touch screens, the halo sits on the step’s element. On screenshot steps.",
+      "size": "Halo size",
+      "dim": "Dimming",
+      "fixed": "Fixed halo if the visitor prefers reduced motion",
+      "ignored": "Ignored while the free spotlight is on."
     }
   },
   "status": {

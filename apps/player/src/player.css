@@ -3477,3 +3477,10 @@ h1.p-title {
   padding: 0;
   justify-content: center;
 }
+
+/* EXT-02 §6.3 : projecteur libre (le halo est dans player-core.css, partagé avec l'éditeur). */
+/* Bouton de la barre : même taille que ses voisins ; enfoncé = projecteur allumé */
+.p-freespot-btn[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--p-text) 9%, transparent);
+  color: var(--p-primary);
+}
