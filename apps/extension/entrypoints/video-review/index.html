@@ -3,42 +3,62 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vérification de la vidéo</title>
+    <title>Vérifier la vidéo</title>
   </head>
   <body>
-    <main id="main" tabindex="-1">
-      <header class="vr-head">
-        <img class="logo" src="/symbole-tutoclick.svg" width="36" height="36" alt="TutoClick" />
-        <div>
-          <h1 data-i18n="vrTitle"></h1>
-          <p class="muted" id="meta"></p>
-        </div>
-      </header>
+    <header class="top">
+      <picture>
+        <source srcset="/logo-tutoclick-compact-sombre.svg" media="(prefers-color-scheme: dark)" />
+        <img src="/logo-tutoclick-compact.svg" height="28" alt="TutoClick" />
+      </picture>
+      <span class="t" id="top-title" aria-hidden="true"></span>
+    </header>
+    <main id="main" class="vrw" tabindex="-1">
+      <div>
+        <h1 id="h1"></h1>
+        <p class="mu intro" id="intro"></p>
+      </div>
       <div id="alert" class="alert" role="alert" hidden></div>
-      <section class="vr-video">
-        <video id="video" controls playsinline aria-label=""></video>
-      </section>
-      <section aria-labelledby="kf-h">
-        <h2 id="kf-h" data-i18n="vrFrames"></h2>
-        <p class="muted" data-i18n="vrFramesHelp"></p>
-        <p class="note" id="blurred"></p>
-        <p class="muted small" id="zone-help" data-i18n="vrZoneHelp"></p>
-        <ul id="frames" class="vr-frames"></ul>
-      </section>
-      <div class="vr-actions">
-        <button type="button" id="delete" class="btn btn-danger-outline" data-i18n="vrDelete"></button>
-        <span class="grow"></span>
-        <span id="progress" class="muted" role="status"></span>
-        <span id="reason" class="reason" hidden></span>
-        <button type="button" id="send" class="btn btn-primary" data-i18n="vrSend"></button>
+      <div class="vsplit" id="split">
+        <section class="vplayer" id="player">
+          <div class="vscreen" id="screen">
+            <video id="video" playsinline></video>
+            <div class="vmasks" id="masks"></div>
+          </div>
+          <div class="vctl">
+            <button type="button" class="ib" id="play"></button>
+            <div class="vtl" id="timeline" role="slider" tabindex="0" aria-valuemin="0">
+              <span class="ph" id="head"></span>
+            </div>
+            <span class="vtime" id="time"></span>
+          </div>
+        </section>
+        <section class="mside" aria-labelledby="zones-h">
+          <div class="mh">
+            <h2 id="zones-h"></h2>
+            <span class="mu" id="count"></span>
+            <button type="button" class="bt" id="add"></button>
+          </div>
+          <ul id="list" class="mlist" role="list"></ul>
+          <p class="mu mhint" id="hint"></p>
+          <p class="sr-only" id="mask-help"></p>
+        </section>
       </div>
     </main>
-    <dialog id="confirm" class="vr-confirm" aria-labelledby="confirm-t" aria-describedby="confirm-d">
-      <h2 id="confirm-t" data-i18n="vrConfirmTitle"></h2>
-      <p id="confirm-d" data-i18n="vrConfirmBody"></p>
-      <div class="vr-confirm-actions">
-        <button type="button" id="confirm-no" class="btn btn-secondary" data-i18n="vrCancel"></button>
-        <button type="button" id="confirm-yes" class="btn btn-danger" data-i18n="vrDelete"></button>
+    <div class="bar">
+      <div>
+        <button type="button" class="bt dg" id="delete"></button>
+        <span class="sp" id="status" role="status"></span>
+        <span id="reason" class="reason mu" hidden></span>
+        <button type="button" class="bt pr send" id="send" disabled></button>
+      </div>
+    </div>
+    <dialog id="confirm" class="dlg" aria-labelledby="confirm-t" aria-describedby="confirm-d">
+      <h2 id="confirm-t"></h2>
+      <p id="confirm-d"></p>
+      <div class="ac">
+        <button type="button" id="confirm-no" class="bt"></button>
+        <button type="button" id="confirm-yes" class="bt pr is-danger"></button>
       </div>
     </dialog>
     <script type="module" src="./main.ts"></script>

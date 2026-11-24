@@ -1,251 +1,304 @@
-body {
-  --vr-bg: #f5f5f4;
-  margin: 0;
-  background: var(--vr-bg);
-  color: var(--fd-color-text, #1c1917);
-  font:
-    15px/1.5 system-ui,
-    sans-serif;
+/* EXT-02 §4.4 : « Vérifier la vidéo » (maquettes ext02/video-*). Les contrôles communs (en-tête, boutons,
+   statuts, « Pourquoi ? », barre fixe, fenêtre) viennent de la feuille de « Vérifier avant l'envoi ». */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
-main {
-  max-width: 1040px;
+.vrw {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 24px 48px;
-  display: grid;
+  padding: 24px 24px 120px;
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
-main:focus {
+.vrw:focus {
   outline: none;
 }
-.vr-head {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-h1 {
+.vrw h1 {
+  margin: 0;
   font-size: 24px;
-  margin: 0;
+  line-height: 1.25;
+  font-weight: 700;
 }
-h2 {
-  font-size: 18px;
-  margin: 0 0 4px;
-}
-.muted {
-  color: #57534e;
-  margin: 0;
-}
-.note {
-  margin: 8px 0 0;
-  font-size: 14px;
-}
-.alert {
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #fde8e6;
-  color: #7a1f12;
-  font-weight: 600;
-}
-.vr-video video {
-  width: 100%;
-  max-height: 60vh;
-  border-radius: 12px;
-  background: #000;
-}
-.vr-frames {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
+/* SPLIT-01 : le lecteur prend le reste, la liste fait 440 px ; une colonne quand la place manque */
+.vsplit {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  gap: 24px;
+  align-items: start;
 }
-.vr-frames li {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 1px #e7e5e4;
+.vplayer {
   overflow: hidden;
-  font-size: 13px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
 }
-.vr-frames {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-}
-/* L21-01 : image clé tirée de la vidéo, zones floutées visibles et ajustables */
-.kf {
+.vscreen {
   position: relative;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: #f4f5f7;
   line-height: 0;
+  touch-action: none;
+  cursor: crosshair;
 }
-.vr-frames img {
+.vscreen video {
   display: block;
   width: 100%;
   height: auto;
-  background: #e7e5e4;
+  max-height: 70vh;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  background: #f4f5f7;
 }
-.zone {
+.vmasks {
   position: absolute;
-  box-sizing: border-box;
-  border: 2px solid #d60b52;
-  box-shadow: 0 0 0 1px #fff;
-  background: rgba(214, 11, 82, 0.12);
-  border-radius: 4px;
-  cursor: move;
-  touch-action: none;
+  inset: 0;
+  pointer-events: none;
 }
-.zone:focus-visible {
-  outline: 3px solid #1f7fb6;
+/* Aperçu d'un masque : flou et voile gris neutre, comme l'incrustation de l'envoi */
+.vmask {
+  position: absolute;
+  border-radius: 4px;
+  background: rgb(143 143 143 / 0.55);
+  backdrop-filter: blur(10px);
+}
+.vmask.is-off {
+  background: none;
+  backdrop-filter: none;
+  outline: 2px dashed var(--fd-color-warning);
+  outline-offset: -2px;
+}
+.vmask.is-live {
+  background: none;
+  backdrop-filter: none;
+}
+.vmask.is-sel {
+  outline: 2px dashed var(--fd-color-primary);
   outline-offset: 2px;
 }
-.zone-h {
+/* Masque ajouté : déplaçable et redimensionnable */
+.vmask.is-manual {
+  pointer-events: auto;
+  cursor: move;
+}
+.vmask.is-manual:focus-visible {
+  outline: 2px solid var(--fd-color-primary);
+  outline-offset: 2px;
+}
+.vmask .grip {
   position: absolute;
-  right: -6px;
-  bottom: -6px;
+  right: -5px;
+  bottom: -5px;
   width: 12px;
   height: 12px;
+  border: 2px solid var(--fd-color-primary);
   border-radius: 3px;
-  background: #fff;
-  border: 2px solid #d60b52;
+  background: var(--fd-color-surface);
   cursor: nwse-resize;
 }
-.zone-x {
+.vdraft {
   position: absolute;
-  top: -11px;
-  right: -11px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  background: #d60b52;
-  color: #fff;
-  font:
-    700 14px/1 system-ui,
-    sans-serif;
-  padding: 0;
-  cursor: pointer;
+  border: 2px dashed var(--fd-color-primary);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fd-color-primary) 12%, transparent);
 }
-.zone-x:focus-visible {
-  outline: 3px solid #1f7fb6;
-  outline-offset: 2px;
-}
-.kf-cap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  line-height: 1.4;
-}
-.small {
-  font-size: 13px;
-}
-.btn-small {
-  height: 32px;
-  padding: 0 12px;
-  font-size: 13px;
-  background: transparent;
-  color: inherit;
-  box-shadow: inset 0 0 0 1px #a8a29e;
-  flex: none;
-}
-.reason {
-  font-size: 13px;
-  color: #7a1f12;
-  max-width: 280px;
-}
-.btn-danger-outline {
-  background: transparent;
-  color: #b42318;
-  box-shadow: inset 0 0 0 1.5px #b42318;
-}
-.btn-danger {
-  background: #b42318;
-  color: #fff;
-}
-.btn-secondary {
-  background: transparent;
-  color: inherit;
-  box-shadow: inset 0 0 0 1px #a8a29e;
-}
-.vr-confirm {
-  border: 0;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 420px;
-  box-shadow: 0 20px 50px rgb(0 0 0 / 25%);
-}
-.vr-confirm::backdrop {
-  background: rgb(0 0 0 / 45%);
-}
-.vr-confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 16px;
-}
-.vr-actions {
+.vctl {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0 16px;
-  background: var(--vr-bg);
-  box-shadow: 0 -1px 0 #e7e5e4;
+  padding: 10px 12px;
 }
-.grow {
-  flex: 1;
-}
-.btn {
-  height: 40px;
-  padding: 0 18px;
-  border-radius: 999px;
+.ib {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0;
   border: 0;
-  font:
-    600 15px system-ui,
-    sans-serif;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fd-color-text-muted);
+}
+.ib:hover {
+  background: var(--fd-color-surface-hover);
+  color: var(--fd-color-text);
+}
+.vtl {
+  position: relative;
+  flex: 1;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
   cursor: pointer;
 }
-.btn:focus-visible {
-  outline: 3px solid #1f7fb6;
+.vtl .seg {
+  position: absolute;
+  top: 6px;
+  height: 16px;
+  min-width: 3px;
+  border-radius: 4px;
+  background: var(--fd-color-border-strong);
+}
+.vtl .seg.off {
+  top: 5px;
+  height: 18px;
+  border: 2px dashed var(--fd-color-warning);
+  background: transparent;
+}
+.vtl .seg.sel {
+  background: var(--fd-color-primary);
+}
+.vtl .seg.off.sel {
+  border-color: var(--fd-color-primary);
+  background: transparent;
+}
+.vtl .ph {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--fd-color-primary);
+  pointer-events: none;
+}
+:is(.ib, .vtl, .mr-name):focus-visible {
+  outline: 2px solid var(--fd-color-primary);
   outline-offset: 2px;
 }
-.btn-primary {
-  background: #a3195b;
-  color: #fff;
+.vtime {
+  flex: none;
+  font: 600 13px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text-muted);
 }
-.btn-primary:disabled {
-  background: #a8a29e;
-  cursor: not-allowed;
+.mside {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
 }
-.btn-ghost-danger {
-  background: transparent;
-  color: #b42318;
+.mside .mh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    --vr-bg: #1c1917;
-    background: var(--vr-bg);
-    color: #f5f5f4;
+.mside .mh h2 {
+  margin: 0 auto 0 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.mlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Colonnes fixes : nom et passage (le reste) · statut 100 px · action 96 px */
+.mr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px 96px;
+  column-gap: 10px;
+  row-gap: 6px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mr.on {
+  background: var(--fd-color-primary-soft);
+}
+.mr .tx {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mr-name {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mr .wy {
+  grid-column: 1;
+  justify-self: start;
+  height: 24px;
+  padding: 0;
+}
+.mr .st2.off {
+  border-color: var(--fd-color-warning);
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+}
+.mlist > .why {
+  margin: 8px 16px;
+}
+.mnone,
+.mhint {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+.reason {
+  font-size: 13px;
+}
+/* Préparation et envoi : libellé et barre de 6 px dans la barre fixe */
+#status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 420px;
+}
+#status b {
+  font-size: 14px;
+}
+.prog {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--fd-color-border);
+}
+.prog > i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--fd-color-primary);
+}
+.bar > div {
+  max-width: 1232px;
+}
+
+@media (max-width: 1071px) {
+  .vsplit {
+    grid-template-columns: 1fr;
   }
-  .muted {
-    color: #d6d3d1;
+}
+@media (max-width: 767px) {
+  .vrw {
+    padding: 16px 16px 120px;
   }
-  .vr-actions {
-    box-shadow: 0 -1px 0 #44403c;
+  .mside .mh {
+    flex-wrap: wrap;
   }
-  .btn-danger-outline {
-    color: #f97066;
-    box-shadow: inset 0 0 0 1.5px #f97066;
+  .mside .mh .bt {
+    width: 100%;
+    justify-content: center;
   }
-  .reason {
-    color: #fca5a5;
-  }
-  .vr-confirm {
-    background: #292524;
-    color: #f5f5f4;
-  }
-  .btn-small,
-  .btn-secondary {
-    box-shadow: inset 0 0 0 1px #78716c;
-  }
-  .vr-frames li {
-    background: #292524;
-    box-shadow: inset 0 0 0 1px #44403c;
+  #status {
+    max-width: none;
+    flex-basis: 100%;
   }
 }

@@ -430,6 +430,13 @@ jobs:
         run: |
           cd apps/extension && node e2e/video-masque.e2e.cjs | tee /tmp/e2e-ext-masque.log
           ! grep -q '^NOT OK' /tmp/e2e-ext-masque.log
+      - name: Vérifier la vidéo (zones repérées, Démasquer / Masquer, masque ajouté, préparation puis envoi)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/video-revue.e2e.cjs | tee /tmp/e2e-ext-revue.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-revue.log
       - name: Canal app vers extension (origine exacte, capture rattachée au Sandbox, permissions inchangées)
         if: always()
         env:

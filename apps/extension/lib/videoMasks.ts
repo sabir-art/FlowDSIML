@@ -128,8 +128,9 @@ export function manualMask(id: string, rect: MaskRect, from: number, to: number)
     live: false,
     on: true,
     frames: [
-      { t: Math.round(from), rects: [rect] },
-      { t: Math.round(Math.max(from + 1, to)), rects: [] },
+      // Arrondi vers le bas : le masque est là dès l'image affichée
+      { t: Math.floor(from), rects: [rect] },
+      { t: Math.ceil(Math.max(from + 1, to)), rects: [] },
     ],
   };
 }

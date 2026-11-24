@@ -242,7 +242,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await vr.setViewportSize({ width: 1280, height: 900 });
   vr.on('pageerror', (e) => console.log('# pageerror', e.message));
   await vr.goto(`chrome-extension://${extId}/video-review.html`);
-  await vr.waitForSelector('#frames li');
+  await vr.locator('#alert:not([hidden])').waitFor();
   ok(
     /Raccourcissez ou découpez l’enregistrement/.test(await vr.textContent('#alert')),
     'au-delà de 50 Mo : message clair',
@@ -257,36 +257,18 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await shot(vr, 'l21-03-trop-lourd', true);
   await seed(false);
   await vr.reload();
-  await vr.waitForSelector('#frames li');
+  await vr.locator('#send:not([disabled])').waitFor();
   ok(await vr.isHidden('#alert'), 'sous 50 Mo : pas d’alerte');
-  ok((await vr.$$('#frames li')).length === 3, 'clics rapprochés fusionnés (3 images clés)');
+  // EXT-02 §4.4 : écran « Vérifier la vidéo » (détail dans video-revue.e2e.cjs)
   ok(
-    /^3 zones floutées repérées/.test(await vr.textContent('#blurred')),
-    'nombre de zones issu de la détection',
+    (await vr.textContent('#time')) === '0:00 / 0:12',
+    `une seule durée : celle de la vidéo (${await vr.textContent('#time')})`,
   );
   ok(
-    (await vr.textContent('#meta')).includes('00:12') && !(await vr.textContent('#meta')).includes('00:08'),
-    'une seule durée : celle de la vidéo',
+    /^Aucune donnée personnelle n’a été repérée\./.test(await vr.textContent('#intro')) &&
+      (await vr.textContent('#list')) === 'Aucune zone pour l’instant.',
+    'enregistrement sans donnée repérée : phrase et liste vide',
   );
-  ok(
-    await vr.$$eval('#frames img', (i) =>
-      i.every((x) => x.alt && x.naturalWidth > 0 && x.src.startsWith('data:image')),
-    ),
-    'images clés tirées de la vidéo, avec texte alternatif',
-  );
-  ok((await vr.$$('#frames .zone')).length === 3, 'zones floutées visibles sur les images clés');
-  // Ajuster : clavier (déplacer, redimensionner), ajouter, retirer
-  const z0 = vr.locator('[data-zone="0-0"]');
-  const before0 = await z0.boundingBox();
-  await z0.focus();
-  await vr.keyboard.press('ArrowRight');
-  await vr.keyboard.press('Shift+ArrowDown');
-  const after0 = await z0.boundingBox();
-  ok(after0.x > before0.x && after0.height > before0.height, 'zone déplacée et redimensionnée au clavier');
-  await vr.getByRole('button', { name: /Ajouter une zone · Pause 2/ }).click();
-  ok((await vr.$$('#frames .zone')).length === 4, 'zone ajoutée');
-  await vr.getByRole('button', { name: 'Retirer la zone 2 de l’image 1' }).click();
-  ok((await vr.$$('#frames .zone')).length === 3, 'zone retirée');
   await vr.waitForFunction(() => document.querySelector('video').readyState >= 1);
   await shot(vr, 'l21-03-verification', true);
   await vr.click('#send');
@@ -318,7 +300,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
     step?.video.pauses.length === 3 && step.video.pauses[0].title === 'Créer un projet',
     'pauses-étapes proposées',
   );
-  ok(Object.keys(step?.video.frames ?? {}).length === 3, 'images des pauses téléversées (zones incrustées)');
+  ok(Object.keys(step?.video.frames ?? {}).length === 3, 'images des pauses téléversées');
   ok(step?.video.autoplayMuted === true && step.video.hasVoice === false, 'lecture muette, sans voix');
   const after = await popup.evaluate(
     () =>
@@ -336,7 +318,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await seed(false);
   const before = log.length;
   await vr.goto(`chrome-extension://${extId}/video-review.html`);
-  await vr.waitForSelector('#frames li');
+  await vr.locator('#send:not([disabled])').waitFor();
   // Vrai bouton, confirmation dans la page : « Annuler » rend le focus au bouton
   await vr.focus('#delete');
   await vr.keyboard.press('Enter');
