@@ -293,3 +293,59 @@ Sous le champ : CircleAlert 16 px `danger` et une phrase d’action. « Utilisez
 ### 7.5 Étape « Formulaire » de l’éditeur
 - Menu ⋯ avec les seules entrées qui ont un sens (un formulaire par démo) et les mêmes libellés que les autres étapes : Modifier, Monter, Descendre, séparateur, Supprimer (danger).
 - Fenêtre MODAL-01 : « Supprimer ce formulaire ? » ; corps « Le formulaire et ses {n} champs sont retirés de la démo. Les réponses déjà reçues restent dans Leads. » (si les réponses sont supprimées : « Les {n} réponses déjà reçues sont aussi supprimées. ») ; puis « Vous pourrez annuler juste après, depuis la notification. » (annulation par la notification de 6 s ; Ctrl + Z ne la fait pas) ; « son champ » au singulier. Boutons « Annuler » (focus par défaut) et « Supprimer le formulaire » (danger).
+
+## 8. Capturer de nouvelles étapes depuis l'éditeur (extension 0.3.0, retour client du 24/11)
+
+Besoin : compléter une démo existante sans en recréer une. On lance la capture depuis l'éditeur, elle vise **cette démo**, et les étapes s'insèrent **après l'étape choisie**. Les captures d'écran et les captures HTML peuvent se mélanger dans une même démo ; l'import d'images reste possible.
+
+Principe, à partir du canal app → extension qui existe déjà (EXT-CONNECT, rattachement d'une capture à un Sandbox) : l'app donne à l'extension la cible (démo, étape d'insertion), le type de capture et la page de départ ; l'extension ouvre cette page dans un nouvel onglet et démarre. On ne demande pas à la personne d'aller cliquer sur l'icône.
+
+Maquettes :
+- éditeur : `retours-2411/ajout-fenetre-*`, `ajout-absente-*`, `ajout-en-cours-*`, `ajout-fini-*` ;
+- extension : `ext02/cadre-cible-*` (barre) et `ext02/verification-ajout-demo-*` (1440 et 390).
+
+### 8.1 Entrée dans l'éditeur
+Dans le menu « Ajouter une étape », « Capturer de nouvelles étapes » perd « Bientôt ». L'entrée est aussi dans le menu ⋯ d'une étape, sous le nom « Capturer après cette étape », qui préremplit l'étape d'insertion.
+
+### 8.2 Fenêtre « Capturer de nouvelles étapes » (MODAL-01, 560 px, tuile décorative)
+- **Insérer après** : liste déroulante des étapes (« 3 · Créer une opportunité »), réglée sur l'étape choisie ; l'option « Au début » vient en premier.
+- **Type de capture** : segmenté « Captures d'écran » / « HTML ».
+  - Aide : « Les deux peuvent se mélanger dans une même démo : chaque étape garde son type. »
+  - HTML est désactivé, avec sa raison, si le réglage de l'espace l'interdit (L49) ou si le domaine de la page n'est pas autorisé.
+- **Page de départ** : l'adresse de l'étape d'insertion si elle est connue (adresse enregistrée à la capture), sinon vide et obligatoire.
+  - Aide : « L'extension ouvre cette page et commence la capture ; naviguez librement ensuite. »
+- **État de l'extension**, testé à l'ouverture de la fenêtre par le canal externe :
+  - « Extension TutoClick 0.3.0 détectée. » (success) ;
+  - sinon, l'encart « Extension TutoClick 0.3.0 requise » avec « Installer l'extension » et « Vérifier à nouveau ». Le bouton principal est alors désactivé.
+- **Séparateur « ou »**, puis « Importer des images à cet endroit » : l'import d'images actuel (§18.1), inséré après la même étape.
+- **Pied** : « Annuler » et le bouton primaire « Ouvrir et capturer ».
+- **Erreurs renvoyées par l'extension**, dans la fenêtre, en `role="alert"` :
+  - « Une capture est déjà en cours dans l'extension. Terminez-la d'abord. » ;
+  - « Connectez-vous à TutoClick dans l'extension. » ;
+  - « L'extension n'a pas accès à ce site » : l'extension ouvre quand même l'onglet, et son popup demande l'autorisation, comme pour le Sandbox.
+
+### 8.3 Pendant la capture
+- **Éditeur** : bandeau info sous l'en-tête, « Capture en cours dans un autre onglet. Les étapes arriveront après l'étape 3 · Créer une opportunité. », avec « Revenir à la capture » (active l'onglet) et « Annuler l'ajout ».
+  - Dans la liste des étapes, un repère pointillé primary montre l'endroit : « Les nouvelles étapes arriveront ici ».
+  - L'éditeur reste utilisable. L'insertion suit l'étape par son identifiant, pas par son numéro.
+- **Barre d'enregistrement de l'extension** (§5) : une pastille de cible « Démo CRM · après l'étape 3 » s'ajoute après le compteur. Le choix du cadre (Page, Élément, Zone) reste disponible en captures d'écran.
+- **Popup**, s'il est ouvert pendant la capture, dans les variantes A comme B : une carte de cible en tête (« Ajout à « Démo CRM » · après l'étape 3 ») avec « Terminer » et « Annuler l'ajout ». La liste des types est remplacée par cette carte, puisqu'on ne lance pas une autre capture.
+
+### 8.4 Vérification et envoi
+- C'est l'écran de vérification habituel (§2 pour le HTML, §5 pour le cadre en captures d'écran), à deux différences près :
+  - le titre et le segmenté de type sont remplacés par la ligne « Destination : Ajout à « Démo CRM », après l'étape 3 · Créer une opportunité » ;
+  - le bouton principal devient « Ajouter n étapes ».
+- **Après l'envoi** :
+  - l'extension rend la main à l'onglet de l'éditeur ;
+  - l'éditeur insère les étapes et affiche le toast « n étapes ajoutées après l'étape 3 » avec « Annuler », qui retire les étapes insérées ;
+  - les nouvelles étapes portent la pastille « Nouveau » jusqu'à leur première ouverture ;
+  - la liste défile jusqu'à elles et sélectionne la première.
+- **Mélange** : chaque étape garde son type. Une étape HTML porte l'icône Code dans la liste des étapes ; le lecteur rejoue chaque étape selon son type.
+
+### 8.5 Règles
+- **Validité** : la cible n'est valable que pour une capture. Elle expire après 30 minutes sans démarrage, et elle est effacée à « Annuler l'ajout » ou à l'envoi.
+- **Droits** : seuls les rôles qui peuvent modifier la démo voient l'entrée. Si la démo a changé d'espace ou a été supprimée entre-temps, l'envoi échoue avec un message clair, et les captures restent dans l'extension pour une nouvelle démo.
+- **Accessibilité** :
+  - bandeau et toasts en `role="status"` ;
+  - repère d'insertion annoncé (« Les nouvelles étapes arriveront après l'étape 3 ») ;
+  - la fenêtre suit MODAL-01 (focus piégé, Échap).
