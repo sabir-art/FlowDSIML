@@ -170,7 +170,7 @@
   overflow-wrap: anywhere;
   visibility: hidden;
   opacity: 0;
-  transition: opacity 0.12s;
+  transition: opacity var(--fd-motion-duration-fast);
 }
 .ai-disabled-wrap:hover .ai-tip,
 .ai-entry:focus-visible + .ai-tip {

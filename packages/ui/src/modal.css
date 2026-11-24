@@ -165,7 +165,7 @@
   animation: fd-modal-in 200ms var(--fd-motion-ease-standard, ease-out);
 }
 .fd-modal[open]::backdrop {
-  animation: fd-modal-veil 200ms ease-out;
+  animation: fd-modal-veil var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 @keyframes fd-modal-in {
   from {
