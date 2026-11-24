@@ -266,6 +266,7 @@
     "changePassword": "Mot de passe",
     "passwordUpdated": "Mot de passe mis à jour.",
     "setPassword": "Définir un mot de passe",
+    "passwordSave": "Enregistrer le mot de passe",
     "passwordCurrent": "Mot de passe actuel",
     "passwordCurrentRequired": "Saisissez votre mot de passe actuel.",
     "passwordCurrentWrong": "Le mot de passe actuel est incorrect.",
