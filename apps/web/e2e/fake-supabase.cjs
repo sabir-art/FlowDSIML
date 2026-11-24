@@ -994,7 +994,8 @@ async function install(page, state = seed()) {
             visitors: 90,
             completions: 40,
             ctaClicks: 12,
-            leads: 1,
+            // Leads réellement enregistrés pour cette démo : l'indicateur suit la vue « Leads »
+            leads: (t.leads || []).filter((l) => l.demo_id === a.p_demo).length,
             steps: [
               { stepIndex: 0, visitors: 90 },
               { stepIndex: 1, visitors: 62 },
@@ -1127,19 +1128,24 @@ async function install(page, state = seed()) {
           return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 50)) });
         }
         case 'workspace_sessions': {
-          const rows = t.leads.slice(0, 30).map((l, i) => ({
-            session_id: `s${i}`,
-            demo_id: l.demo_id,
-            source: ['link', 'embed', 'direct'][i % 3],
-            started_at: new Date(Date.now() - (i + 1) * 3 * 3600000).toISOString(),
-            duration_s: 48 + ((i * 37) % 160),
-            max_step: i % 2 ? 3 : 5,
-            completed: i % 2 === 0,
-            steps_total: 6,
-            has_lead: i % 3 !== 1,
-            lead_email: i % 3 === 1 || state.role === 'viewer' ? null : l.email,
-            lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
-          }));
+          // Sessions de la démo demandée seulement (comme en base) : la vue « Visiteurs » d'une démo
+          // ne montre pas les sessions des autres
+          const rows = t.leads
+            .filter((l) => !a.p_demo || l.demo_id === a.p_demo)
+            .slice(0, 30)
+            .map((l, i) => ({
+              session_id: `s${i}`,
+              demo_id: l.demo_id,
+              source: ['link', 'embed', 'direct'][i % 3],
+              started_at: new Date(Date.now() - (i + 1) * 3 * 3600000).toISOString(),
+              duration_s: 48 + ((i * 37) % 160),
+              max_step: i % 2 ? 3 : 5,
+              completed: i % 2 === 0,
+              steps_total: 6,
+              has_lead: i % 3 !== 1,
+              lead_email: i % 3 === 1 || state.role === 'viewer' ? null : l.email,
+              lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
+            }));
           const off = a.p_offset || 0;
           state.lastSessionsSegment = a.p_segment ?? null;
           // L19 : segment de moins de 5 visiteurs : aucune ligne
