@@ -194,6 +194,15 @@ Précisions (réponses au dev, 24/11) :
 ### 6.2 Flou stylé
 Panneau « Flou » : Forme (Rectangle, Arrondi, Ellipse), Effet (Flou, Pixels, Aplat), Intensité (2 à 24 px, curseur avec valeur), Teinte (Aucune, Gris, Encre, Prune, Bleu, Blanc ; à 30 % par-dessus) et « Appliquer à toutes les étapes ». Aide : « Le texte masqué n’est jamais lisible, quelle que soit la teinte. » (intensité minimale garantie côté rendu).
 
+Précisions (réponses au dev, 24/11) :
+- Ordre du panneau : Forme, Effet, Intensité, Teinte ; pour Aplat, Couleur (3 pastilles, couleur détectée, hexadécimal) et Texte sur l’aplat à la place d’Intensité et Teinte (masquées, pas grisées) ; Position (X, Y, largeur, hauteur) ; interrupteur « Appliquer à toutes les étapes » (remplace les deux boutons radio) ; info « incrusté à la publication ». « Supprimer la zone » reste en icône dans l’en-tête de section.
+- Pixels : Intensité = taille des pavés (2 à 24 px), même libellé.
+- Intensité par défaut 12 px pour une nouvelle zone. Une zone existante garde son rendu et le panneau affiche sa valeur réelle (environ 6 px), jamais une valeur qui ne correspond pas au rendu.
+- La réduction d’image avant le flou est toujours appliquée : le curseur règle la douceur, pas la lisibilité.
+- Teintes (couleurs de la capture, identiques en thème sombre) : Aucune, Gris #8f8f8f, Encre #1a1f26, Prune #a3195b, Bleu #2f6fed, Blanc #ffffff, à 30 % par-dessus Flou et Pixels.
+- Arrondi : rayon de 12 px à l’échelle de la capture (1 280 px de large) ; Ellipse inscrite dans le rectangle ; poignées toujours sur le rectangle, aperçu du canevas selon la forme.
+- Avant / Après : même panneau pour les zones de la capture « Avant ».
+
 ### 6.3 Projecteur libre (aujourd’hui « Bientôt »)
 Panneau « Projecteur » : interrupteur « Projecteur libre », taille du halo (120 à 400 px), assombrissement (20 à 80 %), « Désactivé si le visiteur préfère moins d’animations ». Dans le lecteur : halo net autour du pointeur, bord adouci de 12 px, reste assombri ; au clavier et au toucher, le halo se place sur l’élément de l’étape. C’est le seul dégradé permis, parce qu’il est la fonction elle-même. Tant qu’il n’est pas livré, l’entrée reste « Bientôt », grise, jamais masquée.
 
