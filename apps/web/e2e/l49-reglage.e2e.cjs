@@ -45,6 +45,17 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     'première section de Sécurité',
   );
   const radio = (name) => card.getByRole('radio', { name: new RegExp(`^${name}`) });
+  // Le réglage arrive après la carte : on attend l'état réel avant de le lire (aucun délai fixe)
+  const settled = (loc) => loc.waitFor().catch(() => {});
+  const until = async (fn) => {
+    for (const end = Date.now() + 15000; Date.now() < end;) {
+      if (fn()) return;
+      await new Promise((r) => setImmediate(r));
+      await p.evaluate(() => new Promise((r) => requestAnimationFrame(r)));
+    }
+  };
+  await settled(card.getByRole('radio', { name: /^Autorisées/, checked: true }));
+  await settled(p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer', disabled: true }));
   ok(await radio('Autorisées').isChecked(), 'par défaut : Autorisées');
   ok(
     await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).isDisabled(),
@@ -77,17 +88,25 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await input.press('Enter');
   await input.fill('vieux.example.org');
   await input.press('Enter');
+  await settled(card.locator('.hc-chip').nth(2));
   ok(
     JSON.stringify(await card.locator('.hc-chip .hc-chip__name').allInnerTexts()) ===
       JSON.stringify(['app.example.com', '*.outils.example', 'vieux.example.org']),
     'pastilles : minuscules, joker',
   );
   await card.getByRole('button', { name: 'Retirer vieux.example.org' }).click();
+  await card
+    .locator('.hc-chip')
+    .nth(2)
+    .waitFor({ state: 'detached' })
+    .catch(() => {});
   ok((await card.locator('.hc-chip').count()) === 2, '« Retirer vieux.example.org »');
   await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
   await p.waitForFunction(
     () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
   );
+  // L'enregistrement est lu côté serveur (faux Supabase) : on attend qu'il y soit
+  await until(() => ws.settings?.htmlCapture?.mode === 'domains');
   ok(
     JSON.stringify(ws.settings.htmlCapture) ===
       JSON.stringify({ mode: 'domains', domains: ['app.example.com', '*.outils.example'] }),
@@ -122,10 +141,14 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await p.waitForFunction(
     () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
   );
+  await until(() => ws.settings?.htmlCapture?.mode === 'disabled');
   ok(ws.settings.htmlCapture.mode === 'disabled', 'désactivées : enregistré');
   await p.goto(`${APP}/#/`);
   await p.getByRole('button', { name: 'Nouvelle démo' }).first().click();
   await nd.waitFor();
+  // Les types HTML se désactivent une fois le réglage de l'espace chargé
+  await settled(nd.locator('.nd-type.is-off').nth(1));
+  await settled(nd.getByRole('radio', { name: /captures/, checked: true }));
   for (const name of ['Démo HTML', 'Sandbox']) {
     const r = nd.getByRole('radio', { name: new RegExp(name) });
     ok(
@@ -184,6 +207,12 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   // ===== 390 px =====
   const m = await open(seed(), '/settings/security', 390);
   await m.locator('.hc-card').waitFor();
+  await m
+    .locator('.hc-card')
+    .getByRole('radio', { checked: true })
+    .first()
+    .waitFor()
+    .catch(() => {});
   const sw = await m.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
