@@ -32,7 +32,7 @@ import {
   type CenterPath,
   type PathView,
 } from './center';
-import { brandingUrl } from './config';
+import { brandingUrl, mediaPublicUrl } from './config';
 import { fmt, strings, type Dict } from './i18n';
 import { PasswordGate, SysScreen } from './Gate';
 import { initials, useMedia } from './Player';
@@ -157,7 +157,8 @@ export function CenterApp({ route }: { route: Route }) {
       />
     );
   if (state.status !== 'ok' || !state.center || !state.paths)
-    return <SysScreen kind="notFound" locale={navigator.language} />;
+    // Adresse inconnue, page coupée ou liens publics interdits : même écran (« Cette page n'est pas disponible »)
+    return <SysScreen kind="pageOff" locale={navigator.language} />;
   return <Center t={t} data={state as CenterData} route={r} token={token} />;
 }
 
@@ -199,10 +200,10 @@ function Center({
   return (
     <div class={`ctr ctr--${style}`} data-theme={dark ? 'dark' : undefined} style={vars}>
       <header class="ctr-top">
-        {info.logoPath ? (
+        {info.logoMedia || info.logoPath ? (
           <img
             class="ctr-logo ctr-logo--img"
-            src={brandingUrl(info.logoPath)}
+            src={info.logoMedia ? mediaPublicUrl(info.logoMedia) : brandingUrl(info.logoPath!)}
             alt=""
             width={40}
             height={40}
@@ -273,7 +274,7 @@ function Center({
         {safeExternalUrl(info.a11yUrl) ? <a href={info.a11yUrl}>{a11y}</a> : <span>{a11y}</span>}
         {safeExternalUrl(info.privacyUrl) && <a href={info.privacyUrl ?? undefined}>{c.privacy}</a>}
         {help && <a href={help}>{c.help}</a>}
-        <span>{t.madeWith}</span>
+        {info.madeWith !== false && <span>{t.madeWith}</span>}
       </footer>
     </div>
   );
