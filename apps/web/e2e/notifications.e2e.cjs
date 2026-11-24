@@ -212,6 +212,40 @@ function withNotifications() {
   ok((await p2.getAttribute('.nb-empty', 'role')) === 'status', 'L22-06 : role=status');
   if (SHOTS) await p2.screenshot({ path: `${SHOTS}/l22-06-vide${sfx}.png` });
 
+  // Clic sur la cloche pendant le chargement (réponses lentes) : il n'est pas perdu, le panneau s'ouvre
+  // et reste ouvert quand la page passe de son squelette à son contenu (la cloche est remontée)
+  const p3 = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
+  p3.on('pageerror', (e) => errors.push(e.message));
+  await install(p3, seed());
+  // Les réponses sont libérées une à une, jusqu'à ce que la cloche apparaisse ; les suivantes restent
+  // retenues jusqu'au clic : la page est alors encore en cours de chargement
+  const pending = [];
+  let hold = true;
+  await p3.route(/\/rest\/v1\/|\/functions\/v1\/|\/auth\/v1\//, async (route) => {
+    if (hold) await new Promise((r) => pending.push(r));
+    await route.fallback();
+  });
+  await p3.goto(`${BASE}/#/`);
+  const bell3 = p3.getByRole('button', { name: /^Notifications/ }).first();
+  let released = 0;
+  while (!(await bell3.count())) {
+    if (pending.length) {
+      pending.shift()();
+      released++;
+    }
+    await p3.evaluate(() => new Promise(requestAnimationFrame));
+  }
+  await bell3.click();
+  const waiting = pending.length;
+  hold = false;
+  pending.splice(0).forEach((r) => r());
+  await p3.waitForLoadState('networkidle');
+  await p3.waitForSelector('.nb-empty');
+  ok(
+    await p3.getByRole('dialog', { name: 'Notifications' }).isVisible(),
+    `clic sur la cloche pendant le chargement (${released} réponses reçues, ${waiting} en attente) : le panneau s’ouvre et reste ouvert`,
+  );
+
   ok(errors.length === 0, `aucune erreur JavaScript${errors.length ? ` (${errors.join(' | ')})` : ''}`);
   await b.close();
 })().catch((e) => {

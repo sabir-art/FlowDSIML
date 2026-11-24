@@ -17,10 +17,12 @@ const ok = (c, l) => {
 
 async function prefsOf(page) {
   await page.goto(`${APP}/#/`);
+  // Un clic sur la cloche pendant le chargement est retenu (bellState) : pas d'attente préalable
   await page
     .getByRole('button', { name: /^Notifications/ })
     .first()
     .click();
+  await page.getByRole('dialog', { name: 'Notifications' }).waitFor();
   await page.getByRole('button', { name: 'Préférences' }).click();
   const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
   await prefs.waitFor();
