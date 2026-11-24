@@ -3963,6 +3963,7 @@
     "buttonHint_other": "({{count}} steps of {{total}})",
     "nextKicker": "Next step",
     "todo": "Up next",
+    "soonOnly": "Coming soon",
     "doneList": "Done",
     "footShort": "Visible to owners and admins.",
     "title": "Getting started with your workspace",
