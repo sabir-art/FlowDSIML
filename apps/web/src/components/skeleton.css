@@ -103,10 +103,10 @@
   flex-wrap: wrap;
   justify-content: center;
 }
-/* Contenu après le squelette : fondu de 150 ms permis sans réduction des animations */
+/* Contenu après le squelette : fondu (jeton base) permis sans réduction des animations */
 @media (prefers-reduced-motion: no-preference) {
   .sk-reveal {
-    animation: sk-fade 150ms ease-out;
+    animation: sk-fade var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
   }
 }
 @keyframes sk-fade {

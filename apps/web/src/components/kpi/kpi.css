@@ -285,7 +285,7 @@
   font-weight: 600;
   color: var(--fd-color-primary);
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--fd-motion-duration-fast);
 }
 .kpi-sc__go svg {
   width: 14px;

@@ -1877,23 +1877,23 @@ button.fd-nav__item:hover {
 /* ICON-01 : icône « panneau » de 20 px, trait 2,1 */
 /* NAV-04 §14 bis : en tête du rail, le symbole TutoClick (32 px) au repos ; au survol et au focus clavier du
    bouton, le même bouton devient « Déplier » (carré prune du
-   symbole dans les deux thèmes, icône blanche). Fondu croisé de 150 ms, sans mouvement. */
+   symbole dans les deux thèmes, icône blanche). Fondu croisé court (jeton fast), sans mouvement. */
 .fd-btn.sidebar__pin--rail {
   position: relative;
   border-radius: 8px;
   color: #fff;
-  transition: background-color 150ms ease-out;
+  transition: background-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
 .sidebar__pin-symbol {
   position: absolute;
   inset: 0;
   width: 32px;
   height: 32px;
-  transition: opacity 150ms ease-out;
+  transition: opacity var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
 .fd-btn.sidebar__pin--rail > svg {
   opacity: 0;
-  transition: opacity 150ms ease-out;
+  transition: opacity var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
 .fd-btn.sidebar__pin--rail:is(:hover, :focus-visible) {
   background: #a3195b;

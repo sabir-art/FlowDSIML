@@ -1644,7 +1644,7 @@ button.nd-src:focus-visible {
 .fcol__toggle svg {
   width: 14px;
   height: 14px;
-  transition: transform 120ms;
+  transition: transform var(--fd-motion-duration-fast);
 }
 .fcol__toggle[aria-expanded='true'] svg {
   transform: rotate(90deg);

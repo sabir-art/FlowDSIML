@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  animation: fd-tip-in 120ms ease-out;
+  animation: fd-tip-in var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
 .fd-tooltip::before {
   content: '';
