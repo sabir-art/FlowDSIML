@@ -31,6 +31,9 @@ export function FileDropzone({
   extra,
   onRemove,
   removeLabel,
+  title,
+  pickLabel,
+  className,
 }: {
   /** Nom du groupe pour les lecteurs d'écran (« Logo »). */
   label: string;
@@ -57,6 +60,11 @@ export function FileDropzone({
   extra?: ReactNode;
   onRemove?: () => void;
   removeLabel?: string;
+  /** Titre de l'état vide (par défaut « Glissez un fichier ici »). */
+  title?: string;
+  /** Libellé du bouton de l'état vide (par défaut « Choisir un fichier »). */
+  pickLabel?: string;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const auto = useId();
@@ -79,6 +87,7 @@ export function FileDropzone({
     error && !drag && 'is-error',
     file && !drag && !error && 'is-filled',
     busy && 'is-busy',
+    className,
   ]
     .filter(Boolean)
     .join(' ');
@@ -149,7 +158,9 @@ export function FileDropzone({
           </>
         ) : (
           <>
-            <b>{busy ? t('dropzone.sending') : t(readOnly ? 'dropzone.none' : 'dropzone.title')}</b>
+            <b>
+              {busy ? t('dropzone.sending') : readOnly ? t('dropzone.none') : (title ?? t('dropzone.title'))}
+            </b>
             {busy && bar}
             <span>{hint}</span>
           </>
@@ -165,7 +176,7 @@ export function FileDropzone({
               aria-describedby={describedBy}
               onClick={() => input.current?.click()}
             >
-              {t(file ? 'dropzone.replace' : 'dropzone.pick')}
+              {file ? t('dropzone.replace') : (pickLabel ?? t('dropzone.pick'))}
             </Button>
           )}
           {onLibrary && (

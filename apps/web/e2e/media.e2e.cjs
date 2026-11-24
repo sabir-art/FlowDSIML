@@ -64,7 +64,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   // L18-04 : vide
   ok(
     (await dlg.getByText('Importer votre premier fichier').count()) === 1,
-    'L18-04 : vide, une grande case d’import',
+    'L18-04 : vide, la zone d’import en tête',
   );
   ok(
     (await dlg.getByRole('button', { name: 'Utiliser ce fichier' }).getAttribute('aria-disabled')) === 'true',
@@ -86,7 +86,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
     ]);
     await ch.setFiles(file);
   };
-  await importVia(logo, /Importer votre premier fichier/);
+  await importVia(logo, 'Importer…');
   await dlg.getByRole('button', { name: 'logo-acme.png' }).waitFor();
   ok(state.tables.media_files[0].kind === 'logo', 'import par la fonction media (usage « logo »)');
   ok(
@@ -95,7 +95,7 @@ const nb = (x) => (x || '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ')
   );
   // L18-03 : une image de fond s'importe sous le filtre « Images » (classée image, pas logo)
   await dlg.getByRole('radio', { name: 'Images' }).click();
-  await importVia(fond, /^Importer/);
+  await importVia(fond, 'Importer…');
   await dlg.getByRole('button', { name: 'fond-accueil.png' }).waitFor();
   ok(
     state.tables.media_files.find((x) => x.name === 'fond-accueil.png')?.kind === 'image' &&
