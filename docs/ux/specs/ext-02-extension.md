@@ -6,6 +6,8 @@ Principe : le popup ne montre que ce qu’il faut pour lancer une capture, avec 
 
 ## 1. Popup de l’extension (révision du 23/11, deux variantes)
 
+**Décision du client (24/11) : variante B (formulaire court).** La variante A n’est plus à coder ; ses maquettes restent pour l’historique. Partout où cette spec dit « A comme B », seule B compte (carte de cible du §8 comprise).
+
 Contraintes communes :
 - largeur 360 px, hauteur au plus 600 px (limite de Chrome) ; en-tête et pied fixes, le corps défile seulement si besoin ;
 - **en-tête (NAV-04, PAGE-01)** : logo compact à gauche ; à droite, « ? » (aide dans un nouvel onglet) et ⋯ (Ouvrir TutoClick, Réglages de l’extension, Se déconnecter). Hauteur 56 px, filet dessous ;

@@ -219,6 +219,24 @@ Maquette : `lot2-demos/onb-fin-*`, variante B en place dans l'app.
 - **Après « Masquer »** : le bouton quitte l'en-tête, et l'entrée « Prise en main » reste dans le Centre d'aide.
 - **Défaut transmis par le chef** : « Inviter » doit se cocher dès qu'une invitation est envoyée. Une invitation en attente suffit, sans attendre qu'elle soit acceptée.
 
+## 10. Déclaration d'accessibilité : projet personnel en développement (réponse du client, 24/11)
+
+Le client développe TutoClick seul, sans entreprise ni organisme. La page `/legal/accessibility` (et sa copie statique `legal/accessibilite.html`) est réécrite pour ce cas, **sans aucune donnée personnelle** : pas de nom, pas d'adresse, pas d'e-mail.
+- **Retirer** :
+  - l'encart « en attente de validation par la personne référente accessibilité » ;
+  - tous les champs entre crochets ;
+  - le schéma pluriannuel et le plan d'action ;
+  - la phrase d'engagement qui cite l'article 47 de la loi de 2005 (elle vise les organismes) ;
+  - la section « Voies de recours ».
+- **Introduction** : « TutoClick est un projet personnel, en cours de développement. Il suit le référentiel général d'amélioration de l'accessibilité (RGAA 4.1) comme référence. »
+- **État de conformité** : inchangé, **non conforme** (aucun audit complet), et aucun taux publié. Le lien du pied reste « Accessibilité : non conforme ».
+- **Vérifications réalisées, Contenus non accessibles, Technologies, Outils, Pages vérifiées** : inchangés.
+- **Établissement de la déclaration** : « Cette déclaration a été établie le 24 novembre 2026. »
+- **Retour d'information** (pas de nom, pas d'adresse) :
+  - avec un compte : « Signalez un défaut d'accessibilité depuis l'aide de l'application : Centre d'aide, article « Accessibilité de TutoClick », puis « Cet article vous a aidé ? » et « Non ». Votre message est lu par l'équipe du projet. » C'est le retour anonyme qui existe déjà (L41), et l'article d'aide est à ajouter avec ce titre ;
+  - sans compte, pour un visiteur d'une démo : « Un moyen de contact pour les visiteurs est à venir. »
+- **Date de mise à jour de la page** : celle de la réécriture.
+
 ## Recette
 - **Tests attendus** : `image-calques.e2e` (ajout, déplacement à la souris et au clavier, proportions, opacité, texte alternatif obligatoire, flou au-dessus, incrustation à la publication) ; `media.e2e`, à étendre (navigation, catégorie déduite et changée, sélecteur sur chaque point d'accès, « Utiliser ») ; `members.e2e` (CopyField) ; un contrôle de contraste des pastilles.
 - **Conditions** : clair et sombre, 1440 et 390 (hors éditeur), axe sans violation.
