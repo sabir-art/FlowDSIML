@@ -530,11 +530,20 @@ async function main() {
   else send.disabled = false;
 
   const status = $('status');
+  // Libellé et barre créés une fois, puis mis à jour : le lecteur d'écran n'entend pas chaque image
+  const progText = h('b', {});
+  const progFill = h('i', {});
+  const progBar = h('span', { class: 'prog', 'aria-hidden': 'true' }, progFill);
+  let lastShown = '';
   const progress = (text: string, ratio: number | null) => {
     const p = ratio === null ? null : Math.round(ratio * 100);
-    const bar = h('span', { class: 'prog', 'aria-hidden': 'true' }, h('i', {}));
-    (bar.firstElementChild as HTMLElement).style.width = `${p ?? 100}%`;
-    status.replaceChildren(h('b', {}, p === null ? text : fmt(text, { p })), bar);
+    const shown = p === null ? text : fmt(text, { p });
+    progFill.style.width = `${p ?? 100}%`;
+    if (shown !== lastShown) {
+      lastShown = shown;
+      progText.textContent = shown;
+    }
+    if (!progText.isConnected) status.replaceChildren(progText, progBar);
   };
   const guard = (e: BeforeUnloadEvent) => {
     e.preventDefault();
@@ -619,6 +628,7 @@ async function main() {
       $<HTMLButtonElement>('add').disabled = false;
       $<HTMLButtonElement>('delete').hidden = false;
       status.replaceChildren();
+      lastShown = '';
       renderList();
       renderMasks();
       alertMsg(
