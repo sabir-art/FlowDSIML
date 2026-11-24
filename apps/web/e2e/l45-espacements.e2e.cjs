@@ -231,13 +231,15 @@ async function gap(p, a, b) {
   });
   // L48-A : la page publique a sa propre route (Paramètres > Marque > Page publique)
   await appPage(b, page('Page publique'), 'light', async (p) => {
+    // Page publique §6.1 (catalogue de l'espace) : rangée « Adresse », la deuxième de la première section
+    await p.locator('label.stg-lab[for$="-slug"]').waitFor();
     const e19 = await p.evaluate(() => {
-      const f = [...document.querySelectorAll('[aria-labelledby="br-pp-t"] .stg-two')];
+      const lab = document.querySelector('label.stg-lab[for$="-slug"]');
       return Math.round(
-        f[1].getBoundingClientRect().top - f[1].closest('.stg-row').getBoundingClientRect().top,
+        lab.getBoundingClientRect().top - lab.closest('.stg-row').getBoundingClientRect().top,
       );
     });
-    ok(near(e19, 20), `E19 : filet → « Bouton secondaire » : ${e19} px (20)`);
+    ok(near(e19, 20), `E19 : filet → « Adresse » de la page publique : ${e19} px (20)`);
     return [];
   });
 
