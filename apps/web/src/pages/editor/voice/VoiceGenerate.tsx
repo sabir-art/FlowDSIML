@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Info, RefreshCw } from 'lucide-react';
+import { Play, RefreshCw } from 'lucide-react';
 import { Select } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { AiRequestError, aiBlock, audioLeft, callAi, useAiStatus } from '../../../lib/ai';
@@ -57,6 +57,8 @@ export function VoiceGenerate({
     null,
   );
   const [confirming, setConfirming] = useState(false);
+  const [sample, setSample] = useState<'loading' | 'error' | null>(null);
+  const sampleAudio = useRef<HTMLAudioElement | null>(null);
   // Voix prédéfinies réellement disponibles chez le fournisseur (les autres sont masquées)
   const [available, setAvailable] = useState<readonly VoiceChoice[]>(VOICE_CHOICES);
   useEffect(() => {
@@ -79,6 +81,7 @@ export function VoiceGenerate({
   useEffect(
     () => () => {
       ctrl.current?.abort();
+      sampleAudio.current?.pause();
       if (pending.current) void supabase.storage.from('voices').remove([pending.current]);
     },
     [],
@@ -132,6 +135,20 @@ export function VoiceGenerate({
       setPhase('error');
     }
   };
+  // Exemple de la voix choisie : aucun texte de la démo n'est envoyé, aucun quota consommé
+  const playSample = async () => {
+    sampleAudio.current?.pause();
+    setSample('loading');
+    try {
+      const r = await callAi<{ audio: string }>(ws, 'voice_sample', lang, { voice });
+      const a = new Audio(r.audio);
+      sampleAudio.current = a;
+      setSample(null);
+      await a.play().catch(() => undefined);
+    } catch {
+      setSample('error');
+    }
+  };
   const apply = () => {
     if (!res) return;
     pending.current = null;
@@ -177,24 +194,42 @@ export function VoiceGenerate({
         <span className="vo-label" id={`vo-gv-${stepId}`}>
           {t('ai.voice.voice')}
         </span>
-        <Select
-          aria-labelledby={`vo-gv-${stepId}`}
-          aria-describedby={`vo-gv-h-${stepId}`}
-          value={voice}
-          disabled={busy}
-          onChange={(e) => {
-            const v = e.target.value as VoiceChoice;
-            if (available.includes(v)) setVoice(v);
-          }}
-          options={available.map((v) => ({
-            value: v,
-            label: t(`ai.voice.v.${v}.name`),
-            description: t(`ai.voice.v.${v}.desc`),
-          }))}
-        />
+        <div className="vo-voice">
+          <Select
+            aria-labelledby={`vo-gv-${stepId}`}
+            aria-describedby={`vo-gv-h-${stepId}`}
+            value={voice}
+            disabled={busy}
+            onChange={(e) => {
+              const v = e.target.value as VoiceChoice;
+              if (available.includes(v)) setVoice(v);
+            }}
+            options={available.map((v) => ({
+              value: v,
+              label: t(`ai.voice.v.${v}.name`),
+              description: t(`ai.voice.v.${v}.desc`),
+            }))}
+          />
+          <button
+            type="button"
+            className="btn btn-secondary btn-icon vo-sample"
+            aria-label={t('ai.voice.sample')}
+            title={t('ai.voice.sample')}
+            aria-busy={sample === 'loading'}
+            disabled={busy}
+            onClick={() => void playSample()}
+          >
+            <Play aria-hidden="true" />
+          </button>
+        </div>
         <p className="vo-help" id={`vo-gv-h-${stepId}`}>
           {t('editor.voice.genLang', { lang: langName })}
         </p>
+        {sample === 'error' && (
+          <p className="vo-alert" role="alert">
+            {t('ai.voice.sampleError')}
+          </p>
+        )}
       </div>
       {phase === 'ready' && res && (
         <div>
@@ -225,12 +260,7 @@ export function VoiceGenerate({
           {quota || message}
         </p>
       )}
-      {phase !== 'ready' && !busy && !quota && (
-        <p className="ai-notice-line vo-notice">
-          <Info aria-hidden="true" />
-          {t('ai.voice.notice')}
-        </p>
-      )}
+      {phase !== 'ready' && !busy && !quota && <p className="vo-notice">{t('ai.voice.notice')}</p>}
       {phase === 'ready' && res ? (
         <div className="vo-two">
           <button

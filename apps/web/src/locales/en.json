@@ -4956,7 +4956,7 @@
       "speed_normal": "Normal",
       "speed_fast": "Fast",
       "estimate": "About {{n}} s",
-      "notice": "The text above will be sent to ElevenLabs to produce the audio.",
+      "notice": "The text is sent to our speech synthesis service (ElevenLabs) to create the voice.",
       "go": "Generate voice",
       "busy": "Generating voice…",
       "preview": "Generated voice preview",

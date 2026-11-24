@@ -178,8 +178,9 @@ function prepare(over = {}) {
   );
   ok((await panel.getByRole('radio').count()) === 0, 'Ni liste de voix à cocher, ni vitesse');
   ok(
-    (await panel.getByText('Le texte ci-dessus sera envoyé à ElevenLabs pour produire l’audio.').count()) ===
-      1,
+    (await panel
+      .getByText('Le texte est envoyé à notre service de synthèse vocale (ElevenLabs) pour créer la voix.')
+      .count()) === 1,
     'Avertissement au-dessus du bouton',
   );
   ok(
@@ -189,6 +190,14 @@ function prepare(over = {}) {
   const v0 = await voices();
   ok(v0.names.length === 6 && /^Claire/.test(v0.names[0]), 'Six voix, « Claire » en premier');
   await v0.list.getByRole('option', { name: /Antoine/ }).click();
+  const used0 = state.ai.used;
+  await panel.getByRole('button', { name: 'Écouter un exemple' }).click();
+  await until(() => (state.aiCalls || []).some((c) => c.task === 'voice_sample'));
+  const sample = state.aiCalls.filter((c) => c.task === 'voice_sample').at(-1);
+  ok(sample.input.voice === 'antoine' && !('text' in sample.input), 'Exemple de la voix choisie, sans texte');
+  ok(state.ai.used === used0, 'L’exemple ne consomme pas de quota');
+  const sb = await panel.getByRole('button', { name: 'Écouter un exemple' }).boundingBox();
+  ok(sb.width === 36 && sb.height === 36, 'Bouton d’exemple de 36 px à droite de « Voix »');
   await shot('l30-10-voix-panneau');
   await panel.getByRole('button', { name: 'Générer la voix' }).click();
   await panel.getByRole('button', { name: 'Utiliser' }).waitFor();
@@ -202,7 +211,7 @@ function prepare(over = {}) {
   );
   ok(
     (await panel.getByText('Aperçu', { exact: true }).count()) === 1 &&
-      (await panel.getByRole('button', { name: 'Écouter' }).count()) === 1,
+      (await panel.getByRole('button', { name: 'Écouter', exact: true }).count()) === 1,
     'Aperçu à écouter',
   );
   ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
@@ -222,7 +231,7 @@ function prepare(over = {}) {
   );
   const tight = await page.evaluate(() => {
     const out = [];
-    for (const box of document.querySelectorAll('#vo-panel, #vo-panel .vo-two')) {
+    for (const box of document.querySelectorAll('#vo-panel, #vo-panel .vo-two, #vo-panel .vo-voice')) {
       const kids = [...box.children].filter((c) => c.getClientRects().length && !c.matches('.sr-only'));
       for (let i = 1; i < kids.length; i++) {
         const a = kids[i - 1].getBoundingClientRect();
