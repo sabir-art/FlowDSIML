@@ -534,6 +534,8 @@ async function main() {
   const progText = h('b', {});
   const progFill = h('i', {});
   const progBar = h('span', { class: 'prog', 'aria-hidden': 'true' }, progFill);
+  // Affichée pendant la préparation seulement : cachée, elle se met en pause
+  const progKeep = h('span', { class: 'mu prog-keep' }, s.prepKeep);
   let lastShown = '';
   const progress = (text: string, ratio: number | null) => {
     const p = ratio === null ? null : Math.round(ratio * 100);
@@ -543,7 +545,8 @@ async function main() {
       lastShown = shown;
       progText.textContent = shown;
     }
-    if (!progText.isConnected) status.replaceChildren(progText, progBar);
+    if (!progText.isConnected) status.replaceChildren(progText, progBar, progKeep);
+    progKeep.hidden = text !== s.prep;
   };
   const guard = (e: BeforeUnloadEvent) => {
     e.preventDefault();

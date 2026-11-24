@@ -271,6 +271,9 @@
   border-radius: 3px;
   background: var(--fd-color-border);
 }
+.prog-keep {
+  font-size: 13px;
+}
 .prog > i {
   display: block;
   height: 100%;

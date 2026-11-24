@@ -4,7 +4,8 @@ import { maskBox, rectsAt, type MaskRect, type VideoMask } from './videoMasks';
 /**
  * EXT-02 §4 : incrustation des masques dans la vidéo, à l'envoi. La vidéo brute est rejouée dans un
  * canvas, chaque image reçoit ses masques, et le tout est réenregistré (WebM, même débit). Cela prend à
- * peu près la durée de la vidéo. Rien ne part avant la fin : la vidéo envoyée porte ses masques.
+ * peu près la durée de la vidéo, onglet visible (cachée, la préparation attend). Rien ne part avant la
+ * fin : la vidéo envoyée porte ses masques.
  */
 
 /** Couvre une zone de l'image : flou fort du contenu, puis voile gris neutre (aucune couleur de marque). */
@@ -101,10 +102,27 @@ export async function burnVideo(
       video.addEventListener('ended', () => resolve(), { once: true });
       video.addEventListener('error', () => reject(new Error('VIDEO_UNREADABLE')), { once: true });
     });
+    // Un onglet caché est ralenti par le navigateur : la préparation se met en pause, puis reprend
+    const onVisibility = () => {
+      if (done) return;
+      if (document.hidden) {
+        video.pause();
+        if (recorder.state === 'recording') recorder.pause();
+      } else {
+        if (recorder.state === 'paused') recorder.resume();
+        void video.play().catch(() => undefined);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
     recorder.start(1000);
     schedule();
-    await video.play();
-    await ended;
+    try {
+      if (document.hidden) onVisibility();
+      else await video.play();
+      await ended;
+    } finally {
+      document.removeEventListener('visibilitychange', onVisibility);
+    }
     done = true;
     drawMasked(ctx, video, masks, durationMs, width, height);
     recorder.stop();

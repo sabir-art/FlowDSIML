@@ -342,6 +342,11 @@ const MOCK = 'http://localhost:54400';
     (await v.locator('#status .prog').evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 6,
     'barre de préparation de 6 px',
   );
+  ok(
+    (await v.locator('#status .prog-keep').innerText()) ===
+      'Gardez cet onglet visible pendant la préparation.',
+    'préparation : « Gardez cet onglet visible pendant la préparation. »',
+  );
   await shot(v, 'video-prepa');
   const seenBefore = async () => v.evaluate(() => window.__seen).catch(() => null);
   let seen = [];
