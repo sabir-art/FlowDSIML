@@ -334,15 +334,18 @@ export function Onboarding() {
             du titre, comme dans la modale Extension, la phrase, puis continuer sans */}
         {title(
           'obx-t',
-          t('onboarding.extTitle'),
-          !EXTENSION_URL && !extSeen ? (
+          t(importing ? 'onboarding.importTitle' : 'onboarding.extTitle'),
+          !importing && !EXTENSION_URL && !extSeen ? (
             <>
               {' '}
               <span className="obx-soon">{t('extension.soon')}</span>
             </>
           ) : null,
         )}
-        {!EXTENSION_URL && !extSeen ? (
+        {importing ? (
+          // COMP-01 §18.3 : en mode import, le titre et la phrase parlent de l'import, pas de l'extension
+          <p className="obx-sub">{t('onboarding.importSubtitle')}</p>
+        ) : !EXTENSION_URL && !extSeen ? (
           <p className="obx-sub">{t('extension.soonBody')}</p>
         ) : (
           <p className="obx-sub">{t('onboarding.extSubtitle')}</p>
@@ -426,10 +429,13 @@ export function Onboarding() {
           </button>
         </p>
         {/* Navigateurs pris en charge : seulement quand l'extension peut s'installer */}
-        {(EXTENSION_URL || extSeen) && <p className="obx-foot">{t('onboarding.browsersShort')}</p>}
+        {!importing && (EXTENSION_URL || extSeen) && (
+          <p className="obx-foot">{t('onboarding.browsersShort')}</p>
+        )}
       </>
     );
-    preview = (
+    // En mode import, l'illustration de l'extension n'a plus lieu d'être
+    preview = importing ? null : (
       <div className="obx-card obx-browser">
         <span className="obx-browser__bar">
           <span className="obx-browser__url" />

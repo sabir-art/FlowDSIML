@@ -161,6 +161,8 @@
     "defaultName": "Espace de {{name}}",
     "continue": "Continuer",
     "extTitle": "Installez l’extension",
+    "importTitle": "Importez vos captures",
+    "importSubtitle": "Une étape par image. Rien n’est publié avant que vous le décidiez.",
     "extSubtitle": "Elle enregistre une capture à chaque clic. Rien n’est envoyé avant « Terminer ».",
     "ext1": "Ajoutez l’extension à Chrome",
     "addToChrome": "Ajouter à Chrome",
@@ -1276,6 +1278,8 @@
       "pickHelp": "La capture est copiée avec ses flous : modifier ensuite l’étape ne change pas l’Avant / Après.",
       "incomplete": "L’étape {{n}} Avant / Après n’a pas ses deux captures.",
       "zoneHint": "PNG, JPEG ou WebP, 10 Mo au plus.",
+      "zoneTitle": "Ajouter la capture",
+      "zoneFromStep": "Choisir une étape…",
       "zoneSending": "Envoi de l’image"
     },
     "styles": {

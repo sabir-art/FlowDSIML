@@ -161,6 +161,8 @@
     "defaultName": "{{name}}’s space",
     "continue": "Continue",
     "extTitle": "Install the extension",
+    "importTitle": "Import your captures",
+    "importSubtitle": "One step per image. Nothing is published until you decide.",
     "extSubtitle": "It records a capture at each click. Nothing is sent before “Finish”.",
     "ext1": "Add the extension to Chrome",
     "addToChrome": "Add to Chrome",
@@ -1276,6 +1278,8 @@
       "pickHelp": "The capture is copied with its blurs: editing the step later does not change the Before / After.",
       "incomplete": "Step {{n}} Before / After does not have both captures.",
       "zoneHint": "PNG, JPEG or WebP, 10 MB at most.",
+      "zoneTitle": "Add the capture",
+      "zoneFromStep": "Choose a step…",
       "zoneSending": "Uploading the image"
     },
     "styles": {

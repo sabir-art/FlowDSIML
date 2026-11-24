@@ -2025,6 +2025,13 @@
 .ba-slot.is-empty {
   border-style: dashed;
 }
+/* COMP-01 §18.3 : capture vide sur une ligne dans le panneau de 320 px (vignette 40 px, titre, « Choisir ») */
+.ba-slot.is-empty .ba-thumb {
+  width: 40px;
+}
+.ba-slot.is-empty .ba-slot-text b {
+  white-space: nowrap;
+}
 .ba-thumb {
   width: 64px;
   height: 40px;
@@ -4701,6 +4708,18 @@
   flex: 1;
   align-self: stretch;
   align-content: center;
+  min-width: 0;
+}
+/* Deux sources par zone (« Importer… », « Choisir une étape… ») : elles passent à la ligne plutôt que
+   de pousser la zone hors de sa colonne */
+.ba-cols > .ba-col,
+.ba-col > .ba-pic {
+  min-width: 0;
+}
+.ba-zone .fd-dz__acts {
+  flex-wrap: wrap;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 @container bacanvas (max-width: 639px) {
   .ba-cols {
