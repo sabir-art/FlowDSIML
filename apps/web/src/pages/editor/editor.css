@@ -4244,3 +4244,225 @@
   inset: 8px;
   z-index: 6;
 }
+
+/* ---- EXT-02 §6.4 : voix off dans le panneau de 320 px (maquettes ext02/popup-voix-*) ---- */
+.voice-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.voice-sec > .sec-title,
+.voice-sec > .field,
+.voice-sec > .help,
+.voice-sec > .field-error {
+  margin: 0;
+}
+.voice-sec .vo-tabs {
+  display: flex;
+}
+.voice-sec .vo-tabs > button {
+  flex: 1;
+  padding: 0 6px;
+}
+.voice-sec .vo-tabs > button[aria-disabled='true'] {
+  color: var(--fd-color-text-muted);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.vo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.vo-label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.vo-opt {
+  font-weight: 500;
+  color: var(--fd-color-text-muted);
+}
+/* Lecteur dessiné : bouton rond, onde, temps */
+.vo-aud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 6px 0 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.vo-aud--rec {
+  height: 64px;
+}
+.vo-play {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  cursor: pointer;
+}
+.vo-play.is-stop {
+  background: var(--fd-color-danger);
+  color: #fff;
+}
+.vo-play:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.vo-play:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--fd-color-surface);
+}
+.vo-play svg {
+  width: 16px;
+  height: 16px;
+}
+.vo-wave {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 24px;
+}
+.vo-wave i {
+  flex: 1;
+  border-radius: 1px;
+  background: var(--fd-color-border-strong);
+}
+.vo-wave i.p {
+  background: var(--fd-color-primary);
+}
+.vo-time {
+  flex: none;
+  font: 600 13px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--fd-color-text-muted);
+}
+.vo-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.vo-two .btn,
+.vo-wide {
+  justify-content: center;
+  width: 100%;
+}
+.vo-import {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border: 1px dashed var(--fd-color-border-strong);
+  border-radius: 12px;
+}
+.vo-import .fd-drop__bar {
+  align-self: stretch;
+  margin: 0;
+}
+/* Voix en place */
+.vo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.vo-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vo-card__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.vo-card__icon svg {
+  width: 16px;
+  height: 16px;
+}
+.vo-card__txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin-right: auto;
+}
+.vo-card__txt b {
+  font-weight: 600;
+}
+/* Réglages pour toute la démo : lignes à filets, contrôle calé à droite (ALIGN-01) */
+.vo-demo__t {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fd-color-text-muted);
+}
+.vo-rows {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.vo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.vo-rows > .vo-row:last-child {
+  border-bottom: 0;
+}
+.vo-row__k {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.vo-row__k svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.vo-row__v {
+  flex: none;
+  width: 120px;
+}
+.vo-info {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--fd-color-info-soft);
+}
+.vo-info > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  color: var(--fd-color-info);
+}

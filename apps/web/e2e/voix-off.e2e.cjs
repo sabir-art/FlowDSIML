@@ -68,22 +68,47 @@ function wav(sec) {
   const sec = page.locator('.voice-sec');
   await sec.waitFor();
   ok(/Voix off/i.test(await sec.innerText()), 'section « Voix off » dans l’onglet Étape');
+  // EXT-02 §6.4 : sans voix, segmenté « Générer », « Enregistrer », « Importer »
+  const tabs = sec.getByRole('tablist', { name: 'Source de la voix' }).getByRole('tab');
   ok(
-    (await sec.getByRole('button', { name: 'Enregistrer' }).count()) === 1 &&
-      (await sec.getByRole('button', { name: 'Importer…' }).count()) === 1,
-    'section vide : Enregistrer et « Importer… »',
-  );
-  const gen = sec.locator('.ai-entry', { hasText: 'Générer à partir du texte' });
-  ok(
-    (await gen.getAttribute('aria-disabled')) === 'true',
-    '065 : « Générer à partir du texte » désactivé tant que l’Assistance IA ne l’est pas',
+    (await tabs.allInnerTexts()).join('|') === 'Générer|Enregistrer|Importer',
+    `segmenté de la source (${(await tabs.allInnerTexts()).join(', ')})`,
   );
   ok(
-    /Une piste par étape, 2 minutes au plus\. MP3, M4A, WAV ou WebM, 5\sMo au plus\./.test(
-      sp(await sec.innerText()),
+    (await tabs.nth(0).getAttribute('aria-disabled')) === 'true' &&
+      /Générer : désactivé par l’espace\./.test(sp(await sec.innerText())) &&
+      (await tabs.nth(1).getAttribute('aria-selected')) === 'true',
+    'Assistance IA coupée : « Générer » grisé avec la raison, « Enregistrer » choisi',
+  );
+  ok(
+    (await sec.getByRole('button', { name: 'Démarrer l’enregistrement' }).count()) === 1 &&
+      /Votre micro\. 2 minutes au plus\./.test(sp(await sec.innerText())),
+    'Enregistrer : bouton rond et aide',
+  );
+  const forDemo = sec.getByRole('group', { name: 'Pour toute la démo' });
+  ok(
+    (await forDemo.getByRole('switch', { name: 'Lecture automatique' }).isChecked()) &&
+      (await forDemo.getByRole('switch', { name: 'Sous-titres affichés' }).isChecked()) &&
+      /Bulle/.test(await forDemo.getByRole('combobox', { name: 'Lecteur audio' }).innerText()),
+    '« Pour toute la démo » : lecture automatique, sous-titres affichés, lecteur audio « Bulle »',
+  );
+  ok(
+    /Les navigateurs bloquent le son avant le premier clic du visiteur/.test(
+      await sec.getByRole('note').innerText(),
     ),
-    'aide : limites de la piste',
+    'encart permanent sur le blocage du son',
   );
+  await tabs.nth(1).focus();
+  await page.keyboard.press('ArrowRight');
+  ok(
+    (await tabs.nth(2).getAttribute('aria-selected')) === 'true' &&
+      (await sec.getByRole('button', { name: 'Importer…' }).count()) === 1 &&
+      /MP3, M4A, WAV ou WebM, 5\sMo au plus\. Ou déposez le fichier sur ce bloc\./.test(
+        sp(await sec.innerText()),
+      ),
+    'Importer (→ au clavier) : bouton « Importer… », formats et dépôt',
+  );
+  ok((await sec.locator('audio[controls], input[type=radio]').count()) === 0, 'aucun contrôle natif');
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await sec.screenshot({ path: `${SHOTS}/l28-02-voix-vide${sfx}.png` });
@@ -144,7 +169,8 @@ function wav(sec) {
     'envoi en cours : bouton « Envoi… » désactivé, barre de 6 px, l’erreur précédente a disparu',
   );
   release();
-  await sec.locator('audio').waitFor();
+  const card = sec.locator('.vo-card');
+  await card.waitFor();
   await page.unroute('**/storage/v1/object/voices/**', slow);
   ok((await bar.count()) === 0, 'envoi terminé : la barre disparaît');
   ok(await until(() => /\.wav$/.test(s1()?.voice_path || '')), 'piste importée enregistrée sur l’étape');
@@ -152,16 +178,39 @@ function wav(sec) {
     s1().voice_duration_ms >= 1900 && s1().voice_duration_ms <= 2100,
     `durée lue (${s1().voice_duration_ms} ms)`,
   );
-  const tr = sec.getByLabel('Transcription');
+  // Voix en place : carte, lecteur dessiné, « Remplacer… », menu
   ok(
-    /Créez une opportunité/.test(await tr.inputValue()),
-    'transcription préremplie avec le texte de la bulle',
+    (await card.locator('b').innerText()) === 'Voix importée' &&
+      /^0:02$/.test((await card.locator('.vo-card__txt .muted').innerText()).trim()) &&
+      (await card.getByRole('button', { name: 'Écouter' }).count()) === 1 &&
+      (await card.locator('.vo-time').innerText()) === '0:00 / 0:02' &&
+      (await card.getByRole('button', { name: 'Remplacer…' }).count()) === 1 &&
+      (await sec.getByRole('tablist').count()) === 0,
+    'voix en place : carte « Voix importée », durée, lecteur dessiné, « Remplacer… », plus de segmenté',
   );
+  await card.getByRole('button', { name: 'Plus d’actions sur la voix' }).click();
   ok(
-    (await sec.getByRole('checkbox', { name: 'Lancer la voix à l’arrivée sur l’étape' }).isChecked()) ===
-      true,
-    'lancement à l’arrivée : activé par défaut',
+    (await page.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join('|') ===
+      'Télécharger|Supprimer la voix off',
+    'menu de la voix : Télécharger, Supprimer la voix off',
   );
+  await page.keyboard.press('Escape');
+  const tr = sec.getByLabel(/^Transcription/);
+  ok(
+    /Créez une opportunité/.test(await tr.inputValue()) &&
+      /Transcription \(obligatoire pour publier\)/.test(sp(await sec.innerText())),
+    'transcription préremplie avec le texte de la bulle, « (obligatoire pour publier) »',
+  );
+  // Lecture automatique : réglage de la démo, appliqué aux voix en place
+  const auto = forDemo.getByRole('switch', { name: 'Lecture automatique' });
+  await auto.uncheck({ force: true });
+  const demoRow = () => state.tables.demos.find((d) => d.id === DEMO);
+  ok(
+    await until(() => s1().voice_autoplay === false && demoRow().settings?.voice?.autoplay === false),
+    'lecture automatique désactivée : réglage de la démo et voix de l’étape',
+  );
+  await auto.check({ force: true });
+  ok(await until(() => s1().voice_autoplay === true), 'lecture automatique réactivée');
   ok(
     (await page.locator('.rail').getByRole('img', { name: 'Voix off' }).count()) +
       (await page.locator('[aria-label="Voix off"], [title="Voix off"]').count()) >
@@ -191,19 +240,46 @@ function wav(sec) {
   await tr.fill('Créez une opportunité depuis le bouton en haut à gauche.');
   await until(() => /haut à gauche/.test(s1().voice_transcript || ''));
 
-  // Enregistrement au micro (micro simulé)
-  await sec.getByRole('button', { name: 'Réenregistrer' }).click();
+  // « Remplacer… » rouvre le segmenté ; enregistrement au micro (micro simulé), écoute avant de garder
+  await card.getByRole('button', { name: 'Remplacer…' }).click();
+  ok(
+    (await sec.getByRole('tablist').count()) === 1 &&
+      (await sec.getByRole('button', { name: 'Garder la voix actuelle' }).count()) === 1,
+    '« Remplacer… » : le segmenté revient, avec « Garder la voix actuelle »',
+  );
+  await sec.getByRole('button', { name: 'Démarrer l’enregistrement' }).click();
   const recUi = sec.getByRole('group', { name: 'Enregistrement en cours' });
   await recUi.waitFor();
-  ok(/0:0\d \/ 2:00/.test(await recUi.innerText()), 'minuteur « 0:0x / 2:00 »');
+  ok(
+    /^0:0\d$/.test((await recUi.locator('.vo-time').innerText()).trim()) &&
+      (await recUi.getByRole('button', { name: 'Arrêter l’enregistrement' }).count()) === 1 &&
+      (await recUi.getByRole('button', { name: 'Pause' }).count()) === 1,
+    'enregistrement : durée, arrêt (danger) et pause',
+  );
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await sec.screenshot({ path: `${SHOTS}/l28-02-voix-enregistrement${sfx}.png` });
   }
-  await page.waitForTimeout(1500);
-  await recUi.getByRole('button', { name: 'Terminer' }).click();
-  ok(await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000), 'enregistrement : nouvelle piste WebM');
+  await page.waitForFunction(() =>
+    /0:0[1-9]/.test(document.querySelector('.vo-aud--rec .vo-time')?.textContent ?? ''),
+  );
+  await recUi.getByRole('button', { name: 'Arrêter l’enregistrement' }).click();
+  await sec.getByText('Écoutez avant de garder').waitFor();
+  ok(
+    /\.wav$/.test(s1().voice_path) &&
+      (await sec.getByRole('button', { name: 'Recommencer' }).count()) === 1 &&
+      (await sec.getByRole('button', { name: 'Garder', exact: true }).count()) === 1,
+    'après l’arrêt : « Écoutez avant de garder », « Recommencer » et « Garder » ; rien n’est encore remplacé',
+  );
+  if (SHOTS) {
+    await page.mouse.move(0, 0);
+    await sec.screenshot({ path: `${SHOTS}/l28-02-voix-ecoute${sfx}.png` });
+  }
+  await sec.getByRole('button', { name: 'Garder', exact: true }).click();
+  ok(await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000), '« Garder » : nouvelle piste WebM');
   ok(/haut à gauche/.test(s1().voice_transcript), 'transcription conservée après réenregistrement');
+  await card.waitFor();
+  ok((await card.locator('b').innerText()) === 'Voix enregistrée', 'carte « Voix enregistrée »');
 
   // ===== Lecteur =====
   const pl = await (
