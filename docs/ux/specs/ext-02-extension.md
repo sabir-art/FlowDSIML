@@ -159,6 +159,11 @@ Maquettes : `video-revue-*`, `video-pourquoi-*`, `video-demasque-*` (direct dés
   - Direct désactivé : statut « Masqué » / « Non masqué » (warning), action « Démasquer » / « Masquer ».
   - Direct activé : statut « En direct », pas d’action (colonne vide) ; le « Pourquoi masqué ? » ajoute « Masqué pendant l’enregistrement : ce masque ne peut plus être retiré. »
 - Cliquer une ligne amène la lecture au passage ; glisser sur l’image crée un masque (flèches, Maj + flèches, Suppr).
+- Masque ajouté à la main (validé sur 504299d) : ligne « Masque ajouté 1 », statut « Masqué », action « Retirer ». Zone fixe sur l’image (elle ne suit pas le défilement : le dire dans son « Pourquoi masqué ? » : « Masque ajouté par vous, à cet endroit de l’image. »). Durée par défaut : 5 s à partir de l’instant affiché ; deux poignées sur son segment de la chronologie règlent le début et la fin (au clavier : segment choisi, ← → déplacent la fin d’une seconde, Maj + ← → le début).
+- Ligne démasquée : son « Pourquoi masqué ? » finit par « Vous l’avez démasqué : cette donnée sera visible dans la démo. « Masquer » la couvre de nouveau. »
+- Aucune donnée repérée : « Aucune donnée personnelle n’a été repérée. Regardez la vidéo : vous pouvez masquer un oubli avant l’envoi. » ; liste « Aucune zone pour l’instant. ».
+- Chevauchements : les segments de deux données se superposent sur une seule rangée de la chronologie.
+- Pendant la préparation et l’envoi, « Supprimer l’enregistrement » disparaît de la barre. À 390, les deux boutons de la barre sont l’un sous l’autre, en pleine largeur.
 - Barre fixe : « Supprimer l’enregistrement » (danger), « Envoyer ». À l’envoi avec des masques à incruster : la barre affiche « Préparation de la vidéo… 40 % » et une barre de 6 px (`role="status"`), « Envoyer » désactivé, puis « Envoi… ». Ne pas fermer l’onglet : l’avertissement du navigateur s’affiche si on tente de le fermer.
 - À 390 : lecteur puis liste ; « Ajouter un masque » en pleine largeur.
 
