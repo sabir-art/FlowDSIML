@@ -44,25 +44,24 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       s.tables.notification_mutes = [{ demo_id: DEMO, workspace_id: 'ws-1', user_id: s.user.id }];
     });
     const title = state.tables.demos.find((d) => d.id === DEMO).title;
-    ok((await page.locator('.nt-table tbody tr').count()) === 6, 'six événements dans le tableau');
+    ok((await page.locator('.nt-table tbody tr').count()) === 5, 'cinq événements dans le tableau');
     ok(
       (await page.locator('.nt-table thead th').allTextContents()).join('|') ===
         'Événement|Dans l’app|Par e-mail',
       'colonnes «\u202fÉvénement\u202f», «\u202fDans l’app\u202f», «\u202fPar e-mail\u202f»',
     );
-    const mention = page.locator('.nt-table tbody tr').first();
+    // Retour client : la ligne des mentions n'est plus à l'écran (elles restent toujours notifiées)
     ok(
-      (await mention.locator('td').first().textContent()).trim() === 'Toujours' &&
-        (await mention.locator('td').first().getByRole('switch').count()) === 0,
-      'mentions : «\u202fToujours\u202f» dans l’app, sans interrupteur',
-    );
-    ok(
-      (await mention.locator('.nt-sub').textContent()) ===
-        'Toujours notifiées dans l’app. Vous pouvez choisir l’e-mail.',
-      'mentions : aide de la ligne',
+      (await page.locator('.nt-table tbody').getByText('On me mentionne', { exact: false }).count()) === 0 &&
+        (await page.getByRole('switch', { name: /^Mentions/ }).count()) === 0 &&
+        (await page.locator('.nt-always').count()) === 0,
+      'mentions : plus de ligne ni d’interrupteur à l’écran',
     );
     ok(await sw(page, 'Réponses, dans l’app').isChecked(), 'dans l’app : activé par défaut');
-    ok(!(await sw(page, 'Mentions, par e-mail').isChecked()), 'par e-mail : rien n’est activé par défaut');
+    ok(
+      !(await sw(page, 'Commentaires sur mes démos, par e-mail').isChecked()),
+      'par e-mail : rien n’est activé par défaut',
+    );
     ok(
       (await sw(page, 'Nouveaux leads, dans l’app').isChecked()) &&
         (await sw(page, 'Nouveaux leads, par e-mail').isEnabled()) &&
@@ -71,18 +70,22 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     await shot(page, 'notifs');
 
-    await sw(page, 'Mentions, par e-mail').check();
-    await page.waitForFunction(() => document.querySelector('[aria-label="Mentions, par e-mail"]').checked);
+    await sw(page, 'Commentaires sur mes démos, par e-mail').check();
+    await page.waitForFunction(
+      () => document.querySelector('[aria-label="Commentaires sur mes démos, par e-mail"]').checked,
+    );
     const until = async (fn) => {
       for (let i = 0; i < 100 && !fn(); i++) await page.evaluate(() => new Promise(requestAnimationFrame));
       return fn();
     };
     ok(
-      await until(() => row(state)?.email === true && row(state)?.email_prefs?.mention === true),
-      'e-mail des mentions : accord enregistré',
+      await until(() => row(state)?.email === true && row(state)?.email_prefs?.comment === true),
+      'e-mail des commentaires : accord enregistré',
     );
     ok(
-      row(state).email_prefs.reply === false && row(state).email_prefs.alert === false,
+      row(state).email_prefs.reply === false &&
+        row(state).email_prefs.alert === false &&
+        row(state).email_prefs.mention === false,
       'les autres événements restent sans e-mail, écrits explicitement',
     );
     ok(!(await sw(page, 'Réponses, par e-mail').isChecked()), 'un seul interrupteur e-mail activé');
@@ -96,7 +99,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         !(await sw(page, 'Réponses, par e-mail').isChecked()),
       'coupé dans l’app : l’e-mail est désactivé et décoché',
     );
-    await sw(page, 'Mentions, par e-mail').uncheck();
+    await sw(page, 'Commentaires sur mes démos, par e-mail').uncheck();
     ok(await until(() => row(state).email === false), 'dernier e-mail décoché : l’accord global est retiré');
 
     // Démos coupées
@@ -120,7 +123,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const n = await all.count();
     let disabled = 0;
     for (let i = 0; i < n; i++) if (await all.nth(i).isDisabled()) disabled++;
-    ok(n === 6 && disabled === 6, 'sans service d’e-mail : toute la colonne est désactivée');
+    ok(n === 5 && disabled === 5, 'sans service d’e-mail : toute la colonne est désactivée');
     ok(
       await sw(page, 'Réponses, dans l’app').isEnabled(),
       'la colonne «\u202fDans l’app\u202f» reste réglable',

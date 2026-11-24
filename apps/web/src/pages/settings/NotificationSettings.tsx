@@ -9,7 +9,6 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../auth/AuthProvider';
@@ -20,6 +19,11 @@ import { SettingsShell } from './SettingsShell';
 
 /** Événements réglables, dans l'ordre du tableau. */
 const EVENTS = ['mention', 'reply', 'comment', 'resolved', 'alert', 'lead'] as const;
+/**
+ * Événements réglables à l'écran. La mention n'y figure plus (retour client) : elle reste toujours
+ * notifiée dans l'app, règle tenue en base ; son e-mail n'est plus proposé.
+ */
+const SHOWN = EVENTS.filter((k) => k !== 'mention');
 type EventKey = (typeof EVENTS)[number];
 type Flags = Partial<Record<EventKey, boolean>>;
 
@@ -106,7 +110,10 @@ export function NotificationSettings() {
   const toggleEmail = async (k: EventKey, on: boolean) => {
     const before = { email, emailPrefs };
     // Chaque événement est écrit : l'état affiché devient l'état enregistré, sans valeur implicite
-    const next = Object.fromEntries(EVENTS.map((e) => [e, e === k ? on : byEmail(e)])) as Flags;
+    // L'e-mail des mentions n'est plus proposé : il est écrit désactivé, jamais laissé actif sans réglage
+    const next = Object.fromEntries(
+      EVENTS.map((e) => [e, e === 'mention' ? false : e === k ? on : byEmail(e)]),
+    ) as Flags;
     const any = EVENTS.some((e) => next[e]);
     setEmailPrefs(next);
     setEmail(any);
@@ -144,7 +151,7 @@ export function NotificationSettings() {
             </tr>
           </thead>
           <tbody>
-            {EVENTS.map((k) => {
+            {SHOWN.map((k) => {
               const name = t(`notifSettings.events.${k}.name`);
               return (
                 <tr key={k}>
@@ -153,24 +160,17 @@ export function NotificationSettings() {
                     <span className="nt-sub">{t(`notifSettings.events.${k}.help`)}</span>
                   </th>
                   <td className="nt-c">
-                    {k === 'mention' ? (
-                      <span className="nt-always">
-                        <Check size={16} aria-hidden="true" />
-                        {t('notifSettings.always')}
-                      </span>
-                    ) : (
-                      <label className="fd-switch">
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          aria-label={t('notifSettings.inAppFor', { name })}
-                          checked={inApp(k)}
-                          disabled={!ready}
-                          onChange={(e) => void toggleApp(k, e.target.checked)}
-                        />
-                        <span className="fd-switch__track" aria-hidden="true" />
-                      </label>
-                    )}
+                    <label className="fd-switch">
+                      <input
+                        type="checkbox"
+                        role="switch"
+                        aria-label={t('notifSettings.inAppFor', { name })}
+                        checked={inApp(k)}
+                        disabled={!ready}
+                        onChange={(e) => void toggleApp(k, e.target.checked)}
+                      />
+                      <span className="fd-switch__track" aria-hidden="true" />
+                    </label>
                   </td>
                   <td className="nt-c">
                     <label className="fd-switch">
