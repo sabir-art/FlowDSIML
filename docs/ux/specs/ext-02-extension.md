@@ -181,12 +181,15 @@ Panneau « Flou » : Forme (Rectangle, Arrondi, Ellipse), Effet (Flou, Pixels, A
 Panneau « Projecteur » : interrupteur « Projecteur libre », taille du halo (120 à 400 px), assombrissement (20 à 80 %), « Désactivé si le visiteur préfère moins d’animations ». Dans le lecteur : halo net autour du pointeur, bord adouci de 12 px, reste assombri ; au clavier et au toucher, le halo se place sur l’élément de l’étape. C’est le seul dégradé permis, parce qu’il est la fonction elle-même. Tant qu’il n’est pas livré, l’entrée reste « Bientôt », grise, jamais masquée.
 
 ### 6.4 Voix off dans le panneau de 320 px (réponse au §18.2 « Voix » et « Sous-titres »)
-- Segmenté en tête : « Générer », « Enregistrer », « Importer ».
-- Générer : « Texte lu » (zone de texte, compteur « 68 caractères · environ 5 s »), Langue et Voix côte à côte, « Aperçu » (lecture, onde, temps), « Régénérer ».
-- Enregistrer : bouton rond d’enregistrement (arrêt en danger), onde en direct, durée, aide « Micro : … 2 minutes au plus. ».
-- Importer : zone étroite §18.2 (« Importer… », formats et poids, dépôt sur le bloc).
-- Lignes communes (ALIGN-01) : « Lecture automatique », « Sous-titres », « Lecteur audio » (Bulle, Coin, Masqué).
-- Encart info permanent : « Les navigateurs bloquent le son avant le premier clic du visiteur : la voix démarre à son premier clic, les sous-titres s’affichent dès l’arrivée. »
+Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur `lecteur-voix-*`.
+- **Sans voix** : segmenté « Générer », « Enregistrer », « Importer ».
+  - Générer : « Texte lu (sert aussi de transcription) », compteur ; « Voix » seule (la langue est celle de la démo, rappelée dessous ; pas de choix par étape) ; « Aperçu » ; « Régénérer » et « Utiliser ». États repris de l’existant, dans le panneau : Assistance IA désactivée pour l’espace (segment « Générer » grisé avec « Désactivé par l’espace »), quota atteint (message et date de remise à zéro), génération en cours (barre indéterminée de 6 px).
+  - Enregistrer : bouton rond d’arrêt (danger), onde, durée, « Pause » en icône à droite ; temps annoncé toutes les 30 s. Après l’arrêt : « Écoutez avant de garder », lecteur, « Recommencer » et « Garder ».
+  - Importer : zone étroite §18.2.
+- **Voix en place** : la carte « Voix enregistrée » (ou « générée · Claire », « importée ») avec durée, lecteur et « Remplacer… » (rouvre le segmenté) ; menu ⋯ avec « Télécharger » et « Supprimer la voix » (danger, avec confirmation). Dessous, « Transcription (obligatoire pour publier) » pour une voix enregistrée ou importée ; pour une voix générée, le texte lu tient lieu de transcription.
+- **Pour toute la démo** (titre de section) : « Lecture automatique » ; « Sous-titres affichés » (état par défaut ; le visiteur garde son bouton et la touche C, la transcription reste toujours disponible) ; « Lecteur audio » : « Bulle » (par défaut) ou « Barre du lecteur » (les boutons actuels « Activer le son » et « Écouter »). Pas d’option « Masqué ».
+- Encart info permanent sur le blocage du son avant le premier clic.
+- **Lecteur, option Bulle** : sous le texte de la bulle, une ligne de 36 px sur fond gris clair : lecture / pause de 28 px (primary), onde, temps, bouton sous-titres (`aria-pressed`). Au clavier : Espace sur le bouton, touche C pour les sous-titres.
 
 ## À venir
 
