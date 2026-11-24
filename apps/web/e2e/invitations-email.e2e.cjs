@@ -59,7 +59,7 @@ async function invite(page, emails) {
       .click();
     await page.getByText('2 invitations envoyées.').waitFor();
     ok(
-      (await page.locator('.inv-result').count()) === 2 &&
+      (await page.locator('.inv-results > li').count()) === 2 &&
         (await page.locator('.inv-results__status.is-sent').count()) === 2 &&
         (await page.getByRole('button', { name: 'Copier le lien de marie@acme.example' }).count()) === 1,
       'confirmation dans la modale : « Invitation envoyée » et « Copier le lien » par adresse',
@@ -172,7 +172,9 @@ async function invite(page, emails) {
     ok(
       // Lot 1 (maquette Utilisation) : une rangée comme les autres quotas, avec sa jauge
       (await line.locator('.stg-lab').innerText()) === 'E-mails envoyés aujourd’hui' &&
-        (await line.locator('.us-val').innerText()).trim() === '150 sur 150' &&
+        // NUM-01 : espaces insécables autour de « sur »
+        (await line.locator('.us-val').innerText()).replace(/[\u00a0\u202f]/g, ' ').trim() ===
+          '150 sur 150' &&
         (await line.getByRole('meter').getAttribute('aria-valuenow')) === '100',
       'Utilisation : rangée « E-mails envoyés aujourd’hui », « 150 sur 150 », jauge à 100 %',
     );

@@ -1,12 +1,14 @@
 import { formatDate } from '../../lib/format';
 import { initials } from '../../lib/initials';
 import { AvatarPhoto } from '../../components/AvatarPhoto';
+import { CopyField } from '../../components/CopyField';
 export { initials };
 import { useConfirm } from '../../components/ConfirmDialog';
 import {
   CircleAlert,
   CircleHelp,
   Check,
+  CircleCheck,
   Copy,
   Info,
   LogOut,
@@ -549,7 +551,6 @@ function InviteDialog({
   const [err, setErr] = useState<string | null>(null);
   const [results, setResults] = useState<Array<{ email: string; url: string; status: SendStatus }>>([]);
   const [quota, setQuota] = useState<{ left: number; next_at: string | null } | null>(null);
-  const toast = useToast();
   const { busy, error, run } = useAction();
   useEffect(() => {
     void supabase
@@ -640,34 +641,27 @@ function InviteDialog({
           ) : (
             <p role="status">{t('members.sentBody', { count: results.length })}</p>
           )}
-          {results.map((r, n) => (
-            <div key={r.url} className="fd-modal__field inv-result">
-              <label htmlFor={`inv-link-${n}`}>
-                <span className="inv-results__email">{r.email}</span>
-                <span className={`inv-results__status${delivered(r.status) ? ' is-sent' : ' is-failed'}`}>
-                  {delivered(r.status) ? (
-                    <Check size={16} aria-hidden="true" />
-                  ) : (
-                    <Info size={16} aria-hidden="true" />
-                  )}
-                  {statusText(r.status)}
-                </span>
-              </label>
-              <div className="inv-result__row">
-                <input id={`inv-link-${n}`} className="fd-input" readOnly value={r.url} />
-                <Button
-                  icon={<Copy aria-hidden="true" />}
-                  aria-label={t('members.copyLinkFor', { email: r.email })}
-                  onClick={() => {
-                    void navigator.clipboard.writeText(r.url);
-                    toast(t('members.linkCopied'));
-                  }}
-                >
-                  {t('members.copyLink')}
-                </Button>
-              </div>
-            </div>
-          ))}
+          {/* Retours client du 24/11 §4 : une rangée par adresse, puis son lien dans un CopyField */}
+          <ul className="inv-results">
+            {results.map((r, n) => (
+              <li key={r.url}>
+                <div className="inv-results__row">
+                  <b className="inv-results__email">{r.email}</b>
+                  <span className={`inv-results__status${delivered(r.status) ? ' is-sent' : ' is-failed'}`}>
+                    {delivered(r.status) ? <CircleCheck aria-hidden="true" /> : <Info aria-hidden="true" />}
+                    {statusText(r.status)}
+                  </span>
+                </div>
+                <CopyField
+                  id={`inv-link-${n}`}
+                  label={t('members.inviteLinkFor', { email: r.email })}
+                  value={r.url}
+                  copyLabel={t('members.copyLinkFor', { email: r.email })}
+                  copiedText={t('members.linkCopiedShort')}
+                />
+              </li>
+            ))}
+          </ul>
         </>
       ) : (
         <form id="inv-form" className="st-invite__form" onSubmit={submit} noValidate>

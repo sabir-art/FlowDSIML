@@ -533,24 +533,44 @@
   flex-direction: column;
   gap: 24px;
 }
-.inv-result label {
-  justify-content: space-between;
-}
-.inv-result__row {
+/* Retours client du 24/11 §4 : une rangée par adresse (adresse, état), puis le lien à copier */
+.inv-results {
   display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inv-results > li {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
-.inv-result__row .fd-input {
+.inv-results__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.inv-results__email {
   flex: 1;
   min-width: 0;
-  border-radius: 10px;
+  overflow-wrap: anywhere;
 }
 .inv-results__status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 400;
+}
+.inv-results__status > svg {
+  width: 16px;
+  height: 16px;
+}
+.inv-results__status.is-sent {
+  color: var(--fd-color-success);
 }
 .inv-results__status.is-failed {
   color: var(--fd-color-danger);
