@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ChevronRight, ImagePlus, LayoutTemplate, Plus, Puzzle, WandSparkles } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronRight,
+  FilePlus2,
+  ImagePlus,
+  LayoutTemplate,
+  Plus,
+  Puzzle,
+  WandSparkles,
+} from 'lucide-react';
 import type { ContentType } from '@flowdsiml/core';
 import { CONTENT_TYPES } from '@flowdsiml/core';
 import { aiBlock, useAiStatus } from '../../lib/ai';
@@ -162,23 +171,14 @@ export function NewDemoDialog({
     cards.current?.querySelector<HTMLInputElement>(`input[value="${n}"]`)?.focus();
   };
 
-  const emptyBtn = type === 'captures' && (
-    <button
-      type="button"
-      className="fd-btn fd-btn--ghost nd-empty"
-      disabled={busy}
-      onClick={async () => {
-        setBusy(true);
-        try {
-          await onEmpty(folder || null);
-        } finally {
-          setBusy(false);
-        }
-      }}
-    >
-      {t('demos.newEmpty')}
-    </button>
-  );
+  const createEmpty = async () => {
+    setBusy(true);
+    try {
+      await onEmpty(folder || null);
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <>
       <Modal
@@ -212,7 +212,6 @@ export function NewDemoDialog({
                 <ArrowLeft aria-hidden="true" />
                 {t('common.back')}
               </button>
-              {!images.length && emptyBtn}
               <button type="button" className="fd-btn" onClick={() => void leave(onClose)}>
                 {t('common.cancel')}
               </button>
@@ -439,6 +438,26 @@ export function NewDemoDialog({
                       {t('ai.disabledAdmin')}
                     </Link>
                   )}
+                </li>
+              )}
+              {type === 'captures' && !images.length && (
+                // Retours client du 24/11 §7 : dernière ligne des sources, comme les autres choix
+                <li>
+                  <button
+                    type="button"
+                    className="nd-src nd-empty"
+                    disabled={busy}
+                    onClick={() => void createEmpty()}
+                  >
+                    <span className="nd-src__tile" aria-hidden="true">
+                      <FilePlus2 />
+                    </span>
+                    <span className="nd-src__txt">
+                      <b>{t('demos.newEmpty')}</b>
+                      <span>{t('demos.newEmptyBody')}</span>
+                    </span>
+                    <ChevronRight className="nd-src__go" aria-hidden="true" />
+                  </button>
                 </li>
               )}
             </ul>

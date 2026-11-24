@@ -166,10 +166,16 @@ function data() {
   );
   ok(
     // Le modèle a un chevron ; la ligne de l'IA aussi, sauf désactivée (comme une ligne « Bientôt ») ;
+    // « Partir d'une démo vide » aussi (dernière ligne, retours client du 24/11 §7) ;
     // les images sont une zone d'envoi (MEDIA-01 §18.3), sans chevron
     (await nd.locator('.nd-sources .nd-src__go').count()) +
       (await nd.locator('.nd-sources .nd-ai .nd-src[aria-disabled="true"]').count()) ===
-      2 &&
+      3 &&
+      (await nd
+        .locator('.nd-sources > li')
+        .last()
+        .getByRole('button', { name: /Partir d’une démo vide/ })
+        .count()) === 1 &&
       (await nd.locator('.nd-sources .nd-zone .fd-dz').count()) === 1 &&
       (await nd.getByRole('button', { name: 'Annuler' }).count()) === 1,
     'écart 2 : sources en liste avec chevron, Retour et Annuler',

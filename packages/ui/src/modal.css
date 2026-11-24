@@ -42,24 +42,46 @@
   padding: 16px 16px 16px 24px;
   border-bottom: 1px solid var(--fd-color-border);
 }
+/* Tuile décorative (retours client du 24/11 §7) : sans bordure ni survol, pour ne pas ressembler à un
+   bouton ; fond prune-50 et icône prune, prune-950 en sombre. Même tuile pour toutes les fenêtres. */
 .fd-modal__tile {
   display: grid;
   flex: none;
   place-items: center;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--fd-color-border);
+  border: 0;
   border-radius: 10px;
-  background: var(--fd-color-surface);
-  color: var(--fd-color-text);
+  background: var(--fd-prune-50);
+  color: var(--fd-prune-600);
+  pointer-events: none;
+}
+[data-theme='dark'] .fd-modal__tile {
+  background: var(--fd-prune-950);
+  color: var(--fd-prune-300);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .fd-modal__tile {
+    background: var(--fd-prune-950);
+    color: var(--fd-prune-300);
+  }
 }
 /* La tuile déroge à ICON-01 : icône de 18 px */
 .fd-modal__tile > svg {
   width: 18px;
   height: 18px;
 }
-.fd-modal--danger .fd-modal__tile {
+/* Fenêtre de danger : même tuile décorative, aux couleurs du danger */
+.fd-modal--danger .fd-modal__tile,
+[data-theme='dark'] .fd-modal--danger .fd-modal__tile {
+  background: var(--fd-color-danger-soft);
   color: var(--fd-color-danger);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .fd-modal--danger .fd-modal__tile {
+    background: var(--fd-color-danger-soft);
+    color: var(--fd-color-danger);
+  }
 }
 .fd-modal__head h2 {
   flex: 1;
@@ -162,7 +184,7 @@
 }
 /* MOTION-01 : fondu et légère mise à l'échelle, 200 ms (transform et opacité seulement) */
 .fd-modal[open] {
-  animation: fd-modal-in 200ms var(--fd-motion-ease-standard, ease-out);
+  animation: fd-modal-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 .fd-modal[open]::backdrop {
   animation: fd-modal-veil var(--fd-motion-duration-base) var(--fd-motion-ease-standard);

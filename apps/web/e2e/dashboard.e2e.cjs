@@ -161,6 +161,47 @@ const SHOTS = process.env.SHOTS_DIR;
         .isEnabled()),
     'DSH-06 / DSH-07 (REV-06) : import d’images actif',
   );
+  // Retours client du 24/11 §7 : « Partir d'une démo vide » est la dernière ligne des sources (plus dans
+  // le pied), et la tuile de l'en-tête est décorative (sans bordure, non cliquable)
+  {
+    const row = d2.locator('.nd-sources > li').last().locator('button.nd-src');
+    ok(
+      (await row.innerText()).replace(/\s+/g, ' ').trim() ===
+        'Partir d’une démo vide Une démo sans étape, à remplir dans l’éditeur.' &&
+        (await row.locator('svg.lucide-file-plus-2, svg.lucide-file-plus-corner').count()) >= 1 &&
+        (await row.locator('.nd-src__go').count()) === 1,
+      'Nouvelle démo : « Partir d’une démo vide » en dernière ligne des sources (icône, phrase, chevron)',
+    );
+    ok(
+      (await d2.locator('.fd-modal__foot button').allInnerTexts()).map((x) => x.trim()).join('|') ===
+        'Retour|Annuler',
+      'Nouvelle démo : le pied ne garde que « Retour » et « Annuler »',
+    );
+    const tile = await d2.locator('.fd-modal__tile').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-prune-50)';
+      document.body.append(probe);
+      const want = getComputedStyle(probe).color;
+      probe.remove();
+      return {
+        hidden: el.getAttribute('aria-hidden'),
+        border: cs.borderTopWidth,
+        bg: cs.backgroundColor === want,
+        events: cs.pointerEvents,
+        cursor: cs.cursor,
+        tag: el.tagName,
+      };
+    });
+    ok(
+      tile.hidden === 'true' &&
+        tile.border === '0px' &&
+        tile.bg &&
+        tile.events === 'none' &&
+        tile.tag === 'SPAN',
+      `Nouvelle démo : tuile de l’en-tête décorative, sans bordure, fond prune-50 (${JSON.stringify(tile)})`,
+    );
+  }
   await d2.getByRole('button', { name: 'Partir d’une démo vide' }).click();
   await d2.waitForURL(/\/edit$/);
   ok(true, 'DSH-06 : « Partir d’une démo vide » ouvre l’éditeur');
