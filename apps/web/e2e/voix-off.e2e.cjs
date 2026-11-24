@@ -324,9 +324,32 @@ function wav(sec) {
   );
   await pl.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, headers: cors, body: '{}' }));
   await pl.goto(`${PLAYER}/#/d/${PID}`);
-  const soundBtn = pl.getByRole('button', { name: 'Activer le son' });
-  await soundBtn.waitFor();
-  ok(true, 'lecteur : « Activer le son » au premier écran avec voix');
+  // EXT-02 §6.4 : lecteur de la voix dans la bulle (réglage par défaut), sous le texte
+  const line = pl.locator('.p-voice-line');
+  await line.waitFor();
+  const playBtn = line.getByRole('button', { name: 'Écouter la voix' });
+  const lineCc = line.getByRole('button', { name: 'Sous-titres' });
+  ok(
+    (await playBtn.count()) === 1 &&
+      (await line.locator('.p-voice-time').innerText()) === '0:00 / 0:02' &&
+      (await lineCc.getAttribute('aria-pressed')) === 'true',
+    'bulle : lecture, temps « 0:00 / 0:02 », bouton des sous-titres enfoncé',
+  );
+  const geo = await line.evaluate((e) => {
+    const r = e.getBoundingClientRect();
+    const b = e.querySelector('.p-voice-play').getBoundingClientRect();
+    const body = e.parentElement.querySelector('.p-rich').getBoundingClientRect();
+    return { h: Math.round(r.height), play: Math.round(b.width), under: r.top >= body.bottom };
+  });
+  ok(
+    geo.h === 36 && geo.play === 28 && geo.under,
+    `ligne de 36 px sous le texte, bouton de 28 px (${JSON.stringify(geo)})`,
+  );
+  ok(
+    (await pl.getByRole('button', { name: 'Activer le son' }).count()) === 0 &&
+      (await pl.locator('.p-controls .p-cc').count()) === 0,
+    'bulle : la barre du lecteur n’a plus ses boutons de voix',
+  );
   const cc = pl.locator('.p-voice-cc');
   ok(
     (await cc.innerText()) === 'Bienvenue. Ce module présente la demande de congé.',
@@ -337,24 +360,60 @@ function wav(sec) {
     await pl.mouse.move(0, 0);
     await pl.screenshot({ path: `${SHOTS}/l28-03-lecteur-voix${sfx}.png` });
   }
-  await soundBtn.click();
+  await playBtn.click();
   ok(
     await pl.locator('audio').evaluate((a) => new Promise((res) => setTimeout(() => res(!a.paused), 300))),
-    'Activer le son : la voix démarre',
+    'lecture dans la bulle : la voix démarre',
   );
-  ok((await soundBtn.count()) === 0, 'bouton retiré une fois le son actif');
+  ok(
+    (await line.getByRole('button', { name: 'Mettre la voix en pause' }).count()) === 1,
+    'le bouton devient « Mettre la voix en pause »',
+  );
   await pl.keyboard.press('c');
-  ok((await cc.count()) === 0, 'touche C : sous-titres masqués');
-  const ccBtn = pl.getByRole('button', { name: 'Sous-titres' });
-  ok((await ccBtn.getAttribute('aria-pressed')) === 'false', 'bouton Sous-titres : état annoncé');
-  await ccBtn.click();
+  ok(
+    (await cc.count()) === 0 && (await lineCc.getAttribute('aria-pressed')) === 'false',
+    'touche C : sous-titres masqués, état annoncé',
+  );
+  await lineCc.click();
   ok((await cc.count()) === 1, 'bouton Sous-titres : réaffichés');
   await pl
     .getByRole('button', { name: /Étape suivante|Suivant/ })
     .first()
     .click();
   await pl.waitForTimeout(200);
-  ok((await pl.locator('audio').count()) === 0 && (await cc.count()) === 0, 'étape suivante : voix arrêtée');
+  ok(
+    (await pl.locator('audio').count()) === 0 && (await cc.count()) === 0 && (await line.count()) === 0,
+    'étape suivante : voix arrêtée, plus de ligne audio',
+  );
+
+  // Réglage « Barre du lecteur », sous-titres masqués par défaut
+  manifest.voice = { player: 'bar', captions: false };
+  // Nouvelle visite : le son n'est plus actif
+  await pl.evaluate(() => sessionStorage.clear());
+  await pl.goto('about:blank');
+  await pl.goto(`${PLAYER}/#/d/${PID}`);
+  const soundBtn = pl.getByRole('button', { name: 'Activer le son' });
+  await soundBtn.waitFor();
+  ok(
+    (await pl.locator('.p-voice-line').count()) === 0,
+    'barre du lecteur : « Activer le son » dans la barre, pas de ligne dans la bulle',
+  );
+  const barCc = pl.locator('.p-controls').getByRole('button', { name: 'Sous-titres' });
+  ok(
+    (await cc.count()) === 0 && (await barCc.getAttribute('aria-pressed')) === 'false',
+    'sous-titres masqués par défaut (réglage de la démo), le visiteur garde son bouton',
+  );
+  await barCc.click();
+  ok(
+    (await cc.innerText()) === 'Bienvenue. Ce module présente la demande de congé.',
+    'le visiteur affiche les sous-titres : la transcription reste disponible',
+  );
+  await soundBtn.click();
+  ok(
+    await pl.locator('audio').evaluate((a) => new Promise((res) => setTimeout(() => res(!a.paused), 300))),
+    'Activer le son : la voix démarre',
+  );
+  ok((await soundBtn.count()) === 0, 'bouton retiré une fois le son actif');
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

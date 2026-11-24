@@ -467,6 +467,16 @@ export const voiceSchema = z.object({
 });
 export type Voice = z.infer<typeof voiceSchema>;
 
+/**
+ * EXT-02 §6.4 : réglages de la voix off pour toute la démo. `captions` : sous-titres affichés par défaut
+ * (le visiteur garde son bouton et la touche C) ; `player` : lecteur dans la bulle, ou boutons de la barre.
+ */
+export const voiceSettingsSchema = z.object({
+  captions: z.boolean().default(true).catch(true),
+  player: z.enum(['bubble', 'bar']).default('bubble').catch('bubble'),
+});
+export type VoiceSettings = z.infer<typeof voiceSettingsSchema>;
+
 export const stepSchema = z.object({
   id: z.string(),
   chapterId: z.string().nullable().default(null),
@@ -636,6 +646,9 @@ export const manifestSchema = z.object({
   /** A8 : démo guidée ou Sandbox (navigation libre entre pages HTML reliées). */
   kind: z.enum(['guided', 'sandbox']).default('guided').catch('guided'),
   sandbox: sandboxSchema.nullable().default(null).catch(null),
+  voice: voiceSettingsSchema
+    .default({ captions: true, player: 'bubble' })
+    .catch({ captions: true, player: 'bubble' }),
   title: z.string(),
   locale: z.string().default('fr'),
   publishedAt: z.string(),

@@ -40,6 +40,11 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
     kind: demo.kind === 'sandbox' ? ('sandbox' as const) : ('guided' as const),
     sandbox: demo.kind === 'sandbox' ? sandboxOf(demo.sandbox, ed.steps) : null,
     locale: settings.locale ?? 'fr',
+    // EXT-02 §6.4 : réglages de la voix pour toute la démo (mêmes défauts que la publication)
+    voice: {
+      captions: settings.voice?.captions !== false,
+      player: settings.voice?.player === 'bar' ? 'bar' : 'bubble',
+    },
     publishedAt: new Date().toISOString(),
     // L25-03 : cadre par défaut tant qu'il n'a pas été réglé (comme à la publication)
     theme: { frame: DEFAULT_FRAME, ...(settings.theme ?? {}) },

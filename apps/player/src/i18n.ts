@@ -358,6 +358,8 @@ const dict = {
       enableSound: 'Activer le son',
       captions: 'Sous-titres',
       listen: 'Écouter la voix off',
+      play: 'Écouter la voix',
+      pause: 'Mettre la voix en pause',
     },
     mobile: {
       tap: 'Touchez',
@@ -765,6 +767,8 @@ const dict = {
       enableSound: 'Turn on sound',
       captions: 'Captions',
       listen: 'Play the voice-over',
+      play: 'Play the voice',
+      pause: 'Pause the voice',
     },
     mobile: {
       tap: 'Tap',
