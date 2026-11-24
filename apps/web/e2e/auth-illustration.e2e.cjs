@@ -331,7 +331,8 @@ function measure() {
         .getByRole('heading', { level: 1, name: 'Déclaration d’accessibilité' })
         .or(p.getByRole('heading', { level: 1, name: "Déclaration d'accessibilité" }))
         .waitFor();
-      const doc = (await p.locator('main').innerText()).replace(/\s+/g, ' ');
+      // e9a9c51 : apostrophes typographiques dans les pages légales ; on compare sur l'apostrophe droite
+      const doc = (await p.locator('main').innerText()).replace(/\s+/g, ' ').replace(/’/g, "'");
       ok(
         /déclaré non conforme au sens du référentiel général d'amélioration de l'accessibilité \(RGAA\), version 4\.1/.test(
           doc,
@@ -361,7 +362,7 @@ function measure() {
         'déclaration : retour par l’aide de l’application ; contact des visiteurs à venir',
       );
       ok(
-        (await p.locator('main h2').allInnerTexts()).join(' | ') ===
+        (await p.locator('main h2').allInnerTexts()).join(' | ').replace(/’/g, "'") ===
           "État de conformité | Vérifications réalisées | Contenus non accessibles | Établissement de cette déclaration d'accessibilité | Retour d'information",
         'déclaration : sections attendues',
       );
