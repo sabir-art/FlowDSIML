@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Box,
   AlertTriangle,
   Camera,
   Code,
   ExternalLink,
   Link2,
-  Map as MapIcon,
   MessageSquareOff,
   Plus,
   Unlink,
@@ -429,7 +429,7 @@ export function SandboxPlan({
       <aside className="card sb-settings" aria-labelledby="sb-settings-h">
         <div className="sb-head">
           <span className="icon-chip" aria-hidden="true">
-            <MapIcon {...ICON} />
+            <Box {...ICON} />
           </span>
           <h2 id="sb-settings-h">{t('editor.sandbox.settings')}</h2>
         </div>

@@ -201,6 +201,11 @@ function data() {
       (await nav.getByRole('link', { name: 'Sandbox' }).count()) === 1,
     'barre latérale : Démos et Sandbox',
   );
+  // ICON-01 : un concept, une icône. « Sandbox » de la barre latérale porte l'icône du type (Box)
+  ok(
+    (await nav.getByRole('link', { name: 'Sandbox' }).locator('svg.lucide-box').count()) === 1,
+    'ICON-01 : entrée « Sandbox » avec l’icône du type',
+  );
   const titles = async () => p.locator('.demo-card h3').allInnerTexts();
   ok(!(await titles()).includes('Portail à explorer'), 'Démos : pas de Sandbox');
   const card = (title) => p.locator('.demo-card', { hasText: title });

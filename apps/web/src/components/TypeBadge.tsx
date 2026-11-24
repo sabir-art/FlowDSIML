@@ -1,13 +1,13 @@
-import { Box, Code, Image, Images, Map as MapIcon, Video } from 'lucide-react';
+import { Box, Code, Images, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ContentType } from '@flowdsiml/core';
 import './TypeBadge.css';
 
-/** L48-G §2, EXT-02 §4.1 : icône Lucide de chaque type de contenu (image, code, map, video). */
-export const TYPE_ICON = { captures: Image, html: Code, sandbox: MapIcon, video: Video } as const;
-
-/** Retours client du 24/11 §5 : icônes des pastilles colorées des cartes Démos. */
-const TONE_ICON = { captures: Images, html: Code, sandbox: Box, video: Video } as const;
+/**
+ * ICON-01 (un concept, une icône ; retours client du 24/11 §5) : icône Lucide de chaque type de contenu,
+ * la même partout où le type apparaît (pastilles, badges neutres, choix de « Nouvelle démo », navigation).
+ */
+export const TYPE_ICON = { captures: Images, html: Code, sandbox: Box, video: Video } as const;
 
 /**
  * Badge de type (« Captures », « HTML », « Sandbox », « Vidéo ») : icône et libellé court. `cover` : posé
@@ -25,7 +25,7 @@ export function TypeBadge({
   tone?: boolean;
 }) {
   const { t } = useTranslation();
-  const Icon = tone ? TONE_ICON[type] : TYPE_ICON[type];
+  const Icon = TYPE_ICON[type];
   return (
     <span
       className={`ct-badge${cover ? ' ct-badge--cover' : ''}${tone ? ` ct-badge--tone ct-badge--${type}` : ''}`}
