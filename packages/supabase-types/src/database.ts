@@ -984,6 +984,24 @@ export type Database = {
         };
         Relationships: [];
       };
+      api_keys: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          expires_at: string | null;
+          id: string;
+          last4: string;
+          last_used_at: string | null;
+          name: string;
+          revoked_at: string | null;
+          scopes: string[];
+          workspace_id: string;
+        };
+        ComputedFields: never;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       audit_log: {
         Row: {
           action: string;
@@ -2338,6 +2356,12 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      create_api_key: {
+        Args: { p_workspace: string; p_name: string; p_scopes: string[]; p_expires_days?: number | null };
+        Returns: Json;
+      };
+      rename_api_key: { Args: { p_id: string; p_name: string }; Returns: undefined };
+      revoke_api_key: { Args: { p_id: string }; Returns: undefined };
       answer_invitation: { Args: { p_accept: boolean; p_invitation: string }; Returns: string | null };
       email_budget_today: { Args: { p_workspace: string }; Returns: Json };
       invite_quota: { Args: { p_workspace: string }; Returns: Json };
