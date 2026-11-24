@@ -276,6 +276,11 @@ Maquettes : `mdp-saisie-*` et `mdp-erreur-*` (clair, sombre, 1440, 390). Écrans
 ### 7.1 Œil afficher / masquer
 Bouton intégré au champ (FIELD-01 §11.3), 32 px, icône 16 px en `currentColor`, à droite. Masqué : Eye ; affiché : EyeOff. Nom accessible fixe « Afficher le mot de passe » + `aria-pressed`. Un œil par champ, indépendant. Le clic garde le focus et le curseur ; à l’envoi, tous les champs repassent en masqué.
 
+**Sécurité (retour client du 24/11)** : l’œil ne révèle jamais une valeur que la personne n’a pas saisie elle-même.
+- **Mot de passe actuel** (Profil) : **pas d’œil**. Le champ est vide à l’ouverture, avec `autocomplete="current-password"` ; une valeur glissée par le gestionnaire de mots de passe reste masquée.
+- **Nouveau mot de passe et confirmation** : vides à l’ouverture (`autocomplete="new-password"`). L’œil n’apparaît qu’une fois que la personne a tapé dans le champ. Si le navigateur remplit le champ tout seul (événement de remplissage automatique, ou valeur présente sans frappe), l’œil reste caché jusqu’à ce que le champ soit vidé et ressaisi.
+- **Connexion** : même règle. L’œil sert à vérifier sa propre frappe, pas à relire un mot de passe enregistré.
+
 ### 7.2 Règles en direct
 Liste sous le champ, visible dès le focus, une ligne par règle du serveur, 13 px, écart 4 px, icône 16 px. Non respectée : Circle, `text-muted`. Respectée : CircleCheck `success`, texte `text`. Après un envoi refusé : CircleX `danger`. `aria-describedby` du champ vers la liste ; texte masqué « respectée » / « non respectée » par ligne ; région polie « 2 règles sur 3 respectées », 1 s après la dernière frappe, seulement si le nombre change. Confirmation : règle unique « Les deux mots de passe sont identiques ».
 
