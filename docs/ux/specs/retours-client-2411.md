@@ -190,7 +190,8 @@ Sous le tableau des clés, sur la même page (pas de sous-page), titre h2 « Uti
 
   À 390, la colonne Adresse est masquée ; « Accès requis » reste.
 - **Erreurs**, en une phrase d'aide : « Si la clé manque ou est révoquée, la réponse est 401. Si elle n'a pas l'accès demandé, 403. En cas de trop nombreuses demandes, 429 : réessayez une minute plus tard. » La limite exacte (par minute et par clé) est un choix du dev ; la phrase ne donne pas de chiffre.
-- **Ce que l'API ne renvoie jamais** : des données d'un autre espace, des brouillons non publiés dans `/demos` sauf avec leur statut (le statut est dans la réponse), le nom ou l'adresse d'un membre de l'espace.
+- **Brouillons** : `/demos` renvoie toutes les démos avec leur statut (publiée ou brouillon) ; le lien n'est donné que pour une démo publiée.
+- **Ce que l'API ne renvoie jamais** : des données d'un autre espace, le nom ou l'adresse d'un membre de l'espace.
 - **Leads et RGPD** : l'accès Leads expose des données personnelles de visiteurs. L'export suit la durée de conservation des leads de l'espace (Confidentialité) : un lead supprimé n'est plus renvoyé.
 - **Maquettes** : `lot1-parametres/cles-*` (liste avec section API, création avec les accès), 1440 et 390, clair et sombre.
 - **Recette** : création avec chaque combinaison d'accès, clé sans l'accès → 403 affiché tel quel par l'outil, révocation → 401 immédiat, CopyField et exemple copiables au clavier, axe sans violation, aucune clé réelle dans les captures.
