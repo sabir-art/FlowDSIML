@@ -202,6 +202,7 @@ Précisions (réponses au dev, 24/11) :
 - Teintes (couleurs de la capture, identiques en thème sombre) : Aucune, Gris #8f8f8f, Encre #1a1f26, Prune #a3195b, Bleu #2f6fed, Blanc #ffffff, à 30 % par-dessus Flou et Pixels.
 - Arrondi : rayon de 12 px à l’échelle de la capture (1 280 px de large) ; Ellipse inscrite dans le rectangle ; poignées toujours sur le rectangle, aperçu du canevas selon la forme.
 - Avant / Après : même panneau pour les zones de la capture « Avant ».
+- **Recette 2a1cb69 (conforme, clair et sombre, 1440)** : aide sous Effet conservée (une phrase par effet) ; Forme, Effet et Teinte sont des groupes radio (`radiogroup`), les flèches déplacent le choix et le focus, un seul arrêt de tabulation par groupe ; pastille choisie : anneau intérieur de 2 px `primary` (#a3195b clair, #cf86a9 sombre), contour de focus en plus au clavier ; les flèches du curseur ne changent plus d’étape. Éditeur réservé à l’ordinateur : à 390 px, l’écran « L’éditeur s’utilise sur ordinateur », pas de panneau à recetter.
 
 ### 6.3 Projecteur libre (aujourd’hui « Bientôt »)
 Panneau « Projecteur » : interrupteur « Projecteur libre », taille du halo (120 à 400 px), assombrissement (20 à 80 %), « Désactivé si le visiteur préfère moins d’animations ». Dans le lecteur : halo net autour du pointeur, bord adouci de 12 px, reste assombri ; au clavier et au toucher, le halo se place sur l’élément de l’étape. C’est le seul dégradé permis, parce qu’il est la fonction elle-même. Tant qu’il n’est pas livré, l’entrée reste « Bientôt », grise, jamais masquée.
