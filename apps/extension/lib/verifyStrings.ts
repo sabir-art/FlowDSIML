@@ -118,7 +118,7 @@ const fr = {
   },
   pageWhyReady: 'La page est copiée en entier. Elle pèse {{size}}, sous la limite de {{max}} par page.',
   pageWhyHeavy:
-    '« {{title}} » pèse {{size}}, au-delà des {{max}} permis par page. Retirez-la ou recapturez-la avec moins de contenu affiché.',
+    '« {{title}} » pèse {{size}}, au-delà des {{max}} permis par page : elle ne sera pas envoyée. Retirez-la, ou recapturez-la avec moins de contenu affiché.',
   size: '{{n}} Mo',
   sizeKb: '{{n}} Ko',
   pageN: '{{n}}. {{title}}',
@@ -264,7 +264,7 @@ const en: typeof fr = {
   },
   pageWhyReady: 'The page is copied in full. It weighs {{size}}, under the limit of {{max}} per page.',
   pageWhyHeavy:
-    '“{{title}}” weighs {{size}}, over the {{max}} allowed per page. Remove it, or capture it again with less content displayed.',
+    '“{{title}}” weighs {{size}}, over the {{max}} allowed per page: it will not be sent. Remove it, or capture it again with less content displayed.',
   size: '{{n}} MB',
   sizeKb: '{{n}} KB',
   pageN: '{{n}}. {{title}}',

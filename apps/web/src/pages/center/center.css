@@ -358,6 +358,12 @@
   height: 16px;
   margin: 2px 0 0;
 }
+/* COMP-01 §7 : le radio dessiné fait 18 px */
+.acc input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
 .acc small {
   display: block;
   color: var(--fd-color-text-muted);

@@ -438,6 +438,12 @@
   margin: 2px 0 0;
   accent-color: var(--fd-color-primary);
 }
+/* COMP-01 §7 : le radio dessiné fait 18 px */
+.mk .check input[type='radio'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
 .mk .switch {
   position: relative;
   display: inline-flex;

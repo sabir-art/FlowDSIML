@@ -3,6 +3,8 @@
  *  1. Sur toutes les pages d'a11y.e2e.cjs (app et lecteur), en clair et en sombre : aucun `<select>`, aucun
  *     `<input type="date|time|datetime-local|month|week|color|range">` visible (taille non nulle, hors
  *     `sr-only`), hors des internes d'un composant marqués `data-comp-internal`.
+ *     Aucun `<input type="radio|checkbox">` visible avec le rendu du navigateur : il est dessiné
+ *     (`appearance: none`) ou masqué derrière un élément dessiné.
  *  2. Chaque `<input type="file">` est masqué en `sr-only` (jamais `display: none`) et relié à un bouton
  *     visible (`aria-controls`) ou à un libellé (`<label>`, `aria-label` ou `aria-labelledby`).
  *  3. Chaque Select maison et chaque menu est ouvert : rôles, `aria-expanded`, `aria-activedescendant`
@@ -42,6 +44,14 @@ function natives() {
       name: name(el),
       why: `${el.tagName.toLowerCase()}${el.type ? `[type=${el.type}]` : ''} natif visible`,
     });
+  }
+  // Radios et cases : jamais le rendu du navigateur. Un contrôle dessiné a `appearance: none` ; un contrôle
+  // masqué (sr-only, opacité nulle) laisse sa place à un élément dessiné à côté de lui
+  for (const el of document.querySelectorAll('input[type=radio], input[type=checkbox]')) {
+    const cs = getComputedStyle(el);
+    if (el.closest('[data-comp-internal]') || !shown(el) || srOnly(el) || cs.opacity === '0') continue;
+    if (cs.appearance !== 'none' || cs.webkitAppearance !== 'none')
+      out.push({ name: name(el), why: `input[type=${el.type}] natif visible (non dessiné)` });
   }
   for (const el of document.querySelectorAll('input[type=file]')) {
     const cs = getComputedStyle(el);
