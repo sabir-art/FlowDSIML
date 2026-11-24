@@ -2558,7 +2558,15 @@
     "unpublishTitle": "Retirer la publication de « {{title}} » ?",
     "unpublishBody": "Le lien, l’intégration et les liens personnalisés cesseront de fonctionner. Vous pourrez republier à tout moment.",
     "unpublishConfirm": "Retirer la publication",
-    "accessScope": "Vaut pour le lien, l’intégration, les liens personnalisés et la page de la démo."
+    "accessScope": "Vaut pour le lien, l’intégration, les liens personnalisés et la page de la démo.",
+    "publicPageShow": "Afficher sur la page publique",
+    "publicPageShown": "« {{title}} » est affichée sur la page publique.",
+    "publicPageHidden": "« {{title}} » n’est plus sur la page publique.",
+    "publicPageWhy": {
+      "restricted": "Accès restreint : la démo ne peut pas être sur la page publique",
+      "unpublished": "Publiez la démo d’abord",
+      "off": "La page publique de l’espace est hors ligne"
+    }
   },
   "analytics": {
     "title": "Analytics",

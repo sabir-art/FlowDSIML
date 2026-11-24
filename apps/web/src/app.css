@@ -2899,3 +2899,10 @@ button.fd-nav__item:hover {
 .fd-copy__ok:empty {
   display: none;
 }
+/* Entrée de menu à cocher non cochée : la colonne de l'icône (16 px) reste vide, le texte reste aligné */
+.menu-blank {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+}

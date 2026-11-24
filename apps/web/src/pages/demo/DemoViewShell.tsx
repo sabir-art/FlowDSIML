@@ -21,6 +21,7 @@ import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 import { useUnpublish } from '../share/useUnpublish';
+import { usePublicPageList } from '../share/usePublicPageList';
 import './demo-views.css';
 
 export type DemoView = 'analytics' | 'leads' | 'visitors';
@@ -42,6 +43,8 @@ export function DemoViewShell() {
   const loc = useLocation();
   const navigate = useNavigate();
   const share = useShareWindow();
+  const { current: ws } = useWorkspace();
+  const publicPage = usePublicPageList(ws?.id);
   const { can } = useWorkspace();
   const [demo, setDemo] = useState<Tables<'demos'> | null | undefined>(undefined);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
@@ -140,16 +143,22 @@ export function DemoViewShell() {
           />
         </div>
         <div className="dv-bar__r">
-          {can('demo.publish') && published && (
+          {(publicPage.itemFor(demo).length > 0 || (can('demo.publish') && published)) && (
             <Menu
               label={t('editor.more')}
               items={[
-                {
-                  label: t('share.unpublishMenu'),
-                  icon: <EyeOff />,
-                  danger: true,
-                  onSelect: () => void unpublish(),
-                },
+                ...publicPage.itemFor(demo),
+                ...(can('demo.publish') && published
+                  ? [
+                      ...(publicPage.itemFor(demo).length ? ['separator' as const] : []),
+                      {
+                        label: t('share.unpublishMenu'),
+                        icon: <EyeOff />,
+                        danger: true,
+                        onSelect: () => void unpublish(),
+                      },
+                    ]
+                  : []),
               ]}
             />
           )}

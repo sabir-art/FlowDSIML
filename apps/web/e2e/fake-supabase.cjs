@@ -1939,6 +1939,28 @@ async function install(page, state = seed()) {
                 : null,
           });
         }
+        case 'set_public_page_demo': {
+          // §1 : une démo ajoutée ou retirée de la page publique de l'espace (comme en base)
+          const demo = t.demos.find((x) => x.id === a.p_demo);
+          const c = (t.training_centers || []).find((x) => x.workspace_id === demo?.workspace_id);
+          if (!c || !c.public_page_enabled) return json(route, 400, { code: 'P0001', message: 'PAGE_OFF' });
+          const open = t.demos
+            .filter(
+              (x) =>
+                x.workspace_id === demo.workspace_id &&
+                x.status === 'published' &&
+                !(t.demo_access || []).some((y) => y.demo_id === x.id && y.mode !== 'link'),
+            )
+            .map((x) => x.id);
+          if (a.p_shown && !open.includes(demo.id))
+            return json(route, 400, { code: 'P0001', message: 'DEMO_NOT_PUBLIC' });
+          const cur = Array.isArray(c.public_page?.demos) ? c.public_page.demos : null;
+          if (!(a.p_shown && !cur)) {
+            const list = (cur || open).filter((x) => x !== demo.id);
+            c.public_page = { ...(c.public_page || {}), demos: a.p_shown ? [...list, demo.id] : list };
+          }
+          return json(route, 200, { enabled: true, shown: !!a.p_shown });
+        }
         case 'save_public_page': {
           if ((state.takenSlugs || []).includes(a.p_slug))
             return json(route, 400, { code: 'P0001', message: 'SLUG_TAKEN' });

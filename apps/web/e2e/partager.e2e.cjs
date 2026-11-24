@@ -326,6 +326,71 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.context().close();
   }
 
+  // ===== « Afficher sur la page publique » : case du menu ⋯ (barre de démo, carte), catalogue de l'espace =====
+  if (!MOBILE) {
+    const { page, state } = await open(`/demos/${DEMO}/analytics`, (st) => {
+      st.tables.training_centers = [
+        {
+          workspace_id: 'ws-1',
+          slug: 'acme',
+          draft: {},
+          published: null,
+          public_page: {},
+          public_page_enabled: true,
+        },
+      ];
+    });
+    const centre = () => state.tables.training_centers[0];
+    const more = page.locator('.dv-bar').getByRole('button', { name: 'Plus d’options' });
+    await more.click();
+    const box = page.getByRole('menuitemcheckbox', { name: 'Afficher sur la page publique' });
+    await box.waitFor();
+    ok(
+      (await box.getAttribute('aria-checked')) === 'true',
+      'page publique « toutes les démos » : case cochée',
+    );
+    await box.click();
+    for (let i = 0; i < 50 && !Array.isArray(centre().public_page.demos); i++) await page.waitForTimeout(100);
+    ok(
+      Array.isArray(centre().public_page.demos) && !centre().public_page.demos.includes(DEMO),
+      'décocher : la démo est retirée de la liste de la page publique',
+    );
+    await page.locator('.toasts').getByText('n’est plus sur la page publique').waitFor();
+    await more.click();
+    await page
+      .getByRole('menuitemcheckbox', { name: 'Afficher sur la page publique', checked: false })
+      .click();
+    for (let i = 0; i < 50 && !centre().public_page.demos.includes(DEMO); i++) await page.waitForTimeout(100);
+    ok(centre().public_page.demos.includes(DEMO), 'cocher : la démo revient sur la page publique');
+    // Accès restreint : entrée indisponible, avec la raison
+    state.tables.demo_access = [{ demo_id: DEMO, workspace_id: 'ws-1', mode: 'password' }];
+    await page.reload();
+    await page.locator('.dv-bar').getByRole('button', { name: 'Plus d’options' }).click();
+    const off = page.getByRole('menuitemcheckbox', { name: 'Afficher sur la page publique' });
+    await off.waitFor();
+    ok(
+      (await off.getAttribute('aria-disabled')) === 'true' &&
+        (await off.getAttribute('title')) ===
+          'Accès restreint : la démo ne peut pas être sur la page publique',
+      'accès restreint : entrée désactivée, « Accès restreint : la démo ne peut pas être sur la page publique »',
+    );
+    await page.keyboard.press('Escape');
+    // Carte d'une démo : même entrée
+    state.tables.demo_access = [];
+    await page.goto(`${APP}/#/`);
+    const card = page.locator('.demo-card, .dm-card, article').filter({ hasText: 'Démo CRM' }).first();
+    await card.waitFor();
+    await card
+      .getByRole('button', { name: /Actions|Plus/ })
+      .first()
+      .click();
+    ok(
+      (await page.getByRole('menuitemcheckbox', { name: 'Afficher sur la page publique' }).count()) === 1,
+      'carte d’une démo : « Afficher sur la page publique » dans le menu ⋯',
+    );
+    await page.context().close();
+  }
+
   // ===== Démo non publiée =====
   {
     const { page } = await open(`/demos/${DEMO}/analytics?share=lien`, (state, demo) => {

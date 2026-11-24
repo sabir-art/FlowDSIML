@@ -2558,7 +2558,15 @@
     "unpublishTitle": "Unpublish “{{title}}”?",
     "unpublishBody": "The link, the embed and the personalised links will stop working. You can publish again at any time.",
     "unpublishConfirm": "Unpublish",
-    "accessScope": "Applies to the link, the embed, the personalised links and the demo page."
+    "accessScope": "Applies to the link, the embed, the personalised links and the demo page.",
+    "publicPageShow": "Show on the public page",
+    "publicPageShown": "“{{title}}” is shown on the public page.",
+    "publicPageHidden": "“{{title}}” is no longer on the public page.",
+    "publicPageWhy": {
+      "restricted": "Restricted access: the demo cannot be on the public page",
+      "unpublished": "Publish the demo first",
+      "off": "The workspace’s public page is offline"
+    }
   },
   "analytics": {
     "title": "Analytics",

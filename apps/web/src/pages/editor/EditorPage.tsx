@@ -121,6 +121,7 @@ import { ImagePanel } from './images/ImagePanel';
 import { asLayers, layerName } from './images/layers';
 import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 import { useUnpublish } from '../share/useUnpublish';
+import { usePublicPageList } from '../share/usePublicPageList';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -257,6 +258,7 @@ export function EditorPage() {
   const location = useLocation();
   // §1 : fenêtre Partager au-dessus de l'éditeur ; « Publier » de son bandeau lance la publication d'ici
   const share = useShareWindow();
+  const publicPage = usePublicPageList(ws?.id);
   const [unpublishDialog, unpublish] = useUnpublish(editor.demo, () => void editor.reload());
   const shareWindow = share.view && demoId && (
     <ShareDialog
@@ -1122,7 +1124,10 @@ export function EditorPage() {
                     },
                   ] as const)
                 : []),
-              // §1 : l'état de publication se retire ici, pas dans Partager (ce n'est pas un accès)
+              // §1 : place de la démo sur la page publique de l'espace, puis l'état de publication
+              ...(publicPage.itemFor(editor.demo).length
+                ? ['separator' as const, ...publicPage.itemFor(editor.demo)]
+                : []),
               ...(can('demo.publish') && editor.demo.status === 'published'
                 ? [
                     'separator' as const,
