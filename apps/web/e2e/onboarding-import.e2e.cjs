@@ -59,6 +59,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   ok((await page.getByRole('button', { name: 'Retour' }).count()) === 0, 'pas de « Retour » à l’étape 1');
   // C4 : à l'ouverture, focus sur le titre, sans anneau (même hors clavier)
+  // Le focus est posé après le rendu : on attend qu'il soit sur le titre avant de mesurer
+  await page
+    .waitForFunction(() => document.activeElement === document.querySelector('h1.obx-h1'))
+    .catch(() => {});
   const ring1 = await page.locator('h1.obx-h1').evaluate((el) => {
     const cs = getComputedStyle(el);
     return document.activeElement === el && `${cs.outlineStyle}|${cs.boxShadow}`;
@@ -73,7 +77,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Étape 2 : espace (titre focalisé sans anneau)
   const h2 = page.getByRole('heading', { name: 'Nommez votre espace' });
   await h2.waitFor();
-  await page.waitForTimeout(100);
+  await page
+    .waitForFunction(() => document.activeElement === document.querySelector('h1.obx-h1'))
+    .catch(() => {});
   const ring = await h2.evaluate((el) => {
     const cs = getComputedStyle(el);
     return document.activeElement === el && `${cs.outlineStyle}|${cs.boxShadow}`;
@@ -112,30 +118,43 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   // Étape 4 : extension, détection sans recharger
   await page.getByRole('heading', { name: 'Installez l’extension' }).waitFor();
   ok((await page.getByText('Extension détectée').count()) === 0, 'extension pas encore détectée');
-  // §18.4 : « Bientôt disponible » sur la ligne du titre, 13 px, texte atténué, non gras
-  const soon = await page.locator('h1.obx-h1 .obx-soon').evaluate((el) => {
-    const cs = getComputedStyle(el);
-    const muted = getComputedStyle(document.documentElement).getPropertyValue('--fd-color-text-muted').trim();
-    const probe = document.createElement('span');
-    probe.style.color = muted;
-    document.body.append(probe);
-    const ref = getComputedStyle(probe).color;
-    probe.remove();
-    return { txt: el.textContent, fs: cs.fontSize, fw: cs.fontWeight, muted: cs.color === ref };
-  });
-  ok(
-    soon.txt === 'Bientôt disponible' && soon.fs === '13px' && soon.fw === '400' && soon.muted,
-    `§18.4 : « Bientôt disponible » dans le titre, 13 px, atténué (${JSON.stringify(soon)})`,
-  );
-  // Retours UX 5fbb31d : nom accessible du titre avec une espace ; pas de navigateurs tant qu'on ne peut pas installer
-  ok(
-    (await page.getByRole('heading', { name: 'Installez l’extension Bientôt disponible' }).count()) === 1,
-    'titre « Installez l’extension Bientôt disponible » (espace dans le nom accessible)',
-  );
-  ok(
-    (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 0,
-    'état « Bientôt » : pas de liste de navigateurs',
-  );
+  // L'extension a une fiche (VITE_EXTENSION_URL, cas du site en ligne) ou non (« Bientôt disponible »)
+  const published = (await page.locator('h1.obx-h1 .obx-soon').count()) === 0;
+  if (published) {
+    ok(
+      /^https:\/\//.test(
+        (await page.getByRole('link', { name: /Ajouter à Chrome/ }).getAttribute('href')) ?? '',
+      ) && (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 1,
+      'extension publiée : lien vers la fiche et navigateurs, sans « Bientôt disponible »',
+    );
+  } else {
+    // §18.4 : « Bientôt disponible » sur la ligne du titre, 13 px, texte atténué, non gras
+    const soon = await page.locator('h1.obx-h1 .obx-soon').evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const muted = getComputedStyle(document.documentElement)
+        .getPropertyValue('--fd-color-text-muted')
+        .trim();
+      const probe = document.createElement('span');
+      probe.style.color = muted;
+      document.body.append(probe);
+      const ref = getComputedStyle(probe).color;
+      probe.remove();
+      return { txt: el.textContent, fs: cs.fontSize, fw: cs.fontWeight, muted: cs.color === ref };
+    });
+    ok(
+      soon.txt === 'Bientôt disponible' && soon.fs === '13px' && soon.fw === '400' && soon.muted,
+      `§18.4 : « Bientôt disponible » dans le titre, 13 px, atténué (${JSON.stringify(soon)})`,
+    );
+    // Retours UX 5fbb31d : nom accessible du titre avec une espace ; pas de navigateurs tant qu'on ne peut pas installer
+    ok(
+      (await page.getByRole('heading', { name: 'Installez l’extension Bientôt disponible' }).count()) === 1,
+      'titre « Installez l’extension Bientôt disponible » (espace dans le nom accessible)',
+    );
+    ok(
+      (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 0,
+      'état « Bientôt » : pas de liste de navigateurs',
+    );
+  }
   t.profiles[0].extension_seen_at = new Date().toISOString();
   await page.getByText('Extension détectée').waitFor({ timeout: 4000 });
   ok(true, 'extension détectée en 2 s, sans recharger');
@@ -262,10 +281,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   const oz = page.getByRole('group', { name: 'Importer des images' });
   await oz.waitFor();
   ok(
-    /Une étape par image, dans l’ordre des noms de fichiers\. PNG, JPEG ou WebP\./.test(
-      await oz.innerText(),
-    ) && (await oz.getByRole('button', { name: 'Choisir des images…' }).count()) === 1,
-    'onboarding : zone large avec l’aide de « Nouvelle démo »',
+    /Dans l’ordre des noms de fichiers\. PNG, JPEG ou WebP\./.test(await oz.innerText()) &&
+      !/Une étape par image/.test(await oz.innerText()) &&
+      (await oz.getByRole('button', { name: 'Choisir des images…' }).count()) === 1,
+    'onboarding : zone large, l’aide ne répète pas la phrase du titre',
   );
   ok((await page.locator('.obx-lines').count()) === 0, 'onboarding : la zone remplace le bloc extension');
   // COMP-01 §18.3 : le titre et la phrase suivent le mode ; ni navigateurs ni illustration de l'extension
@@ -279,6 +298,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await page.getByText('Chrome, Edge, Brave et Arc').count()) === 0 &&
       (await page.locator('.obx-browser').count()) === 0,
     'onboarding : ligne des navigateurs et illustration masquées en mode import',
+  );
+  ok(
+    (await page.locator('.obx-preview .obx-file').allInnerTexts())
+      .map((x) => x.replace(/\s+/g, ' '))
+      .join('|') === '1 ecran-1.png|2 ecran-2.png|3 ecran-10.png',
+    'onboarding : illustration des trois captures, dans l’ordre des noms',
   );
   ok(
     (await page.getByRole('button', { name: 'Capturer avec l’extension à la place' }).count()) === 1,

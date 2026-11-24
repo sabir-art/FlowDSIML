@@ -163,6 +163,7 @@
     "extTitle": "Install the extension",
     "importTitle": "Import your captures",
     "importSubtitle": "One step per image. Nothing is published until you decide.",
+    "importHint": "In file name order. PNG, JPEG or WebP.",
     "extSubtitle": "It records a capture at each click. Nothing is sent before “Finish”.",
     "ext1": "Add the extension to Chrome",
     "addToChrome": "Add to Chrome",

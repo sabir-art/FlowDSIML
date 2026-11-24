@@ -360,7 +360,7 @@ export function Onboarding() {
             multiple
             icon={<ImagePlus />}
             title={t('demos.newImport')}
-            hint={t('demos.newImportBody')}
+            hint={t('onboarding.importHint')}
             pickLabel={t('demos.newImportPick')}
             busy={busy}
             busyLabel={t('demos.newImportSending')}
@@ -434,8 +434,20 @@ export function Onboarding() {
         )}
       </>
     );
-    // En mode import, l'illustration de l'extension n'a plus lieu d'être
-    preview = importing ? null : (
+    // En mode import, l'illustration de l'extension laisse la place à celle des fichiers
+    preview = importing ? (
+      // COMP-01 §18.3 : trois captures numérotées, dans l'ordre de leurs noms de fichiers
+      <div className="obx-files">
+        {['ecran-1.png', 'ecran-2.png', 'ecran-10.png'].map((name, i) => (
+          <div key={name} className="obx-card obx-file">
+            <span className="obx-file__shot">
+              <span className="obx-file__num">{i + 1}</span>
+            </span>
+            <span className="obx-file__name">{name}</span>
+          </div>
+        ))}
+      </div>
+    ) : (
       <div className="obx-card obx-browser">
         <span className="obx-browser__bar">
           <span className="obx-browser__url" />
