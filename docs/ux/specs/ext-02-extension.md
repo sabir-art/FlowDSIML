@@ -189,7 +189,7 @@ Maquettes : `popup-voix-{generer,enregistrer,ecoute,importer,place}-*`, lecteur 
 - **Voix en place** : la carte « Voix enregistrée » (ou « générée · Claire », « importée ») avec la durée seule (pas de date, validé sur d72480e), lecteur et « Remplacer… » (rouvre le segmenté) ; menu ⋯ avec « Télécharger » et « Supprimer la voix » (danger, avec confirmation). Dessous, « Transcription (obligatoire pour publier) » pour une voix enregistrée ou importée ; pour une voix générée, le texte lu tient lieu de transcription.
 - **Pour toute la démo** (titre de section) : « Lecture automatique » ; « Sous-titres affichés » (état par défaut ; le visiteur garde son bouton et la touche C, la transcription reste toujours disponible) ; « Lecteur audio » : « Bulle » (par défaut) ou « Barre du lecteur » (les boutons actuels « Activer le son » et « Écouter »). Pas d’option « Masqué ».
 - Encart info permanent sur le blocage du son avant le premier clic.
-- **Lecteur, option Bulle** : sous le texte de la bulle, une ligne de 36 px sur fond gris clair : lecture / pause de 28 px (primary), onde, temps, bouton sous-titres (`aria-pressed`). Au clavier : Espace sur le bouton, touche C pour les sous-titres.
+- **Lecteur, option Bulle** : sous le texte de la bulle, une ligne de 36 px sur fond gris clair : lecture / pause de 28 px (primary), onde, temps, bouton sous-titres (`aria-pressed`). Au clavier : Espace sur le bouton, touche C pour les sous-titres. Bouton Sous-titres enfoncé : fond #e3e6eb, icône primary, sans trait. Sur mobile, ligne de 44 px et boutons de 36 px. Dans une carte de texte large, la ligne garde 320 px, centrée. Étape sans bulle ni carte : boutons de voix dans la barre du lecteur (validé sur f0dfad3).
 
 ## À venir
 
