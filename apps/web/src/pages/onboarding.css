@@ -294,6 +294,47 @@
   padding: 18px 20px;
   font-weight: 600;
 }
+/* COMP-01 §18.3 : mode import, trois captures empilées en léger décalage, dans l'ordre des noms */
+.obx-files {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+.obx-file {
+  display: grid;
+  gap: 8px;
+  width: 220px;
+  padding: 12px;
+}
+.obx-file + .obx-file {
+  /* Décalées sans se recouvrir : chaque nom de fichier reste lisible */
+  margin-top: 12px;
+  margin-left: 40px;
+}
+.obx-file + .obx-file + .obx-file {
+  margin-left: 80px;
+}
+.obx-file__shot {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+}
+.obx-file__num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font: 600 13px var(--fd-font-sans);
+  color: var(--fd-color-on-primary);
+  background: var(--fd-color-primary);
+}
+.obx-file__name {
+  font: 500 13px var(--fd-font-mono);
+  color: var(--fd-color-text-muted);
+}
 .obx-browser {
   display: flex;
   flex-direction: column;

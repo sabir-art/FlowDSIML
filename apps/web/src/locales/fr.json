@@ -163,6 +163,7 @@
     "extTitle": "Installez l’extension",
     "importTitle": "Importez vos captures",
     "importSubtitle": "Une étape par image. Rien n’est publié avant que vous le décidiez.",
+    "importHint": "Dans l’ordre des noms de fichiers. PNG, JPEG ou WebP.",
     "extSubtitle": "Elle enregistre une capture à chaque clic. Rien n’est envoyé avant « Terminer ».",
     "ext1": "Ajoutez l’extension à Chrome",
     "addToChrome": "Ajouter à Chrome",
