@@ -4,6 +4,14 @@ Source : message du chef du 24/11 au soir (9 points). Priorité haute : §1 et �
 Maquettes : `maquettes/refonte/retours-2411b/` (clair et sombre, 1440, et 390 pour §1 et §9).
 Règle de fond, valable partout : **une action n'est pas forcément un bouton** (§0).
 
+**Recadrage du client (24/11, ferme)** : on **ne change pas la structure de base** de l'app. Fond du contenu inchangé (`--fd-color-content-bg`, blanc en clair, `#15191f` en sombre, NAV-02), mêmes barres, mêmes navigations, mêmes cartes. Pour chaque retour, on ne change **que ce qui est demandé**. Les maquettes v3 de ce dossier respectent cette règle ; en cas d'écart entre une maquette et l'app actuelle hors du point traité, l'app actuelle fait foi.
+
+**Décisions du chef (24/11)** — plus de question au client sur ces points :
+1. **Exporter** (PDF, GIF, vidéo) est un mode de Partager ; **Diffuser** (SCORM, intranet, **hors ligne**) reste une fenêtre séparée.
+2. **Visiteurs** = la liste des sessions de la démo.
+3. La démo **hors ligne v1** n'a **ni lead ni suivi**.
+4. Le résumé quotidien part à **9 h**.
+
 ---
 
 ## §0 Règle ACTION-01 : la bonne forme pour chaque action
@@ -39,29 +47,29 @@ Règle de fond, valable partout : **une action n'est pas forcément un bouton** 
   - **Lien** · **Intégrer** · **Liens personnalisés** · **Accès** ;
   - groupe « Fichiers » : **Exporter** (PDF, GIF, vidéo).
   Pas de réseaux sociaux (retirés à la demande du client).
-- **À droite** : en-tête du mode (h3, nom du mode) ; **pastille d'accès** « 🌐 Toute personne avec le lien · Modifier » (icône du mode d'accès, bouton « Modifier » qui ouvre le mode Accès) ; croix de fermeture. Puis le contenu du mode, qui défile seul.
+- **À droite** : en-tête du mode (h3, nom du mode) ; **pastille d'accès** « Toute personne avec le lien · Modifier » (icône Globe) (icône du mode d'accès, bouton « Modifier » qui ouvre le mode Accès) ; croix de fermeture. Puis le contenu du mode, qui défile seul.
 - La pastille d'accès est présente dans **chaque** mode sauf Accès lui-même.
 
-### 1.3 Contenu des modes
-- **Lien** : encadré qui dit l'effet de l'accès (« Toute personne qui a ce lien ouvre la démo, sans compte. L'accès s'applique aussi à l'intégration et aux liens personnalisés. » — texte selon le mode d'accès) ; CopyField du lien + « Ouvrir » ; ligne « Envoyer » en boutons icône (E-mail, message prêt à copier, QR code) ; **vignette du lien** (aperçu 200 × 112, « Changer la vignette », « Télécharger ») ; lignes repliables « Personnaliser l'adresse » et « Adapter le texte au destinataire (paramètres d'URL) ».
-- **Intégrer** : formats en cartes radio (Encadré dans la page · Bouton qui ouvre la démo · Plein écran) ; code (`pre`, monospace, passe à la ligne) ; « Copier le code » ; guides ; **aperçu en direct** de la démo intégrée dans le format choisi.
-- **Liens personnalisés** : recherche, liste (destinataire, date, vues), « Créer un lien » **en bas** de la liste, « Importer (CSV) ».
-- **Accès** : phrase « Le choix vaut pour le lien, l'intégration et les liens personnalisés. La page publique n'affiche que les démos en accès « Toute personne avec le lien ». » ; cartes radio (Toute personne avec le lien · Avec un mot de passe · Sur invitation · Par domaine e-mail) avec leurs champs ; seuls les modes autorisés par l'espace (Paramètres › Sécurité) ; « Voir ce que le visiteur verra » ; « Enregistrer l'accès ».
-- **Exporter** : trois fichiers en cartes radio (PDF · GIF · Vidéo MP4) ; réglages du fichier choisi (langue, format, bulles sur les captures, étapes ; pour GIF et vidéo : résolution, images par seconde, délai entre étapes) ; note « Un fichier exporté n'applique pas l'accès choisi : toute personne qui l'a peut le lire. » ; un seul bouton « Exporter le PDF / le GIF / la vidéo ».
-- La **page publique** n'est plus un mode : son réglage par démo (« Afficher sur la page publique de l'espace ») passe dans le menu ⋯ de la démo et dans Paramètres › Page publique.
+### 1.3 Contenu des modes (sobre : peu de texte, peu de boutons, pas d'encadrés empilés)
+- **Lien** : CopyField du lien (copie en bouton icône) + bouton icône « Ouvrir » ; une ligne de trois boutons icône avec infobulle (E-mail, message prêt à copier, QR code) ; vignette (aperçu 200 × 112, « Changer », bouton icône « Télécharger ») ; deux lignes repliables « Adresse personnalisée » et « Paramètres d'URL ». Aucun encadré d'explication : la pastille d'accès suffit.
+- **Intégrer** : formats en cartes radio (Encadré · Bouton · Plein écran) ; code (`pre`, monospace, passe à la ligne) ; « Copier le code » ; aperçu du format choisi.
+- **Liens personnalisés** : recherche, liste (destinataire, date, vues), « Créer un lien » en bas de la liste, « Importer (CSV) ».
+- **Accès** : une ligne « Vaut pour le lien, l'intégration et les liens personnalisés. » ; cartes radio (Toute personne avec le lien · Avec un mot de passe · Sur invitation · Par domaine e-mail) avec leurs champs ; seuls les modes autorisés par l'espace ; « Enregistrer ».
+- **Exporter** : trois cartes radio (PDF · GIF · Vidéo MP4), réglages du fichier choisi (langue, format ; pour GIF et vidéo : résolution, délai), une ligne d'aide « Le fichier n'est pas protégé par l'accès. » à gauche du seul bouton « Exporter ».
+- La **page publique** n'est plus un mode : son réglage par démo passe dans le menu ⋯ de la démo et dans Paramètres › Page publique.
 
 ### 1.4 Démo non publiée (maquette `partager2-nonpubliee-*`)
-Bandeau `role="status"` en haut du volet droit : « La démo n'est pas publiée : le lien et le code fonctionneront après la publication. » + « Publier ». Lien grisé, « Ouvrir » désactivé avec la raison ; l'accès et l'export restent disponibles.
+Bandeau `role="status"` en haut du volet droit : « Publiez la démo pour activer le lien. » + « Publier ». Lien grisé, « Ouvrir » désactivé avec la raison ; l'accès et l'export restent disponibles.
 
 ### 1.5 Ce qui sort de Partager
 - La colonne de droite actuelle (aperçu, formation, chiffres de la semaine) disparaît : les chiffres sont dans **Analytics de la démo** (§9).
-- « Diffuser » (SCORM, LMS, intranet) : question au client (fenêtre séparée ou mode « Diffuser » dans cette fenêtre). En attendant sa réponse, il reste une fenêtre séparée.
+- « Diffuser » (SCORM, LMS, intranet, hors ligne §8) reste une **fenêtre séparée** (décision du chef).
 
 ### 1.6 Mobile (390, maquettes `partager2-menu-*` et `partager2-lien-*-390`)
 Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec chevron). Un mode s'ouvre à la place, avec « ← » retour à la liste ; la pastille d'accès passe sur sa propre ligne sous le titre.
 
 ### 1.7 Recette
-`partager.e2e` : ouverture depuis la barre de chaque vue et depuis la carte, `?share=` ; focus piégé et rendu ; chaque mode ; pastille d'accès présente partout sauf Accès, et mise à jour après « Enregistrer l'accès » ; copie ; export (fichier produit) ; non publiée ; 390 (liste puis mode, retour) sans défilement horizontal ; axe ; clair et sombre.
+`partager.e2e` : ouverture depuis la barre de chaque vue et depuis la carte, `?share=` ; focus piégé et rendu ; chaque mode ; pastille d'accès présente partout sauf Accès, et mise à jour après « Enregistrer » ; copie ; export (fichier produit) ; non publiée ; 390 (liste puis mode, retour) sans défilement horizontal ; axe ; clair et sombre.
 
 ---
 
@@ -73,14 +81,11 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 
 ---
 
-## §3 Clés d'accès : une seule action, page repensée
+## §3 Clés d'accès : pas de bouton en double (maquette `param-cles-vide-*`)
 
-- **Une seule** « Créer une clé » à l'écran :
-  - aucune clé : seulement dans l'état vide (le bouton de l'en-tête est retiré) ;
-  - au moins une clé : seulement dans l'en-tête de la page.
-- Deux onglets sous l'en-tête de page : **Clés** · **Utiliser l'API** (la documentation n'est plus sous la liste).
-- État vide (maquette `param-cles-vide-*`) : icône, « Reliez un outil à TutoClick », trois étapes numérotées (Créez une clé · Copiez-la dans l'outil · L'outil lit vos données), un seul bouton.
-- Liste : inchangée (§6.2 de la série précédente), plus la pastille d'état (Active, Expirée, Révoquée) à côté du nom.
+- « Créer une clé » reste **dans l'en-tête**, comme aujourd'hui, que la liste soit vide ou non.
+- **État vide** : on retire seulement le bouton en double. Il reste une illustration (icône KeyRound dans une tuile) et une phrase : « Aucune clé pour l'instant » + « Une clé permet à un outil de l'espace (CRM, intranet) de lire vos démos, leurs statistiques ou leurs leads. »
+- Le reste de la page ne change pas (liste, section « Utiliser l'API » de la série précédente, §6.2.1). Pas d'onglets, pas d'étapes numérotées.
 
 ---
 
@@ -90,7 +95,7 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 - **Une seule source de réglages** : « Préférences » dans la cloche ouvre Paramètres › Notifications ; l'ancienne fenêtre de préférences est supprimée.
 - **Résumé quotidien : on le fait.** Sous le tableau, « Fréquence des e-mails » en choix segmenté :
   - « Au fil de l'eau » (au plus un e-mail par heure, comportement actuel) ;
-  - « Un résumé par jour » (à 9 h, heure de la personne ; fuseau du navigateur enregistré au profil, sinon Europe/Paris).
+  - « Un résumé par jour à 9 h » (heure de la personne ; fuseau du navigateur enregistré au profil, sinon Europe/Paris).
   Le résumé quotidien regroupe les événements cochés « Par e-mail » des 24 dernières heures ; pas d'e-mail s'il n'y a rien. Plus de « Bientôt ».
 
 ---
@@ -101,7 +106,8 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 - **Pause** : plus de gros bouton. Indicateur « En direct · actualisé il y a 3 s » (point vert ; sans animation si mouvement réduit) suivi d'un **bouton icône** Pause/Play (32 px, `aria-pressed`, infobulle « Mettre en pause l'actualisation » / « Reprendre »). En pause, l'indicateur devient « En pause » (point gris).
 - **Interface vivante** :
   - indicateurs compacts sur une ligne (visiteurs en ce moment, vues sur 30 min, fins de démo du jour, leads du jour) ;
-  - « Sur les démos maintenant » : une ligne par visiteur (pastille anonyme, lieu approximatif ou e-mail s'il s'est identifié par un lead, démo avec sa pastille de type, barre de progression « Étape n/N », durée) ;
+  - « Sur les démos maintenant » : un tableau aéré à colonnes fixes, avec en-têtes discrets (12 px, `text-muted`) : avatar (28 px) · **Visiteur** (lieu approximatif, ou e-mail s'il s'est identifié par un lead) · **Démo** · **Progression** (barre + « Étape n/N ») · **Depuis**. Lignes de 48 px, séparées par un filet, gouttière de 16 px.
+    - Dans la colonne Démo, **sur une seule ligne** : la pastille du type d'abord, puis le nom de la démo (10 px d'écart, `nowrap`, points de suspension si trop long, nom complet en infobulle) ;
   - « Fil d'activité » à droite : début, fin, lead, avec l'heure relative.
   Les nouvelles lignes apparaissent en fondu court (0,2 s ; aucun mouvement si mouvement réduit). Les changements sont annoncés une fois par minute au plus (`aria-live="polite"` sur le résumé, pas sur chaque ligne).
 - Export : bouton icône Download avec infobulle.
@@ -110,10 +116,9 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 
 ## §6 En-tête de page des Paramètres (maquette `param-entete-marque-*`)
 
-- **En-tête de page** en haut du contenu, identique sur toutes les pages des Paramètres : tuile d'icône 40 px (l'icône de la navigation), **titre h1** 22 px en 700 (le nom de la page, « Thème et couleurs »), phrase de description en `text-muted` (une ou deux lignes, 620 px au plus), filet en dessous.
-- La barre du haut garde le fil d'Ariane (« Marque › Thème et couleurs ») **sans h1** et les actions « Annuler » / « Enregistrer ». Exception documentée à PAGE-01 pour les Paramètres : le h1 est dans l'en-tête de page.
-- Les **sections** (h2, 15 px en 600) viennent ensuite, chacune séparée par un filet. Une section qui ne contient qu'un réglage ne répète pas son titre comme libellé du champ (fin du « Logo » en double).
-- Contenu de chaque en-tête : une ligne par page dans `src/locales` (titre + description), relue par l'UX.
+- **On garde la mise en page actuelle des Paramètres** (barre du haut, navigation secondaire, sections, fond). Seul l'en-tête de page change.
+- L'**en-tête de page** (titre + sous-titre) doit se détacher des sections : titre h1 **24 px en 700** (au lieu de la taille d'une section), sous-titre en `text-muted` 14 px juste dessous, puis **24 px d'espace** avant la première section. Les titres de section restent à 16 px en 600. Pas de tuile d'icône, pas de fond ni de filet en plus.
+- Une section qui ne contient qu'un réglage ne répète pas son titre comme libellé du champ (fin du « Logo » en double).
 
 ---
 
@@ -126,11 +131,11 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 
 ## §8 Démo hors ligne (nouvelle fonction)
 
-- **Où** : menu ⋯ de la barre de la démo, « Démo hors ligne… » (à côté des notes du présentateur), qui ouvre une petite fenêtre : taille estimée, avertissement d'accès, « Télécharger l'archive ».
+- **Où** : dans la fenêtre **Diffuser** (avec SCORM et intranet), choix « Hors ligne » : taille estimée, avertissement d'accès, « Télécharger l'archive ». Plus d'entrée dans le menu ⋯.
 - **Format** : archive `.zip` autonome, « demo-crm-hors-ligne-2026-11-24.zip » : `index.html` + lecteur + toutes les ressources (captures, images ajoutées incrustées, voix, vidéos, polices). S'ouvre par double-clic, sans réseau, dans Chrome, Edge, Firefox et Safari récents. Un `LISEZ-MOI.txt` explique l'ouverture.
 - **Limites** : 300 Mo par archive (la fenêtre montre la taille estimée avant de générer) ; les liens externes et les pages HTML Sandbox liées à un site restent visibles mais ne s'ouvrent pas (« Disponible en ligne seulement ») ; les variables prennent leur valeur de repli ; pas de mise à jour automatique (refaire l'archive après une republication).
 - **Accès** : l'archive contourne les modes d'accès (mot de passe, invitation) : génération réservée aux rôles qui peuvent « Diffuser », et seulement si « Exports hors de TutoClick » est autorisé (Paramètres › Sécurité). Avertissement avant la génération : « Toute personne qui a le fichier voit la démo, sans mot de passe. »
-- **Données** : v1 **sans suivi** (aucune requête réseau, aucune donnée gardée) ; les formulaires de lead sont remplacés par « Laissez votre adresse sur notre stand » (texte réglable) ou masqués. Le suivi différé est une question pour le client (ci-dessous).
+- **Données** : v1 **sans lead ni suivi** (décision du chef) : aucune requête réseau, aucune donnée gardée, les formulaires de lead sont masqués.
 - **Recette** : archive générée, ouverte depuis le disque réseau coupé (Playwright `offline`), toutes les étapes, voix et vidéo ; aucune requête sortante ; taille affichée.
 
 ---
@@ -140,12 +145,12 @@ Feuille plein écran. Premier écran : la liste des modes (lignes de 52 px avec 
 **Problème** : depuis une démo, Analytics ou Leads ouvrent une page de l'app (barre latérale, fil d'Ariane) ; la personne sort de la démo.
 
 - **Une barre de démo commune** à toutes les vues d'une démo : « ← Démos » (ou « ← Analytics » si l'on vient de là), nom et état de la démo, onglets **Édition · Aperçu · Analytics · Leads · Visiteurs**, puis « Partager » et « Publier ». La barre latérale de l'app n'apparaît pas.
-- À droite de la barre : menu ⋯ (notes du présentateur, démo hors ligne §8, historique des versions §11, Diffuser), « Partager » en primaire.
+- À droite de la barre : menu ⋯ (notes du présentateur, Diffuser — SCORM, intranet, hors ligne §8 —, historique des versions §11), « Partager » en primaire.
 - Routes : `/demos/:id/edit`, `/demos/:id/preview`, `/demos/:id/analytics`, `/demos/:id/leads`, `/demos/:id/visitors`. Changer d'onglet ne recharge pas la démo ; « Partager » ouvre la fenêtre §1 au-dessus de n'importe quelle vue.
 - Contenu des vues, centré (1 200 px au plus), sur le fond de l'app (maquette `demo-analytics-*`) :
   - **Analytics** : sous-onglets **Général** · **Sessions** ; filtres en puces (Source, Visiteurs, Période) ; « Imprimer » et « Télécharger (CSV) » en boutons icône ; indicateurs (vues, visiteurs uniques, complétion, leads) ; vues par jour ; « Par moyen de partage » (mêmes noms que §1) ; parcours étape par étape ; **Localisation** (ville approximative, sans conserver l'adresse IP) ;
   - **Leads** : le tableau des leads de la démo, recherche, export CSV ;
-  - **Visiteurs** : les sessions de la démo (visiteur anonyme ou identifié, date, source, progression, durée), filtre par source.
+  - **Visiteurs** (décision du chef) : la liste des sessions de la démo (visiteur anonyme ou identifié, date, source, progression, durée), filtre par source.
 - À 390 : les onglets deviennent un bouton-menu « Analytics ▾ » ; « Partager » devient un bouton icône.
 - L'Analytics global de l'espace garde ses pages ; cliquer sur une démo y ouvre `/demos/:id/analytics` avec « ← Analytics ».
 - Recette : `demo-vues.e2e` : chaque onglet sans barre latérale ni changement de page complet, retour selon l'origine, focus sur le h1 de la vue, 390, axe, clair et sombre.
@@ -163,9 +168,6 @@ Vu chez le concurrent dans le menu ⋯ de la démo. Non spécifié ici : à étu
 
 ---
 
-## Questions pour le client (via le chef, « À faire par vous »)
+## Ordre de réalisation pour le dev
 
-1. **§1** : « Diffuser » (SCORM, LMS, intranet) : fenêtre séparée, ou un mode de plus dans la fenêtre Partager ? (Les captures de référence sont reçues.)
-2. **§9** : « Visiteurs » = la liste des sessions de la démo, est-ce bien ce qu'il attend ? Ou une vue par personne identifiée (leads, invités) ?
-3. **§8** : sur un salon, veut-il **collecter des leads hors ligne** (enregistrés dans l'archive puis envoyés au retour du réseau, avec consentement) ? Cela suppose un suivi différé et un traitement RGPD : à confirmer avant de le spécifier.
-4. **§4** : l'heure du résumé quotidien (9 h) lui convient-elle ?
+§9, §1, §6, §3, §2, §4, §5, §7, §8 (dans Diffuser), puis §10.
