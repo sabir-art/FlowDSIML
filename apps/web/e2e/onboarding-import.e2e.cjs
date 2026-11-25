@@ -342,13 +342,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     changed.length === 1 && changed[0].id === sel.id && changed[0].image_width === 400,
     'image de l’étape remplacée et marquée importée',
   );
-  ok(
-    (await page
-      .locator('.toast.toast--warning')
-      .filter({ hasText: /^Image importée/ })
-      .count()) >= 1,
-    'avertissement d’import après remplacement',
-  );
+  // Le toast suit l'enregistrement de l'image : on l'attend, on ne le lit pas à la volée
+  const warned = await page
+    .locator('.toast.toast--warning')
+    .filter({ hasText: /^Image importée/ })
+    .first()
+    .waitFor({ timeout: 15000 })
+    .then(() => true)
+    .catch(() => false);
+  ok(warned, 'avertissement d’import après remplacement');
 
   // ===== L48-C : 390 px (sans aperçu ni défilement horizontal), « Nouvel espace » =====
   await page.setViewportSize({ width: 390, height: 844 });
