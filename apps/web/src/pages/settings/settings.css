@@ -1132,7 +1132,8 @@ fieldset.stg-row {
   gap: 8px;
 }
 .stg-page__acts .stg-search {
-  width: 240px;
+  /* 260 px : « Rechercher un membre » tient en entier avec la loupe et le raccourci */
+  width: 260px;
   height: 40px;
 }
 .stg-page h1 {
@@ -1172,7 +1173,6 @@ fieldset.stg-row {
   z-index: 30;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 8px;
   box-sizing: border-box;
   height: calc(64px + env(safe-area-inset-bottom, 0px));
@@ -1180,6 +1180,17 @@ fieldset.stg-row {
   border-top: 1px solid var(--fd-color-border);
   background: var(--fd-color-surface);
   animation: stg-savebar-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
+}
+/* Le texte à gauche (deux lignes au besoin), les boutons à droite, sans rétrécir */
+.stg-savebar__txt {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 400 13px / 1.3 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.stg-savebar .fd-btn {
+  flex: none;
 }
 @keyframes stg-savebar-in {
   from {

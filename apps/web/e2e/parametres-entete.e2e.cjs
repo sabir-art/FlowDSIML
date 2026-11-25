@@ -103,9 +103,30 @@ const PAGES = [
             ].length,
             h1: document.querySelectorAll('h1').length,
             scroll: document.documentElement.scrollWidth - innerWidth,
+            searchW: h.querySelector('.stg-search')?.getBoundingClientRect().width ?? null,
+            searchCut: (() => {
+              const i = h.querySelector('.stg-search input');
+              if (!i) return false;
+              const c = document.createElement('canvas').getContext('2d');
+              c.font = getComputedStyle(i).font;
+              const cs = getComputedStyle(i);
+              return (
+                c.measureText(i.placeholder).width >
+                i.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) + 0.5
+              );
+            })(),
+            sep: (document.querySelector('.fd-page-header__sep')?.getClientRects().length ?? 0) > 0,
           };
         });
         const where = `${title} (${route})`;
+        if (search && width >= 600 && (m.searchW !== 260 || m.searchCut))
+          bad.push(
+            `${where} : recherche de ${m.searchW} px, texte indicatif ${m.searchCut ? 'coupé' : 'entier'} (260 px, entier)`,
+          );
+        if (m.sep)
+          bad.push(
+            `${where} : filet vertical affiché dans la barre du haut alors qu’aucune action ne le précède`,
+          );
         if (!(m.ruleW >= m.colW && m.clip === 'clip' && m.ruleBorder === '1px'))
           bad.push(`${where} : filet ${m.ruleW} px pour une colonne de ${m.colW} px (${m.clip})`);
         if (m.gap === null || Math.abs(m.gap - 24) > 1)
@@ -151,8 +172,15 @@ const PAGES = [
         const before = await bar.count();
         // L'espace est chargé (un rechargement tardif remettrait le champ à sa valeur enregistrée)
         await page.waitForLoadState('networkidle');
-        await name.fill('Acme modifié');
-        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        // Saisie tenue : si l'espace finit de se charger après coup, le formulaire reprend ses valeurs
+        // enregistrées, et la saisie est refaite
+        const typed = async () => {
+          await name.fill('Acme modifié');
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+          await page.waitForLoadState('networkidle');
+          return (await name.inputValue()) === 'Acme modifié';
+        };
+        for (let i = 0; i < 5 && !(await typed()); i++);
         if (width < 600) {
           await bar.waitFor();
           await bar.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
@@ -174,6 +202,11 @@ const PAGES = [
               bg: cs.backgroundColor === surface,
               top: cs.borderTopWidth,
               btns: [...el.querySelectorAll('.fd-btn')].map((x) => x.textContent.trim()).join('|'),
+              txt: el.querySelector('.stg-savebar__txt')?.textContent.trim(),
+              txtLeft:
+                el.querySelector('.stg-savebar__txt')?.getBoundingClientRect().right <=
+                el.querySelector('.fd-btn').getBoundingClientRect().left,
+              btnW: [...el.querySelectorAll('.fd-btn')].every((x) => x.scrollWidth <= x.clientWidth + 1),
               gap: Math.round(r.top - last.bottom),
               scroll: document.documentElement.scrollWidth - innerWidth,
             };
@@ -186,6 +219,9 @@ const PAGES = [
               g.bg &&
               g.top === '1px' &&
               g.btns === 'Annuler|Enregistrer' &&
+              g.txt === 'Modifications non enregistrées' &&
+              g.txtLeft &&
+              g.btnW &&
               g.gap >= 8 &&
               g.scroll <= 0,
             `barre « Modifications non enregistrées », ${theme === 'dark' ? 'sombre' : 'clair'}, ${width} px : 64 px, collée en bas, Annuler puis Enregistrer, contenu lisible au-dessus (${JSON.stringify(g)})`,

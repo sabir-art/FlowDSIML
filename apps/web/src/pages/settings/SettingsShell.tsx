@@ -181,7 +181,7 @@ export function SettingsShell({
    */
   pending?: boolean;
   pendingActions?: ReactNode;
-  /** SETTINGS-HDR-01 : recherche de la page (240 px), à gauche des actions. */
+  /** SETTINGS-HDR-01 : recherche de la page (260 px), à gauche des actions. */
   search?: ReactNode;
   /**
    * Page pas encore passée au gabarit du §11 : son contenu garde les styles hérités (« .mk »).
@@ -228,7 +228,8 @@ export function SettingsShell({
   useEffect(() => {
     const el = acts.current;
     if (!watch || !el) return setActsSeen(true);
-    const io = new IntersectionObserver(([e]) => setActsSeen(!!e?.isIntersecting));
+    // Plusieurs relevés peuvent arriver ensemble : seul le dernier dit l'état courant
+    const io = new IntersectionObserver((es) => setActsSeen(!!es.at(-1)?.isIntersecting));
     io.observe(el);
     return () => io.disconnect();
   }, [watch]);
@@ -274,6 +275,10 @@ export function SettingsShell({
         </p>
         {bar && (
           <div className="stg-savebar" role="region" aria-label={t('settings.unsaved')}>
+            {/* L'annonce est faite par la région de texte ci-dessus : celui-ci n'est pas relu */}
+            <p className="stg-savebar__txt" aria-hidden="true">
+              {t('settings.unsaved')}
+            </p>
             {pendingActions ?? actions}
           </div>
         )}
