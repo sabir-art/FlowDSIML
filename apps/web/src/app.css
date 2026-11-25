@@ -2052,7 +2052,7 @@ button.fd-nav__item:hover {
    change d'un seul coup ; le contenu suit par FLIP, lib/shiftFlip.ts) */
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .shell--unfold .sidebar :is(.fd-nav__label, .fd-nav__section, .ws-text, .user-text, .brand) {
-    animation: fd-fade var(--fd-motion-duration-base) var(--fd-motion-ease-standard) backwards;
+    animation: fd-fade var(--fd-motion-duration-fast) var(--fd-motion-ease-standard) backwards;
   }
 }
 
