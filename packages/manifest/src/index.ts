@@ -577,7 +577,8 @@ export type SandboxSettings = z.infer<typeof sandboxSchema>;
 
 /** L28 035 : voix off d'une étape (piste publiée, sous-titres, lancement à l'arrivée sur l'étape). */
 export const voiceSchema = z.object({
-  src: z.string().max(300),
+  // Chemin publié, ou adresse signée dans l'Aperçu de l'éditeur (plus longue)
+  src: z.string().max(2048),
   durationMs: z.number().int().min(1).max(120000),
   transcript: z.string().max(4000),
   autoplay: z.boolean().default(true),

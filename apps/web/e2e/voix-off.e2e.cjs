@@ -281,6 +281,27 @@ function wav(sec) {
   await card.waitFor();
   ok((await card.locator('b').innerText()) === 'Voix enregistrée', 'carte « Voix enregistrée »');
 
+  // ===== L62 : l'Aperçu de l'éditeur fait entendre la voix de l'étape =====
+  {
+    await page.getByRole('radio', { name: 'Aperçu', exact: true }).click();
+    const frame = page.frameLocator('iframe.preview-frame');
+    const audio = frame.locator('audio');
+    await audio.waitFor({ state: 'attached', timeout: 20000 });
+    const src = (await audio.getAttribute('src')) || '';
+    const controls = await frame
+      .getByRole('button', { name: /Activer le son|Lire la voix|Écouter la voix/ })
+      .count();
+    ok(
+      /\/voices\//.test(src) && /\.webm/.test(src) && controls >= 1,
+      `Aperçu : la voix enregistrée de l’étape est chargée (adresse signée du bucket voices) avec sa commande d’écoute (${controls})`,
+    );
+    await page.keyboard.press('Escape');
+    await page
+      .locator('dialog.preview-dialog[open]')
+      .waitFor({ state: 'detached' })
+      .catch(() => {});
+  }
+
   // ===== Lecteur =====
   const pl = await (
     await themedContext(b, { viewport: { width: 1280, height: 800 }, locale: 'fr-FR' })
