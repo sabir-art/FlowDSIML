@@ -109,11 +109,26 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       );
       await page.keyboard.press('Escape');
       await dlg(page).waitFor({ state: 'detached' });
-      ok(
-        !/share=/.test(page.url()) &&
-          (await page.evaluate(() => document.activeElement?.hasAttribute('data-share-open'))),
-        `${view} : Échap ferme, le focus revient à « Partager »`,
-      );
+      // L'adresse perd ?share (un rechargement ne rouvre pas la fenêtre) ; le focus revient, après le
+      // démontage, sur le bouton « Partager » visible à cette largeur
+      const back = await page
+        .waitForFunction(
+          () => {
+            const a = document.activeElement;
+            return (
+              !/share=/.test(location.hash) &&
+              !!a?.hasAttribute('data-share-open') &&
+              a.getClientRects().length > 0
+            );
+          },
+          null,
+          { timeout: 5000 },
+        )
+        .then(
+          () => true,
+          () => false,
+        );
+      ok(back, `${view} : Échap ferme, l’adresse perd ?share, le focus revient à « Partager »`);
     }
     // Focus piégé : Tab ne sort pas de la fenêtre
     await page.locator('.dv-bar [data-share-open]').click();
@@ -392,8 +407,31 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
           const q = perso.getByRole('searchbox', { name: 'Rechercher un lien' });
           await q.fill('zzz-aucun');
           ok(
-            (await perso.getByRole('status').textContent()) === 'Aucun lien ne correspond à la recherche.',
+            (await perso.locator('.sh-empty[role=status]').textContent()) ===
+              'Aucun lien ne correspond à la recherche.',
             'Liens personnalisés : recherche sans résultat annoncée',
+          );
+          // Retour UX : deux lignes régulières par lien (nom + état ; détails atténués séparés par « · »),
+          // lignes de 56 px au moins, aucune adresse ni seconde icône de copie dans la ligne
+          await q.fill('');
+          const rows = perso.locator('table.sh-links tbody tr');
+          await rows.first().waitFor();
+          const shape = await rows.evaluateAll((l) =>
+            l.map((r) => ({
+              h: Math.round(r.getBoundingClientRect().height),
+              name: r.querySelector('.shp-name__t')?.textContent,
+              state: r.querySelector('.shp-name .sh-state')?.textContent?.trim() ?? '',
+              meta: [...(r.querySelector('.shp-meta')?.children ?? [])].map((c) => c.textContent),
+              copies: r.querySelectorAll('th button').length,
+            })),
+          );
+          ok(
+            shape.length === 2 &&
+              shape.every((r) => r.h >= 56 && r.copies === 0) &&
+              shape.some((r) => r.name === 'Camille Exemple' && r.state === 'Désactivé') &&
+              shape.find((r) => r.name === 'Alex Exemple').meta.join(' · ') ===
+                'Session du 5 novembre · Globex · Page personnalisée',
+            `Liens personnalisés : nom + état, puis groupe · variables · page (${JSON.stringify(shape)})`,
           );
           await q.fill('globex');
           ok(

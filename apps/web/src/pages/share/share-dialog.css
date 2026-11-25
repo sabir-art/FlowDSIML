@@ -553,21 +553,49 @@
 .mk #sh-panel-perso .sh-links.has-center td:last-child {
   width: 236px;
 }
+/* Une ligne de 56 px : le nom (500) et sa pastille d'état, puis une ligne atténuée de 12 px où groupe,
+   variables, page personnalisée et expiration se suivent, séparés par « · » */
+.mk #sh-panel-perso .sh-links tbody tr {
+  height: 56px;
+}
+.mk #sh-panel-perso .sh-links tbody :is(th, td) {
+  vertical-align: middle;
+}
 .mk .shp-name {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  overflow-wrap: anywhere;
+  font-weight: 500;
+}
+.mk .shp-name__t {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .shp-name .sh-state {
+  flex: none;
 }
 .mk .shp-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
-  margin-top: 4px;
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
   color: var(--fd-color-text-muted);
   font: 400 12px var(--fd-font-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .shp-meta > span + span::before {
+  content: ' · ';
+  white-space: pre;
+}
+.mk .shp-copied {
+  min-height: 0;
+  margin: 8px 0 0;
+}
+.mk .shp-copied:empty {
+  margin: 0;
 }
 .mk .shp-foot {
   display: flex;

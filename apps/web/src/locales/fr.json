@@ -2462,9 +2462,11 @@
       "httpsRequired": "Saisissez une adresse qui commence par https://",
       "emailHelp": "Sert à relier les vues et le lead à ce contact. Jamais affichée sur la page ni dans la démo.",
       "column": "Page",
-      "badgeOn": "Personnalisée",
+      "badgeOn": "Page personnalisée",
       "badgeOff": "Démo seule",
-      "copyPage": "Copier l’adresse de la page {{name}}"
+      "copyPage": "Copier l’adresse de la page {{name}}",
+      "copyPageShort": "Copier l’adresse de la page",
+      "pageCopied": "Adresse de la page copiée"
     },
     "popupLabel": "Voir la démo",
     "centerNotice": "Cette démo est le module {{position}} de « {{path}} » dans le centre de formation. Envoyez aux apprenants le lien du centre : il affiche leur progression, la reprise et leur attestation.",

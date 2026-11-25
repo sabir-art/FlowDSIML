@@ -2462,9 +2462,11 @@
       "httpsRequired": "Enter an address starting with https://",
       "emailHelp": "Used to link views and the lead to this contact. Never shown on the page or in the demo.",
       "column": "Page",
-      "badgeOn": "Personalised",
+      "badgeOn": "Personalised page",
       "badgeOff": "Demo only",
-      "copyPage": "Copy the page address {{name}}"
+      "copyPage": "Copy the page address {{name}}",
+      "copyPageShort": "Copy the page address",
+      "pageCopied": "Page address copied"
     },
     "popupLabel": "View the demo",
     "centerNotice": "This demo is module {{position}} of “{{path}}” in the training centre. Send learners the centre link: it shows their progress, lets them resume and gives their certificate.",
