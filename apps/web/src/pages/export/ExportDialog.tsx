@@ -701,7 +701,7 @@ export function ExportDialog({
             aria-valuenow={phase.pct}
             aria-label={t('export.progress')}
           >
-            <span style={{ width: `${phase.pct}%` }} />
+            <span style={{ transform: `translateX(${phase.pct - 100}%)` }} />
           </div>
           <p className="fd-label x15-live" aria-live="polite">
             {phase.stage === 0 || phase.fmt === 'mp4' || phase.fmt === 'html'

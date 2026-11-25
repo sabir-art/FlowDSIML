@@ -47,6 +47,8 @@
   box-shadow: 0 24px 48px rgb(0 0 0 / 0.32);
   display: grid;
   grid-template-columns: 26% 1fr;
+  /* MOTION-01 §6 : le hotspot et la bulle se déplacent par transform, en unités de cette fenêtre */
+  container-type: size;
 }
 .mk .auth-ill__nav {
   display: flex;
@@ -211,9 +213,9 @@
   background: var(--ill-hs);
   /* Contour blanc : le hotspot reste visible sur le bouton prune */
   box-shadow: 0 0 0 2px #ffffff;
-  transition:
-    left var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
-    top var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
+  top: 0;
+  left: 0;
+  transition: transform var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
 }
 .mk .auth-ill__hs::after {
   content: '';
@@ -244,10 +246,11 @@
   box-shadow: 0 10px 24px rgb(8 10 14 / 0.18);
   font-size: 11px;
   line-height: 1.4;
+  top: 0;
+  left: 0;
   transition:
-    left var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
-    top var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
-    opacity 120ms;
+    transform var(--fd-motion-duration-slow) var(--fd-motion-ease-standard),
+    opacity var(--fd-motion-duration-fast);
 }
 .mk .auth-ill__tip small {
   display: block;
@@ -277,20 +280,16 @@
   opacity: 0;
 }
 .mk .auth-ill__win[data-step='1'] .auth-ill__hs {
-  top: 8.5%;
-  left: 88%;
+  transform: translate(88cqw, 8.5cqh);
 }
 .mk .auth-ill__win[data-step='1'] .auth-ill__tip {
-  top: 15%;
-  left: 52%;
+  transform: translate(52cqw, 15cqh);
 }
 .mk .auth-ill__win[data-step='2'] .auth-ill__hs {
-  top: 36%;
-  left: 40%;
+  transform: translate(40cqw, 36cqh);
 }
 .mk .auth-ill__win[data-step='2'] .auth-ill__tip {
-  top: 42%;
-  left: 44%;
+  transform: translate(44cqw, 42cqh);
 }
 
 /* Accroche et signature */

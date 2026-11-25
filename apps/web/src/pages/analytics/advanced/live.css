@@ -22,7 +22,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--fd-color-success);
-  animation: lv-pulse 2s var(--fd-motion-ease-standard, ease) infinite;
+  animation: lv-pulse var(--fd-motion-duration-pulse) var(--fd-motion-ease-standard, ease) infinite;
 }
 .mk .lv-state.is-paused > i {
   background: var(--fd-color-text-muted);

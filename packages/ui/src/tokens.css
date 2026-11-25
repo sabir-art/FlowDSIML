@@ -184,6 +184,8 @@
   --fd-motion-duration-exit-slow: 240ms;
   --fd-motion-duration-slow: 320ms;
   --fd-motion-duration-pulse: 1800ms;
+  --fd-motion-duration-spin: 800ms;
+  --fd-motion-duration-loop: 1200ms;
   --fd-motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --fd-motion-ease-emphasized: cubic-bezier(0.3, 0, 0, 1.3);
   --fd-motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);

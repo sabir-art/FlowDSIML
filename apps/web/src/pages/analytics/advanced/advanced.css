@@ -5,7 +5,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--fd-color-success);
-  animation: l19-pulse 1.6s ease-in-out infinite;
+  animation: l19-pulse var(--fd-motion-duration-pulse) ease-in-out infinite;
   vertical-align: 0;
 }
 .mk .an-tabs .live-dot {

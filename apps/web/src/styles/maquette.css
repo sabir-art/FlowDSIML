@@ -863,7 +863,7 @@
   inset: 0;
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  animation: fd-shimmer 1.4s infinite;
+  animation: fd-shimmer var(--fd-motion-duration-loop) infinite;
 }
 @keyframes fd-shimmer {
   to {
@@ -876,7 +876,7 @@
   border: 2px solid currentColor;
   border-right-color: transparent;
   border-radius: 50%;
-  animation: fd-spin 0.8s linear infinite;
+  animation: fd-spin var(--fd-motion-duration-spin) linear infinite;
   display: inline-block;
 }
 @keyframes fd-spin {

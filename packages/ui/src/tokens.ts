@@ -398,6 +398,10 @@ export const motion = {
   'duration-exit-slow': '240ms',
   'duration-slow': '320ms',
   'duration-pulse': '1800ms',
+  /** Rotation d'un indicateur de chargement (MOTION-01 §6) */
+  'duration-spin': '800ms',
+  /** Boucle d'attente : barre indéterminée, clignotement, reflet (MOTION-01 §6) */
+  'duration-loop': '1200ms',
   'ease-standard': 'cubic-bezier(0.2, 0.8, 0.2, 1)',
   'ease-emphasized': 'cubic-bezier(0.3, 0, 0, 1.3)',
   'ease-exit': 'cubic-bezier(0.4, 0, 1, 1)',

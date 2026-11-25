@@ -214,7 +214,17 @@ export function RemoteCursors({
   frame: HTMLElement | null;
 }) {
   const others = usePresenceLive(store);
-  if (!frame) return null;
+  // MOTION-01 §6 : position en px du cadre, appliquée par transform (jamais left/top animés)
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    if (!frame) return;
+    const read = () => setSize({ w: frame.clientWidth, h: frame.clientHeight });
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(frame);
+    return () => ro.disconnect();
+  }, [frame]);
+  if (!frame || !size.w) return null;
   const here = others.filter((p) => p.s === stepId && p.c && !isIdle(p));
   if (!here.length) return null;
   return createPortal(
@@ -223,7 +233,9 @@ export function RemoteCursors({
         <span
           key={p.u}
           className={`rcursor rcursor--${avatarTone(p.u)}`}
-          style={{ left: `${p.c![0] * 100}%`, top: `${p.c![1] * 100}%` }}
+          style={{
+            transform: `translate(${Math.round(p.c![0] * size.w * 10) / 10}px, ${Math.round(p.c![1] * size.h * 10) / 10}px)`,
+          }}
           aria-hidden="true"
         >
           <svg viewBox="0 0 24 24">

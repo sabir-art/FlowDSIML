@@ -855,6 +855,17 @@ input[type='radio']:disabled:checked::after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* MOTION-01 §6 : un indicateur de chargement ne reste jamais figé ; sa rotation devient un battement
+     d'opacité, lent */
+  .spin,
+  .spinner {
+    animation: fd-wait var(--fd-motion-duration-pulse) ease-in-out infinite !important;
+  }
+}
+@keyframes fd-wait {
+  50% {
+    opacity: 0.35;
+  }
 }
 
 /* L45 (E3, E17) : une légende est alignée sur les champs qu'elle titre (pas de retrait du navigateur) */

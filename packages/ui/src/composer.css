@@ -10,8 +10,8 @@
   border-radius: 16px;
   background: var(--fd-color-surface);
   transition:
-    border-color 120ms,
-    box-shadow 120ms;
+    border-color var(--fd-motion-duration-fast),
+    box-shadow var(--fd-motion-duration-fast);
 }
 .fd-composer:hover {
   border-color: var(--fd-color-border-field-hover);

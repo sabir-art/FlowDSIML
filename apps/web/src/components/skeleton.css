@@ -8,7 +8,7 @@
   height: 0.75em;
   border-radius: var(--fd-radius-sm, 4px);
   background: color-mix(in srgb, var(--fd-color-border-strong) 30%, var(--fd-color-surface));
-  animation: sk-beat 1.6s ease-in-out infinite;
+  animation: sk-beat var(--fd-motion-duration-pulse) ease-in-out infinite;
 }
 .sk--round {
   border-radius: 999px;
