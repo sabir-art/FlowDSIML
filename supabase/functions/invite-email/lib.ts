@@ -1,9 +1,14 @@
 // E-mails P1 (spec emails-notifications-invitations §4) : logique de l'Edge Function invite-email, sans
 // dépendance au réseau (testée avec des doubles : aucun envoi réel en test). Un admin envoie les
 // invitations d'équipe qu'il vient de créer :
-//  - nouvelle adresse : invitation Supabase Auth (gabarit invite.html), avec le nom de l'espace et
-//    celui de l'invitant pour seules données ; le lien ramène à l'acceptation (#/invite/<jeton>) ;
-//  - compte existant : notification « invite » dans l'app (posée en base), aucun e-mail.
+//  - nouvelle adresse, ou compte jamais confirmé : invitation Supabase Auth (gabarit invite.html), avec
+//    le nom de l'espace et celui de l'invitant pour seules données ; le lien ramène à l'acceptation
+//    (#/invite/<jeton>). Auth renvoie l'invitation d'un compte non confirmé ; s'il refuse malgré tout
+//    (compte déjà enregistré, délai entre deux envois), l'e-mail part par TutoClick (mail.ts), avec le
+//    lien direct vers la page d'acceptation : aucune invitation ne reste sans e-mail ;
+//  - compte existant (confirmé) : notification « invite » dans l'app (posée en base) ET le même e-mail
+//    de TutoClick. La réponse à l'admin est la même dans tous les cas.
+// Le lien de l'e-mail de TutoClick est bâti côté serveur (réglage APP_URL), jamais depuis la requête.
 // Droits, plafond horaire (20 par espace) et budget du jour (150) sont décidés en base
 // (invite_send_reserve) ; un envoi en échec est rendu (invite_send_undo).
 
@@ -11,13 +16,13 @@ export type Status = 'sent' | 'failed' | 'rate_limit' | 'budget' | 'sent_before'
 export type Reserve =
   | {
       ok: true;
-      mode: 'email';
+      /** email : aucun compte confirmé ; notify : compte existant, notification déjà posée en base. */
+      mode: 'email' | 'notify';
       email: string;
       token: string;
       workspace_name: string;
       inviter_name: string | null;
     }
-  | { ok: true; mode: 'notify' }
   | { ok: false; reason: 'forbidden' | 'not_found' | 'sent' | 'rate_limit' | 'budget' };
 
 /** Lu par le gabarit invite.html ({{ .Data.* }}). */
@@ -34,6 +39,8 @@ export interface Deps {
   undo(invitationId: string): Promise<void>;
   /** Invitation Auth (gabarit invite) ; false si l'envoi a échoué. */
   invite(email: string, redirectTo: string, meta: Meta): Promise<boolean>;
+  /** E-mail de TutoClick avec le lien direct ; false s'il n'est pas configuré ou si l'envoi a échoué. */
+  mail(email: string, token: string, meta: Meta): Promise<boolean>;
 }
 
 export const MAX_BATCH = 20;
@@ -76,17 +83,22 @@ export async function handle(body: Record<string, unknown>, jwt: string, deps: D
       results.push({ id, status: r.reason === 'sent' ? 'sent_before' : r.reason });
       continue;
     }
-    // Confidentialité : même réponse qu'un e-mail, l'admin ne sait pas si l'adresse a un compte
-    if (r.mode === 'notify') {
-      results.push({ id, status: 'sent' });
-      continue;
-    }
     const meta: Meta = {
       workspace_name: r.workspace_name,
       inviter_name: r.inviter_name ?? '',
       demo_title: '',
     };
-    const ok = await deps.invite(r.email, redirectFor(appUrl, r.token), meta).catch(() => false);
+    // Compte existant : la notification est posée, l'e-mail l'accompagne. Confidentialité : même
+    // réponse qu'une nouvelle adresse, quel que soit le sort de l'e-mail (l'admin ne sait pas s'il y a
+    // un compte).
+    if (r.mode === 'notify') {
+      await deps.mail(r.email, r.token, meta).catch(() => false);
+      results.push({ id, status: 'sent' });
+      continue;
+    }
+    const ok =
+      (await deps.invite(r.email, redirectFor(appUrl, r.token), meta).catch(() => false)) ||
+      (await deps.mail(r.email, r.token, meta).catch(() => false));
     if (!ok) await deps.undo(id);
     results.push({ id, status: ok ? 'sent' : 'failed' });
   }
