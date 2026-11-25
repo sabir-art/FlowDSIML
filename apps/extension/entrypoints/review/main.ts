@@ -4,6 +4,11 @@ import { browser } from 'wxt/browser';
 import {
   Cake,
   Check,
+  Crop,
+  Images,
+  Info,
+  Monitor,
+  SquareMousePointer,
   House,
   IdCard,
   KeyRound,
@@ -28,6 +33,9 @@ import type { PiiType } from '@/lib/pii';
 import { sendCaptures } from '@/lib/upload';
 import type { FillTarget } from '@/lib/messages';
 import { rs, tr } from '@/lib/reviewStrings';
+import { strings } from '@/lib/i18n';
+import { defaultHotspotTitle } from '@/lib/geometry';
+import { frameFor, type FrameMode } from '@/lib/frame';
 
 /**
  * Écran de vérification des flous avant envoi (spec f1-formation §1). Tout se passe dans le
@@ -100,7 +108,7 @@ async function boot() {
   $('confirm-yes').textContent = tr('cancelYes');
   $('state-text').textContent = tr('analyzing');
   createIcons({
-    icons: { Lock, Check, Send, Scan: ScanSearch, EyeOff },
+    icons: { Lock, Check, Send, Scan: ScanSearch, EyeOff, Images },
     attrs: { width: 16, height: 16, 'aria-hidden': 'true' },
   });
 
@@ -149,6 +157,7 @@ function render() {
   renderRail();
   renderStage();
   renderPanel();
+  renderFrames();
   const n = captures.length;
   $('send-text').textContent = tr('send', { count: n });
 }
@@ -216,13 +225,144 @@ function renderStage() {
       'data-z': z.id,
     }),
   );
-  stage.replaceChildren(img, ...zones);
+  // EXT-02 §5 : cadre gardé (le reste de l'image n'apparaîtra pas dans la démo)
+  const crop = c.frame?.crop;
+  const kept = crop
+    ? [
+        h('div', {
+          class: 'rv-frame',
+          style: `left:${crop.x * 100}%;top:${crop.y * 100}%;width:${crop.w * 100}%;height:${crop.h * 100}%`,
+          'aria-hidden': 'true',
+        }),
+      ]
+    : [];
+  stage.replaceChildren(img, ...kept, ...zones);
   $('legend').replaceChildren(
     h('li', {}, h('i', { class: 'rv-sw rv-sw--blur' }), tr('legendBlur')),
     h('li', {}, h('i', { class: 'rv-sw rv-sw--off' }), tr('legendDetected')),
     h('li', {}, h('i', { class: 'rv-sw rv-sw--sel' }), tr('legendSelected')),
   );
 }
+
+// ===== EXT-02 §5 : cadre de chaque capture =====
+const FRAMES: Array<{ mode: FrameMode; label: string; icon: IconNode }> = [
+  { mode: 'page', label: strings.framePage, icon: Monitor },
+  { mode: 'element', label: strings.frameElement, icon: SquareMousePointer },
+  { mode: 'zone', label: strings.frameZone, icon: Crop },
+];
+/** Nature du cadre, ou la raison pour laquelle la page entière est gardée. */
+function frameNature(c: PendingCapture): { text: string; info: boolean } {
+  const f = c.frame ?? { mode: 'page' as FrameMode, crop: null };
+  if (f.mode === 'zone')
+    return f.crop
+      ? { text: strings.fnZone, info: false }
+      : { text: c.zone ? strings.fnOutside : strings.fnNoZone, info: true };
+  if (f.mode === 'element')
+    return f.crop ? { text: strings.fnElement, info: false } : { text: strings.fnWide, info: true };
+  return { text: strings.fnPage, info: false };
+}
+function setFrame(c: PendingCapture, mode: FrameMode) {
+  c.frame = frameFor(mode, { element: c.element, click: c.click, viewport: c.viewport, zone: c.zone });
+  save(c);
+  renderFrames();
+  if (captures[current] === c) renderStage();
+}
+function renderFrames() {
+  const ordered = [...captures].sort((a, b) => a.order - b.order);
+  $('caps').hidden = !ordered.length;
+  $('caps-title').textContent = strings.capsTitle.replace('{{n}}', String(ordered.length));
+  $('caps-help').textContent = strings.capsHelp;
+  const focused = (document.activeElement as HTMLElement | null)?.dataset;
+  $('caps-list').replaceChildren(
+    ...ordered.map((c) => {
+      const mode = c.frame?.mode ?? 'page';
+      const crop = c.frame?.crop ?? { x: 0, y: 0, w: 1, h: 1 };
+      const nature = frameNature(c);
+      const n = c.order + 1;
+      return h(
+        'li',
+        { class: 'rv-cap' },
+        h('span', { class: 'rv-cap__n', 'aria-hidden': 'true' }, String(n)),
+        h(
+          'span',
+          { class: 'rv-cap__thumb', style: `aspect-ratio:${c.width} / ${c.height}` },
+          h('img', { src: urls.get(c.id) ?? '', alt: '' }),
+          h('i', {
+            style: `left:${crop.x * 100}%;top:${crop.y * 100}%;width:${crop.w * 100}%;height:${crop.h * 100}%`,
+          }),
+        ),
+        h(
+          'span',
+          { class: 'rv-cap__text' },
+          h(
+            'b',
+            {},
+            c.label
+              ? defaultHotspotTitle(c.label, document.documentElement.lang === 'en' ? 'en' : 'fr')
+              : thumbTitle(c),
+          ),
+          h(
+            'span',
+            { class: `rv-cap__nature${nature.info ? ' is-info' : ''}` },
+            ...(nature.info ? [icon(Info, 16)] : []),
+            nature.text,
+          ),
+        ),
+        h(
+          'span',
+          { class: 'rv-seg', role: 'radiogroup', 'aria-label': strings.frameOf.replace('{{n}}', String(n)) },
+          ...FRAMES.map((f) => {
+            // « Zone » n'a de sens que si une zone était tracée au moment du clic
+            const off = f.mode === 'zone' && !c.zone;
+            return h(
+              'button',
+              {
+                type: 'button',
+                role: 'radio',
+                'aria-checked': String(mode === f.mode),
+                'aria-label': f.label,
+                'aria-disabled': off ? 'true' : undefined,
+                title: off ? strings.fnNoZone : undefined,
+                tabindex: mode === f.mode ? '0' : '-1',
+                'data-cap': c.id,
+                'data-frame': f.mode,
+              },
+              icon(f.icon, 16),
+              h('span', {}, f.label),
+            );
+          }),
+        ),
+      );
+    }),
+  );
+  // Le focus reste sur le segment qui vient d'être actionné
+  if (focused?.cap)
+    document.querySelector<HTMLElement>(`[data-cap="${focused.cap}"][aria-checked="true"]`)?.focus();
+}
+$('caps-list').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>('[data-frame]');
+  if (!b || b.getAttribute('aria-disabled') === 'true') return;
+  const c = captures.find((x) => x.id === b.dataset.cap);
+  if (c) setFrame(c, b.dataset.frame as FrameMode);
+});
+$('caps-list').addEventListener('keydown', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>('[data-frame]');
+  const d =
+    e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      ? 1
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+        ? -1
+        : 0;
+  if (!b || !d) return;
+  e.preventDefault();
+  const all = [...b.parentElement!.querySelectorAll<HTMLElement>('[data-frame]:not([aria-disabled="true"])')];
+  const next = all[(all.indexOf(b) + d + all.length) % all.length];
+  const c = captures.find((x) => x.id === b.dataset.cap);
+  if (c && next) {
+    next.focus();
+    setFrame(c, next.dataset.frame as FrameMode);
+  }
+});
 
 function renderPanel() {
   const c = captures[current]!;

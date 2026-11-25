@@ -509,6 +509,13 @@ jobs:
         run: |
           cd apps/extension && node e2e/popup.e2e.cjs | tee /tmp/e2e-ext-popup.log
           ! grep -q '^NOT OK' /tmp/e2e-ext-popup.log
+      - name: Cadre des captures (EXT-02 §5) (barre Page, Élément, Zone ; tracé au clavier ; cadre modifiable à la vérification ; recadrage non destructif)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/cadre.e2e.cjs | tee /tmp/e2e-ext-cadre.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-cadre.log
       - name: Vérifier avant l'envoi (titre, type, pages, six groupes, « Garder » une donnée ou un lien, lien refusé)
         if: always()
         env:

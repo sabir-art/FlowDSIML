@@ -16,6 +16,7 @@ import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
 import { APP_URL, DEBUGGER } from '@/lib/config';
+import { asFrameMode, frameFor } from '@/lib/frame';
 import {
   ASSET_MAX_BYTES,
   ASSET_TIMEOUT_MS,
@@ -295,6 +296,14 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
       // L25-06 : onglet de la capture quand le suivi des onglets est activé
       tab: state.followTabs ? { n: tab.n, title: msg.title.slice(0, 120) } : undefined,
       full,
+      // EXT-02 §5 : cadre demandé dans la barre ; l'image reste entière
+      frame: frameFor(asFrameMode(msg.frame?.mode), {
+        element: msg.element,
+        click: msg.click,
+        viewport: msg.viewport,
+        zone: msg.frame?.zone ?? null,
+      }),
+      zone: msg.frame?.zone ?? null,
     });
     await setState({ steps: order + 1, lastError: null });
   } catch (e) {
@@ -329,6 +338,9 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
   if (!auth.user) throw new Error('Non connecté');
   await pending.clear();
   const mode = req.mode ?? 'clicks';
+  // EXT-02 §5 : la capture part du cadre par défaut de la personne (Réglages de l'extension), sans zone
+  const saved = (await browser.storage.local.get('fd.frame'))['fd.frame'];
+  await browser.storage.local.set({ 'fd.frameState': { mode: asFrameMode(saved), zone: null } });
   const first = await browser.tabs.get(req.tabId);
   await setState({
     debugged: [],
@@ -733,8 +745,9 @@ export default defineBackground(() => {
         const next = s.fill?.steps[s.steps];
         const guide =
           s.fill && next ? { title: next.title, n: s.steps + 1, total: s.fill.steps.length } : null;
-        if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide };
-        return guide ? { n: 1, title: '', guide } : null;
+        // EXT-02 §5 : la barre affiche « Capture · n »
+        if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide, steps: s.steps };
+        return { n: 1, title: '', guide, steps: s.steps };
       });
     const p = m as PopupRequest;
     if (p.type === 'fd:status') return getState();

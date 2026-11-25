@@ -1,6 +1,7 @@
 import type { RelRect, Viewport, PxRect } from './geometry';
 import type { PiiType } from './pii';
 import type { PageBox } from './fullpage';
+import type { Frame } from './frame';
 
 /** Zone à vérifier sur une capture (coordonnées relatives 0–1). */
 export interface PendingZone {
@@ -34,6 +35,12 @@ export interface PendingCapture {
   zones: PendingZone[];
   /** L25-01 : onglet de la capture (numéro d'ordre et titre), quand plusieurs onglets sont suivis. */
   tab?: { n: number; title: string };
+  /**
+   * EXT-02 §5 : cadre gardé (recadrage non destructif posé à l'envoi). L'image reste entière : le cadre
+   * se change à la vérification. `zone` : zone tracée au moment du clic (pixels de la fenêtre).
+   */
+  frame?: Frame;
+  zone?: PxRect | null;
   /**
    * L25-01 : capture de la page entière (animation de défilement). Ses zones sont repérées sur tout
    * le document et floutées à l'envoi, sauf celles décochées sur la capture du viewport.

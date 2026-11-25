@@ -110,10 +110,8 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
   await aide.waitForLoadState('load');
   await aide.bringToFront();
   await aide.waitForTimeout(1500);
-  const chip = await aide.evaluate(() => document.querySelector('[data-fd-ui]')?.textContent ?? '');
-  const live = await aide.evaluate(
-    () => document.querySelector('[data-fd-ui][role=status]')?.textContent ?? '',
-  );
+  const chip = await aide.locator('[data-fd-ui] .count').textContent();
+  const live = await aide.locator('[data-fd-ui] [role=status]').textContent();
   ok(/Onglet 2 · Aide/.test(chip), `barre : « Onglet 2 · Aide » (${chip})`);
   if (SHOTS) await aide.screenshot({ path: `${SHOTS}/l25-01-barre-onglet.png` });
   ok(/Capture dans l’onglet 2 : Aide/.test(live), 'annonce de l’onglet pour les lecteurs d’écran');
