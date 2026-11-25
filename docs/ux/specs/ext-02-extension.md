@@ -131,7 +131,7 @@ En Sandbox (pas d’étape suivante) : titre « Aucune zone cliquable sur cette 
 
 ### 3.3 bis Lecteur public
 
-La bascule « Zones cliquables » (et la touche H) et le message « Aucun lien à cet endroit » valent aussi dans le lecteur public. L’encart « Aucune zone cliquable » et « Ajouter une zone » n’y apparaissent pas : la bascule affiche 0, désactivée, et seul « Suivant » reste.
+La bascule « Zones cliquables » n’existe que dans la Sandbox (décision du 25/11, écart dev accepté). Dans le lecteur public et la démo guidée, il n’y a pas de bascule : la touche H et le lien « Voir les zones » restent disponibles, et le message « Aucun lien à cet endroit » s’applique. L’encart « Aucune zone cliquable » et « Ajouter une zone » n’y apparaissent pas. Une étape HTML sans hotspot avance par la flèche de la barre, comme une capture.
 
 ### 3.4 À 390 px
 
