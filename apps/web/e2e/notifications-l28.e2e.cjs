@@ -86,22 +86,21 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'menu retiré une fois coupée',
   );
 
-  // Préférences : liste des démos coupées, Réactiver
-  await dlg.getByRole('button', { name: 'Préférences' }).click();
-  const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
-  await prefs.waitFor();
-  const muted = prefs.locator('.nb-muted li');
+  // §4 : « Préférences » ouvre Paramètres › Notifications, où se trouvent les démos coupées et « Réactiver »
+  await dlg.getByRole('link', { name: 'Préférences' }).click();
+  await page.getByRole('heading', { name: 'Notifications', level: 1 }).waitFor();
+  const muted = page.locator('.nt-muted li');
   await muted.first().waitFor();
   ok((await muted.count()) === 1, 'préférences : démo coupée listée');
   if (SHOTS) {
     await page.mouse.move(0, 0);
-    await prefs.screenshot({ path: `${SHOTS}/l28-06-preferences${sfx}.png` });
+    await page.screenshot({ path: `${SHOTS}/l28-06-preferences${sfx}.png` });
   }
   await muted
     .first()
     .getByRole('button', { name: /Réactiver/ })
     .click();
-  await prefs.getByText('Aucune démo coupée.').waitFor();
+  await page.locator('.nt-none').waitFor();
   ok(state.tables.notification_mutes.length === 0, 'Réactiver : démo de nouveau suivie');
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);

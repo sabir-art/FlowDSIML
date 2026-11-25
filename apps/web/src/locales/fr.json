@@ -6078,7 +6078,7 @@
         "help": "Un visiteur laisse son adresse sur une de vos démos."
       }
     },
-    "emailHelp": "E-mail : un résumé au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. Une notification coupée dans l’app ne part pas par e-mail.",
+    "emailHelp": "Le résumé regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail. Une notification coupée dans l’app ne part pas par e-mail.",
     "mutedTitle": "Démos coupées",
     "mutedSub": "Démos dont vous ne recevez plus aucune notification.",
     "mutedNone": "Aucune démo coupée.",
@@ -6088,7 +6088,12 @@
     "saveError": "Le réglage n’a pas pu être enregistré.",
     "always": "Toujours",
     "mentionsAlways": "Les mentions (@) sont toujours notifiées dans l’app.",
-    "mentionsEmail": "Recevoir aussi les mentions par e-mail"
+    "mentionsEmail": "Recevoir aussi les mentions par e-mail",
+    "frequency": "Fréquence des e-mails",
+    "frequency_hourly": "Au fil de l’eau",
+    "frequency_daily": "Un résumé par jour à 9 h",
+    "frequencyHelp_hourly": "Au plus un e-mail par heure.",
+    "frequencyHelp_daily": "À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau."
   },
   "accessKeys": {
     "title": "Clés d’accès",

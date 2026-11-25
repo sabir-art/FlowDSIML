@@ -1133,3 +1133,16 @@ fieldset.stg-row {
 .stg-sec__head[data-page-title]:has(.stg-sec__acts) {
   justify-content: flex-end;
 }
+
+/* §4 : fréquence des e-mails (choix segmenté sous le tableau) */
+.nt-freq {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 20px;
+}
+.nt-freq .segmented [aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

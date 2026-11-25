@@ -26,6 +26,18 @@ const EVENTS = ['mention', 'reply', 'comment', 'resolved', 'alert', 'lead'] as c
 const SHOWN = EVENTS.filter((k) => k !== 'mention');
 type EventKey = (typeof EVENTS)[number];
 type Flags = Partial<Record<EventKey, boolean>>;
+const FREQUENCIES = ['hourly', 'daily'] as const;
+type Frequency = (typeof FREQUENCIES)[number];
+
+/** Fuseau du navigateur (nom IANA), enregistré avec les réglages ; absent : la base prend Europe/Paris. */
+function browserTimezone(): string | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return tz && /^[A-Za-z0-9_+/-]{1,64}$/.test(tz) ? tz : null;
+  } catch {
+    return null;
+  }
+}
 
 const asFlags = (raw: unknown): Flags =>
   raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Flags) : {};
@@ -42,6 +54,7 @@ export function NotificationSettings() {
   const [prefs, setPrefs] = useState<Flags>({});
   const [email, setEmail] = useState(false);
   const [emailPrefs, setEmailPrefs] = useState<Flags>({});
+  const [frequency, setFrequency] = useState<Frequency>('hourly');
   const [emailAvailable, setEmailAvailable] = useState(false);
   const [muted, setMuted] = useState<Array<{ demoId: string; title: string }>>([]);
 
@@ -57,7 +70,7 @@ export function NotificationSettings() {
     let live = true;
     void supabase
       .from('notification_settings')
-      .select('prefs, email, email_prefs')
+      .select('prefs, email, email_prefs, email_frequency')
       .eq('user_id', me)
       .maybeSingle()
       .then(({ data }) => {
@@ -66,6 +79,7 @@ export function NotificationSettings() {
         setPrefs(asFlags(data?.prefs));
         setEmail(!!data?.email);
         setEmailPrefs(asFlags(data?.email_prefs));
+        setFrequency(data?.email_frequency === 'daily' ? 'daily' : 'hourly');
         setReady(true);
       });
     return () => {
@@ -92,7 +106,13 @@ export function NotificationSettings() {
   /** Par e-mail : sous l'accord global ; un événement non réglé suit cet accord. */
   const byEmail = (k: EventKey) => email && emailPrefs[k] !== false && inApp(k);
 
-  const save = async (patch: { prefs?: Flags; email?: boolean; email_prefs?: Flags }) => {
+  const save = async (patch: {
+    prefs?: Flags;
+    email?: boolean;
+    email_prefs?: Flags;
+    email_frequency?: Frequency;
+    timezone?: string | null;
+  }) => {
     if (!me) return false;
     const { error } = hasRow.current
       ? await supabase.from('notification_settings').update(patch).eq('user_id', me)
@@ -114,10 +134,17 @@ export function NotificationSettings() {
     const any = EVENTS.some((e) => next[e]);
     setEmailPrefs(next);
     setEmail(any);
-    if (!(await save({ email: any, email_prefs: next }))) {
+    // Le fuseau du navigateur suit l'accord : le résumé quotidien part à 9 h, heure de la personne
+    if (!(await save({ email: any, email_prefs: next, timezone: browserTimezone() }))) {
       setEmail(before.email);
       setEmailPrefs(before.emailPrefs);
     }
+  };
+  const chooseFrequency = async (f: Frequency) => {
+    if (f === frequency) return;
+    const before = frequency;
+    setFrequency(f);
+    if (!(await save({ email_frequency: f, timezone: browserTimezone() }))) setFrequency(before);
   };
   const unmute = async (demoId: string, title: string) => {
     const { error } = await supabase.from('notification_mutes').delete().eq('demo_id', demoId);
@@ -195,7 +222,35 @@ export function NotificationSettings() {
           disabled={!emailAvailable || !ready}
           onChange={(e) => void toggleEmail('mention', e.target.checked)}
         />
-        <p className="stg-help nt-help">{t('notifSettings.emailHelp')}</p>
+        {/* §4 : fréquence des e-mails. Au fil de l'eau (au plus un par heure) ou un résumé par jour à 9 h,
+            heure de la personne ; rien à envoyer : pas d'e-mail. */}
+        <div className="nt-freq">
+          <span className="t-label" id="nt-freq-l">
+            {t('notifSettings.frequency')}
+          </span>
+          <div
+            className="segmented"
+            role="radiogroup"
+            aria-labelledby="nt-freq-l"
+            aria-describedby="nt-freq-h"
+          >
+            {FREQUENCIES.map((f) => (
+              <button
+                key={f}
+                type="button"
+                role="radio"
+                aria-checked={frequency === f}
+                aria-disabled={!emailAvailable || !ready || undefined}
+                onClick={() => emailAvailable && ready && void chooseFrequency(f)}
+              >
+                {t(`notifSettings.frequency_${f}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="stg-help nt-help" id="nt-freq-h">
+          {t(`notifSettings.frequencyHelp_${frequency}`)} {t('notifSettings.emailHelp')}
+        </p>
       </section>
 
       <section className="stg-sec" aria-labelledby="nt-muted">

@@ -15,6 +15,7 @@ const ok = (c, l) => {
   if (!c) process.exitCode = 1;
 };
 
+/** §4 : les réglages d'e-mail sont dans Paramètres › Notifications (« Préférences » de la cloche y mène). */
 async function prefsOf(page) {
   await page.goto(`${APP}/#/`);
   // Un clic sur la cloche pendant le chargement est retenu (bellState) : pas d'attente préalable
@@ -23,8 +24,9 @@ async function prefsOf(page) {
     .first()
     .click();
   await page.getByRole('dialog', { name: 'Notifications' }).waitFor();
-  await page.getByRole('button', { name: 'Préférences' }).click();
-  const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
+  await page.getByRole('link', { name: 'Préférences' }).click();
+  await page.getByRole('heading', { name: 'Notifications', level: 1 }).waitFor();
+  const prefs = page.locator('section[aria-labelledby="nt-title"]:not([aria-busy])');
   await prefs.waitFor();
   return prefs;
 }
@@ -43,12 +45,12 @@ async function prefsOf(page) {
   {
     const page = await open(seed());
     const prefs = await prefsOf(page);
-    const sw = prefs.getByRole('switch', { name: /Recevoir aussi par e-mail/ });
+    const sw = prefs.getByRole('switch', { name: 'Réponses, par e-mail', exact: true });
     ok(
-      (await sw.isDisabled()) && /Bientôt/.test(await prefs.innerText()),
+      (await sw.isDisabled()) && /Bientôt/.test(await prefs.locator('thead').innerText()),
       'sans BREVO_API_KEY : «\u202fBientôt\u202f», désactivée',
     );
-    // Règle X4 : «\u202fBientôt\u202f» en texte gris, sans point d'état (aussi pour «\u202fRésumé quotidien\u202f»)
+    // Règle X4 : «\u202fBientôt\u202f» en texte gris, sans point d'état
     ok((await prefs.locator('.fd-status').count()) === 0, '«\u202fBientôt\u202f» sans point d’état');
     await page.close();
   }
@@ -59,21 +61,25 @@ async function prefsOf(page) {
     state.brevoKey = true;
     const page = await open(state);
     const prefs = await prefsOf(page);
-    const sw = prefs.getByRole('switch', { name: /Recevoir aussi par e-mail/ });
-    await prefs.getByText('Un e-mail au plus par heure').waitFor();
+    const sw = prefs.getByRole('switch', { name: 'Réponses, par e-mail', exact: true });
+    await prefs.getByText('Au plus un e-mail par heure.', { exact: false }).waitFor();
     ok(
       !(await sw.isDisabled()) && !(await sw.isChecked()),
       'avec la clé : option active, désactivée par défaut',
     );
     ok(
-      (await prefs.innerText()).includes(
-        'Un e-mail au plus par heure, qui regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail.',
+      (await prefs.locator('#nt-freq-h').innerText()).includes(
+        'Le résumé regroupe vos notifications non lues. Lien de désinscription dans chaque e-mail.',
       ),
       'aide sous l’option',
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/EML-05-option.png` });
     await sw.check();
-    await page.waitForTimeout(300);
+    for (let i = 0; i < 100; i++) {
+      if ((state.tables.notification_settings || []).find((x) => x.user_id === state.user.id)?.email === true)
+        break;
+      await page.evaluate(() => new Promise(requestAnimationFrame));
+    }
     ok(
       (state.tables.notification_settings || []).find((x) => x.user_id === state.user.id)?.email === true,
       'option enregistrée (table propre à l’utilisateur)',
