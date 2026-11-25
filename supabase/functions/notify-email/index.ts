@@ -65,6 +65,12 @@ Deno.serve(async (req) => {
     }
   }
   const bearer = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  // Option « Bientôt » dans l'app : le journal dit quel réglage manque (son nom seulement, jamais une valeur)
+  if (body.action === 'status') {
+    const missing = ['BREVO_API_KEY', 'EMAIL_FROM', 'APP_URL'].filter((k) => !env(k));
+    if (missing.length)
+      console.warn(`notify-email indisponible, réglage(s) absent(s) : ${missing.join(', ')}`);
+  }
   const r = await handle(body, query, bearer, deps());
   return json(r.status, r.body);
 });
