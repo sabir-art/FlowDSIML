@@ -7,6 +7,8 @@ import {
   parseCaptions,
   parseVoice,
   providerRefusal,
+  resolveVoices,
+  VOICES,
 } from './audio.ts';
 
 const STEP = '0b5c1f0e-0000-4000-8000-000000000001';
@@ -65,7 +67,12 @@ Deno.test('providerRefusal : la cause est nommée sans secret, le message du fou
     http: 503,
     log: '401 quota_exceeded',
   });
-  assertEquals(providerRefusal(402, null).error, 'PROVIDER_QUOTA');
+  // 402 : l'offre du compte ne permet pas la demande (ce n'est pas un quota épuisé)
+  assertEquals(providerRefusal(402, null), { error: 'PROVIDER_PLAN', http: 502, log: '402' });
+  assertEquals(providerRefusal(402, d('paid_plan_required')).error, 'PROVIDER_PLAN');
+  // Sans code : le nom de la première clé de detail, jamais une valeur
+  assertEquals(providerRefusal(402, { detail: { message: 'texte libre cle-factice' } }).log, '402 (message)');
+  assertEquals(providerRefusal(422, { detail: [{ loc: ['body'] }] }).log, '422');
   assertEquals(providerRefusal(401, d('invalid_api_key')).error, 'PROVIDER_KEY');
   assertEquals(providerRefusal(401, d('missing_permissions')).error, 'PROVIDER_KEY');
   assertEquals(providerRefusal(401, d('detected_unusual_activity')), {
@@ -89,4 +96,41 @@ Deno.test('providerRefusal : la cause est nommée sans secret, le message du fou
   assert(
     !providerRefusal(401, d('quota_exceeded', 'cle-factice dans le message')).log.includes('cle-factice'),
   );
+});
+
+Deno.test('resolveVoices : les voix proposées sont celles du compte', () => {
+  const v = (voice_id: string, gender: string, category = 'premade', language = 'en') => ({
+    voice_id,
+    category,
+    labels: { gender, language },
+  });
+  // Les identifiants prévus présents sur le compte sont gardés tels quels
+  const all = Object.values(VOICES).map((id, i) => v(id, i < 3 ? 'female' : 'male'));
+  assertEquals(resolveVoices(all), VOICES);
+  // Compte sans aucune des voix prévues : même genre, prédéfinies d'abord, puis la langue
+  const account = [
+    v('lib-f-1', 'female', 'professional', 'fr'),
+    v('pre-f-en', 'female', 'premade', 'en'),
+    v('pre-f-fr', 'female', 'premade', 'fr'),
+    v('pre-m-1', 'male', 'premade', 'en'),
+    v('own-m-1', 'male', 'cloned', 'fr'),
+    { voice_id: 42 },
+  ];
+  assertEquals(resolveVoices(account), {
+    claire: 'pre-f-fr',
+    louise: 'pre-f-en',
+    sarah: 'lib-f-1',
+    antoine: 'pre-m-1',
+    adam: 'own-m-1',
+  });
+  // Une voix prévue présente garde sa place, les autres se partagent le reste sans doublon
+  const mixed = resolveVoices([v(VOICES.adam!, 'male'), v('pre-m-2', 'male')]);
+  assertEquals(mixed, { adam: VOICES.adam!, antoine: 'pre-m-2' });
+  // Une ancienne voix (is_legacy) cède sa place à une voix actuelle, et ne sert qu'en dernier recours
+  const legacy = { ...v(VOICES.claire!, 'female'), is_legacy: true };
+  assertEquals(resolveVoices([legacy, v('pre-f-2', 'female')]), {
+    claire: 'pre-f-2',
+    louise: VOICES.claire!,
+  });
+  assertEquals(resolveVoices([]), {});
 });
