@@ -181,7 +181,7 @@ async function invite(page, emails) {
     await page.close();
   }
 
-  // Recette 4 : compte existant, aucun e-mail ; la personne invitée accepte depuis ses notifications
+  // Recette 4 : compte existant, notification et e-mail direct de TutoClick ; la personne invitée accepte depuis ses notifications
   {
     const state = admin({ existingAccounts: ['paul@acme.example'] });
     const page = await open(state);
@@ -194,8 +194,10 @@ async function invite(page, emails) {
     const body = await (await reply).json();
     await page.getByText('2 invitations envoyées.').waitFor();
     ok(
-      (state.inviteEmails || []).map((e) => e.email).join(',') === 'marie@acme.example',
-      'compte existant : aucun e-mail d’invitation (seule la nouvelle adresse en reçoit un)',
+      (state.inviteEmails || []).map((e) => e.email).join(',') === 'marie@acme.example' &&
+        (state.directEmails || []).map((e) => e.email).join(',') === 'paul@acme.example' &&
+        /^#\/invite\/[0-9a-f-]{36}$/.test(state.directEmails[0].link),
+      'compte existant : pas d’invitation Auth, mais l’e-mail de TutoClick avec le lien de l’invitation',
     );
     // Confidentialité : même réponse, même message et même budget, l'admin ne sait pas qui a un compte
     ok(

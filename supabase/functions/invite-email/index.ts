@@ -1,10 +1,12 @@
 // Edge Function `invite-email` (e-mails P1) : envoi des invitations d'équipe par Supabase Auth (gabarit
-// invite.html, SMTP de TutoClick). JWT vérifié par la plateforme et ici (auth.getUser). Droits,
+// invite.html, SMTP de TutoClick) ; compte existant, ou refus d'Auth : e-mail de TutoClick par Brevo
+// (mail.ts ; BREVO_API_KEY, EMAIL_FROM et APP_URL, sinon cet e-mail ne part pas). JWT vérifié par la plateforme et ici (auth.getUser). Droits,
 // plafond horaire et budget du jour : en base (invite_send_reserve). L'adresse de retour vient de
 // l'app ; Supabase Auth n'accepte que les redirections autorisées (sinon l'adresse du site).
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { handle, type Deps, type Reserve } from './lib.ts';
+import { acceptLink, renderInvite, sendInviteMail } from './mail.ts';
 
 const MAX_BODY = 4_000;
 
@@ -36,6 +38,21 @@ const deps: Deps = {
   async invite(email, redirectTo, meta) {
     const { error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo, data: meta });
     return !error;
+  },
+  async mail(email, token, meta) {
+    const key = Deno.env.get('BREVO_API_KEY')?.trim();
+    const from = Deno.env.get('EMAIL_FROM')?.trim();
+    const url = acceptLink(Deno.env.get('APP_URL')?.trim(), token);
+    if (!key || !from || !url) {
+      // Noms des réglages seulement : jamais une valeur, jamais une adresse
+      console.error('invite-email : e-mail direct non configuré (BREVO_API_KEY, EMAIL_FROM, APP_URL)');
+      return false;
+    }
+    return await sendInviteMail(
+      renderInvite({ to: email, workspace: meta.workspace_name, inviter: meta.inviter_name, url }),
+      key,
+      from,
+    );
   },
 };
 

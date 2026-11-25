@@ -529,8 +529,9 @@ async function install(page, state = seed()) {
       return json(route, 400, { error: 'bad_action' });
     }
     // E-mails P1 : invitations d'équipe. Aucun envoi réel : faux transport (state.inviteEmails) ;
-    // state.inviteTransport = 'fail' simule l'échec, state.existingAccounts les comptes déjà utilisés
-    // (notification), state.emailBudget le compteur du jour (150 au plus).
+    // state.inviteTransport = 'fail' simule l'échec, state.existingAccounts les comptes confirmés
+    // (notification et e-mail direct de TutoClick, state.directEmails), state.emailBudget le compteur
+    // du jour (150 au plus).
     if (p.startsWith('/functions/v1/invite-email')) {
       const b = JSON.parse(req.postData() || '{}');
       state.inviteEmails = state.inviteEmails || [];
@@ -547,6 +548,7 @@ async function install(page, state = seed()) {
         if ((state.existingAccounts || []).includes(inv.email)) {
           state.emailBudget = (state.emailBudget ?? 0) + 1;
           inv.sent_at = new Date().toISOString();
+          (state.directEmails ||= []).push({ email: inv.email, link: `#/invite/${inv.token}` });
           return { id, status: 'sent' };
         }
         if (state.inviteTransport === 'fail') return { id, status: 'failed' };
@@ -2574,6 +2576,19 @@ async function install(page, state = seed()) {
                 expires_at: i.expires_at,
               })),
           );
+        case 'set_invitation_role': {
+          // Comme la base : admin de l'espace, jamais Propriétaire
+          const inv = t.invitations.find((i) => i.id === a.p_invitation);
+          const mine = t.members.find(
+            (m) => m.workspace_id === inv?.workspace_id && m.user_id === state.user.id,
+          );
+          if (!inv || !['owner', 'admin'].includes(mine?.role))
+            return json(route, 403, { code: '42501', message: 'Accès refusé' });
+          if (a.p_role === 'owner' || (inv.role === 'owner' && mine.role !== 'owner'))
+            return json(route, 400, { code: 'P0001', message: 'INVITATION_ROLE_FORBIDDEN' });
+          inv.role = a.p_role;
+          return json(route, 204, null);
+        }
         case 'answer_invitation': {
           // Depuis la notification (compte existant) ou la prise en main (invitation en attente)
           const n = (t.notifications || []).find(

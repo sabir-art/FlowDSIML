@@ -48,9 +48,9 @@ select is((select sent from private.email_budget where day = private.email_day()
 select is((select sent_at from public.invitations where id = '00000000-0000-0000-0000-0000000300b3'), null,
   'échec : invitation de nouveau envoyable');
 
--- Compte existant : notification dans l'app, aucun e-mail
-select is(public.invite_send_reserve('00000000-0000-0000-0000-0000000300b2', '00000000-0000-0000-0000-0000000300a1'),
-  '{"ok": true, "mode": "notify"}'::jsonb, 'compte existant : notification');
+-- Compte existant : notification dans l'app (et de quoi écrire l'e-mail, voir invitation_renvoi_role)
+select is(public.invite_send_reserve('00000000-0000-0000-0000-0000000300b2', '00000000-0000-0000-0000-0000000300a1') ->> 'mode',
+  'notify', 'compte existant : notification');
 select is((select data - 'invitation' from public.notifications where kind = 'invite'),
   '{"actor": "Olga Exemple", "workspace": "Acme"}'::jsonb, 'notification : espace et invitant');
 select is((select sent from private.email_budget where day = private.email_day()), 2,
