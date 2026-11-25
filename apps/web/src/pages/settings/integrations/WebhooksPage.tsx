@@ -32,7 +32,8 @@ import {
   type Webhook,
 } from './webhooks';
 import './integrations.css';
-import { Button, Modal } from '@flowdsiml/ui';
+import { Button, Modal, EmptyState } from '@flowdsiml/ui';
+import { WebhooksPreview } from '../../../components/EmptyPreviews';
 
 export function WebhooksPage() {
   const { t } = useTranslation();
@@ -109,14 +110,12 @@ export function WebhooksPage() {
           </div>
         </div>
         {hooks === null ? null : hooks.length === 0 ? (
-          <div className="stg-empty">
-            <span className="stg-empty__tile" aria-hidden="true">
-              <WebhookIcon size={20} />
-            </span>
-            <h3>{t('integrations.emptyTitle')}</h3>
-            <p>{t('integrations.emptyBody')}</p>
-            <div className="stg-empty__acts">{addButton}</div>
-          </div>
+          // EMPTY-01 : « Ajouter un webhook » n'est que dans l'en-tête de la page
+          <EmptyState
+            preview={<WebhooksPreview />}
+            title={t('integrations.emptyTitle')}
+            body={t('integrations.emptyBody')}
+          />
         ) : (
           <div className="wh-table">
             <table className="stg-table">

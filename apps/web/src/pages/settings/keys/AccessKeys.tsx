@@ -11,7 +11,8 @@ import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Check, CircleAlert, Copy, KeyRound, Plus } from 'lucide-react';
-import { Alert, Button, Modal, Select } from '@flowdsiml/ui';
+import { Alert, Button, Modal, Select, EmptyState } from '@flowdsiml/ui';
+import { KeysPreview } from '../../../components/EmptyPreviews';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { SUPABASE_URL } from '../../../lib/env';
@@ -136,14 +137,12 @@ export function AccessKeys() {
           </div>
         </div>
         {keys === null ? null : keys.length === 0 ? (
-          <div className="stg-empty">
-            <span className="stg-empty__tile" aria-hidden="true">
-              <KeyRound size={20} />
-            </span>
-            <h3>{t('accessKeys.emptyTitle')}</h3>
-            {/* §3 : « Créer une clé » n'est qu'à un endroit, dans l'en-tête de la page */}
-            <p>{t('accessKeys.emptyBody')}</p>
-          </div>
+          // §3 et EMPTY-01 : « Créer une clé » n'est qu'à un endroit, dans l'en-tête de la page
+          <EmptyState
+            preview={<KeysPreview />}
+            title={t('accessKeys.emptyTitle')}
+            body={t('accessKeys.emptyBody')}
+          />
         ) : (
           <table className="stg-table ak-table">
             <caption className="sr-only">{t('accessKeys.caption')}</caption>

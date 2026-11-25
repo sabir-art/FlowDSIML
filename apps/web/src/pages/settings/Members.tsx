@@ -32,7 +32,8 @@ import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { SettingsShell } from './SettingsShell';
-import { Alert, Button, Modal, Select, computePosition, getPortal } from '@flowdsiml/ui';
+import { Alert, Button, Modal, Select, computePosition, getPortal, EmptyState } from '@flowdsiml/ui';
+import { TeamPreview } from '../../components/EmptyPreviews';
 import { useToast } from '../../components/Toast';
 import { EmailChips, isEmail, splitEmails } from '../../components/EmailChips';
 
@@ -422,6 +423,15 @@ export function Members() {
             )}
           </tbody>
         </table>
+        {/* EMPTY-01 : seul dans l'espace, sans invitation en cours. « Inviter » reste dans l'en-tête */}
+        {canManage && members.length === 1 && invites.length === 0 && !needle && (
+          <EmptyState
+            level={3}
+            preview={<TeamPreview />}
+            title={t('members.emptyTitle')}
+            body={t('members.emptyBody')}
+          />
+        )}
       </section>
 
       {inviting && (

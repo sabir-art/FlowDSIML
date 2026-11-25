@@ -94,8 +94,9 @@ const hook = (id, state, ws) => ({
   await p.getByText('Aucune connexion active').waitFor();
   ok(true, '« Connectées » : état vide');
   ok(
-    (await p.getByRole('button', { name: 'Ajouter un webhook' }).count()) === 1,
-    '« Connectées » : « Ajouter un webhook »',
+    (await p.getByRole('button', { name: 'Ajouter un webhook' }).count()) === 0 &&
+      (await p.locator('.fd-es').getByRole('button', { name: 'Voir les intégrations' }).count()) === 1,
+    '« Connectées » : pas d’« Ajouter un webhook » répété, « Voir les intégrations » (EMPTY-01)',
   );
   // Clavier : flèches dans le segmenté
   await p.getByRole('radio', { name: 'Connectées' }).focus();

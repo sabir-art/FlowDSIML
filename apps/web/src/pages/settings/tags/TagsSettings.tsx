@@ -1,8 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, ArrowDown, ArrowUp, Plus, Tag as TagIcon } from 'lucide-react';
-import { Button } from '@flowdsiml/ui';
+import { CircleAlert, ArrowDown, ArrowUp, Plus } from 'lucide-react';
+import { Button, EmptyState } from '@flowdsiml/ui';
+import { TagsPreview } from '../../../components/EmptyPreviews';
 import { SettingsShell } from '../SettingsShell';
 import { supabase } from '../../../lib/supabase';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -157,14 +158,8 @@ export function TagsSettings() {
         )}
 
         {loaded && store.tags.length === 0 && !creating ? (
-          <div className="stg-empty">
-            <span className="stg-empty__tile" aria-hidden="true">
-              <TagIcon size={20} />
-            </span>
-            <h3>{t('tags.emptyTitle')}</h3>
-            <p>{t('tags.emptyBody')}</p>
-            {editable && <div className="stg-empty__acts">{newButton}</div>}
-          </div>
+          // EMPTY-01 : « Nouvelle étiquette » n'est que dans l'en-tête de la page
+          <EmptyState preview={<TagsPreview />} title={t('tags.emptyTitle')} body={t('tags.emptyBody')} />
         ) : (
           loaded && (
             <div className="tgs-card" role="table" aria-label={t('tags.tableLabel')}>

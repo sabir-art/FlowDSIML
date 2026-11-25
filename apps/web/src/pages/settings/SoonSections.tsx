@@ -14,7 +14,8 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Menu } from '../../components/Menu';
 import '../editor/vars/vars.css';
-import { Alert, Button, Empty, Modal } from '@flowdsiml/ui';
+import { Alert, Button, EmptyState, Modal } from '@flowdsiml/ui';
+import { VariablesPreview } from '../../components/EmptyPreviews';
 
 type Row = Tables<'variables'>;
 
@@ -93,22 +94,11 @@ export function VariablesSettings() {
           </div>
         </div>
         {vars && vars.length === 0 ? (
-          <Empty
-            level={3}
-            icon={<Braces />}
+          // EMPTY-01 : « Nouvelle variable » n'est que dans l'en-tête de la page
+          <EmptyState
+            preview={<VariablesPreview />}
             title={t('vars.emptyTitle')}
             body={t('vars.emptyBody')}
-            action={
-              editable ? (
-                <Button
-                  variant="primary"
-                  icon={<Plus aria-hidden="true" />}
-                  onClick={() => setEditing('new')}
-                >
-                  {t('vars.new')}
-                </Button>
-              ) : undefined
-            }
           />
         ) : (
           <table className="stg-table st-vars-table">
