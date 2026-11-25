@@ -328,6 +328,43 @@ function sampler() {
       );
     await ctx.close();
   }
+  // ===== Barre de progression masquée par la démo (éditeur › Réglages) : compteur gardé, avancement annoncé =====
+  {
+    const ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, locale: 'fr-FR' });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.route('**/functions/v1/open-demo', (r) =>
+      r.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', manifest: { ...manifest, theme: { progress: false } } }),
+        headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+      }),
+    );
+    await page.route('**/assets/*.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+    await page.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+    await page.goto(`${PLAYER}/#/d/${DEMO}`);
+    await page.locator('.p-stage > .p-tip').waitFor();
+    const bar = await page.evaluate(() => {
+      const el = document.querySelector('.p-controls [role=progressbar]');
+      const r = el.getBoundingClientRect();
+      const c = document.querySelector('.p-controls .p-count');
+      return {
+        w: r.width,
+        h: r.height,
+        now: el.getAttribute('aria-valuenow'),
+        max: el.getAttribute('aria-valuemax'),
+        count: c.textContent.trim(),
+        countShown: c.getBoundingClientRect().width > 10,
+        scroll: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    ok(bar.w <= 1 && bar.h <= 1, `barre masquée : le trait n’est plus affiché (${bar.w} × ${bar.h})`);
+    ok(
+      bar.now === '1' && bar.max === '3' && bar.count === '1 / 3' && bar.countShown && bar.scroll <= 0,
+      `barre masquée : compteur « ${bar.count} » affiché, avancement toujours annoncé (${bar.now} sur ${bar.max})`,
+    );
+    await ctx.close();
+  }
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

@@ -262,6 +262,28 @@ const SHOTS = process.env.SHOTS_DIR;
     'F1 : checklist activée',
   );
 
+  // Barre de progression du lecteur : interrupteur actif (plus de « Bientôt »), aide selon l'état
+  {
+    const sw = page.getByLabel('Barre de progression');
+    ok(
+      (await sw.isEnabled()) &&
+        (await sw.isChecked()) &&
+        (await page.getByText('La barre de progression est affichée dans le lecteur.').count()) === 1,
+      'barre de progression : interrupteur actif, coché par défaut, sans « Bientôt »',
+    );
+    await sw.uncheck();
+    await page.getByText(/Le lecteur n’affiche que le compteur d’étapes \(«\s2\s\/\s8\s»\)\./).waitFor();
+    await page.waitForFunction(() => true);
+    const saved = async () =>
+      state.calls.some(
+        (c) =>
+          c.method === 'PATCH' && c.path.endsWith('/demos') && c.body?.settings?.theme?.progress === false,
+      );
+    for (let i = 0; i < 40 && !(await saved()); i++) await page.waitForTimeout(100);
+    ok(await saved(), 'barre de progression décochée : réglage enregistré dans le thème de la démo');
+    await sw.check();
+  }
+
   // F1 : menu de choix ajouté depuis le rail
   await tool('Étape');
   await page.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();
