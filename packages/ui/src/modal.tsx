@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 /**
@@ -63,6 +63,30 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
+  // MOTION-01 §3, sortie : la fenêtre fermée garde son dernier contenu le temps de sa transition
+  // (160 ms, modal.css). Sans transition (mouvement réduit, navigateur sans prise en charge), rien n'est gardé.
+  const [wasOpen, setWasOpen] = useState(open);
+  const [closing, setClosing] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    setClosing(!open);
+  }
+  const live = { icon, title, subtitle, footerLead, footer, children };
+  const kept = useRef(live);
+  if (open) kept.current = live;
+  const view = open ? live : kept.current;
+  useEffect(() => {
+    if (!closing) return;
+    const d = ref.current;
+    const cs = d ? getComputedStyle(d) : null;
+    const ms = cs && cs.display !== 'none' ? parseFloat(cs.transitionDuration) * 1000 || 0 : 0;
+    if (ms <= 0) {
+      setClosing(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setClosing(false), ms);
+    return () => window.clearTimeout(timer);
+  }, [closing]);
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -103,21 +127,21 @@ export function Modal({
         if (dismissible && e.target === ref.current) (onDismiss ?? (() => ref.current?.close()))();
       }}
     >
-      {open && (
-        <div className="fd-modal__box">
+      {(open || closing) && (
+        <div className="fd-modal__box" inert={!open}>
           <div className="fd-modal__head">
             <span className="fd-modal__tile" aria-hidden="true">
-              {icon}
+              {view.icon}
             </span>
-            {subtitle ? (
+            {view.subtitle ? (
               <div className="fd-modal__titles">
-                <h2 id={`${id}-t`}>{title}</h2>
+                <h2 id={`${id}-t`}>{view.title}</h2>
                 <p className="fd-modal__sub" id={`${id}-s`}>
-                  {subtitle}
+                  {view.subtitle}
                 </p>
               </div>
             ) : (
-              <h2 id={`${id}-t`}>{title}</h2>
+              <h2 id={`${id}-t`}>{view.title}</h2>
             )}
             {dismissible && (
               <button
@@ -130,11 +154,11 @@ export function Modal({
               </button>
             )}
           </div>
-          <div className="fd-modal__body">{children}</div>
-          {footer ? (
+          <div className="fd-modal__body">{view.children}</div>
+          {view.footer ? (
             <div className="fd-modal__foot">
-              {footerLead ? <span className="fd-modal__lead">{footerLead}</span> : null}
-              {footer}
+              {view.footerLead ? <span className="fd-modal__lead">{view.footerLead}</span> : null}
+              {view.footer}
             </div>
           ) : null}
         </div>

@@ -16,6 +16,32 @@
 .fd-modal:not([open]) {
   display: none;
 }
+/* MOTION-01 §3, sortie : la fenêtre fermée reste affichée 160 ms (display et overlay en transition
+   discrète), en fondu, 8 px plus bas et à 98 % ; le voile s'efface avec elle. Le composant garde son
+   contenu pendant ce temps. Sans prise en charge du navigateur, la fenêtre se ferme d'un coup. */
+@supports (transition-behavior: allow-discrete) and (overlay: auto) {
+  .fd-modal {
+    transition:
+      opacity var(--fd-motion-duration-exit) var(--fd-motion-ease-exit),
+      transform var(--fd-motion-duration-exit) var(--fd-motion-ease-exit),
+      overlay var(--fd-motion-duration-exit) allow-discrete,
+      display var(--fd-motion-duration-exit) allow-discrete;
+  }
+  .fd-modal::backdrop {
+    transition:
+      opacity var(--fd-motion-duration-exit) var(--fd-motion-ease-exit),
+      overlay var(--fd-motion-duration-exit) allow-discrete,
+      display var(--fd-motion-duration-exit) allow-discrete;
+  }
+  .fd-modal:not([open]) {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    pointer-events: none;
+  }
+  .fd-modal:not([open])::backdrop {
+    opacity: 0;
+  }
+}
 .fd-modal--md {
   width: 560px;
 }

@@ -180,6 +180,7 @@
   --fd-border-strong: 2px;
   --fd-motion-duration-fast: 120ms;
   --fd-motion-duration-base: 200ms;
+  --fd-motion-duration-exit: 160ms;
   --fd-motion-duration-slow: 320ms;
   --fd-motion-duration-pulse: 1800ms;
   --fd-motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -659,6 +660,7 @@
   :root {
     --fd-motion-duration-fast: 0ms;
     --fd-motion-duration-base: 0ms;
+    --fd-motion-duration-exit: 0ms;
     --fd-motion-duration-slow: 0ms;
   }
 }

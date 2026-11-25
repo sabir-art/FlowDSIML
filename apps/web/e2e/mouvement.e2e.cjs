@@ -348,6 +348,80 @@ function act(target) {
   await windows(false);
   await windows(true);
 
+  // ===== §3 : sortie d'une fenêtre (« Nouvelle démo »), 160 ms, opacité et transform =====
+  const leave = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/demos`);
+    await page
+      .getByRole('button', { name: /Nouvelle démo/ })
+      .first()
+      .click();
+    const dialog = page.locator('dialog.fd-modal[open]');
+    await dialog.waitFor();
+    await dialog.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    const r = await page.evaluate(() => {
+      const el = document.querySelector('dialog.fd-modal[open]');
+      el.querySelector('.fd-modal__close').click();
+      const first = {
+        open: el.open,
+        focusBack: !el.contains(document.activeElement) && document.activeElement !== document.body,
+        shown: getComputedStyle(el).display !== 'none',
+        box: !!el.querySelector('.fd-modal__box'),
+        duration: getComputedStyle(el).transitionDuration.split(',')[0].trim(),
+        easing: getComputedStyle(el)
+          .transitionTimingFunction.split(/,(?![^(]*\))/)[0]
+          .trim(),
+        props: getComputedStyle(el).transitionProperty,
+      };
+      return new Promise((resolve) => {
+        const t0 = performance.now();
+        const opacities = [];
+        let inert = false;
+        const tick = () => {
+          const cs = getComputedStyle(el);
+          opacities.push(Number(cs.opacity));
+          if (el.querySelector('.fd-modal__box[inert]')) inert = true;
+          const gone = cs.display === 'none' && !el.querySelector('.fd-modal__box');
+          if (gone || performance.now() - t0 > 2000) resolve({ first, opacities, gone, inert });
+          else requestAnimationFrame(tick);
+        };
+        tick();
+      });
+    });
+    const tag = reduced ? 'mouvement réduit' : 'sortie';
+    ok(r.first.open === false && r.first.focusBack, `${tag} : fenêtre fermée et focus rendu tout de suite`);
+    if (reduced) {
+      ok(parseFloat(r.first.duration) < 0.001, `${tag} : fermeture sans transition (${r.first.duration})`);
+    } else {
+      ok(
+        r.first.shown && r.first.box && r.inert,
+        'sortie : la fenêtre reste affichée avec son contenu, inerte, le temps du fondu',
+      );
+      ok(
+        r.first.duration === '0.16s' &&
+          r.first.easing === 'cubic-bezier(0.4, 0, 1, 1)' &&
+          r.first.props === 'opacity, transform, overlay, display',
+        `sortie : ${r.first.duration}, ${r.first.easing}, ${r.first.props}`,
+      );
+      ok(
+        r.opacities.some((o) => o > 0 && o < 1) &&
+          r.opacities.every((o, i) => i === 0 || o <= r.opacities[i - 1] + 0.001),
+        'sortie : l’opacité décroît sans rebond',
+      );
+    }
+    ok(r.gone, `${tag} : à la fin, fenêtre masquée et contenu retiré`);
+    await ctx.close();
+  };
+  await leave(false);
+  await leave(true);
+
   // ===== §3 : le soulignement de l'onglet actif glisse d'un onglet à l'autre (Analytics) =====
   const tabs = async (reduced) => {
     const ctx = await b.newContext({
