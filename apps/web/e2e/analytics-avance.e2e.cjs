@@ -339,8 +339,14 @@ const live = (n) => ({
   await page.getByRole('button', { name: 'Voir les 31 réponses écrites' }).click();
   const drawer = page.getByRole('dialog', { name: 'Réponses écrites' });
   await drawer.waitFor();
+  // Les réponses se chargent après l'ouverture du tiroir : on attend le texte, pas un délai
+  const written = await drawer
+    .getByText('Plus de captures sur le formulaire, merci.')
+    .waitFor({ timeout: 15000 })
+    .then(() => true)
+    .catch(() => false);
   ok(
-    (await drawer.getByText('Plus de captures sur le formulaire, merci.').count()) === 1,
+    written && (await drawer.getByText('Plus de captures sur le formulaire, merci.').count()) === 1,
     'réponses écrites (éditeur)',
   );
   await drawer.getByRole('button', { name: 'Fermer' }).click();
