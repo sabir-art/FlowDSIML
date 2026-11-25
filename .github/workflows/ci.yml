@@ -246,6 +246,9 @@ jobs:
       - name: Éditeur, capturer de nouvelles étapes (EXT-02 §8) (fenêtre, extension détectée ou requise, bandeau, repère, insertion, « Nouveau », annulation)
         if: always()
         run: cd apps/web && node e2e/capture-etapes.e2e.cjs && THEME=dark node e2e/capture-etapes.e2e.cjs
+      - name: Démo mélangée, captures et étape HTML (EXT-02 §8) (éditeur selon le type de l'étape, lecteur capture puis page HTML puis capture)
+        if: always()
+        run: cd apps/web && node e2e/demo-melangee.e2e.cjs
       - name: 'Démo hors ligne : archive générée, ouverte depuis le disque réseau coupé, aucune requête sortante (retours du 24/11, 2e série §8)'
         if: always()
         run: cd apps/web && node e2e/hors-ligne.e2e.cjs && THEME=dark node e2e/hors-ligne.e2e.cjs
