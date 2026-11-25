@@ -123,6 +123,9 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
     'courbe seule, sans aplat sous la courbe',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l47-espace.png`, fullPage: true });
+  // Après une capture pleine page (défilement, surtout à 390 px) : l'onglet doit être revenu à l'écran
+  await wsTabs.nth(0).waitFor();
+  await wsTabs.nth(0).scrollIntoViewIfNeeded();
   await wsTabs.nth(0).click();
   await selected(0);
   const steps = page.locator('section.an-w', { has: page.getByRole('heading', { name: /Étape par étape/ }) });
