@@ -48,6 +48,7 @@ import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
+import { useFlip } from '../../lib/flip';
 import { CaptureMoreDialog, CaptureMoreMarker, type CaptureMore } from './capture/CaptureMore';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { deleteFormWithUndo } from './formDelete';
@@ -365,6 +366,8 @@ export function StepList({
   const [grabbed, setGrabbed] = useState<number | null>(null);
   const [announce, setAnnounce] = useState('');
   const listRef = useRef<HTMLOListElement>(null);
+  // MOTION-01 : réordonnancement, ajout ou retrait d'une étape : les autres glissent à leur place (FLIP)
+  useFlip(listRef, editor.steps.map((x) => x.id).join());
   const focusStep = (i: number) =>
     requestAnimationFrame(() =>
       listRef.current?.querySelector<HTMLButtonElement>(`[data-step-index="${i}"]`)?.focus(),
@@ -577,6 +580,7 @@ export function StepList({
                 </li>
               )}
               <li
+                data-flip={s.id}
                 draggable={!readOnly}
                 onDragStart={() => setDragFrom(i)}
                 onDragOver={(e) => {

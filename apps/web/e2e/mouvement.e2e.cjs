@@ -525,6 +525,77 @@ function act(target) {
   await tabs(false);
   await tabs(true);
 
+  // ===== §3 : réordonnancement de la liste des étapes et toasts empilés (FLIP) =====
+  const flip = async (reduced) => {
+    const { page, ctx } = await open(reduced ? { reducedMotion: 'reduce' } : {});
+    const tag = reduced ? 'mouvement réduit' : 'FLIP';
+    /** Animations de transform en cours sur les éléments suivis, juste après un geste. */
+    const moving = (sel) =>
+      page.evaluate(
+        (sel) =>
+          [...document.querySelectorAll(sel)].flatMap((el) =>
+            el.getAnimations().flatMap((a) => {
+              const kf = a.effect.getKeyframes();
+              const props = [...new Set(kf.flatMap((f) => Object.keys(f)))].filter(
+                (n) => !/^(offset|easing|composite|computedOffset)$/.test(n),
+              );
+              return props.join() === 'transform'
+                ? [
+                    {
+                      duration: a.effect.getTiming().duration,
+                      easing: a.effect.getTiming().easing,
+                      from: kf[0].transform,
+                    },
+                  ]
+                : [];
+            }),
+          ),
+        sel,
+      );
+    ok(
+      (await moving('.rail-list [data-flip]')).length === 0,
+      `${tag} : rien ne bouge au premier affichage de la liste`,
+    );
+    // Alt + flèche haut : l'étape 2 passe en tête, les deux étapes échangent leur place
+    await page.locator('.rail-list .step').nth(1).focus();
+    await page.keyboard.press('Alt+ArrowUp');
+    await page.waitForFunction(
+      () => document.querySelector('.rail-list .step .meta b')?.textContent === 'Écran 2',
+    );
+    const steps = await moving('.rail-list [data-flip]');
+    if (reduced) ok(steps.length === 0, `${tag} : les étapes changent de place sans glisser`);
+    else {
+      ok(steps.length === 2, `FLIP : les deux étapes déplacées glissent (${steps.length})`);
+      ok(
+        steps.every((a) => a.duration === 200 && a.easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)') &&
+          steps.some((a) => /translate\(0px, -?\d/.test(a.from)),
+        `FLIP : transform seul, 200 ms, courbe standard (${steps.map((a) => a.from).join(' | ')})`,
+      );
+    }
+    // Deux toasts : le premier remonte quand le second entre
+    await page.locator('.rail-list .step').nth(0).focus();
+    await page.keyboard.press('Delete');
+    await page.locator('.toast').first().waitFor();
+    // Le premier toast a fini son entrée avant l'arrivée du second
+    await page
+      .locator('.toast')
+      .first()
+      .evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
+    await page.locator('.rail-list .step').nth(0).focus();
+    await page.keyboard.press('Delete');
+    await page.waitForFunction(() => document.querySelectorAll('.toast').length === 2);
+    const toasts = await moving('.toast');
+    if (reduced) ok(toasts.length === 0, `${tag} : le toast en place ne glisse pas`);
+    else
+      ok(
+        toasts.length === 1 && toasts[0].duration === 200 && /translate\(0px, [3-9]\d/.test(toasts[0].from),
+        `FLIP : le toast en place remonte en glissant quand un autre entre (${toasts.map((a) => a.from).join()})`,
+      );
+    await ctx.close();
+  };
+  await flip(false);
+  await flip(true);
+
   // ===== §3 : squelette vers contenu, fondu croisé (page Démos, chargement ralenti) =====
   const skeleton = async (reduced) => {
     const ctx = await b.newContext({

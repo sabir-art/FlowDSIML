@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, TriangleAlert, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useFlip } from '../lib/flip';
 import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
 import '../styles/maquette-peau.css';
@@ -35,6 +36,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const seq = useRef(0);
+  // MOTION-01 : quand un toast entre ou sort, les autres rejoignent leur place en glissant (FLIP)
+  const stack = useRef<HTMLDivElement>(null);
+  useFlip(stack, toasts.map((x) => x.id).join(), 'viewport');
   const close = useCallback((id: number) => setToasts((l) => l.filter((x) => x.id !== id)), []);
   const show = useCallback(
     (text: string, action?: ToastAction, opts?: ToastOptions) => {
@@ -68,10 +72,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={show}>
       {children}
       <div className="mk mk-toasts">
-        <div className="toasts" role="status" aria-live="polite">
+        <div className="toasts" role="status" aria-live="polite" ref={stack}>
           {toasts.map((x) => (
             <div
               key={x.id}
+              data-flip={x.id}
               className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}${x.detail ? ' toast--rich' : ''}`}
             >
               {x.tone === 'warning' ? (

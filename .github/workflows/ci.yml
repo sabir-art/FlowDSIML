@@ -177,7 +177,7 @@ jobs:
       - name: AUTH-ILL panneau illustré des pages d'accès (couleurs de la marque, contrastes, fenêtre, bulle, mouvement réduit)
         if: always()
         run: cd apps/web && node e2e/auth-illustration.e2e.cjs
-      - name: MOTION-01 scène de l’éditeur (FLIP 0,32 s), fenêtres, voile, menus et onglets (0,2 s, opacité et transform), mouvement réduit
+      - name: MOTION-01 scène de l’éditeur (FLIP 0,32 s), fenêtres (entrée et sortie), menus, onglets, squelette, toasts et liste des étapes (FLIP), mouvement réduit
         if: always()
         run: cd apps/web && node e2e/mouvement.e2e.cjs
       - name: Bulle « Afficher « Précédent » » (désactivé à l'étape 1, aperçu à l'étape 2, toutes les étapes)
