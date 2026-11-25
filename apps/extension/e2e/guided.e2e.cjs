@@ -62,12 +62,12 @@ const ui = require('./popup-ui.cjs');
   );
   await page.bringToFront();
   await page.waitForTimeout(900);
-  const badge1 = await page.textContent('[data-fd-ui]');
+  const badge1 = await page.locator('[data-fd-ui] .count').textContent();
   if (process.env.SHOTS_DIR)
     await page.screenshot({ path: `${process.env.SHOTS_DIR}/l26-04-extension-barre.png` });
   await page.click('#go');
   await page.waitForTimeout(2500);
-  const badge2 = await page.textContent('[data-fd-ui]');
+  const badge2 = await page.locator('[data-fd-ui] .count').textContent();
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
   const review = await reviewP;

@@ -3,6 +3,7 @@ import type { Detection } from './scan';
 import type { HtmlCapture } from './htmlCapture';
 import type { PageBox } from './fullpage';
 import type { PiiType } from './pii';
+import type { FrameMode } from './frame';
 
 /** Clic capturé par le content script et envoyé au service worker. */
 export interface ClickPayload {
@@ -25,6 +26,8 @@ export interface ClickPayload {
   page?: PageBox;
   /** L25-01 : repérages sur tout le document (pixels CSS du document), pour la capture pleine page. */
   pageDetections?: { type: PiiType; rect: PxRect }[];
+  /** EXT-02 §5 : cadre demandé dans la barre pour cette capture (zone relative à la fenêtre). */
+  frame?: { mode: FrameMode; zone: PxRect | null };
 }
 
 /** F7 : type de capture choisi dans la popup. */

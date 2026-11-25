@@ -41,6 +41,15 @@
           </button>
         </aside>
       </main>
+      <!-- EXT-02 §5 : cadre de chaque capture (l'image entière est gardée, le cadre se change ici) -->
+      <section id="caps" class="rv-caps" aria-labelledby="caps-title" hidden>
+        <div class="rv-caps__head">
+          <span class="rv-caps__tile" aria-hidden="true"><i data-lucide="images"></i></span>
+          <h2 id="caps-title"></h2>
+          <p id="caps-help" class="muted"></p>
+        </div>
+        <ol id="caps-list"></ol>
+      </section>
       <footer class="rv-foot">
         <p class="rv-privacy"><i data-lucide="lock"></i><span id="privacy"></span></p>
         <button id="cancel" class="btn" type="button"></button>

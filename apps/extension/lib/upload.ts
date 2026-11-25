@@ -4,6 +4,7 @@ import { burnBlurs } from './burn';
 import { defaultHotspotTitle, hotspotRect } from './geometry';
 import type { PendingCapture } from './pending';
 import type { FillTarget } from './messages';
+import { intoCrop } from './frame';
 import { fullHeight, fullPageBlurs } from './fullpage';
 
 /**
@@ -107,6 +108,9 @@ export async function sendCaptures(
     const options: Record<string, unknown> = {};
     if (c.tab) options.tab = c.tab;
     if (fullPage) options.fullPage = fullPage;
+    // EXT-02 §5 : cadre gardé, en recadrage non destructif (l'image envoyée reste entière)
+    const crop = c.frame?.crop ?? null;
+    if (crop) options.crop = crop;
     const elementMeta = JSON.parse(
       JSON.stringify({
         selector: c.selector,
@@ -119,7 +123,9 @@ export async function sendCaptures(
         pii: c.zones.map((z) => ({ type: z.type, rect: z.rect, blurred: z.blur, manual: !!z.manual })),
       }),
     ) as NonNullable<Json>;
-    const rect = hotspotRect(c.click, c.element, c.viewport);
+    // Le hotspot est relatif au cadre recadré (L25-02)
+    const whole = hotspotRect(c.click, c.element, c.viewport);
+    const rect = intoCrop(whole, crop) ?? whole;
     if (slot) {
       // Étape du modèle : image et page posées, titre, textes et réglages gardés
       const upd = await supabase
