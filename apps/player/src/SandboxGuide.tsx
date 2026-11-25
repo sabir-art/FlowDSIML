@@ -166,7 +166,7 @@ export function GuideBubble({
   );
 }
 
-const ring = (b: Rect) => {
+export const ring = (b: Rect) => {
   const pct = (v: number) => `${Math.round(v * 100000) / 1000}%`;
   return { left: pct(b.x), top: pct(b.y), width: pct(b.w), height: pct(b.h) };
 };

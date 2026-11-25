@@ -287,9 +287,11 @@ const manifests = {
   const g = await open(GUID, { width: 1024, height: 800 });
   await g.waitForSelector('.p-html-frame iframe');
   await g.frameLocator('.p-html-frame iframe').locator('h1').waitFor();
+  // Démo guidée : la page se lit comme une capture, sans la rangée du Sandbox sous la page
   ok(
-    (await g.getByRole('button', { name: 'Suivant', exact: true }).count()) === 1,
-    'démo guidée : bouton Suivant',
+    (await g.locator('.p-html-bar, .p-html-zones').count()) === 0 &&
+      (await g.getByRole('button', { name: 'Suivant', exact: true }).count()) === 0,
+    'démo guidée : ni « Zones cliquables » ni « Suivant » sous la page',
   );
   await g.frameLocator('.p-html-frame iframe').locator('#menu a', { hasText: 'Agenda' }).click();
   await g.locator('.p-html-miss b').waitFor();
@@ -298,18 +300,21 @@ const manifests = {
     'démo guidée : lien non relié annoncé',
   );
   if (SHOTS) await g.screenshot({ path: `${SHOTS}/l20-04-guidee${sfx}.png` });
-  await g.getByRole('button', { name: 'Suivant', exact: true }).click();
+  await g.getByRole('button', { name: 'Étape suivante' }).click();
   await g.frameLocator('.p-html-frame iframe').locator('h1', { hasText: 'Agenda' }).waitFor();
-  ok(true, 'Suivant mène à la page 2');
+  ok(true, '« Étape suivante » (barre de lecture) mène à la page 2');
   // L30-05 : étape HTML d'une démo guidée avec bulle : posée sur l'élément, clic sur l'élément → suite
   const gn = await open(GENR, { width: 1024, height: 800 });
-  const gb = gn.locator('.p-gd[role="dialog"]');
+  // Même bulle que les captures : titre, « 1 / 2 », « Suivant »
+  const gb = gn.locator('.p-stage > .p-tip[role="dialog"]');
   await gb.waitFor();
   ok(
     /Exportez le tableau/.test(await gb.innerText()) &&
-      /Étape 1 sur\s2/.test(await gb.innerText()) &&
+      /1 \/ 2/.test(await gb.innerText()) &&
+      (await gb.getByRole('button', { name: 'Suivant', exact: true }).count()) === 1 &&
+      (await gn.locator('.p-gd[role="dialog"]').count()) === 0 &&
       !/Explorer sans guide/.test(await gb.innerText()),
-    'démo guidée HTML : bulle de l’étape, sans « Explorer sans guide »',
+    'démo guidée HTML : bulle des captures (« 1 / 2 », « Suivant »), sans « Explorer sans guide »',
   );
   await gn.locator('.p-gd-ring').waitFor();
   {

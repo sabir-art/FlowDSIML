@@ -2673,11 +2673,23 @@ h1.p-title {
   gap: 12px;
 }
 /* EXT-02 §3 : bascule « Zones cliquables » et message « Aucun lien à cet endroit » */
-.p-html-step {
+.p-html-step,
+.p-html-frame {
   --p-zone: #2f6fed;
   --p-zone-soft: rgba(47, 111, 237, 0.16);
 }
-.is-dark .p-html-step {
+/* Démo guidée : la page HTML prend la scène des captures (mêmes proportions, largeur et cadre) */
+.p-stage.p-html-frame {
+  width: min(100cqw, 100cqh * var(--ratio, 1.6));
+  box-shadow: var(--p-shadow);
+}
+.p-win > .p-stage.p-html-frame {
+  width: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+.is-dark .p-html-step,
+.is-dark .p-html-frame {
   --p-zone: #7fa8ff;
   --p-zone-soft: rgba(127, 168, 255, 0.2);
 }

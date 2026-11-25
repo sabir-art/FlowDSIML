@@ -20,7 +20,9 @@ const EXTLINK_RE = /^https:\/\/[^\s"'<>]+$/;
  * A8 (L20) : étape HTML. La page capturée est rendue en iframe srcdoc sandbox (origine opaque, CSP
  * stricte, notre seul script) à la taille capturée, mise à l'échelle du lecteur. Elle reste du vrai
  * texte, lisible par un lecteur d'écran ; les éléments masqués sont retirés du rendu.
- * Démo guidée : « Suivant » et liens vers une étape. Sandbox : navigation libre entre les pages reliées.
+ * Démo guidée : la page prend la scène des captures (même cadre, même largeur, bulle de l'étape posée
+ * par le lecteur) ; liens vers une étape. Sandbox : navigation libre entre les pages reliées, avec sa
+ * barre (pages clés, « Zones cliquables »).
  * EXT-02 §3 : la bascule « Zones cliquables » (touche H) entoure en bleu les éléments reliés ; un clic à
  * côté les illumine un instant et affiche « Aucun lien à cet endroit » avec leur nombre.
  */
@@ -38,8 +40,6 @@ export function HtmlStep({
   t,
   sub,
   sandbox,
-  nextLabel,
-  onNext,
   onGo,
   status,
   target = null,
@@ -52,8 +52,6 @@ export function HtmlStep({
   sub: (s: string) => string;
   /** Réglages du Sandbox (null : démo guidée). */
   sandbox: SandboxSettings | null;
-  nextLabel: string;
-  onNext: () => void;
   onGo: (stepId: string) => void;
   /** Sandbox : « n pages clés vues sur N ». */
   status?: string;
@@ -107,6 +105,8 @@ export function HtmlStep({
   const [boxW, setBoxW] = useState(0);
   const vw = h.viewport?.w ?? 1280;
   const vh = h.viewport?.h ?? 800;
+  /** Démo guidée : la page tient dans la scène des captures (taille donnée par la feuille de style). */
+  const guided = !sandbox;
 
   useEffect(() => {
     let alive = true;
@@ -131,6 +131,17 @@ export function HtmlStep({
     const el = box.current;
     const step = el?.parentElement;
     if (!el || !step) return;
+    if (guided) {
+      // La scène a déjà sa taille (proportions de la page capturée) : la page la remplit
+      const fit = new ResizeObserver(() => {
+        const w = el.clientWidth;
+        if (!w) return;
+        setScale(w / vw);
+        setBoxW(w);
+      });
+      fit.observe(el);
+      return () => fit.disconnect();
+    }
     const wrap = el.closest<HTMLElement>('.p-stage-wrap');
     const ro = new ResizeObserver(() => {
       const full = step.clientWidth;
@@ -151,7 +162,7 @@ export function HtmlStep({
     ro.observe(step);
     if (wrap) ro.observe(wrap);
     return () => ro.disconnect();
-  }, [vw, vh]);
+  }, [vw, vh, guided]);
 
   /** Opérations envoyées à la page : variables résolues, images https ou data:image seulement. */
   const ops = useMemo<FrameOp[]>(
@@ -266,12 +277,16 @@ export function HtmlStep({
   }, [ready, targetKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const title = h.title || step.title || '';
-  return (
-    <div class="p-html-step">
+  const page = (
+    <>
       <div
-        class="p-html-frame"
+        class={guided ? 'p-stage p-html-frame' : 'p-html-frame'}
         ref={box}
-        style={{ height: `${Math.round(vh * scale)}px`, width: boxW ? `${boxW}px` : '100%' }}
+        style={
+          guided
+            ? { '--ratio': String(vw / vh) }
+            : { height: `${Math.round(vh * scale)}px`, width: boxW ? `${boxW}px` : '100%' }
+        }
       >
         {doc ? (
           <iframe
@@ -349,6 +364,13 @@ export function HtmlStep({
         </div>
       </div>
       {leave && <LeaveDialog url={leave} ht={ht} onClose={() => setLeave(null)} />}
+    </>
+  );
+  // Démo guidée : ni titre ni barre sous la page (ils relèvent du Sandbox), comme une capture
+  if (guided) return page;
+  return (
+    <div class="p-html-step">
+      {page}
       <div class="p-html-bar">
         {/* Sandbox : le repère des pages clés tient la place du titre de l'étape */}
         {status ? (
@@ -356,7 +378,7 @@ export function HtmlStep({
             {status}
           </p>
         ) : (
-          <span class="p-html-title">{sandbox ? '' : sub(step.title ?? '')}</span>
+          <span class="p-html-title" />
         )}
         <button
           type="button"
@@ -370,11 +392,6 @@ export function HtmlStep({
           {ht.zones}
           <span class="p-html-zones-n">{zones ?? 0}</span>
         </button>
-        {!sandbox && (
-          <button type="button" class="pill pill-p" onClick={onNext}>
-            {nextLabel}
-          </button>
-        )}
       </div>
     </div>
   );

@@ -77,13 +77,28 @@ const htmlPage = `<!doctype html><html><head><meta charset="utf-8"><title>Rappor
   const [first, last] = base.steps;
   const manifest = {
     ...base,
+    // Cadre de navigateur du thème : les captures et la page HTML doivent le porter toutes les deux
+    theme: { frame: {} },
     steps: [
       { ...first, zoom: null },
       {
         id: HTML_STEP,
         kind: 'html',
-        title: 'Rapports',
-        hotspots: [],
+        title: 'Rapports HTML',
+        hotspots: [
+          {
+            id: 'hh',
+            x: 0.02,
+            y: 0.2,
+            w: 0.1,
+            h: 0.06,
+            sel: '#suite',
+            title: 'Ouvrez la suite',
+            body: 'Le lien mène au rapport suivant.',
+            placement: 'auto',
+            action: { type: 'next' },
+          },
+        ],
         blurs: [],
         html: {
           url: 'assets/rapports.html',
@@ -98,45 +113,139 @@ const htmlPage = `<!doctype html><html><head><meta charset="utf-8"><title>Rappor
   };
   const png = require('fs').readFileSync(require('path').join(__dirname, 'fixture.png'));
   const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' };
-  const player = await ctx.newPage();
-  player.on('pageerror', (e) => {
-    if (!/lacks the 'allow-same-origin' flag/.test(e.message)) errors.push(`player: ${e.message}`);
-  });
-  await player.route('**/functions/v1/open-demo', (r) =>
-    r.fulfill({
-      contentType: 'application/json',
-      headers: cors,
-      body: JSON.stringify({ status: 'ok', manifest }),
-    }),
-  );
-  await player.route('**/assets/*.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
-  await player.route('**/assets/*.html', (r) =>
-    r.fulfill({ contentType: 'text/html', headers: cors, body: htmlPage }),
-  );
-  await player.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, headers: cors, body: '{}' }));
-  await player.goto(`${PLAYER}/#/d/${manifest.demoId}`);
-  await player.waitForSelector('.p-stage .p-img');
-  ok((await player.locator('.p-html-frame').count()) === 0, 'lecteur, étape 1 : capture d’écran');
-  const next = async () => {
-    const btn = player.getByRole('button', { name: /^(Suivant|Continuer)$/ }).last();
-    if (await btn.count()) await btn.click();
-    else await player.keyboard.press('ArrowRight');
-  };
-  await next();
-  await player.frameLocator('.p-html-frame iframe').locator('h1').waitFor({ timeout: 15000 });
-  ok(
-    (await player.frameLocator('.p-html-frame iframe').locator('h1').innerText()) === 'Rapports' &&
-      (await player.locator('.p-html-frame iframe').getAttribute('sandbox')) !== null,
-    'lecteur, étape 2 : page HTML rejouée en iframe sandbox',
-  );
-  ok((await player.locator('.p-stage .p-img').count()) === 0, 'lecteur, étape 2 : plus de capture à l’écran');
-  await next();
-  await player.waitForSelector('.p-stage .p-img', { timeout: 15000 });
-  ok(
-    (await player.locator('.p-html-frame').count()) === 0 &&
-      (await player.locator('.p-stage .p-img').getAttribute('src')).includes('b.webp'),
-    'lecteur, étape 3 : retour à une capture d’écran',
-  );
+  const SHOTS = process.env.SHOTS_DIR;
+  // Démo guidée : l'étape HTML se lit comme une capture (même cadre, même bulle), à 1440 et à 390,
+  // en clair et en sombre
+  for (const width of [1440, 390]) {
+    for (const scheme of ['light', 'dark']) {
+      const tag = `lecteur ${width} ${scheme === 'dark' ? 'sombre' : 'clair'}`;
+      const pctx = await b.newContext({
+        viewport: { width, height: width === 390 ? 844 : 900 },
+        locale: 'fr-FR',
+        colorScheme: scheme,
+      });
+      const player = await pctx.newPage();
+      player.on('pageerror', (e) => {
+        if (!/lacks the 'allow-same-origin' flag/.test(e.message)) errors.push(`player: ${e.message}`);
+      });
+      await player.route('**/functions/v1/open-demo', (r) =>
+        r.fulfill({
+          contentType: 'application/json',
+          headers: cors,
+          body: JSON.stringify({ status: 'ok', manifest }),
+        }),
+      );
+      await player.route('**/assets/*.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+      await player.route('**/assets/*.html', (r) =>
+        r.fulfill({ contentType: 'text/html', headers: cors, body: htmlPage }),
+      );
+      await player.route('**/functions/v1/track', (r) =>
+        r.fulfill({ status: 200, headers: cors, body: '{}' }),
+      );
+      await player.goto(`${PLAYER}/#/d/${manifest.demoId}`);
+      await player.waitForSelector('.p-stage .p-img');
+      ok((await player.locator('.p-html-frame').count()) === 0, `${tag}, étape 1 : capture d’écran`);
+      // Relevé de l'étape affichée : scène, cadre de navigateur, bulle (ancrée, ou feuille du bas)
+      const bubble = () => player.locator(width === 390 ? '.p-sheet' : '.p-stage > .p-tip');
+      const measure = async () => {
+        await bubble().waitFor();
+        return player.evaluate(
+          (sel) => {
+            const box = (el) => {
+              if (!el) return null;
+              const r = el.getBoundingClientRect();
+              return { x: r.left, y: r.top, w: r.width, h: r.height, bottom: r.bottom, right: r.right };
+            };
+            const tip = document.querySelector(sel);
+            return {
+              stage: box(document.querySelector('.p-stage')),
+              win: box(document.querySelector('.p-win')),
+              chrome: box(document.querySelector('.p-win > .p-chrome')),
+              tip: box(tip),
+              tipText: tip?.innerText ?? '',
+              tipClass: tip?.className ?? '',
+              controls: box(document.querySelector('.p-controls')),
+              text: document.querySelector('#p-main').innerText,
+              scroll: document.documentElement.scrollWidth - innerWidth,
+            };
+          },
+          width === 390 ? '.p-sheet' : '.p-stage > .p-tip',
+        );
+      };
+      const shot = await measure();
+      const next = () => bubble().getByRole('button', { name: 'Suivant', exact: true }).click();
+      await next();
+      await player.frameLocator('.p-html-frame iframe').locator('h1').waitFor({ timeout: 15000 });
+      ok(
+        (await player.frameLocator('.p-html-frame iframe').locator('h1').innerText()) === 'Rapports' &&
+          (await player.locator('.p-html-frame iframe').getAttribute('sandbox')) !== null,
+        `${tag}, étape 2 : page HTML rejouée en iframe sandbox`,
+      );
+      ok(
+        (await player.locator('.p-stage .p-img').count()) === 0,
+        `${tag}, étape 2 : plus de capture à l’écran`,
+      );
+      await player.locator('.p-gd-ring').waitFor();
+      const page = await measure();
+      if (SHOTS) await player.screenshot({ path: `${SHOTS}/melangee-html-${width}-${scheme}.png` });
+      // Même bulle que les captures : titre et texte du hotspot, « 2 / 3 », « Suivant »
+      ok(
+        /Ouvrez la suite/.test(page.tipText) &&
+          /Le lien mène au rapport suivant\./.test(page.tipText) &&
+          /2 \/ 3/.test(page.tipText) &&
+          /Suivant/.test(page.tipText) &&
+          !/Rapports HTML/.test(page.tipText),
+        `${tag}, étape 2 : bulle du hotspot avec « 2 / 3 » et « Suivant » (${page.tipText.replace(/\s+/g, ' ')})`,
+      );
+      ok(
+        (await player.locator('.p-gd[role="dialog"]').count()) === 0 &&
+          (await player.locator('.p-html-bar, .p-html-zones, .p-html-title').count()) === 0 &&
+          !/Zones cliquables|Étape 2 sur/.test(page.text),
+        `${tag}, étape 2 : ni bulle de guide, ni rangée du Sandbox (titre, « Zones cliquables », « Suivant » à part)`,
+      );
+      if (width === 390) {
+        ok(
+          page.tip.y >= page.stage.bottom - 1 && page.tip.bottom <= page.controls.y + 1,
+          `${tag}, étape 2 : feuille en bas, sous la page et au-dessus de la barre de lecture (page ${Math.round(page.stage.y)}–${Math.round(page.stage.bottom)}, feuille ${Math.round(page.tip.y)}–${Math.round(page.tip.bottom)})`,
+        );
+        ok(
+          Math.abs(page.tip.bottom - shot.tip.bottom) <= 1 && Math.abs(page.tip.x - shot.tip.x) <= 1,
+          `${tag}, étape 2 : feuille à la même place que sur la capture`,
+        );
+      } else {
+        ok(
+          /p-tip-(top|bottom|left|right)/.test(page.tipClass) &&
+            page.tip.x >= page.stage.x - 1 &&
+            page.tip.right <= page.stage.right + 1,
+          `${tag}, étape 2 : bulle ancrée sur l’élément, dans la page (${page.tipClass})`,
+        );
+        const ring = await player.locator('.p-gd-ring').boundingBox();
+        const link = await player.frameLocator('.p-html-frame iframe').locator('#suite').boundingBox();
+        ok(
+          ring && link && Math.abs(ring.x - link.x) < 3 && Math.abs(ring.y - link.y) < 3,
+          `${tag}, étape 2 : l’élément visé est entouré`,
+        );
+        // Même cadre de navigateur et même largeur maximale que les captures
+        ok(
+          !!shot.chrome && !!page.chrome && Math.abs(shot.chrome.h - page.chrome.h) <= 1,
+          `${tag}, étape 2 : cadre de navigateur des captures (${Math.round(page.chrome?.h ?? 0)} px)`,
+        );
+        ok(
+          Math.abs(page.win.w - shot.win.w) <= 2 || Math.abs(page.win.h - shot.win.h) <= 2,
+          `${tag}, étape 2 : même gabarit que la capture, sans saut (capture ${Math.round(shot.win.w)} × ${Math.round(shot.win.h)}, page ${Math.round(page.win.w)} × ${Math.round(page.win.h)})`,
+        );
+      }
+      ok(page.scroll <= 1, `${tag}, étape 2 : sans défilement horizontal`);
+      await next();
+      await player.waitForSelector('.p-stage .p-img', { timeout: 15000 });
+      ok(
+        (await player.locator('.p-html-frame').count()) === 0 &&
+          (await player.locator('.p-stage .p-img').getAttribute('src')).includes('b.webp'),
+        `${tag}, étape 3 : retour à une capture d’écran`,
+      );
+      await pctx.close();
+    }
+  }
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

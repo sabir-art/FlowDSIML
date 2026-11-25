@@ -76,7 +76,7 @@ import { Checklist } from './Checklist';
 import { BeforeAfterStep } from './BeforeAfter';
 import { VideoStep } from './VideoStep';
 import { HtmlStep } from './HtmlStep';
-import { GuideBubble, GuidePill } from './SandboxGuide';
+import { GuideBubble, GuidePill, ring } from './SandboxGuide';
 import { advance, GUIDE_START, guideKey, guidePath, guideView, readGuide, type GuideState } from './guide';
 import { InfoDialog } from './InfoDialog';
 import { VoiceLine, VoiceLineContext, type VoiceLineState } from './VoiceLine';
@@ -335,7 +335,9 @@ export function Player({
   /** L17 : une étape Avant / Après se comporte comme une capture (ni pop-up, ni écran de fin). */
   const visual =
     step.kind === 'image' || step.kind === 'before_after' || step.kind === 'video' || step.kind === 'html';
-  const primary = step.kind === 'image' ? step.hotspots[0] : undefined;
+  // Démo guidée : une étape HTML porte la même bulle qu'une capture (posée sur l'élément visé)
+  const primary =
+    step.kind === 'image' || (step.kind === 'html' && m.kind !== 'sandbox') ? step.hotspots[0] : undefined;
   const last = index === m.steps.length - 1;
   /** Choix dont l'étape cible existe encore (un choix orphelin est ignoré). */
   const choices = step.options.choices.filter((c) => choiceTarget(m, c.action, index));
@@ -1089,15 +1091,18 @@ export function Player({
               }
             />
           ) : step.kind === 'html' && step.html ? (
-            <>
+            <HtmlWindow
+              on={!sandbox}
+              frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+              title={m.title}
+              ratio={(step.html.viewport?.w ?? 1280) / (step.html.viewport?.h ?? 800)}
+            >
               <HtmlStep
                 key={step.id}
                 step={withDataset(step, m.dataset, dsRow)}
                 t={t}
                 sub={sub}
                 sandbox={sandbox}
-                nextLabel={last ? (m.quiz ? t.quiz.start : t.finish) : t.next}
-                onNext={last ? (m.quiz ? openQuiz : finish) : next}
                 onGo={goStep}
                 target={
                   point
@@ -1153,23 +1158,17 @@ export function Player({
                         />
                       )
                     : htmlBubble
-                      ? (box, found) => (
-                          <GuideBubble
-                            t={t}
-                            sub={sub}
-                            html={html}
-                            point={htmlBubble}
-                            box={box}
-                            found={found}
-                            k={index}
-                            n={m.steps.length}
-                            sheet={compact}
-                            startsOn={null}
-                            done={false}
-                            onGo={() => undefined}
-                            onClose={() => undefined}
-                          />
-                        )
+                      ? // Démo guidée : l'élément visé est entouré, et la bulle est celle des captures
+                        // (titre, texte, « n / N », « Suivant ») ; sur petit écran, la feuille du bas
+                        (box) =>
+                          box && (
+                            <>
+                              <div class="p-gd-ring" style={ring(box)} aria-hidden="true" />
+                              {!compact && tipProps && !gateForm && !ended && (
+                                <Tooltip {...tipProps} h={{ ...tipProps.h, ...box }} />
+                              )}
+                            </>
+                          )
                       : undefined
                 }
                 status={
@@ -1181,7 +1180,7 @@ export function Player({
                     : undefined
                 }
               />
-            </>
+            </HtmlWindow>
           ) : step.kind === 'image' && step.image ? (
             <>
               <TabWindow
@@ -2135,6 +2134,28 @@ function Beacon({ h, label, onClick }: { h: Hotspot; label: string; onClick: () 
     >
       <span class="p-beacon-dot" />
     </button>
+  );
+}
+
+/** Démo guidée : la page HTML prend le cadre de navigateur des captures ; en Sandbox, pas de cadre. */
+function HtmlWindow({
+  on,
+  frame,
+  title,
+  ratio,
+  children,
+}: {
+  on: boolean;
+  frame?: Frame;
+  title: string;
+  ratio: number;
+  children: ComponentChildren;
+}) {
+  if (!on) return <>{children}</>;
+  return (
+    <TabWindow tabs={{ tabs: [], active: 0 }} changed={false} frame={frame} title={title} ratio={ratio}>
+      {children}
+    </TabWindow>
   );
 }
 
