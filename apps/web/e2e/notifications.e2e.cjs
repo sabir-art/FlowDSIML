@@ -144,42 +144,42 @@ function withNotifications() {
     'Échap ferme, focus rendu à la cloche',
   );
 
-  // Préférences : un interrupteur par type, e-mail « Bientôt »
+  // §4 : une seule source de réglages. « Préférences » ouvre Paramètres › Notifications ; l'ancienne
+  // fenêtre de préférences de la cloche n'existe plus
   await bell.click();
-  await dlg.getByRole('button', { name: 'Préférences' }).click();
-  const prefs = page.getByRole('dialog', { name: 'Préférences de notification' });
-  await prefs.waitFor();
+  const prefsLink = dlg.getByRole('link', { name: 'Préférences' });
   ok(
-    (await prefs.getByRole('switch').count()) === 8,
-    'L22-05 : 4 types + alertes (L19) + nouveaux leads (§6.3) + e-mail + résumé quotidien (L28-06)',
+    ((await prefsLink.getAttribute('href')) || '').endsWith('#/settings/notifications') &&
+      (await dlg.getByRole('switch').count()) === 0,
+    '§4 : « Préférences » est un lien vers Paramètres › Notifications, plus d’interrupteurs dans la cloche',
   );
-  const mentionSw = prefs.getByRole('switch', { name: /On me mentionne/ });
+  await prefsLink.click();
+  await page.getByRole('heading', { name: 'Notifications', level: 1 }).waitFor();
   ok(
-    (await mentionSw.isChecked()) && (await mentionSw.getAttribute('aria-disabled')) === 'true',
-    'L28-06 : mentions toujours activées (aria-disabled)',
+    (await page.getByRole('dialog', { name: 'Notifications' }).count()) === 0 &&
+      (await page.getByRole('dialog', { name: 'Préférences de notification' }).count()) === 0,
+    '§4 : le panneau se ferme, aucune fenêtre de préférences',
   );
-  ok(
-    Number(await mentionSw.evaluate((e) => getComputedStyle(e.nextElementSibling).opacity)) === 0.5,
-    'L28-06 : interrupteur « On me mentionne » estompé (état désactivé du design system)',
-  );
-  ok(
-    /Les mentions sont toujours signalées\./.test(await prefs.innerText()) &&
-      (await prefs.getByRole('switch', { name: /Résumé quotidien/ }).isDisabled()),
-    'L28-06 : aide des mentions, résumé quotidien « Bientôt »',
-  );
-  ok(
-    await prefs.getByRole('switch', { name: /e-mail/ }).isDisabled(),
-    'L22-05 : e-mail désactivé, « Bientôt »',
-  );
-  await prefs.getByRole('switch', { name: /répond à un fil/ }).uncheck();
-  await page.waitForTimeout(400);
+  await page.locator('section[aria-labelledby="nt-title"]:not([aria-busy])').waitFor();
+  await page.getByRole('switch', { name: 'Réponses, dans l’app', exact: true }).uncheck();
+  await page.waitForFunction(() => !document.querySelector('[aria-label="Réponses, dans l’app"]').checked);
+  for (let i = 0; i < 100; i++) {
+    if (
+      (state.tables.notification_settings || []).find((x) => x.user_id === state.user.id)?.prefs?.reply ===
+      false
+    )
+      break;
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+  }
   ok(
     (state.tables.notification_settings || []).find((x) => x.user_id === state.user.id)?.prefs?.reply ===
       false,
     'L22-05 : préférence enregistrée (table propre à l’utilisateur)',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-05-preferences${sfx}.png` });
-  await prefs.getByRole('button', { name: 'Retour aux notifications' }).click();
+  await page.goto(`${BASE}/#/`);
+  await bell.click();
+  await dlg.waitFor();
 
   // Ouvrir une notification : éditeur sur l'étape, fil ouvert, notification lue
   await dlg.getByRole('link', { name: 'Ouvrir la mention de Marie Durand, étape 2' }).click();

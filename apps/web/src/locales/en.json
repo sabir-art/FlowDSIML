@@ -6078,7 +6078,7 @@
         "help": "A visitor leaves their address on one of your demos."
       }
     },
-    "emailHelp": "Email: at most one summary per hour, grouping your unread notifications. Unsubscribe link in every email. A notification turned off in the app is not sent by email.",
+    "emailHelp": "The summary groups your unread notifications. Unsubscribe link in every email. A notification turned off in the app is not sent by email.",
     "mutedTitle": "Muted demos",
     "mutedSub": "Demos you no longer receive any notification from.",
     "mutedNone": "No muted demo.",
@@ -6088,7 +6088,12 @@
     "saveError": "The setting could not be saved.",
     "always": "Always",
     "mentionsAlways": "Mentions (@) are always notified in the app.",
-    "mentionsEmail": "Also receive mentions by email"
+    "mentionsEmail": "Also receive mentions by email",
+    "frequency": "Email frequency",
+    "frequency_hourly": "As it happens",
+    "frequency_daily": "One summary a day at 9 am",
+    "frequencyHelp_hourly": "One email an hour at most.",
+    "frequencyHelp_daily": "At 9 am, your time; no email when there is nothing new."
   },
   "accessKeys": {
     "title": "Access keys",

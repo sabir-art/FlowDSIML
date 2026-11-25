@@ -10,7 +10,6 @@ import { HelpButton } from '../../help/HelpButton';
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import {
   Mail,
-  ArrowLeft,
   AtSign,
   Bell,
   BellRing,
@@ -34,7 +33,7 @@ import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
 import { bellStore, useBellOpen } from './bellState';
-import { NOTIFICATION_KINDS, badge, bodyParts, grouped, notificationHref } from './notifications';
+import { badge, bodyParts, grouped, notificationHref } from './notifications';
 import './notifications.css';
 import { Empty } from '@flowdsiml/ui';
 
@@ -70,7 +69,6 @@ function BellPanel() {
       window.location.href.replace(/[?&]notifications=1/, ''),
     );
   }, [location.search]);
-  const [view, setView] = useState<'list' | 'prefs'>('list');
   const [filter, setFilter] = useState<Filter>('all');
   // Cloche placée à gauche (barre d'Analytics) : le panneau s'ouvre vers la droite, jamais sous la barre latérale
   const [toRight, setToRight] = useState(false);
@@ -85,7 +83,6 @@ function BellPanel() {
 
   const close = useCallback((refocus = true) => {
     bellStore.set(false);
-    setView('list');
     if (refocus) btn.current?.focus();
   }, []);
 
@@ -178,226 +175,114 @@ function BellPanel() {
               }
             }}
           >
-            {view === 'list' ? (
-              <>
-                <header>
-                  <h2 id={`${id}-t`}>{t('notifications.title')}</h2>
-                  {n.unread > 0 && (
-                    <button
-                      type="button"
-                      className="fd-btn fd-btn--ghost fd-btn--sm"
-                      onClick={() => void n.markRead()}
-                    >
-                      <CheckCheck aria-hidden="true" />
-                      {t('notifications.markAll')}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                    aria-label={t('common.close')}
-                    onClick={() => close()}
-                  >
-                    <X aria-hidden="true" />
-                  </button>
-                </header>
-                <div className="fd-segmented" role="tablist" aria-label={t('notifications.filter')}>
-                  {FILTERS.map((f, i) => (
-                    <button
-                      key={f}
-                      ref={(el) => {
-                        tabs.current[i] = el;
-                      }}
-                      type="button"
-                      role="tab"
-                      id={`${id}-tab-${f}`}
-                      aria-selected={filter === f}
-                      aria-controls={`${id}-panel`}
-                      tabIndex={filter === f ? 0 : -1}
-                      onClick={() => setFilter(f)}
-                      onKeyDown={(e) => onTabKey(e, i)}
-                    >
-                      {t(`notifications.f_${f}`)}
-                      {f === 'mention' && mentions > 0 && ` · ${mentions}`}
-                      {f === 'unread' && n.unread > 0 && ` · ${n.unread}`}
-                    </button>
-                  ))}
-                </div>
-                <div
-                  className="nb-body"
-                  id={`${id}-panel`}
-                  role="tabpanel"
-                  aria-labelledby={`${id}-tab-${filter}`}
-                >
-                  {n.loading ? null : shown.length === 0 ? (
-                    <Empty
-                      variant="compact"
-                      level={3}
-                      live
-                      className="nb-empty"
-                      icon={<Bell />}
-                      title={t('notifications.emptyTitle')}
-                      body={t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}
-                    />
-                  ) : (
-                    grouped(shown).map((g) => (
-                      <section key={g.group} aria-labelledby={`${id}-g-${g.group}`}>
-                        <h3 className="nb-group" id={`${id}-g-${g.group}`}>
-                          {t(`notifications.g_${g.group}`)}
-                        </h3>
-                        <ul className="nb-list">
-                          {g.rows.map((x) => (
-                            <Row
-                              key={x.id}
-                              onAnswered={() => {
-                                void n.reload();
-                              }}
-                              onJoined={() => close(false)}
-                              item={x}
-                              muted={!!x.demo_id && mutedIds.has(x.demo_id)}
-                              onMute={async () => {
-                                if (x.demo_id && (await n.mute(x.demo_id)))
-                                  toast(
-                                    t('notifications.mutedToast', {
-                                      demo: x.demoTitle || t('demos.untitled'),
-                                    }),
-                                  );
-                              }}
-                              onOpen={() => {
-                                if (!x.read_at) void n.markRead([x.id]);
-                                close(false);
-                              }}
-                            />
-                          ))}
-                        </ul>
-                      </section>
-                    ))
-                  )}
-                </div>
-                <footer className="nb-foot">
-                  <span className="fd-help">{t('notifications.window')}</span>
+            <>
+              <header>
+                <h2 id={`${id}-t`}>{t('notifications.title')}</h2>
+                {n.unread > 0 && (
                   <button
                     type="button"
                     className="fd-btn fd-btn--ghost fd-btn--sm"
-                    onClick={() => setView('prefs')}
+                    onClick={() => void n.markRead()}
                   >
-                    <Settings aria-hidden="true" />
-                    {t('notifications.prefs')}
+                    <CheckCheck aria-hidden="true" />
+                    {t('notifications.markAll')}
                   </button>
-                </footer>
-              </>
-            ) : (
-              <>
-                <header>
-                  <button
-                    type="button"
-                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                    aria-label={t('notifications.back')}
-                    onClick={() => setView('list')}
-                  >
-                    <ArrowLeft aria-hidden="true" />
-                  </button>
-                  <h2 id={`${id}-t`}>{t('notifications.prefsTitle')}</h2>
-                  <button
-                    type="button"
-                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-                    aria-label={t('common.close')}
-                    onClick={() => close()}
-                  >
-                    <X aria-hidden="true" />
-                  </button>
-                </header>
-                <p className="fd-help nb-prefs-help">{t('notifications.prefsHelp')}</p>
-                <ul className="nb-prefs">
-                  {NOTIFICATION_KINDS.map((k) => (
-                    <li key={k}>
-                      <label className="fd-switch">
-                        <span>
-                          {t(`notifications.p_${k}`)}
-                          {k === 'mention' && (
-                            <span className="fd-help nb-pref-help" id={`${id}-mention-h`}>
-                              {t('notifications.mentionAlways')}
-                            </span>
-                          )}
-                        </span>
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          checked={k === 'mention' ? true : n.prefs[k]}
-                          // L28-06 : les mentions sont toujours signalées
-                          aria-disabled={k === 'mention' || undefined}
-                          aria-describedby={k === 'mention' ? `${id}-mention-h` : undefined}
-                          onChange={(e) => k !== 'mention' && void n.setPref(k, e.target.checked)}
-                        />
-                        <span className="fd-switch__track" aria-hidden="true" />
-                      </label>
-                    </li>
-                  ))}
-                  <li>
-                    {/* E-mails P2 : résumé par e-mail, désactivé par défaut ; « Bientôt » sans clé Brevo */}
-                    {n.emailAvailable ? (
-                      <label className="fd-switch">
-                        <span>
-                          {t('notifications.p_email')}
-                          <span className="fd-help nb-pref-help" id={`${id}-email-h`}>
-                            {t('notifications.p_emailHelp')}
-                          </span>
-                        </span>
-                        <input
-                          type="checkbox"
-                          role="switch"
-                          checked={n.email}
-                          aria-describedby={`${id}-email-h`}
-                          onChange={(e) => void n.setEmail(e.target.checked)}
-                        />
-                        <span className="fd-switch__track" aria-hidden="true" />
-                      </label>
-                    ) : (
-                      <label className="fd-switch is-soon">
-                        <span>
-                          {t('notifications.p_email')} <span className="soon-text">{t('shell.soon')}</span>
-                        </span>
-                        <input type="checkbox" role="switch" checked={false} disabled />
-                        <span className="fd-switch__track" aria-hidden="true" />
-                      </label>
-                    )}
-                  </li>
-                  <li>
-                    <label className="fd-switch is-soon">
-                      <span>
-                        {t('notifications.p_digest')} <span className="soon-text">{t('shell.soon')}</span>
-                      </span>
-                      <input type="checkbox" role="switch" checked={false} disabled />
-                      <span className="fd-switch__track" aria-hidden="true" />
-                    </label>
-                  </li>
-                </ul>
-                {/* L28-06 : démos coupées, avec « Réactiver » */}
-                <h3 className="nb-group">{t('notifications.mutedTitle')}</h3>
-                {n.muted.length ? (
-                  <ul className="nb-muted">
-                    {n.muted.map((m) => (
-                      <li key={m.demoId}>
-                        <BellOff aria-hidden="true" />
-                        <span className="grow">{m.title || t('demos.untitled')}</span>
-                        <button
-                          type="button"
-                          className="fd-btn fd-btn--ghost fd-btn--sm"
-                          aria-label={t('notifications.unmuteLabel', {
-                            demo: m.title || t('demos.untitled'),
-                          })}
-                          onClick={() => void n.unmute(m.demoId)}
-                        >
-                          {t('notifications.unmute')}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="fd-help nb-prefs-help">{t('notifications.mutedNone')}</p>
                 )}
-              </>
-            )}
+                <button
+                  type="button"
+                  className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                  aria-label={t('common.close')}
+                  onClick={() => close()}
+                >
+                  <X aria-hidden="true" />
+                </button>
+              </header>
+              <div className="fd-segmented" role="tablist" aria-label={t('notifications.filter')}>
+                {FILTERS.map((f, i) => (
+                  <button
+                    key={f}
+                    ref={(el) => {
+                      tabs.current[i] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    id={`${id}-tab-${f}`}
+                    aria-selected={filter === f}
+                    aria-controls={`${id}-panel`}
+                    tabIndex={filter === f ? 0 : -1}
+                    onClick={() => setFilter(f)}
+                    onKeyDown={(e) => onTabKey(e, i)}
+                  >
+                    {t(`notifications.f_${f}`)}
+                    {f === 'mention' && mentions > 0 && ` · ${mentions}`}
+                    {f === 'unread' && n.unread > 0 && ` · ${n.unread}`}
+                  </button>
+                ))}
+              </div>
+              <div
+                className="nb-body"
+                id={`${id}-panel`}
+                role="tabpanel"
+                aria-labelledby={`${id}-tab-${filter}`}
+              >
+                {n.loading ? null : shown.length === 0 ? (
+                  <Empty
+                    variant="compact"
+                    level={3}
+                    live
+                    className="nb-empty"
+                    icon={<Bell />}
+                    title={t('notifications.emptyTitle')}
+                    body={t(filter === 'all' ? 'notifications.emptyBody' : 'notifications.emptyFilter')}
+                  />
+                ) : (
+                  grouped(shown).map((g) => (
+                    <section key={g.group} aria-labelledby={`${id}-g-${g.group}`}>
+                      <h3 className="nb-group" id={`${id}-g-${g.group}`}>
+                        {t(`notifications.g_${g.group}`)}
+                      </h3>
+                      <ul className="nb-list">
+                        {g.rows.map((x) => (
+                          <Row
+                            key={x.id}
+                            onAnswered={() => {
+                              void n.reload();
+                            }}
+                            onJoined={() => close(false)}
+                            item={x}
+                            muted={!!x.demo_id && mutedIds.has(x.demo_id)}
+                            onMute={async () => {
+                              if (x.demo_id && (await n.mute(x.demo_id)))
+                                toast(
+                                  t('notifications.mutedToast', {
+                                    demo: x.demoTitle || t('demos.untitled'),
+                                  }),
+                                );
+                            }}
+                            onOpen={() => {
+                              if (!x.read_at) void n.markRead([x.id]);
+                              close(false);
+                            }}
+                          />
+                        ))}
+                      </ul>
+                    </section>
+                  ))
+                )}
+              </div>
+              <footer className="nb-foot">
+                <span className="fd-help">{t('notifications.window')}</span>
+                {/* §4 : une seule source de réglages, Paramètres › Notifications */}
+                <Link
+                  className="fd-btn fd-btn--ghost fd-btn--sm"
+                  to="/settings/notifications"
+                  onClick={() => close(false)}
+                >
+                  <Settings aria-hidden="true" />
+                  {t('notifications.prefs')}
+                </Link>
+              </footer>
+            </>
           </div>
         )}
       </span>

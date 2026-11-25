@@ -98,6 +98,35 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     ok(!(await sw(page, 'Réponses, par e-mail').isChecked()), 'un seul interrupteur e-mail activé');
 
+    // §4 : fréquence des e-mails, au fil de l'eau par défaut ; le résumé quotidien part à 9 h, heure de la
+    // personne (fuseau du navigateur enregistré avec le réglage)
+    const freq = page.getByRole('radiogroup', { name: 'Fréquence des e-mails' });
+    ok(
+      (await freq.getByRole('radio').allInnerTexts()).join('|') ===
+        'Au fil de l’eau|Un résumé par jour à 9 h' &&
+        (await freq.getByRole('radio', { name: 'Au fil de l’eau' }).getAttribute('aria-checked')) === 'true',
+      'fréquence : « Au fil de l’eau » (par défaut) et « Un résumé par jour à 9 h »',
+    );
+    ok(
+      (await page.locator('#nt-freq-h').innerText()).startsWith('Au plus un e-mail par heure.') &&
+        !/Bientôt/.test(await page.locator('.nt-freq').innerText()),
+      'fréquence : aide de l’option choisie, sans « Bientôt »',
+    );
+    await freq.getByRole('radio', { name: 'Un résumé par jour à 9 h' }).click();
+    ok(
+      await until(() => row(state)?.email_frequency === 'daily'),
+      'fréquence : le résumé quotidien est enregistré',
+    );
+    const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+    ok(row(state).timezone === tz, `fréquence : fuseau du navigateur enregistré (${row(state).timezone})`);
+    ok(
+      (await page.locator('#nt-freq-h').innerText()).startsWith(
+        'À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau.',
+      ),
+      'fréquence : aide du résumé quotidien',
+    );
+    await shot(page, 'notifs-frequence');
+
     await sw(page, 'Réponses, par e-mail').check();
     ok(await until(() => row(state).email_prefs.reply === true), 'e-mail des réponses activé');
     await sw(page, 'Réponses, dans l’app').uncheck();
@@ -139,6 +168,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     let disabled = 0;
     for (let i = 0; i < n; i++) if (await all.nth(i).isDisabled()) disabled++;
     ok(n === 5 && disabled === 5, 'sans service d’e-mail : toute la colonne est désactivée');
+    ok(
+      await page
+        .getByRole('radiogroup', { name: 'Fréquence des e-mails' })
+        .getByRole('radio')
+        .evaluateAll((l) => l.length === 2 && l.every((b) => b.getAttribute('aria-disabled') === 'true')),
+      'sans service d’e-mail : la fréquence est désactivée',
+    );
     ok(
       await sw(page, 'Réponses, dans l’app').isEnabled(),
       'la colonne «\u202fDans l’app\u202f» reste réglable',
