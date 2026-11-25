@@ -161,7 +161,8 @@ const SHOTS = process.env.SHOTS_DIR;
       [inv.email, label[to]],
     );
     ok(
-      state.tables.invitations[0].role === to && (await page.locator('.alert-danger').count()) === 0,
+      state.tables.invitations[0].role === to &&
+        (await page.locator('.st-wrap [role="alert"]').count()) === 0,
       'invitation en attente : rôle enregistré, ligne à jour, confirmation par un toast',
     );
     // La base refuse Propriétaire : l'erreur reste une alerte, le rôle ne change pas
@@ -177,6 +178,40 @@ const SHOTS = process.env.SHOTS_DIR;
       return r.status;
     }, inv.id);
     ok(refused === 400 && state.tables.invitations[0].role === to, 'invitation : Propriétaire refusé');
+  }
+
+  // Retour client du 25/11 : une confirmation passagère passe par un toast, jamais par un texte posé
+  // dans la page. « Copier le lien d'invitation » : toast annoncé (role=status), rien entre la barre
+  // et le tableau.
+  {
+    const inv = state.tables.invitations[0];
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.getByRole('button', { name: `Actions pour ${inv.email}` }).click();
+    await page.getByRole('menuitem', { name: 'Copier le lien d’invitation' }).click();
+    const toast = page.locator('.toasts[role="status"] .toast', { hasText: 'Lien d’invitation copié.' });
+    await toast.waitFor();
+    const m = await page.evaluate(() => {
+      const wrap = document.querySelector('.st-wrap');
+      const toast = [...document.querySelectorAll('.toasts .toast')].find((x) =>
+        x.textContent.includes('Lien d’invitation copié.'),
+      );
+      return {
+        inline: wrap.textContent.includes('Lien d’invitation copié.'),
+        alerts: wrap.querySelectorAll('.alert-success, .fd-alert--success').length,
+        live: toast.closest('[role="status"]')?.getAttribute('aria-live'),
+        icon: !!toast.querySelector('svg'),
+        close: !!toast.querySelector('button[aria-label]'),
+      };
+    });
+    ok(
+      (await page.evaluate(() => navigator.clipboard.readText())).endsWith(`#/invite/${inv.token}`) &&
+        !m.inline &&
+        m.alerts === 0 &&
+        m.live === 'polite' &&
+        m.icon &&
+        m.close,
+      `« Copier le lien d’invitation » : lien copié, toast annoncé avec icône et Fermer, aucun texte dans la page (${JSON.stringify(m)})`,
+    );
   }
 
   await page.getByRole('button', { name: 'Inviter', exact: true }).click();

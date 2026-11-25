@@ -173,7 +173,7 @@ export function SharePanel({
     : links;
   const [creating, setCreating] = useState(false);
   const [exportFmt, setExportFmt] = useState<'pdf' | 'gif' | 'mp4'>('pdf');
-  const { error, success, run } = useAction();
+  const { error, run } = useAction();
   const editable = can('demo.edit');
 
   /** L38-2 : liens exportés en CSV (lien du centre pour un module de formation). */
@@ -468,11 +468,6 @@ export function SharePanel({
           {error && (
             <div className="alert alert-danger sh-alert" role="alert">
               {error}
-            </div>
-          )}
-          {success && (
-            <div className="alert alert-success sh-alert" role="status">
-              {success}
             </div>
           )}
           <div className="shd-panel">

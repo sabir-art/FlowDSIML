@@ -14,7 +14,7 @@ import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { Menu } from '../../components/Menu';
 import '../editor/vars/vars.css';
-import { Button, Empty, Modal } from '@flowdsiml/ui';
+import { Alert, Button, Empty, Modal } from '@flowdsiml/ui';
 
 type Row = Tables<'variables'>;
 
@@ -291,11 +291,7 @@ function VariableDrawer({
       }
     >
       <form id="var-form" className="st-invite__form" onSubmit={submit}>
-        {(error || err) && (
-          <div className="alert alert-danger" role="alert">
-            {error || err}
-          </div>
-        )}
+        {(error || err) && <Alert kind="error">{error || err}</Alert>}
         {field('var-label', t('vars.name'), label, setLabel, 40, { required: true })}
         {field('var-desc', t('vars.description'), description, setDescription, 80)}
         {field('var-ex', t('vars.example'), example, setExample, 80, {

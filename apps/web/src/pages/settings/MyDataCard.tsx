@@ -7,6 +7,7 @@ import { strToU8, zipSync } from 'fflate';
 import { supabase } from '../../lib/supabase';
 import { errorMessage } from '../../lib/errors';
 import { useAuth } from '../../auth/AuthProvider';
+import { useToast } from '../../components/Toast';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 
 type Check = {
@@ -48,11 +49,11 @@ async function listAll(bucket: string, prefix: string, depth = 3): Promise<strin
 export function MyDataCard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const toast = useToast();
   const { user } = useAuth();
   const { select } = useWorkspace();
   const [exporting, setExporting] = useState(false);
   const [exportErr, setExportErr] = useState<string | null>(null);
-  const [exported, setExported] = useState(false);
   const [params, setParams] = useSearchParams();
   const [check, setCheck] = useState<Check | null>(null);
   const [email, setEmail] = useState('');
@@ -75,7 +76,6 @@ export function MyDataCard() {
   async function prepareExport() {
     setExporting(true);
     setExportErr(null);
-    setExported(false);
     try {
       const { data, error } = await supabase.rpc('export_my_data');
       if (error) throw error;
@@ -101,7 +101,8 @@ export function MyDataCard() {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
-      setExported(true);
+      // Confirmation passagère : un toast, jamais un texte posé dans la page
+      toast(t('myData.done'));
     } catch {
       setExportErr(t('myData.exportFailed'));
     } finally {
@@ -203,9 +204,6 @@ export function MyDataCard() {
           </div>
         </div>
         {exporting && <div className="st-mydata-bar" aria-hidden="true" />}
-        <p className="stg-status" role="status">
-          {exported ? t('myData.done') : ''}
-        </p>
         {exportErr && (
           <p className="stg-error" role="alert">
             <CircleAlert size={16} aria-hidden="true" />

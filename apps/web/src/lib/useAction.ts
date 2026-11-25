@@ -1,10 +1,17 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from './errors';
+import { useToast } from '../components/Toast';
 
-/** Exécute une action asynchrone avec état de chargement, erreur traduite et message de succès. */
-export function useAction() {
+/**
+ * Exécute une action asynchrone avec état de chargement, erreur traduite et message de succès.
+ * Règle (retour client du 25/11) : une confirmation passagère (copié, envoyé, enregistré…) passe par un
+ * toast, jamais par un texte posé dans la page. `inline` est réservé aux écrans d'authentification, où
+ * le message est le contenu même de l'écran (« e-mail envoyé ») : lui seul remplit `success`.
+ */
+export function useAction(opts: { inline?: boolean } = {}) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -15,7 +22,10 @@ export function useAction() {
     setSuccess(null);
     try {
       const r = await fn();
-      if (successMsg) setSuccess(successMsg);
+      if (successMsg) {
+        if (opts.inline) setSuccess(successMsg);
+        else toast(successMsg);
+      }
       return r;
     } catch (e) {
       setError(errorMessage(t, e));
