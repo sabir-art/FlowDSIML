@@ -96,7 +96,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const { page, state } = await open((s) => {
       Object.assign(s.tables.profiles[0], {
         extension_seen_at: '2026-11-02T10:00:00Z',
-        extension_version: '0.2.0',
+        // Version publiée sur le Chrome Web Store (VITE_EXTENSION_VERSION, 0.3.1 par défaut)
+        extension_version: '0.3.1',
         extension_last_capture_at: new Date(Date.now() - 2 * 3600_000).toISOString(),
         extension_last_demo: DEMO,
       });
@@ -118,7 +119,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       facts.map((f) => f[0]).join('|') === 'Version|Dernière capture|Raccourci',
       `présente : trois faits (${facts.map((f) => f[0]).join('|')})`,
     );
-    ok(/^0\.2\.0 · à jour$/.test(facts[0][1].trim()), `version déclarée et à jour (${facts[0][1]})`);
+    ok(/^0\.3\.1 · à jour$/.test(facts[0][1].trim()), `version déclarée et à jour (${facts[0][1]})`);
     await page.waitForFunction(
       (t) => document.querySelectorAll('.xt-fact dd')[1]?.textContent.includes(t),
       title,
