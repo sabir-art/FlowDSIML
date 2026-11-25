@@ -602,7 +602,8 @@ async function onHtmlBar(
   }
   if (m.type === 'fd:html-ready') {
     if (s.htmlAwait) await setState({ htmlAwait: false });
-    return { capture: !!s.htmlAwait, pages: s.steps };
+    // EXT-02 §8 : la barre de capture HTML porte la même pastille de cible que celle des captures
+    return { capture: !!s.htmlAwait, pages: s.steps, target: targetChip(s) };
   }
   if (m.type === 'fd:html-page') {
     const order = s.steps + 1;
@@ -854,6 +855,15 @@ async function cancel(): Promise<RecordingStatus> {
   return setState({ ...EMPTY });
 }
 
+/** EXT-02 §8 : pastille de cible d'un ajout (« Démo CRM · après l'étape 3 »), null hors ajout. */
+function targetChip(s: { addTo?: RecordingStatus['addTo'] }): string | null {
+  return s.addTo
+    ? (s.addTo.after ? strings.addChipAfter : strings.addChipStart)
+        .replace('{{demo}}', s.addTo.title)
+        .replace('{{n}}', String(s.addTo.after?.n ?? ''))
+    : null;
+}
+
 export default defineBackground(() => {
   // F7 : raccourcis (Alt + Maj + P, M, S) de la barre d'enregistrement
   browser.commands?.onCommand.addListener((cmd: string) => {
@@ -895,11 +905,7 @@ export default defineBackground(() => {
         const guide =
           s.fill && next ? { title: next.title, n: s.steps + 1, total: s.fill.steps.length } : null;
         // EXT-02 §8 : pastille de cible « Démo CRM · après l'étape 3 »
-        const target = s.addTo
-          ? (s.addTo.after ? strings.addChipAfter : strings.addChipStart)
-              .replace('{{demo}}', s.addTo.title)
-              .replace('{{n}}', String(s.addTo.after?.n ?? ''))
-          : null;
+        const target = targetChip(s);
         // EXT-02 §5 : la barre affiche « Capture · n »
         if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide, steps: s.steps, target };
         return { n: 1, title: '', guide, steps: s.steps, target };

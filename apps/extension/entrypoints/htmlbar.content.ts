@@ -70,9 +70,15 @@ export default defineContentScript({
     const countEl = $<HTMLSpanElement>('.n');
     const capBtn = $<HTMLButtonElement>('.cap');
     const toast = $<HTMLDivElement>('.toast');
-    const setCount = (n: number) =>
-      (countEl.textContent =
-        n <= 1 ? s.htmlPagesOne.replace('{{n}}', String(n)) : s.htmlPages.replace('{{n}}', String(n)));
+    // EXT-02 §8 : cible d'un ajout (« Démo CRM · après l'étape 3 »), à la suite du nombre de pages
+    let target: string | null = null;
+    let pages = 0;
+    const setCount = (n: number) => {
+      pages = n;
+      const label =
+        n <= 1 ? s.htmlPagesOne.replace('{{n}}', String(n)) : s.htmlPages.replace('{{n}}', String(n));
+      countEl.textContent = target ? `${label} · ${target}` : label;
+    };
     setCount(0);
     function flash(text: string, err = false) {
       toast.textContent = text;
@@ -228,20 +234,23 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener(onMsg);
 
     // Au chargement : capture si la page suit un clic (ou au démarrage)
-    void send<{ capture: boolean; pages: number }>({ type: 'fd:html-ready' }).then((r) => {
-      setCount(r?.pages ?? 0);
-      if ((r?.pages ?? 0) === 0) {
-        notice.hidden = false;
-        setTimeout(() => (notice.hidden = true), 10000);
-      }
-      if (r?.capture) {
-        // Capture de départ en attente : un clic fait entre-temps ne doit pas produire un doublon
-        initial = true;
-        setTimeout(() => {
-          initial = false;
-          void capture();
-        }, 600);
-      }
-    });
+    void send<{ capture: boolean; pages: number; target?: string | null }>({ type: 'fd:html-ready' }).then(
+      (r) => {
+        target = r?.target ?? null;
+        setCount(r?.pages ?? pages);
+        if ((r?.pages ?? 0) === 0) {
+          notice.hidden = false;
+          setTimeout(() => (notice.hidden = true), 10000);
+        }
+        if (r?.capture) {
+          // Capture de départ en attente : un clic fait entre-temps ne doit pas produire un doublon
+          initial = true;
+          setTimeout(() => {
+            initial = false;
+            void capture();
+          }, 600);
+        }
+      },
+    );
   },
 });

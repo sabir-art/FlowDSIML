@@ -271,6 +271,12 @@ const ok = (c, l) => {
     }
     ok(n >= 1, `capture HTML : page de départ copiée (${n})`);
   }
+  await hpage.waitForFunction(() =>
+    /Démo CRM · après l’étape 2/.test(
+      document.querySelector('[data-fd-ui]')?.shadowRoot?.querySelector('.n')?.textContent ?? '',
+    ),
+  );
+  ok(true, 'capture HTML : la barre porte la pastille de cible « Démo CRM · après l’étape 2 »');
   await hpage.bringToFront();
   const logH = (await (await fetch('http://localhost:54400/__log')).json()).length;
   const hreviewP = ctx.waitForEvent('page', { predicate: (p) => p.url().includes('/html-review.html') });
