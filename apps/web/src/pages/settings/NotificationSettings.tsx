@@ -170,8 +170,10 @@ export function NotificationSettings() {
                 {t('notifSettings.inApp')}
               </th>
               <th scope="col" className="nt-c">
-                {t('notifSettings.byEmail')}
-                {!emailAvailable && <span className="stg-soon nt-soon">{t('shell.soon')}</span>}
+                <span className="nt-mailh">
+                  {t('notifSettings.byEmail')}
+                  {!emailAvailable && <span className="fd-badge nt-soon">{t('shell.soon')}</span>}
+                </span>
               </th>
             </tr>
           </thead>
