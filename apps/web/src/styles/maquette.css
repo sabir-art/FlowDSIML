@@ -793,17 +793,25 @@
 @keyframes fd-toast-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(-8px);
   }
 }
+@keyframes fd-toast-out {
+  to {
+    opacity: 0;
+  }
+}
+/* CAD-08 (révisé le 25/11) : en haut à droite, 16 px sous la barre du haut, sans couvrir l'aide ni la
+   cloche ; sous les menus ouverts, au-dessus du contenu */
 .mk .toasts {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  top: calc(var(--fd-layout-topbar-height) + 16px);
+  right: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  z-index: var(--fd-z-toast);
+  /* Sous les menus ouverts, au-dessus du contenu et des barres collées */
+  z-index: calc(var(--fd-z-dropdown) - 1);
   /* Seuls les toasts reçoivent les clics : l'espace entre eux laisse passer vers la page */
   pointer-events: none;
 }
@@ -817,14 +825,28 @@
   padding: var(--fd-space-3) var(--fd-space-4);
   background: var(--fd-color-surface-raised);
   border: 1px solid var(--fd-color-border);
-  border-radius: var(--fd-radius-lg);
+  border-radius: var(--fd-radius-surface);
   box-shadow: var(--fd-shadow-md);
-  /* MOTION-01 §3 : le toast entre par le bas (8 px) en fondu, 200 ms */
+  /* MOTION-01 §3 : le toast entre par le haut (8 px) en fondu, 200 ms */
   animation: fd-toast-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
-/* Variante à deux lignes : message en 600, précision atténuée dessous ; 400 px au plus */
-.mk .toast--rich {
-  width: 400px;
+/* Sortie : fondu de 160 ms, sans glissement */
+.mk .toast.toast--leaving {
+  animation: fd-toast-out var(--fd-motion-duration-exit) var(--fd-motion-ease-exit) forwards;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .toast {
+    animation: fd-toast-fade var(--fd-motion-duration-fast) linear;
+  }
+  .mk .toast.toast--leaving {
+    animation: fd-toast-out var(--fd-motion-duration-fast) linear forwards;
+  }
+}
+@keyframes fd-toast-fade {
+  from {
+    opacity: 0;
+  }
 }
 .mk .toast--rich .toast-text {
   font-weight: 600;
@@ -841,11 +863,11 @@
   flex: none;
   margin-top: 1px;
 }
-@media (max-width: 639px) {
+@media (max-width: 599px) {
   .mk .toasts {
+    top: calc(var(--fd-layout-topbar-height) + 8px);
     left: 16px;
     right: 16px;
-    bottom: 16px;
   }
   .mk .toast {
     width: auto;
