@@ -1,6 +1,7 @@
 /**
  * Recette L48-F (spec docs/ux/specs/l48f-integrations.md §5). Données fictives (acme.example).
- *  - « Toutes » : 4 groupes, Webhooks et Clés d'API disponibles, les autres « Bientôt » sans focus ni clic ;
+ *  - « Toutes » : 4 groupes, Webhooks, Clés d'API et Slack disponibles, les autres « Bientôt » sans focus
+ *    ni clic ; Slack (ALERT-01) : webhook entrant, test, état « Connecté », retrait ;
  *  - « Connectées » vide puis avec 2 webhooks actifs ; « Connecter » ouvre « Ajouter un webhook » ;
  *  - demande à la DSI (mailto avec sujet) ou « Renseigner le lien du support » ; page Webhooks et détail ;
  *  - 390 px : select « Catégorie », pas de défilement horizontal ; segmenté aux flèches ; axe.
@@ -63,11 +64,11 @@ const hook = (id, state, ws) => ({
   const rows = p.locator('.int-list > li');
   const soon = p.locator('.int-list > li .int-soon');
   ok(
-    (await rows.count()) === 11 && (await soon.count()) === 9,
-    `11 lignes dont 9 « Bientôt » : Webhooks et Clés d’API sont disponibles (${await rows.count()}, ${await soon.count()})`,
+    (await rows.count()) === 11 && (await soon.count()) === 8,
+    `11 lignes dont 8 « Bientôt » : Webhooks, Clés d’API et Slack sont disponibles (${await rows.count()}, ${await soon.count()})`,
   );
   ok(
-    (await p.locator('.int-list > li[aria-disabled="true"]').count()) === 8,
+    (await p.locator('.int-list > li[aria-disabled="true"]').count()) === 7,
     `lignes « Bientôt » aria-disabled, hors e-mailing (${await p.locator('.int-list > li[aria-disabled="true"]').count()})`,
   );
   ok(
@@ -107,6 +108,84 @@ const hook = (id, state, ws) => ({
     'flèche droite : Communication, sans titre de groupe',
   );
   await axe(p, 'Intégrations (aucune connexion)');
+
+  // ===== ALERT-01 §7-8 : Slack par webhook entrant (adresse fictive, aucun appel réel) =====
+  const FAKE_HOOK = 'https://hooks.slack.com/services/T000FICTIF/B000FICTIF/cle-factice';
+  const slackLi = p.locator('.int-list > li', { hasText: 'Slack' });
+  ok(
+    /Recevoir les alertes analytics dans un canal\./.test(await slackLi.innerText()) &&
+      (await slackLi.locator('.int-soon').count()) === 0,
+    'Slack : ligne disponible, plus de « Bientôt »',
+  );
+  await slackLi.getByRole('button', { name: 'Connecter Slack' }).click();
+  const sd = p.getByRole('dialog', { name: 'Slack' });
+  await sd.waitFor();
+  const field = sd.getByLabel('Adresse du webhook entrant');
+  ok(
+    (await field.getAttribute('placeholder')) === 'https://hooks.slack.com/services/…' &&
+      (await field.evaluate((el) => el === document.activeElement)),
+    'fenêtre Slack : champ « Adresse du webhook entrant » avec son exemple, focus dessus',
+  );
+  ok(
+    (await sd.locator('.fd-modal__foot button').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
+      'Envoyer un test | Enregistrer',
+    'boutons « Envoyer un test » (secondaire) et « Enregistrer » (primaire)',
+  );
+  ok(
+    (await sd.locator('.int-slack__scope li[aria-disabled="true"] .soon-text').count()) === 2 &&
+      /Nouveaux leads/.test(await sd.locator('.int-slack__scope').innerText()) &&
+      /Commentaires/.test(await sd.locator('.int-slack__scope').innerText()),
+    'leads et commentaires : visibles en gris, « Bientôt »',
+  );
+  // Adresse refusée : autre hôte
+  await field.fill('https://hooks.slack.com.evil.example/services/T000FICTIF/B000FICTIF/cle-factice');
+  await sd.getByRole('button', { name: 'Enregistrer' }).click();
+  await sd.getByText('Indiquez une adresse https://hooks.slack.com/services/…').waitFor();
+  ok(
+    (await field.getAttribute('aria-invalid')) === 'true' && !s.slack,
+    'autre hôte que hooks.slack.com : erreur sous le champ, rien n’est enregistré',
+  );
+  await axe(p, 'Intégrations, fenêtre Slack (erreur)');
+  // « Envoyer un test » enregistre l'adresse puis envoie le test
+  await field.fill(FAKE_HOOK);
+  await sd.getByRole('button', { name: 'Envoyer un test' }).click();
+  await p.getByText('Test envoyé dans Slack').waitFor();
+  ok(
+    s.slack?.url === FAKE_HOOK && s.slack.tests === 1 && !('app_url' in s.slack),
+    '« Envoyer un test » : adresse enregistrée, un test envoyé ; le navigateur n’envoie pas l’adresse de l’app',
+  );
+  await sd.getByText('Connecté', { exact: true }).waitFor();
+  ok(
+    (await sd.getByLabel('Adresse du webhook entrant').count()) === 0 &&
+      !(await sd.innerText()).includes('cle-factice') &&
+      (await sd.getByRole('button', { name: 'Retirer' }).count()) === 1,
+    'connecté : pastille « Connecté », action « Retirer », l’adresse n’est plus affichée',
+  );
+  await axe(p, 'Intégrations, fenêtre Slack (connecté)');
+  await p.keyboard.press('Escape');
+  await sd.waitFor({ state: 'detached' });
+  ok(/Connecté/.test(await slackLi.innerText()), 'ligne Slack : « Connecté »');
+  await p.getByRole('radio', { name: 'Connectées' }).click();
+  await p.waitForURL(/categorie=connectees/);
+  await p.locator('.int-list--bare > li').first().waitFor();
+  ok(
+    (await p.locator('.int-list > li').count()) === 1 &&
+      /Slack/.test(await p.locator('.int-list > li').innerText()),
+    `« Connectées » : Slack y figure (${await p.locator('.int-list > li').count()} : ${(await p.locator('.int-list').innerText()).replace(/\n/g, ' ')})`,
+  );
+  // Slack refuse le test : le message le dit
+  await p.getByRole('button', { name: 'Ouvrir Slack' }).click();
+  s.slackTestFails = true;
+  await sd.getByRole('button', { name: 'Envoyer un test' }).click();
+  await p.getByText('Le test n’a pas pu être envoyé').waitFor();
+  ok(s.slack.tests === 1, 'test refusé par Slack : « Le test n’a pas pu être envoyé »');
+  s.slackTestFails = false;
+  // Retrait, avec confirmation
+  await sd.getByRole('button', { name: 'Retirer' }).click();
+  await p.getByRole('dialog', { name: 'Retirer Slack ?' }).getByRole('button', { name: 'Retirer' }).click();
+  await p.getByText('Slack retiré').waitFor();
+  ok(s.slack === null, '« Retirer » (confirmé) : webhook retiré');
+  await p.keyboard.press('Escape');
   await p.context().close();
 
   // ===== Avec webhooks, sans lien du support =====
