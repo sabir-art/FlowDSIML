@@ -51,3 +51,25 @@ La recette du lot B ouvrira chaque démo dans l'éditeur et dans le lecteur.
 3. **Banc** : ajouter ma page piège (en-têtes « Nom / Statut / Actions », « Ville : Lyon », « NomStatutActions » collés), avec l'attendu « 0 détection », dans les deux modes.
 
 Tout le reste du lot A est conforme : onglets, noms d'écran, boutons non floutés, données fictives remplacées.
+
+---
+
+# Nouvelle recette après f12d7f1 : VERT
+
+Recette refaite le 25/11 avec l'extension reconstruite sur f12d7f1 (avec 628e87d et 1e0f804).
+
+- **Banc du dev**, page piège comprise :
+  - `etat-html` : 7 parcours conformes. La page piège a 6 états sur 6 et **0 remplacement** ;
+  - `etat-captures` : la page piège a **0 zone repérée** ; nom et e-mail fictifs repérés ; bouton et lien non repérés.
+- **Mes parcours, mode Captures d'écran** (8 clics sur la page piège) : « Aucune donnée personnelle détectée », 0 détection sur 8 captures (`v2-captures-0-detection.png`). Le faux « Nom · Statut » a disparu.
+- **Mes parcours, mode HTML** :
+  - page piège : aucune donnée remplacée. « Ville : Lyon » et « Camille D. » restent lisibles ;
+  - même page avec de vraies données : « 12 rue des Lilas, 69003 Lyon » et « 06 12 34 56 78 » sont **remplacés** (`v2-html-vraies-donnees.png`).
+
+## Remarque (non bloquante, à traiter avec la règle F1)
+
+« Client : Camille Durand » n'est pas détecté : « Client » n'est pas reconnu comme un libellé de nom. Je propose d'ajouter aux libellés de nom « Client », « Contact », « Interlocuteur », « Responsable » et « Bénéficiaire ». La valeur ne serait remplacée que si elle a la forme d'un nom (règle de f12d7f1), pour ne pas toucher aux noms d'entreprise en majuscules.
+
+## Réponse à la question du dev (tableaux)
+
+Oui pour les vrais tableaux : quand un en-tête `th` est un libellé de nom (Nom, Prénom, Nom complet, Contact), les cellules de cette colonne sont remplacées si elles ont la forme d'un nom, même réduit à un mot (« Durand »). Les en-têtes eux-mêmes ne le sont jamais. Le cas « Nom / Statut / Actions » en spans collés ou en série d'en-têtes reste à 0 détection.
