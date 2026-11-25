@@ -7,7 +7,8 @@
  *  - vidéo : Ma voix, Webcam dans un coin, Masquer en direct ;
  *  - erreur « Cette page ne peut pas être capturée » : « Démarrer » désactivé, jamais masqué ;
  *  - aucun contrôle natif (select, case, bouton radio, champ nombre) ; clavier ; réglages de l'extension.
- * Usage : voir capture.e2e.cjs (build sans WXT_DEBUGGER pour « Bientôt »).
+ * Usage : voir capture.e2e.cjs. Passe sur les deux builds : avec WXT_DEBUGGER=1 (CI), Format mobile est
+ * proposé ; sans (version de la boutique), il reste visible en « Bientôt », comme « Page entière ».
  */
 const { chromium } = require('playwright');
 const path = require('path');
@@ -35,7 +36,11 @@ const SHOTS = process.env.SHOTS_DIR;
     if (!sw) sw = await ctx.waitForEvent('serviceworker');
     const extId = sw.url().split('/')[2];
     const manifest = JSON.parse(fs.readFileSync(path.join(ext, 'manifest.json'), 'utf8'));
-    const soon = !(manifest.optional_permissions || []).includes('debugger');
+    // Version de la boutique (sans l'outil de débogage) : Format mobile et page entière en « Bientôt ».
+    // Le build des e2e (WXT_DEBUGGER=1) les propose : les deux cas sont vérifiés selon le manifeste.
+    const soon = ![...(manifest.permissions || []), ...(manifest.optional_permissions || [])].includes(
+      'debugger',
+    );
     const errors = [];
     const tag = theme === 'dark' ? 'sombre' : 'clair';
     const shot = async (p, name) =>
@@ -146,6 +151,12 @@ const SHOTS = process.env.SHOTS_DIR;
         `${tag} · Format mobile ne se choisit pas`,
       );
     }
+    if (!soon)
+      ok(
+        (await list.locator('[data-value=mobile]').getAttribute('aria-disabled')) === null &&
+          (await list.locator('[data-value=mobile] .pill').count()) === 0,
+        `${tag} · Format mobile disponible avec l’outil de débogage, sans pastille`,
+      );
     await shot(popup, 'types');
     ok(
       (await popup.locator('.pp').evaluate((el) => el.offsetHeight)) <= 600,
