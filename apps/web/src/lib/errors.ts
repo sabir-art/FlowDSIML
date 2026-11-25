@@ -135,7 +135,7 @@ export function errorMessage(t: TFunction, err: unknown, opts?: { password?: str
     [/Invalid login credentials/i, 'errors.badCredentials'],
     [/Email not confirmed/i, 'errors.emailNotConfirmed'],
     [/User already registered/i, 'errors.alreadyRegistered'],
-    [/rate limit|too many/i, 'errors.rateLimited'],
+    [/rate limit|too many|only request this after/i, 'errors.rateLimited'],
     [/owner/i, 'errors.ownerRule'],
     [/permission denied|Accès refusé|42501|row-level security/i, 'errors.forbidden'],
     [/Failed to fetch|NetworkError/i, 'errors.network'],
