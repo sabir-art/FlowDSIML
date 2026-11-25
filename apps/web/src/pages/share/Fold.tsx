@@ -24,7 +24,8 @@ export function Fold({
         type="button"
         className="shd-fold__head"
         aria-expanded={open}
-        aria-controls={`${id}-body`}
+        // Le contenu n'est dans la page qu'une fois la ligne ouverte : pas de référence vers un absent
+        aria-controls={open ? `${id}-body` : undefined}
         onClick={() => setOpen((v) => !v)}
       >
         {icon}

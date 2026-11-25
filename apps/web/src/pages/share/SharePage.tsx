@@ -44,7 +44,7 @@ import { addressUrl, embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl 
 import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
-import { Menu } from '../../components/Menu';
+import { Menu, type MenuItem } from '../../components/Menu';
 import { asSettings } from '../editor/types';
 import { AccessPanel, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
@@ -160,6 +160,8 @@ export function SharePanel({
   const tab: Tab = TAB_OF[mode];
   const [qr, setQr] = useState(false);
   const [msgCopied, copyMsg] = useCopied();
+  // Adresse d'une page personnalisée copiée depuis le menu ⋯ : confirmée sous la liste, sans toast
+  const [pageCopied, copyPage] = useCopied();
   const [persoQ, setPersoQ] = useState('');
   const needle = persoQ.trim().toLocaleLowerCase();
   const shownLinks = needle
@@ -695,62 +697,38 @@ export function SharePanel({
                           );
                           const expired = l.expires_at && Date.parse(l.expires_at) < Date.now();
                           const st = linkStats[l.id];
+                          const hasPage = !!(l.page_enabled && l.page_code);
+                          const meta = [
+                            l.cohort,
+                            ...vars,
+                            hasPage ? t('share.pp.badgeOn') : null,
+                            l.expires_at && !expired
+                              ? t('share.expiresOn', {
+                                  date: formatDate(l.expires_at, { day: 'numeric', month: 'short' }),
+                                })
+                              : null,
+                          ].filter((x): x is string => !!x);
                           return (
                             <tr key={l.id} className={l.is_active && !expired ? undefined : 'sh-off'}>
                               <th scope="row" className="sh-row-h">
+                                {/* Ligne 1 : le nom et sa pastille d'état ; ligne 2, atténuée, sur une seule ligne :
+                                    groupe · variables · page personnalisée · expiration */}
                                 <span className="shp-name">
-                                  {l.name || '—'}
-                                  {!l.is_active && (
+                                  <span className="shp-name__t" title={l.name || undefined}>
+                                    {l.name || '—'}
+                                  </span>
+                                  {(!l.is_active || expired) && (
                                     <Status size="sm" className="sh-state">
-                                      {t('share.disabled')}
+                                      {!l.is_active ? t('share.disabled') : t('share.expired')}
                                     </Status>
                                   )}
                                 </span>
-                                {(l.cohort ||
-                                  vars.length > 0 ||
-                                  l.expires_at ||
-                                  (l.page_enabled && l.page_code)) && (
-                                  <span className="shp-meta">
+                                {meta.length > 0 && (
+                                  <span className="shp-meta" title={meta.join(' · ')}>
                                     {l.cohort && <span className="sh-cohort-cell">{l.cohort}</span>}
-                                    {vars.map((v) => (
-                                      <span key={v} className="badge sh-var" title={v}>
-                                        {v}
-                                      </span>
+                                    {meta.slice(l.cohort ? 1 : 0).map((m) => (
+                                      <span key={m}>{m}</span>
                                     ))}
-                                    {l.expires_at && (
-                                      <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
-                                        {expired
-                                          ? t('share.expired')
-                                          : t('share.expiresOn', {
-                                              date: formatDate(l.expires_at, {
-                                                day: 'numeric',
-                                                month: 'short',
-                                              }),
-                                            })}
-                                      </Status>
-                                    )}
-                                    {l.page_enabled && l.page_code ? (
-                                      <div className="sh-pp-cell">
-                                        <Status size="sm" tone="success">
-                                          {t('share.pp.badgeOn')}
-                                        </Status>
-                                        {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
-                                        <span className="sh-pp-url">
-                                          <span
-                                            className="t-mono"
-                                            title={personalPageUrl(demoId, l.page_code)}
-                                          >
-                                            {`…/${l.page_code}`}
-                                          </span>
-                                          <CopyAction
-                                            className="btn btn-ghost btn-sm btn-icon"
-                                            label={t('share.pp.copyPage', { name: l.name || '—' })}
-                                            title={t('share.pp.copyPage', { name: l.name || '—' })}
-                                            text={personalPageUrl(demoId, l.page_code)}
-                                          />
-                                        </span>
-                                      </div>
-                                    ) : null}
                                   </span>
                                 )}
                               </th>
@@ -793,37 +771,56 @@ export function SharePanel({
                                     }
                                     text={shareLinkUrl(l.token)}
                                   />
-                                  {editable && (
+                                  {(editable || hasPage) && (
                                     <Menu
                                       label={t('members.actionsFor', { name: l.name || '—' })}
                                       items={[
-                                        {
-                                          label: l.is_active ? t('share.disable') : t('share.enable'),
-                                          icon: <Power />,
-                                          onSelect: () =>
-                                            void run(async () => {
-                                              check(
-                                                await supabase
-                                                  .from('share_links')
-                                                  .update({ is_active: !l.is_active })
-                                                  .eq('id', l.id),
-                                              );
-                                              await load();
-                                            }),
-                                        },
-                                        'separator',
-                                        {
-                                          label: t('common.delete'),
-                                          icon: <Trash2 />,
-                                          danger: true,
-                                          onSelect: () =>
-                                            void run(async () => {
-                                              check(
-                                                await supabase.from('share_links').delete().eq('id', l.id),
-                                              );
-                                              await load();
-                                            }),
-                                        },
+                                        // L25-13 : adresse de la page personnalisée (/p/<démo>/<code>)
+                                        ...(hasPage
+                                          ? [
+                                              {
+                                                label: t('share.pp.copyPageShort'),
+                                                icon: <Copy />,
+                                                onSelect: () =>
+                                                  void copyPage(personalPageUrl(demoId, l.page_code!)),
+                                              },
+                                            ]
+                                          : []),
+                                        ...(editable
+                                          ? ([
+                                              ...(hasPage ? (['separator'] as const) : []),
+                                              {
+                                                label: l.is_active ? t('share.disable') : t('share.enable'),
+                                                icon: <Power />,
+                                                onSelect: () =>
+                                                  void run(async () => {
+                                                    check(
+                                                      await supabase
+                                                        .from('share_links')
+                                                        .update({ is_active: !l.is_active })
+                                                        .eq('id', l.id),
+                                                    );
+                                                    await load();
+                                                  }),
+                                              },
+                                              'separator',
+                                              {
+                                                label: t('common.delete'),
+                                                icon: <Trash2 />,
+                                                danger: true,
+                                                onSelect: () =>
+                                                  void run(async () => {
+                                                    check(
+                                                      await supabase
+                                                        .from('share_links')
+                                                        .delete()
+                                                        .eq('id', l.id),
+                                                    );
+                                                    await load();
+                                                  }),
+                                              },
+                                            ] as Array<MenuItem | 'separator'>)
+                                          : []),
                                       ]}
                                     />
                                   )}
@@ -836,6 +833,9 @@ export function SharePanel({
                     </table>
                   </div>
                 )}
+                <p className="shl-ok shp-copied" role="status">
+                  {pageCopied ? t('share.pp.pageCopied') : ''}
+                </p>
                 {links.length > 0 && shownLinks.length === 0 && (
                   <p className="muted sh-empty" role="status">
                     {t('share.persoNoMatch')}

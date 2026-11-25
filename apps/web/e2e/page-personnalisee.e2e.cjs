@@ -23,7 +23,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     if (!c) process.exitCode = 1;
   };
   const errors = [];
-  const ctx = await themedContext(b, { viewport: { width: 1440, height: 900 } });
+  const ctx = await themedContext(b, {
+    viewport: { width: 1440, height: 900 },
+    permissions: ['clipboard-read', 'clipboard-write'],
+  });
 
   // ===== App : modale « Nouveau lien personnalisé » =====
   const page = await ctx.newPage();
@@ -128,20 +131,21 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       link.cta_url === null,
     'lien créé avec sa page (code tiré par la base)',
   );
+  // Retour UX : sous le nom, une ligne atténuée « variables · Page personnalisée » ; l'adresse de la page se
+  // copie par le menu ⋯ de la ligne (plus d'adresse ni de seconde icône dans la ligne)
+  const line = page.locator('table.sh-links tbody tr').first();
   ok(
-    (await page.getByText('Personnalisée', { exact: true }).count()) === 1,
-    'liste : badge « Personnalisée »',
+    /Page personnalisée/.test(await line.locator('.shp-meta').innerText()) &&
+      (await page.locator('.sh-pp-url').count()) === 0,
+    'liste : « Page personnalisée » sous le nom, sans adresse dans la ligne',
   );
+  await line.getByRole('button', { name: 'Actions pour Globex — Marie' }).click();
+  await page.getByRole('menuitem', { name: 'Copier l’adresse de la page' }).click();
+  await page.locator('.shp-copied', { hasText: 'Adresse de la page copiée' }).waitFor();
   ok(
-    (await page.locator('.sh-pp-url .t-mono').innerText()).endsWith(`/${link.page_code}`) &&
-      (await page.locator('.sh-pp-url .t-mono').getAttribute('title')).endsWith(
-        `#/p/${DEMO}/${link.page_code}`,
-      ),
-    'liste : adresse de la page /p/<démo>/<code>',
-  );
-  ok(
-    (await page.getByRole('button', { name: 'Copier l’adresse de la page Globex — Marie' }).count()) === 1,
-    'liste : copier l’adresse de la page',
+    (await page.evaluate(() => navigator.clipboard.readText())).endsWith(`#/p/${DEMO}/${link.page_code}`) &&
+      (await page.locator('.toast', { hasText: 'copiée' }).count()) === 0,
+    'liste : menu ⋯ › « Copier l’adresse de la page » (/p/<démo>/<code>), confirmée sur place',
   );
   ok(
     await page.locator('.table-wrap').evaluate((el) => el.scrollWidth <= el.clientWidth + 1),

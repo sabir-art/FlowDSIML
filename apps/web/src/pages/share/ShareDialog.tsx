@@ -96,9 +96,17 @@ function ShareWindow({
     if (!d.open) d.showModal();
     return () => {
       if (d.open) d.close();
-      // Le focus revient au bouton « Partager » (ou à l'élément qui a ouvert la fenêtre)
-      const back = opener?.isConnected ? opener : document.querySelector<HTMLElement>('[data-share-open]');
-      back?.focus();
+      // Le focus revient au bouton « Partager » (ou à l'élément qui a ouvert la fenêtre), une fois la
+      // fenêtre retirée de la page : pendant le démontage, le navigateur peut encore le reprendre. Le
+      // bouton visé est celui qui est à l'écran à cette largeur (la barre en a un par disposition).
+      const shown = (el: HTMLElement | null) => !!el?.isConnected && el.getClientRects().length > 0;
+      requestAnimationFrame(() => {
+        const back = shown(opener)
+          ? opener
+          : ([...document.querySelectorAll<HTMLElement>('[data-share-open]')].find(shown) ?? null);
+        // Une autre fenêtre a pu s'ouvrir entre-temps (l'export remplace Partager) : on lui laisse le focus
+        if (!document.querySelector('dialog[open]')) back?.focus();
+      });
     };
   }, []);
   // Le titre du mode prend le focus quand on change de mode (lecteurs d'écran, feuille mobile)
