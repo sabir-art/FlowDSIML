@@ -134,6 +134,51 @@ const SHOTS = process.env.SHOTS_DIR;
     'menu « ⋯ » › Modifier le rôle : rôle enregistré',
   );
 
+  // Retour client du 25/11 : le rôle d'une invitation en attente se change par le même menu, avec un toast
+  {
+    const inv = state.tables.invitations[0];
+    const was = inv.role;
+    const to = was === 'editor' ? 'admin' : 'editor';
+    const label = { admin: 'Admin', editor: 'Éditeur', viewer: 'Lecteur' };
+    await page.getByRole('button', { name: `Actions pour ${inv.email}` }).click();
+    ok(
+      (await page.getByRole('menuitemradio').allInnerTexts()).join('|') === 'Admin|Éditeur|Lecteur' &&
+        (await page.getByRole('menuitemradio', { name: label[was] }).getAttribute('aria-checked')) ===
+          'true' &&
+        (await page.locator('[role="menuitemradio"][aria-checked="true"]').count()) === 1,
+      'invitation en attente, menu « ⋯ » : Admin, Éditeur, Lecteur, rôle courant coché, pas de Propriétaire',
+    );
+    await page.getByRole('menuitemradio', { name: label[to] }).click();
+    const toast = page.locator('[role="status"]', {
+      hasText: new RegExp(`Rôle de ${inv.email.replace(/[.+]/g, '\\$&')}\\s?: ${label[to]}\\.`),
+    });
+    await toast.first().waitFor();
+    await page.waitForFunction(
+      ([mail, role]) =>
+        [...document.querySelectorAll('.stg-table tbody tr')].some(
+          (r) => r.textContent.includes(mail) && r.children[2].textContent.trim() === role,
+        ),
+      [inv.email, label[to]],
+    );
+    ok(
+      state.tables.invitations[0].role === to && (await page.locator('.alert-danger').count()) === 0,
+      'invitation en attente : rôle enregistré, ligne à jour, confirmation par un toast',
+    );
+    // La base refuse Propriétaire : l'erreur reste une alerte, le rôle ne change pas
+    const refused = await page.evaluate(async (id) => {
+      const key = Object.keys(localStorage).find((k) => k.endsWith('-auth-token'));
+      const tok = key ? JSON.parse(localStorage.getItem(key)).access_token : '';
+      const base = performance.getEntriesByType('resource').find((e) => e.name.includes('/rest/v1/'));
+      const r = await fetch(`${new URL(base.name).origin}/rest/v1/rpc/set_invitation_role`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${tok}`, apikey: 'anon' },
+        body: JSON.stringify({ p_invitation: id, p_role: 'owner' }),
+      });
+      return r.status;
+    }, inv.id);
+    ok(refused === 400 && state.tables.invitations[0].role === to, 'invitation : Propriétaire refusé');
+  }
+
   await page.getByRole('button', { name: 'Inviter', exact: true }).click();
   const modal = page.locator('dialog.fd-modal[open]');
   await modal.waitFor();

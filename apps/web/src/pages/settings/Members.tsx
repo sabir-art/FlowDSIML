@@ -51,7 +51,8 @@ type SendStatus = 'sent' | 'failed' | 'rate_limit' | 'budget' | 'sent_before' | 
 
 /**
  * E-mails P1 : envoi des invitations créées (fonction invite-email). Nouvelle adresse : e-mail Supabase
- * Auth ; compte existant : notification dans l'app, avec la même réponse (l'admin ne sait pas lequel). Réseau en échec : toutes en échec (repli sur le lien).
+ * Auth ; compte existant : notification dans l'app et e-mail de TutoClick, avec la même réponse (l'admin
+ * ne sait pas lequel). Réseau en échec : toutes en échec (repli sur le lien).
  */
 async function sendInvitations(ids: string[]): Promise<Record<string, SendStatus>> {
   const { data, error } = await supabase.functions.invoke<{
@@ -182,6 +183,13 @@ export function Members() {
         await supabase.from('members').update({ role }).eq('workspace_id', ws.id).eq('user_id', m.user_id),
       );
       toast(t('members.roleChanged', { name: m.full_name || m.email, role: t(`roles.${role}`) }));
+      await load();
+    });
+  /** Rôle d'une invitation en attente : même geste que pour un membre, même toast. */
+  const setInviteRole = (i: Tables<'invitations'>, role: WorkspaceRole) =>
+    void run(async () => {
+      check(await supabase.rpc('set_invitation_role', { p_invitation: i.id, p_role: role }));
+      toast(t('members.roleChanged', { name: i.email, role: t(`roles.${role}`) }));
       await load();
     });
 
@@ -355,6 +363,25 @@ export function Members() {
                   <Menu
                     label={t('members.actionsFor', { name: i.email })}
                     items={[
+                      // Admin, Éditeur, Lecteur, comme pour un membre ; une invitation Propriétaire ne se
+                      // modifie que par un propriétaire
+                      ...(i.role !== 'owner' || myRole === 'owner'
+                        ? [
+                            ...[...roles]
+                              .reverse()
+                              .filter((r) => r !== 'owner')
+                              .map((r) => ({
+                                label: t(`roles.${r}`),
+                                group: t('members.changeRole'),
+                                icon: i.role === r ? <Check /> : <span />,
+                                current: i.role === r,
+                                radio: true,
+                                onSelect: () =>
+                                  i.role === r ? undefined : setInviteRole(i, r as WorkspaceRole),
+                              })),
+                            'separator' as const,
+                          ]
+                        : []),
                       {
                         label: t('members.copyInviteLink'),
                         icon: <Copy />,
