@@ -140,7 +140,7 @@ const CAS = [
   },
 ];
 
-async function capturer(cas) {
+async function capturer(cas, apres) {
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'fd-banc-')), {
     headless: true,
     locale: 'fr-FR',
@@ -221,6 +221,8 @@ async function capturer(cas) {
       })),
     );
     if (SHOTS) await review.screenshot({ path: `${SHOTS}/banc-${cas.id}-verification.png`, fullPage: true });
+    // Lot B : suite du parcours dans l'écran de vérification (envoi), avant de fermer le navigateur
+    if (apres) await apres(review, ctx);
   } catch (e) {
     erreur = erreur || `vérification : ${String(e.message).split('\n')[0]}`;
   }
@@ -268,7 +270,7 @@ async function relire(b, cas, pages) {
   return vues;
 }
 
-(async () => {
+async function principal() {
   // Règle de l'espace fictif : capture HTML autorisée (faux Supabase)
   await fetch('http://localhost:54400/__html-capture', {
     method: 'POST',
@@ -332,7 +334,11 @@ async function relire(b, cas, pages) {
     );
     if (!ok) process.exitCode = 1;
   }
-})().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+}
+
+module.exports = { CAS, capturer, relire };
+if (require.main === module)
+  principal().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
