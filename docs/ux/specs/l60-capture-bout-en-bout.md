@@ -33,7 +33,8 @@ Décision du client du 25/11 : la capture est la priorité absolue. Planche : `d
   - Par défaut : le dernier espace utilisé, et une nouvelle démo.
 - **Titre de la démo** : le champ disparaît du popup. La démo prend le titre de l'onglet (« ExampleCRM ») et se renomme dans l'éditeur, en un clic sur le titre.
 - **Aide** sous la destination : « Un clic démarre la capture. Le mode encadré est votre dernier choix : Entrée le relance. »
-- **Pied** : à gauche, **Réglages** (icône Sliders) ; à droite, « Données vérifiées » (comme aujourd'hui).
+- **Pied** : à gauche, **Réglages** (icône Sliders) ; à droite, « Données vérifiées » (comme aujourd'hui). Il a 12 px au-dessus et 16 px en bas.
+- **Hauteur** : le popup s'arrête à la hauteur du contenu, sans hauteur fixe ni minimale, 600 px au plus.
 - **Réglages** : une vue du popup avec un bouton Retour. Tous les réglages sont mémorisés.
   - **Taille de l'onglet** : Actuelle, 1440 ou Mobile. « Format mobile » cesse d'être un type de capture et devient ce réglage.
   - **Suivre les nouveaux onglets** (Captures et HTML).

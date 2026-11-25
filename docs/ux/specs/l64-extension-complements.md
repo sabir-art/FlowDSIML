@@ -1,4 +1,4 @@
-# L64 — Extension : menu ⋯, destination, AI Copilot, apparence
+# L64 — Extension : menu •••, destination, rédaction automatique, apparence
 
 Ce document complète L60 (`l60-capture-bout-en-bout.md`). Planche : `docs/ux/propositions/l64/planche-l64-extension.png` (popup de 360 px, clair et sombre, plus la barre de capture claire et sombre).
 
@@ -27,12 +27,15 @@ C'est une vue du popup, avec un bouton Retour et le titre « Destination ». Les
 - En bas de la vue, la ligne **Espace** (tuile et nom) avec « Changer », qui ouvre la liste du menu ⋯.
 - Dans la vue des modes, la ligne de destination devient « Dans **Acme** · Ventes · Nouvelle démo ». Le texte est tronqué avec des points de suspension.
 
-## 3. AI Copilot
+## 3. Rédaction automatique
 
-C'est un réglage, en tête de la vue Réglages, dans un encadré teinté de marque (rayon 12) : icône Sparkles, « AI Copilot », et un interrupteur.
+Le nom est générique, en français, sous notre marque. Aucun nom de fournisseur ni de modèle n'apparaît dans l'extension (l'ancien nom de travail « AI Copilot » est abandonné).
 
-- Aide : « Rédige le titre et le texte de chaque étape pendant la capture, à partir du clic et de la page. Vous relisez dans l'éditeur. »
-- Sous les réglages : « AI Copilot utilise le quota IA de l'espace (1 crédit par étape). Désactivé si l'espace n'autorise pas l'IA. »
+C'est un réglage, en tête de la vue Réglages, dans un encadré teinté de marque (rayon 12) : icône Sparkles, « Rédaction automatique », et un interrupteur.
+
+- Aide : « L'IA de TutoClick rédige le titre et le texte de chaque étape pendant la capture. Vous relisez dans l'éditeur. »
+- Sous les réglages : « La rédaction automatique utilise le quota IA de l'espace (1 crédit par étape). Désactivée si l'espace n'autorise pas l'IA. »
+- Le modèle utilisé est choisi par le propriétaire de la plateforme dans la Console (L41, page « Modèles IA »).
 - Si l'espace n'autorise pas l'IA, l'encadré reste visible, avec l'interrupteur désactivé et « Désactivé par l'espace ».
 - **Pendant la capture** : la carte « Étape n capturée » ajoute une ligne « Texte proposé : « … » », précédée de l'icône Sparkles.
   - Le texte arrive en moins de 2 s. En attendant, la ligne affiche « Rédaction… » avec un battement d'opacité (MOTION-01).
@@ -51,12 +54,20 @@ C'est un réglage, en tête de la vue Réglages, dans un encadré teinté de mar
 - **Barre sombre** : celle de L60. Elle reste lisible sur tous les sites, et c'est le choix conseillé sur des pages claires chargées.
 - Les deux barres ont la même géométrie : 48 px de haut, contrôles de 36 px sur le même centre.
 
-## 5. e2e
+## 5. Hauteur du popup (toutes les vues L60 et L64)
+
+- Le popup s'arrête à la hauteur du contenu : aucune hauteur fixe ni minimale, 600 px au plus (avec défilement du corps au-delà).
+- Le pied a 12 px au-dessus et **16 px en bas**, comme les 16 px du haut du corps : il n'y a pas de vide sous « Réglages · Données vérifiées ».
+- Vérifié dans toutes les vues de la planche (Modes, Menu, Destination, Ajouter à une démo, Réglages), en clair et en sombre.
+
+## 6. e2e
 
 - Menu ⋯ : les espaces sont listés et le courant est coché. Changer d'espace met à jour la destination. Se déconnecter pendant une capture demande une confirmation.
 - Destination : le dossier choisi est mémorisé après une nouvelle ouverture du popup. « Ajouter à une démo » ajoute les étapes à la fin de la démo choisie.
-- AI Copilot :
+- Rédaction automatique :
   - avec l'IA désactivée dans l'espace, l'interrupteur est désactivé et visible ;
   - avec l'IA activée (faux fournisseur), la carte montre le texte proposé, et l'étape arrive avec le texte et la mention IA ;
   - aucune image n'est envoyée au fournisseur.
 - Apparence : Clair, Sombre et Système s'appliquent à la barre. Mêmes mesures dans les deux thèmes.
+- Hauteur : la hauteur du document du popup est égale à celle de son contenu (pas de bande vide sous le pied), et le pied a 16 px en bas.
+- Aucun nom de fournisseur (Anthropic, OpenAI, Claude, ChatGPT, ElevenLabs) dans les textes de l'extension.
