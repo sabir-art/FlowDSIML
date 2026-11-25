@@ -155,6 +155,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await toast.getByRole('button', { name: 'Changer' }).click();
     const menu = page.getByRole('menu');
     await menu.waitFor();
+    // MOTION-01 : le menu s'ouvre de 96 % à 100 % ; les mesures se font une fois l'animation finie
+    await menu.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((x) => x.finished)));
     ok(
       (await menu.getByRole('menuitemradio', { name: 'Logo' }).getAttribute('aria-checked')) === 'true' &&
         (await menu.getByRole('menuitemradio', { name: 'Image' }).getAttribute('aria-checked')) === 'false',
