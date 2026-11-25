@@ -12,12 +12,17 @@
 |---|---|---|
 | `--fd-motion-duration-fast` | 120 ms | Survol, focus, petits changements d'état (interrupteur, coche, couleur) |
 | `--fd-motion-duration-base` | 200 ms | Menus, popovers, infobulles, toasts, onglets, contenu qui remplace un squelette |
-| `--fd-motion-duration-slow` | 320 ms | Scène de l'éditeur, panneaux, tiroirs, modales, dépli de la barre latérale |
+| `--fd-motion-duration-slow` | 320 ms | Tiroirs mobiles, modales (la barre latérale et la colonne Dossiers suivent en 200 ms, §3) |
+| `--fd-motion-duration-spin` | 800 ms | Un tour des indicateurs de chargement en rotation (nouveau, 25/11) |
+| `--fd-motion-duration-pulse` | 1800 ms | Pulsations en boucle ; l'illustration de la prise en main dure 2 × pulse (3,6 s) |
+| `--fd-motion-duration-loop` | 1200 ms | Barres indéterminées, clignotements, reflet du squelette (nouveau, 25/11) |
 | `--fd-motion-ease-standard` | `cubic-bezier(.2, .8, .2, 1)` | Entrées et changements de taille (décélération) |
 | `--fd-motion-ease-exit` | `cubic-bezier(.4, 0, 1, 1)` | Sorties (accélération), à 80 % de la durée d'entrée |
 
 - `--fd-motion-ease-emphasized`, avec son dépassement de 1,3, est **réservé** aux confirmations ponctuelles (coche « Copié », pastille de nouveauté). Il est interdit sur la scène, les panneaux, les menus et les modales : un rebond y paraît mou.
 - Les trois durées tombent déjà à 0 ms sous `prefers-reduced-motion: reduce` (tokens.css). Toute animation **doit** passer par ces jetons pour en hériter (§4).
+- Boucles et mouvement réduit : seuls les indicateurs de chargement (rotation, barre indéterminée) continuent, sans jamais être figés ; pulsations, reflet du squelette et illustration de la prise en main s'arrêtent.
+- Exceptions écrites dans la garde §6, toutes deux dans `packages/ui/base.css` : la remise à zéro globale du mouvement réduit (0,01 ms) et l'astuce du remplissage automatique des champs (transition de 600000 s).
 - Les noms courts proposés par le chef (`--fd-motion-fast`, `-base`, `-slow`) ne sont pas créés. Ce seraient des doublons des jetons existants.
 
 ## 2. Éditeur : la scène suit les panneaux (FLIP)
