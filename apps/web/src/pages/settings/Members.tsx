@@ -400,14 +400,24 @@ export function Members() {
                       },
                       'separator',
                       {
-                        label: t('members.revoke'),
+                        // « Révoquer » est réservé aux clés d'accès ; les points annoncent la confirmation
+                        label: t('members.removeInvite'),
                         icon: <Trash2 />,
                         danger: true,
                         onSelect: () =>
-                          void run(async () => {
-                            check(await supabase.from('invitations').delete().eq('id', i.id));
-                            await load();
-                          }),
+                          void (async () => {
+                            const yes = await ask({
+                              title: t('members.removeInviteTitle'),
+                              body: t('members.removeInviteBody', { email: i.email }),
+                              confirmLabel: t('members.removeInviteConfirm'),
+                              danger: true,
+                            });
+                            if (!yes) return;
+                            await run(async () => {
+                              check(await supabase.from('invitations').delete().eq('id', i.id));
+                              await load();
+                            });
+                          })(),
                       },
                     ]}
                   />

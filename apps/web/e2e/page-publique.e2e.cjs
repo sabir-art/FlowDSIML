@@ -62,7 +62,8 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
     await page.screenshot({ path: `${SHOTS}/${name}-${WIDTH}${sfx}.png`, fullPage: true });
   };
   const row = (state) => (state.tables.training_centers || []).find((c) => c.workspace_id === 'ws-1');
-  const save = (page) => page.getByRole('button', { name: 'Enregistrer', exact: true });
+  // L'en-tête de la page : sous 600 px, la barre collée en bas porte un second « Enregistrer »
+  const save = (page) => page.locator('.stg-page').getByRole('button', { name: 'Enregistrer', exact: true });
   const sw = (page) => page.getByRole('switch', { name: 'Page publique' });
 
   // 1. Réglage complet, puis mise en ligne

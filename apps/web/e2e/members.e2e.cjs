@@ -484,6 +484,33 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-06.png` });
   await page.keyboard.press('Escape');
+  // « Retirer l'invitation… » (le mot « Révoquer » est réservé aux clés) : confirmation, puis retrait
+  {
+    const before = state.tables.invitations.length;
+    const inv = state.tables.invitations.at(-1);
+    await page.goto(`${APP}/#/settings/members`);
+    await page.getByRole('button', { name: `Actions pour ${inv.email}` }).click();
+    ok(
+      (await page.getByRole('menuitem', { name: 'Révoquer' }).count()) === 0,
+      'menu d’une invitation : plus de « Révoquer »',
+    );
+    await page.getByRole('menuitem', { name: 'Retirer l’invitation…' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Retirer l’invitation ?' });
+    await dlg.waitFor();
+    ok((await dlg.innerText()).includes(inv.email), 'confirmation : nomme l’adresse invitée');
+    await dlg.getByRole('button', { name: 'Annuler' }).click();
+    await dlg.waitFor({ state: 'detached' });
+    ok(state.tables.invitations.length === before, '« Annuler » : l’invitation reste');
+    await page.getByRole('button', { name: `Actions pour ${inv.email}` }).click();
+    await page.getByRole('menuitem', { name: 'Retirer l’invitation…' }).click();
+    await page
+      .getByRole('dialog', { name: 'Retirer l’invitation ?' })
+      .getByRole('button', { name: 'Retirer l’invitation' })
+      .click();
+    await page.getByRole('button', { name: `Actions pour ${inv.email}` }).waitFor({ state: 'detached' });
+    ok(state.tables.invitations.length === before - 1, 'confirmation : invitation retirée');
+  }
+
   // Connecté en Lecteur (recette UX du 25/11) : ni « Inviter », ni invitations, ni menu sur les autres
   {
     const st = seedMaquette();

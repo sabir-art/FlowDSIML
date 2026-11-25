@@ -316,7 +316,6 @@
     "inviteCreated": "Invitation créée. Envoyez ce lien à la personne invitée :",
     "pending": "Invitations en attente",
     "copyLink": "Copier le lien",
-    "revoke": "Révoquer",
     "remove": "Retirer",
     "leave": "Quitter",
     "confirmRemove": "Retirer {{email}} ?",
@@ -402,6 +401,10 @@
     "emptyBody": "Chaque personne reçoit un e-mail d’invitation, avec le rôle que vous choisissez.",
     "changeRole": "Rôle",
     "copyInviteLink": "Copier le lien d’invitation",
+    "removeInvite": "Retirer l’invitation…",
+    "removeInviteTitle": "Retirer l’invitation ?",
+    "removeInviteBody": "Le lien envoyé à {{email}} ne fonctionnera plus. Vous pourrez inviter cette adresse de nouveau.",
+    "removeInviteConfirm": "Retirer l’invitation",
     "noMatch": "Aucun membre ne correspond à cette recherche.",
     "roleHelp": {
       "viewer": "Consulte les démos et les analytics.",

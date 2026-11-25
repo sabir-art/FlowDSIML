@@ -77,6 +77,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [close],
   );
+  // Centrés sur la zone de contenu principale (à droite de la barre latérale et de la colonne des
+  // Paramètres), pas sur la fenêtre : le milieu est relu quand un toast arrive ou que la zone change
+  const count = toasts.length;
+  useEffect(() => {
+    const el = stack.current;
+    if (!el || !count) return;
+    const zone = () => document.querySelector('.st-main') ?? document.getElementById('main');
+    const sync = () => {
+      const r = zone()?.getBoundingClientRect();
+      if (r && r.width > 0) el.style.setProperty('--fd-toast-x', `${Math.round(r.left + r.width / 2)}px`);
+      else el.style.removeProperty('--fd-toast-x');
+    };
+    sync();
+    const ro = new ResizeObserver(sync);
+    const z = zone();
+    if (z) ro.observe(z);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [count]);
   const latest = useRef<Toast[]>([]);
   latest.current = toasts;
   const hold = (on: boolean) => {

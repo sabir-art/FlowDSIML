@@ -87,6 +87,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
       const els = [...document.querySelectorAll('.toasts .toast')];
       const r = els.map((el) => el.getBoundingClientRect());
       const vw = document.documentElement.clientWidth;
+      // Zone de contenu principale : à droite de la barre latérale et de la colonne des Paramètres
+      const zone = (
+        document.querySelector('.st-main') ?? document.getElementById('main')
+      ).getBoundingClientRect();
+      const nav = document.querySelector('.st-nav')?.getBoundingClientRect();
       const probe = document.createElement('i');
       probe.style.borderRadius = 'var(--fd-radius-surface)';
       document.body.append(probe);
@@ -95,7 +100,12 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
       const last = r.at(-1);
       return {
         bottom: Math.round(innerHeight - last.bottom),
-        centre: Math.abs((last.left + last.right) / 2 - vw / 2) <= 1,
+        centre:
+          vw < 600
+            ? Math.abs((last.left + last.right) / 2 - vw / 2) <= 1
+            : Math.abs((last.left + last.right) / 2 - (zone.left + zone.width / 2)) <= 1,
+        // Le toast ne mord pas sur la navigation
+        clearOfNav: !nav || nav.width === 0 || r.every((x) => x.left >= nav.right),
         left: Math.round(last.left),
         w: Math.round(last.width),
         order: els.map((el) => (el.textContent.includes('Éditeur') ? 'second' : 'premier')).join('|'),
@@ -115,10 +125,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         m.close &&
         m.through &&
         m.centre &&
+        m.clearOfNav &&
         (width >= 600
           ? m.bottom === 24 && m.w <= 420
           : m.bottom === 16 && m.left === 16 && m.w === width - 32),
-      `toasts à ${width} px : en bas au milieu, le plus récent en bas (${JSON.stringify(m)})`,
+      `toasts à ${width} px : en bas, au milieu de la zone de contenu, le plus récent en bas (${JSON.stringify(m)})`,
     );
     // Souris sur la pile : rien ne se ferme, même après la durée d'affichage ; souris partie : tout se ferme
     const t0 = Date.now();
