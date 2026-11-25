@@ -2376,7 +2376,7 @@
     "fixed": "Fixed size",
     "popup": "Button + pop-up",
     "copyCode": "Copy code",
-    "clickToStart": "Start on click (cover + “Launch the demo” button)",
+    "clickToStart": "Start on click",
     "cspNote": "The host site must allow iframes from {{host}} (CSP frame-src header).",
     "persoHelp": "One link per person, with pre-filled variables and its own statistics.",
     "newLink": "Create a link",
@@ -2596,7 +2596,8 @@
     "exportGo": "Export",
     "exportWhat_pdf": "A step-by-step guide, to print or attach.",
     "exportWhat_gif": "A short animation, for an email or a chat.",
-    "exportWhat_mp4": "A video of the demo, with subtitles if needed."
+    "exportWhat_mp4": "A video of the demo, with subtitles if needed.",
+    "clickToStartHint": "A cover and a “Launch the demo” button before loading"
   },
   "analytics": {
     "title": "Analytics",

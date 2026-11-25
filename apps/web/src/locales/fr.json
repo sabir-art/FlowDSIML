@@ -2376,7 +2376,7 @@
     "fixed": "Taille fixe",
     "popup": "Bouton + pop-up",
     "copyCode": "Copier le code",
-    "clickToStart": "Démarrer au clic (couverture + bouton « Lancer la démo »)",
+    "clickToStart": "Démarrer au clic",
     "cspNote": "Le site d’accueil doit autoriser les iframes provenant de {{host}} (en-tête CSP frame-src).",
     "persoHelp": "Un lien par personne, avec ses variables pré-remplies et ses propres statistiques.",
     "newLink": "Créer un lien",
@@ -2596,7 +2596,8 @@
     "exportGo": "Exporter",
     "exportWhat_pdf": "Un guide pas à pas, à imprimer ou à joindre.",
     "exportWhat_gif": "Une animation courte, pour un e-mail ou une messagerie.",
-    "exportWhat_mp4": "Une vidéo de la démo, avec sous-titres si besoin."
+    "exportWhat_mp4": "Une vidéo de la démo, avec sous-titres si besoin.",
+    "clickToStartHint": "Une couverture et un bouton « Lancer la démo » avant le chargement"
   },
   "analytics": {
     "title": "Analytics",

@@ -1151,7 +1151,8 @@ function EmbedPanel({
           </div>
           {/* « Bientôt » : en gris, jamais caché */}
           <p className="she-soon" aria-disabled="true">
-            {t('share.clickToStart')} <span className="soon-text">{t('shell.soon')}</span>
+            <span title={t('share.clickToStartHint')}>{t('share.clickToStart')}</span>
+            <span className="fd-badge">{t('shell.soon')}</span>
           </p>
         </div>
       )}

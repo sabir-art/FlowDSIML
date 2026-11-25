@@ -163,7 +163,36 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // ===== Les modes, la pastille d'accès, la copie =====
   {
-    const { page, state } = await open(`/demos/${DEMO}/analytics?share=${MOBILE ? 'menu' : 'lien'}`);
+    const { page, state } = await open(
+      `/demos/${DEMO}/analytics?share=${MOBILE ? 'menu' : 'lien'}`,
+      (st, demo) => {
+        // Deux liens personnalisés fictifs : la liste remplie est vérifiée et capturée
+        const link = (id, name, extra) => ({
+          id,
+          demo_id: DEMO,
+          workspace_id: demo.workspace_id,
+          name,
+          token: `jeton-${id}`,
+          variables: {},
+          is_active: true,
+          expires_at: null,
+          cohort: null,
+          page_enabled: false,
+          page_code: null,
+          created_at: '2026-11-12T10:00:00Z',
+          ...extra,
+        });
+        st.tables.share_links = [
+          link('l1', 'Alex Exemple', {
+            variables: { company: 'Globex' },
+            cohort: 'Session du 5 novembre',
+            page_enabled: true,
+            page_code: 'Ab3dE9Ab3dE9',
+          }),
+          link('l2', 'Camille Exemple', { is_active: false, created_at: '2026-11-20T10:00:00Z' }),
+        ];
+      },
+    );
     await dlg(page).waitFor();
     const d = dlg(page);
     // La date de publication arrive avec la démo : on attend l'en-tête complet
@@ -358,14 +387,26 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
             (await perso.getByRole('status').textContent()) === 'Aucun lien ne correspond à la recherche.',
             'Liens personnalisés : recherche sans résultat annoncée',
           );
+          await q.fill('globex');
+          ok(
+            (await perso.locator('table.sh-links tbody tr').count()) === 1 &&
+              (await perso.locator('table.sh-links tbody th').first().innerText()).includes('Alex Exemple'),
+            'Liens personnalisés : la recherche porte aussi sur les variables',
+          );
           await q.fill('');
+          await perso.getByRole('button', { name: 'Copier le lien Alex Exemple' }).click();
+          ok(
+            (await page.evaluate(() => navigator.clipboard.readText())).includes('jeton-l1') &&
+              (await page.locator('.toast').count()) === 0,
+            'Liens personnalisés : lien copié, confirmé sur place (pas de toast)',
+          );
           ok(
             (await perso.locator('table.sh-links thead th').allTextContents()).slice(0, 3).join('|') ===
               'Destinataire|Créé le|Vues',
             'Liens personnalisés : colonnes Destinataire, Créé le, Vues',
           );
         }
-        await shot(page, 'partager-liens');
+        await shot(page, state.tables.share_links.length ? 'partager-liens-liste' : 'partager-liens');
       }
       if (m === 'Intégrer') {
         // §1.3 : trois formats en cartes radio, code qui passe à la ligne, « Copier le code », aperçu
