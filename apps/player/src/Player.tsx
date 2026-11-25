@@ -1659,6 +1659,12 @@ type TipProps = {
   t: Dict;
 };
 
+/**
+ * MOTION-01 §3 « Lecteur : changement d'étape » : dernière capture affichée (étape image), gardée d'une
+ * étape à l'autre pour le fondu croisé. L'étape suivante la superpose à la sienne et l'efface en 200 ms.
+ */
+let lastShot: { url: string; style: Record<string, string | number> | undefined; at: number } | null = null;
+
 function ImageStep({
   step,
   sub,
@@ -1752,6 +1758,31 @@ function ImageStep({
   // L25-02 : capture recadrée (la page entière ne l'est pas : pas de défilement sur une capture recadrée)
   const crop = asCrop(step.options.crop);
   const shown = croppedSize(img, crop);
+  // Fondu croisé : la capture de l'étape quittée (à l'instant) reste au-dessus de la nouvelle, puis
+  // s'efface dès que la nouvelle est chargée. Jamais au premier affichage ni en mouvement réduit.
+  const [leaving, setLeaving] = useState(() =>
+    !dimmed && !reducedMotion && lastShot && lastShot.url !== img.url && Date.now() - lastShot.at < 1500
+      ? { url: lastShot.url, style: lastShot.style, go: false }
+      : null,
+  );
+  // Étape atteinte depuis une autre (pas le premier affichage) : la bulle entre en fondu
+  const [stepChange] = useState(() => !dimmed && !reducedMotion && !!lastShot && lastShot.url !== img.url);
+  useEffect(() => {
+    if (dimmed) return;
+    const mine = { url: img.url, style: cropImageStyle(crop) as Record<string, string | number> | undefined };
+    lastShot = { ...mine, at: Date.now() };
+    // L'étape est quittée : l'heure du départ borne le fondu (pas de capture d'il y a longtemps)
+    return () => {
+      lastShot = { ...mine, at: Date.now() };
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- la capture de l'étape ne change pas
+  }, [img.url, dimmed]);
+  useEffect(() => {
+    if (!leaving) return;
+    // Capture qui ne charge pas : l'ancienne ne reste pas indéfiniment
+    const id = window.setTimeout(() => setLeaving(null), 1500);
+    return () => window.clearTimeout(id);
+  }, [leaving]);
   const scroll = anim?.type === 'scroll' && fp?.url && !crop ? scrollPlan(fp, anim) : null;
   const animated = !reduced && (typed !== null || (scroll !== null && scroll.distance > 0));
   const [phase, setPhase] = useState<'run' | 'go' | 'done'>(animated ? 'run' : 'done');
@@ -1815,7 +1846,7 @@ function ImageStep({
   return (
     <div
       ref={stage}
-      class={`p-stage${dimmed ? ' is-backdrop' : ''}`}
+      class={`p-stage${dimmed ? ' is-backdrop' : ''}${stepChange ? ' is-step-change' : ''}`}
       style={{ '--ratio': String(shown.width / shown.height) }}
       onPointerMove={
         freeOn && !fixed
@@ -1859,7 +1890,22 @@ function ImageStep({
             alt={alt}
             draggable={false}
             style={cropImageStyle(crop)}
-            onError={() => setBroken(true)}
+            onLoad={() => setLeaving((l) => (l ? { ...l, go: true } : l))}
+            onError={() => {
+              setBroken(true);
+              setLeaving(null);
+            }}
+          />
+        )}
+        {leaving && (
+          <img
+            class={`p-img-out${leaving.go ? ' is-go' : ''}`}
+            src={leaving.url}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            style={leaving.style}
+            onAnimationEnd={() => setLeaving(null)}
           />
         )}
         {scroll && fp && playing && (
