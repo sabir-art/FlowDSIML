@@ -1,7 +1,7 @@
 /**
  * L48-F §1 : Paramètres > Intégrations. Une carte, une liste groupée par catégorie, un filtre segmenté
- * (gardé dans ?categorie=) ; seuls les webhooks sont disponibles, les autres lignes disent « Bientôt »
- * (visibles, désactivées, jamais masquées). Réservé aux propriétaires et admins.
+ * (gardé dans ?categorie=) ; les webhooks et Slack (alertes, ALERT-01) sont disponibles, les autres
+ * lignes disent « Bientôt » (visibles, désactivées, jamais masquées). Réservé aux propriétaires et admins.
  */
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -27,6 +27,7 @@ import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { supportHref } from '../../../lib/support';
 import { listWebhooks, sendTest, type Webhook } from './webhooks';
 import { SecretDialog, WebhookForm } from './WebhooksPage';
+import { SlackDialog, slackConnected } from './SlackDialog';
 import './integrations.css';
 
 type Cat = 'automation' | 'communication' | 'audience' | 'crm';
@@ -48,7 +49,6 @@ const SOON: Array<{ k: string; cat: Cat; logo?: string; icon?: ReactNode }> = [
   { k: 'zapier', cat: 'automation', logo: zapierLogo },
   { k: 'keys', cat: 'automation', icon: <KeyRound /> },
   { k: 'remote', cat: 'automation', icon: <Gamepad2 /> },
-  { k: 'slack', cat: 'communication', logo: slackLogo },
   { k: 'teams', cat: 'communication', logo: teamsLogo },
   { k: 'ga', cat: 'audience', logo: gaLogo },
   { k: 'matomo', cat: 'audience', logo: matomoLogo },
@@ -64,6 +64,9 @@ export function IntegrationsPage() {
   const [hooks, setHooks] = useState<Webhook[] | null>(null);
   const [adding, setAdding] = useState(false);
   const [secret, setSecret] = useState<{ id: string; secret: string } | null>(null);
+  // ALERT-01 : webhook entrant Slack de l'espace (null : état pas encore lu)
+  const [slack, setSlack] = useState<boolean | null>(null);
+  const [slackOpen, setSlackOpen] = useState(false);
   const segRef = useRef<HTMLDivElement>(null);
   const ws = current?.id;
   const allowed = can('integrations.manage');
@@ -80,7 +83,9 @@ export function IntegrationsPage() {
     if (location.hash === '#webhooks') navigate('/settings/integrations/webhooks', { replace: true });
   }, [location.hash, navigate]);
   const load = useCallback(async () => {
-    if (ws) setHooks(await listWebhooks(ws));
+    if (!ws) return;
+    setHooks(await listWebhooks(ws));
+    setSlack(await slackConnected(ws));
   }, [ws]);
   useEffect(() => {
     if (allowed) void load();
@@ -124,6 +129,32 @@ export function IntegrationsPage() {
             {t('integrations.activeCount', { count: active })}
             <ChevronRight aria-hidden="true" />
           </span>
+        )
+      }
+    />
+  );
+  // ALERT-01 §7 : Slack, connecté par un webhook entrant (alertes analytics)
+  const slackRow = (
+    <IntRow
+      key="slack"
+      logo={slackLogo}
+      name={t('integrations.soon_slack')}
+      body={t('integrations.slack.row')}
+      state={
+        slack ? (
+          <span className="int-acts">
+            <span className="int-on">
+              <i aria-hidden="true" />
+              {t('integrations.slack.connected')}
+            </span>
+            <Button aria-label={t('integrations.slack.manage')} onClick={() => setSlackOpen(true)}>
+              {t('integrations.open')}
+            </Button>
+          </span>
+        ) : (
+          <Button aria-label={t('integrations.slack.connect')} onClick={() => setSlackOpen(true)}>
+            {t('integrations.connect')}
+          </Button>
         )
       }
     />
@@ -184,6 +215,7 @@ export function IntegrationsPage() {
   );
   const rowsOf = (c: Cat): ReactNode[] => [
     ...(c === 'automation' ? [webhookRow] : []),
+    ...(c === 'communication' ? [slackRow] : []),
     ...SOON.filter((x) => x.cat === c).map(soonRow),
     ...(c === 'communication' ? [emailingRow] : []),
     ...(c === 'crm' ? [enrichRow] : []),
@@ -233,8 +265,11 @@ export function IntegrationsPage() {
           ))}
         </div>
         {filter === 'connected' ? (
-          hooks === null ? null : active > 0 ? (
-            <ul className="int-list int-list--bare">{webhookRow}</ul>
+          hooks === null ? null : active > 0 || slack ? (
+            <ul className="int-list int-list--bare">
+              {active > 0 && webhookRow}
+              {slack && slackRow}
+            </ul>
           ) : (
             <div className="stg-empty">
               <span className="stg-empty__tile" aria-hidden="true">
@@ -288,6 +323,15 @@ export function IntegrationsPage() {
             void load();
           }}
           onSaved={() => setAdding(false)}
+        />
+      )}
+      {slackOpen && ws && (
+        <SlackDialog
+          ws={ws}
+          connected={!!slack}
+          logo={slackLogo}
+          onClose={() => setSlackOpen(false)}
+          onChanged={async () => setSlack(await slackConnected(ws))}
         />
       )}
       {secret && (

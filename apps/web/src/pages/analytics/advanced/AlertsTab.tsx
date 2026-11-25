@@ -265,6 +265,17 @@ function AlertDialog({
       live = false;
     };
   }, []);
+  // ALERT-01 §7 : « Slack » actif quand l'espace a enregistré son webhook entrant
+  const [slackOn, setSlackOn] = useState<boolean | null>(null);
+  useEffect(() => {
+    let live = true;
+    void supabase
+      .rpc('slack_webhook_connected', { p_ws: wsId })
+      .then(({ data, error }) => live && setSlackOn(!error && data === true));
+    return () => {
+      live = false;
+    };
+  }, [wsId]);
   const mine = !alert || alert.created_by === user?.id;
   const mail = channels.includes('email');
 
@@ -296,7 +307,12 @@ function AlertDialog({
       return setErr(pct ? t('analytics.adv.al.thresholdPct') : t('analytics.adv.al.thresholdViews'));
     if (trigger === 'structure_below_goal' && !path) return setErr(t('analytics.adv.al.pathRequired'));
     const chans = channels.filter(
-      (c) => c === 'app' || (c === 'webhook' && !webhookOff) || (c === 'email' && (mailOk || !mine)),
+      (c) =>
+        c === 'app' ||
+        (c === 'webhook' && !webhookOff) ||
+        (c === 'email' && (mailOk || !mine)) ||
+        // « Slack » déjà choisi reste, même si le webhook de l'espace a été retiré entre-temps
+        (c === 'slack' && (slackOn || !!alert?.channels.includes('slack'))),
     );
     // « E-mail » : l'alerte reste toujours visible dans l'app
     if (chans.includes('email') && !chans.includes('app')) chans.unshift('app');
@@ -467,10 +483,11 @@ function AlertDialog({
                   <label className="check" aria-disabled={!mine || undefined}>
                     <input
                       type="checkbox"
-                      disabled={!mine}
+                      // Non modifiable mais focalisable : l'aide est lue (aria-disabled, pas disabled)
+                      aria-disabled={!mine || undefined}
                       checked={mail}
                       aria-describedby={`${id}-em`}
-                      onChange={(e) => toggleCh('email', e.target.checked)}
+                      onChange={(e) => mine && toggleCh('email', e.target.checked)}
                     />
                     {t('analytics.adv.al.email')}
                   </label>
@@ -484,10 +501,26 @@ function AlertDialog({
                   {t('analytics.adv.al.email')} <span className="soon-text">{t('shell.soon')}</span>
                 </label>
               )}
-              <label className="check is-soon" aria-disabled="true">
-                <input type="checkbox" disabled />
-                {t('analytics.adv.al.slack')} <span className="soon-text">{t('shell.soon')}</span>
+              <label className="check" aria-disabled={!slackOn || undefined}>
+                <input
+                  type="checkbox"
+                  disabled={!slackOn}
+                  checked={channels.includes('slack')}
+                  onChange={(e) => toggleCh('slack', e.target.checked)}
+                />
+                {t('analytics.adv.al.slack')}
               </label>
+              {slackOn === false && (
+                <p className="help l19-indent">
+                  {isAdmin ? (
+                    <Link to="/settings/integrations?categorie=communication">
+                      {t('analytics.adv.al.configure')}
+                    </Link>
+                  ) : (
+                    t('analytics.adv.al.slackHelp')
+                  )}
+                </p>
+              )}
             </div>
           </fieldset>
           <div className="field">

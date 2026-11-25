@@ -439,11 +439,17 @@ const live = (n) => ({
   ok((await dlg.getByLabel('Seuil (%)').count()) === 1, 'seuil en % pour la complétion');
   ok((await dlg.getByText('hooks.acme.example').count()) === 1, 'webhook abonné : domaine affiché');
   ok(await dlg.getByRole('checkbox', { name: /E-mail/ }).isDisabled(), 'e-mail « Bientôt »');
-  ok(await dlg.getByRole('checkbox', { name: /Slack/ }).isDisabled(), 'Slack « Bientôt »');
+  // ALERT-01 §7 : Slack grisé avec « Configurer » tant que l'espace n'a pas enregistré son webhook
+  ok(
+    (await dlg.getByRole('checkbox', { name: /Slack/ }).isDisabled()) &&
+      (await dlg.getByRole('link', { name: 'Configurer dans Intégrations' }).last().getAttribute('href')) ===
+        '#/settings/integrations?categorie=communication',
+    'Slack non connecté : case grisée, lien « Configurer dans Intégrations »',
+  );
   ok(
     (await dlg.locator('.is-soon .badge').count()) === 0 &&
-      (await dlg.locator('.is-soon .soon-text').count()) === 2,
-    '§17.4 : « Bientôt » en texte gris, sans pastille',
+      (await dlg.locator('.is-soon .soon-text').count()) === 1,
+    '§17.4 : « Bientôt » (e-mail) en texte gris, sans pastille',
   );
   await pick(dlg.getByLabel('Démo'), DEMO);
   await dlg.getByRole('checkbox', { name: /Webhook/ }).check();
@@ -506,9 +512,9 @@ const live = (n) => ({
       'envoi configuré : case « E-mail » active, avec son aide',
     );
     ok(
-      (await d2.locator('.is-soon .soon-text').count()) === 1 &&
+      (await d2.locator('.is-soon .soon-text').count()) === 0 &&
         (await d2.getByRole('checkbox', { name: /Slack/ }).isDisabled()),
-      'Slack reste « Bientôt »',
+      'plus aucun « Bientôt » dans les canaux ; Slack attend son webhook',
     );
     await appBox.uncheck();
     await mailBox.check();
@@ -546,14 +552,64 @@ const live = (n) => ({
       .last()
       .click();
     const d3 = pm.getByRole('dialog', { name: 'Modifier l’alerte' });
+    const other = d3.getByRole('checkbox', { name: 'E-mail' });
+    await other.waitFor();
+    // Non modifiable mais focalisable (aria-disabled) : son aide est lue, un clic ne change rien
+    await other.focus();
+    await other.click({ force: true });
     ok(
-      (await d3.getByRole('checkbox', { name: 'E-mail' }).isDisabled()) &&
-        (await d3.getByRole('checkbox', { name: 'E-mail' }).isChecked()) &&
+      (await other.getAttribute('aria-disabled')) === 'true' &&
+        (await other.getAttribute('disabled')) === null &&
+        (await other.evaluate((el) => el === document.activeElement)) &&
+        (await other.isChecked()) &&
         (await d3.getByText(/Envoyé à la personne qui a créé l’alerte/).count()) === 1,
-      'alerte d’une autre personne : « E-mail » visible, non modifiable, avec l’explication',
+      'alerte d’une autre personne : « E-mail » lisible au clavier, non modifiable, avec l’explication',
     );
     await pm.close();
     state.brevoKey = null;
+  }
+
+  // ===== ALERT-01 §7 : canal « Slack », une fois le webhook de l'espace enregistré (adresse fictive) =====
+  {
+    state.slack = {
+      url: 'https://hooks.slack.com/services/T000FICTIF/B000FICTIF/cle-factice',
+      tests: 0,
+    };
+    const ps = await ctx.newPage();
+    ps.on('pageerror', (e) => errors.push(e.message));
+    await install(ps, state);
+    await ps.goto(`${APP}/#/analytics`);
+    await ps.locator('.an-more').click();
+    await ps.getByRole('menuitem', { name: 'Alertes' }).click();
+    await ps.getByRole('button', { name: 'Nouvelle alerte' }).click();
+    const d4 = ps.getByRole('dialog', { name: 'Nouvelle alerte' });
+    const slackBox = d4.getByRole('checkbox', { name: 'Slack' });
+    await ps.waitForFunction(() => {
+      const el = [...document.querySelectorAll('dialog[open] label.check')].find((l) =>
+        /Slack/.test(l.textContent),
+      );
+      return el && !el.querySelector('input').disabled;
+    });
+    ok(
+      (await slackBox.isEnabled()) &&
+        (await d4.getByRole('link', { name: 'Configurer dans Intégrations' }).count()) <= 1,
+      'Slack connecté : case active',
+    );
+    await slackBox.check();
+    const n0 = state.tables.alerts.length;
+    await d4.getByRole('button', { name: 'Créer l’alerte' }).click();
+    await d4.waitFor({ state: 'detached' });
+    ok(
+      state.tables.alerts[n0]?.channels.join() === 'app,slack',
+      `alerte créée avec « Slack » (${state.tables.alerts[n0]?.channels.join()})`,
+    );
+    await ps
+      .getByText(/dans l’app et Slack/)
+      .first()
+      .waitFor();
+    ok(true, 'liste : canaux « dans l’app et Slack »');
+    await ps.close();
+    state.slack = null;
   }
 
   // ===== Captures du lot, même état de données (1 alerte active, segments enregistrés), sans toast =====

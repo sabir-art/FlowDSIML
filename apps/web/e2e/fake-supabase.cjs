@@ -598,6 +598,12 @@ async function install(page, state = seed()) {
     }
     // L23 : envoi immédiat (test, rejeu) ; résultat réglable par state.dispatchResult
     if (p.startsWith('/functions/v1/webhooks-dispatch')) {
+      // ALERT-01 : test de la carte Slack (state.slackTestFails simule un refus de Slack)
+      if (typeof body?.slack_test === 'number') {
+        if (!state.slack?.url) return json(route, 404, { error: 'not_found' });
+        if (!state.slackTestFails) state.slack.tests += 1;
+        return json(route, 200, { ok: !state.slackTestFails });
+      }
       const d = (t.webhook_deliveries || []).find(
         (x) => x.id === body?.delivery_id && x.status === 'pending',
       );
@@ -1976,6 +1982,24 @@ async function install(page, state = seed()) {
           Object.assign(c, { slug: a.p_slug, public_page: a.p_page, public_page_enabled: !!a.p_enabled });
           (state.publicPageSaves ||= []).push({ replace: !!a.p_replace, enabled: !!a.p_enabled });
           return json(route, 200, null);
+        }
+        // ALERT-01 : webhook entrant Slack de l'espace. state.slack garde l'adresse (jamais renvoyée) et
+        // les tests envoyés (par /functions/v1/webhooks-dispatch { slack_test }) ; aucun appel réseau.
+        case 'slack_webhook_connected':
+          return json(route, 200, !!state.slack?.url);
+        case 'slack_webhook_set': {
+          if (!/^https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9_/-]{8,200}$/.test(a.p_url || ''))
+            return json(route, 400, { code: '22023', message: 'SLACK_URL' });
+          state.slack = { url: a.p_url, tests: state.slack?.tests ?? 0, queued: 0 };
+          return json(route, 200, null);
+        }
+        case 'slack_webhook_remove':
+          state.slack = null;
+          return json(route, 200, null);
+        case 'slack_webhook_test': {
+          if (!state.slack?.url) return json(route, 200, null);
+          state.slack.queued = (state.slack.queued ?? 0) + 1;
+          return json(route, 200, 1000 + state.slack.queued);
         }
         case 'set_center_access': {
           const c = (t.training_centers || []).find((x) => x.workspace_id === a.p_ws);

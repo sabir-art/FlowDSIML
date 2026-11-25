@@ -331,6 +331,30 @@ a.int-row--link:focus-visible {
   width: 16px;
   height: 16px;
 }
+/* ALERT-01 : état et action d'une ligne connectée ; contenu de la fenêtre Slack */
+.int-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.int-slack {
+  display: grid;
+  gap: 16px;
+}
+.int-slack p {
+  margin: 0;
+}
+.int-slack__scope {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+.int-slack__scope [aria-disabled='true'] {
+  color: var(--fd-color-text-muted);
+}
 .int-need {
   margin: 24px 0 0;
   font-size: 13px;

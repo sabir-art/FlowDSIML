@@ -7,11 +7,14 @@
 //    qu'une livraison inexistante) ; 10 envois immédiats par minute et par utilisateur au plus.
 // Même sécurité réseau dans les deux modes (lib.ts) : DNS puis refus des IP privées, pas de redirection,
 // 10 s, réponse tronquée à 2 Ko ; L37 : connexion à l'IP contrôlée, TLS vérifié pour le nom (pinned.ts). Le résultat est enregistré par webhook_record_result.
+// ALERT-01 : messages Slack des alertes (slack.ts). Planifié : { task: 'slack' } ; test immédiat par un
+// admin : { slack_test: <numéro> }. Le lien du message vient du réglage APP_URL (absent : sans lien).
 // Déployée sans vérification JWT par la plateforme : chaque mode vérifie lui-même son accès.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { deliver, purgeOrphans, safeEqual, type Delivery, type Orphan } from './lib.ts';
 import { pinnedFetch } from './pinned.ts';
+import { postSlack, type SlackMessage } from './slack.ts';
 
 const BATCH = 25;
 const CONCURRENCY = 5;
@@ -64,6 +67,22 @@ async function scheduled() {
   return json(200, { sent });
 }
 
+/** ALERT-01 : envoie un message Slack et note le résultat (un échec repart à la tâche suivante). */
+async function sendSlack(m: SlackMessage): Promise<boolean> {
+  const ok = await postSlack(m, Deno.env.get('APP_URL'));
+  await supabase.rpc('slack_record_result', { p_id: m.id, p_ok: ok });
+  return ok;
+}
+
+/** ALERT-01 : messages Slack en attente (tâche planifiée). */
+async function slackScheduled() {
+  const { data, error } = await supabase.rpc('slack_claim_due', { p_limit: BATCH });
+  if (error) return json(500, { error: 'claim' });
+  let sent = 0;
+  for (const m of (data ?? []) as SlackMessage[]) if (await sendSlack(m)) sent++;
+  return json(200, { sent });
+}
+
 /** L25 : vidéos de plus de 24 h citées par aucune étape, retirées par l'API Storage (lots de 100). */
 async function purgeVideos() {
   const { data, error } = await supabase.rpc('orphan_videos', { p_limit: 500 });
@@ -94,7 +113,13 @@ async function purgeStorageOrphans() {
 async function immediate(req: Request, token: string) {
   const { data: u } = await supabase.auth.getUser(token);
   if (!u.user) return json(401, { error: 'auth' });
-  const body = (await req.json().catch(() => null)) as { delivery_id?: unknown } | null;
+  const body = (await req.json().catch(() => null)) as { delivery_id?: unknown; slack_test?: unknown } | null;
+  // ALERT-01 : « Envoyer un test » de la carte Slack (le message n'est rendu qu'à un admin de l'espace)
+  if (typeof body?.slack_test === 'number' && Number.isSafeInteger(body.slack_test)) {
+    const { data: m } = await supabase.rpc('slack_claim_test', { p_id: body.slack_test, p_user: u.user.id });
+    if (!m) return json(404, { error: 'not_found' });
+    return json(200, { ok: await sendSlack(m as SlackMessage) });
+  }
   const id = typeof body?.delivery_id === 'string' && UUID.test(body.delivery_id) ? body.delivery_id : null;
   if (!id) return json(404, { error: 'not_found' });
   const { data, error } = await supabase.rpc('webhook_claim_one', { p_delivery: id, p_user: u.user.id });
@@ -118,6 +143,7 @@ Deno.serve(async (req) => {
     const body = (await req.json().catch(() => null)) as { task?: unknown } | null;
     if (body?.task === 'purge_videos') return purgeVideos();
     if (body?.task === 'purge_orphans') return purgeStorageOrphans();
+    if (body?.task === 'slack') return slackScheduled();
     return scheduled();
   }
   const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
