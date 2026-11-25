@@ -6,7 +6,6 @@ import {
   Check,
   CircleCheck,
   Crosshair,
-  Download,
   EyeOff,
   MousePointerClick,
   Puzzle,
@@ -97,7 +96,6 @@ function Welcome() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Download aria-hidden="true" />
             {t('extension.installStore')}
             <ArrowUpRight aria-hidden="true" />
             <span className="sr-only">{t('extension.newTab')}</span>
