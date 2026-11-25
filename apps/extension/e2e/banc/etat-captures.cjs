@@ -99,6 +99,58 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
     !zones.some((z) => touche(z, boxes.bouton)) && !zones.some((z) => touche(z, boxes.lien)),
     'ni le bouton « Modifier la fiche » ni le lien ne sont repérés : aucun flou à tort',
   );
+  // Page piège (recette UX) : rien de personnel, donc AUCUNE zone repérée, à chaque clic
+  {
+    await review.close();
+    const p2 = await ctx.newPage();
+    await p2.goto(`${BANC}/piege`);
+    await p2.getByRole('heading', { name: 'Offres' }).waitFor();
+    const tab2 = await popup.evaluate(
+      async (u) => (await chrome.tabs.query({ url: u + '/piege' }))[0].id,
+      BANC,
+    );
+    await popup.evaluate(
+      (tabId) =>
+        chrome.runtime.sendMessage({
+          type: 'fd:start',
+          workspaceId: '11111111-1111-1111-1111-111111111111',
+          title: 'Banc, page piège',
+          tabId,
+        }),
+      tab2,
+    );
+    await p2.bringToFront();
+    await p2.locator('[data-fd-ui]').first().waitFor({ state: 'attached' });
+    const base = await steps();
+    for (const sel of ['#colles', '#ville', 'button.btn']) {
+      const n = await steps();
+      await p2.locator(sel).first().click();
+      const end = Date.now() + 15000;
+      while (Date.now() < end && (await steps()) <= n) await new Promise((r) => setTimeout(r, 200));
+    }
+    const made = (await steps()) - base;
+    const rev2 = ctx.waitForEvent('page', (p) => p.url().includes('/review.html'), { timeout: 20000 });
+    await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
+    const r2 = await rev2;
+    await r2.waitForLoadState('domcontentloaded');
+    const caps = await r2.evaluate(
+      () =>
+        new Promise((res) => {
+          const r = indexedDB.open('fd-pending', 1);
+          r.onsuccess = () => {
+            const g = r.result.transaction('captures').objectStore('captures').getAll();
+            g.onsuccess = () =>
+              res(g.result.map((c) => ({ title: c.title, zones: (c.zones ?? []).map((z) => z.type) })));
+          };
+        }),
+    );
+    const piege = caps.filter((c) => c.title === 'Offres');
+    const total = piege.reduce((n, c) => n + c.zones.length, 0);
+    ok(
+      made >= 2 && piege.length === made && total === 0,
+      `page piège, ${piege.length} captures : ${total} zone(s) repérée(s), 0 attendue (${JSON.stringify(piege.map((c) => c.zones))})`,
+    );
+  }
   await ctx.close();
 })().catch((e) => {
   console.error(e);

@@ -5,6 +5,7 @@ export {
   labelType,
   maskExcerpt,
   matchText,
+  plausibleValue,
   type PiiType,
   type TextMatch,
 } from '@flowdsiml/core';

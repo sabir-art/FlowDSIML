@@ -1,5 +1,13 @@
 import type { PxRect } from './geometry';
-import { autocompleteType, inlineLabelValue, labelType, maskExcerpt, matchText, type PiiType } from './pii';
+import {
+  autocompleteType,
+  inlineLabelValue,
+  labelType,
+  maskExcerpt,
+  matchText,
+  plausibleValue,
+  type PiiType,
+} from './pii';
 
 /** Détection trouvée dans la page (boîte en pixels CSS du viewport). */
 export interface Detection {
@@ -175,7 +183,9 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
     const ctx = parent.closest(COMMAND) ? '' : contextLabel(parent);
     const ctxType = labelType(ctx);
     const trimmed = text.trim();
-    if (ctxType && trimmed.length <= 120 && !labelType(trimmed)) {
+    // La valeur doit avoir la forme de la donnée annoncée : « Statut » après « Nom » est un autre
+    // en-tête, « Lyon » après « Ville » une ville seule (lisible)
+    if (ctxType && trimmed.length <= 120 && !labelType(trimmed) && plausibleValue(ctxType, trimmed)) {
       const start = text.indexOf(trimmed);
       emit({
         type: ctxType,
@@ -188,7 +198,8 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
       });
       continue;
     }
-    const inline = inlineLabelValue(text);
+    const found = inlineLabelValue(text);
+    const inline = found && plausibleValue(found.type, text.slice(found.start, found.end)) ? found : null;
     const matches = inline ? [inline] : matchText(text, ctx);
     for (const m of matches)
       emit({

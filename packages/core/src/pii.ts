@@ -131,6 +131,32 @@ export function inlineLabelValue(text: string): TextMatch | null {
   return { type, start, end: start + m[2]!.length };
 }
 
+const PARTICLE = /^(de|du|des|la|le|d|van|von|der|den|di|da|el|al|ben)$/i;
+/**
+ * L60 (faux positifs) : un texte désigné par un libellé voisin n'est remplacé que s'il a la forme de la
+ * donnée annoncée.
+ *  - name : un nom de personne, deux à quatre mots commençant par une majuscule (particules et initiales
+ *    admises : « Camille Durand », « J. Martin », « Anne de La Tour »). Un mot d'interface seul
+ *    (« Statut », « Actions ») ou une expression courante (« Offre essentielle ») n'en est pas un.
+ *  - address : une adresse porte un numéro (voie ou code postal). Une ville seule reste lisible
+ *    (décision produit du 25/11) : elle n'est pas une donnée personnelle à elle seule.
+ */
+export function plausibleValue(type: PiiType, value: string): boolean {
+  const v = value.replace(/\s+/g, ' ').trim();
+  if (type === 'address') return /\d/.test(v);
+  if (type !== 'name') return true;
+  if (/[\d@:/]/.test(v)) return false;
+  const words = v.split(' ');
+  if (words.length < 2 || words.length > 5) return false;
+  let proper = 0;
+  for (const w of words) {
+    if (PARTICLE.test(w.replace(/[’']$/, ''))) continue;
+    if (!/^\p{Lu}(\.|[\p{L}’'.-]*)$/u.test(w)) return false;
+    proper++;
+  }
+  return proper >= 2;
+}
+
 /** Extrait masqué pour l'écran de vérification : jamais la valeur en clair. */
 export function maskExcerpt(type: PiiType, value: string): string {
   const v = value.replace(/\s+/g, ' ').trim();
