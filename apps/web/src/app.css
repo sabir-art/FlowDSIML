@@ -567,7 +567,7 @@
   margin-top: var(--fd-space-6);
 }
 .spin {
-  animation: spin 1s linear infinite;
+  animation: spin var(--fd-motion-duration-spin) linear infinite;
 }
 @keyframes spin {
   to {
@@ -2381,7 +2381,7 @@ button.fd-nav__item:hover {
   height: 100%;
   border-radius: inherit;
   background: var(--fd-color-primary);
-  animation: fd-dz-slide 1.2s ease-in-out infinite;
+  animation: fd-dz-slide var(--fd-motion-duration-loop) ease-in-out infinite;
 }
 @keyframes fd-dz-slide {
   from {

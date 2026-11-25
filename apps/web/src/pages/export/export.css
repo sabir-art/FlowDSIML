@@ -286,7 +286,8 @@
   height: 100%;
   border-radius: 999px;
   background: var(--fd-color-chart-1);
-  transition: width 0.2s;
+  /* MOTION-01 §6 : remplissage pleine largeur, déplacé dans la piste (overflow: hidden) */
+  transition: transform var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 .exp-steps {
   list-style: none;
@@ -323,7 +324,7 @@
   border-radius: 50%;
   border: 2px solid var(--fd-color-chart-track);
   border-top-color: var(--fd-color-chart-1);
-  animation: x15spin 0.9s linear infinite;
+  animation: x15spin var(--fd-motion-duration-spin) linear infinite;
   flex: none;
 }
 .exp-steps .todo {

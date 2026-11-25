@@ -4,8 +4,8 @@
   border-radius: var(--fd-radius-md);
   background: var(--fd-color-surface);
   transition:
-    border-color 120ms,
-    box-shadow 120ms;
+    border-color var(--fd-motion-duration-fast),
+    box-shadow var(--fd-motion-duration-fast);
 }
 .var-rte:focus-within {
   /* FIELD-01 §11.3 : le groupe porte la bordure et le focus */

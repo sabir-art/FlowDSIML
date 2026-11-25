@@ -490,7 +490,7 @@ export function EditorPage() {
     selection.kind === 'form' ? editor.forms.find((f) => f.id === selection.id) : undefined;
   // MOTION-01 §2 : la scène suit l'ouverture et la fermeture des panneaux (après l'ajustement au dock)
   const panelOpen = !!(selectedForm || (panel && panel !== 'blur'));
-  useStageFlip(stageInner, `${panelOpen ? 1 : 0}|${dock.open ? 1 : 0}|${zoom}`);
+  useStageFlip(stageInner, `${panelOpen ? 1 : 0}|${dock.open ? 1 : 0}|${zoom}|${stepsCollapsed ? 1 : 0}`);
   // Le panneau n'entre en mouvement qu'après un geste : jamais d'animation au premier affichage
   const [panelMoves, setPanelMoves] = useState(false);
   // L48-E §3 : lien avec le canevas. Un point choisi ouvre « Points d'intérêt » ; une zone floutée

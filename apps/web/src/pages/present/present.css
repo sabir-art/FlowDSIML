@@ -512,7 +512,7 @@
   height: 10px;
   border-radius: 50%;
   background: currentColor;
-  animation: rm-pulse 1.4s ease-in-out infinite;
+  animation: rm-pulse var(--fd-motion-duration-pulse) ease-in-out infinite;
 }
 @keyframes rm-pulse {
   50% {

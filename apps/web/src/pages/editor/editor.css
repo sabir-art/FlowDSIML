@@ -1034,7 +1034,7 @@
 .cm-skeleton__lines > span {
   display: block;
   background: var(--fd-color-surface-sunken);
-  animation: cm-pulse 1.4s ease-in-out infinite;
+  animation: cm-pulse var(--fd-motion-duration-pulse) ease-in-out infinite;
 }
 .cm-skeleton__avatar {
   width: 32px;
@@ -1826,9 +1826,10 @@
   position: absolute;
   z-index: 40;
   pointer-events: none;
-  transition:
-    left 0.12s linear,
-    top 0.12s linear;
+  /* MOTION-01 §6 : le curseur suit par transform (position en px du cadre, PresenceUI.tsx) */
+  top: 0;
+  left: 0;
+  transition: transform var(--fd-motion-duration-fast) linear;
 }
 .rcursor svg {
   display: block;
@@ -2436,7 +2437,7 @@
   width: 2px;
   height: 1.1em;
   background: currentColor;
-  animation: cap-caret 1s steps(1) infinite;
+  animation: cap-caret var(--fd-motion-duration-loop) steps(1) infinite;
 }
 @keyframes cap-caret {
   50% {
@@ -2875,7 +2876,7 @@
   height: 10px;
   border-radius: 50%;
   background: var(--fd-color-danger);
-  animation: voice-blink 1.2s ease-in-out infinite;
+  animation: voice-blink var(--fd-motion-duration-loop) ease-in-out infinite;
 }
 .voice-dot.is-paused {
   animation: none;
@@ -3475,15 +3476,7 @@
   min-height: 0;
   background: var(--fd-color-surface);
   border-top: 1px solid var(--fd-color-border);
-  transition: height var(--fd-motion-duration-fast, 120ms) ease;
-}
-.mk .cm-dock.is-resizing {
-  transition: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mk .cm-dock {
-    transition: none;
-  }
+  /* MOTION-01 §6 : pas de transition de hauteur ; le panneau s'ouvre d'un coup, la scène suit par FLIP */
 }
 /* Poignée : 8 px de zone de saisie, trait centré de 32 × 4 px */
 .mk .cm-dock__handle {
@@ -3979,17 +3972,7 @@
 .mk .ed-body > .rail {
   flex: 0 0 var(--rail-w, 264px);
   width: var(--rail-w, 264px);
-  transition:
-    flex-basis 200ms ease-out,
-    width 200ms ease-out;
-}
-.mk .ed-body.is-col-drag > .rail {
-  transition: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mk .ed-body > .rail {
-    transition: none;
-  }
+  /* MOTION-01 §6 : pas de transition de largeur ; la colonne bascule d'un coup, la scène suit par FLIP */
 }
 /* Poignée : à cheval sur le filet de la colonne ; repliée, demi-pastille contre le bord droit du rail */
 .mk .ed-body > .fd-cgrip {
@@ -4345,7 +4328,7 @@
   height: 100%;
   border-radius: 999px;
   background: var(--fd-color-primary);
-  animation: ai-indet 1.2s ease-in-out infinite;
+  animation: ai-indet var(--fd-motion-duration-loop) ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .vo-indet::after {

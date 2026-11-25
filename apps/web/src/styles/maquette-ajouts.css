@@ -2843,7 +2843,7 @@
   background: linear-gradient(90deg, transparent, var(--fd-color-primary), transparent);
   background-size: 50% 100%;
   background-repeat: no-repeat;
-  animation: st-mydata-bar 1.2s linear infinite;
+  animation: st-mydata-bar var(--fd-motion-duration-loop) linear infinite;
 }
 @keyframes st-mydata-bar {
   from {
