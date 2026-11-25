@@ -83,7 +83,7 @@
   flex: none;
   width: 36px;
   height: 20px;
-  border-radius: 999px;
+  border-radius: var(--fd-radius-round);
   background: var(--fd-color-border-field);
   transition: background-color var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
@@ -94,7 +94,7 @@
   left: 2px;
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: var(--fd-radius-round);
   background: #fff;
   transition: transform var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
@@ -156,7 +156,7 @@
   max-width: 100%;
   gap: 2px;
   padding: 4px;
-  border-radius: var(--fd-radius-full);
+  border-radius: var(--fd-radius-control);
   background: var(--fd-color-surface-sunken);
   border: 1px solid var(--fd-color-border);
 }
@@ -165,7 +165,7 @@
   min-height: 32px;
   padding: 4px var(--fd-space-4);
   border: 0;
-  border-radius: var(--fd-radius-full);
+  border-radius: var(--fd-radius-control-sm);
   background: transparent;
   color: var(--fd-color-text-muted);
   font: 600 var(--fd-text-label-size) / 1.2 var(--fd-font-sans);
@@ -197,14 +197,14 @@
   display: flex;
   gap: var(--fd-space-1);
   padding: 4px;
-  border-radius: var(--fd-radius-full);
+  border-radius: var(--fd-radius-control);
   background: var(--fd-color-surface-sunken);
 }
 .fd-tabs > [role='tab'] {
   flex: 1;
   height: 32px;
   border: 0;
-  border-radius: var(--fd-radius-full);
+  border-radius: var(--fd-radius-control-sm);
   background: transparent;
   color: var(--fd-color-text-muted);
   font: 600 var(--fd-text-label-size) / 1 var(--fd-font-sans);
@@ -350,7 +350,7 @@
   text-align: center;
   background: var(--fd-color-surface);
   border: 1px solid var(--fd-color-border);
-  border-radius: 16px;
+  border-radius: var(--fd-radius-surface);
 }
 .fd-empty__icon {
   /* L48-B (B4), L48-F (F4), L48-E (E6) : icône seule, 32 à 40 px, text-muted, sans pastille */
@@ -435,7 +435,7 @@
   left: 0;
   height: 4px;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: var(--fd-radius-round);
   background: var(--fd-color-border);
 }
 .fd-slider__fill {
@@ -452,7 +452,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid var(--fd-color-primary);
-  border-radius: 50%;
+  border-radius: var(--fd-radius-round);
   background: var(--fd-color-surface);
   box-shadow: 0 1px 2px rgb(8 10 14 / 0.16);
 }

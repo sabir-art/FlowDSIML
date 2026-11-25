@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   border: 1px solid var(--fd-color-border-field);
-  border-radius: 16px;
+  border-radius: var(--fd-radius-control);
   background: var(--fd-color-surface);
   transition:
     border-color var(--fd-motion-duration-fast),
@@ -41,7 +41,7 @@
   margin: 0;
   padding: 12px 16px 0;
   border: 0;
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--fd-radius-control) var(--fd-radius-control) 0 0;
   background: transparent;
   color: var(--fd-color-text);
   font: inherit;
@@ -56,7 +56,7 @@
   /* L'anneau de focus est porté par le cadre entier (barre comprise) */
   outline: none;
   box-shadow: none;
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--fd-radius-control) var(--fd-radius-control) 0 0;
 }
 .fd-composer .fd-composer__input::placeholder {
   color: var(--fd-color-text-muted);
@@ -86,7 +86,7 @@
   height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--fd-radius-control-sm);
   background: transparent;
   color: var(--fd-color-text-muted);
   cursor: pointer;
@@ -116,7 +116,7 @@
   padding: 0 8px;
   height: 32px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--fd-radius-control-sm);
   background: transparent;
   color: var(--fd-color-text);
   font: inherit;
@@ -136,7 +136,7 @@
   height: 32px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: var(--fd-radius-control-sm);
   background: var(--fd-color-primary);
   color: var(--fd-color-on-primary);
   cursor: pointer;
@@ -146,7 +146,7 @@
   content: '';
   position: absolute;
   inset: -4px;
-  border-radius: 50%;
+  border-radius: var(--fd-radius-round);
 }
 .fd-composer__send svg {
   width: 18px;

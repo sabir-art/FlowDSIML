@@ -176,6 +176,13 @@
   --fd-radius-2xl: 24px;
   --fd-radius-3xl: 32px;
   --fd-radius-full: 9999px;
+  --fd-radius-control: 10px;
+  --fd-radius-control-sm: 8px;
+  --fd-radius-tag: 6px;
+  --fd-radius-detail: 4px;
+  --fd-radius-surface: 12px;
+  --fd-radius-overlay: 16px;
+  --fd-radius-round: 9999px;
   --fd-border-default: 1px;
   --fd-border-strong: 2px;
   --fd-motion-duration-fast: 120ms;
