@@ -98,13 +98,15 @@ const TABS: Array<{ id: Tab; icon: ReactNode }> = [
   { id: 'where', icon: <Share2 aria-hidden="true" /> },
 ];
 
-const tabKey = (demoId: string) => `fd.l16.tab.${demoId}`;
-function readTab(demoId: string): Tab {
+/** Dernier onglet utilisé : gardé par personne (sur cet appareil), pas par démo. */
+const TAB_KEY = 'tc.diffuser.tab';
+function readTab(): Tab {
   try {
-    const v = localStorage.getItem(tabKey(demoId));
-    return v === 'training' || v === 'intranet' || v === 'mail' || v === 'where' ? v : 'scorm';
+    const v = localStorage.getItem(TAB_KEY);
+    // Première ouverture : le premier onglet affiché (l'ordre affiché est l'ordre par défaut)
+    return v === 'scorm' || v === 'intranet' || v === 'mail' || v === 'where' ? v : 'training';
   } catch {
-    return 'scorm';
+    return 'training';
   }
 }
 
@@ -167,7 +169,7 @@ export function DistributeDialog({
   const editor = useDemoEditor(demoId);
   const access = useDemoAccess(demoId).access;
   const [info, setInfo] = useState<Info | null>(null);
-  const [tab, setTabState] = useState<Tab>(() => initialTab ?? readTab(demoId));
+  const [tab, setTabState] = useState<Tab>(() => initialTab ?? readTab());
   const [rows, setRows] = useState<WhereRow[] | null>(null);
   const job = useScormJob(demoId);
   const running = job?.state.status === 'running';
@@ -177,7 +179,7 @@ export function DistributeDialog({
   const setTab = (v: Tab) => {
     setTabState(v);
     try {
-      localStorage.setItem(tabKey(demoId), v);
+      localStorage.setItem(TAB_KEY, v);
     } catch {
       /* stockage indisponible */
     }
