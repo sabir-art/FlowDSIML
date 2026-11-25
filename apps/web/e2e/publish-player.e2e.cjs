@@ -69,7 +69,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(await pub.isDisabled(), 'RGPD : une seule case ne suffit pas');
   await dlg.getByLabel(/fictives ou floutées/).check();
   await pub.click();
-  await app.waitForURL(/share\?published=1/, { timeout: 15000 });
+  await app.waitForFunction(() => /share=lien&published=1/.test(location.hash), null, { timeout: 15000 });
   ok(true, 'publication terminée, redirection vers la page de partage');
   ok(state.lastAck?.reviewed && state.lastAck?.fictional, 'RGPD : confirmation envoyée à publish_demo');
   ok(!!state.storage[`published/${DEMO}/latest.json`], 'manifeste latest.json téléversé');
@@ -83,13 +83,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   const publicUrl = await app.inputValue('#sh-pub');
   ok(publicUrl === `${PUBLIC_PLAYER}/#/d/${DEMO}`, 'lien public affiché (adresse publique du lecteur)');
-  await app.getByRole('tab', { name: 'Intégrer' }).click();
+  await app.locator('.shd-nav').getByRole('button', { name: 'Intégrer', exact: true }).click();
   ok((await app.textContent('.sh-code')).includes('<iframe'), 'snippet d’intégration affiché');
   if (SHOTS) await app.screenshot({ path: `${SHOTS}/share.png`, fullPage: true });
 
   // Lien personnalisé (onglet dédié, modale « Nouveau lien personnalisé »)
-  await app.getByRole('tab', { name: 'Liens personnalisés' }).click();
-  await app.getByRole('button', { name: 'Nouveau lien' }).click();
+  await app.locator('.shd-nav').getByRole('button', { name: 'Liens personnalisés', exact: true }).click();
+  await app.getByRole('button', { name: 'Créer un lien' }).click();
   await app.fill('#sh-ln', 'Globex — Marie');
   await app.fill('#sh-v-company', 'Globex');
   await app.getByRole('button', { name: 'Créer et copier le lien' }).click();
@@ -211,7 +211,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await lg.close();
 
   // L11 : protection par mot de passe (onglet Accès), vérifiée par open-demo
-  await app.getByRole('tab', { name: 'Accès' }).click();
+  await app.locator('.shd-nav').getByRole('button', { name: 'Accès', exact: true }).click();
   await app.getByRole('radio', { name: /Avec un mot de passe/ }).check();
   await app.fill('#acc-pw', 'court');
   ok(
@@ -226,7 +226,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await app.locator('.l11-opt.is-soon input:disabled').count()) === 1,
     'L11 / L39 : seul le jeton (A1-11) reste en Bientôt',
   );
-  ok(/Avec un mot de passe/.test(await app.textContent('.l11-sum')), 'L11 : carte « Accès à la démo »');
+  // §1 : l'accès de la démo est rappelé en tête de chaque mode (pastille d'accès)
+  await app.locator('.shd-nav').getByRole('button', { name: 'Lien', exact: true }).click();
+  ok(/Avec un mot de passe/.test(await app.textContent('.shd-access')), 'L11 : pastille d’accès de la démo');
+  await app.locator('.shd-access').getByRole('button', { name: 'Modifier' }).click();
 
   const g = await ctx.newPage();
   await install(g, state);

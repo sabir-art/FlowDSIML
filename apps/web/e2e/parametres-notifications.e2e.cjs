@@ -201,17 +201,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     await shot(page, 'notifs-cloche-lead');
     await item.first().getByRole('link').click();
-    await page.waitForURL(new RegExp(`/demos/${DEMO}/analytics`));
-    const h = page.getByRole('heading', { name: 'Leads', level: 2 });
-    await h.waitFor();
+    // §9 : les leads de la démo ont leur vue, dans la démo
+    await page.waitForFunction((d) => location.hash === `#/demos/${d}/leads`, DEMO);
     await page.waitForFunction(() => {
       const el = document.activeElement;
-      const r = el?.getBoundingClientRect();
-      return el?.id === 'da-leads' && r.top >= 0 && r.bottom <= window.innerHeight;
+      return el?.tagName === 'H1' && /^Leads de/.test(el.textContent || '');
     });
     ok(
-      await h.isVisible(),
-      'le lien mène aux leads de la démo, titre «\u202fLeads\u202f» à l’écran, avec le focus',
+      (await page.locator('.dv-tabs a[aria-current="page"]').textContent()).trim() === 'Leads',
+      'le lien mène à la vue «\u202fLeads\u202f» de la démo, focus sur son titre',
     );
     await page.context().close();
   }

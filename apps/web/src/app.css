@@ -2899,3 +2899,17 @@ button.fd-nav__item:hover {
 .fd-copy__ok:empty {
   display: none;
 }
+/* Entrée de menu à cocher non cochée : la colonne de l'icône (16 px) reste vide, le texte reste aligné */
+.menu-blank {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Écran plein (erreur de chargement, éditeur sur petit écran) : le fond est celui du contenu, comme le
+   reste de l'app, jamais le fond bleuté de la page. */
+.on-content {
+  min-height: 100vh;
+  background: var(--fd-color-content-bg);
+}

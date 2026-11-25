@@ -105,7 +105,7 @@ export function readPrefs(raw: unknown): NotificationPrefs {
 
 /**
  * Lien vers l'éditeur, sur l'étape, avec le fil ouvert ; une alerte mène à l'onglet Alertes, un nouveau
- * lead aux leads de la démo (Analytics de la démo ; la carte « Leads » prend le focus, LEADS_FOCUS).
+ * lead aux leads de la démo (vue « Leads » de la démo).
  */
 export const notificationHref = (n: Pick<NotificationRow, 'kind' | 'demo_id' | 'step_id' | 'comment_id'>) =>
   n.kind === 'alert'
@@ -113,8 +113,5 @@ export const notificationHref = (n: Pick<NotificationRow, 'kind' | 'demo_id' | '
     : n.kind === 'webhook_paused'
       ? '/settings/integrations'
       : n.kind === 'lead'
-        ? `/demos/${n.demo_id}/analytics`
+        ? `/demos/${n.demo_id}/leads`
         : `/demos/${n.demo_id}/edit?step=${n.step_id}${n.comment_id ? `&comment=${n.comment_id}` : ''}`;
-
-/** Cible du focus à l'arrivée depuis une notification « Nouveau lead » (routeFocus, state.focus). */
-export const LEADS_FOCUS = 'da-leads';

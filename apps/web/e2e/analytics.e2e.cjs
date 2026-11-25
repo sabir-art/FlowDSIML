@@ -93,14 +93,16 @@ const DEMO2 = '0b5c1f0e-0000-4000-8000-000000000002';
   await page.reload();
   await page.waitForSelector('.kpi-tab');
   ok(await selected(3), 'rechargement : indicateur gardé');
-  await page.waitForSelector('text=prospect@globex.example', { timeout: 3000 }).catch(() => null);
-  ok((await page.locator('text=prospect@globex.example').count()) === 1, 'leads de la démo listés');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/analytics-demo.png`, fullPage: true });
   const [dl] = await Promise.all([
     page.waitForEvent('download'),
     page.getByRole('button', { name: 'Exporter en CSV' }).first().click(),
   ]);
   ok(dl.suggestedFilename().endsWith('.csv'), 'export CSV de l’entonnoir');
+  // §9 : les leads de la démo sont dans la vue « Leads » (même barre de démo)
+  await page.locator('.dv-tabs').getByRole('link', { name: 'Leads', exact: true }).click();
+  await page.waitForSelector('text=prospect@globex.example', { timeout: 5000 }).catch(() => null);
+  ok((await page.locator('text=prospect@globex.example').count()) === 1, 'leads de la démo listés');
 
   // Analytics de l'espace (ANA-01, L48-D) : 4 indicateurs, période, filtre par démo, onglets
   await page.goto(`${APP}/#/analytics`);

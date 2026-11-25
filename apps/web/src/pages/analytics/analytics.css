@@ -12,6 +12,11 @@
 .mk .an-tabrow::-webkit-scrollbar {
   display: none;
 }
+/* Il reste des onglets à droite : fondu de 24 px au lieu d'une coupure nette */
+.mk .an-tabrow[data-more] {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
 .mk .an-tabs2 {
   display: flex;
   gap: 4px;

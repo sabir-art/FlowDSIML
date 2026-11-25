@@ -1102,7 +1102,7 @@
   gap: var(--fd-space-4);
   min-height: 100vh;
   padding: var(--fd-space-4);
-  background: var(--fd-color-bg);
+  background: var(--fd-color-content-bg);
 }
 .editor-narrow__notice h1 {
   margin: 0 0 var(--fd-space-1);
@@ -4780,4 +4780,14 @@
   margin-top: 8px;
   margin-bottom: 12px;
   font-size: 13px;
+}
+
+/* §9 : onglets de la barre de démo avec leur icône (Édition, Aperçu, Analytics, Leads, Visiteurs) */
+.mk .ed-tabs :is(button, a) {
+  gap: 6px;
+}
+.mk .ed-tabs :is(button, a) > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
 }

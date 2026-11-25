@@ -134,10 +134,33 @@ function seedDistribute(s, { published = true } = {}) {
       /version 3, publiée le/.test(nb(await dlg.locator('.dif-sub').textContent())),
     'Sous-titre : badge et version',
   );
-  ok((await tab('SCORM').getAttribute('aria-selected')) === 'true', 'Onglet SCORM par défaut');
+  // Première ouverture : le premier onglet affiché (« Parcours de formation ») ; ensuite, le dernier utilisé
   ok(
-    await tab('SCORM').evaluate((el) => el === document.activeElement),
+    (await dlg.getByRole('tab').first().textContent()).trim() === 'Parcours de formation' &&
+      (await tab('Parcours de formation').getAttribute('aria-selected')) === 'true',
+    'Premier onglet « Parcours de formation » par défaut (ordre affiché = ordre par défaut)',
+  );
+  ok(
+    await tab('Parcours de formation').evaluate((el) => el === document.activeElement),
     'Focus sur l’onglet actif à l’ouverture',
+  );
+  // « Hors ligne » : dernier onglet, grisé, avec la pastille « Bientôt » ; il ne se sélectionne pas
+  const off = dlg.getByRole('tab').last();
+  ok(
+    /^Hors ligne\s*Bientôt$/.test((await off.innerText()).trim()) &&
+      (await off.getAttribute('aria-disabled')) === 'true' &&
+      (await off.locator('.fd-badge').count()) === 1,
+    'Dernier onglet « Hors ligne », désactivé, pastille « Bientôt »',
+  );
+  await off.click({ force: true });
+  ok(
+    (await tab('Parcours de formation').getAttribute('aria-selected')) === 'true',
+    '« Hors ligne » ne se sélectionne pas',
+  );
+  await tab('SCORM').click();
+  ok(
+    (await page.evaluate(() => localStorage.getItem('tc.diffuser.tab'))) === 'scorm',
+    'Dernier onglet utilisé mémorisé par personne',
   );
 
   // ===== L16-01 : réglages SCORM =====

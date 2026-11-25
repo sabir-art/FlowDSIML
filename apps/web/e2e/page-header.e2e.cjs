@@ -24,8 +24,6 @@ const SHELL = [
   ['Apprenants', '/learners'],
   ['Analytics', '/analytics'],
   ['Analytics · Leads', '/analytics?tab=leads'],
-  ['Analytics d’une démo', `/demos/${DEMO}/analytics`],
-  ['Partager', `/demos/${DEMO}/share`],
   ['Nouveautés', '/nouveautes'],
 ];
 // Éditeurs : variante `.fd-page-header--editor` de la même barre (≥ 1 024 px, écran étroit en dessous)

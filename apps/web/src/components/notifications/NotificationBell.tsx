@@ -34,14 +34,7 @@ import { formatRelativeShort } from '../../lib/format';
 import { avatarTone } from '../../lib/avatarTone';
 import { useNotifications, type NotificationItem } from './useNotifications';
 import { bellStore, useBellOpen } from './bellState';
-import {
-  LEADS_FOCUS,
-  NOTIFICATION_KINDS,
-  badge,
-  bodyParts,
-  grouped,
-  notificationHref,
-} from './notifications';
+import { NOTIFICATION_KINDS, badge, bodyParts, grouped, notificationHref } from './notifications';
 import './notifications.css';
 import { Empty } from '@flowdsiml/ui';
 
@@ -540,7 +533,6 @@ function AlertRow({
       <Link
         className="nb-cover"
         to={notificationHref(x)}
-        state={x.kind === 'lead' ? { focus: LEADS_FOCUS } : undefined}
         aria-label={
           x.kind === 'webhook_paused'
             ? t('notifications.open_webhook', { text })

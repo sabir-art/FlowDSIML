@@ -97,10 +97,13 @@ export function LeadsTable({ demoId }: { demoId?: string }) {
           level={3}
           icon={<Inbox />}
           title={t('leads.empty')}
-          body={t('leads.emptyHint')}
+          body={t(demoId ? 'leads.emptyHintDemo' : 'leads.emptyHint')}
           action={
             can('demo.edit') ? (
-              <Link className="fd-btn fd-btn--primary" to={demoId ? `/demos/${demoId}/edit` : '/'}>
+              <Link
+                className="fd-btn fd-btn--primary"
+                to={demoId ? `/demos/${demoId}/edit?tab=settings` : '/'}
+              >
                 <span className="fd-btn__icon" aria-hidden="true">
                   <Plus />
                 </span>

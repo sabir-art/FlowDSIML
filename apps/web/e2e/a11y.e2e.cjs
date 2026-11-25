@@ -624,6 +624,9 @@ const APP_PAGES = [
   },
   { name: 'Partager · accès', route: `/#/demos/${DEMO}/share?tab=access` },
   { name: 'Analytics d’une démo', route: `/#/demos/${DEMO}/analytics` },
+  // §9 : vues d'une démo hors de l'éditeur (barre de démo commune, sans barre latérale)
+  { name: 'Leads d’une démo', route: `/#/demos/${DEMO}/leads` },
+  { name: 'Visiteurs d’une démo', route: `/#/demos/${DEMO}/visitors` },
   { name: 'Analytics', route: '/#/analytics' },
   { name: 'Analytics · sessions', route: '/#/analytics?tab=sessions' },
   { name: 'Analytics · démos', route: '/#/analytics?tab=demos' },

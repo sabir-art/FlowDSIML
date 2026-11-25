@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   ArrowRight,
-  Archive,
   Accessibility,
   CircleAlert,
   CircleCheck,
@@ -925,7 +924,6 @@ function Options(p: {
     { key: 'gif', icon: <ImageIcon aria-hidden="true" /> },
     { key: 'html', icon: <Accessibility aria-hidden="true" /> },
     { key: 'mp4', icon: <Film aria-hidden="true" />, off: !videoOk },
-    { key: 'zip', icon: <Archive aria-hidden="true" />, soon: true },
   ];
   const { mp4x, setMp4x } = p;
   const sw = (

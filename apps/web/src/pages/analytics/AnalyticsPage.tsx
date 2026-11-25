@@ -42,6 +42,7 @@ import { DevicesWidget, ReturningWidget, SourcesWidget, StepsWidget } from './wi
 import './advanced/advanced.css';
 import './analytics.css';
 import { Status } from '@flowdsiml/ui';
+import { useScrollFade } from '../../components/useScrollFade';
 
 /** L19b : « page » = lecteur affiché dans la page publique. */
 type Source = 'direct' | 'embed' | 'link' | 'page';
@@ -84,6 +85,8 @@ const SEARCH_MIN = 10;
 
 /** Analytics de l'espace (ANA-01, L48-D) : 4 onglets et « Plus », 4 indicateurs, grille de widgets. */
 export function AnalyticsPage() {
+  // Petit écran : fondu au bord droit tant que des onglets restent à faire défiler
+  const tabRow = useScrollFade<HTMLDivElement>();
   const { t } = useTranslation();
   const { current, can } = useWorkspace();
   const ws = current!;
@@ -283,7 +286,7 @@ export function AnalyticsPage() {
     >
       {/* L48-D §1 : 4 onglets au premier niveau, puis « Plus » (menu), qui prend le nom de l'onglet ouvert */}
       {/* §18.7 : rangée d'onglets, défilement horizontal voulu sur mobile */}
-      <div className="an-tabrow" data-scroll-x="">
+      <div className="an-tabrow" data-scroll-x="" ref={tabRow}>
         <div className="an-tabs2" role="tablist" aria-label={t('analytics.views_label')}>
           {primary.map((k) => (
             <button
@@ -657,13 +660,15 @@ function Overview({
   );
 }
 
-function Sessions({
+export function Sessions({
   wsId,
   days,
   demo,
   source,
   title,
   segment,
+  hideDemo = false,
+  sourceLabel,
 }: {
   wsId: string;
   days: number;
@@ -671,6 +676,10 @@ function Sessions({
   source: Source | '';
   title: (id: string) => string;
   segment: unknown;
+  /** Vue « Visiteurs » d'une démo : la colonne Démo répéterait la démo courante. */
+  hideDemo?: boolean;
+  /** Nom du moyen de partage (dans une démo : ceux de la fenêtre Partager). */
+  sourceLabel?: (source: Source) => string;
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
@@ -712,13 +721,14 @@ function Sessions({
   const to = Math.min(res.total, (page + 1) * PAGE);
   return (
     <div className="card">
-      <div className="table-wrap">
+      {/* Tableau large : la zone qui défile se parcourt aussi au clavier (RGAA 12.9) */}
+      <div className="table-wrap" role="region" aria-label={t('analytics.tab.sessions')} tabIndex={0}>
         <table className="table">
           <caption className="sr-only">{t('analytics.tab.sessions')}</caption>
           <thead>
             <tr>
               <th>{t('analytics.visitor')}</th>
-              <th>{t('leads.demo')}</th>
+              {!hideDemo && <th>{t('leads.demo')}</th>}
               <th>{t('analytics.source')}</th>
               <th className="r">{t('analytics.duration')}</th>
               <th className="r">{t('analytics.progress')}</th>
@@ -728,7 +738,7 @@ function Sessions({
           <tbody>
             {res.rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={hideDemo ? 5 : 6} className="muted">
                   {res.tooSmall ? t('analytics.adv.seg.tooSmall') : t('analytics.noSessions')}
                 </td>
               </tr>
@@ -763,9 +773,11 @@ function Sessions({
                       </div>
                     </div>
                   </td>
-                  <td>{title(s.demo_id)}</td>
+                  {!hideDemo && <td>{title(s.demo_id)}</td>}
                   <td>
-                    <span className="badge">{t(`analytics.src.${s.source}`)}</span>
+                    <span className="badge">
+                      {sourceLabel ? sourceLabel(s.source as Source) : t(`analytics.src.${s.source}`)}
+                    </span>
                   </td>
                   <td className="r">{dur(s.duration_s)}</td>
                   <td className="r">

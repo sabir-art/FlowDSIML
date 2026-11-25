@@ -994,7 +994,8 @@ async function install(page, state = seed()) {
             visitors: 90,
             completions: 40,
             ctaClicks: 12,
-            leads: 1,
+            // Leads réellement enregistrés pour cette démo : l'indicateur suit la vue « Leads »
+            leads: (t.leads || []).filter((l) => l.demo_id === a.p_demo).length,
             steps: [
               { stepIndex: 0, visitors: 90 },
               { stepIndex: 1, visitors: 62 },
@@ -1064,8 +1065,13 @@ async function install(page, state = seed()) {
           const pubs = t.demos.filter(
             (d) => d.status === 'published' && !d.deleted_at && (!a.p_demo || d.id === a.p_demo),
           );
+          // Démo demandée non publiée : mêmes chiffres que demo_analytics (120 vues, 96 la période
+          // d'avant), pour que la courbe et la répartition suivent les indicateurs
+          const draft =
+            a.p_demo && !pubs.length ? t.demos.find((d) => d.id === a.p_demo && !d.deleted_at) : null;
+          if (draft) pubs.push(draft);
           const k = previous ? 0.85 : 1;
-          const views = Math.round(267 * pubs.length * k);
+          const views = draft ? (previous ? 96 : 120) : Math.round(267 * pubs.length * k);
           const end = Date.parse(a.p_to || new Date().toISOString());
           const days = Math.max(1, Math.round((end - Date.parse(a.p_from)) / 86400000));
           const row = (v) => ({
@@ -1122,19 +1128,24 @@ async function install(page, state = seed()) {
           return json(route, 200, { total: rows.length, rows: rows.slice(off, off + (a.p_limit || 50)) });
         }
         case 'workspace_sessions': {
-          const rows = t.leads.slice(0, 30).map((l, i) => ({
-            session_id: `s${i}`,
-            demo_id: l.demo_id,
-            source: ['link', 'embed', 'direct'][i % 3],
-            started_at: new Date(Date.now() - (i + 1) * 3 * 3600000).toISOString(),
-            duration_s: 48 + ((i * 37) % 160),
-            max_step: i % 2 ? 3 : 5,
-            completed: i % 2 === 0,
-            steps_total: 6,
-            has_lead: i % 3 !== 1,
-            lead_email: i % 3 === 1 || state.role === 'viewer' ? null : l.email,
-            lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
-          }));
+          // Sessions de la démo demandée seulement (comme en base) : la vue « Visiteurs » d'une démo
+          // ne montre pas les sessions des autres
+          const rows = t.leads
+            .filter((l) => !a.p_demo || l.demo_id === a.p_demo)
+            .slice(0, 30)
+            .map((l, i) => ({
+              session_id: `s${i}`,
+              demo_id: l.demo_id,
+              source: ['link', 'embed', 'direct'][i % 3],
+              started_at: new Date(Date.now() - (i + 1) * 3 * 3600000).toISOString(),
+              duration_s: 48 + ((i * 37) % 160),
+              max_step: i % 2 ? 3 : 5,
+              completed: i % 2 === 0,
+              steps_total: 6,
+              has_lead: i % 3 !== 1,
+              lead_email: i % 3 === 1 || state.role === 'viewer' ? null : l.email,
+              lead_fields: i % 3 === 1 || state.role === 'viewer' ? null : l.fields,
+            }));
           const off = a.p_offset || 0;
           state.lastSessionsSegment = a.p_segment ?? null;
           // L19 : segment de moins de 5 visiteurs : aucune ligne
@@ -1927,6 +1938,28 @@ async function install(page, state = seed()) {
                 ? { title: c.published.title || ws.name }
                 : null,
           });
+        }
+        case 'set_public_page_demo': {
+          // §1 : une démo ajoutée ou retirée de la page publique de l'espace (comme en base)
+          const demo = t.demos.find((x) => x.id === a.p_demo);
+          const c = (t.training_centers || []).find((x) => x.workspace_id === demo?.workspace_id);
+          if (!c || !c.public_page_enabled) return json(route, 400, { code: 'P0001', message: 'PAGE_OFF' });
+          const open = t.demos
+            .filter(
+              (x) =>
+                x.workspace_id === demo.workspace_id &&
+                x.status === 'published' &&
+                !(t.demo_access || []).some((y) => y.demo_id === x.id && y.mode !== 'link'),
+            )
+            .map((x) => x.id);
+          if (a.p_shown && !open.includes(demo.id))
+            return json(route, 400, { code: 'P0001', message: 'DEMO_NOT_PUBLIC' });
+          const cur = Array.isArray(c.public_page?.demos) ? c.public_page.demos : null;
+          if (!(a.p_shown && !cur)) {
+            const list = (cur || open).filter((x) => x !== demo.id);
+            c.public_page = { ...(c.public_page || {}), demos: a.p_shown ? [...list, demo.id] : list };
+          }
+          return json(route, 200, { enabled: true, shown: !!a.p_shown });
         }
         case 'save_public_page': {
           if ((state.takenSlugs || []).includes(a.p_slug))

@@ -90,6 +90,7 @@ function colClosedByDefault(userId: string | undefined) {
 }
 import { useMediaQuery } from '../../lib/useMediaQuery';
 import { LazyNotificationBell } from '../../components/notifications/LazyNotificationBell';
+import { usePublicPageList } from '../share/usePublicPageList';
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const CrumbLink = (p: { to: string; className?: string; title?: string; children?: ReactNode }) => (
@@ -143,6 +144,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { current, can } = useWorkspace();
+  const publicPage = usePublicPageList(current?.id);
   const ws = current!;
   const [demos, setDemos] = useState<Demo[] | null>(null);
   const onb = useOnboarding({ deferred: true });
@@ -724,7 +726,13 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       disabled: !stepCounts[d.id],
       onSelect: () => navigate(`/demos/${d.id}/edit?present=1`),
     },
-    { label: t('editor.share'), icon: <Share2 />, onSelect: () => navigate(`/demos/${d.id}/share`) },
+    {
+      label: t('editor.share'),
+      icon: <Share2 />,
+      onSelect: () => navigate(`/demos/${d.id}/edit?share=lien`),
+    },
+    // §1 : place de la démo sur la page publique de l'espace (administrateurs)
+    ...publicPage.itemFor(d),
     ...(can('demo.edit') && d.status !== 'archived'
       ? [{ label: t('distribute.menu'), icon: <Send />, onSelect: () => setDistributing(d.id) }]
       : []),

@@ -109,10 +109,14 @@ export function DemosTab({
         </thead>
         <tbody>
           {list.slice(0, limit).map((d) => (
-            <tr key={d.id} onClick={() => navigate(`/demos/${d.id}/analytics`)}>
+            <tr
+              key={d.id}
+              onClick={() => navigate(`/demos/${d.id}/analytics`, { state: { from: 'analytics' } })}
+            >
               <td>
                 <Link
                   to={`/demos/${d.id}/analytics`}
+                  state={{ from: 'analytics' }}
                   onClick={(e) => e.stopPropagation()}
                   className="an-demos__name"
                 >

@@ -48,19 +48,23 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Page publique désactivée : section désactivée avec « Activer la page publique »
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
-  await page.getByRole('tab', { name: 'Liens personnalisés' }).click();
-  await page.getByRole('button', { name: 'Nouveau lien' }).click();
+  await page.locator('.shd-nav').getByRole('button', { name: 'Liens personnalisés', exact: true }).click();
+  await page.getByRole('button', { name: 'Créer un lien' }).click();
   const sw = page.getByRole('checkbox', { name: 'Page personnalisée' });
   await sw.waitFor();
   ok((await sw.isDisabled()) && !(await sw.isChecked()), 'page publique désactivée : section désactivée');
   ok(
-    (await page.getByRole('button', { name: 'Activer la page publique' }).count()) === 1,
+    (await page.getByRole('button', { name: 'Activer la page de la démo' }).count()) === 1,
     'lien « Activer la page publique »',
   );
-  await page.getByRole('button', { name: 'Activer la page publique' }).click();
+  await page.getByRole('button', { name: 'Activer la page de la démo' }).click();
   ok(
-    (await page.getByRole('tab', { name: 'Page publique' }).getAttribute('aria-selected')) === 'true',
-    'ouvre l’onglet Page publique',
+    await page
+      .locator('.shd-nav button[aria-current="page"]', { hasText: 'Page de la démo' })
+      .waitFor({ timeout: 5000 })
+      .then(() => true)
+      .catch(() => false),
+    'ouvre le mode Page publique',
   );
 
   // Page publique activée : section activée par défaut
@@ -76,8 +80,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     },
   ];
   await page.reload();
-  await page.getByRole('tab', { name: 'Liens personnalisés' }).click();
-  await page.getByRole('button', { name: 'Nouveau lien' }).click();
+  await page.locator('.shd-nav').getByRole('button', { name: 'Liens personnalisés', exact: true }).click();
+  await page.getByRole('button', { name: 'Créer un lien' }).click();
   await sw.waitFor();
   ok(await sw.isChecked(), 'activée par défaut si la page publique l’est');
   await page.fill('#sh-ln', 'Globex — Marie');

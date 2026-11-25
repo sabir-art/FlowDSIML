@@ -1,39 +1,53 @@
 import {
+  AtSign,
+  Blocks,
+  Braces,
+  Check,
+  ChevronLeft,
+  ChevronRight,
   CircleAlert,
+  Clapperboard,
+  Code,
   Copy,
   Download,
-  Eye,
+  ExternalLink,
+  FileText,
+  Globe,
   GraduationCap,
+  ImagePlay,
   Info,
+  KeyRound,
+  Link2,
+  Lock,
   Mail,
-  Play,
+  MessageSquareText,
+  Pencil,
   Plus,
   Power,
+  QrCode,
+  Search,
+  Share2,
   ShieldCheck,
   Trash2,
   Upload,
+  Users,
   X,
 } from 'lucide-react';
-import { useConfirm } from '../../components/ConfirmDialog';
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { extractVariableKeys } from '@flowdsiml/core';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
 import { addressUrl, embedSnippet, personalPageUrl, publicDemoUrl, shareLinkUrl } from '../../lib/embed';
-import { unpublishDemo } from '../../lib/publish';
 import { formatDate, formatDateTime, formatNumber, formatRelativeShort } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { Menu } from '../../components/Menu';
 import { asSettings } from '../editor/types';
-import { useDemoEditor } from '../editor/useDemoEditor';
-import { PublishButton } from '../editor/PublishButton';
-import { AccessPanel, AccessSummary, useDemoAccess } from './AccessPanel';
+import { AccessPanel, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
-import { CopyButton } from './codeBlock';
 import { PublicPagePanel } from './PublicPagePanel';
 import {
   PersonalPageFields,
@@ -44,36 +58,80 @@ import {
 import { ExportDialog } from '../export/ExportDialog';
 import { AddressField } from './AddressField';
 import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
-import { popupAllowed } from './snippets';
+import { addressOnly, popupAllowed } from './snippets';
+import { highlightHtml } from './codeBlock';
 import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
 import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
 import { ImportLinksDialog } from './ImportLinksDialog';
-import { TrainingCard } from './TrainingCard';
 import { COHORT_MAX, cohorts, exportLinks, linkFromRow } from './linksCsv';
 import { downloadText } from '../../lib/download';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { Status, Select } from '@flowdsiml/ui';
-import { AppPage } from '../../components/AppPage';
+import { CopyField } from '../../components/CopyField';
+import { Qr } from '../present/RemoteDialogs';
+import { Fold } from './Fold';
+import { CopyAction } from './CopyAction';
+import { RadioCards } from './RadioCards';
+import { useCopied } from '../../components/useCopied';
+import { useEmbedSize } from './embedSize';
 
-type Tab = 'link' | 'embed' | 'perso' | 'access' | 'page';
+type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
+/** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
+export const SHARE_MODES = ['lien', 'integrer', 'perso', 'page', 'acces', 'exporter'] as const;
+export type ShareMode = (typeof SHARE_MODES)[number];
+/** `menu` : à 390 px, la liste des modes seule (premier écran de la feuille). */
+export type ShareView = ShareMode | 'menu';
+const TAB_OF: Record<ShareMode, Tab> = {
+  lien: 'link',
+  integrer: 'embed',
+  perso: 'perso',
+  acces: 'access',
+  exporter: 'export',
+  page: 'page',
+};
+const MODE_ICON: Record<ShareMode, typeof Link2> = {
+  lien: Link2,
+  integrer: Code,
+  perso: Users,
+  acces: Lock,
+  exporter: Download,
+  page: Globe,
+};
 type LinkStats = Record<string, { views: number; last: string | null }>;
 
-/** Partager une démo (PRT-01), à l'identique de la maquette partage.html, sur les données réelles. */
-export function SharePage() {
+/**
+ * Partager une démo (SHARE-02, retours du 24/11 2e série §1) : contenu de la fenêtre à deux volets. À
+ * gauche, la liste des modes ; à droite, le mode choisi, avec en tête la pastille d'accès (l'accès est un
+ * réglage unique de la démo, qui vaut pour tous les moyens de partage). Les contenus des modes sont ceux
+ * de l'ancienne page Partager (PRT-01).
+ */
+export function SharePanel({
+  demoId,
+  view,
+  onView,
+  onClose,
+  onPublish,
+  justPublished = false,
+}: {
+  demoId: string;
+  view: ShareView;
+  onView: (v: ShareView) => void;
+  onClose: () => void;
+  /** « Publier » du bandeau d'une démo non publiée (la publication vit dans l'éditeur). */
+  onPublish: () => void;
+  /** La démo vient d'être publiée : message de confirmation en tête. */
+  justPublished?: boolean;
+}) {
   const { t } = useTranslation();
-  const [dialog, ask] = useConfirm();
-  const { demoId = '' } = useParams();
-  const [params] = useSearchParams();
   const { can, current } = useWorkspace();
   const rules = useShareRules(current?.id);
-  const editor = useDemoEditor(demoId);
   const access = useDemoAccess(demoId);
+  const mode: ShareMode = view === 'menu' ? 'lien' : view;
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
-  const hasCohort = links.some((l) => l.cohort);
   const [linkStats, setLinkStats] = useState<LinkStats>({});
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
@@ -97,18 +155,21 @@ export function SharePage() {
   const [cohortList, setCohortList] = useState<string[]>([]);
   const [importing, setImporting] = useState(false);
   /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
-  const [training, setTraining] = useState<{
-    paths: Pick<Tables<'paths'>, 'id' | 'title'>[];
-    modules: Pick<Tables<'path_modules'>, 'path_id' | 'demo_id' | 'position'>[];
-  }>({ paths: [], modules: [] });
-  // RP-2 : la modale RGPD ouvre directement l'onglet Accès (?tab=access)
-  const [tab, setTab] = useState<Tab>(() => {
-    const q = params.get('tab');
-    return q === 'embed' || q === 'perso' || q === 'access' || q === 'page' ? q : 'link';
-  });
+  const tab: Tab = TAB_OF[mode];
+  const [qr, setQr] = useState(false);
+  const [msgCopied, copyMsg] = useCopied();
+  const [persoQ, setPersoQ] = useState('');
+  const needle = persoQ.trim().toLocaleLowerCase();
+  const shownLinks = needle
+    ? links.filter((l) =>
+        [l.name, l.cohort, ...Object.values((l.variables as Record<string, string>) ?? {})]
+          .filter(Boolean)
+          .some((v) => String(v).toLocaleLowerCase().includes(needle)),
+      )
+    : links;
   const [creating, setCreating] = useState(false);
-  const [exporting, setExporting] = useState<boolean | 'gif'>(false);
-  const [week, setWeek] = useState<{ views: number; leads: number } | null>(null);
+  const [exporting, setExporting] = useState<false | 'pdf' | 'gif' | 'mp4'>(false);
+  const [exportFmt, setExportFmt] = useState<'pdf' | 'gif' | 'mp4'>('pdf');
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
 
@@ -139,7 +200,7 @@ export function SharePage() {
     setDemo(d.data);
     if (!d.data) return;
     setOrigins((asSettings(d.data.settings).allowedEmbedOrigins ?? []).join('\n'));
-    const [l, v, vars, a] = await Promise.all([
+    const [l, v, vars] = await Promise.all([
       supabase
         .from('share_links')
         .select('*')
@@ -153,11 +214,6 @@ export function SharePage() {
             .maybeSingle()
         : Promise.resolve({ data: null }),
       supabase.from('variables').select('*').eq('workspace_id', d.data.workspace_id).order('key'),
-      supabase.rpc('demo_analytics', {
-        p_demo: demoId,
-        p_from: new Date(Date.now() - 7 * 86400_000).toISOString(),
-        p_to: new Date().toISOString(),
-      }),
     ]);
     const list = l.data ?? [];
     setLinks(list);
@@ -175,7 +231,6 @@ export function SharePage() {
       supabase.from('share_links').select('cohort').eq('workspace_id', d.data.workspace_id).neq('cohort', ''),
     ]);
     setCenterModule(centerModuleOf(center.data, paths.data ?? [], mods.data ?? [], demoId));
-    setTraining({ paths: paths.data ?? [], modules: mods.data ?? [] });
     setCohortList(cohorts((groups.data ?? []).map((g) => g.cohort)));
     const ver = v.data as { published_at: string; public_ack: { by?: string; at?: string } | null } | null;
     setPublishedAt(ver?.published_at ?? null);
@@ -219,8 +274,6 @@ export function SharePage() {
       const c = Math.max(0, dsd.link_column ? dsd.columns.indexOf(dsd.link_column) : 0);
       setDsRows(dsd.rows.map((r) => r[c] ?? ''));
     } else setDsRows(null);
-    const w = a.data as unknown as { views: number; leads: number } | null;
-    setWeek(w ? { views: Number(w.views), leads: Number(w.leads) } : null);
     // Vues et dernière vue de chaque lien personnalisé (événements demo_view portant le lien)
     const stats: LinkStats = {};
     await Promise.all(
@@ -258,243 +311,301 @@ export function SharePage() {
   // personnalisés et paquets gardent l'identifiant
   const publicUrl = address ? addressUrl(address) : url;
   const publicLinksOff = current?.public_links_enabled === false;
-  // Modifications non publiées : démo modifiée après la publication de la version en ligne
-  const pending =
-    published && publishedAt ? Date.parse(demo.updated_at) > Date.parse(publishedAt) + 2000 : false;
   const paramExample = usedKeys
     .slice(0, 2)
     .map((k, i) => [i ? '&' : '?', `${k}=`, variables.find((v) => v.key === k)?.default_value || k] as const);
 
-  // Onglets texte seul, comme le rendu de la maquette
-  const tabs: Array<{ id: Tab }> = [
-    { id: 'link' },
-    { id: 'embed' },
-    { id: 'perso' },
-    { id: 'access' },
-    { id: 'page' },
+  const AccessIcon =
+    access.access.mode === 'password'
+      ? KeyRound
+      : access.access.mode === 'invite'
+        ? Mail
+        : access.access.mode === 'domain'
+          ? AtSign
+          : Globe;
+  // « Page de la démo » : la page propre à la démo (à ne pas confondre avec le catalogue public de
+  // l'espace) ; « Fichiers » : l'export produit un fichier, hors de l'accès
+  const groups: Array<{ label?: string; modes: ShareMode[] }> = [
+    { modes: ['lien', 'integrer', 'perso', 'page', 'acces'] },
+    { label: t('share.group.files'), modes: ['exporter'] },
   ];
 
   return (
-    // PAGE-01 (COMP-01 §16.1) : fil d'Ariane « Démos › {démo} › Partager », actions dans la barre
-    <AppPage
-      className="mk sh"
-      title={t('share.crumb')}
-      crumbs={[
-        { label: t('demos.title'), to: '/' },
-        { label: demo.title, to: `/demos/${demoId}/edit` },
-      ]}
-      mobileBack={{ to: `/demos/${demoId}/edit`, ariaLabel: t('share.backToEditor') }}
-      actions={
-        <>
-          <a className="fd-btn" href={`${url}?preview=1`} target="_blank" rel="noreferrer">
-            <Eye aria-hidden="true" />
-            {t('share.preview')}
-          </a>
-          {/* L27 : exports hors de l'app interdits par les règles de l'espace */}
+    <div className={`mk sh shd${view === 'menu' ? ' is-menu' : ''}`}>
+      {exporting && (
+        <ExportDialog demoId={demoId} initialFormat={exporting} onClose={() => setExporting(false)} />
+      )}
+      <aside className="shd-side">
+        <div className="shd-head">
+          <span className="shd-tile" aria-hidden="true">
+            <Share2 />
+          </span>
+          <div className="shd-head__txt">
+            <h2 id="shd-title" title={t('share.windowTitle', { title: demo.title })}>
+              {t('share.windowTitle', { title: demo.title })}
+            </h2>
+            <p>
+              {published && publishedAt
+                ? t('share.publishedShort', {
+                    // Sans l'année pour l'année en cours (« Publiée le 24 nov. »), comme la barre de démo
+                    date: formatDate(publishedAt, {
+                      day: 'numeric',
+                      month: 'short',
+                      ...(new Date(publishedAt).getFullYear() === new Date().getFullYear()
+                        ? {}
+                        : { year: 'numeric' }),
+                    }),
+                  })
+                : t('share.notYetPublished')}
+            </p>
+          </div>
           <button
             type="button"
-            className="fd-btn"
-            aria-disabled={rules.exports_allowed ? undefined : true}
-            title={rules.exports_allowed ? undefined : t('rules.errExports')}
-            onClick={() => rules.exports_allowed && setExporting(true)}
+            className="fd-btn fd-btn--ghost fd-btn--icon shd-close shd-close--side"
+            aria-label={t('common.close')}
+            title={t('common.close')}
+            onClick={onClose}
           >
-            <Download aria-hidden="true" />
-            {t('export.menu')}
+            <X aria-hidden="true" />
           </button>
-          {editable && editor.demo && (!published || pending) && (
-            <span className="sh-publish">
-              <PublishButton editor={editor} republishLabel={t('share.publishChanges')} />
+        </div>
+        <nav className="shd-nav" aria-label={t('share.mode')}>
+          {groups.map((g) => (
+            <div key={g.label ?? 'main'} className="shd-nav__group" role="group" aria-label={g.label}>
+              {g.label && (
+                <span className="shd-nav__label" aria-hidden="true">
+                  {g.label}
+                </span>
+              )}
+              {g.modes.map((m) => {
+                const Icon = MODE_ICON[m];
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    className="shd-nav__item"
+                    aria-current={view === m ? 'page' : undefined}
+                    onClick={() => onView(m)}
+                  >
+                    <Icon aria-hidden="true" />
+                    <span>{t(`share.modeName.${m}`)}</span>
+                    <ChevronRight className="shd-nav__go" aria-hidden="true" />
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+      </aside>
+      <div className="shd-main">
+        <header className="shd-top">
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon shd-back"
+            aria-label={t('share.backToModes')}
+            title={t('share.backToModes')}
+            onClick={() => onView('menu')}
+          >
+            <ChevronLeft aria-hidden="true" />
+          </button>
+          <h3 id="shd-mode" tabIndex={-1}>
+            {t(`share.modeName.${mode}`)}
+          </h3>
+          {/* L'accès vaut pour tous les moyens de partage : il est rappelé en tête de chaque mode */}
+          {mode !== 'acces' && (
+            <span className="shd-access">
+              <AccessIcon aria-hidden="true" />
+              <span className="shd-access__txt">{t(`access.mode.${access.access.mode}`)}</span>
+              {editable && (
+                <button type="button" className="fd-btn fd-btn--sm" onClick={() => onView('acces')}>
+                  {t('share.editAccess')}
+                </button>
+              )}
             </span>
           )}
-        </>
-      }
-    >
-      {dialog}
-      {exporting && (
-        <ExportDialog
-          demoId={demoId}
-          initialFormat={exporting === 'gif' ? 'gif' : undefined}
-          onClose={() => setExporting(false)}
-        />
-      )}
-      {/* État de publication : en tête du contenu, plus sous un grand titre */}
-      <div className="sh-pub">
-        <p className="muted sh-sub">
-          {published && publishedAt ? (
-            <>
-              {t('share.publishedOn', { date: formatDateTime(publishedAt) })}
-              {pending && (
-                <>
-                  {' · '}
-                  <Link to={`/demos/${demoId}/edit`}>{t('share.pendingChanges')}</Link>
-                </>
-              )}
-            </>
-          ) : (
-            t('share.neverPublished', { title: demo.title })
-          )}
-        </p>
-        {published && ack && (
-          <p className="muted sh-sub sh-ack">
-            <ShieldCheck size={14} aria-hidden="true" />
-            {t('share.ackLine', { name: ack.name, date: formatDateTime(ack.at) })}
-          </p>
-        )}
-      </div>
-      {params.get('published') && (
-        <div className="alert alert-success sh-alert" role="status">
-          {t('share.justPublished')}
-        </div>
-      )}
-      {error && (
-        <div className="alert alert-danger sh-alert" role="alert">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="alert alert-success sh-alert" role="status">
-          {success}
-        </div>
-      )}
-
-      <div className="share-layout">
-        <div className="card">
-          <div className="sh-tabs-wrap">
-            <div className="tabs" role="tablist" aria-label={t('share.mode')} data-scroll-x="">
-              {tabs.map(({ id }) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  id={`sh-tab-${id}`}
-                  aria-selected={tab === id}
-                  aria-controls={tab === id ? `sh-panel-${id}` : undefined}
-                  tabIndex={tab === id ? 0 : -1}
-                  onClick={() => setTab(id)}
-                  onKeyDown={(e) => {
-                    const i = tabs.findIndex((x) => x.id === id);
-                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                      const n = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length]!.id;
-                      setTab(n);
-                      document.getElementById(`sh-tab-${n}`)?.focus();
-                    }
-                  }}
-                >
-                  {t(`share.tab.${id}`)}
+          <button
+            type="button"
+            className="fd-btn fd-btn--ghost fd-btn--icon shd-close"
+            aria-label={t('common.close')}
+            title={t('common.close')}
+            onClick={onClose}
+          >
+            <X aria-hidden="true" />
+          </button>
+        </header>
+        <div className="shd-body" aria-labelledby="shd-mode" role="region">
+          {!published && (
+            <div className="shd-banner" role="status">
+              <Info aria-hidden="true" />
+              <span>{t('share.publishToEnable')}</span>
+              {editable && (
+                <button type="button" className="fd-btn fd-btn--primary fd-btn--sm" onClick={onPublish}>
+                  {t('publish.publish')}
                 </button>
-              ))}
+              )}
             </div>
-          </div>
-          <div className="card-pad">
+          )}
+          {published && ack && (
+            <p className="muted sh-sub sh-ack">
+              <ShieldCheck size={14} aria-hidden="true" />
+              {t('share.ackLine', { name: ack.name, date: formatDateTime(ack.at) })}
+            </p>
+          )}
+          {justPublished && (
+            <div className="alert alert-success sh-alert" role="status">
+              {t('share.justPublished')}
+            </div>
+          )}
+          {error && (
+            <div className="alert alert-danger sh-alert" role="alert">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="alert alert-success sh-alert" role="status">
+              {success}
+            </div>
+          )}
+          <div className="shd-panel">
             {tab === 'link' && (
-              <section role="tabpanel" id="sh-panel-link" aria-labelledby="sh-tab-link">
-                <div className="setting sh-first">
-                  <div>
-                    <b>{t('share.publicAccess')}</b>
-                    <p className="t-caption muted">{t('share.publicAccessHelp')}</p>
-                  </div>
-                  <span className="switch">
-                    <input
-                      type="checkbox"
-                      aria-label={t('share.publicAccess')}
-                      checked={published}
-                      disabled={!editable || !published}
-                      onChange={() =>
-                        void ask({
-                          title: t('share.unpublish'),
-                          body: t('share.confirmUnpublish'),
-                          confirmLabel: t('share.unpublish'),
-                          danger: true,
-                        }).then(
-                          (yes) =>
-                            yes &&
-                            void run(async () => {
-                              await unpublishDemo(demoId);
-                              await load();
-                            }, t('share.unpublished')),
-                        )
-                      }
-                    />
-                    <span />
-                  </span>
-                </div>
-                {!published && (
-                  <div className="alert alert-warning sh-note">
-                    <Info aria-hidden="true" />
-                    <span>{t('share.notPublishedNote')}</span>
-                  </div>
-                )}
+              <section id="sh-panel-link" aria-labelledby="shd-mode">
                 {publicLinksOff && (
                   <div className="alert sh-note">
                     <Info aria-hidden="true" />
                     <span>{t('share.publicLinksOff')}</span>
                   </div>
                 )}
-                <div className="field sh-field">
-                  <label htmlFor="sh-pub">{t('share.publicLink')}</label>
-                  <div className="input-group">
-                    <input
-                      id="sh-pub"
-                      className="input t-mono"
-                      readOnly
-                      value={publicUrl}
-                      disabled={!published}
-                    />
-                    <CopyButton value={publicUrl} />
-                  </div>
+                {/* §1.3 : mode Lien sobre. Le lien se copie et s'ouvre par deux boutons icône ; trois autres
+                    façons de le transmettre ; les réglages rares sont repliés. La pastille d'accès suffit :
+                    aucun encadré d'explication. */}
+                <div className="shl-link">
+                  <CopyField
+                    id="sh-pub"
+                    label={t('share.publicLink')}
+                    value={publicUrl}
+                    copyLabel={t('share.copyLink')}
+                    copiedText={t('common.copied')}
+                    disabled={!published}
+                  />
+                  {published ? (
+                    <a
+                      className="fd-btn fd-btn--icon"
+                      href={publicUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={t('share.openLink')}
+                      title={t('share.openLink')}
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-disabled="true"
+                      aria-label={t('share.openLink')}
+                      title={t('share.publishFirst')}
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
-                {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
-                <AddressField demoId={demo.id} editable={editable} address={address} onSaved={setAddress} />
-                <hr className="divider sh-hr" />
-                <h2 className="t-label sh-h3" id="sh-params-h">
-                  {t('share.urlParams')}
-                </h2>
-                {/* §18.7 : l'adresse revient à la ligne (plus de zone défilante, donc plus d'arrêt de tabulation) */}
-                <div className="code" role="region" aria-labelledby="sh-params-h">
-                  {publicUrl}
-                  {paramExample.map(([sep, k, v]) => (
-                    <span key={k}>
-                      <span className="k">
-                        {sep}
-                        {k}
-                      </span>
-                      <span className="s">{encodeURIComponent(v)}</span>
-                    </span>
-                  ))}
-                </div>
-                <p className="help sh-help">
-                  {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
-                </p>
-                <hr className="divider sh-hr" />
-                <h2 className="t-label sh-h3">{t('share.elsewhere')}</h2>
-                <div className="row wrap">
-                  <a
-                    className="btn btn-secondary btn-sm"
-                    href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
-                    aria-disabled={published ? undefined : 'true'}
-                  >
-                    <Mail aria-hidden="true" />
-                    {t('share.email')}
-                  </a>
-                  {/* P1-5 : outil interne, aucun bouton de réseau social */}
-                  {/* REV-10 : l'export GIF et vidéo existe (L15, L25) : on l'ouvre sur le GIF */}
+                <div className="shl-acts" role="group" aria-label={t('share.elsewhere')}>
+                  {published ? (
+                    <a
+                      className="fd-btn fd-btn--icon"
+                      href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
+                      aria-label={t('share.byEmail')}
+                      title={t('share.byEmail')}
+                    >
+                      <Mail size={16} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-disabled="true"
+                      aria-label={t('share.byEmail')}
+                      title={t('share.publishFirst')}
+                    >
+                      <Mail size={16} aria-hidden="true" />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
-                    disabled={!published}
-                    aria-disabled={rules.exports_allowed ? undefined : true}
-                    title={rules.exports_allowed ? undefined : t('rules.errExports')}
-                    onClick={() => rules.exports_allowed && setExporting('gif')}
+                    className="fd-btn fd-btn--icon"
+                    aria-label={t('share.copyMessage')}
+                    title={published ? t('share.copyMessage') : t('share.publishFirst')}
+                    aria-disabled={published ? undefined : 'true'}
+                    onClick={() =>
+                      published && void copyMsg(t('share.messageText', { title: demo.title, url: publicUrl }))
+                    }
                   >
-                    <Download aria-hidden="true" />
-                    {t('share.gif')}
+                    {msgCopied ? (
+                      <Check size={16} aria-hidden="true" />
+                    ) : (
+                      <MessageSquareText size={16} aria-hidden="true" />
+                    )}
                   </button>
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--icon"
+                    aria-label={t('share.qrCode')}
+                    title={published ? t('share.qrCode') : t('share.publishFirst')}
+                    aria-expanded={published ? qr : undefined}
+                    aria-disabled={published ? undefined : 'true'}
+                    onClick={() => published && setQr((v) => !v)}
+                  >
+                    <QrCode size={16} aria-hidden="true" />
+                  </button>
+                  {/* Confirmation sur place (pas de toast) : toujours présente, annoncée poliment */}
+                  <span className="shl-ok" role="status">
+                    {msgCopied ? t('common.copied') : ''}
+                  </span>
+                </div>
+                {qr && published && (
+                  <div className="shl-qr">
+                    <Qr text={publicUrl} label={t('share.qrLabel', { title: demo.title })} size={144} />
+                    <p className="help">{t('share.qrHelp')}</p>
+                  </div>
+                )}
+                <div className="shd-folds">
+                  {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
+                  <Fold icon={<Pencil aria-hidden="true" />} title={t('share.customAddress')}>
+                    <AddressField
+                      demoId={demo.id}
+                      editable={editable}
+                      address={address}
+                      onSaved={setAddress}
+                    />
+                  </Fold>
+                  <Fold icon={<Braces aria-hidden="true" />} title={t('share.urlParamsShort')}>
+                    <h4 className="sr-only" id="sh-params-h">
+                      {t('share.urlParams')}
+                    </h4>
+                    {/* §18.7 : l'adresse revient à la ligne (pas de zone défilante) */}
+                    <div className="code" role="region" aria-labelledby="sh-params-h">
+                      {publicUrl}
+                      {paramExample.map(([sep, k, v]) => (
+                        <span key={k}>
+                          <span className="k">
+                            {sep}
+                            {k}
+                          </span>
+                          <span className="s">{encodeURIComponent(v)}</span>
+                        </span>
+                      ))}
+                    </div>
+                    <p className="help sh-help">
+                      {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
+                    </p>
+                  </Fold>
                 </div>
               </section>
             )}
 
             {tab === 'embed' && (
-              <section role="tabpanel" id="sh-panel-embed" aria-labelledby="sh-tab-embed">
+              <section id="sh-panel-embed" aria-labelledby="shd-mode">
                 <EmbedPanel
                   url={publicUrl}
                   demoId={demo.id}
@@ -524,38 +635,34 @@ export function SharePage() {
             )}
 
             {tab === 'perso' && (
-              <section role="tabpanel" id="sh-panel-perso" aria-labelledby="sh-tab-perso">
-                <div className="row between sh-perso-head">
-                  <p className="muted">{t('share.persoHelp')}</p>
-                  <div className="row sh-perso-acts">
-                    {links.length > 0 && (
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => exportCsv(links)}>
-                        <Download aria-hidden="true" />
-                        {t('share.import.exportAll')}
-                      </button>
-                    )}
-                    {editable && (
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => setImporting(true)}
-                      >
-                        <Upload aria-hidden="true" />
-                        {t('share.import.open')}
-                      </button>
-                    )}
-                    {editable && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setCreating(true)}
-                      >
-                        <Plus aria-hidden="true" />
-                        {t('share.newLink')}
-                      </button>
-                    )}
+              <section id="sh-panel-perso" aria-labelledby="shd-mode">
+                {/* §1.3 : mode sobre. Recherche, liste (destinataire, date, vues) ; « Créer un lien » et
+                    « Importer (CSV) » sous la liste. */}
+                {links.length > 0 && (
+                  <div className="shp-top">
+                    <div className="shp-search">
+                      <Search aria-hidden="true" />
+                      <input
+                        id="sh-perso-q"
+                        type="search"
+                        className="input"
+                        aria-label={t('share.persoSearch')}
+                        placeholder={t('share.persoSearch')}
+                        value={persoQ}
+                        onChange={(e) => setPersoQ(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-label={t('share.import.exportAll')}
+                      title={t('share.import.exportAll')}
+                      onClick={() => exportCsv(links)}
+                    >
+                      <Download size={16} aria-hidden="true" />
+                    </button>
                   </div>
-                </div>
+                )}
                 {centerModule && (
                   <p className="sh-center-note" role="note">
                     <GraduationCap aria-hidden="true" />
@@ -569,17 +676,14 @@ export function SharePage() {
                 )}
                 {links.length === 0 ? (
                   <p className="muted sh-empty">{t('share.noLinks')}</p>
-                ) : (
+                ) : shownLinks.length === 0 ? null : (
                   <div className="table-wrap">
-                    <table className="table sh-links">
+                    <table className={`table sh-links${centerModule ? ' has-center' : ''}`}>
                       <caption className="sr-only">{t('share.tab.perso')}</caption>
                       <thead>
                         <tr>
-                          <th>{t('share.linkNameShort')}</th>
-                          {hasCohort && <th>{t('share.cohort')}</th>}
-                          <th>{t('editor.variables')}</th>
-                          <th>{t('share.pp.column')}</th>
-                          {/* L25-13 : vues et dernière vue dans une colonne (table plus étroite) */}
+                          <th>{t('share.persoRecipient')}</th>
+                          <th className="shp-date">{t('share.persoCreated')}</th>
                           <th className="r">{t('analytics.views')}</th>
                           <th>
                             <span className="sr-only">{t('members.actions')}</span>
@@ -587,7 +691,7 @@ export function SharePage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {links.map((l) => {
+                        {shownLinks.map((l) => {
                           const vars = Object.values((l.variables as Record<string, string>) ?? {}).filter(
                             Boolean,
                           );
@@ -596,64 +700,64 @@ export function SharePage() {
                           return (
                             <tr key={l.id} className={l.is_active && !expired ? undefined : 'sh-off'}>
                               <th scope="row" className="sh-row-h">
-                                {l.name || '—'}
-                                {!l.is_active && (
-                                  <Status size="sm" className="sh-state">
-                                    {t('share.disabled')}
-                                  </Status>
+                                <span className="shp-name">
+                                  {l.name || '—'}
+                                  {!l.is_active && (
+                                    <Status size="sm" className="sh-state">
+                                      {t('share.disabled')}
+                                    </Status>
+                                  )}
+                                </span>
+                                {(l.cohort ||
+                                  vars.length > 0 ||
+                                  l.expires_at ||
+                                  (l.page_enabled && l.page_code)) && (
+                                  <span className="shp-meta">
+                                    {l.cohort && <span className="sh-cohort-cell">{l.cohort}</span>}
+                                    {vars.map((v) => (
+                                      <span key={v} className="badge sh-var" title={v}>
+                                        {v}
+                                      </span>
+                                    ))}
+                                    {l.expires_at && (
+                                      <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
+                                        {expired
+                                          ? t('share.expired')
+                                          : t('share.expiresOn', {
+                                              date: formatDate(l.expires_at, {
+                                                day: 'numeric',
+                                                month: 'short',
+                                              }),
+                                            })}
+                                      </Status>
+                                    )}
+                                    {l.page_enabled && l.page_code ? (
+                                      <div className="sh-pp-cell">
+                                        <Status size="sm" tone="success">
+                                          {t('share.pp.badgeOn')}
+                                        </Status>
+                                        {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
+                                        <span className="sh-pp-url">
+                                          <span
+                                            className="t-mono"
+                                            title={personalPageUrl(demoId, l.page_code)}
+                                          >
+                                            {`…/${l.page_code}`}
+                                          </span>
+                                          <CopyAction
+                                            className="btn btn-ghost btn-sm btn-icon"
+                                            label={t('share.pp.copyPage', { name: l.name || '—' })}
+                                            title={t('share.pp.copyPage', { name: l.name || '—' })}
+                                            text={personalPageUrl(demoId, l.page_code)}
+                                          />
+                                        </span>
+                                      </div>
+                                    ) : null}
+                                  </span>
                                 )}
                               </th>
-                              {hasCohort && (
-                                <td className="sh-cohort-cell">
-                                  {l.cohort || <span className="muted">—</span>}
-                                </td>
-                              )}
-                              <td>
-                                {vars.map((v) => (
-                                  <span key={v} className="badge sh-var" title={v}>
-                                    {v}
-                                  </span>
-                                ))}
-                                {l.expires_at && (
-                                  <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
-                                    {expired
-                                      ? t('share.expired')
-                                      : t('share.expiresOn', {
-                                          date: formatDate(l.expires_at, { day: 'numeric', month: 'short' }),
-                                        })}
-                                  </Status>
-                                )}
-                                {!vars.length && !l.expires_at && <span className="muted">—</span>}
-                              </td>
-                              <td>
-                                {l.page_enabled && l.page_code ? (
-                                  <div className="sh-pp-cell">
-                                    <Status size="sm" tone="success">
-                                      {t('share.pp.badgeOn')}
-                                    </Status>
-                                    {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
-                                    <span className="sh-pp-url">
-                                      <span className="t-mono" title={personalPageUrl(demoId, l.page_code)}>
-                                        {`…/${l.page_code}`}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        className="btn btn-ghost btn-sm btn-icon"
-                                        aria-label={t('share.pp.copyPage', { name: l.name || '—' })}
-                                        title={t('share.pp.copyPage', { name: l.name || '—' })}
-                                        onClick={() =>
-                                          void navigator.clipboard
-                                            ?.writeText(personalPageUrl(demoId, l.page_code!))
-                                            .then(() => run(async () => undefined, t('members.linkCopied')))
-                                        }
-                                      >
-                                        <Copy aria-hidden="true" />
-                                      </button>
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <Status size="sm">{t('share.pp.badgeOff')}</Status>
-                                )}
+                              <td className="shp-date">
+                                {formatDate(l.created_at, { day: 'numeric', month: 'short' })}
                               </td>
                               <td className="r sh-views">
                                 {formatNumber(st?.views ?? 0)}
@@ -667,25 +771,19 @@ export function SharePage() {
                               <td className="r">
                                 <div className="row sh-actions">
                                   {centerModule && (
-                                    <button
-                                      type="button"
+                                    <CopyAction
                                       className="btn btn-secondary btn-sm"
-                                      aria-label={t('share.centerLinkOf', { name: l.name || '—' })}
+                                      label={t('share.centerLinkOf', { name: l.name || '—' })}
                                       title={t('share.centerLinkOf', { name: l.name || '—' })}
-                                      onClick={() =>
-                                        void navigator.clipboard
-                                          ?.writeText(centerLinkUrl(PLAYER_URL, centerModule.slug, l.token))
-                                          .then(() => run(async () => undefined, t('members.linkCopied')))
-                                      }
+                                      text={centerLinkUrl(PLAYER_URL, centerModule.slug, l.token)}
+                                      icon={<GraduationCap aria-hidden="true" />}
                                     >
-                                      <GraduationCap aria-hidden="true" />
                                       {t('share.centerLink')}
-                                    </button>
+                                    </CopyAction>
                                   )}
-                                  <button
-                                    type="button"
+                                  <CopyAction
                                     className="btn btn-ghost btn-sm btn-icon"
-                                    aria-label={
+                                    label={
                                       centerModule
                                         ? t('share.demoLinkOf', { name: l.name || '—' })
                                         : t('share.copyLinkOf', { name: l.name || '—' })
@@ -695,14 +793,8 @@ export function SharePage() {
                                         ? t('share.demoLinkOf', { name: l.name || '—' })
                                         : undefined
                                     }
-                                    onClick={() =>
-                                      void navigator.clipboard
-                                        ?.writeText(shareLinkUrl(l.token))
-                                        .then(() => run(async () => undefined, t('members.linkCopied')))
-                                    }
-                                  >
-                                    <Copy aria-hidden="true" />
-                                  </button>
+                                    text={shareLinkUrl(l.token)}
+                                  />
                                   {editable && (
                                     <Menu
                                       label={t('members.actionsFor', { name: l.name || '—' })}
@@ -746,12 +838,38 @@ export function SharePage() {
                     </table>
                   </div>
                 )}
+                {links.length > 0 && shownLinks.length === 0 && (
+                  <p className="muted sh-empty" role="status">
+                    {t('share.persoNoMatch')}
+                  </p>
+                )}
+                {editable && (
+                  <div className="shp-foot">
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--primary"
+                      onClick={() => setCreating(true)}
+                    >
+                      <Plus aria-hidden="true" />
+                      {t('share.newLink')}
+                    </button>
+                    <button type="button" className="fd-btn" onClick={() => setImporting(true)}>
+                      <Upload aria-hidden="true" />
+                      {t('share.import.open')}
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 
-            {tab === 'access' && <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />}
+            {tab === 'access' && (
+              <>
+                <p className="help shd-scope">{t('share.accessScope')}</p>
+                <AccessPanel demoId={demo.id} state={access} editable={can('demo.edit')} />
+              </>
+            )}
             {tab === 'page' && (
-              <section role="tabpanel" id="sh-panel-page" aria-labelledby="sh-tab-page">
+              <section id="sh-panel-page" aria-labelledby="shd-mode">
                 <PublicPagePanel
                   demoId={demo.id}
                   demoTitle={demo.title}
@@ -761,59 +879,54 @@ export function SharePage() {
                 />
               </section>
             )}
+            {tab === 'export' && (
+              <section id="sh-panel-export" aria-labelledby="shd-mode">
+                {/* §1.3 : trois fichiers en cartes radio ; un seul « Exporter », avec la mise en garde à sa
+                    gauche. Les réglages du fichier (langue, format, résolution, délai), l'aperçu et
+                    l'avancement sont dans la fenêtre d'export. */}
+                <RadioCards
+                  className="shx-formats"
+                  label={t('share.exportFormat')}
+                  value={exportFmt}
+                  onChange={setExportFmt}
+                  options={[
+                    {
+                      value: 'pdf',
+                      label: t('share.exportPdf'),
+                      art: <FileText className="shx-art" />,
+                    },
+                    {
+                      value: 'gif',
+                      label: t('share.exportGif'),
+                      art: <ImagePlay className="shx-art" />,
+                    },
+                    {
+                      value: 'mp4',
+                      label: t('share.exportMp4'),
+                      art: <Clapperboard className="shx-art" />,
+                    },
+                  ]}
+                />
+                <p className="help shx-what">{t(`share.exportWhat_${exportFmt}`)}</p>
+                <div className="shx-foot">
+                  <p className="help">{t('share.exportHelp')}</p>
+                  {/* L27 : exports hors de l'app interdits par les règles de l'espace */}
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--primary"
+                    aria-disabled={rules.exports_allowed ? undefined : true}
+                    title={rules.exports_allowed ? undefined : t('rules.errExports')}
+                    onClick={() => rules.exports_allowed && setExporting(exportFmt)}
+                  >
+                    <Download aria-hidden="true" />
+                    {t('share.exportGo')}
+                  </button>
+                </div>
+              </section>
+            )}
           </div>
         </div>
-
-        <aside className="col sh-aside" aria-label={t('share.preview')}>
-          {/* L11 : carte « Accès à la démo » en tête de la colonne */}
-          <AccessSummary state={access} url={url} />
-          <TrainingCard
-            demoId={demoId}
-            workspaceId={demo.workspace_id}
-            editable={editable}
-            paths={training.paths}
-            modules={training.modules}
-            onChanged={load}
-          />
-          <MiniPreview demoId={demo.id} previewUrl={`${url}?preview=1`} />
-          <div className="card card-pad">
-            <h2 className="t-label">{t('share.socialPreview')}</h2>
-            <div className="sh-og">
-              <div className="sh-og-img">
-                <b>{demo.title}</b>
-              </div>
-              <div className="sh-og-txt">
-                <span className="t-caption subtle">{new URL(url).host}</span>
-                <p className="t-label">
-                  {demo.title} · {t('share.interactiveDemo')}
-                </p>
-              </div>
-            </div>
-            <p className="help sh-help">
-              <span className="soon-text">{t('shell.soon')}</span> · {t('share.ogHelp')}
-            </p>
-          </div>
-          <div className="card card-pad">
-            <div className="row between">
-              <h2 className="t-label">{t('share.thisWeek')}</h2>
-              <Link to={`/demos/${demoId}/analytics`} className="t-caption">
-                {t('share.seeAnalytics')}
-              </Link>
-            </div>
-            <div className="grid sh-week">
-              <div>
-                <span className="t-caption muted">{t('analytics.views')}</span>
-                <div className="num sh-num">{formatNumber(week?.views ?? 0)}</div>
-              </div>
-              <div>
-                <span className="t-caption muted">{t('analytics.leads')}</span>
-                <div className="num sh-num">{formatNumber(week?.leads ?? 0)}</div>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
-
       {creating && (
         <NewLinkDialog
           variables={variables}
@@ -824,7 +937,7 @@ export function SharePage() {
           cohortList={cohortList}
           onEnablePublicPage={() => {
             setCreating(false);
-            setTab('page');
+            onView('page');
           }}
           onClose={() => setCreating(false)}
           onCreate={async (name, vars, days, pp, cohort) => {
@@ -909,7 +1022,7 @@ export function SharePage() {
           }}
         />
       )}
-    </AppPage>
+    </div>
   );
 }
 
@@ -934,7 +1047,10 @@ function EmbedPanel({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [format, setFormat] = useState<'responsive' | 'fixed' | 'popup'>('responsive');
+  const [format, setFormat] = useState<'responsive' | 'popup' | 'full'>('responsive');
+  // Encadré : taille automatique (suit la largeur de la page) ou fixe, en pixels ; gardée par démo
+  const [size, setSize] = useEmbedSize(demoId);
+  const [copied, copyValue] = useCopied();
   // L29-01 : outil cible ; l'adresse personnalisée (L28-01) est reprise si elle existe
   const [target, setTarget] = useEmbedTarget();
   const limitId = useId();
@@ -949,143 +1065,171 @@ function EmbedPanel({
           label: t('share.popupLabel'),
           float: false,
         })
-      : mode === 'responsive'
-        ? embedSnippet(url, title)
-        : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
+      : mode === 'full'
+        ? `<iframe src="${url}" title="${safe}" loading="lazy" allow="fullscreen; clipboard-write" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`
+        : size.fixed
+          ? `<iframe src="${url}" title="${safe}" width="${size.width}" height="${size.height}" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`
+          : embedSnippet(url, title);
+  // L29-01 : certains outils ne prennent qu'une adresse
+  const onlyAddress = addressOnly(target);
+  const value = onlyAddress ? url : code;
+  const host = new URL(url).host;
   return (
     <>
-      {/* L45 (E13) : trois groupes à 24 px ; le mode d'intégration a son libellé */}
-      <div className="fd-stack fd-stack--group">
-        <TargetPicker value={target} onChange={setTarget} />
-        <div className="fd-stack fd-stack--label sh-embed-mode">
-          <span className="t-label" id="sh-embed-mode-l">
-            {t('share.embedFormat')}
-          </span>
-          <div className="segmented" role="radiogroup" aria-labelledby="sh-embed-mode-l">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'responsive'}
-              onClick={() => setFormat('responsive')}
-            >
-              {t('share.responsive')}
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'fixed'}
-              onClick={() => setFormat('fixed')}
-            >
-              {t('share.fixed')}
-            </button>
-            {/* L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide */}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'popup'}
-              aria-disabled={popupOff || undefined}
-              aria-describedby={popupOff ? limitId : undefined}
-              onClick={() => !popupOff && setFormat('popup')}
-            >
-              {t('share.popup')}
-            </button>
+      {/* §1.3 : mode Intégrer sobre. Trois formats en cartes radio, le code, sa copie, un aperçu ; l'outil
+          cible et les sites autorisés sont des réglages rares, repliés. */}
+      <RadioCards
+        className="she-formats"
+        label={t('share.embedFormat')}
+        value={mode}
+        onChange={setFormat}
+        options={[
+          {
+            value: 'responsive',
+            label: t('share.embedFrame'),
+            art: <span className="she-art she-art--frame" />,
+          },
+          {
+            value: 'popup',
+            label: t('share.embedButton'),
+            art: <span className="she-art she-art--button" />,
+            // L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide
+            disabled: popupOff,
+            describedBy: limitId,
+            hint: popupOff ? t(`snippets.limit_${target}`, { host }) : undefined,
+          },
+          { value: 'full', label: t('share.embedFull'), art: <span className="she-art she-art--full" /> },
+        ]}
+      />
+      {mode === 'responsive' && (
+        <div className="she-size">
+          <div className="she-size__row">
+            <span className="t-label" id="she-size-l">
+              {t('share.embedSize')}
+            </span>
+            <div className="segmented" role="radiogroup" aria-labelledby="she-size-l">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!size.fixed}
+                onClick={() => setSize({ ...size, fixed: false })}
+              >
+                {t('share.embedSizeAuto')}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={size.fixed}
+                onClick={() => setSize({ ...size, fixed: true })}
+              >
+                {t('share.embedSizeFixed')}
+              </button>
+            </div>
+            {size.fixed && (
+              <div className="she-size__px">
+                {(['width', 'height'] as const).map((k) => (
+                  <label key={k} className="she-size__f">
+                    <span>{t(`share.embedSize_${k}`)}</span>
+                    <input
+                      className="input"
+                      inputMode="numeric"
+                      value={String(size[k])}
+                      aria-describedby="she-size-u"
+                      onChange={(e) => {
+                        const n = Number(e.target.value.replace(/\D/g, '').slice(0, 4));
+                        setSize({ ...size, [k]: n });
+                      }}
+                      onBlur={() => setSize({ ...size, [k]: Math.min(4000, Math.max(200, size[k])) })}
+                    />
+                  </label>
+                ))}
+                <span className="help" id="she-size-u">
+                  {t('share.embedSizeUnit')}
+                </span>
+              </div>
+            )}
           </div>
+          {/* « Bientôt » : en gris, jamais caché */}
+          <p className="she-soon" aria-disabled="true">
+            <span title={t('share.clickToStartHint')}>{t('share.clickToStart')}</span>
+            <span className="fd-badge">{t('shell.soon')}</span>
+          </p>
         </div>
-        <TargetGuide
-          target={target}
-          code={code}
-          address={url}
-          published={published}
-          limitId={limitId}
-          playerHost={new URL(url).host}
-          onScorm={() => navigate(`/demos/${demoId}/distribute`)}
-        />
-      </div>
-      <hr className="divider sh-hr" />
-      <div className="setting">
-        <span className="t-label">
-          {t('share.clickToStart')} <span className="soon-text">{t('shell.soon')}</span>
+      )}
+      <pre
+        className="code sh-code she-code"
+        aria-label={onlyAddress ? t('snippets.addressLabel') : t('snippets.codeLabel')}
+        tabIndex={0}
+      >
+        {onlyAddress ? value : highlightHtml(value)}
+      </pre>
+      <div className="row sh-embed-actions">
+        <button
+          type="button"
+          className="fd-btn fd-btn--primary"
+          aria-disabled={!published || undefined}
+          title={published ? undefined : t('share.publishFirst')}
+          onClick={() => published && void copyValue(value)}
+        >
+          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+          {copied ? t('common.copied') : onlyAddress ? t('snippets.copyAddress') : t('snippets.copyCode')}
+        </button>
+        <span className="sr-only" role="status">
+          {copied ? t('common.copied') : ''}
         </span>
-        <span className="switch">
-          <input type="checkbox" disabled aria-label={t('share.clickToStart')} />
-          <span />
+      </div>
+      <div className={`she-prev she-prev--${mode}`} role="img" aria-label={t(`share.embedPreview_${mode}`)}>
+        <span className="she-prev__page">
+          <span className="she-prev__demo" />
         </span>
       </div>
-      <div className="field sh-field">
-        <label htmlFor="sh-origins">{t('share.allowedOrigins')}</label>
-        <textarea
-          id="sh-origins"
-          className="textarea"
-          rows={3}
-          disabled={!editable}
-          placeholder={'www.exemple.org\n*.exemple.org'}
-          value={origins}
-          onChange={(e) => setOrigins(e.target.value)}
-        />
-        {/* L45 (E14) : aide → « Enregistrer » à 12 px */}
-        <div className="fd-stack fd-stack--action">
-          <span className="help">{t('share.allowedOriginsHint')}</span>
-          {editable && (
-            <button type="button" className="btn btn-secondary btn-sm sh-save" onClick={onSaveOrigins}>
-              {t('common.save')}
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="alert sh-note">
-        <Info aria-hidden="true" />
-        <span className="t-caption">{t('share.cspNote', { host: new URL(url).host })}</span>
+      <div className="shd-folds">
+        <Fold
+          icon={<Blocks aria-hidden="true" />}
+          title={t('share.embedTool')}
+          defaultOpen={target !== 'html'}
+        >
+          <div className="fd-stack fd-stack--group">
+            <TargetPicker value={target} onChange={setTarget} />
+            <TargetGuide
+              codeless
+              target={target}
+              code={code}
+              address={url}
+              published={published}
+              limitId={limitId}
+              playerHost={host}
+              onScorm={() => navigate(`/demos/${demoId}/distribute`)}
+            />
+          </div>
+        </Fold>
+        <Fold icon={<ShieldCheck aria-hidden="true" />} title={t('share.embedSites')}>
+          <div className="field sh-field">
+            <label htmlFor="sh-origins">{t('share.allowedOrigins')}</label>
+            <textarea
+              id="sh-origins"
+              className="textarea"
+              rows={3}
+              disabled={!editable}
+              placeholder={'www.exemple.org\n*.exemple.org'}
+              value={origins}
+              onChange={(e) => setOrigins(e.target.value)}
+            />
+            {/* L45 (E14) : aide → « Enregistrer » à 12 px */}
+            <div className="fd-stack fd-stack--action">
+              <span className="help">
+                {t('share.allowedOriginsHint')} {t('share.cspNote', { host })}
+              </span>
+              {editable && (
+                <button type="button" className="fd-btn fd-btn--sm sh-save" onClick={onSaveOrigins}>
+                  {t('common.save')}
+                </button>
+              )}
+            </div>
+          </div>
+        </Fold>
       </div>
     </>
-  );
-}
-
-/** Aperçu de la maquette : mini-lecteur (capture de l'étape 1) et bouton « Lancer la démo ». */
-function MiniPreview({ demoId, previewUrl }: { demoId: string; previewUrl: string }) {
-  const { t } = useTranslation();
-  const [image, setImage] = useState<string | null>(null);
-  useEffect(() => {
-    let alive = true;
-    void (async () => {
-      const { data } = await supabase
-        .from('steps')
-        .select('image_path')
-        .eq('demo_id', demoId)
-        .not('image_path', 'is', null)
-        .order('position')
-        .limit(1);
-      const path = data?.[0]?.image_path;
-      if (!path) return;
-      const s = await supabase.storage.from('captures').createSignedUrl(path, 3600);
-      if (alive) setImage(s.data?.signedUrl ?? null);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [demoId]);
-  return (
-    // L19b : seul le lecteur garde le thème de la démo ; le cadre suit le thème de l'app
-    <div className="preview-box">
-      <div
-        className="mini-player fd-player-scope"
-        /* §18.6 : aperçu miniature : barre et écran accolés */ data-gap-exempt=""
-      >
-        <div className="bar" /* §18.6 : points de fenêtre de l’aperçu, décor */ data-gap-exempt="">
-          <i />
-          <i />
-          <i />
-        </div>
-        <div className="sh-screen">
-          {image ? <img src={image} alt="" /> : <div className="sh-blank" />}
-          <div className="sh-overlay">
-            <a className="btn btn-primary sh-launch" href={previewUrl} target="_blank" rel="noreferrer">
-              <Play aria-hidden="true" />
-              {t('share.launch')}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 

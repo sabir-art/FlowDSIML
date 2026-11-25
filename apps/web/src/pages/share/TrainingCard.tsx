@@ -3,7 +3,7 @@
  * est un module, ou permet de l'ajouter à une formation (choix de la formation et de la position), et mène
  * au paquet SCORM (Diffuser). Écriture réservée aux éditeurs (politique path_modules_write).
  */
-import { useId, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, GraduationCap, PackageOpen } from 'lucide-react';
@@ -138,5 +138,44 @@ export function TrainingCard({
         <Link to={`/demos/${demoId}/distribute`}>{t('share.training.scorm')}</Link>
       </p>
     </div>
+  );
+}
+
+/**
+ * Parcours de formation d'une démo, dans la fenêtre « Diffuser » (première section) : la carte charge
+ * elle-même les parcours de l'espace et la place de la démo.
+ */
+export function TrainingSection({
+  demoId,
+  workspaceId,
+  editable,
+}: {
+  demoId: string;
+  workspaceId: string;
+  editable: boolean;
+}) {
+  const [data, setData] = useState<{ paths: Pick<Tables<'paths'>, 'id' | 'title'>[]; modules: Mod[] } | null>(
+    null,
+  );
+  const load = useCallback(async () => {
+    const [paths, mods] = await Promise.all([
+      supabase.from('paths').select('id, title').eq('workspace_id', workspaceId),
+      supabase.from('path_modules').select('path_id, demo_id, position').eq('workspace_id', workspaceId),
+    ]);
+    setData({ paths: paths.data ?? [], modules: mods.data ?? [] });
+  }, [workspaceId]);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  if (!data) return null;
+  return (
+    <TrainingCard
+      demoId={demoId}
+      workspaceId={workspaceId}
+      editable={editable}
+      paths={data.paths}
+      modules={data.modules}
+      onChanged={load}
+    />
   );
 }

@@ -488,7 +488,7 @@ const ARROW =
     await d.getByLabel(/J’ai relu|J'ai relu/).check();
     await d.getByLabel(/fictives ou floutées/).check();
     await d.getByRole('button', { name: 'Publier en public' }).click();
-    await page.waitForURL(/share\?published=1/, { timeout: 20000 });
+    await page.waitForFunction(() => /share=lien&published=1/.test(location.hash), null, { timeout: 20000 });
     const manifest = JSON.parse(state.storage[`published/${DEMO}/latest.json`].data.toString());
     const s1 = manifest.steps.find((s) => s.id === 's1');
     const file = state.storage[`published/${DEMO}/${s1.image.url}`];

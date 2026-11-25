@@ -296,6 +296,29 @@ const delivery = (hook, type, status, code, min, extra = {}) => ({
   await page.waitForFunction(() => !document.querySelector('.l23 .wh-banner--pause'));
   ok(t.webhooks.find((w) => w.id === 'wh-pause').state === 'active', 'L23-07 : Réactiver');
 
+  // Audit UX du 25/11 : l'API v1 existe, la ligne « Clés d'API » ouvre Paramètres › Clés d'accès ;
+  // dans Général, le logo renvoie à Thème et couleurs (un seul endroit pour le régler)
+  await page.goto(`${BASE}/#/settings/integrations`);
+  const keys = page.locator('.int-row', { hasText: 'Clés d’API' });
+  await keys.waitFor();
+  ok(
+    ((await keys.getAttribute('href')) || '').endsWith('#/settings/keys') &&
+      !/Bientôt/.test(await keys.innerText()) &&
+      /Ouvrir/.test(await keys.innerText()),
+    '« Clés d’API » : lien « Ouvrir » vers Clés d’accès, sans « Bientôt »',
+  );
+  await page.goto(`${BASE}/#/settings/workspace`);
+  const logo = page.locator('.stg-row', { hasText: 'Il se règle dans Thème et couleurs.' });
+  await logo.waitFor();
+  ok(
+    (
+      (await logo.getByRole('link', { name: 'Ouvrir Thème et couleurs' }).getAttribute('href')) || ''
+    ).endsWith('#/settings/brand') &&
+      !/Bientôt/.test(await logo.innerText()) &&
+      (await logo.getByRole('button').count()) === 0,
+    'Général › Logo : renvoi vers Thème et couleurs, ni « Bientôt » ni bouton inactif',
+  );
+
   // Accès : un éditeur ne voit ni l'onglet ni la page
   t.members[0].role = 'editor';
   await page.goto(`${BASE}/#/settings/workspace`);

@@ -24,7 +24,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   p.on('pageerror', (e) => errors.push(e.message));
   await install(p, state);
 
-  for (const route of [`/#/demos/${DEMO}/share`, '/#/settings/brand', '/#/learners', '/#/']) {
+  // Les vues d'une démo n'ont plus la barre latérale (§9, §1) : le changement d'espace se fait depuis
+  // une page de l'application
+  for (const route of ['/#/media', '/#/settings/brand', '/#/learners', '/#/']) {
     await p.goto(`${APP}${route}`);
     await p.waitForTimeout(1200);
     const from = (await p.locator('.ws-switch b').textContent()).trim();

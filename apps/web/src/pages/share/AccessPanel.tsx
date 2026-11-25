@@ -256,7 +256,7 @@ export function AccessPanel({
   };
 
   return (
-    <section role="tabpanel" id="sh-panel-access" aria-labelledby="sh-tab-access">
+    <section id="sh-panel-access" aria-labelledby="shd-mode">
       <fieldset className="l11-modes" onKeyDown={onKey} disabled={!editable}>
         <legend className="t-label l11-legend">{t('access.who')}</legend>
         {modes.map((m) => (

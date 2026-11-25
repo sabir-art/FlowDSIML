@@ -20,6 +20,11 @@ import {
   Languages,
   Lightbulb,
   Pencil,
+  ChartColumn,
+  Mail,
+  Users,
+  Play,
+  EyeOff,
 } from 'lucide-react';
 import {
   EditorRail,
@@ -51,7 +56,7 @@ import { activityOf, type EditTable, type PresencePayload } from './presence/pre
 import { usePresenceCalm, usePresenceChannel } from './presence/usePresence';
 import { CoBanner, PresenceStack, RemoteCursors } from './presence/PresenceUI';
 import { useShowCursors } from './presence/showCursors';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../../lib/errors';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
@@ -114,6 +119,9 @@ import '../../styles/maquette-peau.css';
 import { BackButton, Select } from '@flowdsiml/ui';
 import { ImagePanel } from './images/ImagePanel';
 import { asLayers, layerName } from './images/layers';
+import { ShareDialog, useShareWindow } from '../share/ShareDialog';
+import { useUnpublish } from '../share/useUnpublish';
+import { usePublicPageList } from '../share/usePublicPageList';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -247,6 +255,24 @@ export function EditorPage() {
   /** Outils du rail visibles (Assistant : éditeurs), dans l'ordre (raccourcis Alt + 1 à 9). */
   const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
+  const location = useLocation();
+  // §1 : fenêtre Partager au-dessus de l'éditeur ; « Publier » de son bandeau lance la publication d'ici
+  const share = useShareWindow();
+  const publicPage = usePublicPageList(ws?.id);
+  const [unpublishDialog, unpublish] = useUnpublish(editor.demo, () => void editor.reload());
+  const shareWindow = share.view && demoId && (
+    <ShareDialog
+      demoId={demoId}
+      view={share.view}
+      onView={share.setView}
+      onClose={share.close}
+      justPublished={share.justPublished}
+      onPublish={() => {
+        share.close();
+        requestAnimationFrame(() => document.querySelector<HTMLButtonElement>('.ed-publish button')?.click());
+      }}
+    />
+  );
   // L48-E §3 : outil du rail ouvert (un seul panneau) ; ANA-09 : ?tab=settings ouvre les Réglages
   const [panel, setPanelState] = useState<ToolId | null>(() =>
     params.get('tab') === 'settings' ? 'settings' : savedTool(),
@@ -572,9 +598,28 @@ export function EditorPage() {
   useEffect(() => {
     if (ready) storeEditorGeometry(demoId);
   }, [ready, demoId]);
+  // §9 : « Aperçu » cliqué depuis une autre vue de la démo (Analytics, Leads, Visiteurs)
+  const wantPreview = useRef(!!(location.state as { preview?: boolean } | null)?.preview);
+  useEffect(() => {
+    if (!ready || !wantPreview.current || !editor.steps.length) return;
+    wantPreview.current = false;
+    preview();
+    // Une seule fois, quand la démo est chargée
+  }, [ready, editor.steps.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (narrow)
-    return <EditorNarrowView editor={editor} comments={comments} index={index} setIndex={setIndex} />;
+    return (
+      <>
+        <EditorNarrowView
+          editor={editor}
+          comments={comments}
+          index={index}
+          setIndex={setIndex}
+          onShare={share.open}
+        />
+        {shareWindow}
+      </>
+    );
   const backToDemos = (primary = false) => (
     <Link to="/" className={`fd-btn${primary ? ' fd-btn--primary' : ''}`}>
       {t('loading.backToDemos')}
@@ -819,6 +864,8 @@ export function EditorPage() {
         <TranslateDialog editor={editor} ws={ws.id} onClose={() => setTranslating(false)} />
       )}
       <Suspense fallback={null}>
+        {shareWindow}
+        {unpublishDialog}
         {distributing && demoId && can('demo.edit') && (
           <DistributeDialog demoId={demoId} onClose={() => setDistributing(false)} />
         )}
@@ -894,6 +941,7 @@ export function EditorPage() {
               role="radio"
               onClick={() => setPreviewManifest(null)}
             >
+              <Pencil aria-hidden="true" />
               {t('editor.modeEdit')}
             </button>
             <button
@@ -903,11 +951,25 @@ export function EditorPage() {
               onClick={() => preview()}
               disabled={!editor.steps.length}
             >
+              <Play aria-hidden="true" />
               {t('editor.preview')}
             </button>
           </div>
-          <Link to={`/demos/${demoId}/analytics`}>{t('nav.analytics')}</Link>
-          <Link to={`/demos/${demoId}/analytics?indicateur=leads`}>{t('kpi.leads')}</Link>
+          {/* §9 : mêmes onglets que les autres vues de la démo */}
+          <Link to={`/demos/${demoId}/analytics`}>
+            <ChartColumn aria-hidden="true" />
+            {t('nav.analytics')}
+          </Link>
+          {can('leads.view') && (
+            <Link to={`/demos/${demoId}/leads`}>
+              <Mail aria-hidden="true" />
+              {t('kpi.leads')}
+            </Link>
+          )}
+          <Link to={`/demos/${demoId}/visitors`}>
+            <Users aria-hidden="true" />
+            {t('demoViews.visitors')}
+          </Link>
         </div>
         <div className="ed-bar__r">
           {user && (
@@ -1062,16 +1124,33 @@ export function EditorPage() {
                     },
                   ] as const)
                 : []),
+              // §1 : place de la démo sur la page publique de l'espace, puis l'état de publication
+              ...(publicPage.itemFor(editor.demo).length
+                ? ['separator' as const, ...publicPage.itemFor(editor.demo)]
+                : []),
+              ...(can('demo.publish') && editor.demo.status === 'published'
+                ? [
+                    'separator' as const,
+                    {
+                      label: t('share.unpublishMenu'),
+                      icon: <EyeOff />,
+                      danger: true,
+                      onSelect: () => void unpublish(),
+                    },
+                  ]
+                : []),
             ]}
           />
-          <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/share`}>
+          {/* §1 : Partager s'ouvre en fenêtre, au-dessus de la démo (?share=…) */}
+          <button type="button" className="btn btn-secondary btn-sm" data-share-open="" onClick={share.open}>
             <Share2 aria-hidden="true" />
             {t('editor.share')}
-          </Link>
+          </button>
           {can('demo.publish') && (
             <span className="ed-publish">
               <PublishButton
                 editor={editor}
+                autoOpen={!!(location.state as { publish?: boolean } | null)?.publish}
                 republishLabel={t('publish.publish')}
                 onReviewStep={(i) => {
                   setIndex(i);

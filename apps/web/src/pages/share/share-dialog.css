@@ -1,0 +1,694 @@
+/* Retours du 24/11 (2e série) §1 : Partager en fenêtre à deux volets (maquettes retours-2411b/partager2-*).
+   960 × 640 px ; à gauche la liste des modes (232 px, surface-sunken), à droite le mode choisi. */
+.fd-modal.shd-dialog {
+  width: 960px;
+  max-width: calc(100vw - 32px);
+  height: 640px;
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+.mk.shd {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+}
+.mk .shd-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 20px 12px;
+  overflow-y: auto;
+  border-right: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface-sunken);
+}
+.mk .shd-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0 8px;
+}
+.mk .shd-tile {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--fd-prune-50);
+  color: var(--fd-prune-600);
+}
+[data-theme='dark'] .mk .shd-tile {
+  background: var(--fd-prune-950);
+  color: var(--fd-prune-300);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .mk .shd-tile {
+    background: var(--fd-prune-950);
+    color: var(--fd-prune-300);
+  }
+}
+.mk .shd-tile svg {
+  width: 16px;
+  height: 16px;
+}
+.mk .shd-head__txt {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shd-head h2 {
+  margin: 0;
+  /* Une ligne : un nom long est coupé par « … » (nom complet en infobulle), le volet ne grandit pas */
+  overflow: hidden;
+  font: 600 15px/1.3 var(--fd-font-sans);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .shd-head p {
+  margin: 2px 0 0;
+  font: 400 12px/1.4 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.mk .shd-nav,
+.mk .shd-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mk .shd-nav {
+  gap: 12px;
+}
+.mk .shd-nav__label {
+  padding: 4px 10px;
+  font: 600 11px/1.4 var(--fd-font-sans);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--fd-color-text-muted);
+}
+.mk .shd-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--fd-color-text);
+  font: 500 14px var(--fd-font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.mk .shd-nav__item > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .shd-nav__item > span {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shd-nav__item:hover {
+  background: var(--fd-color-nav-hover);
+}
+.mk .shd-nav__item[aria-current='page'] {
+  border-color: var(--fd-color-border);
+  background: var(--fd-color-surface);
+}
+.mk .shd-nav__item[aria-current='page'] > svg:first-child {
+  color: var(--fd-color-primary);
+}
+.mk .shd-nav__item .shd-nav__go,
+.mk .shd-back,
+.mk .shd-close--side {
+  display: none;
+}
+.mk .shd-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.mk .shd-top {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px 16px 12px 20px;
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .shd-top h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font: 600 18px/1.3 var(--fd-font-sans);
+}
+.mk .shd-top h3:focus {
+  outline: none;
+}
+/* Pastille d'accès : icône du mode d'accès, son nom, « Modifier » */
+.mk .shd-access {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 2px 0 12px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  font: 500 13px var(--fd-font-sans);
+}
+.mk .shd-access > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-primary);
+}
+.mk .shd-access__txt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mk .shd-access:not(:has(button)) {
+  padding-right: 12px;
+}
+.mk .shd-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 20px;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mk .shd-body > .sh-sub {
+  margin: 0;
+}
+.mk .shd-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 14px;
+}
+.mk .shd-banner > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .shd-banner > span {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shd-panel {
+  min-width: 0;
+}
+
+/* Sous 640 px : feuille plein écran. La liste des modes d'abord, puis le mode à sa place avec « ← » */
+@media (max-width: 639px) {
+  .fd-modal.shd-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+  .mk.shd {
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: 0;
+  }
+  .mk.shd:not(.is-menu) .shd-side,
+  .mk.shd.is-menu .shd-main {
+    display: none;
+  }
+  .mk .shd-side {
+    border-right: 0;
+    padding: 16px 12px;
+  }
+  .mk .shd-close--side {
+    display: inline-grid;
+  }
+  .mk .shd-nav__item {
+    height: 52px;
+  }
+  .mk .shd-nav__item .shd-nav__go {
+    display: block;
+  }
+  .mk .shd-nav__item[aria-current='page'] {
+    border-color: transparent;
+    background: none;
+  }
+  .mk .shd-back {
+    display: inline-grid;
+  }
+  .mk .shd-top {
+    min-height: 56px;
+    padding: 8px 8px 8px 4px;
+    gap: 4px 8px;
+  }
+  /* La pastille d'accès passe sur sa propre ligne, sous le titre */
+  .mk .shd-access {
+    order: 3;
+    flex: 1 0 calc(100% - 32px);
+    justify-content: space-between;
+    box-sizing: border-box;
+    max-width: calc(100vw - 32px);
+    margin: 0 16px 4px;
+  }
+  .mk .shd-body {
+    padding: 16px;
+  }
+}
+
+/* Contenus repris de l'ancienne page : ils tiennent dans le volet, sans défilement horizontal */
+.mk .shd-panel .input-group > .input,
+.mk .shd-panel .input-group > input {
+  min-width: 0;
+}
+.mk .shd-panel .input-group {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 639px) {
+  .mk .shd-access__txt {
+    flex: 1;
+  }
+}
+
+.mk .shd-scope {
+  margin: 0 0 16px;
+}
+
+/* §1.3 Mode Lien sobre : champ à copier + « Ouvrir », trois boutons icône, lignes repliables */
+.mk .shl-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mk .shl-link .fd-copy {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shl-link > .fd-btn--icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.mk .shl-acts {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.mk .shl-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.mk .shl-qr svg {
+  flex: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.mk .shl-qr .help {
+  margin: 0;
+}
+.mk .shd-panel .fd-btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mk .shd-folds {
+  margin-top: 16px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .shd-fold {
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .shd-fold__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-text);
+  font: 500 14px var(--fd-font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.mk .shd-fold__head > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.mk .shd-fold__head > span {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shd-fold__chev {
+  color: var(--fd-color-text-muted);
+  transition: transform var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
+}
+.mk .shd-fold.is-open .shd-fold__chev {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .shd-fold__chev {
+    transition: none;
+  }
+}
+.mk .shd-fold__body {
+  padding: 4px 0 16px;
+}
+
+/* Cartes radio (§1.3) : un choix entre quelques formes d'un même objet */
+.mk .shd-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.mk .shd-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  font: 500 14px var(--fd-font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.mk .shd-card[aria-checked='true'] {
+  border-color: var(--fd-color-primary);
+  box-shadow: 0 0 0 1px var(--fd-color-primary);
+}
+.mk .shd-card[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mk .shd-card__art {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken, var(--fd-color-content-bg));
+}
+.mk .shd-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mk .shd-card__dot {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--fd-color-text-muted);
+  border-radius: 50%;
+}
+.mk .shd-card[aria-checked='true'] .shd-card__dot {
+  border: 5px solid var(--fd-color-primary);
+}
+.mk .shd-card__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Mode Intégrer : schémas des formats, code qui passe à la ligne, aperçu */
+.mk .she-art {
+  display: block;
+  border-radius: 4px;
+  background: var(--fd-color-border);
+}
+.mk .she-art--frame {
+  width: 78%;
+  height: 52px;
+}
+.mk .she-art--button {
+  width: 78px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--fd-color-primary);
+}
+.mk .she-art--full {
+  width: calc(100% - 8px);
+  height: 64px;
+}
+.mk .she-code {
+  margin: 16px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: visible;
+}
+.mk .shd-panel .sh-embed-actions {
+  margin-top: 16px;
+}
+.mk .she-prev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-content-bg);
+}
+.mk .she-prev__page {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--fd-color-surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+}
+.mk .she-prev__demo {
+  display: block;
+  width: 56%;
+  height: 70%;
+  border-radius: 6px;
+  background: var(--fd-color-border);
+}
+.mk .she-prev--popup .she-prev__demo {
+  width: 96px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--fd-color-primary);
+}
+.mk .she-prev--full .she-prev__demo {
+  width: 100%;
+  height: 100%;
+}
+
+/* Mode Liens personnalisés (§1.3) : recherche, liste à colonnes fixes, actions sous la liste */
+.mk .shp-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mk .shp-search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.mk .shp-search > svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.mk .shp-search .input {
+  width: 100%;
+  padding-left: 36px;
+}
+.mk .shp-top > .fd-btn--icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.mk #sh-panel-perso .sh-links {
+  width: 100%;
+  table-layout: fixed;
+}
+.mk #sh-panel-perso .sh-links th:nth-child(2),
+.mk #sh-panel-perso .sh-links td:nth-child(2) {
+  width: 84px;
+}
+.mk #sh-panel-perso .sh-links th:nth-child(3),
+.mk #sh-panel-perso .sh-links td:nth-child(3) {
+  width: 72px;
+}
+.mk #sh-panel-perso .sh-links th:last-child,
+.mk #sh-panel-perso .sh-links td:last-child {
+  width: 96px;
+}
+.mk #sh-panel-perso .sh-links.has-center th:last-child,
+.mk #sh-panel-perso .sh-links.has-center td:last-child {
+  width: 236px;
+}
+.mk .shp-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mk .shp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+  color: var(--fd-color-text-muted);
+  font: 400 12px var(--fd-font-sans);
+}
+.mk .shp-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+@media (max-width: 639px) {
+  .mk #sh-panel-perso .sh-links .shp-date {
+    display: none;
+  }
+  .mk #sh-panel-perso .sh-links.has-center th:last-child,
+  .mk #sh-panel-perso .sh-links.has-center td:last-child {
+    width: 136px;
+  }
+  /* Écran étroit : « Lien du centre » en icône seule (son nom reste lu) */
+  .mk #sh-panel-perso .sh-links.has-center .sh-actions .btn-secondary {
+    gap: 0;
+    padding: 0 8px;
+    font-size: 0;
+  }
+}
+
+/* Confirmation de copie sur place (pas de toast) */
+.mk .shl-acts {
+  align-items: center;
+}
+.mk .shl-ok {
+  color: var(--fd-color-success-text, var(--fd-color-text-muted));
+  font: 500 13px var(--fd-font-sans);
+}
+/* Intégrer › Encadré : taille automatique ou fixe, et le réglage à venir en gris */
+.mk .she-size {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.mk .she-size__row,
+.mk .she-size__px {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.mk .she-size__f {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 13px var(--fd-font-sans);
+}
+.mk .she-size__f .input {
+  width: 76px;
+}
+.mk .she-size__px .help {
+  margin: 0;
+}
+.mk .she-soon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+}
+
+/* Mode Page de la démo (§1.3) : interrupteur, adresse, champs, réglages rares repliés */
+.mk .sh-page .shg-on {
+  width: 100%;
+  justify-content: space-between;
+  font-weight: 500;
+}
+.mk .sh-page .sh-page-form {
+  margin-top: 16px;
+}
+.mk .sh-page .shd-folds {
+  margin-top: 0;
+}
+.mk .shg-more {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mk .shg-more .fd-switch {
+  width: 100%;
+  justify-content: space-between;
+}
+.mk .sh-page .sh-page-form > .shl-link + .sh-page-fs {
+  margin-top: 16px;
+}
+
+/* Mode Exporter (§1.3) : trois fichiers en cartes radio, un seul « Exporter » */
+.mk .shx-art {
+  width: 28px;
+  height: 28px;
+  color: var(--fd-color-text-muted);
+}
+.mk .shd-card[aria-checked='true'] .shx-art {
+  color: var(--fd-color-primary);
+}
+.mk .shx-what {
+  margin: 12px 0 0;
+}
+.mk .shx-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .shx-foot .help {
+  flex: 1 1 200px;
+  margin: 0;
+}
+/* Lien désactivé : texte atténué mais lisible (AA) ; ses actions restent utilisables */
+.mk #sh-panel-perso .sh-off td,
+.mk #sh-panel-perso .sh-off th {
+  opacity: 1;
+  color: var(--fd-color-text-muted);
+}

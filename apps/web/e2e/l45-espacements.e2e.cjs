@@ -156,23 +156,24 @@ async function gap(p, a, b) {
   // ===== Partager (E13 à E15) =====
   const share = { name: 'Partager', route: `/#/demos/${DEMO}/share` };
   await appPage(b, { ...share, route: `/#/demos/${DEMO}/share?tab=embed` }, 'light', async (p) => {
-    await p.waitForTimeout(400);
+    // §1.3 : cartes radio, code, copie, aperçu à 16 px ; les réglages rares sont repliés
+    await p.locator('#sh-panel-embed .she-prev').waitFor();
     const e13 = await p.evaluate(() => {
       const panel = document.querySelector('#sh-panel-embed');
-      const where = panel.querySelector('.snip-where');
-      const mode = panel.querySelector('.sh-embed-mode');
-      const guide = panel.querySelector('.snip-guide');
-      const r = (el) => el.getBoundingClientRect();
+      const r = (sel) => panel.querySelector(sel).getBoundingClientRect();
       return {
-        a: Math.round(r(mode).top - r(where).bottom),
-        b: Math.round(r(guide).top - r(mode).bottom),
-        label: mode.querySelector('.t-label')?.textContent,
+        z: Math.round(r('.she-size').top - r('.she-formats').bottom),
+        a: Math.round(r('.she-code').top - r('.she-size').bottom),
+        b: Math.round(r('.sh-embed-actions').top - r('.she-code').bottom),
+        c: Math.round(r('.she-prev').top - r('.sh-embed-actions').bottom),
       };
     });
     ok(
-      near(e13.a, 24) && near(e13.b, 24) && !!e13.label,
-      `E13 : groupes à ${e13.a} et ${e13.b} px (24), libellé « ${e13.label} »`,
+      near(e13.z, 16) && near(e13.a, 16) && near(e13.b, 16) && near(e13.c, 16),
+      `E13 : formats → taille → code → copie → aperçu à ${e13.z}, ${e13.a}, ${e13.b} et ${e13.c} px (16)`,
     );
+    await p.getByRole('button', { name: 'Sites autorisés', exact: true }).click();
+    await p.locator('#sh-origins').waitFor();
     const e14 = await p.evaluate(() => {
       const st = document.querySelector('#sh-panel-embed .sh-field .fd-stack--action');
       const btn = st?.querySelector('button');
@@ -186,7 +187,8 @@ async function gap(p, a, b) {
     return [];
   });
   await appPage(b, { ...share, route: `/#/demos/${DEMO}/share?tab=link` }, 'light', async (p) => {
-    await p.waitForTimeout(400);
+    await p.getByRole('button', { name: 'Adresse personnalisée', exact: true }).click();
+    await p.locator('#sh-slug').waitFor();
     const e15 = await gap(p, '#sh-slug-help', '.sh-addr-actions');
     ok(e15 === null || near(e15, 12), `E15 : aide → « Enregistrer l’adresse » : ${e15} px (12)`);
     return [];
@@ -257,13 +259,13 @@ async function gap(p, a, b) {
         soon: rows.filter((x) => x.querySelector('input').disabled && x.querySelector('.soon')).length,
       };
     });
-    ok(m.n === 5 && m.minH >= 60, `E21 : 5 formats en liste, ${Math.round(m.minH)} px de haut au moins (60)`);
+    ok(m.n === 4 && m.minH >= 60, `E21 : 4 formats en liste, ${Math.round(m.minH)} px de haut au moins (60)`);
     ok(
       m.gaps.every((g) => g === 8),
       `E21 : 8 px entre les lignes (${m.gaps.join(', ')})`,
     );
     ok(m.oneLine, 'E21 : descriptions sur une ligne');
-    ok(m.soon === 1, 'E21 : « Hors ligne » visible, désactivé, badge « Bientôt »');
+    ok(m.soon === 0, 'E21 : pas de format « Bientôt » (le hors ligne est annoncé dans Diffuser)');
     await p.keyboard.press('Escape').catch(() => {});
     return [];
   });

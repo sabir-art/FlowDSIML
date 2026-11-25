@@ -1,6 +1,6 @@
-import { Download, Mail, Route, Share2 } from 'lucide-react';
+import { Download, Route } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { completionRate, computeFunnel, countTrend, rateTrend, toCsv } from '@flowdsiml/core';
 import type { Tables } from '@flowdsiml/supabase-types';
@@ -23,10 +23,7 @@ import {
 } from '../../components/kpi/KpiTabs';
 import { formatNumber } from '../../lib/format';
 import { Loading } from '../../components/guards';
-import { useWorkspace } from '../../workspace/WorkspaceProvider';
-import { LeadsTable } from './LeadsTable';
 import { ChartColumn } from 'lucide-react';
-import { AppPage } from '../../components/AppPage';
 
 interface Analytics {
   views: number;
@@ -45,7 +42,6 @@ export const PERIODS = [7, 30, 90] as const;
 export function DemoAnalyticsPage() {
   const { t } = useTranslation();
   const { demoId = '' } = useParams();
-  const { can } = useWorkspace();
   const [days, setDays] = useState<number>(30);
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [steps, setSteps] = useState<Pick<Tables<'steps'>, 'id' | 'title'>[]>([]);
@@ -62,7 +58,6 @@ export function DemoAnalyticsPage() {
     setParams(next, { replace: true });
   };
   const [series, setSeries] = useState<{ cur: Series | null; prev: Series | null; end: number } | null>(null);
-  const [versionNumber, setVersionNumber] = useState<number | null>(null);
 
   useEffect(() => {
     void (async () => {
@@ -72,10 +67,9 @@ export function DemoAnalyticsPage() {
       if (d.data?.current_version_id) {
         const v = await supabase
           .from('demo_versions')
-          .select('manifest, number')
+          .select('manifest')
           .eq('id', d.data.current_version_id)
           .maybeSingle();
-        setVersionNumber(v.data?.number ?? null);
         const m = v.data?.manifest as { steps?: Array<{ id: string; title: string }> } | undefined;
         if (m?.steps) return setSteps(m.steps.map((s) => ({ id: s.id, title: s.title })));
       }
@@ -161,7 +155,9 @@ export function DemoAnalyticsPage() {
       ]
     : [];
   const pick = (d: Parameters<typeof dayValue>[0]) => dayValue(d, metric);
-  const SOURCES = ['embed', 'link', 'page', 'direct'] as const;
+  // Moyens de partage, dans l'ordre et sous les noms de la fenêtre Partager (« direct » est le lien
+  // public, « link » les liens personnalisés)
+  const SOURCES = ['direct', 'embed', 'link', 'page'] as const;
 
   function exportFunnel() {
     downloadText(
@@ -190,39 +186,21 @@ export function DemoAnalyticsPage() {
   }
 
   return (
-    // PAGE-01 : fil d'Ariane « Démos › {démo} › Analytics », statut et version à côté, actions à droite
-    <AppPage
-      className="stack page-wide"
-      title={t('analytics.title')}
-      crumbs={[
-        { label: t('demos.title'), to: '/' },
-        { label: demo.title, to: `/demos/${demoId}/edit` },
-      ]}
-      mobileBack={{ to: '/analytics', ariaLabel: t('common.back') }}
-      after={
-        <span>
-          {[
-            t(`status.${demo.status}`),
-            versionNumber ? t('analytics.versionN', { n: versionNumber }) : null,
-            t('share.stepCount', { count: totalSteps || steps.length }),
-          ]
-            .filter(Boolean)
-            .join(' · ')}
-        </span>
-      }
-      actions={
-        <>
-          <PeriodPicker days={days} setDays={setDays} />
-          <Link className="fd-btn" to={`/demos/${demoId}/share`}>
-            <Share2 size={16} aria-hidden="true" />
-            {t('editor.share')}
-          </Link>
-          <Button icon={<Download />} onClick={exportDaily} disabled={!data?.daily.length}>
-            {t('analytics.export')}
-          </Button>
-        </>
-      }
-    >
+    // §9 : vue « Analytics » de la démo, sous la barre commune (période, export en bouton icône)
+    <>
+      <div className="dv-tools">
+        <PeriodPicker days={days} setDays={setDays} />
+        <button
+          type="button"
+          className="fd-btn fd-btn--icon"
+          aria-label={t('analytics.export')}
+          title={t('analytics.export')}
+          onClick={exportDaily}
+          disabled={!data?.daily.length}
+        >
+          <Download size={16} aria-hidden="true" />
+        </button>
+      </div>
       {error && <Alert kind="error">{error}</Alert>}
       {!data ? (
         <Loading />
@@ -241,15 +219,15 @@ export function DemoAnalyticsPage() {
             />
           </KpiTabs>
           <MetricTable
-            title={t('kpi.bySource')}
-            nameLabel={t('kpi.source')}
+            title={t('demoViews.byChannel')}
+            nameLabel={t('demoViews.channel')}
             active={metric}
             columns={KPI_KEYS.map((k) => ({ key: k, label: t(`kpi.col.${k}`), rate: k === 'completion' }))}
             rows={SOURCES.map((src) => {
               const r = series?.cur?.bySource.find((x) => x.source === src);
               return {
                 id: src,
-                name: t(`kpi.sourceName.${src}`),
+                name: t(`demoViews.channelName.${src}`),
                 values: metricValues(r ?? { views: 0, visitors: 0, completions: 0, cta: 0, leads: 0 }),
               };
             })}
@@ -282,23 +260,9 @@ export function DemoAnalyticsPage() {
               />
             )}
           </Card>
-          {can('leads.view') && (
-            <Card>
-              <div className="fd-card__head">
-                <span className="fd-icon-chip" aria-hidden="true">
-                  <Mail />
-                </span>
-                {/* Cible de la notification « Nouveau lead » (state.focus, voir routeFocus) */}
-                <h2 className="fd-card__title" id="da-leads" tabIndex={-1} data-route-focus="">
-                  {t('analytics.leads')}
-                </h2>
-              </div>
-              <LeadsTable demoId={demoId} />
-            </Card>
-          )}
         </>
       )}
-    </AppPage>
+    </>
   );
 }
 

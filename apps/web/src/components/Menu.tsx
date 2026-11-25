@@ -32,6 +32,8 @@ export interface MenuItem {
   group?: string;
   /** Choix exclusif d'un groupe (rôle d'un membre) : `menuitemradio`, coché quand `current`. */
   radio?: boolean;
+  /** Réglage oui / non (ex. « Afficher sur la page publique ») : `menuitemcheckbox`, coché quand `current`. */
+  checkbox?: boolean;
 }
 
 /** Au-delà de ce nombre d'éléments, le menu s'affiche en feuille du bas sous 480 px (§15.7). */
@@ -278,14 +280,14 @@ export function Menu({
                     <button
                       key={it.label}
                       type="button"
-                      role={it.radio ? 'menuitemradio' : 'menuitem'}
-                      aria-checked={it.radio ? !!it.current : undefined}
+                      role={it.radio ? 'menuitemradio' : it.checkbox ? 'menuitemcheckbox' : 'menuitem'}
+                      aria-checked={it.radio || it.checkbox ? !!it.current : undefined}
                       className={`menu-item${it.danger ? ' menu-item--danger' : ''}`}
                       /* APG : une entrée indisponible reste atteignable aux flèches, annoncée désactivée */
                       aria-disabled={it.disabled ? 'true' : undefined}
                       aria-describedby={it.disabled && it.hint ? `${id}-h${i}` : undefined}
                       title={it.disabled && it.hint ? it.hint : undefined}
-                      aria-current={it.current && !it.radio ? 'true' : undefined}
+                      aria-current={it.current && !it.radio && !it.checkbox ? 'true' : undefined}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (it.disabled) return;

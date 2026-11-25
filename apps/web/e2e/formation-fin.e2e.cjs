@@ -107,7 +107,7 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       'n° 1 : le lien de la démo seule passe en second',
     );
     // Création d'un lien : le lien du centre est copié
-    await page.getByRole('button', { name: 'Nouveau lien' }).click();
+    await page.getByRole('button', { name: 'Créer un lien' }).click();
     await page.fill('#sh-ln', 'Camille Exemple');
     await page.getByRole('button', { name: /Créer et copier le lien/ }).click();
     await page.getByText('Le lien du centre (progression et attestation) est copié').waitFor();
