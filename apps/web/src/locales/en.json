@@ -1051,6 +1051,7 @@
       "stepCta": "Action button",
       "showButton": "Show the button",
       "secondary": "Secondary button",
+      "noButton": "The end screen will have no button. The visitor will only be able to close the demo.",
       "restart": "Restart",
       "zoomOn": "Zoom on an area",
       "organisation": "Organization"

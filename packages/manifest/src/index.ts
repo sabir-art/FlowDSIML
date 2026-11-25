@@ -301,6 +301,9 @@ export const stepOptionsSchema = z
     /** L12-05 : libellé de « Précédent » dans la bulle (vide = thème) et affichage du bouton. */
     prevLabel: z.string().max(24).default('').catch(''),
     showPrev: z.boolean().default(false).catch(false),
+    /** Écran de fin (dernière étape de texte) : bouton secondaire « Recommencer », affiché ou non, et son libellé (vide = « Recommencer »). */
+    restartShow: z.boolean().default(true).catch(true),
+    restartLabel: z.string().max(30).default('').catch(''),
     /** Choix invalides ignorés un par un (un lien mal formé n'invalide pas la démo). */
     choices: z
       .array(z.unknown())
@@ -415,6 +418,8 @@ export const stepOptionsSchema = z
     buttonLabel: '',
     prevLabel: '',
     showPrev: false,
+    restartShow: true,
+    restartLabel: '',
     choices: [],
     rules: [],
   });

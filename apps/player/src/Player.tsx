@@ -1403,17 +1403,21 @@ export function Player({
                       {fromCenter && (
                         <CenterNext from={fromCenter} demoId={m.demoId} done={completed.current} t={t} />
                       )}
-                      <button
-                        class={
-                          fromCenter
-                            ? 'p-link p-link--muted'
-                            : `p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`
-                        }
-                        onClick={() => go(0)}
-                      >
-                        <RotateCcw {...ICON} size={16} />
-                        {t.restart}
-                      </button>
+                      {/* Bouton secondaire de l'écran de fin : masquable et renommable dans l'éditeur ;
+                          dans un parcours du centre de formation, le lien discret reste */}
+                      {(fromCenter || !endText || step.options.restartShow) && (
+                        <button
+                          class={
+                            fromCenter
+                              ? 'p-link p-link--muted'
+                              : `p-btn ${step.cta || !endText ? 'p-btn-ghost' : 'p-btn-secondary'}`
+                          }
+                          onClick={() => go(0)}
+                        >
+                          <RotateCcw {...ICON} size={16} />
+                          {(endText && !fromCenter && sub(step.options.restartLabel)) || t.restart}
+                        </button>
+                      )}
                     </>
                   )}
                 </div>

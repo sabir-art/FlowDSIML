@@ -59,7 +59,9 @@ export function StepPanel({
 
   const last = index === editor.steps.length - 1;
   const textTitle = last ? t('editor.end.title') : t('editor.end.textTitle');
-  const soon = <span className="soon-text">{t('shell.soon')}</span>;
+  const opts = asStepOptions(step.options);
+  const setOpts = (patch: Partial<typeof opts>) =>
+    editor.updateStep(step.id, { options: { ...opts, ...patch } as unknown as StepRow['options'] });
 
   return (
     <div className="sp-panel">
@@ -127,13 +129,44 @@ export function StepPanel({
 
       {section === 'cta' && step.kind === 'text' && last && (
         <div className="sec">
-          <div className="sec-title">
-            {t('editor.end.secondary')}
-            {soon}
-          </div>
-          <div className="field">
-            <label htmlFor="st-sec">{t('editor.ctaLabel')}</label>
-            <input id="st-sec" className="input input-sm" disabled readOnly value={t('editor.end.restart')} />
+          <div className="sec-title">{t('editor.end.secondary')}</div>
+          {/* Écran de fin : bouton « Recommencer », affiché ou non, libellé au choix */}
+          <div className="cta-fields">
+            <div className="setting">
+              <label className="t-label" htmlFor="st-sec-on">
+                {t('editor.end.showButton')}
+              </label>
+              <span className="switch">
+                <input
+                  id="st-sec-on"
+                  type="checkbox"
+                  checked={opts.restartShow}
+                  disabled={readOnly}
+                  onChange={(e) => setOpts({ restartShow: e.target.checked })}
+                />
+                <span />
+              </span>
+            </div>
+            {/* Ni bouton principal ni bouton secondaire : prévenu, sans bloquer */}
+            {!opts.restartShow && !asCta(step.cta) && (
+              <p className="help help-warning" role="status">
+                {t('editor.end.noButton')}
+              </p>
+            )}
+            {opts.restartShow && (
+              <VarTextField
+                singleLine
+                id="st-sec"
+                label={t('editor.ctaLabel')}
+                maxLength={30}
+                catalog={catalog}
+                canManage={!readOnly}
+                disabled={readOnly}
+                value={opts.restartLabel}
+                placeholder={t('editor.end.restart')}
+                onChange={(v) => setOpts({ restartLabel: v })}
+              />
+            )}
           </div>
         </div>
       )}
