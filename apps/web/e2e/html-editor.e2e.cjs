@@ -245,9 +245,9 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
   ok(
     (await nozone.locator('b').innerText()) === 'Aucune zone cliquable sur cette étape' &&
       (await nozone.getAttribute('role')) === 'status' &&
-      (await pv.getByRole('button', { name: /^Zones cliquables/ }).isDisabled()) &&
-      (await pv.locator('.p-html-zones-n').innerText()) === '0',
-    'aperçu : encart « Aucune zone cliquable sur cette étape », bascule à 0 désactivée',
+      // Démo guidée : la page se lit comme une capture, sans la rangée du Sandbox (bascule des zones)
+      (await pv.locator('.p-html-bar, .p-html-zones').count()) === 0,
+    'aperçu : encart « Aucune zone cliquable sur cette étape », sans la rangée du Sandbox',
   );
   ok(
     (await nozone.getByRole('button').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
