@@ -525,6 +525,87 @@ function act(target) {
   await tabs(false);
   await tabs(true);
 
+  // ===== §3 : sortie d'un menu (120 ms, courbe de sortie) =====
+  const menuOut = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/demos`);
+    const trigger = page.locator('.demo-card .menu-trigger').first();
+    await trigger.waitFor();
+    await trigger.click();
+    const menu = page.getByRole('menu');
+    await menu.waitFor();
+    await menu.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    // Échap : relevé dans la même tâche que la fermeture, puis image par image
+    const r = await page.evaluate(() => {
+      const live = document.querySelector('#fd-portal [role=menu]');
+      live.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      return new Promise((resolve) => {
+        const out = {
+          roles: -1,
+          focus: '',
+          ghost: 0,
+          anim: null,
+          props: [],
+          hidden: false,
+          t0: performance.now(),
+        };
+        const tick = () => {
+          const g = document.querySelector('#fd-portal .menu-list[inert]');
+          if (out.roles < 0) {
+            out.roles = document.querySelectorAll('[role=menu]').length;
+            out.focus = document.activeElement?.className ?? '';
+          }
+          if (g) {
+            out.ghost++;
+            out.hidden = g.getAttribute('aria-hidden') === 'true' && !g.querySelector('[role],[id]');
+            const a = g.getAnimations()[0];
+            if (a) {
+              const tm = a.effect.getTiming();
+              out.anim = `${tm.duration} ${tm.easing}`;
+              out.props = [...new Set(a.effect.getKeyframes().flatMap((f) => Object.keys(f)))].filter(
+                (n) => !/^(offset|easing|composite|computedOffset)$/.test(n),
+              );
+            }
+          }
+          if ((out.roles >= 0 && !g && performance.now() - out.t0 > 60) || performance.now() - out.t0 > 2000)
+            resolve(out);
+          else requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    });
+    const tag = reduced ? 'mouvement réduit' : 'sortie du menu';
+    ok(
+      r.roles === 0 && /menu-trigger/.test(r.focus),
+      `${tag} : le menu est fermé tout de suite, le focus revient au déclencheur`,
+    );
+    if (reduced) ok(r.ghost === 0, `${tag} : le menu disparaît sans fondu`);
+    else {
+      ok(
+        r.ghost >= 2 && r.hidden,
+        `sortie du menu : une copie inerte s’efface à sa place (${r.ghost} image(s))`,
+      );
+      ok(
+        r.anim === '120 cubic-bezier(0.4, 0, 1, 1)' && r.props.sort().join() === 'opacity,transform',
+        `sortie du menu : 120 ms, courbe de sortie, opacité et transform (${r.anim})`,
+      );
+    }
+    ok(
+      (await page.locator('#fd-portal .menu-list').count()) === 0,
+      `${tag} : à la fin, plus rien dans le portail`,
+    );
+    await ctx.close();
+  };
+  await menuOut(false);
+  await menuOut(true);
+
   // ===== §3 : réordonnancement de la liste des étapes et toasts empilés (FLIP) =====
   const flip = async (reduced) => {
     const { page, ctx } = await open(reduced ? { reducedMotion: 'reduce' } : {});

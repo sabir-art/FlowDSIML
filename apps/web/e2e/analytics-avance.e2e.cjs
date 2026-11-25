@@ -472,6 +472,8 @@ const live = (n) => ({
     .getByRole('dialog', { name: 'Modifier l’alerte' })
     .getByRole('button', { name: 'Enregistrer' })
     .click();
+  // Le libellé choisi est déjà dans la fenêtre : on attend sa fermeture, puis la ligne mise à jour
+  await page.getByRole('dialog', { name: 'Modifier l’alerte' }).waitFor({ state: 'detached' });
   await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
   ok(state.tables.alerts[1].trigger === 'cta', 'alerte modifiée');
 
