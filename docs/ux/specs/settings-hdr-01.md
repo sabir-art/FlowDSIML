@@ -90,3 +90,7 @@ Règles :
   - il y a au plus un primaire ;
   - le rayon des contrôles vaut `--fd-radius-control` ;
   - aucun débordement horizontal à 390.
+
+## 6. États vides (EMPTY-01, fait partie de cette spec)
+
+Sur toutes les pages Paramètres, l'action de création reste **seulement dans l'en-tête**. L'état vide n'a plus de bouton qui la répète. Il montre un aperçu atténué du résultat (composant `EmptyState` avec emplacement `preview`), puis un titre et une phrase. Le détail, la liste des aperçus et l'inventaire des doublons à retirer dans toute l'app sont dans `docs/ux/specs/empty-01.md`.
