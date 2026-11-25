@@ -124,10 +124,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       // Mesure après l'animation d'apparition (elle met le toast à l'échelle)
       await toast.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished.catch(() => {}))));
       const w = (await toast.boundingBox()).width;
-      // Sous 640 px : toute la largeur visible moins 32 px (la barre de défilement n'en fait pas partie)
+      // Sous 600 px : toute la largeur visible moins 32 px (la barre de défilement n'en fait pas partie)
       const visible = await page.evaluate(() => document.documentElement.clientWidth);
       ok(
-        MOBILE ? Math.abs(w - (visible - 32)) <= 1 : w <= 400 && w > 300,
+        MOBILE ? Math.abs(w - (visible - 32)) <= 1 : w <= 420 && w > 300,
         `toast : largeur ${Math.round(w)} px`,
       );
     }

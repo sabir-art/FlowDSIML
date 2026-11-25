@@ -230,10 +230,7 @@ const D = (n) => `0b5c1f0e-0000-4000-8000-0000000000a${n}`;
         '1440 : «\u202fVoir la page\u202f» reste dans l’en-tête',
       );
     }
-    // Coupée de nouveau. Le toast de l'enregistrement précédent (en haut à droite) est fermé d'abord,
-    // comme le ferait la personne : il couvre l'interrupteur tant que la souris reste dessus
-    for (const x of await page.locator('.toast button[aria-label="Fermer"]').all()) await x.click();
-    await page.locator('.toast').first().waitFor({ state: 'detached' });
+    // Coupée de nouveau
     await sw(page).uncheck();
     await save(page).click();
     await page.getByText('Page publique enregistrée. Elle n’est pas visible.').waitFor();
