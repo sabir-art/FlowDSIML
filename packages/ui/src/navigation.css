@@ -55,8 +55,9 @@
   margin: 0 4px;
   background: var(--fd-color-border);
 }
+/* Sans action avant lui, le filet ne sépare rien : il n'est pas affiché */
 .fd-page-header__actions > .fd-page-header__sep:first-child {
-  margin-left: 0;
+  display: none;
 }
 .fd-page-header__tools {
   display: flex;

@@ -99,7 +99,11 @@ const TOKENS = {
               w: t.getBoundingClientRect().width,
               icon: t.querySelector('svg')?.getBoundingClientRect().width,
             })),
-            divider: !!header.querySelector('.fd-page-header__sep'),
+            // Le filet ne s'affiche que s'il sépare des actions de page des outils
+            divider: (header.querySelector('.fd-page-header__sep')?.getClientRects().length ?? 0) > 0,
+            pageActions: header.querySelectorAll(
+              '.fd-page-header__actions > :not(.fd-page-header__sep, .fd-page-header__tools)',
+            ).length,
             navBg: cs(document.querySelector('.st-nav')).backgroundColor,
             navBorder: cs(document.querySelector('.st-nav')).borderRightWidth,
             sideBg: cs(side).backgroundColor,
@@ -152,7 +156,7 @@ const TOKENS = {
           `${who} : fil « ${group} › ${title} », parents sans soulignement, chevron de 14 px`,
         );
         ok(
-          m.divider &&
+          m.divider === m.pageActions > 0 &&
             m.tools.length === 2 &&
             m.tools[0].name === 'Aide' &&
             /^Notifications/.test(m.tools[1].name) &&
