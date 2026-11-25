@@ -2312,6 +2312,7 @@
       "limit2": "Les liens externes restent visibles mais ne s’ouvrent qu’en ligne.",
       "limit3": "L’archive ne se met pas à jour : refaites-la après une republication.",
       "download": "Télécharger l’archive",
+      "downloadAgain": "Télécharger de nouveau",
       "generating": "Préparation de l’archive…",
       "progress": "Fichiers {{done}} sur {{total}}",
       "progressLabel": "Avancement de l’archive",

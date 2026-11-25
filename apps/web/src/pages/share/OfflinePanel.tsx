@@ -195,14 +195,16 @@ export function OfflinePanel({
         ) : (
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn ${job.status === 'ready' ? 'btn-secondary' : 'btn-primary'}`}
             aria-disabled={off || undefined}
             aria-describedby={blocked ?? 'dif-off-warn'}
             title={!editable ? t('distribute.offline.noRight') : undefined}
             onClick={start}
           >
             <Download aria-hidden="true" />
-            {t('distribute.offline.download')}
+            {job.status === 'ready'
+              ? t('distribute.offline.downloadAgain')
+              : t('distribute.offline.download')}
           </button>
         )}
       </div>

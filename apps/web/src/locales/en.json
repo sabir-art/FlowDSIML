@@ -2312,6 +2312,7 @@
       "limit2": "External links stay visible but only open online.",
       "limit3": "The archive does not update itself: generate it again after republishing.",
       "download": "Download the archive",
+      "downloadAgain": "Download again",
       "generating": "Preparing the archive…",
       "progress": "Files {{done}} of {{total}}",
       "progressLabel": "Archive progress",
