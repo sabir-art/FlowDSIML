@@ -348,6 +348,92 @@ function act(target) {
   await windows(false);
   await windows(true);
 
+  // ===== §3 : le soulignement de l'onglet actif glisse d'un onglet à l'autre (Analytics) =====
+  const tabs = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/analytics`);
+    await page.waitForSelector('.an-tabs2 [role=tab][aria-selected=true]');
+    const tag = reduced ? 'mouvement réduit' : 'onglets';
+    ok((await page.locator('.fd-tab-glide').count()) === 0, `${tag} : premier affichage sans trait mobile`);
+    const r = await page.evaluate(() => {
+      const list = document.querySelector('.an-tabs2');
+      const all = [...list.querySelectorAll('[role=tab]')];
+      const from = all.find((x) => x.getAttribute('aria-selected') === 'true');
+      const to = all[all.indexOf(from) + 1];
+      const rf = from.getBoundingClientRect();
+      const rt = to.getBoundingClientRect();
+      to.click();
+      return new Promise((resolve) => {
+        const frames = [];
+        const t0 = performance.now();
+        const tick = () => {
+          const bar = list.querySelector('.fd-tab-glide');
+          if (bar) {
+            const a = bar.getAnimations()[0];
+            const tm = a?.effect?.getTiming();
+            const rb = bar.getBoundingClientRect();
+            frames.push({
+              left: rb.left,
+              width: rb.width,
+              props: a ? a.effect.getKeyframes().flatMap((k) => Object.keys(k)) : [],
+              duration: tm?.duration,
+              easing: tm?.easing,
+              selBorder: getComputedStyle(to).borderBottomColor,
+            });
+          }
+          if ((frames.length && !bar) || performance.now() - t0 > 2000) {
+            resolve({
+              frames,
+              from: { left: rf.left, width: rf.width },
+              to: { left: rt.left, width: rt.width },
+              endBorder: getComputedStyle(to).borderBottomColor,
+              left: !!list.querySelector('.fd-tab-glide') || list.hasAttribute('data-tab-gliding'),
+            });
+          } else requestAnimationFrame(tick);
+        };
+        tick();
+      });
+    });
+    if (reduced) {
+      ok(r.frames.length === 0, `${tag} : l’onglet change sans trait mobile`);
+    } else {
+      const f = r.frames;
+      ok(f.length >= 3, `onglets : un seul trait mobile pendant ${f.length} image(s)`);
+      ok(
+        f.length > 0 && Math.abs(f[0].left - r.from.left) <= 2 && Math.abs(f[0].width - r.from.width) <= 4,
+        `onglets : le trait part de l’ancien onglet (${Math.round(f[0]?.left)} px × ${Math.round(f[0]?.width)}, ${Math.round(r.from.left)} × ${Math.round(r.from.width)} attendus)`,
+      );
+      ok(
+        f.length > 0 && f[0].duration === 200 && f[0].easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `onglets : 200 ms, ${f[0]?.easing}`,
+      );
+      ok(
+        f.every((x) =>
+          x.props.every((n) => n === 'transform' || /^(offset|easing|composite|computedOffset)$/.test(n)),
+        ),
+        'onglets : transform seul',
+      );
+      ok(
+        f.every((x) => x.selBorder === 'rgba(0, 0, 0, 0)'),
+        'onglets : le soulignement propre du nouvel onglet reste masqué pendant le glissement',
+      );
+      ok(
+        !r.left && r.endBorder !== 'rgba(0, 0, 0, 0)',
+        'onglets : à la fin, trait retiré et soulignement de l’onglet rétabli',
+      );
+    }
+    await ctx.close();
+  };
+  await tabs(false);
+  await tabs(true);
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

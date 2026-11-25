@@ -10,11 +10,13 @@ import './i18n';
 import { applyTheme, getTheme } from './lib/theme';
 import { installDialogFocusLoop } from './lib/dialogFocus';
 import { installTooltips } from '@flowdsiml/ui/tooltip';
+import { installTabGlide } from './lib/tabGlide';
 import { App } from './App';
 
 applyTheme(getTheme());
 installDialogFocusLoop();
 installTooltips();
+installTabGlide();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

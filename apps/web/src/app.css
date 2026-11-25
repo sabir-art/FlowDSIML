@@ -71,6 +71,12 @@
   color: var(--fd-color-text-muted);
   border-bottom: 2px solid transparent;
 }
+/* MOTION-01 §3 : pendant le glissement du soulignement (lib/tabGlide.ts), l'onglet actif laisse le
+   trait mobile tenir sa place */
+[data-tab-gliding] > [role='tab'][aria-selected='true'],
+[data-tab-gliding] > * > [role='tab'][aria-selected='true'] {
+  border-bottom-color: transparent !important;
+}
 .tabs button[aria-selected='true'] {
   color: var(--fd-color-text);
   border-bottom-color: var(--fd-color-primary);
