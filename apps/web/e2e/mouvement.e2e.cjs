@@ -257,6 +257,97 @@ function act(target) {
     await c2.close();
   }
 
+  // ===== §3 : fenêtres, menus et toasts (liste des démos) =====
+  const windows = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/demos`);
+    const trigger = page.locator('.demo-card .menu-trigger').first();
+    await trigger.waitFor();
+    const tag = reduced ? 'mouvement réduit' : 'mouvement';
+    const anim = (el) => {
+      const cs = getComputedStyle(el);
+      const kf = el.getAnimations()[0]?.effect?.getKeyframes?.()[0];
+      return {
+        name: cs.animationName,
+        duration: cs.animationDuration,
+        easing: cs.animationTimingFunction,
+        from: kf ? `${kf.opacity} ${kf.transform}` : null,
+        origin: cs.transformOrigin,
+        props: el
+          .getAnimations()
+          .flatMap((a) =>
+            a.effect
+              .getKeyframes()
+              .flatMap((k) =>
+                Object.keys(k).filter((n) => !/^(offset|easing|composite|computedOffset)$/.test(n)),
+              ),
+          ),
+      };
+    };
+    await trigger.click();
+    const menu = page.locator('#fd-portal .menu-list');
+    await menu.waitFor();
+    const m = await menu.evaluate(anim);
+    if (reduced) {
+      ok(m.name === 'none' || m.duration === '0s', `${tag} : menu sans animation (${m.name}, ${m.duration})`);
+    } else {
+      ok(
+        m.name === 'fd-pop-in' && m.duration === '0.2s' && m.easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `menu : ${m.name}, ${m.duration}, ${m.easing}`,
+      );
+      ok(/^0 scale\(0\.96\)$/.test(m.from || ''), `menu : part de l’opacité 0 et de 96 % (${m.from})`);
+      ok(
+        m.props.every((n) => n === 'opacity' || n === 'transform'),
+        `menu : opacité et transform seulement (${[...new Set(m.props)].join(', ')})`,
+      );
+    }
+    // « Partager » ouvre une fenêtre native
+    await menu.getByRole('menuitem', { name: 'Partager' }).click();
+    const dialog = page.locator('dialog[open]').first();
+    await dialog.waitFor();
+    const d = await dialog.evaluate(anim);
+    if (reduced) {
+      ok(
+        d.name === 'none' || d.duration === '0s',
+        `${tag} : fenêtre sans animation (${d.name}, ${d.duration})`,
+      );
+    } else {
+      ok(
+        d.name === 'fd-modal-in' && d.duration === '0.2s' && d.easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `fenêtre : ${d.name}, ${d.duration}, ${d.easing}`,
+      );
+      ok(
+        /^0 translateY\(8px\) scale\(0\.98\)$/.test(d.from || ''),
+        `fenêtre : part de l’opacité 0, 8 px plus bas, à 98 % (${d.from})`,
+      );
+      ok(
+        d.props.every((n) => n === 'opacity' || n === 'transform'),
+        `fenêtre : opacité et transform seulement (${[...new Set(d.props)].join(', ')})`,
+      );
+      const veil = await dialog.evaluate((el) => {
+        const cs = getComputedStyle(el, '::backdrop');
+        return `${cs.animationName} ${cs.animationDuration}`;
+      });
+      ok(veil === 'fd-modal-veil 0.2s', `fenêtre : voile en fondu (${veil})`);
+    }
+    // Au repos, la fenêtre ne garde aucun transform
+    await dialog.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    ok(
+      (await dialog.evaluate((el) => getComputedStyle(el).transform)) === 'none',
+      `${tag} : fenêtre au repos sans transform`,
+    );
+    await ctx.close();
+  };
+  await windows(false);
+  await windows(true);
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

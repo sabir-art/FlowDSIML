@@ -17,7 +17,7 @@
 }
 /* MOTION-01 : scale(.96) vers 1 et fondu, 200 ms (transform et opacité seulement) */
 .fd-pop[data-ready] {
-  animation: fd-pop-in 200ms var(--fd-motion-ease-standard, ease-out);
+  animation: fd-pop-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard, ease-out);
   transform-origin: top left;
 }
 @keyframes fd-pop-in {

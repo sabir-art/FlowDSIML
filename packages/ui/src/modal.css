@@ -193,17 +193,20 @@
     color: var(--fd-prune-100, #f3d3e2);
   }
 }
-/* MOTION-01 : fondu et légère mise à l'échelle, 200 ms (transform et opacité seulement) */
-.fd-modal[open] {
+/* MOTION-01 §3 : voile en fondu ; boîte en fondu, 8 px plus bas et à 98 %, 200 ms (transform et opacité
+   seulement). Vaut pour toutes les fenêtres natives de l'app, anciens gabarits compris. */
+.fd-modal[open],
+dialog[open]:not(.fd-modal) {
   animation: fd-modal-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
-.fd-modal[open]::backdrop {
+.fd-modal[open]::backdrop,
+dialog[open]:not(.fd-modal)::backdrop {
   animation: fd-modal-veil var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 @keyframes fd-modal-in {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: translateY(8px) scale(0.98);
   }
 }
 @keyframes fd-modal-veil {
@@ -213,7 +216,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .fd-modal[open],
-  .fd-modal[open]::backdrop {
+  .fd-modal[open]::backdrop,
+  dialog[open]:not(.fd-modal),
+  dialog[open]:not(.fd-modal)::backdrop {
     animation: none;
   }
 }

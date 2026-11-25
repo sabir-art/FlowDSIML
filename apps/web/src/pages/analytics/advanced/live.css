@@ -219,7 +219,7 @@
   vertical-align: middle;
 }
 .mk .lv-table tbody tr {
-  animation: lv-in 0.2s var(--fd-motion-ease-standard, ease);
+  animation: lv-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard, ease);
 }
 @keyframes lv-in {
   from {
