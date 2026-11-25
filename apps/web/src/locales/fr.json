@@ -2597,7 +2597,7 @@
     "exportWhat_pdf": "Un guide pas à pas, à imprimer ou à joindre.",
     "exportWhat_gif": "Une animation courte, pour un e-mail ou une messagerie.",
     "exportWhat_mp4": "Une vidéo de la démo, avec sous-titres si besoin.",
-    "clickToStartHint": "Une couverture et un bouton « Lancer la démo » avant le chargement"
+    "clickToStartHint": "Une couverture et un bouton « Lancer la démo » avant le chargement"
   },
   "analytics": {
     "title": "Analytics",
@@ -4867,14 +4867,20 @@
     "emailing": {
       "title": "Outils d'e-mailing",
       "body": "Ajouter les leads à une liste ou déclencher un scénario d'e-mails.",
-      "items": ["Listes et scénarios", "Respect du consentement du formulaire"],
+      "items": [
+        "Listes et scénarios",
+        "Respect du consentement du formulaire"
+      ],
       "action": "Connecter",
       "why": "Nécessite des comptes et des clés des éditeurs. En attendant : webhooks."
     },
     "enrich": {
       "title": "Enrichissement des visiteurs",
       "body": "Identifier l'organisation d'un visiteur anonyme.",
-      "items": ["Entreprise à partir du réseau", "Taille, secteur"],
+      "items": [
+        "Entreprise à partir du réseau",
+        "Taille, secteur"
+      ],
       "action": "Activer",
       "why": "Non prévu sans analyse juridique : traitement de données personnelles par un tiers (RGPD)."
     },
