@@ -1192,6 +1192,9 @@ async function appPage(b, s, theme, check) {
     );
   if (s.open) await s.open(p);
   await p.waitForTimeout(300);
+  // MOTION-01 : une fenêtre qui se ferme garde son contenu (inerte) le temps de sa sortie ; sous charge
+  // elle peut durer plus que le délai ci-dessus : on attend qu'elle soit partie avant de mesurer
+  await p.waitForFunction(() => !document.querySelector('.fd-modal__box[inert]'), null, { timeout: 10000 });
   const v = await (check ? check(p, s) : audit(p, s.exclude));
   await ctx.close();
   return v;
