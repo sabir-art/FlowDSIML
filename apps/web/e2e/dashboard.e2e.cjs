@@ -127,7 +127,11 @@ const SHOTS = process.env.SHOTS_DIR;
     'mobile : barre latérale repliée',
   );
   await m.getByRole('button', { name: 'Ouvrir le menu' }).click();
-  await m.waitForTimeout(300);
+  // MOTION-01 : le tiroir glisse en 320 ms ; on mesure une fois l'animation finie
+  await m.waitForTimeout(50);
+  await m
+    .locator('.sidebar')
+    .evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
   ok(
     await m.locator('.sidebar').evaluate((el) => el.getBoundingClientRect().left >= 0),
     'mobile : menu ouvert au tap',
