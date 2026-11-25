@@ -64,11 +64,11 @@ Deno.test('providerRefusal : la cause est nommée sans secret, le message du fou
   // Quota épuisé : le fournisseur répond 401, le code passe avant le statut
   assertEquals(providerRefusal(401, d('quota_exceeded')), {
     error: 'PROVIDER_QUOTA',
-    http: 503,
+    http: 424,
     log: '401 quota_exceeded',
   });
   // 402 : l'offre du compte ne permet pas la demande (ce n'est pas un quota épuisé)
-  assertEquals(providerRefusal(402, null), { error: 'PROVIDER_PLAN', http: 502, log: '402' });
+  assertEquals(providerRefusal(402, null), { error: 'PROVIDER_PLAN', http: 424, log: '402' });
   assertEquals(providerRefusal(402, d('paid_plan_required')).error, 'PROVIDER_PLAN');
   // Sans code : le nom de la première clé de detail, jamais une valeur
   assertEquals(providerRefusal(402, { detail: { message: 'texte libre cle-factice' } }).log, '402 (message)');
@@ -77,7 +77,7 @@ Deno.test('providerRefusal : la cause est nommée sans secret, le message du fou
   assertEquals(providerRefusal(401, d('missing_permissions')).error, 'PROVIDER_KEY');
   assertEquals(providerRefusal(401, d('detected_unusual_activity')), {
     error: 'PROVIDER_KEY',
-    http: 502,
+    http: 424,
     log: '401 detected_unusual_activity',
   });
   assertEquals(providerRefusal(403, 'pas du JSON').error, 'PROVIDER_KEY');

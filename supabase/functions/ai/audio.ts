@@ -150,7 +150,11 @@ export const mp3DurationMs = (bytes: number) => Math.round((bytes * 8) / 128);
  */
 export interface ProviderRefusal {
   error: 'PROVIDER_KEY' | 'PROVIDER_QUOTA' | 'PROVIDER_PLAN' | 'PROVIDER_VOICE' | 'PROVIDER';
-  http: 502 | 503;
+  /**
+   * 424 pour un refus nommé : une réponse 502 ou 503 peut être remplacée en chemin par la passerelle,
+   * et l'app ne recevrait plus le code (constaté en production : message générique).
+   */
+  http: 424 | 502 | 503;
   /** Pour le journal : « 401 quota_exceeded », « network »… */
   log: string;
 }
@@ -167,13 +171,13 @@ export function providerRefusal(status: number | null, body: unknown): ProviderR
       : '';
   const log = code ? `${status} ${code}` : firstKey ? `${status} (${firstKey})` : String(status);
   // Le fournisseur répond 401 aussi pour un quota épuisé : le code passe avant le statut
-  if (/quota|credit|limit_reached/.test(code)) return { error: 'PROVIDER_QUOTA', http: 503, log };
+  if (/quota|credit|limit_reached/.test(code)) return { error: 'PROVIDER_QUOTA', http: 424, log };
   // Offre du compte insuffisante (voix de bibliothèque avec l'offre gratuite, etc.) : 402
   if (/paid_plan|plan_required|payment|subscription|free_users|upgrade/.test(code) || status === 402)
-    return { error: 'PROVIDER_PLAN', http: 502, log };
-  if (/voice|model/.test(code) || status === 404) return { error: 'PROVIDER_VOICE', http: 502, log };
+    return { error: 'PROVIDER_PLAN', http: 424, log };
+  if (/voice|model/.test(code) || status === 404) return { error: 'PROVIDER_VOICE', http: 424, log };
   if (status === 401 || status === 403 || /api_key|permission|unusual_activity|unauthorized/.test(code))
-    return { error: 'PROVIDER_KEY', http: 502, log };
+    return { error: 'PROVIDER_KEY', http: 424, log };
   return { error: 'PROVIDER', http: status === 429 || status >= 500 ? 503 : 502, log };
 }
 
