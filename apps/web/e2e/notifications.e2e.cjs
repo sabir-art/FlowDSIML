@@ -10,7 +10,14 @@ const SACHA = '0b5c1f0e-0000-4000-8000-0000000000b2';
 // Identifiant au format UUID pour la mention stockée (l'utilisateur du faux Supabase est « u-alice »)
 const ALICE_UUID = '0b5c1f0e-0000-4000-8000-0000000000a1';
 
-const ago = (min) => new Date(Date.now() - min * 60_000).toISOString();
+// Horloge figée à midi : les groupes par date ne dépendent pas de l'heure du lancement (un lancement à
+// minuit faisait glisser « Aujourd'hui » vers « Cette semaine »). Le dernier midi passé : jamais dans le
+// futur, pour que la session du faux serveur reste valable.
+const NOW = (() => {
+  const noon = new Date().setHours(12, 0, 0, 0);
+  return noon <= Date.now() ? noon : noon - 86400_000;
+})();
+const ago = (min) => new Date(NOW - min * 60_000).toISOString();
 
 function withNotifications() {
   const state = seed();
@@ -71,6 +78,7 @@ function withNotifications() {
 (async () => {
   const b = await chromium.launch();
   const page = await (await themedContext(b, { viewport: { width: 1440, height: 900 } })).newPage();
+  await page.clock.setFixedTime(NOW);
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const ok = (cond, label) => {
