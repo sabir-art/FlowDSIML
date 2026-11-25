@@ -22,6 +22,8 @@ import {
   parseCaptions,
   parseVoice,
   providerRefusal,
+  resolveVoices,
+  type AccountVoice,
 } from './audio.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -78,23 +80,27 @@ async function reserveOr(ws: string, uid: string, feature: string, audio = 0): P
  * Voix prédéfinies réellement disponibles sur le compte (GET /voices, cache d'une heure) : les voix
  * absentes sont masquées. En cas d'erreur du fournisseur, la liste complète est gardée sans être mise en cache.
  */
-let catalog: { at: number; keys: string[] } | null = null;
-async function availableVoices(key: string): Promise<string[]> {
-  if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.keys;
+let catalog: { at: number; map: Record<string, string> } | null = null;
+/** L62 : voix proposée → identifiant d'une voix DU COMPTE (resolveVoices), cache d'une heure. */
+async function voiceMap(key: string): Promise<Record<string, string>> {
+  if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.map;
   const res = await fetch(`${ELEVEN}/voices?show_legacy=true`, { headers: { 'xi-api-key': key } }).catch(
     () => null,
   );
   if (!res?.ok) {
     console.error('ai: voices', await refusalOf(res).then((r) => r.log));
-    return Object.keys(VOICES);
+    return { ...VOICES };
   }
-  const out = (await res.json().catch(() => ({}))) as { voices?: Array<{ voice_id?: string }> };
-  const ids = new Set((out.voices ?? []).map((v) => v.voice_id));
-  const keys = Object.keys(VOICES).filter((k) => ids.has(VOICES[k]));
-  // Aucune des voix prévues sur le compte : c'est un réglage à corriger, le journal le dit
-  if (!keys.length) console.error('ai: voices none_of_catalog', ids.size);
-  catalog = { at: Date.now(), keys };
-  return keys;
+  const out = (await res.json().catch(() => ({}))) as { voices?: AccountVoice[] };
+  const map = resolveVoices(out.voices ?? []);
+  // Combien de voix prévues existent telles quelles sur le compte, et combien ont été remplacées
+  const kept = Object.keys(map).filter((k) => map[k] === VOICES[k]).length;
+  console.log(
+    'ai: voices',
+    `account=${(out.voices ?? []).length} kept=${kept} mapped=${Object.keys(map).length - kept}`,
+  );
+  catalog = { at: Date.now(), map };
+  return map;
 }
 
 /** Refus du fournisseur : statut et code court, jamais le message (il peut reprendre le texte envoyé). */
@@ -111,8 +117,8 @@ async function purge(key: string, url: string, what: string) {
 
 /** Extrait d'une voix (fourni par le fournisseur) : aucun texte envoyé, aucun quota consommé. */
 async function voiceSample(key: string, voice: string) {
-  const id = VOICES[voice];
-  if (!id || !(await availableVoices(key)).includes(voice)) return json(400, { error: 'BAD_VOICE' });
+  const id = (await voiceMap(key))[voice];
+  if (!id) return json(400, { error: 'BAD_VOICE' });
   const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
   if (!meta?.ok) {
     const r = await refusalOf(meta);
@@ -149,7 +155,8 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     const { data: cfg } = await admin.rpc('ai_config', { p_ws: ws });
     const c = cfg as { enabled?: boolean; features?: Record<string, boolean> } | null;
     if (!c?.enabled || !c.features?.voice) return json(403, { error: 'AI_DISABLED' });
-    if (body.task === 'voice_list') return json(200, { result: { voices: await availableVoices(key) } });
+    if (body.task === 'voice_list')
+      return json(200, { result: { voices: Object.keys(await voiceMap(key)) } });
     return voiceSample(key, String(input.voice ?? ''));
   }
   let parsed;
@@ -170,10 +177,11 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
 
   if (body.task === 'voice') {
     const v = parsed as ReturnType<typeof parseVoice>;
-    if (!(await availableVoices(key)).includes(v.voice)) return json(400, { error: 'BAD_VOICE' });
+    const voiceId = (await voiceMap(key))[v.voice];
+    if (!voiceId) return json(400, { error: 'BAD_VOICE' });
     const blocked = await reserveOr(ws, uid, 'voice', v.estimate);
     if (blocked) return blocked;
-    const res = await fetch(`${ELEVEN}/text-to-speech/${VOICES[v.voice]}?output_format=${TTS_FORMAT}`, {
+    const res = await fetch(`${ELEVEN}/text-to-speech/${voiceId}?output_format=${TTS_FORMAT}`, {
       method: 'POST',
       headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
       body: JSON.stringify({ text: v.text, model_id: TTS_MODEL, voice_settings: { speed: v.speed } }),

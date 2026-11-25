@@ -69,9 +69,11 @@ export function useAudioText() {
       ? t('ai.audio.providerKey')
       : code === 'PROVIDER_QUOTA'
         ? t('ai.audio.providerQuota')
-        : code === 'PROVIDER_VOICE'
-          ? t('ai.audio.providerVoice')
-          : '';
+        : code === 'PROVIDER_PLAN'
+          ? t('ai.audio.providerPlan')
+          : code === 'PROVIDER_VOICE'
+            ? t('ai.audio.providerVoice')
+            : '';
   return {
     disabled: (f: AudioFeature) => t(`ai.audio.disabled_${f}`),
     quota,

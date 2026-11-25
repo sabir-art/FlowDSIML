@@ -204,6 +204,8 @@ function prepare(over = {}) {
     ['PROVIDER_KEY', 'Le service de voix refuse la clé de l’espace. Prévenez un administrateur.'],
     ['PROVIDER_QUOTA', 'Les crédits du service de voix sont épuisés. Prévenez un administrateur.'],
     ['PROVIDER_VOICE', 'Cette voix n’est pas disponible sur le service de voix.'],
+    // Refus 402 du fournisseur (offre gratuite, voix réservée à une offre payante)
+    ['PROVIDER_PLAN', 'L’offre du compte du service de voix ne permet pas cette demande.'],
   ]) {
     state.aiProvider = code;
     await panel.getByRole('button', { name: 'Écouter un exemple' }).click();

@@ -5438,6 +5438,7 @@
     "audio": {
       "providerKey": "Le service de voix refuse la clé de l’espace. Prévenez un administrateur.",
       "providerQuota": "Les crédits du service de voix sont épuisés. Prévenez un administrateur.",
+      "providerPlan": "L’offre du compte du service de voix ne permet pas cette demande. Essayez une autre voix ou prévenez un administrateur.",
       "providerVoice": "Cette voix n’est pas disponible sur le service de voix. Choisissez-en une autre ou prévenez un administrateur.",
       "disabled_voice": "Voix de synthèse désactivée dans cet espace. Un administrateur peut l’activer dans Paramètres > Assistance IA.",
       "disabled_captions": "Sous-titres automatiques désactivés dans cet espace. Un administrateur peut les activer dans Paramètres > Assistance IA.",

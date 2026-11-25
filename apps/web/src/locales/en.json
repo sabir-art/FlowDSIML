@@ -5438,6 +5438,7 @@
     "audio": {
       "providerKey": "The voice service rejects the workspace key. Tell an administrator.",
       "providerQuota": "The voice service credits are used up. Tell an administrator.",
+      "providerPlan": "The voice service account plan does not allow this request. Try another voice or tell an administrator.",
       "providerVoice": "This voice is not available on the voice service. Pick another one or tell an administrator.",
       "disabled_voice": "Text-to-speech is turned off in this workspace. An admin can turn it on in Settings > AI assistance.",
       "disabled_captions": "Automatic captions are turned off in this workspace. An admin can turn them on in Settings > AI assistance.",
