@@ -2,6 +2,8 @@ import '@flowdsiml/ui/tokens.css';
 import '@/lib/fonts.css';
 import './style.css';
 import { browser } from 'wxt/browser';
+import { strings } from '@/lib/i18n';
+import { ADD_KEY, type AddTarget } from '@/lib/external';
 import {
   Box,
   ChartNoAxesColumn,
@@ -676,7 +678,13 @@ async function main() {
 
   pages = (await htmlStore.all()).sort((a, b) => a.order - b.order);
   const target = (await browser.storage.local.get('fd.htmlReview'))['fd.htmlReview'] as
-    { workspaceId: string; title: string; appendTo?: string } | undefined;
+    | {
+        workspaceId: string;
+        title: string;
+        appendTo?: string;
+        addTo?: { demoId: string; title: string; after: { n: number; title: string } | null } | null;
+      }
+    | undefined;
   const send = $<HTMLButtonElement>('send');
   if (!pages.length || !target) {
     alertMsg(s.nothing);
@@ -724,8 +732,32 @@ async function main() {
     } catch {
       /* nom illisible : libellé sans nom */
     }
-    $('kline').replaceChildren(icon(Box), name ? fmt(s.append, { name }) : s.appendUnnamed);
+    // EXT-02 §8.4 : ajout à une démo ouverte dans l'éditeur : destination et « Ajouter n étapes »
+    const add = target.addTo;
+    $('kline').replaceChildren(
+      icon(Box),
+      add
+        ? (add.after ? strings.addDestAfter : strings.addDestStart)
+            .replace('{{demo}}', add.title)
+            .replace('{{n}}', String(add.after?.n ?? ''))
+            .replace('{{title}}', add.after?.title ?? '')
+        : name
+          ? fmt(s.append, { name })
+          : s.appendUnnamed,
+    );
     $('kline').hidden = false;
+    if (add) {
+      const label = () => {
+        const n = toSend().length;
+        send.textContent = (n === 1 ? strings.addSend_one : strings.addSend_other).replace(
+          '{{count}}',
+          String(n),
+        );
+      };
+      label();
+      // Une page retirée ou gardée change le nombre d'étapes ajoutées
+      document.addEventListener('click', () => requestAnimationFrame(label));
+    }
   } else renderKind();
 
   renderAll();
@@ -742,7 +774,7 @@ async function main() {
     hideToast();
     alertMsg(null);
     try {
-      const { demoId, dropped } = await sendHtml(
+      const { demoId, dropped, stepIds } = await sendHtml(
         batch,
         {
           workspaceId: target.workspaceId,
@@ -757,8 +789,32 @@ async function main() {
       await htmlStore.clear();
       await browser.storage.local.remove(['fd.htmlReview', 'fd.attach']);
       const url = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
+      void supabase
+        .rpc('extension_report', { p_version: browser.runtime.getManifest().version, p_demo: demoId })
+        .then(
+          () => undefined,
+          () => undefined,
+        );
+      // EXT-02 §8.4 : l'éditeur lit les étapes créées et les place ; l'extension lui rend la main
+      let back: { windowId?: number } | null = null;
+      if (target.addTo) {
+        const t = (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined;
+        if (t && t.demoId === demoId) {
+          await browser.storage.local.set({ [ADD_KEY]: { ...t, state: 'sent', stepIds } });
+          back =
+            t.editorTabId !== null
+              ? ((await browser.tabs.update(t.editorTabId, { active: true }).catch(() => null)) ?? null)
+              : null;
+        }
+      }
       if (!dropped.length) {
         $('progress').textContent = s.sent;
+        if (back) {
+          if (back.windowId !== undefined)
+            await browser.windows.update(back.windowId, { focused: true }).catch(() => undefined);
+          const self = await browser.tabs.getCurrent();
+          if (self?.id !== undefined) return void browser.tabs.remove(self.id);
+        }
         location.href = url;
         return;
       }

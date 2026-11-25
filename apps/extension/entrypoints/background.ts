@@ -413,7 +413,7 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
   const adding =
     wanted &&
     wanted.state === 'pending' &&
-    mode === 'clicks' &&
+    mode === (wanted.mode ?? 'clicks') &&
     !req.fill &&
     wanted.workspaceId === req.workspaceId
       ? wanted
@@ -673,7 +673,11 @@ async function onAdd(
   }
   if (req.type === 'fd:add-focus') {
     if (!mine) return { ok: false, error: 'none' };
-    const review = (await browser.tabs.query({ url: browser.runtime.getURL('/review.html') }))[0];
+    const review = (
+      await browser.tabs.query({
+        url: [browser.runtime.getURL('/review.html'), browser.runtime.getURL('/html-review.html')],
+      })
+    )[0];
     const id = mine.state === 'review' ? review?.id : mine.captureTabId;
     if (id === undefined || id === null) return { ok: false, error: 'tab' };
     const tab = await browser.tabs.update(id, { active: true }).catch(() => null);
@@ -685,8 +689,11 @@ async function onAdd(
     if (!mine) return { ok: true };
     const s = await getState();
     if (s.recording && s.addTo?.demoId === req.demoId) await cancel();
-    if (mine.state === 'review') await pending.clear();
-    await browser.storage.local.remove([ADD_KEY, 'fd.review']);
+    if (mine.state === 'review') {
+      await pending.clear();
+      await htmlStore.clear();
+    }
+    await browser.storage.local.remove([ADD_KEY, 'fd.review', 'fd.htmlReview']);
     return { ok: true };
   }
   if (req.type !== 'fd:add-steps') return { ok: false, error: 'schema' };
@@ -720,6 +727,7 @@ async function onAdd(
     editorTabId: sender.tab?.id ?? null,
     captureTabId: tab.id,
     stepIds: [],
+    mode: req.mode,
   };
   await saveTarget(target);
   const origin = originOf(req.url)!;
@@ -727,7 +735,14 @@ async function onAdd(
   // Sans accès au site : l'onglet est ouvert, le popup demande l'autorisation puis démarre
   if (!granted) return { ok: true, started: false };
   await tabLoaded(tab.id);
-  await start({ type: 'fd:start', workspaceId: req.workspaceId, title: '', tabId: tab.id, mode: 'clicks' });
+  await start({
+    type: 'fd:start',
+    workspaceId: req.workspaceId,
+    title: '',
+    tabId: tab.id,
+    mode: req.mode,
+    followTabs: req.mode === 'html',
+  });
   return { ok: true, started: true };
 }
 
@@ -774,13 +789,24 @@ async function stop(): Promise<RecordingStatus> {
     if (state.workspaceId && (await htmlStore.count()) > 0) {
       // EXT-CONNECT : capture rattachée à un Sandbox du même espace (posée par l'app)
       const attach = (await browser.storage.local.get('fd.attach'))['fd.attach'] as PendingAttach | undefined;
-      const appendTo =
-        attach && attach.workspaceId === state.workspaceId && Date.now() - attach.at < ATTACH_TTL_MS
+      const appendTo = state.addTo
+        ? state.addTo.demoId
+        : attach && attach.workspaceId === state.workspaceId && Date.now() - attach.at < ATTACH_TTL_MS
           ? attach.demoId
           : undefined;
       await browser.storage.local.set({
-        'fd.htmlReview': { workspaceId: state.workspaceId, title: state.title || 'Nouvelle démo', appendTo },
+        'fd.htmlReview': {
+          workspaceId: state.workspaceId,
+          title: state.title || 'Nouvelle démo',
+          appendTo,
+          // EXT-02 §8 : ajout à la démo ouverte dans l'éditeur (étapes HTML)
+          addTo: state.addTo ?? null,
+        },
       });
+      if (state.addTo) {
+        const t = await addTarget();
+        if (t && t.demoId === state.addTo.demoId) await saveTarget({ ...t, state: 'review' });
+      }
       await browser.tabs.create({ url: browser.runtime.getURL('/html-review.html') });
     }
     return setState({ ...EMPTY });
