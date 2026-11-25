@@ -535,6 +535,9 @@ jobs:
             sleep 1
           done
           node e2e/banc/etat-html.cjs > /tmp/banc-etat.json
+          # Même détection en mode captures d'écran : données fictives repérées, aucun bouton flouté à tort
+          node e2e/banc/etat-captures.cjs | tee /tmp/banc-captures.log
+          ! grep -q '^NOT OK' /tmp/banc-captures.log
       - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
         if: always()
         env:
