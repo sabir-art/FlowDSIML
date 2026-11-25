@@ -89,7 +89,9 @@ export function Checklist({
             </button>
           </div>
           <div class="p-checklist-bar" aria-hidden="true">
-            <div style={{ width: `${items.length ? (done / items.length) * 100 : 0}%` }} />
+            <div
+              style={{ transform: `translateX(${(items.length ? (done / items.length) * 100 : 0) - 100}%)` }}
+            />
           </div>
           <ol>
             {items.map((it) => (

@@ -180,7 +180,7 @@ jobs:
       - name: MOTION-01 scène de l’éditeur (FLIP 0,32 s), fenêtres (entrée et sortie), menus, onglets et pastille, barre latérale et Dossiers, squelette, toasts et liste des étapes (FLIP), mouvement réduit
         if: always()
         run: cd apps/web && node e2e/mouvement.e2e.cjs
-      - name: MOTION-01 §6 garde des feuilles de style (aucune transition sur une propriété de mise en page, aucune durée en dur)
+      - name: MOTION-01 §6 garde des feuilles de style, app et lecteur (aucune transition sur une propriété de mise en page, aucune durée en dur)
         if: always()
         run: cd apps/web && node e2e/mouvement-regles.e2e.cjs
       - name: Bulle « Afficher « Précédent » » (désactivé à l'étape 1, aperçu à l'étape 2, toutes les étapes)

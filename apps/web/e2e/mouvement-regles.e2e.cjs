@@ -1,11 +1,12 @@
 /**
- * MOTION-01 §6, points 3 et 6 : garde statique sur les feuilles de style de l'app (apps/web/src et
- * packages/ui/src ; le lecteur a ses propres styles, hors de cette passe).
+ * MOTION-01 §6, points 3 et 6 : garde statique sur les feuilles de style de l'app (apps/web/src,
+ * packages/ui/src) et du lecteur (apps/player/src, packages/player-core/src).
  *  - aucune transition ni animation ne cible une propriété de mise en page (width, height, top, left,
  *    right, bottom, margin, padding, flex-basis, grid-template-columns, ni « all ») : on anime
  *    `transform` et `opacity` ;
  *  - aucune durée de transition ou d'animation n'est écrite en dur (ms, s) hors du fichier de jetons :
- *    on passe par `--fd-motion-duration-*`.
+ *    on passe par `--fd-motion-duration-*` (app) ou `--p-motion-duration-*` (lecteur, définis en tête
+ *    de player-core.css).
  * Les exceptions sont listées ici, chacune avec sa raison.
  * Usage : node e2e/mouvement-regles.e2e.cjs (aucun serveur nécessaire)
  */
@@ -13,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
-const DIRS = ['apps/web/src', 'packages/ui/src'];
+const DIRS = ['apps/web/src', 'packages/ui/src', 'apps/player/src', 'packages/player-core/src'];
 /** Fichier des jetons (généré) : seul endroit où une durée s'écrit en clair. */
 const TOKENS = ['packages/ui/src/tokens.css'];
 /** Exceptions : fichier, extrait de la déclaration, raison. */
@@ -27,6 +28,11 @@ const ALLOWED = [
     file: 'packages/ui/src/base.css',
     has: '0.01ms !important',
     why: 'mouvement réduit : remise à zéro globale des durées',
+  },
+  {
+    file: 'apps/player/src/player.css',
+    has: '0.01ms !important',
+    why: 'mouvement réduit : remise à zéro globale des durées du lecteur',
   },
 ];
 
@@ -69,8 +75,8 @@ const split = (value, sep) => {
   return out;
 };
 
-const layout = [];
-const literal = [];
+const layout = new Set();
+const literal = new Set();
 const allowedSeen = new Set();
 let rules = 0;
 for (const file of files) {
@@ -97,7 +103,7 @@ for (const file of files) {
     for (const part of split(value.replace(/!important/g, ''), ',')) {
       const words = split(part, ' ');
       // Durées en dur : tout mot « 120ms » ou « 0.2s » (une valeur nulle ne compte pas)
-      if (words.some((w) => DURATION.test(w) && parseFloat(w) !== 0)) literal.push(`${at(m.index)} ${decl}`);
+      if (words.some((w) => DURATION.test(w) && parseFloat(w) !== 0)) literal.add(`${at(m.index)} ${decl}`);
       if ((prop === 'transition' || prop === 'transition-property') && !words.includes('none')) {
         // La propriété animée : le mot qui n'est ni une durée, ni une courbe, ni une fonction
         const names = words.filter(
@@ -105,7 +111,7 @@ for (const file of files) {
         );
         // Sans nom de propriété, une transition vaut pour « all »
         const target = names.length ? names : prop === 'transition' ? ['all'] : [];
-        if (target.some((n) => LAYOUT.test(n) && n !== 'none')) layout.push(`${at(m.index)} ${decl}`);
+        if (target.some((n) => LAYOUT.test(n) && n !== 'none')) layout.add(`${at(m.index)} ${decl}`);
       }
     }
   }
@@ -129,18 +135,18 @@ for (const file of files) {
         if (name && !name.startsWith('--')) props.add(name);
       }
     const bad = [...props].filter((p) => LAYOUT.test(p));
-    if (bad.length) layout.push(`${at(m.index)} @keyframes ${m[1]} anime ${bad.join(', ')}`);
+    if (bad.length) layout.add(`${at(m.index)} @keyframes ${m[1]} anime ${bad.join(', ')}`);
   }
 }
 
 ok(files.length > 20 && rules > 100, `${files.length} feuilles de style lues, ${rules} règles de mouvement`);
 ok(
-  layout.length === 0,
-  `aucune transition ni animation sur une propriété de mise en page${layout.length ? ` :\n  ${layout.join('\n  ')}` : ''}`,
+  layout.size === 0,
+  `aucune transition ni animation sur une propriété de mise en page${layout.size ? ` :\n  ${[...layout].join('\n  ')}` : ''}`,
 );
 ok(
-  literal.length === 0,
-  `aucune durée en dur hors des jetons${literal.length ? ` :\n  ${literal.join('\n  ')}` : ''}`,
+  literal.size === 0,
+  `aucune durée en dur hors des jetons${literal.size ? ` :\n  ${[...literal].join('\n  ')}` : ''}`,
 );
 // Mouvement réduit : un indicateur de chargement (rotation, barre indéterminée) n'est jamais figé ; il bat
 // en opacité seule, sans déplacement

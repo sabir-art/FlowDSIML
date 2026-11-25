@@ -314,7 +314,9 @@ export function Quiz({
           aria-valuenow={Math.max(answered, qi + 1)}
         >
           {/* F2-03 : la question en cours compte (1 sur 3 : environ 33 %) */}
-          <div style={{ width: `${(Math.max(answered, qi + 1) / order.length) * 100}%` }} />
+          <div
+            style={{ transform: `translateX(${(Math.max(answered, qi + 1) / order.length) * 100 - 100}%)` }}
+          />
         </div>
         <fieldset class="p-quiz-fieldset" aria-describedby={`${id}-hint`}>
           <legend tabIndex={-1} ref={legendRef}>

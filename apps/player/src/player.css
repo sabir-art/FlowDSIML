@@ -160,7 +160,7 @@ body {
 .p-zoom {
   position: absolute;
   inset: 0;
-  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform var(--p-motion-duration-zoom) var(--p-motion-ease-zoom);
 }
 .p-img {
   width: 100%;
@@ -181,7 +181,7 @@ body {
   pointer-events: none;
 }
 .p-img-out.is-go {
-  animation: p-img-out 200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: p-img-out var(--p-motion-duration-base) var(--p-motion-ease-standard) forwards;
 }
 @keyframes p-img-out {
   to {
@@ -189,7 +189,7 @@ body {
   }
 }
 .p-stage.is-step-change > .p-tip {
-  animation: p-tip-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: p-tip-in var(--p-motion-duration-base) var(--p-motion-ease-standard);
 }
 @keyframes p-tip-in {
   from {
@@ -322,10 +322,11 @@ body {
   overflow: hidden;
 }
 .p-progress > div {
+  /* MOTION-01 §6 : remplissage pleine largeur, déplacé dans la piste (overflow: hidden) */
   height: 100%;
   background: var(--p-primary);
   border-radius: 3px;
-  transition: width 0.3s;
+  transition: transform var(--p-motion-duration-slow) var(--p-motion-ease-standard);
 }
 .p-count {
   font-size: 12px;
@@ -437,18 +438,7 @@ body {
 }
 
 /* PL2 : pastilles et bulle suivent le zoom de l'image (coordonnées écran) sans être agrandies */
-.p-stage > .p-beacon,
-.p-stage > .p-tip {
-  transition:
-    left 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
-    top 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .p-stage > .p-beacon,
-  .p-stage > .p-tip {
-    transition: none;
-  }
-}
+/* MOTION-01 §6 : pastilles et bulle suivent le zoom par translate (Player.tsx), jamais par left/top */
 
 /* PL4 : sous 480 px, titre sur 2 lignes au plus, CTA de l'en-tête compact et sans icône */
 @media (max-width: 479px) {
@@ -605,8 +595,8 @@ a.p-btn:hover {
   font-weight: 600;
   cursor: pointer;
   transition:
-    border-color 0.15s,
-    background 0.15s;
+    border-color var(--p-motion-duration-fast),
+    background var(--p-motion-duration-fast);
 }
 .p-choice:hover {
   border-color: var(--p-primary);
@@ -694,7 +684,7 @@ a.p-btn:hover {
   height: 100%;
   border-radius: 3px;
   background: #f39200;
-  transition: width 0.3s;
+  transition: transform var(--p-motion-duration-slow) var(--p-motion-ease-standard);
 }
 .p-checklist ol {
   list-style: none;
@@ -786,7 +776,7 @@ a.p-btn:hover {
   height: 100%;
   border-radius: 999px;
   background: var(--p-primary);
-  transition: width 0.3s;
+  transition: transform var(--p-motion-duration-slow) var(--p-motion-ease-standard);
 }
 .p-quiz-fieldset {
   border: 0;
@@ -974,7 +964,7 @@ a.p-btn:hover {
   /* Non validé : ardoise (4,5:1 sur la piste claire) ; validé : couleur principale, contrôlée (--p-ring-pass) */
   stroke: var(--p-ring-fail, #5b6675);
   stroke-linecap: round;
-  animation: p-ring-draw 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: p-ring-draw var(--p-motion-duration-zoom) var(--p-motion-ease-zoom);
 }
 .p-ring.is-pass .p-ring__arc {
   stroke: var(--p-ring-pass, var(--p-primary));
@@ -2582,7 +2572,7 @@ h1.p-title {
   inset: -2px;
   border-radius: 50%;
   pointer-events: none;
-  animation: p-halo 1.8s infinite;
+  animation: p-halo var(--p-motion-duration-pulse) infinite;
 }
 @keyframes p-halo {
   0% {
@@ -2988,10 +2978,10 @@ h1.p-title {
 }
 /* Passage à un autre onglet : l'onglet s'active, puis la capture apparaît */
 .p-win.is-switch .p-tab.is-active {
-  animation: p-tab-on 0.3s ease-out both;
+  animation: p-tab-on var(--p-motion-duration-slow) ease-out both;
 }
 .p-win.is-switch > .p-stage {
-  animation: p-shot-in 0.35s 0.2s ease-out both;
+  animation: p-shot-in var(--p-motion-duration-slow) var(--p-motion-duration-base) ease-out both;
 }
 @keyframes p-tab-on {
   from {
@@ -3048,7 +3038,7 @@ h1.p-title {
   height: 1.1em;
   margin-left: 1px;
   background: currentColor;
-  animation: p-caret 1s steps(1) infinite;
+  animation: p-caret var(--p-motion-duration-loop) steps(1) infinite;
 }
 @keyframes p-caret {
   50% {

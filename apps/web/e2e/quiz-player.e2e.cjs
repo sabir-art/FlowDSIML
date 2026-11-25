@@ -141,13 +141,16 @@ const manifest = {
   await page.locator('.p-controls [aria-label="Étape suivante"]').click();
   await page.getByRole('button', { name: 'Passer au quiz' }).click();
   await page.waitForSelector('.p-quiz-card');
-  // F2-03 : la question en cours compte dans la barre (1 sur 3 : environ 33 %)
+  // F2-03 : la question en cours compte dans la barre (1 sur 3 : environ 33 %). Le remplissage est
+  // pleine largeur, déplacé dans la piste (MOTION-01 §6) : on mesure sa part visible, une fois en place
+  const shown = () => {
+    const track = document.querySelector('.p-quiz-progress').getBoundingClientRect();
+    const fill = document.querySelector('.p-quiz-progress > div').getBoundingClientRect();
+    return (fill.right - track.left) / track.width;
+  };
+  await page.waitForFunction(`Math.abs((${shown})() - 1 / 3) < 0.02`).catch(() => undefined);
   ok(
-    Math.abs(
-      (await page.locator('.p-quiz-progress > div').evaluate((el) => el.getBoundingClientRect().width)) /
-        (await page.locator('.p-quiz-progress').evaluate((el) => el.getBoundingClientRect().width)) -
-        1 / 3,
-    ) < 0.02,
+    Math.abs((await page.evaluate(shown)) - 1 / 3) < 0.02,
     'barre de progression : environ 33 % sur la question 1',
   );
   ok(
