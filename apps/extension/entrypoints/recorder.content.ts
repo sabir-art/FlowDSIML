@@ -2,6 +2,7 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { Check, Crop, Monitor, Square, SquareMousePointer, createElement, type IconNode } from 'lucide';
 import { elementLabel, type PxRect } from '@/lib/geometry';
+import { INTERACTIVE, labelText } from '@/lib/labelText';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
 import { scanFullPage, scanPage } from '@/lib/scan';
@@ -412,19 +413,10 @@ export default defineContentScript({
     });
     bar.addEventListener('pointerup', () => (drag = null));
 
-    const INTERACTIVE = 'a,button,input,select,textarea,label,[role],[onclick],[tabindex]';
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
       return { left: r.left, top: r.top, width: r.width, height: r.height };
     };
-    /**
-     * Texte du libellé : celui de l'élément s'il est interactif ou sans enfant ; pour un bloc plus grand
-     * (section, page), son premier titre, sinon rien (« Cliquez ici ») : jamais des textes collés.
-     */
-    const labelText = (el: Element) =>
-      el.matches(INTERACTIVE) || !el.firstElementChild
-        ? (el.textContent ?? '')
-        : (el.querySelector('h1,h2,h3,h4,h5,h6')?.textContent ?? '');
     const pick = (target: Element | null) => target?.closest(INTERACTIVE) ?? target;
 
     // Mode Élément : au survol, le cadre qui sera gardé (pointillé, étiquette dans le coin)
@@ -460,7 +452,7 @@ export default defineContentScript({
         element: el ? rect(el) : null,
         label: el
           ? elementLabel({
-              text: el instanceof HTMLInputElement ? null : labelText(el),
+              text: labelText(el),
               ariaLabel: el.getAttribute('aria-label'),
               placeholder: el.getAttribute('placeholder'),
               title: el.getAttribute('title'),

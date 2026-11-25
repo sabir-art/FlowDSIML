@@ -5264,6 +5264,7 @@
       "check": "Check",
       "open": "Open the step",
       "altMissing": "The screenshot has no alternative text.",
+      "technical": "Technical title left by the capture (selector or glued text). Rewrite it, or run the analysis for a suggestion.",
       "tooLong": "{{n}}-character bubble: above {{max}}, it is hard to read.",
       "type": {
         "clarity": "Clarity",

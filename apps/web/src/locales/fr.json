@@ -5264,6 +5264,7 @@
       "check": "Vérification",
       "open": "Ouvrir l’étape",
       "altMissing": "La capture n’a pas de texte alternatif.",
+      "technical": "Titre technique issu de la capture (sélecteur ou textes collés). Réécrivez-le, ou lancez l’analyse pour une proposition.",
       "tooLong": "Bulle de {{n}} caractères : au-delà de {{max}}, elle est difficile à lire.",
       "type": {
         "clarity": "Clarté",

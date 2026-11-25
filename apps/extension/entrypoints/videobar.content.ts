@@ -1,6 +1,7 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { elementLabel } from '@/lib/geometry';
+import { labelText } from '@/lib/labelText';
 import { maskExcerpt } from '@flowdsiml/core';
 import { scanNodes } from '@/lib/scan';
 import type { RecordingStatus, VideoBarRequest } from '@/lib/messages';
@@ -326,7 +327,7 @@ export default defineContentScript({
         target?.closest('a,button,input,select,textarea,label,[role],[onclick],[tabindex]') ?? target;
       const label = el
         ? elementLabel({
-            text: el instanceof HTMLInputElement ? null : (el.textContent ?? ''),
+            text: labelText(el),
             ariaLabel: el.getAttribute('aria-label'),
             placeholder: el.getAttribute('placeholder'),
             title: el.getAttribute('title'),

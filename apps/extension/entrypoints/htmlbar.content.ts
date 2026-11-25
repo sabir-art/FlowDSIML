@@ -2,6 +2,7 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { stableSelector } from '@flowdsiml/core';
 import { elementLabel } from '@/lib/geometry';
+import { labelText } from '@/lib/labelText';
 import { captureHtml } from '@/lib/htmlCapture';
 import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
 import type { HtmlBarRequest } from '@/lib/messages';
@@ -204,7 +205,7 @@ export default defineContentScript({
           'a,button,[role="button"],[role="link"],[role="tab"],[role="menuitem"],input[type="submit"]',
         ) ?? t;
       const label = elementLabel({
-        text: el instanceof HTMLInputElement ? null : (el.textContent ?? ''),
+        text: labelText(el),
         ariaLabel: el.getAttribute('aria-label'),
         placeholder: el.getAttribute('placeholder'),
         title: el.getAttribute('title'),

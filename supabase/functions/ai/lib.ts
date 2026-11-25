@@ -348,7 +348,8 @@ export function buildPrompt(req: Request): Prompt {
       return {
         model: SONNET,
         system:
-          `${BASE} Relis les textes de la démo (chaque élément a un id et un rôle : titre d'étape, titre ou texte de bulle) et propose au plus 10 améliorations utiles, les plus importantes d'abord. Ne propose rien pour un texte déjà clair. ` +
+          `${BASE} Relis TOUS les textes de la démo, dans l'ordre des étapes. L'id de chaque élément dit son rôle : « s:…:title » titre d'étape, « s:…:body » texte d'étape, « h:…:title » et « h:…:body » titre et texte d'une bulle, « p:…:title:… » et « p:…:body:… » titre et texte d'une pause de vidéo. Propose au plus 10 améliorations utiles, les plus importantes d'abord. Ne propose rien pour un texte déjà clair. ` +
+          "Un titre technique laissé par la capture (sélecteur CSS comme « div:has(> #x) », noms de boutons collés sans espace, texte tronqué) est toujours à signaler (type clarity) avec une réécriture courte à l'impératif, déduite des textes voisins de la même étape ; sans indice, propose « Cliquez ici ». " +
           'Types : clarity (phrase ambiguë ou trop complexe), length (texte trop long pour une bulle), accessibility (consigne qui dépend de la couleur ou de la position seule, lien peu explicite), consistency (même action nommée différemment). ' +
           `message : constat en une phrase. id : celui de l'élément concerné. proposal : texte de remplacement complet de cet élément (même rôle), ou chaîne vide. ${inLang}`,
         messages: user({ items: p.items }),

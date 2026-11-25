@@ -1,3 +1,4 @@
+import { readableLabel } from '@flowdsiml/core';
 /** Géométrie pure (testée) : conversion des coordonnées de la page en coordonnées relatives (0–1). */
 export interface Viewport {
   width: number;
@@ -58,9 +59,9 @@ export function elementLabel(info: {
   title?: string | null;
   alt?: string | null;
 }): string {
-  const raw = info.ariaLabel || info.text || info.placeholder || info.title || info.alt || '';
-  const clean = raw.replace(/\s+/g, ' ').trim();
-  return clean.length > 60 ? `${clean.slice(0, 57)}…` : clean;
+  // L63 : libellé accessible, puis texte visible court ; jamais un sélecteur ni des textes collés
+  // (chaîne vide alors : « Cliquez ici »)
+  return readableLabel([info.ariaLabel, info.text, info.placeholder, info.title, info.alt]);
 }
 
 export function defaultHotspotTitle(label: string, locale: 'fr' | 'en' = 'fr'): string {
