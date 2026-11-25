@@ -42,6 +42,7 @@ import { DevicesWidget, ReturningWidget, SourcesWidget, StepsWidget } from './wi
 import './advanced/advanced.css';
 import './analytics.css';
 import { Status } from '@flowdsiml/ui';
+import { useScrollFade } from '../../components/useScrollFade';
 
 /** L19b : « page » = lecteur affiché dans la page publique. */
 type Source = 'direct' | 'embed' | 'link' | 'page';
@@ -84,6 +85,8 @@ const SEARCH_MIN = 10;
 
 /** Analytics de l'espace (ANA-01, L48-D) : 4 onglets et « Plus », 4 indicateurs, grille de widgets. */
 export function AnalyticsPage() {
+  // Petit écran : fondu au bord droit tant que des onglets restent à faire défiler
+  const tabRow = useScrollFade<HTMLDivElement>();
   const { t } = useTranslation();
   const { current, can } = useWorkspace();
   const ws = current!;
@@ -283,7 +286,7 @@ export function AnalyticsPage() {
     >
       {/* L48-D §1 : 4 onglets au premier niveau, puis « Plus » (menu), qui prend le nom de l'onglet ouvert */}
       {/* §18.7 : rangée d'onglets, défilement horizontal voulu sur mobile */}
-      <div className="an-tabrow" data-scroll-x="">
+      <div className="an-tabrow" data-scroll-x="" ref={tabRow}>
         <div className="an-tabs2" role="tablist" aria-label={t('analytics.views_label')}>
           {primary.map((k) => (
             <button

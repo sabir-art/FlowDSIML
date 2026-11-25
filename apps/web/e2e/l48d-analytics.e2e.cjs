@@ -235,6 +235,24 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     '390 px : pas de défilement horizontal de la page',
   );
   ok(await pm.getByRole('button', { name: /Trier par/ }).isVisible(), '390 px : menu « Trier par »');
+  // Audit UX du 25/11 : les onglets défilent ; un fondu de 24 px au bord droit tant qu'il en reste
+  const row = pm.locator('.an-tabrow');
+  const fade = () =>
+    row.evaluate((el) => ({
+      more: el.hasAttribute('data-more'),
+      mask: getComputedStyle(el).maskImage || getComputedStyle(el).webkitMaskImage,
+      scrolls: el.scrollWidth > el.clientWidth + 1,
+    }));
+  const f0 = await fade();
+  ok(
+    !f0.scrolls || (f0.more && /linear-gradient/.test(f0.mask)),
+    `390 px : onglets qui défilent, fondu au bord droit (${JSON.stringify(f0)})`,
+  );
+  if (f0.scrolls) {
+    await row.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+    await pm.waitForFunction(() => !document.querySelector('.an-tabrow').hasAttribute('data-more'));
+    ok((await fade()).mask === 'none', '390 px : en bout de défilement, plus de fondu');
+  }
   ok(
     !(await pm.locator('.an-demos__t thead th', { hasText: 'Visiteurs' }).isVisible()),
     '390 px : colonnes non triées masquées',
