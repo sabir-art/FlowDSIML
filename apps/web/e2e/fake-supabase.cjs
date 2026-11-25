@@ -746,6 +746,21 @@ async function install(page, state = seed()) {
         refresh_token: 'fake-refresh',
         user: state.user,
       });
+    // L61 : compte créé mais adresse pas encore confirmée (state.unconfirmed). Auth refuse la connexion
+    // par mot de passe avec « Email not confirmed » ; le renvoi de l'e-mail est compté (state.resends),
+    // state.resendLimited simule le plafond d'envoi. Aucun envoi réel.
+    if (state.unconfirmed && p.startsWith('/auth/v1/token') && body?.password !== undefined)
+      return json(route, 400, { code: 400, error_code: 'email_not_confirmed', msg: 'Email not confirmed' });
+    if (p.startsWith('/auth/v1/resend')) {
+      if (state.resendLimited)
+        return json(route, 429, {
+          code: 429,
+          error_code: 'over_email_send_rate_limit',
+          msg: 'For security purposes, you can only request this after 60 seconds.',
+        });
+      (state.resends ||= []).push({ type: body?.type, email: body?.email });
+      return json(route, 200, {});
+    }
     if (state.signedOut && p.startsWith('/auth/v1/token'))
       return json(route, 400, { error: 'invalid_grant', error_description: 'Invalid login credentials' });
     if (p.startsWith('/auth/v1/user')) {

@@ -150,6 +150,9 @@ jobs:
       - name: 'EMPTY-01 : états vides (aucun bouton qui répète l’en-tête, aperçu décoratif, clair et sombre, 1440 et 390 px)'
         if: always()
         run: cd apps/web && node e2e/etats-vides.e2e.cjs
+      - name: 'L61 : connexion avec une adresse non confirmée (message clair, renvoi de l’e-mail de confirmation)'
+        if: always()
+        run: cd apps/web && node e2e/connexion-non-confirmee.e2e.cjs
       - name: Barres de liste L40 (40 px, une ligne à 1 440 px, feuille Filtres sous 768 px)
         if: always()
         run: cd apps/web && node e2e/l40-barres.e2e.cjs

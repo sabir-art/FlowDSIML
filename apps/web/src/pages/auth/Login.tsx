@@ -1,4 +1,4 @@
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, Mail } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,10 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [badCredentials, setBadCredentials] = useState(false);
+  // L61 : compte créé, adresse pas encore confirmée. Ce n'est pas une erreur de mot de passe : la page
+  // le dit et propose de renvoyer l'e-mail de confirmation.
+  const [unconfirmed, setUnconfirmed] = useState('');
+  const resend = useAction({ inline: true });
   const { busy, error, success, run } = useAction({ inline: true });
 
   if (user) return <Navigate to={redirect} replace />;
@@ -40,10 +44,21 @@ export function Login() {
     const errs = validateForm(form, t);
     setErrors(errs);
     setBadCredentials(false);
+    setUnconfirmed('');
     if (focusFirstError(form, errs)) return;
     if (mode === 'password') {
-      const r = await run(async () => check(await supabase.auth.signInWithPassword({ email, password })));
-      if (r === undefined) {
+      let notConfirmed = false;
+      const r = await run(async () => {
+        const res = await supabase.auth.signInWithPassword({ email, password });
+        notConfirmed =
+          res.error?.code === 'email_not_confirmed' || /email not confirmed/i.test(res.error?.message ?? '');
+        return check(res);
+      });
+      if (notConfirmed) {
+        setUnconfirmed(email);
+        resend.setError(null);
+        resend.setSuccess(null);
+      } else if (r === undefined) {
         // Lot 7 : encadré en haut du formulaire, erreur sous le mot de passe (seul champ marqué
         // invalide) ; la saisie est gardée, le mot de passe est focalisé et sélectionné pour le corriger
         setBadCredentials(true);
@@ -103,6 +118,40 @@ export function Login() {
           {success}
         </div>
       )}
+      {unconfirmed && mode === 'password' && (
+        <div className="alert alert-warning auth-alert auth-unconfirmed" role="alert">
+          <Mail aria-hidden="true" />
+          <div>
+            <b>{t('auth.unconfirmedTitle')}</b>
+            <span>{t('auth.unconfirmedBody', { email: unconfirmed })}</span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              aria-disabled={resend.busy || undefined}
+              onClick={() => {
+                if (resend.busy) return;
+                void resend.run(
+                  async () =>
+                    check(
+                      await supabase.auth.resend({
+                        type: 'signup',
+                        email: unconfirmed,
+                        options: { emailRedirectTo: authRedirect(redirect) },
+                      }),
+                    ),
+                  t('auth.unconfirmedResent'),
+                );
+              }}
+            >
+              {t('auth.unconfirmedResend')}
+            </button>
+            {/* Confirmation ou refus du renvoi, annoncé */}
+            <span className={resend.error ? 'error-msg' : 'help'} role="status">
+              {resend.error || resend.success || ''}
+            </span>
+          </div>
+        </div>
+      )}
       {badCredentials && mode === 'password' && (
         <div className="alert alert-danger auth-alert" role="alert">
           <CircleAlert aria-hidden="true" />
@@ -160,7 +209,7 @@ export function Login() {
             />
             <MkFieldError id="password" errors={errors} />
             {/* L'encadré du haut annonce l'erreur d'identifiants ; ce message la rattache au champ */}
-            {(badCredentials || (error && mode === 'password')) && (
+            {(badCredentials || (error && mode === 'password' && !unconfirmed)) && (
               <span className="error-msg" id="login-error" role={badCredentials ? undefined : 'alert'}>
                 <CircleAlert aria-hidden="true" />
                 {badCredentials ? t('auth.badPassword') : error}
