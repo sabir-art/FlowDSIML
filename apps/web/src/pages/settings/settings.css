@@ -1071,11 +1071,15 @@ fieldset.stg-row {
   padding-top: 12px;
   border-top: 1px solid var(--fd-color-border);
 }
-/* « Bientôt » de l'en-tête e-mail : sous le libellé, la colonne garde sa largeur */
+/* « Bientôt » de l'en-tête e-mail : la pastille du système, à côté du libellé, sur une seule ligne */
+.nt-mailh {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
 .nt-table thead .nt-soon {
-  display: block;
   margin-left: 0;
-  font-size: 12px;
 }
 @media (max-width: 767px) {
   /* Les en-têtes restent : sans eux, rien ne dit quelle colonne est l'e-mail */
@@ -1145,4 +1149,16 @@ fieldset.stg-row {
 .nt-freq .segmented [aria-disabled='true'] {
   opacity: 0.5;
   cursor: not-allowed;
+}
+/* La colonne e-mail laisse la place à la pastille « Bientôt » quand l'envoi n'est pas configuré */
+.nt-table th.nt-c:has(.nt-soon) {
+  width: 152px;
+}
+@media (max-width: 767px) {
+  .nt-table th.nt-c:has(.nt-soon) {
+    width: 132px;
+  }
+  .nt-mailh {
+    gap: 4px;
+  }
 }

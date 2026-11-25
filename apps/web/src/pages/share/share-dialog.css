@@ -571,6 +571,8 @@
 .mk .shp-name__t {
   min-width: 0;
   overflow: hidden;
+  /* 500 : le nom se distingue de la ligne de détails */
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -719,4 +721,15 @@
 .mk #sh-panel-perso .sh-off th {
   opacity: 1;
   color: var(--fd-color-text-muted);
+}
+
+/* Écran étroit : la pastille d'état passe en tête de la ligne 2, le nom garde toute la largeur */
+@media (max-width: 639px) {
+  .mk .shp-name {
+    flex-wrap: wrap;
+    gap: 2px 8px;
+  }
+  .mk .shp-name__t {
+    flex: 1 0 100%;
+  }
 }
