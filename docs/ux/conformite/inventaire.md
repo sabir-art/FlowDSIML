@@ -21,7 +21,7 @@
 | CAD-05 | Carte d’usage et profil | `dashboard.html` | pied de la barre latérale | Démos publiées 18 / ∞, Crédits IA 820 / 1 000 avec jauge orange, avatar, nom, e-mail, déconnexion. |
 | CAD-06 | Barre du haut : recherche globale, aide, notifications | `dashboard.html` | barre du haut | Fil d’Ariane, champ « Rechercher… / » (raccourci /), bouton Aide, bouton Notifications. |
 | CAD-07 | Navigation mobile (tiroir) | `dashboard.html` | largeur < 1 024 px, bouton menu | Barre latérale en tiroir, ouverte par le bouton menu de la barre du haut ; recherche masquée sous 768 px. |
-| CAD-08 | Toast de confirmation | `dashboard.html` | toute action avec data-toast | Toast en bas à droite, icône de succès, bouton Fermer, disparition après 5 s ; pleine largeur sous 640 px. |
+| CAD-08 | Toast de confirmation | `dashboard.html` | toute action avec data-toast | Toast **en haut à droite** (décision du 25/11) : bord droit à 16 px du bord de la fenêtre, haut à 16 px sous la barre du haut (soit `top: calc(56px + 16px)`), au-dessus du contenu mais sous les menus ouverts, jamais sur la cloche ni l'aide ; 360 px au plus ; icône (succès, erreur, info), bouton Fermer ; 4 s (erreurs 6 s), pause au survol et au focus ; pile de 3, le plus récent en haut. Sous 600 px : en haut, pleine largeur moins 16 px de chaque côté, 8 px sous la barre du haut. Mouvement : MOTION-01. |
 
 ### Authentification
 
