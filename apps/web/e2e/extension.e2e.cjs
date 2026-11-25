@@ -163,6 +163,31 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await page.context().close();
   }
 
+  // ===== Extension présente, version plus ancienne que la version publiée =====
+  // 0.2.0 (déclarée) et 0.1.0 (encore installée chez certains) : la page le dit, sans erreur
+  for (const old of ['0.2.0', '0.1.0']) {
+    const { page } = await open((s) => {
+      Object.assign(s.tables.profiles[0], {
+        extension_seen_at: '2026-11-02T10:00:00Z',
+        extension_version: old,
+      });
+    });
+    await page.locator('.xt-fact').first().waitFor();
+    const version = (await page.locator('.xt-fact dd').first().innerText()).trim();
+    const manage = page.locator('a.xt-manage');
+    ok(
+      version === `${old} · Mise à jour disponible` &&
+        (await page.getByRole('heading', { name: 'L’extension est prête' }).count()) === 1 &&
+        // Quand la fiche de la boutique est configurée, le lien y mène (nouvel onglet, sans référent)
+        ((await manage.count()) === 0 ||
+          (/^https:\/\//.test(await manage.getAttribute('href')) &&
+            (await manage.getAttribute('target')) === '_blank' &&
+            /noopener/.test(await manage.getAttribute('rel')))),
+      `version ${old} installée : « Mise à jour disponible », la page reste utilisable (${version})`,
+    );
+    await page.context().close();
+  }
+
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

@@ -484,6 +484,35 @@ const SHOTS = process.env.SHOTS_DIR;
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/PRM-06.png` });
   await page.keyboard.press('Escape');
+  // Connecté en Lecteur (recette UX du 25/11) : ni « Inviter », ni invitations, ni menu sur les autres
+  {
+    const st = seedMaquette();
+    st.tables.members.find((m) => m.user_id === st.user.id).role = 'viewer';
+    const p2 = await b.newPage({ viewport: { width: 1440, height: 900 } });
+    p2.on('pageerror', (e) => errors.push(e.message));
+    await install(p2, st);
+    await p2.goto(`${APP}/#/settings/members`);
+    await p2.locator('.stg-table tbody tr').first().waitFor();
+    const mail = st.tables.invitations[0].email;
+    const menus = await p2.getByRole('button', { name: /^Actions pour / }).count();
+    ok(
+      (await p2.getByRole('button', { name: 'Inviter', exact: true }).count()) === 0 &&
+        !(await p2.locator('.stg-table').innerText()).includes(mail) &&
+        (await p2.locator('.stg-table tbody tr').count()) === st.tables.members.length &&
+        menus <= 1,
+      `Lecteur : pas d’« Inviter », aucune invitation listée, aucun menu sur les autres membres (${menus} menu)`,
+    );
+    if (menus === 1) {
+      await p2.getByRole('button', { name: /^Actions pour / }).click();
+      ok(
+        (await p2.getByRole('menuitem').allInnerTexts()).join('|') === 'Quitter' &&
+          (await p2.getByRole('menuitemradio').count()) === 0,
+        'Lecteur : son seul menu est le sien, « Quitter », sans changement de rôle',
+      );
+    }
+    await p2.close();
+  }
+
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {
