@@ -365,6 +365,21 @@ export const radius = {
   '2xl': '24px',
   '3xl': '32px',
   full: '9999px',
+  // RADIUS-01 : un rayon par famille. Le code n'utilise que ces alias (garde e2e rayons-regles).
+  /** Contrôles de 36 à 48 px : boutons, champs, listes, conteneur d'un segmenté, composeur. */
+  control: '10px',
+  /** Petits contrôles de 24 à 34 px : boutons sm et à icône, options d'un segmenté, pastilles de filtre. */
+  'control-sm': '8px',
+  /** Marques non interactives : badges de statut, étiquettes, compteurs. */
+  tag: '6px',
+  /** Détails : kbd, code en ligne, case à cocher. */
+  detail: '4px',
+  /** Surfaces : cartes, menus, popovers, toasts, encadrés. */
+  surface: '12px',
+  /** Surfaces superposées : fenêtres, tiroirs, feuilles (coins libres). */
+  overlay: '16px',
+  /** Ronds : avatars, interrupteurs, points d'état, barres de progression. */
+  round: '9999px',
 } as const;
 
 export const shadow = {

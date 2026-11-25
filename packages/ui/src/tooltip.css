@@ -5,7 +5,7 @@
   z-index: 2147483000;
   max-width: 240px;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--fd-radius-control-sm);
   background: var(--fd-tip-bg);
   color: #ffffff;
   font:
@@ -67,7 +67,7 @@
 .fd-tooltip kbd {
   min-width: 18px;
   padding: 0 5px;
-  border-radius: 4px;
+  border-radius: var(--fd-radius-detail);
   background: rgb(255 255 255 / 0.14);
   font: inherit;
   font-size: 12px;
