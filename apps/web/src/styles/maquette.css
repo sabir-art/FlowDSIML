@@ -739,7 +739,8 @@
   display: grid;
   place-items: center;
   padding: var(--fd-space-4);
-  animation: fd-fade var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
+  /* MOTION-01 §3 : modales en 200 ms */
+  animation: fd-fade var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 .mk .modal-backdrop[hidden] {
   display: none;
@@ -752,7 +753,7 @@
   background: var(--fd-color-surface);
   border-radius: var(--fd-radius-xl);
   box-shadow: var(--fd-shadow-lg);
-  animation: fd-pop var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
+  animation: fd-modal-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 .mk .modal-lg {
   width: min(720px, 100%);
@@ -789,6 +790,12 @@
     transform: scale(0.98);
   }
 }
+@keyframes fd-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
 .mk .toasts {
   position: fixed;
   right: 24px;
@@ -812,7 +819,8 @@
   border: 1px solid var(--fd-color-border);
   border-radius: var(--fd-radius-lg);
   box-shadow: var(--fd-shadow-md);
-  animation: fd-pop var(--fd-motion-duration-base);
+  /* MOTION-01 §3 : le toast entre par le bas (8 px) en fondu, 200 ms */
+  animation: fd-toast-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
 }
 /* Variante à deux lignes : message en 600, précision atténuée dessous ; 400 px au plus */
 .mk .toast--rich {
