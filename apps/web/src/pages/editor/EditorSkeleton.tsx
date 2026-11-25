@@ -1,9 +1,13 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, MoreHorizontal, Plus, Redo2, Rocket, Share2, Undo2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Play, Plus, Redo2, Rocket, Share2, Undo2 } from 'lucide-react';
 import { Sk } from '../../components/Skeleton';
-import { Select } from '@flowdsiml/ui';
+import { BackButton, Select } from '@flowdsiml/ui';
+
+const BackLink = (p: { to: string; className?: string; title?: string; children?: ReactNode }) => (
+  <Link {...p} />
+);
 
 const ratioKey = (demoId: string) => `fd.ed.r.${demoId}`;
 
@@ -56,59 +60,77 @@ export function EditorSkeleton({
   const { t } = useTranslation();
   const geo = readEditorGeometry(demoId);
   return (
-    <main className="mk ed" id="main" aria-busy={showBlocks || !children ? 'true' : 'false'}>
+    <main
+      className={`mk ed${children ? ' on-content' : ''}`}
+      id="main"
+      aria-busy={showBlocks || !children ? 'true' : 'false'}
+    >
       {status}
       <h1 className="sr-only">{t('loading.editor')}</h1>
-      <header className="ed-bar">
-        <Link to="/" className="btn btn-ghost btn-sm btn-icon" aria-label={t('editor.backToDemos')}>
-          <ArrowLeft aria-hidden="true" />
-        </Link>
-        <span className="ed-title ed-title--sk">{showBlocks && <Sk w={200} />}</span>
-        {showBlocks && <Sk w={72} h={22} className="sk--round" />}
-        <span className="grow" />
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-icon"
-          aria-label={t('editor.undo')}
-          disabled
-        >
-          <Undo2 aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm btn-icon"
-          aria-label={t('editor.redo')}
-          disabled
-        >
-          <Redo2 aria-hidden="true" />
-        </button>
-        <div className="segmented" role="radiogroup" aria-label={t('editor.mode')}>
-          <button type="button" role="radio" aria-checked disabled>
-            {t('editor.modeEdit')}
-          </button>
-          <button type="button" role="radio" aria-checked={false} disabled>
-            {t('editor.preview')}
-          </button>
+      {/* Même structure que la barre réelle (gauche · onglets · droite), actions désactivées. Erreur ou démo
+          indisponible (`children`) : seulement « ← Démos », rien d'autre n'est utilisable. */}
+      <header className="fd-page-header fd-page-header--editor ed-bar">
+        <div className="ed-bar__l">
+          <BackButton to="/" label={t('demos.title')} ariaLabel={t('editor.backToDemos')} as={BackLink} />
+          {!children && (
+            <>
+              <span className="ed-vsep" aria-hidden="true" />
+              <span className="ed-title ed-title--sk">{showBlocks && <Sk w={200} />}</span>
+            </>
+          )}
         </div>
-        <span className="grow" />
-        <button
-          type="button"
-          className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
-          aria-label={t('editor.more')}
-          disabled
-        >
-          <MoreHorizontal aria-hidden="true" />
-        </button>
-        <button type="button" className="btn btn-secondary btn-sm" disabled>
-          <Share2 aria-hidden="true" />
-          {t('editor.share')}
-        </button>
-        <span className="ed-publish">
-          <button type="button" className="btn btn-primary btn-sm" disabled>
-            <Rocket aria-hidden="true" />
-            {t('publish.publish')}
-          </button>
-        </span>
+        {!children && (
+          <div className="ed-tabs" aria-hidden="true">
+            <div className="ed-tabs__modes">
+              <button type="button" aria-checked disabled tabIndex={-1}>
+                <Pencil aria-hidden="true" />
+                {t('editor.modeEdit')}
+              </button>
+              <button type="button" aria-checked={false} disabled tabIndex={-1}>
+                <Play aria-hidden="true" />
+                {t('editor.preview')}
+              </button>
+            </div>
+          </div>
+        )}
+        {!children && (
+          <div className="ed-bar__r">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm btn-icon"
+              aria-label={t('editor.undo')}
+              disabled
+            >
+              <Undo2 aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm btn-icon"
+              aria-label={t('editor.redo')}
+              disabled
+            >
+              <Redo2 aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+              aria-label={t('editor.more')}
+              disabled
+            >
+              <MoreHorizontal aria-hidden="true" />
+            </button>
+            <button type="button" className="btn btn-secondary btn-sm" disabled>
+              <Share2 aria-hidden="true" />
+              {t('editor.share')}
+            </button>
+            <span className="ed-publish">
+              <button type="button" className="btn btn-primary btn-sm" disabled>
+                <Rocket aria-hidden="true" />
+                {t('publish.publish')}
+              </button>
+            </span>
+          </div>
+        )}
       </header>
       {children ?? (
         <div className="ed-body">

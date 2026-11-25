@@ -33,7 +33,7 @@ export function RequireWorkspace({ children }: { children: ReactNode }) {
   if (loading) return <Loading />;
   if (!current && error)
     return (
-      <main id="main" className="center">
+      <main id="main" className="center on-content">
         <LoadError title={t('loading.workspaceError')} body={t('loading.errorBody')} onRetry={retry} />
       </main>
     );

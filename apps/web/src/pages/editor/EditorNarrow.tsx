@@ -43,7 +43,7 @@ export function EditorNarrowView({
       setPreviewManifest(m.buildDraftManifest(editor, ws?.name ?? '')),
     );
   return (
-    <main className="editor-narrow" id="main" aria-busy={editor.loading ? 'true' : 'false'}>
+    <main className="editor-narrow on-content" id="main" aria-busy={editor.loading ? 'true' : 'false'}>
       {/* EDT-13 : avis centré, sans carte (maquette) */}
       <div className="editor-narrow__notice">
         <Monitor className="editor-narrow__icon" aria-hidden="true" />

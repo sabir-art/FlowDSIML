@@ -2906,3 +2906,10 @@ button.fd-nav__item:hover {
   width: 16px;
   height: 16px;
 }
+
+/* Écran plein (erreur de chargement, éditeur sur petit écran) : le fond est celui du contenu, comme le
+   reste de l'app, jamais le fond bleuté de la page. */
+.on-content {
+  min-height: 100vh;
+  background: var(--fd-color-content-bg);
+}

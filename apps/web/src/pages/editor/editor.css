@@ -1102,7 +1102,7 @@
   gap: var(--fd-space-4);
   min-height: 100vh;
   padding: var(--fd-space-4);
-  background: var(--fd-color-bg);
+  background: var(--fd-color-content-bg);
 }
 .editor-narrow__notice h1 {
   margin: 0 0 var(--fd-space-1);
