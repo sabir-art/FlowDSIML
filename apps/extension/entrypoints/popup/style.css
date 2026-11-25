@@ -161,11 +161,19 @@ a {
   color: #fff;
 }
 .btn-ghost-danger {
+  /* Texte seul, calé sur la gouttière de 16 px : les trois actions tiennent dans 360 px */
   margin-right: auto;
-  padding: 0 8px;
-  border-color: transparent;
+  padding: 0;
+  border-width: 0;
   background: none;
   color: var(--fd-color-danger);
+}
+.btn-ghost-danger:hover {
+  background: none;
+  text-decoration: underline;
+}
+#foot-recording .btn:not(.btn-ghost-danger) {
+  padding: 0 12px;
 }
 .link-button {
   padding: 0;

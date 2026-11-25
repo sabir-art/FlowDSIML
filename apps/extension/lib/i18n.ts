@@ -604,7 +604,9 @@ export const strings: Strings = (globalThis.navigator?.language ?? 'fr').toLower
 export const lang = strings === en ? 'en' : 'fr';
 
 export function stepsCaptured(n: number): string {
-  return (n === 1 ? strings.stepsCaptured_one : strings.stepsCaptured_other).replace('{{count}}', String(n));
+  // En français, 0 s'accorde au singulier (« 0 étape capturée ») ; en anglais, au pluriel
+  const one = n === 1 || (n === 0 && lang === 'fr');
+  return (one ? strings.stepsCaptured_one : strings.stepsCaptured_other).replace('{{count}}', String(n));
 }
 
 /** L25-01 : puce de l'onglet suivi dans la barre d'enregistrement, et son annonce. */

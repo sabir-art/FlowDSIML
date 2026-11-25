@@ -160,6 +160,25 @@ const ok = (c, l) => {
       (await popup.locator('#setup').isHidden()),
     'popup : carte de cible à la place du formulaire, « Terminer » et « Annuler l’ajout »',
   );
+  {
+    // Pied du popup : « Annuler l'ajout » part de la gouttière de 16 px, comme le reste
+    const left = await popup
+      .locator('#cancel-label')
+      .evaluate((el) => Math.round(el.getBoundingClientRect().left));
+    ok(left === 16, `popup : « Annuler l’ajout » aligné sur la gouttière de 16 px (${left})`);
+    ok(
+      await popup.evaluate(() => {
+        const f = document.getElementById('foot-recording');
+        const r = [...f.querySelectorAll('.btn')].map((b) => b.getBoundingClientRect());
+        return r.every((x) => x.left >= 16 && x.right <= 344) && f.scrollWidth <= f.clientWidth;
+      }),
+      'popup : les trois actions du pied tiennent dans la largeur, sans débordement',
+    );
+    ok(
+      (await popup.locator('#count').innerText()).trim() === '0 étape capturée',
+      `popup : « 0 étape capturée », au singulier (${(await popup.locator('#count').innerText()).trim()})`,
+    );
+  }
   if (process.env.SHOTS_DIR) await popup.screenshot({ path: `${process.env.SHOTS_DIR}/popup-ajout.png` });
 
   // « Revenir à la capture » depuis l'éditeur

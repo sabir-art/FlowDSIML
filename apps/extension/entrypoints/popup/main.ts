@@ -38,7 +38,6 @@ import {
   TriangleAlert,
   Video,
   Webcam,
-  X,
   createIcons,
 } from 'lucide';
 import { viewportFor, type DeviceKey } from '@/lib/video';
@@ -86,7 +85,6 @@ const ICONS = {
   Smartphone,
   TriangleAlert,
   Webcam,
-  X,
 };
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
 for (const svg of document.querySelectorAll<SVGElement>('.pph .ib svg')) {
