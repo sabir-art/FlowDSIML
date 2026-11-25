@@ -2148,7 +2148,8 @@
       "intranet": "Intranet",
       "mail": "Email",
       "where": "Where it is shared",
-      "training": "Training paths"
+      "training": "Training paths",
+      "offline": "Offline"
     },
     "published_badge": "Published",
     "modified": "Modified",
@@ -3942,8 +3943,6 @@
     "fmt_gif_help": "Short silent loop. For documentation or a ticket.",
     "fmt_mp4": "MP4 video",
     "fmt_mp4_help": "H.264 video with subtitles, created in your browser.",
-    "fmt_zip": "Offline (.zip)",
-    "fmt_zip_help": "Standalone demo, works without Internet.",
     "layout": "Layout",
     "layoutOne": "One step per page",
     "layoutTwo": "Two steps per page",

@@ -3105,3 +3105,11 @@
 .mk.sh .sh-pub > p {
   margin: 0;
 }
+
+/* Diffuser : onglet à venir (« Hors ligne »), grisé avec sa pastille « Bientôt » */
+.mk .tabs .dif-tab-soon,
+.dif-dialog .tabs .dif-tab-soon {
+  gap: 8px;
+  color: var(--fd-color-text-muted);
+  cursor: not-allowed;
+}

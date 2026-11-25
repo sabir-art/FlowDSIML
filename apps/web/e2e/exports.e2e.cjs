@@ -59,12 +59,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(/^8 pages/.test(await help(p)), 'L15-01 : 7 étapes + couverture = 8 pages');
     ok(!/balisé/.test(await help(p)), 'L15-01 : aucune promesse de PDF balisé');
     ok(await p.getByRole('radio', { name: /PDF/ }).first().isChecked(), 'L15-01 : PDF choisi par défaut');
-    // L25-11 : la carte MP4 est active ; «\u202fHors ligne\u202f» reste «\u202fBientôt\u202f»
-    const zip = p.getByRole('radio', { name: /Hors ligne/ });
+    // Le hors ligne n'est pas un export : il est annoncé dans Diffuser (voir distribute.e2e)
     ok(
-      (await zip.isDisabled()) &&
-        /Bientôt/.test(await p.locator('label.exp-format', { has: zip }).textContent()),
-      'L15-01 : hors ligne «\u202fBientôt\u202f»',
+      (await p.getByRole('radio', { name: /Hors ligne/ }).count()) === 0,
+      'Exporter : pas de «\u202fHors ligne\u202f» (il est dans Diffuser)',
     );
     ok(!(await p.getByRole('radio', { name: /Vidéo MP4/ }).isDisabled()), 'L25-11 : MP4 sélectionnable');
     ok((await p.locator('.x15-svg').count()) === 1, 'L15-01 : aperçu rendu');
@@ -238,7 +236,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const { p } = await open({ published: false }, `/#/demos/${DEMO}/share`);
     // §1 : l'export est un mode de la fenêtre Partager
     await p.locator('.shd-nav').getByRole('button', { name: 'Exporter', exact: true }).click();
-    await p.locator('#sh-panel-export').getByRole('button', { name: 'Exporter (PDF, GIF)' }).click();
+    await p.locator('#sh-panel-export').getByRole('button', { name: 'Exporter', exact: true }).click();
     await p.waitForSelector('dialog.x15-dialog[open]');
     ok(
       /jamais été publiée/.test(await p.locator('dialog.x15-dialog').textContent()),

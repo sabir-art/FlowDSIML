@@ -259,13 +259,13 @@ async function gap(p, a, b) {
         soon: rows.filter((x) => x.querySelector('input').disabled && x.querySelector('.soon')).length,
       };
     });
-    ok(m.n === 5 && m.minH >= 60, `E21 : 5 formats en liste, ${Math.round(m.minH)} px de haut au moins (60)`);
+    ok(m.n === 4 && m.minH >= 60, `E21 : 4 formats en liste, ${Math.round(m.minH)} px de haut au moins (60)`);
     ok(
       m.gaps.every((g) => g === 8),
       `E21 : 8 px entre les lignes (${m.gaps.join(', ')})`,
     );
     ok(m.oneLine, 'E21 : descriptions sur une ligne');
-    ok(m.soon === 1, 'E21 : « Hors ligne » visible, désactivé, badge « Bientôt »');
+    ok(m.soon === 0, 'E21 : pas de format « Bientôt » (le hors ligne est annoncé dans Diffuser)');
     await p.keyboard.press('Escape').catch(() => {});
     return [];
   });

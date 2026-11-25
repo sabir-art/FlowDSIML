@@ -2148,7 +2148,8 @@
       "intranet": "Intranet",
       "mail": "E-mail",
       "where": "Où elle est diffusée",
-      "training": "Parcours de formation"
+      "training": "Parcours de formation",
+      "offline": "Hors ligne"
     },
     "published_badge": "Publiée",
     "modified": "Modifiée",
@@ -3942,8 +3943,6 @@
     "fmt_gif_help": "Boucle courte, sans son, pour une documentation ou un ticket.",
     "fmt_mp4": "Vidéo MP4",
     "fmt_mp4_help": "Vidéo H.264 avec sous-titres, créée dans votre navigateur.",
-    "fmt_zip": "Hors ligne (.zip)",
-    "fmt_zip_help": "Démo autonome, ouvrable sans Internet.",
     "layout": "Mise en page",
     "layoutOne": "Une étape par page",
     "layoutTwo": "Deux étapes par page",

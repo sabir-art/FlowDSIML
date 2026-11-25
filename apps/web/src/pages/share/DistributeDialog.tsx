@@ -21,6 +21,7 @@ import {
   Copy,
   Download,
   Globe,
+  GraduationCap,
   Info,
   Layers,
   Link2,
@@ -30,8 +31,8 @@ import {
   RefreshCw,
   Send,
   Share2,
+  WifiOff,
   X,
-  GraduationCap,
 } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { parseManifest, type Manifest } from '@flowdsiml/manifest';
@@ -447,6 +448,19 @@ export function DistributeDialog({
               )}
             </button>
           ))}
+          {/* Démo hors ligne : à venir, dans Diffuser. « Bientôt » : en gris, visible, jamais caché */}
+          <button
+            type="button"
+            role="tab"
+            className="dif-tab-soon"
+            aria-selected={false}
+            aria-disabled
+            tabIndex={-1}
+          >
+            <WifiOff aria-hidden="true" />
+            {t('distribute.tab.offline')}
+            <span className="fd-badge">{t('shell.soon')}</span>
+          </button>
         </div>
         <section role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${tab}`}>
           {modified && tab !== 'where' && tab !== 'training' && (
