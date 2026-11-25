@@ -1,5 +1,6 @@
 import {
   AtSign,
+  Blocks,
   Braces,
   ChevronLeft,
   ChevronRight,
@@ -52,7 +53,8 @@ import {
 import { ExportDialog } from '../export/ExportDialog';
 import { AddressField } from './AddressField';
 import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
-import { popupAllowed } from './snippets';
+import { addressOnly, popupAllowed } from './snippets';
+import { highlightHtml } from './codeBlock';
 import { popupCode } from './distribute';
 import { PLAYER_URL } from '../../lib/env';
 import { centerLinkUrl, centerModuleOf, type CenterModule } from './centerModule';
@@ -67,6 +69,7 @@ import { CopyField } from '../../components/CopyField';
 import { Qr } from '../present/RemoteDialogs';
 import { useToast } from '../../components/Toast';
 import { Fold } from './Fold';
+import { RadioCards } from './RadioCards';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
 /** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
@@ -997,7 +1000,8 @@ function EmbedPanel({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [format, setFormat] = useState<'responsive' | 'fixed' | 'popup'>('responsive');
+  const toast = useToast();
+  const [format, setFormat] = useState<'responsive' | 'popup' | 'full'>('responsive');
   // L29-01 : outil cible ; l'adresse personnalisée (L28-01) est reprise si elle existe
   const [target, setTarget] = useEmbedTarget();
   const limitId = useId();
@@ -1014,90 +1018,115 @@ function EmbedPanel({
         })
       : mode === 'responsive'
         ? embedSnippet(url, title)
-        : `<iframe src="${url}" title="${safe}" width="960" height="644" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`;
+        : `<iframe src="${url}" title="${safe}" loading="lazy" allow="fullscreen; clipboard-write" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`;
+  // L29-01 : certains outils ne prennent qu'une adresse
+  const onlyAddress = addressOnly(target);
+  const value = onlyAddress ? url : code;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      toast(onlyAddress ? t('snippets.addressCopied') : t('snippets.codeCopied'));
+    } catch {
+      toast(t('distribute.copyFailed'));
+    }
+  };
+  const host = new URL(url).host;
   return (
     <>
-      {/* L45 (E13) : trois groupes à 24 px ; le mode d'intégration a son libellé */}
-      <div className="fd-stack fd-stack--group">
-        <TargetPicker value={target} onChange={setTarget} />
-        <div className="fd-stack fd-stack--label sh-embed-mode">
-          <span className="t-label" id="sh-embed-mode-l">
-            {t('share.embedFormat')}
-          </span>
-          <div className="segmented" role="radiogroup" aria-labelledby="sh-embed-mode-l">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'responsive'}
-              onClick={() => setFormat('responsive')}
-            >
-              {t('share.responsive')}
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'fixed'}
-              onClick={() => setFormat('fixed')}
-            >
-              {t('share.fixed')}
-            </button>
-            {/* L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide */}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={mode === 'popup'}
-              aria-disabled={popupOff || undefined}
-              aria-describedby={popupOff ? limitId : undefined}
-              onClick={() => !popupOff && setFormat('popup')}
-            >
-              {t('share.popup')}
-            </button>
+      {/* §1.3 : mode Intégrer sobre. Trois formats en cartes radio, le code, sa copie, un aperçu ; l'outil
+          cible et les sites autorisés sont des réglages rares, repliés. */}
+      <RadioCards
+        className="she-formats"
+        label={t('share.embedFormat')}
+        value={mode}
+        onChange={setFormat}
+        options={[
+          {
+            value: 'responsive',
+            label: t('share.embedFrame'),
+            art: <span className="she-art she-art--frame" />,
+          },
+          {
+            value: 'popup',
+            label: t('share.embedButton'),
+            art: <span className="she-art she-art--button" />,
+            // L29-02 : jamais masqué ; désactivé pour un outil sans script, la limite sert d'aide
+            disabled: popupOff,
+            describedBy: limitId,
+            hint: popupOff ? t(`snippets.limit_${target}`, { host }) : undefined,
+          },
+          { value: 'full', label: t('share.embedFull'), art: <span className="she-art she-art--full" /> },
+        ]}
+      />
+      <pre
+        className="code sh-code she-code"
+        aria-label={onlyAddress ? t('snippets.addressLabel') : t('snippets.codeLabel')}
+        tabIndex={0}
+      >
+        {onlyAddress ? value : highlightHtml(value)}
+      </pre>
+      <div className="row sh-embed-actions">
+        <button
+          type="button"
+          className="fd-btn fd-btn--primary"
+          aria-disabled={!published || undefined}
+          title={published ? undefined : t('share.publishToEnable')}
+          onClick={() => published && void copy()}
+        >
+          <Copy aria-hidden="true" />
+          {onlyAddress ? t('snippets.copyAddress') : t('snippets.copyCode')}
+        </button>
+      </div>
+      <div className={`she-prev she-prev--${mode}`} role="img" aria-label={t(`share.embedPreview_${mode}`)}>
+        <span className="she-prev__page">
+          <span className="she-prev__demo" />
+        </span>
+      </div>
+      <div className="shd-folds">
+        <Fold
+          icon={<Blocks aria-hidden="true" />}
+          title={t('share.embedTool')}
+          defaultOpen={target !== 'html'}
+        >
+          <div className="fd-stack fd-stack--group">
+            <TargetPicker value={target} onChange={setTarget} />
+            <TargetGuide
+              codeless
+              target={target}
+              code={code}
+              address={url}
+              published={published}
+              limitId={limitId}
+              playerHost={host}
+              onScorm={() => navigate(`/demos/${demoId}/distribute`)}
+            />
           </div>
-        </div>
-        <TargetGuide
-          target={target}
-          code={code}
-          address={url}
-          published={published}
-          limitId={limitId}
-          playerHost={new URL(url).host}
-          onScorm={() => navigate(`/demos/${demoId}/distribute`)}
-        />
-      </div>
-      <hr className="divider sh-hr" />
-      <div className="setting">
-        <span className="t-label">
-          {t('share.clickToStart')} <span className="soon-text">{t('shell.soon')}</span>
-        </span>
-        <span className="switch">
-          <input type="checkbox" disabled aria-label={t('share.clickToStart')} />
-          <span />
-        </span>
-      </div>
-      <div className="field sh-field">
-        <label htmlFor="sh-origins">{t('share.allowedOrigins')}</label>
-        <textarea
-          id="sh-origins"
-          className="textarea"
-          rows={3}
-          disabled={!editable}
-          placeholder={'www.exemple.org\n*.exemple.org'}
-          value={origins}
-          onChange={(e) => setOrigins(e.target.value)}
-        />
-        {/* L45 (E14) : aide → « Enregistrer » à 12 px */}
-        <div className="fd-stack fd-stack--action">
-          <span className="help">{t('share.allowedOriginsHint')}</span>
-          {editable && (
-            <button type="button" className="btn btn-secondary btn-sm sh-save" onClick={onSaveOrigins}>
-              {t('common.save')}
-            </button>
-          )}
-        </div>
-      </div>
-      <div className="alert sh-note">
-        <Info aria-hidden="true" />
-        <span className="t-caption">{t('share.cspNote', { host: new URL(url).host })}</span>
+        </Fold>
+        <Fold icon={<ShieldCheck aria-hidden="true" />} title={t('share.embedSites')}>
+          <div className="field sh-field">
+            <label htmlFor="sh-origins">{t('share.allowedOrigins')}</label>
+            <textarea
+              id="sh-origins"
+              className="textarea"
+              rows={3}
+              disabled={!editable}
+              placeholder={'www.exemple.org\n*.exemple.org'}
+              value={origins}
+              onChange={(e) => setOrigins(e.target.value)}
+            />
+            {/* L45 (E14) : aide → « Enregistrer » à 12 px */}
+            <div className="fd-stack fd-stack--action">
+              <span className="help">
+                {t('share.allowedOriginsHint')} {t('share.cspNote', { host })}
+              </span>
+              {editable && (
+                <button type="button" className="fd-btn fd-btn--sm sh-save" onClick={onSaveOrigins}>
+                  {t('common.save')}
+                </button>
+              )}
+            </div>
+          </div>
+        </Fold>
       </div>
     </>
   );

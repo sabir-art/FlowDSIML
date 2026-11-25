@@ -2372,7 +2372,7 @@
     "email": "Email",
     "gif": "GIF / video",
     "v2": "Available in V2",
-    "embedFormat": "Embed mode",
+    "embedFormat": "Embed format",
     "responsive": "Responsive",
     "fixed": "Fixed size",
     "popup": "Button + pop-up",
@@ -2578,7 +2578,15 @@
     "qrCode": "Show the QR code",
     "qrLabel": "QR code of the link to “{{title}}”",
     "qrHelp": "Scan it with a phone camera.",
-    "urlParamsShort": "URL parameters"
+    "urlParamsShort": "URL parameters",
+    "embedFrame": "Framed in the page",
+    "embedButton": "Button that opens the demo",
+    "embedFull": "Full screen",
+    "embedPreview_responsive": "Preview: the demo in a frame on the page",
+    "embedPreview_popup": "Preview: a button on the page opens the demo",
+    "embedPreview_full": "Preview: the demo fills the whole page",
+    "embedTool": "Adapt to a tool",
+    "embedSites": "Allowed sites"
   },
   "analytics": {
     "title": "Analytics",

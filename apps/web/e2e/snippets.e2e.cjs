@@ -52,6 +52,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.locator('.shd-nav').getByRole('button', { name: 'Intégrer', exact: true }).click();
   const panel = page.locator('#sh-panel-embed');
   const where = panel.getByRole('radiogroup', { name: 'Où intégrer ?' });
+  // §1.3 : l'outil cible est un réglage rare, en ligne repliable (repliée tant que l'outil est HTML)
+  const tool = panel.getByRole('button', { name: 'Adapter à un outil', exact: true });
+  ok((await tool.getAttribute('aria-expanded')) === 'false', '« Adapter à un outil » repliée par défaut');
+  await tool.click();
   await where.waitFor();
   const names = await where.getByRole('radio').allInnerTexts();
   ok(
@@ -73,7 +77,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   );
 
   // Pop-up : code bouton + script
-  await panel.getByRole('radio', { name: 'Bouton + pop-up' }).click();
+  await panel.getByRole('radio', { name: 'Bouton qui ouvre la démo' }).click();
   ok(/popup\.js/.test(await panel.locator('pre').innerText()), 'mode pop-up : bouton + script');
 
   // WordPress : 3 consignes, limite
@@ -87,7 +91,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // SharePoint : adresse seule, pop-up visible mais désactivé, limite en aide
   await where.getByRole('radio', { name: 'SharePoint' }).click();
-  const pop = panel.getByRole('radio', { name: 'Bouton + pop-up' });
+  const pop = panel.getByRole('radio', { name: 'Bouton qui ouvre la démo' });
   ok((await pop.getAttribute('aria-disabled')) === 'true', 'SharePoint : pop-up visible et désactivé');
   const desc = await pop.getAttribute('aria-describedby');
   ok(
@@ -107,7 +111,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
 
   // Moodle : iframe et renvoi vers le SCORM ; Notion : adresse seule
   await where.getByRole('radio', { name: 'Moodle' }).click();
-  await panel.getByRole('radio', { name: 'Responsive' }).click();
+  await panel.getByRole('radio', { name: 'Encadré dans la page' }).click();
   ok(
     /<iframe/.test(await panel.locator('pre').innerText()) && /paquet SCORM/.test(await panel.innerText()),
     'Moodle : iframe, limite SCORM',

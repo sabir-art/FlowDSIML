@@ -266,7 +266,54 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       ok((await d.locator('.shd-access').count()) === 1, `${m} : pastille d’accès présente`);
       ok(await noScroll(page), `${m} : pas de défilement horizontal`);
       await axe(page, m);
-      if (m === 'Intégrer') await shot(page, 'partager-integrer');
+      if (m === 'Intégrer') {
+        // §1.3 : trois formats en cartes radio, code qui passe à la ligne, « Copier le code », aperçu
+        const emb = d.locator('#sh-panel-embed');
+        const cards = emb.getByRole('radiogroup', { name: 'Format d’intégration' }).getByRole('radio');
+        ok(
+          (await cards.allInnerTexts()).join('|') ===
+            'Encadré dans la page|Bouton qui ouvre la démo|Plein écran' &&
+            (await cards.nth(0).getAttribute('aria-checked')) === 'true',
+          'Intégrer : cartes radio Encadré · Bouton · Plein écran, Encadré choisi',
+        );
+        const pre = emb.locator('pre.she-code');
+        ok(
+          /<iframe/.test(await pre.innerText()) &&
+            (await pre.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)),
+          'Intégrer : le code passe à la ligne (pas de défilement dans le bloc)',
+        );
+        await cards.nth(0).focus();
+        await page.keyboard.press('ArrowRight');
+        ok(
+          (await cards.nth(1).getAttribute('aria-checked')) === 'true' &&
+            /popup\.js/.test(await pre.innerText()),
+          'Intégrer : flèche droite → « Bouton », code bouton + script',
+        );
+        await cards.nth(2).click();
+        ok(
+          /position:fixed/.test(await pre.innerText()),
+          'Intégrer : « Plein écran », iframe sur toute la page',
+        );
+        ok(
+          ((await emb.locator('.she-prev').getAttribute('aria-label')) || '').startsWith('Aperçu') &&
+            (await emb.locator('.she-prev--full').count()) === 1,
+          'Intégrer : aperçu du format choisi',
+        );
+        await cards.nth(0).click();
+        await emb.getByRole('button', { name: 'Copier le code' }).click();
+        ok(
+          (await page.evaluate(() => navigator.clipboard.readText())).includes('<iframe'),
+          'Intégrer : « Copier le code » met le code dans le presse-papiers',
+        );
+        const folds = emb.locator('.shd-fold__head');
+        ok(
+          (await folds.allTextContents()).join('|') === 'Adapter à un outil|Sites autorisés' &&
+            (await folds.evaluateAll((l) => l.every((b) => b.getAttribute('aria-expanded') === 'false'))) &&
+            (await emb.locator('.alert, .soon-text').count()) === 0,
+          'Intégrer : réglages rares repliés, aucun encadré, aucun « Bientôt »',
+        );
+        await shot(page, 'partager-integrer');
+      }
     }
     // Exporter : le fichier se prépare dans la fenêtre d'export
     await d
