@@ -57,7 +57,7 @@
 
 | Élément | Mouvement | Durée et courbe |
 |---|---|---|
-| **Barre latérale en rail** (§6) | Dépli au survol : `transform: translateX` d'un calque de 256 px qui glisse depuis la gauche ; libellés en `opacity` de 0 à 1, décalés de 40 ms | 200 ms `standard` ; repli en 160 ms `exit` |
+| **Barre latérale en rail** (§6, NAV-04) | Pas de dépli au survol (correction client, NAV-04 §14 bis). Bascule replié ↔ déplié par le bouton : la colonne change de largeur d'un seul coup, les libellés apparaissent en `opacity` de 0 à 1 après la bascule, et le contenu principal suit par FLIP | 200 ms `standard` |
 | **Colonne Dossiers** (§7) | Bascule : FLIP sur le contenu principal ; colonne en `translateX(-16px)` et `opacity` | 320 ms `standard` |
 | **Menus, déroulants, popovers** | `opacity` de 0 à 1 et `scale(.96)` vers 1, origine au déclencheur | 200 ms `standard` ; sortie en 120 ms `exit` |
 | **Infobulles** | `opacity`, après le délai existant de 300 ms | 120 ms |
