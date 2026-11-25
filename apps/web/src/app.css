@@ -1783,29 +1783,6 @@ button.fd-nav__item {
 button.fd-nav__item:hover {
   background: var(--fd-color-nav-hover);
 }
-.ext-dialog .ext-steps {
-  margin: var(--fd-space-3) 0;
-  padding-left: 1.4em;
-}
-.ext-dialog .ext-steps li + li {
-  margin-top: var(--fd-space-1);
-}
-.ext-dialog .ext-soon {
-  margin-left: 6px;
-  font-family: var(--fd-font-sans);
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0;
-  color: var(--fd-color-text-muted);
-}
-.ext-dialog .ext-ok {
-  display: flex;
-  align-items: center;
-  gap: var(--fd-space-2);
-}
-.ext-dialog .ext-ok svg {
-  color: var(--fd-color-success);
-}
 
 /* L48-D : recherche en haut d'un menu (longues listes) */
 .menu-search {

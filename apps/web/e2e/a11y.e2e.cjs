@@ -833,6 +833,20 @@ const APP_PAGES = [
   { name: 'Confidentialité', route: '/#/settings/privacy' },
   // §3.4 : Médiathèque (vide, puis avec des fichiers des trois catégories)
   { name: 'Médiathèque (page vide)', route: '/#/media' },
+  // §7 : page Extension, absente puis présente
+  { name: 'Extension', route: '/#/extension', open: (p) => p.waitForSelector('.xt-card') },
+  {
+    name: 'Extension · installée',
+    route: '/#/extension',
+    seed: (d) => {
+      Object.assign(d.tables.profiles[0], {
+        extension_seen_at: '2026-11-02T10:00:00Z',
+        extension_version: '0.2.0',
+        extension_last_capture_at: '2026-11-24T08:00:00Z',
+      });
+    },
+    open: (p) => p.waitForSelector('.xt-ready'),
+  },
   {
     name: 'Médiathèque (page)',
     route: '/#/media',

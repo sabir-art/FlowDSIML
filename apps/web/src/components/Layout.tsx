@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useHelp } from '../help/HelpProvider';
-import { ExtensionDialog } from './ExtensionDialog';
 import { PanneauIcon } from './PanneauIcon';
 import { LazyNotificationBell } from './notifications/LazyNotificationBell';
 import { useWorkspace } from '../workspace/WorkspaceProvider';
@@ -66,7 +65,6 @@ export function Layout() {
   const platformRole = usePlatformRole();
   const { current, can } = useWorkspace();
   const [open, setOpen] = useState(false);
-  const [extension, setExtension] = useState(false);
   const help = useHelp();
 
   const menuBtn = useRef<HTMLButtonElement>(null);
@@ -251,15 +249,7 @@ export function Layout() {
         </nav>
         <div className="spacer" />
         <nav aria-label={t('nav.utilities')} className="fd-nav fd-nav--utils">
-          <button
-            type="button"
-            className="fd-nav__item"
-            data-tip={collapsedRail ? t('nav.extension') : undefined}
-            onClick={() => setExtension(true)}
-          >
-            <Puzzle {...ICON} />
-            <span className="fd-nav__label">{t('nav.extension')}</span>
-          </button>
+          {item('/extension', path === '/extension', <Puzzle {...ICON} />, t('nav.extension'))}
           {help && (
             <button
               type="button"
@@ -356,7 +346,6 @@ export function Layout() {
           menuBtn.current?.focus();
         }}
       />
-      {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
       <main className="main" id="main" tabIndex={-1}>
         {/* Changement d'espace : la page est remontée, ses données et requêtes de l'ancien espace abandonnées */}
         <Outlet key={current?.id ?? 'none'} />

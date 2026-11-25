@@ -957,7 +957,10 @@ export type Database = {
           avatar_path: string | null;
           avatar_url: string | null;
           created_at: string;
+          extension_last_capture_at: string | null;
+          extension_last_demo: string | null;
           extension_seen_at: string | null;
+          extension_version: string | null;
           full_name: string;
           id: string;
           locale: string;
@@ -2555,6 +2558,7 @@ export type Database = {
       present_remote_status: { Args: { p_id: string }; Returns: Json };
       present_remote_end: { Args: { p_id: string }; Returns: undefined };
       extension_seen: { Args: Record<PropertyKey, never>; Returns: undefined };
+      extension_report: { Args: { p_version: string; p_demo?: string }; Returns: undefined };
       workspace_onboarding: { Args: { p_ws: string }; Returns: Json };
       set_default_style: {
         Args: { p_ws: string; p_builtin?: string | null; p_theme?: string | null };

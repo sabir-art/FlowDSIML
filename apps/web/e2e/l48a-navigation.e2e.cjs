@@ -65,34 +65,12 @@ const MB = 1024 * 1024;
       'sous-titre «\u202fEspace · n membres\u202f»',
     );
 
-    // Extension : non détectée
-    await utils.getByRole('button', { name: 'Extension' }).click();
-    // §18.4 : pas de VITE_EXTENSION_URL dans les tests, extension jamais détectée : «\u202fBientôt disponible\u202f»
-    const dlg = page.getByRole('dialog', { name: /^Extension TutoClick/ });
-    await dlg.waitFor();
-    {
-      const soon = await dlg.locator('h2 .ext-soon').evaluate((el) => ({
-        txt: el.textContent,
-        fs: getComputedStyle(el).fontSize,
-      }));
-      ok(
-        soon.txt === 'Bientôt disponible' && soon.fs === '13px',
-        '§18.4 : titre «\u202fExtension TutoClick\u202f», «\u202fBientôt disponible\u202f» en 13 px',
-      );
-    }
+    // §7 : « Extension » est un lien vers sa page (voir extension.e2e) ; plus de fenêtre
     ok(
-      (await dlg.locator('.dialog-body > *').count()) === 1 &&
-        (await dlg.locator('.ext-steps, .link-button').count()) === 0 &&
-        JSON.stringify(await dlg.locator('.dialog-actions').getByRole('button').allInnerTexts()) ===
-          JSON.stringify(['Fermer']) &&
-        (await dlg.locator('.dialog-actions a').count()) === 0,
-      '§18.4 : une phrase, ni étapes ni lien d’aide, «\u202fFermer\u202f» seul',
-    );
-    await page.keyboard.press('Escape');
-    await dlg.waitFor({ state: 'hidden' });
-    ok(
-      await page.evaluate(() => document.activeElement?.textContent?.trim() === 'Extension'),
-      'Échap ferme la modale et rend le focus',
+      ((await utils.getByRole('link', { name: 'Extension' }).getAttribute('href')) || '').endsWith(
+        '#/extension',
+      ) && (await utils.getByRole('button', { name: 'Extension' }).count()) === 0,
+      'Extension : lien vers la page Extension',
     );
 
     // Centre d'aide : ouvre le tiroir
@@ -195,13 +173,11 @@ const MB = 1024 * 1024;
       (await page.getByRole('link', { name: 'Parcours de formation' }).count()) === 0,
       'éditeur : pas de «\u202fParcours de formation\u202f»',
     );
-    await page.getByRole('button', { name: 'Extension', exact: true }).click();
-    const dlg = page.getByRole('dialog', { name: 'Extension installée' });
-    await dlg.waitFor();
-    ok(/2 nov\. 2026/.test(await dlg.innerText()), 'Extension détectée : date de détection');
-    await dlg.getByRole('button', { name: 'Lancer une capture' }).click();
+    await page.getByRole('link', { name: 'Extension', exact: true }).click();
+    await page.getByRole('heading', { name: 'L’extension est prête' }).waitFor();
+    await page.getByRole('link', { name: 'Capturer une démo' }).click();
     await page.getByRole('dialog', { name: /Nouvelle démo/ }).waitFor();
-    ok(true, '«\u202fLancer une capture\u202f» ouvre «\u202fNouvelle démo\u202f»');
+    ok(true, 'Extension détectée : «\u202fCapturer une démo\u202f» ouvre «\u202fNouvelle démo\u202f»');
     await ctx.close();
   }
 
