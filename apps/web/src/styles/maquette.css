@@ -805,13 +805,15 @@
    cloche ; sous les menus ouverts, au-dessus du contenu */
 .mk .toasts {
   position: fixed;
-  top: calc(var(--fd-layout-topbar-height) + 16px);
+  /* --fd-toast-anchor : bas de l'en-tête d'une page qui porte ses actions sous la barre du haut
+     (Paramètres), pour ne jamais les couvrir ; sinon la barre du haut */
+  top: calc(var(--fd-toast-anchor, var(--fd-layout-topbar-height)) + 16px);
   right: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* Sous les menus ouverts, au-dessus du contenu et des barres collées */
-  z-index: calc(var(--fd-z-dropdown) - 1);
+  /* Au-dessus des panneaux et des barres collées : l'action d'un toast (« Annuler ») reste cliquable */
+  z-index: var(--fd-z-toast);
   /* Seuls les toasts reçoivent les clics : l'espace entre eux laisse passer vers la page */
   pointer-events: none;
 }
@@ -865,7 +867,7 @@
 }
 @media (max-width: 599px) {
   .mk .toasts {
-    top: calc(var(--fd-layout-topbar-height) + 8px);
+    top: calc(var(--fd-toast-anchor, var(--fd-layout-topbar-height)) + 8px);
     left: 16px;
     right: 16px;
   }
