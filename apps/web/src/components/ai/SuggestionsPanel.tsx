@@ -6,6 +6,8 @@ import type { DemoEditor } from '../../pages/editor/useDemoEditor';
 import { asSettings } from '../../pages/editor/types';
 import { useToast } from '../Toast';
 import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
+import { looksTechnical } from '@flowdsiml/core';
+import { asVideo } from '../../pages/editor/video/videoModel';
 import { markAiApplied, useBlockText } from './AiWrite';
 import './ai.css';
 
@@ -22,6 +24,39 @@ export interface Suggestion {
   local?: boolean;
   /** Contrôle local : ouvre l'élément au lieu d'appliquer un texte. */
   stepId?: string;
+}
+
+/** Textes envoyés au plus pour une analyse (limite de la fonction ai). */
+export const MAX_TEXTS = 100;
+
+/**
+ * L63 : TOUS les textes de TOUTES les étapes, dans l'ordre de lecture. Titre et texte de l'étape, titre
+ * et texte de chaque bulle (captures, pages HTML), titre et texte de chaque pause d'une vidéo. L'id dit où
+ * écrire : `s:<étape>:title|body`, `h:<bulle>:title|body`, `p:<étape>:title|body:<pause>`.
+ */
+export function demoTexts(
+  editor: Pick<DemoEditor, 'steps' | 'hotspots'>,
+): Array<{ id: string; text: string; n: number }> {
+  const out: Array<{ id: string; text: string; n: number }> = [];
+  const add = (id: string, text: string | null | undefined, n: number) => {
+    if (text?.trim()) out.push({ id, text, n });
+  };
+  editor.steps.forEach((s, i) => {
+    add(`s:${s.id}:title`, s.title, i + 1);
+    add(`s:${s.id}:body`, s.body, i + 1);
+    for (const h of editor.hotspots
+      .filter((x) => x.step_id === s.id)
+      .sort((a, b) => a.position - b.position)) {
+      add(`h:${h.id}:title`, h.title, i + 1);
+      add(`h:${h.id}:body`, h.body, i + 1);
+    }
+    if (s.kind === 'video')
+      for (const p of asVideo(s.video).pauses) {
+        add(`p:${s.id}:title:${p.id}`, p.title, i + 1);
+        add(`p:${s.id}:body:${p.id}`, p.body, i + 1);
+      }
+  });
+  return out;
 }
 
 /** Bulle au-delà de laquelle la lecture devient difficile (contrôle local). */
@@ -45,6 +80,19 @@ export function localChecks(
         local: true,
         stepId: s.id,
       });
+    // L63 : titre technique né de la capture (sélecteur, textes collés) : à réécrire
+    for (const f of demoTexts({ steps: [s], hotspots: editor.hotspots }))
+      if (f.id.endsWith(':title') && looksTechnical(f.text))
+        out.push({
+          id: `tech:${f.id}`,
+          key: f.id,
+          n: i + 1,
+          type: 'clarity',
+          message: t('ai.suggest.technical'),
+          proposal: '',
+          local: true,
+          stepId: s.id,
+        });
     for (const h of editor.hotspots.filter((x) => x.step_id === s.id))
       if (h.body.length > BUBBLE_MAX)
         out.push({
@@ -99,19 +147,7 @@ export function SuggestionsPanel({
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const fields = () => {
-    const out: Array<{ id: string; text: string; n: number }> = [];
-    editor.steps.forEach((s, i) => {
-      if (s.title?.trim()) out.push({ id: `s:${s.id}:title`, text: s.title, n: i + 1 });
-      for (const h of editor.hotspots
-        .filter((x) => x.step_id === s.id)
-        .sort((a, b) => a.position - b.position)) {
-        if (h.title.trim()) out.push({ id: `h:${h.id}:title`, text: h.title, n: i + 1 });
-        if (h.body.trim()) out.push({ id: `h:${h.id}:body`, text: h.body, n: i + 1 });
-      }
-    });
-    return out;
-  };
+  const fields = () => demoTexts(editor);
 
   const analyse = async () => {
     const b = aiBlock(status, 'suggest');
@@ -119,7 +155,7 @@ export function SuggestionsPanel({
       setMessage(blockText(b, status));
       return setPhase('blocked');
     }
-    const f = fields().slice(0, 100);
+    const f = fields().slice(0, MAX_TEXTS);
     ctrl.current?.abort();
     const c = new AbortController();
     ctrl.current = c;
@@ -148,16 +184,28 @@ export function SuggestionsPanel({
     }
   };
 
-  const current = (key: string) => {
-    const [kind, id, field] = key.split(':');
-    if (kind === 's') return editor.steps.find((s) => s.id === id)?.title ?? '';
-    const h = editor.hotspots.find((x) => x.id === id);
-    return (field === 'title' ? h?.title : h?.body) ?? '';
-  };
+  const current = (key: string) => demoTexts(editor).find((f) => f.id === key)?.text ?? '';
   const write = (key: string, text: string) => {
-    const [kind, id, field] = key.split(':');
-    if (kind === 's') editor.updateStep(id!, { title: text });
-    else editor.updateHotspot(id!, field === 'title' ? { title: text } : { body: text });
+    const [kind, id, field, ...rest] = key.split(':');
+    if (kind === 's') editor.updateStep(id!, field === 'body' ? { body: text } : { title: text });
+    else if (kind === 'p') {
+      // Pause-étape d'une vidéo : seule cette pause change, le reste du montage est gardé tel quel
+      const step = editor.steps.find((s) => s.id === id);
+      const raw = step?.video;
+      if (!step || !raw || typeof raw !== 'object' || Array.isArray(raw)) return;
+      const pauseId = rest.join(':');
+      const pauses = Array.isArray(raw.pauses) ? raw.pauses : [];
+      editor.updateStep(id!, {
+        video: {
+          ...raw,
+          pauses: pauses.map((p) =>
+            p && typeof p === 'object' && !Array.isArray(p) && p.id === pauseId
+              ? { ...p, [field!]: text }
+              : p,
+          ),
+        },
+      });
+    } else editor.updateHotspot(id!, field === 'title' ? { title: text } : { body: text });
   };
   const apply = (s: Suggestion) => {
     const before = current(s.key);
