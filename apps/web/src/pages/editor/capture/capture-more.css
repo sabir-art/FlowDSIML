@@ -1,0 +1,145 @@
+/* EXT-02 §8 : « Capturer de nouvelles étapes » (fenêtre, bandeau, repère de la liste) */
+.cm-dialog .fd-modal__body {
+  gap: 16px;
+}
+.cm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cm-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.cm-help {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.cm-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.cm-seg > button {
+  justify-content: center;
+  gap: 8px;
+}
+.cm-seg > button[aria-disabled='true'] {
+  color: var(--fd-color-text-muted);
+  cursor: not-allowed;
+}
+.cm-seg svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.cm-ext {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.cm-dialog .cm-ext--ok {
+  color: var(--fd-color-success);
+}
+.cm-ext svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.cm-ext--missing {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface-sunken);
+}
+.cm-ext--missing p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cm-ext--missing p span {
+  color: var(--fd-color-text-muted);
+}
+.cm-ext__acts {
+  display: flex;
+  gap: 8px;
+}
+.cm-or {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.cm-or::before,
+.cm-or::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--fd-color-border);
+}
+.cm-import {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Bandeau sous l'en-tête de l'éditeur */
+.cm-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--fd-color-border);
+  background: var(--fd-color-info-soft);
+  font-size: 13px;
+}
+.cm-banner > svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--fd-color-info);
+}
+.cm-banner p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.cm-banner .cm-banner__cancel {
+  color: var(--fd-color-primary);
+}
+@media (max-width: 720px) {
+  .cm-banner {
+    flex-wrap: wrap;
+  }
+  .cm-banner p {
+    flex-basis: calc(100% - 28px);
+  }
+}
+
+/* Repère d'insertion dans la liste des étapes */
+.mk .cm-marker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 24px;
+  padding: 8px 10px;
+  border: 1px dashed var(--fd-color-primary);
+  border-radius: var(--fd-radius-md);
+  font-size: 12px;
+  color: var(--fd-color-primary);
+  list-style: none;
+}
+.mk .cm-marker svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.mk .rail--collapsed .cm-marker span {
+  display: none;
+}

@@ -243,6 +243,9 @@ jobs:
       - name: 'Page Extension : absente, présente, version et dernière capture (retours du 24/11, 2e série §7)'
         if: always()
         run: cd apps/web && node e2e/extension.e2e.cjs && THEME=dark node e2e/extension.e2e.cjs && WIDTH=390 node e2e/extension.e2e.cjs
+      - name: Éditeur, capturer de nouvelles étapes (EXT-02 §8) (fenêtre, extension détectée ou requise, bandeau, repère, insertion, « Nouveau », annulation)
+        if: always()
+        run: cd apps/web && node e2e/capture-etapes.e2e.cjs && THEME=dark node e2e/capture-etapes.e2e.cjs
       - name: 'Démo hors ligne : archive générée, ouverte depuis le disque réseau coupé, aucune requête sortante (retours du 24/11, 2e série §8)'
         if: always()
         run: cd apps/web && node e2e/hors-ligne.e2e.cjs && THEME=dark node e2e/hors-ligne.e2e.cjs
@@ -550,3 +553,10 @@ jobs:
           cd apps/extension && pnpm build
           node e2e/external.e2e.cjs | tee /tmp/e2e-ext-canal.log
           ! grep -q '^NOT OK' /tmp/e2e-ext-canal.log
+      - name: Capturer de nouvelles étapes (EXT-02 §8) (ping, cible de l'éditeur, pastille de la barre, « Ajouter n étapes », retour à l'éditeur)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/ajout.e2e.cjs | tee /tmp/e2e-ext-ajout.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-ajout.log
