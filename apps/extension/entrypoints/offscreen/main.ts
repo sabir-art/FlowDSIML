@@ -63,18 +63,47 @@ async function frame(): Promise<Blob> {
   return new Promise((res) => c.toBlob((b) => res(b ?? new Blob()), 'image/webp', 0.85));
 }
 
+/**
+ * L60, banc : faux flux d'onglet (build des e2e seulement, WXT_E2E=1). Un Chromium sans écran n'a pas
+ * de flux d'onglet (tabCapture) : une image animée le remplace, pour que l'enregistrement, les repères
+ * et l'envoi soient testés de bout en bout. Absent du build de la boutique (branche retirée au build).
+ */
+const FAKE_STREAM = 'fd-e2e-faux-flux';
+function fakeTabStream(): MediaStream {
+  const c = document.createElement('canvas');
+  c.width = 1280;
+  c.height = 720;
+  const g = c.getContext('2d')!;
+  let n = 0;
+  const draw = () => {
+    g.fillStyle = '#f6f3ee';
+    g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#a3195b';
+    g.fillRect((n * 8) % c.width, 320, 120, 80);
+    g.fillStyle = '#17324d';
+    g.font = '32px sans-serif';
+    g.fillText(`Faux flux d'onglet · image ${n++}`, 40, 80);
+  };
+  draw();
+  setInterval(draw, 100);
+  return c.captureStream(10);
+}
+
 async function start(m: Start) {
   chunks = [];
   marks = [];
   masks = new Map();
   frames = [];
   meta = m.meta;
-  const tab = await navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: {
-      mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: m.streamId },
-    } as unknown as MediaTrackConstraints,
-  });
+  const tab =
+    import.meta.env.WXT_E2E === '1' && m.streamId === FAKE_STREAM
+      ? fakeTabStream()
+      : await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: m.streamId },
+          } as unknown as MediaTrackConstraints,
+        });
   tracks = [...tab.getTracks()];
   let mic: MediaStream | null = null;
   if (m.mic) {

@@ -538,6 +538,9 @@ jobs:
           # Même détection en mode captures d'écran : données fictives repérées, aucun bouton flouté à tort
           node e2e/banc/etat-captures.cjs | tee /tmp/banc-captures.log
           ! grep -q '^NOT OK' /tmp/banc-captures.log
+          # Vidéo de bout en bout sur un faux flux d'onglet (build des e2e seulement)
+          node e2e/banc/etat-video.cjs | tee /tmp/banc-video.log
+          ! grep -q '^NOT OK' /tmp/banc-video.log
       - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
         if: always()
         env:
