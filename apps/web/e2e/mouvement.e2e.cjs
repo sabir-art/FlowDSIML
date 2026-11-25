@@ -273,7 +273,24 @@ function act(target) {
     const tag = reduced ? 'mouvement réduit' : 'mouvement';
     const anim = (el) => {
       const cs = getComputedStyle(el);
-      const kf = el.getAnimations()[0]?.effect?.getKeyframes?.()[0];
+      // Une animation de 200 ms peut être finie avant la mesure : on lit alors la règle @keyframes.
+      let kf = el.getAnimations()[0]?.effect?.getKeyframes?.()[0];
+      if (!kf && cs.animationName && cs.animationName !== 'none') {
+        for (const sheet of document.styleSheets) {
+          let rules;
+          try {
+            rules = sheet.cssRules;
+          } catch {
+            continue;
+          }
+          for (const r of rules) {
+            if (r instanceof CSSKeyframesRule && r.name === cs.animationName) {
+              const f = r.findRule('from') || r.findRule('0%');
+              if (f) kf = { opacity: f.style.opacity, transform: f.style.transform };
+            }
+          }
+        }
+      }
       return {
         name: cs.animationName,
         duration: cs.animationDuration,
