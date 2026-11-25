@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Orbe v2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{margin:0;font:400 13px/1.4 Inter,system-ui,sans-serif;background:#eef0f4;color:#1d2433}
+.wrap{display:grid;grid-template-columns:320px 320px 160px 160px;width:960px}
+.cell{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:330px}
+.l{background:#f6f7fb}.d{background:#14161b;color:#eef0f4}
+.cell small{color:#5b6472}.d small{color:#9aa3af}
+h1{margin:0;padding:14px 20px 10px;font:600 16px Inter,system-ui,sans-serif;background:#fff;display:flex;justify-content:space-between;align-items:center}
+.meter{display:flex;align-items:center;gap:10px;font:500 13px Inter,system-ui,sans-serif;color:#5b6472}
+.meter i{display:block;width:120px;height:6px;border-radius:999px;background:#e3e6ee;overflow:hidden}.meter b{display:block;height:100%;width:0;background:#a3195b;border-radius:999px}
+.st{min-width:64px}
+</style></head><body>
+<h1><span id="ttl">Orbe</span><span class="meter"><span class="st" id="st">Silence</span><i><b id="mb"></b></i></span></h1>
+<div class="wrap" id="w"></div>
+<script src="orbe2.js"></script>
+<script>
+const q = new URLSearchParams(location.search); const V = q.get('v') || 'aurora';
+const NAMES = { aurora: 'A · Verre aurora', ruban: 'B · Ruban de lumière', particules: 'C · Particules' };
+document.getElementById('ttl').textContent = NAMES[V] + (q.get('reduced') ? ' · mouvement réduit' : '');
+const cells = [['l', 240, 'Grand · clair'], ['d', 240, 'Grand · sombre'], ['l', 64, 'Taille réelle · clair'], ['d', 64, 'Taille réelle · sombre']];
+const orbs = [];
+for (const [cls, s, cap] of cells) {
+  const d = document.createElement('div'); d.className = 'cell ' + cls; const cv = document.createElement('canvas');
+  const pad = Math.round(s * 1.25); cv.width = pad; cv.height = pad; cv.style.width = pad + 'px'; cv.style.height = pad + 'px';
+  d.appendChild(cv); d.insertAdjacentHTML('beforeend', `<small>${cap} · ${s} px</small>`); document.getElementById('w').appendChild(d);
+  const o = TutoOrb2.create(cv, { variant: V, dark: cls === 'd' }); if (q.get('reduced')) o.reduced = true; orbs.push(o);
+}
+// Volume simulé, déterministe : silence 0–1,5 s, parole 1,5–6 s (syllabes, mots, respirations), silence 6–7,5 s
+const rnd = (i) => { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); };
+const speech = (t) => { if (t < 1.5 || t > 6) return 0; const syl = Math.floor(t * 5.2); const ph = (t * 5.2) % 1; const env = Math.sin(Math.PI * ph) ** 1.4;
+  const word = (t % 1.6) > 1.35 ? 0.12 : 1; return Math.min(1, (0.35 + 0.6 * rnd(syl)) * env * word); };
+let T = 0;
+window.__step = (dt) => { T += dt; const raw = speech(T % 7.5); for (const o of orbs) o.frame(dt, raw);
+  document.getElementById('st').textContent = raw > 0.02 || (T % 7.5 > 1.5 && T % 7.5 < 6) ? 'Parole' : 'Silence';
+  document.getElementById('mb').style.width = Math.round(orbs[0].state.lv * 100) + '%'; };
+if (!q.get('frames')) { let last = performance.now(); const loop = (n) => { __step(Math.min(0.05, (n - last) / 1000)); last = n; requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+</script></body></html>

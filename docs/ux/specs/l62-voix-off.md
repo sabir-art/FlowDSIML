@@ -94,6 +94,20 @@ Aujourd'hui, une fois une voix enregistrée, il faut la supprimer pour retrouver
 
 ## 7. Lecteur audio côté visiteur : Bulle, Orbe, Barre
 
+> **Orbe en reprise (retour du client du 25/11)** : la v1 décrite plus bas était trop rapide, n'était pas aux couleurs de la charte et faisait « bille 3D ». Trois directions v2 sont proposées au client dans `docs/ux/propositions/l62/orbe-v2/` :
+> - les vidéos de 7,5 s (silence, parole, silence) : `orbe-aurora.mp4`, `orbe-ruban.mp4`, `orbe-particules.mp4` et `orbe-aurora-reduced.mp4`, chacune aussi en GIF ;
+> - la planche `planche-orbe-v2.png` ;
+> - le code de référence `orbe2.js`, avec la démo `orbe2-demo.html`.
+>
+> Les règles communes aux trois directions :
+> - **couleurs** : la charte par défaut (prune, framboise, reflets orange) ; « Thème de la démo » reste une option ;
+> - **rythme** : volutes en 6 à 10 s, respiration en 4,5 s ;
+> - **volume** : lissé fort (attaque 220 ms, relâche 650 ms). La voix accélère une phase continue : rien ne saute, ni au début ni à la fin de la parole ;
+> - **dessin** : canvas 2D seul (dégradés en couches, flou, mode « lighter »). Il n'y a pas de WebGL, donc pas de repli à prévoir ;
+> - **mouvement réduit** : un anneau pulsé, sans mouvement interne.
+>
+> **Le §7 ci-dessous ne part pas chez le dev** avant le choix du client.
+
 Planche : `docs/ux/propositions/l62/planche-l62-orbe.png`.
 
 Animation : `docs/ux/propositions/l62/orbe/orbe-animation.gif` (et `.webm`). Démo vivante : `orbe/orbe-demo.html`. Code de référence : `orbe/orbe.js`, un canvas 2D sans dépendance d'environ 85 lignes.
