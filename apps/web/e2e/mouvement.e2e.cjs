@@ -596,6 +596,95 @@ function act(target) {
   await flip(false);
   await flip(true);
 
+  // ===== §3 : tiroirs à 390 px (menu de navigation, colonne Dossiers) =====
+  const drawers = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 390, height: 844 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/`);
+    await page.locator('.demo-card').first().waitFor();
+    const tag = reduced ? 'mouvement réduit' : 'tiroirs';
+    const read = () =>
+      page.evaluate(() => {
+        const cs = (q) => getComputedStyle(document.querySelector(q));
+        const s = cs('#sidebar');
+        const v = cs('.scrim');
+        return {
+          nav: `${s.transitionProperty} ${s.transitionDuration} ${s.transitionTimingFunction}`,
+          veil: `${v.transitionProperty} ${v.transitionDuration} ${v.transitionTimingFunction}`,
+          clicks: v.pointerEvents,
+        };
+      });
+    const closed = await read();
+    await page.getByRole('button', { name: 'Ouvrir le menu' }).click();
+    await page.locator('.nav-open #sidebar').waitFor();
+    const opened = await read();
+    if (reduced)
+      ok(
+        parseFloat(opened.nav.split(' ')[1]) < 0.001 && parseFloat(closed.nav.split(' ')[1]) < 0.001,
+        `${tag} : le menu s’ouvre et se ferme sans glissement (${opened.nav.split(' ')[1]})`,
+      );
+    else {
+      ok(
+        opened.nav === 'transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1)' &&
+          opened.veil === 'opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `tiroirs : menu ouvert en translateX, voile en opacité, 320 ms (${opened.nav})`,
+      );
+      ok(
+        closed.nav === 'transform 0.24s cubic-bezier(0.4, 0, 1, 1)' &&
+          closed.veil === 'opacity 0.24s cubic-bezier(0.4, 0, 1, 1)',
+        `tiroirs : sortie en 240 ms, courbe de sortie (${closed.nav})`,
+      );
+    }
+    ok(
+      closed.clicks === 'none' && opened.clicks === 'auto',
+      `${tag} : le voile ne reçoit les clics qu’ouvert`,
+    );
+    // Le tiroir a fini d'entrer : il est à sa place, et le voile le referme
+    await page.locator('#sidebar').evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    ok(
+      (await page.locator('#sidebar').evaluate((el) => Math.round(el.getBoundingClientRect().left))) === 0,
+      `${tag} : menu ouvert à sa place`,
+    );
+    await page.locator('.scrim').click({ position: { x: 370, y: 400 } });
+    await page.waitForFunction(() => !document.querySelector('.nav-open'));
+    await page.locator('#sidebar').evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    ok(
+      (await page.locator('#sidebar').evaluate((el) => el.getBoundingClientRect().right)) <= 0,
+      `${tag} : menu refermé, hors de l’écran`,
+    );
+    // Colonne Dossiers en tiroir
+    await page.getByRole('button', { name: 'Dossiers' }).first().click();
+    const sheet = page.locator('.fcol-sheet');
+    await sheet.waitFor();
+    const d = await sheet.evaluate((el) => {
+      const a = getComputedStyle(el);
+      const b = getComputedStyle(el.querySelector('.fcol--drawer'));
+      return {
+        veil: `${a.animationName} ${a.animationDuration}`,
+        drawer: `${b.animationName} ${b.animationDuration}`,
+      };
+    });
+    if (reduced)
+      ok(
+        parseFloat(d.drawer.split(' ')[1]) < 0.001,
+        `${tag} : tiroir Dossiers sans glissement (${d.drawer})`,
+      );
+    else
+      ok(
+        d.veil === 'fd-veil-in 0.32s' && d.drawer === 'fd-drawer-in-right 0.32s',
+        `tiroirs : Dossiers glisse depuis son bord, voile en fondu, 320 ms (${d.drawer})`,
+      );
+    await ctx.close();
+  };
+  await drawers(false);
+  await drawers(true);
+
   // ===== §3 : squelette vers contenu, fondu croisé (page Démos, chargement ralenti) =====
   const skeleton = async (reduced) => {
     const ctx = await b.newContext({
