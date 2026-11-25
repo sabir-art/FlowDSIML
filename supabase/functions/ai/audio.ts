@@ -69,6 +69,36 @@ export function estimateSeconds(text: string, speed = 1): number {
 
 export const mp3DurationMs = (bytes: number) => Math.round((bytes * 8) / 128);
 
+/**
+ * Refus du fournisseur audio, nommé sans secret (L62) : le statut HTTP et le code d'erreur court du
+ * fournisseur (`detail.status`, ex. quota_exceeded). Jamais son message, qui peut reprendre le texte
+ * envoyé. `error` est le code rendu à l'app, `http` le statut de notre réponse.
+ *  - PROVIDER_KEY : clé refusée, droits manquants, compte bloqué par le fournisseur ;
+ *  - PROVIDER_QUOTA : crédits du compte du fournisseur épuisés (ce n'est pas le quota de l'espace) ;
+ *  - PROVIDER_VOICE : voix ou modèle introuvable sur le compte ;
+ *  - PROVIDER : indisponibilité passagère (réseau, 429, 5xx) ou cause inconnue.
+ */
+export interface ProviderRefusal {
+  error: 'PROVIDER_KEY' | 'PROVIDER_QUOTA' | 'PROVIDER_VOICE' | 'PROVIDER';
+  http: 502 | 503;
+  /** Pour le journal : « 401 quota_exceeded », « network »… */
+  log: string;
+}
+export function providerRefusal(status: number | null, body: unknown): ProviderRefusal {
+  if (status === null) return { error: 'PROVIDER', http: 502, log: 'network' };
+  const detail = (body as { detail?: unknown } | null)?.detail;
+  const raw = (detail as { status?: unknown } | null)?.status;
+  const code = typeof raw === 'string' && /^[a-z0-9_]{1,48}$/.test(raw) ? raw : '';
+  const log = code ? `${status} ${code}` : String(status);
+  // Le fournisseur répond 401 aussi pour un quota épuisé : le code passe avant le statut
+  if (/quota|credit|payment|subscription|limit_reached/.test(code) || status === 402)
+    return { error: 'PROVIDER_QUOTA', http: 503, log };
+  if (/voice|model/.test(code) || status === 404) return { error: 'PROVIDER_VOICE', http: 502, log };
+  if (status === 401 || status === 403 || /api_key|permission|unusual_activity|unauthorized/.test(code))
+    return { error: 'PROVIDER_KEY', http: 502, log };
+  return { error: 'PROVIDER', http: status === 429 || status >= 500 ? 503 : 502, log };
+}
+
 export interface Word {
   text: string;
   start: number;

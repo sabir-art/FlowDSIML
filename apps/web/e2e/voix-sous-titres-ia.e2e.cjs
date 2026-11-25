@@ -199,7 +199,31 @@ function prepare(over = {}) {
   const sb = await panel.getByRole('button', { name: 'Écouter un exemple' }).boundingBox();
   ok(sb.width === 36 && sb.height === 36, 'Bouton d’exemple de 36 px à droite de «\u202fVoix\u202f»');
   await shot('l30-10-voix-panneau');
-  await panel.getByRole('button', { name: 'Générer la voix' }).click();
+  // L62 : le service de voix refuse. La cause est dite (clé, crédits, voix), pas « Réessayez »
+  for (const [code, text] of [
+    ['PROVIDER_KEY', 'Le service de voix refuse la clé de l’espace. Prévenez un administrateur.'],
+    ['PROVIDER_QUOTA', 'Les crédits du service de voix sont épuisés. Prévenez un administrateur.'],
+    ['PROVIDER_VOICE', 'Cette voix n’est pas disponible sur le service de voix.'],
+  ]) {
+    state.aiProvider = code;
+    await panel.getByRole('button', { name: 'Écouter un exemple' }).click();
+    await panel.getByText(text, { exact: false }).first().waitFor();
+    const sampleSaid = await panel.getByText(text, { exact: false }).count();
+    await panel.getByRole('button', { name: /Générer la voix|Réessayer/ }).click();
+    await page.waitForFunction(
+      (t) =>
+        [...document.querySelectorAll('[role="alert"], .error-msg, .ai-error')].some((e) =>
+          e.textContent.includes(t),
+        ),
+      text,
+    );
+    ok(
+      sampleSaid >= 1 && (await panel.getByText('La proposition n’a pas pu être générée').count()) === 0,
+      `service de voix en refus (${code}) : la cause est dite pour l’exemple et pour la génération`,
+    );
+  }
+  state.aiProvider = null;
+  await panel.getByRole('button', { name: /Générer la voix|Réessayer/ }).click();
   await panel.getByRole('button', { name: 'Utiliser' }).waitFor();
   const call = state.aiCalls.at(-1);
   ok(

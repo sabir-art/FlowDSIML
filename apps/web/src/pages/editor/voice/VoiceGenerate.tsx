@@ -58,6 +58,7 @@ export function VoiceGenerate({
   );
   const [confirming, setConfirming] = useState(false);
   const [sample, setSample] = useState<'loading' | 'error' | null>(null);
+  const [sampleWhy, setSampleWhy] = useState('');
   const sampleAudio = useRef<HTMLAudioElement | null>(null);
   // Voix prédéfinies réellement disponibles chez le fournisseur (les autres sont masquées)
   const [available, setAvailable] = useState<readonly VoiceChoice[]>(VOICE_CHOICES);
@@ -145,7 +146,9 @@ export function VoiceGenerate({
       sampleAudio.current = a;
       setSample(null);
       await a.play().catch(() => undefined);
-    } catch {
+    } catch (e) {
+      // L62 : la cause quand le service audio refuse, sinon le message général
+      setSampleWhy(e instanceof AiRequestError ? at.provider(e.code) : '');
       setSample('error');
     }
   };
@@ -227,7 +230,7 @@ export function VoiceGenerate({
         </p>
         {sample === 'error' && (
           <p className="vo-alert" role="alert">
-            {t('ai.voice.sampleError')}
+            {sampleWhy || t('ai.voice.sampleError')}
           </p>
         )}
       </div>
