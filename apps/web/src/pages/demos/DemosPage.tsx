@@ -232,11 +232,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const wide = useMediaQuery('(min-width: 1024px)');
   // COL-02 (COMP-01 §19) : largeur et repli gardés pour la personne ; repliée par défaut sous 1 280 px
   const col = useColumn(`fd.folders.col.${user?.id ?? ''}`, FOLDERS_BOUNDS, colClosedByDefault(user?.id));
-  // MOTION-01 §3 : la colonne bascule d'un coup, le contenu suit par FLIP (320 ms) ; à l'ouverture
+  // MOTION-01 §3 : la colonne bascule d'un coup, le contenu suit par FLIP (200 ms) ; à l'ouverture
   // par le bouton, la colonne entre en fondu (jamais au premier affichage)
   const demosMain = useRef<HTMLDivElement>(null);
   useShiftFlip(demosMain, col.closed ? 'closed' : 'open', {
-    token: '--fd-motion-duration-slow',
     clip: () => demosMain.current?.parentElement ?? null,
   });
   const [colOpening, setColOpening] = useState(false);

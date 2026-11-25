@@ -1077,7 +1077,7 @@ function act(target) {
     const unfold = await toggle('.sidebar__pin', '.sidebar', '#main', '.sidebar .fd-nav__label');
     check('barre latérale, dépli', unfold, 200, true);
     ok(
-      reduced ? unfold.fadeName === 'none' : unfold.fadeName === 'fd-fade 0.2s',
+      reduced ? unfold.fadeName === 'none' : unfold.fadeName === 'fd-fade 0.12s',
       `${mode}, barre latérale : libellés ${reduced ? 'sans fondu' : 'en fondu après le dépli'} (${unfold.fadeName})`,
     );
     await page.waitForFunction(
@@ -1085,11 +1085,11 @@ function act(target) {
     );
     // Colonne Dossiers : repli, puis dépli (la colonne entre en fondu, 16 px)
     const close = await toggle('.fd-cgrip__btn', '.fcol-slot', '.demos-main', null);
-    check('colonne Dossiers, repli', close, 320, false);
+    check('colonne Dossiers, repli', close, 200, false);
     const open = await toggle('.fd-cgrip__btn', '.fcol-slot', '.demos-main', '.fcol');
-    check('colonne Dossiers, dépli', open, 320, true);
+    check('colonne Dossiers, dépli', open, 200, true);
     ok(
-      reduced ? open.fadeName === 'none' : open.fadeName === 'fcol-in 0.32s',
+      reduced ? open.fadeName === 'none' : open.fadeName === 'fcol-in 0.2s',
       `${mode}, colonne Dossiers : ${reduced ? 'ouverture sans mouvement' : 'la colonne entre en fondu'} (${open.fadeName})`,
     );
     await ctx.close();

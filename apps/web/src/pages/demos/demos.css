@@ -1500,7 +1500,7 @@ button.nd-src:focus-visible {
    l'ouverture par le bouton, la colonne entre de 16 px par la gauche, en fondu */
 @media (prefers-reduced-motion: no-preference) {
   .fcol-slot.is-opening .fcol {
-    animation: fcol-in var(--fd-motion-duration-slow) var(--fd-motion-ease-standard) backwards;
+    animation: fcol-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard) backwards;
   }
 }
 @keyframes fcol-in {
