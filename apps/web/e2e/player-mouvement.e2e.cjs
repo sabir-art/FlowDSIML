@@ -144,6 +144,105 @@ function sampler() {
     );
     await ctx.close();
   }
+  // ===== MOTION-01 §6 : le zoom d'une étape : pastille et bulle suivent par translate, jamais left/top =====
+  for (const reduced of [false, true]) {
+    const ctx = await b.newContext({
+      viewport: { width: 1280, height: 800 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    const zoomed = {
+      ...manifest,
+      steps: [{ ...first, zoom: { x: 0.2, y: 0.5, scale: 1.6, transition: 'smooth', keep: false } }, last],
+    };
+    await page.route('**/functions/v1/open-demo', (r) =>
+      r.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', manifest: zoomed }),
+        headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+      }),
+    );
+    await page.route('**/assets/*.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+    await page.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+    // Relevé dès le premier rendu : animations posées sur la pastille et la bulle, transitions CSS
+    await page.addInitScript(() => {
+      window.__z = { beacon: null, tip: null, css: [] };
+      const tick = () => {
+        for (const [k, q] of [
+          ['beacon', '.p-stage > .p-beacon'],
+          ['tip', '.p-stage > .p-tip'],
+        ]) {
+          const el = document.querySelector(q);
+          if (!el) continue;
+          const cs = getComputedStyle(el);
+          if (/left|top|all/.test(cs.transitionProperty) && parseFloat(cs.transitionDuration) > 0.001)
+            window.__z.css.push(`${k}: ${cs.transitionProperty} ${cs.transitionDuration}`);
+          const a = el.getAnimations().find((x) => !x.animationName && x.effect.getKeyframes()[0]?.translate);
+          if (a && !window.__z[k]) {
+            const tm = a.effect.getTiming();
+            window.__z[k] = {
+              from: a.effect.getKeyframes()[0].translate,
+              props: [...new Set(a.effect.getKeyframes().flatMap((f) => Object.keys(f)))].filter(
+                (n) => !/^(offset|easing|composite|computedOffset)$/.test(n),
+              ),
+              duration: tm.duration,
+              easing: tm.easing,
+            };
+          }
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await page.goto(`${PLAYER}/#/d/${DEMO}`);
+    await page.locator('.p-stage > .p-tip').waitFor();
+    await page.waitForFunction(() => /scale\(1\.6\)/.test(document.querySelector('.p-zoom').style.transform));
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.p-stage > .p-beacon, .p-stage > .p-tip')].every(
+        (el) => !el.getAnimations().some((x) => !x.animationName),
+      ),
+    );
+    const z = await page.evaluate(() => window.__z);
+    const tag = reduced ? 'mouvement réduit, zoom' : 'zoom';
+    ok(
+      z.css.length === 0,
+      `${tag} : aucune transition de left/top sur la pastille ni la bulle (${z.css[0] ?? ''})`,
+    );
+    if (reduced) {
+      ok(!z.beacon && !z.tip, `${tag} : pastille et bulle placées sans mouvement`);
+    } else {
+      for (const k of ['beacon', 'tip']) {
+        const a = z[k];
+        ok(
+          !!a &&
+            a.duration === 600 &&
+            a.easing === 'cubic-bezier(0.2, 0.7, 0.2, 1)' &&
+            a.props.join() === 'translate' &&
+            a.from !== '0px 0px',
+          `zoom : ${k === 'beacon' ? 'la pastille' : 'la bulle'} suit par translate seul, 600 ms (${a?.from}, ${a?.props.join()})`,
+        );
+      }
+    }
+    // Barre de progression : remplissage pleine largeur déplacé par transform
+    const bar = await page.evaluate(() => {
+      const track = document.querySelector('.p-progress');
+      const fill = track.firstElementChild;
+      const cs = getComputedStyle(fill);
+      return {
+        full: Math.abs(fill.offsetWidth - track.clientWidth) <= 1,
+        prop: cs.transitionProperty,
+        shown: (fill.getBoundingClientRect().right - track.getBoundingClientRect().left) / track.clientWidth,
+        now: track.getAttribute('aria-valuenow'),
+      };
+    });
+    ok(
+      bar.full && bar.prop === 'transform' && Math.abs(bar.shown - 0.5) < 0.03 && bar.now === '1',
+      `${tag} : barre de progression en transform, à moitié pour l’étape 1 sur 2 (${Math.round(bar.shown * 100)} %)`,
+    );
+    await ctx.close();
+  }
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

@@ -1,5 +1,18 @@
 /* Styles partagés player ↔ aperçu WYSIWYG de l'éditeur (pastille, bulle, boutons).
    Variables attendues : --p-primary, --p-hotspot, --p-surface, --p-text, --p-radius (voir themeVars()). */
+/* MOTION-01 §6 : jetons de mouvement du lecteur (mêmes valeurs que --fd-motion-* de l'app, plus le zoom).
+   Seul endroit où une durée s'écrit en clair ; contrôlé par e2e/mouvement-regles.e2e.cjs. Chargés par le
+   lecteur et par l'aperçu de l'éditeur. */
+:root {
+  --p-motion-duration-fast: 120ms;
+  --p-motion-duration-base: 200ms;
+  --p-motion-duration-slow: 320ms;
+  --p-motion-duration-zoom: 600ms;
+  --p-motion-duration-pulse: 1800ms;
+  --p-motion-duration-loop: 1200ms;
+  --p-motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --p-motion-ease-zoom: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
 .p-tip,
 .p-beacon {
   --p-shadow: 0 4px 8px rgb(31 29 26 / 6%), 0 18px 40px rgb(31 29 26 / 16%);
@@ -28,7 +41,7 @@
   box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
 }
 .p-pulse .p-beacon-dot {
-  animation: p-pulse 1.8s infinite;
+  animation: p-pulse var(--p-motion-duration-pulse) infinite;
 }
 @keyframes p-pulse {
   0% {
@@ -203,11 +216,9 @@
   background: transparent;
   box-shadow: 0 0 0 3px var(--p-hotspot);
   cursor: pointer;
-  transition:
-    left 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
-    top 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
-    width 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
-    height 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* MOTION-01 §6 : la zone suit le zoom par translate et scale (lecteur, Player.tsx), jamais par
+     left, top, width ou height */
+  transform-origin: 0 0;
 }
 .p-veil {
   position: absolute;
@@ -253,8 +264,8 @@
     rgb(10 12 16 / var(--fd)) var(--fr)
   );
   transition:
-    --fx 200ms ease-out,
-    --fy 200ms ease-out;
+    --fx var(--p-motion-duration-base) ease-out,
+    --fy var(--p-motion-duration-base) ease-out;
 }
 .p-freespot.is-follow,
 .p-freespot.is-fixed {
