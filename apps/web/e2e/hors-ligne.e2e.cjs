@@ -103,6 +103,19 @@ function seedOffline(s, { rules = null, role = null } = {}) {
         (await off.locator('.dif-file b').innerText()) === name,
       'archive prête : fichier nommé, poids affiché',
     );
+    ok(
+      (await off.locator('.dif-file b').evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return !/mono/i.test(cs.fontFamily) && cs.fontWeight === '500';
+      })) === true,
+      'archive prête : nom du fichier en texte normal (500), pas en monospace',
+    );
+    const again = off.locator('.dif-off__acts .btn');
+    ok(
+      (await again.innerText()).trim() === 'Télécharger de nouveau' &&
+        (await again.getAttribute('class')).includes('btn-secondary'),
+      'archive prête : « Télécharger de nouveau » en secondaire',
+    );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/hors-ligne-pret${sfx}.png` });
     const files = unzipSync(fs.readFileSync(await dl.path()));
     const names = Object.keys(files);

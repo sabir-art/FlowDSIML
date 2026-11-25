@@ -233,6 +233,10 @@
   font: 600 13px var(--fd-font-mono);
   overflow-wrap: anywhere;
 }
+/* Hors ligne : un nom de fichier n'est pas du code, texte normal (recette UX du §8) */
+.dif-off .dif-file b {
+  font: 500 13px var(--fd-font-sans);
+}
 .dif-file-ic {
   width: 40px;
   height: 40px;
