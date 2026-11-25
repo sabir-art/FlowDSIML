@@ -394,6 +394,8 @@ export const motion = {
   'duration-base': '200ms',
   /** Sortie d'une fenêtre (MOTION-01 §3) */
   'duration-exit': '160ms',
+  /** Sortie d'un tiroir (MOTION-01 §3) */
+  'duration-exit-slow': '240ms',
   'duration-slow': '320ms',
   'duration-pulse': '1800ms',
   'ease-standard': 'cubic-bezier(0.2, 0.8, 0.2, 1)',

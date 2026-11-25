@@ -1847,8 +1847,11 @@ button.nd-src:focus-visible {
   inset: 0;
   z-index: var(--fd-z-modal);
   background: rgb(8 10 14 / 0.45);
+  /* MOTION-01 §3 : voile en fondu, tiroir glissé depuis son bord, 320 ms */
+  animation: fd-veil-in var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
 }
 .fcol-sheet > .fcol--drawer {
+  animation: fd-drawer-in-right var(--fd-motion-duration-slow) var(--fd-motion-ease-standard);
   right: 0;
   left: auto;
   width: min(300px, 86vw);

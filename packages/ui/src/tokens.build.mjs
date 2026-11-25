@@ -86,6 +86,7 @@ ${block('.fd-player-scope', [...themed('light'), ['color-scheme', 'light']])}
     --fd-motion-duration-fast: 0ms;
     --fd-motion-duration-base: 0ms;
     --fd-motion-duration-exit: 0ms;
+    --fd-motion-duration-exit-slow: 0ms;
     --fd-motion-duration-slow: 0ms;
   }
 }
