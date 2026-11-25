@@ -89,7 +89,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
   // Lien personnalisé (onglet dédié, modale « Nouveau lien personnalisé »)
   await app.locator('.shd-nav').getByRole('button', { name: 'Liens personnalisés', exact: true }).click();
-  await app.getByRole('button', { name: 'Nouveau lien' }).click();
+  await app.getByRole('button', { name: 'Créer un lien' }).click();
   await app.fill('#sh-ln', 'Globex — Marie');
   await app.fill('#sh-v-company', 'Globex');
   await app.getByRole('button', { name: 'Créer et copier le lien' }).click();

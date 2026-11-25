@@ -21,6 +21,7 @@ import {
   Plus,
   Power,
   QrCode,
+  Search,
   Share2,
   ShieldCheck,
   Trash2,
@@ -125,7 +126,6 @@ export function SharePanel({
   const mode: ShareMode = view === 'menu' ? 'lien' : view;
   const [demo, setDemo] = useState<Tables<'demos'> | null>(null);
   const [links, setLinks] = useState<Tables<'share_links'>[]>([]);
-  const hasCohort = links.some((l) => l.cohort);
   const [linkStats, setLinkStats] = useState<LinkStats>({});
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   /** L17-01 : confirmation RGPD enregistrée avec la version en ligne (auteur et date). */
@@ -152,6 +152,15 @@ export function SharePanel({
   const tab: Tab = TAB_OF[mode];
   const toast = useToast();
   const [qr, setQr] = useState(false);
+  const [persoQ, setPersoQ] = useState('');
+  const needle = persoQ.trim().toLocaleLowerCase();
+  const shownLinks = needle
+    ? links.filter((l) =>
+        [l.name, l.cohort, ...Object.values((l.variables as Record<string, string>) ?? {})]
+          .filter(Boolean)
+          .some((v) => String(v).toLocaleLowerCase().includes(needle)),
+      )
+    : links;
   const [creating, setCreating] = useState(false);
   const [exporting, setExporting] = useState<boolean | 'gif'>(false);
   const { error, success, run } = useAction();
@@ -618,37 +627,33 @@ export function SharePanel({
 
             {tab === 'perso' && (
               <section id="sh-panel-perso" aria-labelledby="shd-mode">
-                <div className="row between sh-perso-head">
-                  <p className="muted">{t('share.persoHelp')}</p>
-                  <div className="row sh-perso-acts">
-                    {links.length > 0 && (
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => exportCsv(links)}>
-                        <Download aria-hidden="true" />
-                        {t('share.import.exportAll')}
-                      </button>
-                    )}
-                    {editable && (
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => setImporting(true)}
-                      >
-                        <Upload aria-hidden="true" />
-                        {t('share.import.open')}
-                      </button>
-                    )}
-                    {editable && (
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        onClick={() => setCreating(true)}
-                      >
-                        <Plus aria-hidden="true" />
-                        {t('share.newLink')}
-                      </button>
-                    )}
+                {/* §1.3 : mode sobre. Recherche, liste (destinataire, date, vues) ; « Créer un lien » et
+                    « Importer (CSV) » sous la liste. */}
+                {links.length > 0 && (
+                  <div className="shp-top">
+                    <div className="shp-search">
+                      <Search aria-hidden="true" />
+                      <input
+                        id="sh-perso-q"
+                        type="search"
+                        className="input"
+                        aria-label={t('share.persoSearch')}
+                        placeholder={t('share.persoSearch')}
+                        value={persoQ}
+                        onChange={(e) => setPersoQ(e.target.value)}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-label={t('share.import.exportAll')}
+                      title={t('share.import.exportAll')}
+                      onClick={() => exportCsv(links)}
+                    >
+                      <Download size={16} aria-hidden="true" />
+                    </button>
                   </div>
-                </div>
+                )}
                 {centerModule && (
                   <p className="sh-center-note" role="note">
                     <GraduationCap aria-hidden="true" />
@@ -662,17 +667,14 @@ export function SharePanel({
                 )}
                 {links.length === 0 ? (
                   <p className="muted sh-empty">{t('share.noLinks')}</p>
-                ) : (
+                ) : shownLinks.length === 0 ? null : (
                   <div className="table-wrap">
-                    <table className="table sh-links">
+                    <table className={`table sh-links${centerModule ? ' has-center' : ''}`}>
                       <caption className="sr-only">{t('share.tab.perso')}</caption>
                       <thead>
                         <tr>
-                          <th>{t('share.linkNameShort')}</th>
-                          {hasCohort && <th>{t('share.cohort')}</th>}
-                          <th>{t('editor.variables')}</th>
-                          <th>{t('share.pp.column')}</th>
-                          {/* L25-13 : vues et dernière vue dans une colonne (table plus étroite) */}
+                          <th>{t('share.persoRecipient')}</th>
+                          <th className="shp-date">{t('share.persoCreated')}</th>
                           <th className="r">{t('analytics.views')}</th>
                           <th>
                             <span className="sr-only">{t('members.actions')}</span>
@@ -680,7 +682,7 @@ export function SharePanel({
                         </tr>
                       </thead>
                       <tbody>
-                        {links.map((l) => {
+                        {shownLinks.map((l) => {
                           const vars = Object.values((l.variables as Record<string, string>) ?? {}).filter(
                             Boolean,
                           );
@@ -689,64 +691,73 @@ export function SharePanel({
                           return (
                             <tr key={l.id} className={l.is_active && !expired ? undefined : 'sh-off'}>
                               <th scope="row" className="sh-row-h">
-                                {l.name || '—'}
-                                {!l.is_active && (
-                                  <Status size="sm" className="sh-state">
-                                    {t('share.disabled')}
-                                  </Status>
+                                <span className="shp-name">
+                                  {l.name || '—'}
+                                  {!l.is_active && (
+                                    <Status size="sm" className="sh-state">
+                                      {t('share.disabled')}
+                                    </Status>
+                                  )}
+                                </span>
+                                {(l.cohort ||
+                                  vars.length > 0 ||
+                                  l.expires_at ||
+                                  (l.page_enabled && l.page_code)) && (
+                                  <span className="shp-meta">
+                                    {l.cohort && <span className="sh-cohort-cell">{l.cohort}</span>}
+                                    {vars.map((v) => (
+                                      <span key={v} className="badge sh-var" title={v}>
+                                        {v}
+                                      </span>
+                                    ))}
+                                    {l.expires_at && (
+                                      <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
+                                        {expired
+                                          ? t('share.expired')
+                                          : t('share.expiresOn', {
+                                              date: formatDate(l.expires_at, {
+                                                day: 'numeric',
+                                                month: 'short',
+                                              }),
+                                            })}
+                                      </Status>
+                                    )}
+                                    {l.page_enabled && l.page_code ? (
+                                      <div className="sh-pp-cell">
+                                        <Status size="sm" tone="success">
+                                          {t('share.pp.badgeOn')}
+                                        </Status>
+                                        {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
+                                        <span className="sh-pp-url">
+                                          <span
+                                            className="t-mono"
+                                            title={personalPageUrl(demoId, l.page_code)}
+                                          >
+                                            {`…/${l.page_code}`}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            className="btn btn-ghost btn-sm btn-icon"
+                                            aria-label={t('share.pp.copyPage', { name: l.name || '—' })}
+                                            title={t('share.pp.copyPage', { name: l.name || '—' })}
+                                            onClick={() =>
+                                              void navigator.clipboard
+                                                ?.writeText(personalPageUrl(demoId, l.page_code!))
+                                                .then(() =>
+                                                  run(async () => undefined, t('members.linkCopied')),
+                                                )
+                                            }
+                                          >
+                                            <Copy aria-hidden="true" />
+                                          </button>
+                                        </span>
+                                      </div>
+                                    ) : null}
+                                  </span>
                                 )}
                               </th>
-                              {hasCohort && (
-                                <td className="sh-cohort-cell">
-                                  {l.cohort || <span className="muted">—</span>}
-                                </td>
-                              )}
-                              <td>
-                                {vars.map((v) => (
-                                  <span key={v} className="badge sh-var" title={v}>
-                                    {v}
-                                  </span>
-                                ))}
-                                {l.expires_at && (
-                                  <Status size="sm" tone={expired ? 'neutral' : 'warning'}>
-                                    {expired
-                                      ? t('share.expired')
-                                      : t('share.expiresOn', {
-                                          date: formatDate(l.expires_at, { day: 'numeric', month: 'short' }),
-                                        })}
-                                  </Status>
-                                )}
-                                {!vars.length && !l.expires_at && <span className="muted">—</span>}
-                              </td>
-                              <td>
-                                {l.page_enabled && l.page_code ? (
-                                  <div className="sh-pp-cell">
-                                    <Status size="sm" tone="success">
-                                      {t('share.pp.badgeOn')}
-                                    </Status>
-                                    {/* L25-13 : adresse de la page (/p/<démo>/<code>), copiable */}
-                                    <span className="sh-pp-url">
-                                      <span className="t-mono" title={personalPageUrl(demoId, l.page_code)}>
-                                        {`…/${l.page_code}`}
-                                      </span>
-                                      <button
-                                        type="button"
-                                        className="btn btn-ghost btn-sm btn-icon"
-                                        aria-label={t('share.pp.copyPage', { name: l.name || '—' })}
-                                        title={t('share.pp.copyPage', { name: l.name || '—' })}
-                                        onClick={() =>
-                                          void navigator.clipboard
-                                            ?.writeText(personalPageUrl(demoId, l.page_code!))
-                                            .then(() => run(async () => undefined, t('members.linkCopied')))
-                                        }
-                                      >
-                                        <Copy aria-hidden="true" />
-                                      </button>
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <Status size="sm">{t('share.pp.badgeOff')}</Status>
-                                )}
+                              <td className="shp-date">
+                                {formatDate(l.created_at, { day: 'numeric', month: 'short' })}
                               </td>
                               <td className="r sh-views">
                                 {formatNumber(st?.views ?? 0)}
@@ -837,6 +848,27 @@ export function SharePanel({
                         })}
                       </tbody>
                     </table>
+                  </div>
+                )}
+                {links.length > 0 && shownLinks.length === 0 && (
+                  <p className="muted sh-empty" role="status">
+                    {t('share.persoNoMatch')}
+                  </p>
+                )}
+                {editable && (
+                  <div className="shp-foot">
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--primary"
+                      onClick={() => setCreating(true)}
+                    >
+                      <Plus aria-hidden="true" />
+                      {t('share.newLink')}
+                    </button>
+                    <button type="button" className="fd-btn" onClick={() => setImporting(true)}>
+                      <Upload aria-hidden="true" />
+                      {t('share.import.open')}
+                    </button>
                   </div>
                 )}
               </section>

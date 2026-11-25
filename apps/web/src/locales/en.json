@@ -2380,7 +2380,7 @@
     "clickToStart": "Start on click (cover + “Launch the demo” button)",
     "cspNote": "The host site must allow iframes from {{host}} (CSP frame-src header).",
     "persoHelp": "One link per person, with pre-filled variables and its own statistics.",
-    "newLink": "New link",
+    "newLink": "Create a link",
     "noLinks": "No personalised links yet.",
     "linkNameShort": "Name",
     "lastView": "Last view",
@@ -2479,7 +2479,7 @@
     "cohort": "Group",
     "cohortPlaceholder": "E.g. 12 November session",
     "import": {
-      "open": "Import a list (CSV)",
+      "open": "Import (CSV)",
       "title": "Import a list of learners",
       "help": "One personalised link per row. Columns: first name, last name, email, and group (optional). Links are checked before they are created; TutoClick sends no email.",
       "template": "Download the template",
@@ -2586,7 +2586,11 @@
     "embedPreview_popup": "Preview: a button on the page opens the demo",
     "embedPreview_full": "Preview: the demo fills the whole page",
     "embedTool": "Adapt to a tool",
-    "embedSites": "Allowed sites"
+    "embedSites": "Allowed sites",
+    "persoSearch": "Search a link",
+    "persoRecipient": "Recipient",
+    "persoCreated": "Created",
+    "persoNoMatch": "No link matches the search."
   },
   "analytics": {
     "title": "Analytics",

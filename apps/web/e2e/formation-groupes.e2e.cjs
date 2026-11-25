@@ -81,21 +81,23 @@ const GROUP = 'Session du 12 novembre';
     (await page.locator('table.sh-links .sh-cohort-cell').first().textContent()) === 'Session du 5 novembre',
     'n° 3 : groupe affiché sur la ligne du lien',
   );
-  // Retour Lead UX : colonne «\u202fGroupe\u202f» propre ; les 3 actions de l'en-tête sur une ligne, à droite de l'aide
+  // §1.3 (mode sobre) : colonnes Destinataire, Créé le, Vues ; le groupe est sous le nom ; « Créer un lien » et
+  // « Importer (CSV) » sous la liste, l'export en bouton icône près de la recherche
   ok(
-    (await page.locator('table.sh-links thead th').allTextContents()).includes('Groupe'),
-    'Lead UX : colonne «\u202fGroupe\u202f» dans la liste des liens',
+    (await page.locator('table.sh-links thead th').allTextContents()).slice(0, 3).join('|') ===
+      'Destinataire|Créé le|Vues',
+    '§1.3 : colonnes Destinataire, Créé le, Vues',
   );
-  const acts = await page
-    .locator('.sh-perso-acts > .btn')
-    .evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
-  const helpBox = await page.locator('.sh-perso-head > p').boundingBox();
-  const actsBox = await page.locator('.sh-perso-acts').boundingBox();
+  const foot = await page.locator('.shp-foot > .fd-btn').allInnerTexts();
+  const listBox = await page.locator('table.sh-links').boundingBox();
+  const footBox = await page.locator('.shp-foot').boundingBox();
   ok(
-    acts.length === 3 && new Set(acts).size === 1 && actsBox.x >= helpBox.x + helpBox.width,
-    'Lead UX : Exporter, Importer et Nouveau lien sur une ligne, à droite de l’aide',
+    foot.map((x) => x.trim()).join('|') === 'Créer un lien|Importer (CSV)' &&
+      footBox.y >= listBox.y + listBox.height &&
+      (await page.getByRole('button', { name: 'Exporter les liens (CSV)' }).count()) === 1,
+    `§1.3 : « Créer un lien » et « Importer (CSV) » sous la liste (${foot.join('|')})`,
   );
-  await page.getByRole('button', { name: 'Importer une liste (CSV)' }).click();
+  await page.getByRole('button', { name: 'Importer (CSV)' }).click();
   const dlg = page.getByRole('dialog', { name: 'Importer une liste d’apprenants' });
   await dlg.waitFor();
   ok(
@@ -253,7 +255,7 @@ const GROUP = 'Session du 12 novembre';
   );
 
   // ===== n° 3 : groupe à la création d'un lien =====
-  await page.getByRole('button', { name: 'Nouveau lien' }).click();
+  await page.getByRole('button', { name: 'Créer un lien' }).click();
   await page.fill('#sh-ln', 'Noa Exemple');
   const opts = await page.locator('#sh-cohort-l option').evaluateAll((o) => o.map((x) => x.value));
   ok(

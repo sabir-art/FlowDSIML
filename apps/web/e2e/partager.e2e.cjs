@@ -266,6 +266,30 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       ok((await d.locator('.shd-access').count()) === 1, `${m} : pastille d’accès présente`);
       ok(await noScroll(page), `${m} : pas de défilement horizontal`);
       await axe(page, m);
+      if (m === 'Liens personnalisés') {
+        // §1.3 : « Créer un lien » et « Importer (CSV) » en bas ; pas de phrase d'aide ni de boutons en tête
+        const perso = d.locator('#sh-panel-perso');
+        ok(
+          (await perso.locator('.shp-foot > .fd-btn').allInnerTexts()).map((x) => x.trim()).join('|') ===
+            'Créer un lien|Importer (CSV)' && (await perso.locator('.sh-perso-head').count()) === 0,
+          'Liens personnalisés : « Créer un lien » et « Importer (CSV) » sous la liste',
+        );
+        if ((await perso.locator('table.sh-links tbody tr').count()) > 0) {
+          const q = perso.getByRole('searchbox', { name: 'Rechercher un lien' });
+          await q.fill('zzz-aucun');
+          ok(
+            (await perso.getByRole('status').textContent()) === 'Aucun lien ne correspond à la recherche.',
+            'Liens personnalisés : recherche sans résultat annoncée',
+          );
+          await q.fill('');
+          ok(
+            (await perso.locator('table.sh-links thead th').allTextContents()).slice(0, 3).join('|') ===
+              'Destinataire|Créé le|Vues',
+            'Liens personnalisés : colonnes Destinataire, Créé le, Vues',
+          );
+        }
+        await shot(page, 'partager-liens');
+      }
       if (m === 'Intégrer') {
         // §1.3 : trois formats en cartes radio, code qui passe à la ligne, « Copier le code », aperçu
         const emb = d.locator('#sh-panel-embed');
