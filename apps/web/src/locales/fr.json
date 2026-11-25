@@ -2297,6 +2297,33 @@
       "regenerate": "Générer la version {{n}}",
       "note": "Un paquet SCORM est une copie : après chaque publication, générez-le à nouveau et remplacez-le dans le LMS. Les envois par e-mail ne sont pas suivis ici : ils partent de votre messagerie.",
       "empty": "Cette démo n’est encore diffusée nulle part. Choisissez un canal dans les onglets SCORM, Intranet ou E-mail."
+    },
+    "offline": {
+      "intro": "Une archive .zip autonome : elle s’ouvre par un double-clic sur index.html, sans réseau.",
+      "size": "Taille estimée",
+      "sizeLoading": "Calcul en cours…",
+      "sizeUnknown": "Inconnue avant la génération",
+      "sizeValue_one": "{{size}} · {{count}} fichier",
+      "sizeValue_other": "{{size}} · {{count}} fichiers",
+      "limit": "Limite",
+      "limitValue": "300 Mo par archive",
+      "warning": "Toute personne qui a le fichier voit la démo, sans mot de passe.",
+      "limit1": "Ni suivi ni formulaire de lead : rien n’est envoyé, rien n’est gardé.",
+      "limit2": "Les liens externes restent visibles mais ne s’ouvrent qu’en ligne.",
+      "limit3": "L’archive ne se met pas à jour : refaites-la après une republication.",
+      "download": "Télécharger l’archive",
+      "generating": "Préparation de l’archive…",
+      "progress": "Fichiers {{done}} sur {{total}}",
+      "progressLabel": "Avancement de l’archive",
+      "readyTitle": "Archive prête.",
+      "readyText": "Le téléchargement a démarré.",
+      "fileMeta": "{{size}} · version {{n}}",
+      "errTitle": "L’archive n’a pas abouti.",
+      "errAsset": "Un fichier de l’étape {{n}} est illisible. Republiez la démo, puis réessayez.",
+      "errSize": "L’archive dépasse 300 Mo. Raccourcissez la démo ou retirez une vidéo.",
+      "errUnpublished": "La démo n’est pas publiée.",
+      "errServer": "Vérifiez votre connexion, puis réessayez.",
+      "noRight": "Votre rôle ne permet pas de diffuser cette démo."
     }
   },
   "share": {

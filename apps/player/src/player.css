@@ -3491,3 +3491,24 @@ h1.p-title {
   background: color-mix(in srgb, var(--p-text) 9%, transparent);
   color: var(--p-primary);
 }
+
+/* Démo hors ligne : « Disponible en ligne seulement » quand un lien externe est activé */
+.p-online-only {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 50;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #12161b;
+  color: #fff;
+  font:
+    500 14px / 1.3 system-ui,
+    sans-serif;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.25);
+}
+.p-online-only[hidden] {
+  display: none;
+}

@@ -144,18 +144,11 @@ function seedDistribute(s, { published = true } = {}) {
     await tab('Parcours de formation').evaluate((el) => el === document.activeElement),
     'Focus sur l’onglet actif à l’ouverture',
   );
-  // « Hors ligne » : dernier onglet, grisé, avec la pastille « Bientôt » ; il ne se sélectionne pas
-  const off = dlg.getByRole('tab').last();
+  // §8 : « Hors ligne » est un onglet de Diffuser, avec le SCORM et l'intranet (voir hors-ligne.e2e)
   ok(
-    /^Hors ligne\s*Bientôt$/.test((await off.innerText()).trim()) &&
-      (await off.getAttribute('aria-disabled')) === 'true' &&
-      (await off.locator('.fd-badge').count()) === 1,
-    'Dernier onglet « Hors ligne », désactivé, pastille « Bientôt »',
-  );
-  await off.click({ force: true });
-  ok(
-    (await tab('Parcours de formation').getAttribute('aria-selected')) === 'true',
-    '« Hors ligne » ne se sélectionne pas',
+    (await dlg.getByRole('tab').allInnerTexts()).map((x) => x.replace(/\s+\d+$/, '').trim()).join('|') ===
+      'Parcours de formation|SCORM|Intranet|Hors ligne|E-mail|Où elle est diffusée',
+    'Onglets : Parcours de formation, SCORM, Intranet, Hors ligne, E-mail, Où elle est diffusée',
   );
   await tab('SCORM').click();
   ok(

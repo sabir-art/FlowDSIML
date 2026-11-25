@@ -243,6 +243,9 @@ jobs:
       - name: 'Page Extension : absente, présente, version et dernière capture (retours du 24/11, 2e série §7)'
         if: always()
         run: cd apps/web && node e2e/extension.e2e.cjs && THEME=dark node e2e/extension.e2e.cjs && WIDTH=390 node e2e/extension.e2e.cjs
+      - name: 'Démo hors ligne : archive générée, ouverte depuis le disque réseau coupé, aucune requête sortante (retours du 24/11, 2e série §8)'
+        if: always()
+        run: cd apps/web && node e2e/hors-ligne.e2e.cjs && THEME=dark node e2e/hors-ligne.e2e.cjs
       - name: 'Vues d’une démo : Analytics, Leads, Visiteurs dans la démo, barre commune (retours du 24/11, 2e série §9)'
         if: always()
         run: cd apps/web && node e2e/demo-vues.e2e.cjs && THEME=dark node e2e/demo-vues.e2e.cjs && WIDTH=390 node e2e/demo-vues.e2e.cjs && THEME=dark WIDTH=390 node e2e/demo-vues.e2e.cjs

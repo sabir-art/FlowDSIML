@@ -10,13 +10,17 @@ import type { TrackerLike } from './api';
 import { randomId, resolveAssets } from './logic';
 import { scoreQuiz } from './quizScore';
 import { sha256Hex } from './sha256';
+import { blockExternalLinks } from './openExternal';
 import { findApi, ScormSession, type PassCriterion, type ScormVersion } from './scorm';
 import '@flowdsiml/player-core/player-core.css';
 import './player.css';
 
 export interface PackageConfig {
   manifest: unknown;
-  scorm: ScormVersion;
+  /** `null` : archive hors ligne, sans LMS. */
+  scorm: ScormVersion | null;
+  /** Archive hors ligne (v1) : aucune requête sortante, liens externes visibles mais inactifs. */
+  offline?: boolean;
   /** Critère de réussite (« toutes les étapes vues » par défaut). */
   pass?: PassCriterion;
   /** Option de l'export : suivi TutoClick en plus du LMS (désactivé par défaut). */
@@ -75,6 +79,43 @@ class OfflineTracker implements TrackerLike {
   }
 }
 
+/**
+ * Hors ligne : un lien externe (bouton d'action, choix, lien d'une bulle) reste visible mais ne s'ouvre
+ * pas ; « Disponible en ligne seulement » est annoncé quelques secondes.
+ */
+function offlineLinks(locale: string) {
+  const text = locale === 'en' ? 'Available online only' : 'Disponible en ligne seulement';
+  let box: HTMLDivElement | null = null;
+  let timer: number | undefined;
+  const notice = () => {
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'p-online-only';
+      box.setAttribute('role', 'status');
+      document.body.append(box);
+    }
+    box.textContent = text;
+    box.hidden = false;
+    clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      if (box) box.hidden = true;
+    }, 4000);
+  };
+  blockExternalLinks(notice);
+  // Liens écrits en dur dans la page (<a href="https://…">) : même règle
+  addEventListener(
+    'click',
+    (e) => {
+      const a = (e.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a || !/^https?:/i.test(a.getAttribute('href') ?? '')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      notice();
+    },
+    true,
+  );
+}
+
 async function boot() {
   const root = document.getElementById('root')!;
   const cfg = (window as unknown as { TUTOCLICK_PACKAGE?: PackageConfig }).TUTOCLICK_PACKAGE;
@@ -85,7 +126,13 @@ async function boot() {
   const manifest = resolveAssets(parseManifest(cfg.manifest), '');
   document.title = manifest.title;
   document.documentElement.lang = cfg.locale ?? manifest.locale;
-  const lms = new ScormSession(cfg.scorm, findApi(cfg.scorm), cfg.pass ?? { kind: 'steps' });
+  // Archive hors ligne : pas de LMS (session inactive), aucune adresse externe ouverte
+  if (cfg.offline) offlineLinks(cfg.locale ?? manifest.locale);
+  const lms = new ScormSession(
+    cfg.scorm ?? '1.2',
+    cfg.scorm ? findApi(cfg.scorm) : null,
+    cfg.pass ?? { kind: 'steps' },
+  );
   const state = lms.init();
   // Apprenant LMS : identifiant haché, calculé seulement si les statistiques sont envoyées (jamais en
   // clair vers TutoClick) ; sinon identifiant aléatoire

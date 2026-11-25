@@ -68,6 +68,7 @@ import {
   type Tab,
 } from './distribute';
 import { clearScormJob, getScormJob, startScormJob, useScormJob } from './scormJobs';
+import { OfflinePanel } from './OfflinePanel';
 import type { PassCriterion, ScormOptions, ScormVersion } from './scormPackage';
 import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
@@ -95,6 +96,8 @@ const TABS: Array<{ id: Tab; icon: ReactNode }> = [
   { id: 'training', icon: <GraduationCap aria-hidden="true" /> },
   { id: 'scorm', icon: <Package aria-hidden="true" /> },
   { id: 'intranet', icon: <Globe aria-hidden="true" /> },
+  // §8 : archive autonome, avec le SCORM et l'intranet
+  { id: 'offline', icon: <WifiOff aria-hidden="true" /> },
   { id: 'mail', icon: <Mail aria-hidden="true" /> },
   { id: 'where', icon: <Share2 aria-hidden="true" /> },
 ];
@@ -105,7 +108,9 @@ function readTab(): Tab {
   try {
     const v = localStorage.getItem(TAB_KEY);
     // Première ouverture : le premier onglet affiché (l'ordre affiché est l'ordre par défaut)
-    return v === 'scorm' || v === 'intranet' || v === 'mail' || v === 'where' ? v : 'training';
+    return v === 'scorm' || v === 'intranet' || v === 'offline' || v === 'mail' || v === 'where'
+      ? v
+      : 'training';
   } catch {
     return 'training';
   }
@@ -365,6 +370,14 @@ export function DistributeDialog({
         ruled={pubBlocked ? `${id}-rule` : null}
       />
     );
+  } else if (info && tab === 'offline') {
+    body = (
+      <OfflinePanel
+        demoId={demoId}
+        editable={can('demo.edit')}
+        blocked={pubBlocked || !rules.exports_allowed ? `${id}-rule` : null}
+      />
+    );
   } else if (info && tab === 'mail' && mail) {
     body = <MailPanel m={mail} set={(patch) => setMail((x) => (x ? { ...x, ...patch } : x))} />;
     foot = <MailFoot m={mail} />;
@@ -448,19 +461,6 @@ export function DistributeDialog({
               )}
             </button>
           ))}
-          {/* Démo hors ligne : à venir, dans Diffuser. « Bientôt » : en gris, visible, jamais caché */}
-          <button
-            type="button"
-            role="tab"
-            className="dif-tab-soon"
-            aria-selected={false}
-            aria-disabled
-            tabIndex={-1}
-          >
-            <WifiOff aria-hidden="true" />
-            {t('distribute.tab.offline')}
-            <span className="fd-badge">{t('shell.soon')}</span>
-          </button>
         </div>
         <section role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${tab}`}>
           {modified && tab !== 'where' && tab !== 'training' && (
@@ -472,7 +472,7 @@ export function DistributeDialog({
               </span>
             </div>
           )}
-          {(pubBlocked || (tab === 'scorm' && !rules.exports_allowed)) &&
+          {(pubBlocked || ((tab === 'scorm' || tab === 'offline') && !rules.exports_allowed)) &&
             tab !== 'where' &&
             tab !== 'training' && (
               <div className="alert alert-info dif-modified" role="note" id={`${id}-rule`}>

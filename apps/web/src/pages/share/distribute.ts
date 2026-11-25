@@ -6,7 +6,7 @@
 import type { Json } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 
-export type Tab = 'training' | 'scorm' | 'intranet' | 'mail' | 'where';
+export type Tab = 'training' | 'scorm' | 'intranet' | 'offline' | 'mail' | 'where';
 export type DiffusionKind = 'scorm' | 'intranet' | 'widget' | 'iframe' | 'email';
 
 export interface EmbedOptions {

@@ -2297,6 +2297,33 @@
       "regenerate": "Generate version {{n}}",
       "note": "A SCORM package is a copy: after each publication, generate it again and replace it in the LMS. Emails are not tracked here: they leave from your email app.",
       "empty": "This demo is not shared anywhere yet. Choose a channel in the SCORM, Intranet or Email tabs."
+    },
+    "offline": {
+      "intro": "A self-contained .zip archive: it opens by double-clicking index.html, with no network.",
+      "size": "Estimated size",
+      "sizeLoading": "Calculating…",
+      "sizeUnknown": "Unknown before generating",
+      "sizeValue_one": "{{size}} · {{count}} file",
+      "sizeValue_other": "{{size}} · {{count}} files",
+      "limit": "Limit",
+      "limitValue": "300 MB per archive",
+      "warning": "Anyone who has the file can see the demo, without a password.",
+      "limit1": "No tracking and no lead form: nothing is sent, nothing is stored.",
+      "limit2": "External links stay visible but only open online.",
+      "limit3": "The archive does not update itself: generate it again after republishing.",
+      "download": "Download the archive",
+      "generating": "Preparing the archive…",
+      "progress": "Files {{done}} of {{total}}",
+      "progressLabel": "Archive progress",
+      "readyTitle": "Archive ready.",
+      "readyText": "The download has started.",
+      "fileMeta": "{{size}} · version {{n}}",
+      "errTitle": "The archive could not be created.",
+      "errAsset": "A file of step {{n}} cannot be read. Republish the demo, then try again.",
+      "errSize": "The archive exceeds 300 MB. Shorten the demo or remove a video.",
+      "errUnpublished": "The demo is not published.",
+      "errServer": "Check your connection, then try again.",
+      "noRight": "Your role does not allow distributing this demo."
     }
   },
   "share": {
