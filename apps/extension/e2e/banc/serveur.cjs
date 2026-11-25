@@ -95,6 +95,15 @@ const PAGES = {
      <main><h1>Catalogue</h1><p class="carte">Survolez « Produits » pour ouvrir le menu.</p></main>`,
     `const m = document.getElementById('m'); m.addEventListener('mouseenter', () => m.classList.add('ouvert')); m.addEventListener('mouseleave', () => m.classList.remove('ouvert'));`,
   ),
+  // 6. Fiche avec de vraies données personnelles (fictives) : elles doivent être remplacées, pas les commandes
+  '/donnees': page(
+    'Fiche contact',
+    `${entete}</header><main><h1>Fiche contact</h1>
+     <p class="carte"><span>Nom</span> <span id="v-nom">Camille Durand</span></p>
+     <p class="carte"><span>E-mail</span> <span id="v-mail">camille.durand@acme.example</span></p>
+     <p class="erreur" hidden>Indiquez votre nom.</p>
+     <button class="btn">Modifier la fiche</button> <a href="/donnees">Voir l’historique</a></main>`,
+  ),
   '/menu/logiciels': page(
     'Logiciels',
     `${entete}<a href="/menu">Catalogue</a></header><main><h1>Logiciels</h1><p class="carte">ExempleCRM, ExempleFacture.</p></main>`,

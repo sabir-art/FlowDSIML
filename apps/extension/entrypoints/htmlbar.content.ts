@@ -154,6 +154,9 @@ export default defineContentScript({
       const from = location.href;
       const heading = mainHeading(document);
       const expanded = el.getAttribute('aria-expanded');
+      // L60 : un onglet choisi remplace un panneau sans changer d'adresse ni de titre : c'est un écran
+      const tab = el.closest('[role="tab"]');
+      const tabWas = tab?.getAttribute('aria-selected') ?? null;
       const until = Date.now() + WATCH_MS;
       // 1. L'adresse change sans rechargement
       clearInterval(watch);
@@ -188,7 +191,9 @@ export default defineContentScript({
         if (no !== clickNo || location.href !== from || initial) return;
         // Le clic a ouvert ou fermé un menu, une liste, un volet : état passager de la même page
         if (el.isConnected && el.getAttribute('aria-expanded') !== expanded) return;
-        if (isScreenChange(document, appeared, heading, { w: innerWidth, h: innerHeight })) {
+        const tabChosen =
+          !!tab && tab.isConnected && tabWas !== 'true' && tab.getAttribute('aria-selected') === 'true';
+        if (tabChosen || isScreenChange(document, appeared, heading, { w: innerWidth, h: innerHeight })) {
           clearInterval(watch);
           void capture();
         }

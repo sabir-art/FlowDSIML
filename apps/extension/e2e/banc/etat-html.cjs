@@ -32,7 +32,7 @@ const CAS = [
     attendus: [
       ['Accueil', 'Bienvenue dans ExempleCRM.'],
       ['Liste des clients (chargée en différé)', 'Maison Leroy'],
-      ['Fiche du client', 'Ville : Lyon'],
+      ['Fiche du client', 'Ajouter une note'],
     ],
   },
   {
@@ -106,6 +106,19 @@ const CAS = [
       ['Menu ouvert (liens visibles)', '__MENU_OUVERT__'],
       ['Page Logiciels', 'ExempleCRM, ExempleFacture.'],
     ],
+  },
+  {
+    id: 'donnees',
+    nom: 'Données personnelles et commandes',
+    depart: '/donnees',
+    pret: (p) => p.getByRole('heading', { name: 'Fiche contact' }).waitFor(),
+    gestes: async () => {},
+    attendus: [
+      ['Commandes lisibles (bouton et lien)', 'Modifier la fiche'],
+      ['Lien lisible', 'Voir l’historique'],
+    ],
+    // Ce qui ne doit PAS rester lisible dans la copie
+    interdits: ['Camille Durand', 'camille.durand@acme.example'],
   },
 ];
 
@@ -226,6 +239,7 @@ async function relire(b, cas, pages) {
       order: p.order,
       url: new URL(p.url).pathname,
       titre: p.title,
+      nom: p.heading ?? null,
       lien: p.clickLabel ?? null,
       octets: p.html.length,
       ...m,
@@ -237,6 +251,11 @@ async function relire(b, cas, pages) {
 }
 
 (async () => {
+  // Règle de l'espace fictif : capture HTML autorisée (faux Supabase)
+  await fetch('http://localhost:54400/__html-capture', {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'allowed', domains: [] }),
+  });
   const b = await chromium.launch();
   const rapport = [];
   for (const cas of CAS) {
@@ -262,10 +281,12 @@ async function relire(b, cas, pages) {
       rendu: fidele ? 'styles, couleurs et logo conformes' : 'écart de rendu',
       liens: vues.map((v) => v.lien),
       titres: vues.map((v) => v.titre),
+      noms: vues.map((v) => v.nom),
       chatTiersDansLaCopie: vues.map((v) => v.chat),
       scriptsDansLaCopie: vues.map((v) => v.scripts),
       verification: groupes,
       erreur,
+      fuites: (cas.interdits ?? []).filter((t) => vues.some((v) => v.texte.includes(t))),
       vues: vues.map(({ texte, ...v }) => v),
     });
     console.error(
@@ -274,6 +295,21 @@ async function relire(b, cas, pages) {
   }
   await b.close();
   console.log(JSON.stringify(rapport, null, 2));
+  // Critère du lot A : tous les états retrouvés, rendu conforme, aucune donnée personnelle lisible
+  for (const r of rapport) {
+    // Nom de chaque écran : lisible (ni vide ni technique)
+    const nomsOk = r.noms.every((n) => n && !/[#>{}]|:has\(/.test(n));
+    const ok =
+      r.etatsCaptures === r.etatsAttendus &&
+      !r.erreur &&
+      r.rendu.startsWith('styles') &&
+      !r.fuites.length &&
+      nomsOk;
+    console.error(
+      `${ok ? 'ok' : 'NOT OK'} - ${r.nom} : ${r.etatsCaptures}/${r.etatsAttendus} états, ${r.rendu}${r.fuites.length ? `, données lisibles : ${r.fuites.join(', ')}` : ''}${nomsOk ? '' : `, noms d’écran à revoir : ${JSON.stringify(r.noms)}`}${r.erreur ? `, ${r.erreur}` : ''}`,
+    );
+    if (!ok) process.exitCode = 1;
+  }
 })().catch((e) => {
   console.error(e);
   process.exit(1);

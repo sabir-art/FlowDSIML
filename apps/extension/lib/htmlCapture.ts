@@ -1,3 +1,4 @@
+import { screenName } from './screenChange';
 import {
   type HtmlRemovedItem,
   type HtmlSecurityCounts,
@@ -24,6 +25,8 @@ export interface HtmlCapture {
   bytes: number;
   tooBig: boolean;
   title: string;
+  /** L60 : nom lisible de l'écran copié (titre principal, puis l'onglet choisi s'il y en a un). */
+  heading?: string;
   url: string;
   viewport: { w: number; h: number };
   /** Liens de la page (sélecteur stable, href absolu, libellé) : liaison du Sandbox. */
@@ -275,6 +278,7 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     bytes,
     tooBig: bytes > HTML_MAX_BYTES,
     title: document.title.slice(0, 200),
+    heading: screenName(document).slice(0, 200),
     url: location.href.slice(0, 2000),
     viewport: { w: innerWidth, h: innerHeight },
     links,

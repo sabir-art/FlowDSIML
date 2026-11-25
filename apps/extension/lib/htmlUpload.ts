@@ -123,7 +123,8 @@ export async function sendHtml(
       workspace_id: target.workspaceId,
       position: first + i,
       kind: 'html',
-      title: (p.clickLabel || p.title || `Page ${i + 1}`).slice(0, 200),
+      // L60 : le nom de l'écran copié (son titre, son onglet), pas le libellé du clic qui le quitte
+      title: (p.heading || p.title || `Page ${i + 1}`).slice(0, 200),
       page_url: p.url.slice(0, 2000),
       html_path: path,
       html_ops: ops as unknown as Json,

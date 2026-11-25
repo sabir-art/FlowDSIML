@@ -27,6 +27,20 @@ export function mainHeading(doc: Document): string {
   return doc.title;
 }
 
+/**
+ * L60 : nom lisible d'un écran pour le plan. Le titre principal affiché, suivi de l'onglet choisi quand
+ * la page en a (« Fiche produit · Tarifs ») : deux états d'une même page ne portent pas le même nom.
+ */
+export function screenName(doc: Document): string {
+  const head = mainHeading(doc);
+  for (const t of doc.querySelectorAll('[role="tab"][aria-selected="true"]')) {
+    if (t.closest(`[data-fd-ui],${PASSING}`) || !isVisible(t)) continue;
+    const tab = (t.textContent ?? '').replace(/\s+/g, ' ').trim();
+    if (tab && tab.length <= 40 && tab !== head) return `${head} · ${tab}`;
+  }
+  return head;
+}
+
 /** Aire visible d'un élément dans la fenêtre, en px². */
 function areaInViewport(el: Element, vw: number, vh: number): number {
   const r = el.getBoundingClientRect();
