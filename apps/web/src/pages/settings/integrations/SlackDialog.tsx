@@ -5,7 +5,7 @@
  */
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, Send } from 'lucide-react';
+import { Check, CircleAlert, Send } from 'lucide-react';
 import { Button, Modal } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../components/Toast';
@@ -112,7 +112,7 @@ export function SlackDialog({
           connected ? (
             <>
               <Button
-                variant="danger"
+                className="int-slack__remove"
                 aria-disabled={busy || undefined}
                 onClick={run(async () => {
                   const yes = await ask({
@@ -153,16 +153,28 @@ export function SlackDialog({
         }
       >
         <div className="int-slack">
-          <p id={`${id}-d`}>{t('integrations.slack.body')}</p>
-          <ul className="int-slack__scope">
-            <li>{t('integrations.slack.scopeAlerts')}</li>
-            <li aria-disabled="true">
-              {t('integrations.slack.scopeLeads')} <span className="soon-text">{t('shell.soon')}</span>
-            </li>
-            <li aria-disabled="true">
-              {t('integrations.slack.scopeComments')} <span className="soon-text">{t('shell.soon')}</span>
-            </li>
-          </ul>
+          <p id={`${id}-d`}>
+            {t(connected ? 'integrations.slack.bodyConnected' : 'integrations.slack.body')}
+          </p>
+          <div>
+            <p className="int-slack__t" id={`${id}-s`}>
+              {t('integrations.slack.scopeTitle')}
+            </p>
+            <ul className="int-slack__scope" aria-labelledby={`${id}-s`}>
+              <li>
+                <Check size={16} aria-hidden="true" />
+                {t('integrations.slack.scopeAlerts')}
+              </li>
+              <li aria-disabled="true">
+                <span>{t('integrations.slack.scopeLeads')}</span>
+                <span className="soon-text">{t('shell.soon')}</span>
+              </li>
+              <li aria-disabled="true">
+                <span>{t('integrations.slack.scopeComments')}</span>
+                <span className="soon-text">{t('shell.soon')}</span>
+              </li>
+            </ul>
+          </div>
           {connected ? (
             <p className="int-on int-slack__state" role="status">
               <i aria-hidden="true" />

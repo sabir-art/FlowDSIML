@@ -468,8 +468,11 @@ function AlertDialog({
                   checked={channels.includes('webhook') && !webhookOff}
                   onChange={(e) => toggleCh('webhook', e.target.checked)}
                 />
-                {t('analytics.adv.al.chWebhookLabel')}
-                {hook && <span className="t-caption muted"> · {hook}</span>}
+                {/* Domaine du webhook : texte secondaire, sur la ligne de base du libellé */}
+                <span>
+                  {t('analytics.adv.al.chWebhookLabel')}
+                  {hook && <span className="l19-hook">{`\u00a0· ${hook}`}</span>}
+                </span>
               </label>
               {webhookOff ? (
                 <p className="help l19-indent">

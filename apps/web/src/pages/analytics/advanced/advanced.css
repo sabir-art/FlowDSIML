@@ -409,6 +409,10 @@ dialog.l19-filter {
 .mk .l19-indent {
   padding-left: 26px;
 }
+.mk .l19-hook {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
 .mk .check.is-soon {
   opacity: 0.6;
 }

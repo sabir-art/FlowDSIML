@@ -133,6 +133,8 @@ const hook = (id, state, ws) => ({
   );
   ok(
     (await sd.locator('.int-slack__scope li[aria-disabled="true"] .soon-text').count()) === 2 &&
+      (await sd.getByText('Ce qui arrive dans le canal').count()) === 1 &&
+      (await sd.locator('.int-slack__scope li').first().locator('svg').count()) === 1 &&
       /Nouveaux leads/.test(await sd.locator('.int-slack__scope').innerText()) &&
       /Commentaires/.test(await sd.locator('.int-slack__scope').innerText()),
     'leads et commentaires : visibles en gris, « Bientôt »',
@@ -161,6 +163,36 @@ const hook = (id, state, ws) => ({
       (await sd.getByRole('button', { name: 'Retirer' }).count()) === 1,
     'connecté : pastille « Connecté », action « Retirer », l’adresse n’est plus affichée',
   );
+  {
+    // Le bouton vient d'apparaître : on lit ses couleurs une fois sa transition finie
+    await p.waitForFunction(() => {
+      const cs = getComputedStyle(document.querySelector('.fd-modal__foot .int-slack__remove'));
+      return cs.backgroundColor === 'rgba(0, 0, 0, 0)' && cs.borderTopColor === cs.color;
+    });
+    const foot = await sd.evaluate((d) => {
+      const [rm, test] = [...d.querySelectorAll('.fd-modal__foot button')];
+      const cs = getComputedStyle(rm);
+      return {
+        order: [rm.textContent.trim(), test.textContent.trim()].join(' | '),
+        left: rm.getBoundingClientRect().right < test.getBoundingClientRect().left,
+        gap: test.getBoundingClientRect().left - rm.getBoundingClientRect().right,
+        outline: `${cs.backgroundColor} | ${cs.borderTopColor} | ${cs.color}`,
+      };
+    });
+    ok(
+      foot.order === 'Retirer | Envoyer un test' &&
+        foot.left &&
+        foot.gap > 40 &&
+        // Fond transparent, contour et texte de la même couleur (rouge de danger)
+        /^rgba\(0, 0, 0, 0\) \| (rgb\([^)]+\)) \| \1$/.test(foot.outline),
+      `connecté : « Retirer » en danger secondaire (contour), à gauche ; « Envoyer un test » à droite (${foot.order}, écart ${Math.round(foot.gap)} px, ${foot.outline})`,
+    );
+    ok(
+      (await sd.getByText(/Pour changer de canal, retirez Slack puis reconnectez-le\./).count()) === 1 &&
+        (await sd.getByText(/Collez l’adresse/).count()) === 0,
+      'connecté : l’introduction dit comment changer de canal',
+    );
+  }
   await axe(p, 'Intégrations, fenêtre Slack (connecté)');
   await p.keyboard.press('Escape');
   await sd.waitFor({ state: 'detached' });

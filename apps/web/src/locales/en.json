@@ -4665,6 +4665,8 @@
     "slack": {
       "row": "Receive analytics alerts in a channel.",
       "body": "Paste the address of a Slack incoming webhook: the workspace analytics alerts arrive in the chosen channel.",
+      "bodyConnected": "The workspace analytics alerts arrive in the linked channel. To change channel, remove Slack then reconnect it.",
+      "scopeTitle": "What arrives in the channel",
       "scopeAlerts": "Analytics alerts",
       "scopeLeads": "New leads",
       "scopeComments": "Comments",
