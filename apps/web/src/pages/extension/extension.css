@@ -1,0 +1,244 @@
+/* Page Extension (retours du 24/11, 2e série §7) */
+.mk.xt {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.mk .xt-card {
+  padding: 20px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 16px;
+  background: var(--fd-color-surface);
+}
+.mk .xt-card h2 {
+  margin: 0;
+  font: 600 16px var(--fd-font-sans);
+}
+
+/* Bientôt */
+.mk .xt-soon h2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.mk .xt-soon p {
+  max-width: 64ch;
+  margin: 8px 0 0;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+}
+
+/* Extension absente : accueil */
+.mk .xt-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+}
+.mk .xt-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--fd-color-surface-sunken);
+  font: 500 13px var(--fd-font-sans);
+}
+.mk .xt-chip svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .xt-hero h2 {
+  margin: 16px 0 12px;
+  font: 700 24px / 1.25 var(--fd-font-sans);
+}
+.mk .xt-benefits,
+.mk .xt-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 14px var(--fd-font-sans);
+}
+.mk .xt-benefits li,
+.mk .xt-tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.mk .xt-benefits svg,
+.mk .xt-tips svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+.mk .xt-benefits svg {
+  color: var(--fd-color-success);
+}
+.mk .xt-hero__act {
+  margin-top: 20px;
+}
+.mk .xt-help {
+  margin: 12px 0 0;
+  color: var(--fd-color-text-muted);
+  font: 400 13px var(--fd-font-sans);
+}
+.mk .xt-ill {
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--fd-color-surface-sunken);
+}
+.mk .xt-ill__page {
+  position: relative;
+  height: 172px;
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+.mk .xt-ill__click {
+  position: absolute;
+  top: 52%;
+  left: 18%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--fd-color-primary) 22%, transparent);
+}
+.mk .xt-ill__pop {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 150px;
+  padding: 10px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-lg);
+  font: 400 12px var(--fd-font-sans);
+}
+.mk .xt-ill__pop b {
+  font-weight: 600;
+}
+.mk .xt-ill__pop span {
+  color: var(--fd-color-text-muted);
+}
+.mk .xt-ill__pop i {
+  height: 24px;
+  border-radius: 999px;
+  background: var(--fd-color-primary);
+}
+
+/* Extension présente */
+.mk .xt-ready {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.mk .xt-ready__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}
+.mk .xt-ready__icon svg {
+  width: 24px;
+  height: 24px;
+}
+.mk .xt-ready__txt {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.mk .xt-ready__txt h2 {
+  font-size: 18px;
+}
+.mk .xt-ready__txt p {
+  margin: 4px 0 0;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+}
+.mk .xt-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.mk .xt-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  background: var(--fd-color-surface);
+}
+.mk .xt-fact dt {
+  color: var(--fd-color-text-muted);
+  font: 400 12px var(--fd-font-sans);
+}
+.mk .xt-fact dd {
+  margin: 0;
+  font: 600 14px var(--fd-font-sans);
+  overflow-wrap: anywhere;
+}
+.mk .xt-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.mk .xt-keys kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--fd-color-border-strong, var(--fd-color-border));
+  border-radius: 6px;
+  background: var(--fd-color-surface-sunken);
+  font: 600 12px var(--fd-font-sans);
+}
+.mk .xt-keys__what {
+  margin-left: 6px;
+  color: var(--fd-color-text-muted);
+  font-weight: 400;
+}
+.mk .xt-tips {
+  margin-top: 12px;
+}
+.mk .xt-manage {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 14px;
+  color: var(--fd-color-text-muted);
+  font: 400 13px var(--fd-font-sans);
+}
+.mk .xt-manage svg {
+  width: 14px;
+  height: 14px;
+}
+@media (max-width: 899px) {
+  .mk .xt-hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 20px;
+  }
+  .mk .xt-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

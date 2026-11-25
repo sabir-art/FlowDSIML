@@ -19,14 +19,11 @@ const { APP_PAGES, PLAYER_PAGES, appPage, playerPage } = require('./a11y.e2e.cjs
 /** Dialogues qui ont déjà eu le défaut (ouverts après le chargement de la page). */
 const DIALOGS = [
   {
-    name: 'Dialogue Extension TutoClick',
-    route: '/#/',
+    // §7 : l'extension a sa page (plus de fenêtre) ; la page est contrôlée comme l'était la fenêtre
+    name: 'Page Extension',
+    route: '/#/extension',
     open: async (p) => {
-      await p
-        .getByRole('navigation', { name: 'Utilitaires' })
-        .getByRole('button', { name: 'Extension' })
-        .click();
-      await p.getByRole('dialog', { name: /Extension TutoClick|Installer l’extension/ }).waitFor();
+      await p.locator('.xt-card').first().waitFor();
     },
   },
   {

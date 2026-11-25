@@ -45,7 +45,6 @@ import {
 import type { Tables } from '@flowdsiml/supabase-types';
 import { Alert, Button, Empty, PageHeader, Select, Status } from '@flowdsiml/ui';
 import { NoMatch } from '../../components/empty/NoMatch';
-import { ExtensionDialog } from '../../components/ExtensionDialog';
 import { completionRate, contentType, countTrend, rateTrend, type ContentType } from '@flowdsiml/core';
 import { TypeBadge } from '../../components/TypeBadge';
 import { TrendBadge } from '../../components/kpi/KpiTabs';
@@ -216,7 +215,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   useEffect(() => setSlot(document.getElementById('topbar-slot')), []);
   const foldersBtn = useRef<HTMLButtonElement>(null);
   const [newFolderParent, setNewFolderParent] = useState<string | null>(null);
-  const [extension, setExtension] = useState(false);
   const [q, setQ] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<Sort>('updated');
@@ -1471,7 +1469,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                   }}
                   onExtension={() => {
                     setNewOpen(false);
-                    setExtension(true);
+                    // §7 : l'extension a sa page (installation, état, conseils)
+                    navigate('/extension');
                   }}
                 />
               )}
@@ -1571,7 +1570,6 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                 />
               </Suspense>
             )}
-            {extension && <ExtensionDialog onClose={() => setExtension(false)} />}
             <ConfirmDialog
               open={!!pendingMove}
               title={t('demos.moveTo')}
