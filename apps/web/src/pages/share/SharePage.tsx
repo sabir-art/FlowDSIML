@@ -1,11 +1,13 @@
 import {
   AtSign,
+  Braces,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
   Code,
   Copy,
   Download,
+  ExternalLink,
   Globe,
   GraduationCap,
   Info,
@@ -13,8 +15,11 @@ import {
   Link2,
   Lock,
   Mail,
+  MessageSquareText,
+  Pencil,
   Plus,
   Power,
+  QrCode,
   Share2,
   ShieldCheck,
   Trash2,
@@ -37,7 +42,6 @@ import { Menu } from '../../components/Menu';
 import { asSettings } from '../editor/types';
 import { AccessPanel, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
-import { CopyButton } from './codeBlock';
 import { PublicPagePanel } from './PublicPagePanel';
 import {
   PersonalPageFields,
@@ -59,6 +63,10 @@ import '../../styles/maquette.css';
 import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { Status, Select } from '@flowdsiml/ui';
+import { CopyField } from '../../components/CopyField';
+import { Qr } from '../present/RemoteDialogs';
+import { useToast } from '../../components/Toast';
+import { Fold } from './Fold';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
 /** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
@@ -139,6 +147,8 @@ export function SharePanel({
   const [importing, setImporting] = useState(false);
   /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
   const tab: Tab = TAB_OF[mode];
+  const toast = useToast();
+  const [qr, setQr] = useState(false);
   const [creating, setCreating] = useState(false);
   const [exporting, setExporting] = useState<boolean | 'gif'>(false);
   const { error, success, run } = useAction();
@@ -460,52 +470,115 @@ export function SharePanel({
                     <span>{t('share.publicLinksOff')}</span>
                   </div>
                 )}
-                <div className="field sh-field">
-                  <label htmlFor="sh-pub">{t('share.publicLink')}</label>
-                  <div className="input-group">
-                    <input
-                      id="sh-pub"
-                      className="input t-mono"
-                      readOnly
-                      value={publicUrl}
-                      disabled={!published}
-                    />
-                    <CopyButton value={publicUrl} />
-                  </div>
+                {/* §1.3 : mode Lien sobre. Le lien se copie et s'ouvre par deux boutons icône ; trois autres
+                    façons de le transmettre ; les réglages rares sont repliés. La pastille d'accès suffit :
+                    aucun encadré d'explication. */}
+                <div className="shl-link">
+                  <CopyField
+                    id="sh-pub"
+                    label={t('share.publicLink')}
+                    value={publicUrl}
+                    copyLabel={t('share.copyLink')}
+                    copiedText={t('share.linkCopied')}
+                    disabled={!published}
+                  />
+                  {published ? (
+                    <a
+                      className="fd-btn fd-btn--icon"
+                      href={publicUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={t('share.openLink')}
+                      title={t('share.openLink')}
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-disabled="true"
+                      aria-label={t('share.openLink')}
+                      title={t('share.openWhyNot')}
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                    </button>
+                  )}
                 </div>
-                {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
-                <AddressField demoId={demo.id} editable={editable} address={address} onSaved={setAddress} />
-                <hr className="divider sh-hr" />
-                <h2 className="t-label sh-h3" id="sh-params-h">
-                  {t('share.urlParams')}
-                </h2>
-                {/* §18.7 : l'adresse revient à la ligne (plus de zone défilante, donc plus d'arrêt de tabulation) */}
-                <div className="code" role="region" aria-labelledby="sh-params-h">
-                  {publicUrl}
-                  {paramExample.map(([sep, k, v]) => (
-                    <span key={k}>
-                      <span className="k">
-                        {sep}
-                        {k}
-                      </span>
-                      <span className="s">{encodeURIComponent(v)}</span>
-                    </span>
-                  ))}
-                </div>
-                <p className="help sh-help">
-                  {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
-                </p>
-                <hr className="divider sh-hr" />
-                <h2 className="t-label sh-h3">{t('share.elsewhere')}</h2>
-                <div className="row wrap">
+                <div className="shl-acts" role="group" aria-label={t('share.elsewhere')}>
                   <a
-                    className="btn btn-secondary btn-sm"
+                    className="fd-btn fd-btn--icon"
                     href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
+                    aria-label={t('share.byEmail')}
+                    title={t('share.byEmail')}
                     aria-disabled={published ? undefined : 'true'}
                   >
-                    <Mail aria-hidden="true" />
-                    {t('share.email')}
+                    <Mail size={16} aria-hidden="true" />
                   </a>
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--icon"
+                    aria-label={t('share.copyMessage')}
+                    title={t('share.copyMessage')}
+                    aria-disabled={published ? undefined : 'true'}
+                    onClick={() => {
+                      if (!published) return;
+                      void navigator.clipboard
+                        ?.writeText(t('share.messageText', { title: demo.title, url: publicUrl }))
+                        .then(() => toast(t('share.messageCopied')));
+                    }}
+                  >
+                    <MessageSquareText size={16} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--icon"
+                    aria-label={t('share.qrCode')}
+                    title={t('share.qrCode')}
+                    aria-expanded={qr}
+                    aria-disabled={published ? undefined : 'true'}
+                    onClick={() => published && setQr((v) => !v)}
+                  >
+                    <QrCode size={16} aria-hidden="true" />
+                  </button>
+                </div>
+                {qr && published && (
+                  <div className="shl-qr">
+                    <Qr text={publicUrl} label={t('share.qrLabel', { title: demo.title })} size={144} />
+                    <p className="help">{t('share.qrHelp')}</p>
+                  </div>
+                )}
+                <div className="shd-folds">
+                  {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
+                  <Fold icon={<Pencil aria-hidden="true" />} title={t('share.customAddress')}>
+                    <AddressField
+                      demoId={demo.id}
+                      editable={editable}
+                      address={address}
+                      onSaved={setAddress}
+                    />
+                  </Fold>
+                  <Fold icon={<Braces aria-hidden="true" />} title={t('share.urlParamsShort')}>
+                    <h4 className="sr-only" id="sh-params-h">
+                      {t('share.urlParams')}
+                    </h4>
+                    {/* §18.7 : l'adresse revient à la ligne (pas de zone défilante) */}
+                    <div className="code" role="region" aria-labelledby="sh-params-h">
+                      {publicUrl}
+                      {paramExample.map(([sep, k, v]) => (
+                        <span key={k}>
+                          <span className="k">
+                            {sep}
+                            {k}
+                          </span>
+                          <span className="s">{encodeURIComponent(v)}</span>
+                        </span>
+                      ))}
+                    </div>
+                    <p className="help sh-help">
+                      {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
+                    </p>
+                  </Fold>
                 </div>
               </section>
             )}

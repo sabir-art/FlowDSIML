@@ -36,7 +36,8 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   seedExport(state);
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
-  await page.locator('#sh-slug').waitFor();
+  // §1.3 : paramètres d'URL en ligne repliable
+  await page.getByRole('button', { name: 'Paramètres d’URL', exact: true }).click();
   const code = page.getByRole('region', { name: /Personnaliser par paramètres/ });
   await code.getByText(/\?company=/).waitFor();
   ok(/\?company=/.test(await code.innerText()), 'exemple : variable présente dans la démo (company)');
@@ -91,6 +92,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     s.body = (s.body || '').replace(/\{\{[^}]*\}\}/g, '');
   }
   await page.reload();
+  await page.getByRole('button', { name: 'Paramètres d’URL', exact: true }).click();
   await page.locator('#sh-panel-link .sh-help').waitFor();
   ok(
     !/\?/.test(await code.innerText()) &&

@@ -207,15 +207,56 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     // Copie du lien
     const link = await d.locator('#sh-pub').inputValue();
-    await d
-      .locator('#sh-panel-link')
-      .getByRole('button', { name: /^Copier/ })
-      .first()
-      .click();
+    const lien = d.locator('#sh-panel-link');
+    await lien.getByRole('button', { name: 'Copier le lien', exact: true }).click();
     ok(
       (await page.evaluate(() => navigator.clipboard.readText())) === link && /\/d\/|\/l\//.test(link),
       'Lien : « Copier » met le lien public dans le presse-papiers',
     );
+    // §1.3 : mode sobre. Ouvrir, trois façons de transmettre, deux lignes repliées, aucun encadré
+    const openBtn = lien.getByRole('link', { name: 'Ouvrir la démo dans un nouvel onglet' });
+    ok(
+      (await openBtn.getAttribute('href')) === link && (await openBtn.getAttribute('target')) === '_blank',
+      'Lien : bouton icône « Ouvrir » vers le lien public, nouvel onglet',
+    );
+    const acts = lien.getByRole('group', { name: 'Partager ailleurs' });
+    ok(
+      (await acts.locator('.fd-btn--icon').count()) === 3 &&
+        (
+          (await acts.getByRole('link', { name: 'Envoyer par e-mail' }).getAttribute('href')) || ''
+        ).startsWith('mailto:?subject='),
+      'Lien : trois boutons icône (e-mail, message, QR code)',
+    );
+    await acts.getByRole('button', { name: 'Copier un message prêt à envoyer' }).click();
+    const msg = await page.evaluate(() => navigator.clipboard.readText());
+    ok(msg.includes(link) && msg.startsWith('Bonjour'), `Lien : message prêt à envoyer copié (${msg})`);
+    const qrBtn = acts.getByRole('button', { name: 'Afficher le QR code' });
+    ok((await qrBtn.getAttribute('aria-expanded')) === 'false', 'Lien : QR code masqué par défaut');
+    await qrBtn.click();
+    await lien.locator('.shl-qr svg').waitFor();
+    ok(
+      (await qrBtn.getAttribute('aria-expanded')) === 'true' &&
+        /QR code du lien/.test((await lien.locator('.shl-qr svg').getAttribute('aria-label')) || ''),
+      'Lien : QR code affiché, nommé',
+    );
+    await shot(page, 'partager-lien-qr');
+    await qrBtn.click();
+    const folds = lien.locator('.shd-fold__head');
+    ok(
+      (await folds.count()) === 2 &&
+        (await folds.allTextContents()).join('|') === 'Adresse personnalisée|Paramètres d’URL' &&
+        (await folds.evaluateAll((l) => l.every((b) => b.getAttribute('aria-expanded') === 'false'))) &&
+        (await lien.locator('#sh-slug').count()) === 0,
+      'Lien : deux lignes repliées « Adresse personnalisée », « Paramètres d’URL »',
+    );
+    await folds.nth(1).click();
+    ok(
+      (await lien.getByRole('region', { name: /paramètres/i }).count()) === 1 &&
+        (await folds.nth(1).getAttribute('aria-expanded')) === 'true',
+      'Lien : « Paramètres d’URL » se déplie',
+    );
+    await folds.nth(1).click();
+    ok((await lien.locator('.fd-note, .sh-note').count()) === 0, 'Lien : aucun encadré d’explication');
     ok(await noScroll(page), 'Lien : pas de défilement horizontal');
     await shot(page, 'partager-lien');
     await axe(page, 'Lien');
@@ -410,7 +451,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       (await d.locator('.shd-head p').textContent()) === 'Pas encore publiée',
       'en-tête : « Pas encore publiée »',
     );
-    ok(await d.locator('#sh-pub').isDisabled(), 'non publiée : le lien est grisé');
+    ok(
+      (await d.locator('#sh-pub').isDisabled()) &&
+        (await d.getByRole('link', { name: 'Ouvrir la démo dans un nouvel onglet' }).count()) === 0,
+      'non publiée : le lien est grisé, « Ouvrir » indisponible',
+    );
     ok((await d.locator('.shd-access').count()) === 1, 'non publiée : l’accès se règle déjà');
     await shot(page, 'partager-nonpubliee');
     await axe(page, 'Non publiée');

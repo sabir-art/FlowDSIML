@@ -42,7 +42,15 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   d.current_version_id = d.current_version_id || 'v-1';
   await install(page, state);
   await page.goto(`${APP}/#/demos/${DEMO}/share`);
-  const field = page.getByLabel('Adresse personnalisée');
+  // §1.3 : l'adresse personnalisée est une ligne repliable du mode Lien
+  const fold = page.getByRole('button', { name: 'Adresse personnalisée', exact: true });
+  await fold.waitFor();
+  ok(
+    (await fold.getAttribute('aria-expanded')) === 'false',
+    'ligne « Adresse personnalisée » repliée par défaut',
+  );
+  await fold.click();
+  const field = page.locator('#sh-slug');
   await field.waitFor();
   const save = page.getByRole('button', { name: 'Enregistrer l’adresse' });
   ok(!/Bientôt/.test(await page.locator('label[for=sh-slug]').innerText()), 'plus de « Bientôt »');
@@ -86,6 +94,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   // Lecteur : pas de champ, adresse affichée
   t.members[0].role = 'viewer';
   await page.reload();
+  await page.getByRole('button', { name: 'Adresse personnalisée', exact: true }).click();
   await page.locator('.sh-addr-ro').waitFor();
   ok((await page.locator('#sh-slug').count()) === 0, 'lecteur : adresse affichée sans champ');
 

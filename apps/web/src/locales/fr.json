@@ -2566,7 +2566,19 @@
       "restricted": "Accès restreint : la démo ne peut pas être sur la page publique",
       "unpublished": "Publiez la démo d’abord",
       "off": "La page publique de l’espace est hors ligne"
-    }
+    },
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié",
+    "openLink": "Ouvrir la démo dans un nouvel onglet",
+    "openWhyNot": "Publiez la démo pour ouvrir le lien",
+    "byEmail": "Envoyer par e-mail",
+    "copyMessage": "Copier un message prêt à envoyer",
+    "messageText": "Bonjour, voici la démo « {{title}} » : {{url}}",
+    "messageCopied": "Message copié",
+    "qrCode": "Afficher le QR code",
+    "qrLabel": "QR code du lien de « {{title}} »",
+    "qrHelp": "À scanner avec l’appareil photo d’un téléphone.",
+    "urlParamsShort": "Paramètres d’URL"
   },
   "analytics": {
     "title": "Analytics",

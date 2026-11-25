@@ -2566,7 +2566,19 @@
       "restricted": "Restricted access: the demo cannot be on the public page",
       "unpublished": "Publish the demo first",
       "off": "The workspace’s public page is offline"
-    }
+    },
+    "copyLink": "Copy the link",
+    "linkCopied": "Link copied",
+    "openLink": "Open the demo in a new tab",
+    "openWhyNot": "Publish the demo to open the link",
+    "byEmail": "Send by email",
+    "copyMessage": "Copy a ready-to-send message",
+    "messageText": "Hello, here is the demo “{{title}}”: {{url}}",
+    "messageCopied": "Message copied",
+    "qrCode": "Show the QR code",
+    "qrLabel": "QR code of the link to “{{title}}”",
+    "qrHelp": "Scan it with a phone camera.",
+    "urlParamsShort": "URL parameters"
   },
   "analytics": {
     "title": "Analytics",

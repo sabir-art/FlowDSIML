@@ -292,3 +292,87 @@
 .mk .shd-scope {
   margin: 0 0 16px;
 }
+
+/* §1.3 Mode Lien sobre : champ à copier + « Ouvrir », trois boutons icône, lignes repliables */
+.mk .shl-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.mk .shl-link .fd-copy {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shl-link > .fd-btn--icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.mk .shl-acts {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.mk .shl-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+.mk .shl-qr svg {
+  flex: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.mk .shl-qr .help {
+  margin: 0;
+}
+.mk .shd-panel .fd-btn[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mk .shd-folds {
+  margin-top: 16px;
+  border-top: 1px solid var(--fd-color-border);
+}
+.mk .shd-fold {
+  border-bottom: 1px solid var(--fd-color-border);
+}
+.mk .shd-fold__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fd-color-text);
+  font: 500 14px var(--fd-font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.mk .shd-fold__head > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.mk .shd-fold__head > span {
+  flex: 1;
+  min-width: 0;
+}
+.mk .shd-fold__chev {
+  color: var(--fd-color-text-muted);
+  transition: transform var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
+}
+.mk .shd-fold.is-open .shd-fold__chev {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mk .shd-fold__chev {
+    transition: none;
+  }
+}
+.mk .shd-fold__body {
+  padding: 4px 0 16px;
+}

@@ -16,7 +16,10 @@ export function CopyField({
   copyLabel,
   copiedText,
   className,
+  disabled = false,
 }: {
+  /** Valeur pas encore utilisable (lien d'une démo non publiée) : champ grisé, copie indisponible. */
+  disabled?: boolean;
   id?: string;
   /** Libellé du champ, masqué à l'œil (« Lien d'invitation pour … »). */
   label: string;
@@ -57,6 +60,7 @@ export function CopyField({
           ref={input}
           className="fd-copy__input"
           readOnly
+          disabled={disabled}
           value={value}
           onClick={(e) => e.currentTarget.select()}
         />
@@ -64,7 +68,9 @@ export function CopyField({
           type="button"
           className={`fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm fd-copy__btn${copied ? ' is-ok' : ''}`}
           aria-label={copyLabel}
-          onClick={() => void copy()}
+          title={copyLabel}
+          aria-disabled={disabled || undefined}
+          onClick={() => !disabled && void copy()}
         >
           {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         </button>
