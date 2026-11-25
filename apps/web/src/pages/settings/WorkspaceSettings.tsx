@@ -1,7 +1,7 @@
 import { SettingsShell } from './SettingsShell';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { check, useAction } from '../../lib/useAction';
@@ -174,18 +174,14 @@ export function WorkspaceSettings() {
           <div data-gap-exempt="">
             <div className="stg-row">
               <div className="stg-text" data-gap-exempt="">
-                <div className="stg-lab">
-                  {t('workspace.logo')} {soon}
-                </div>
-                <div className="stg-help">{t('workspace.logoHelp')}</div>
+                <div className="stg-lab">{t('workspace.logo')}</div>
+                {/* Le logo se règle à un seul endroit : Thème et couleurs */}
+                <div className="stg-help">{t('workspace.logoWhere')}</div>
               </div>
               <div className="stg-ctl">
-                <div className="stg-lr">
-                  <span className="stg-logo" aria-hidden="true">
-                    {((name || ws.name).trim()[0] ?? '?').toUpperCase()}
-                  </span>
-                  <Button aria-disabled="true">{t('workspace.changeLogo')}</Button>
-                </div>
+                <Link className="fd-btn" to="/settings/brand">
+                  {t('workspace.logoOpen')}
+                </Link>
               </div>
             </div>
             <div className="stg-row">

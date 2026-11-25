@@ -128,16 +128,32 @@ export function IntegrationsPage() {
       }
     />
   );
-  const soonRow = (c: (typeof SOON)[number]) => (
-    <IntRow
-      key={c.k}
-      logo={c.logo}
-      icon={c.icon}
-      name={t(`integrations.soon_${c.k}`)}
-      body={t(`integrations.soon_${c.k}_body`)}
-      soon
-    />
-  );
+  const soonRow = (c: (typeof SOON)[number]) =>
+    // L'API v1 existe : la ligne ouvre Paramètres › Clés d'accès (plus de « Bientôt »)
+    c.k === 'keys' ? (
+      <IntRow
+        key={c.k}
+        icon={c.icon}
+        name={t('integrations.soon_keys')}
+        body={t('integrations.soon_keys_body')}
+        to="/settings/keys"
+        state={
+          <span className="int-on int-open">
+            {t('integrations.open')}
+            <ChevronRight aria-hidden="true" />
+          </span>
+        }
+      />
+    ) : (
+      <IntRow
+        key={c.k}
+        logo={c.logo}
+        icon={c.icon}
+        name={t(`integrations.soon_${c.k}`)}
+        body={t(`integrations.soon_${c.k}_body`)}
+        soon
+      />
+    );
   // VB-02 : outils d'e-mailing, avec l'alternative active (webhooks) : la ligne garde son lien
   const emailingRow = (
     <IntRow

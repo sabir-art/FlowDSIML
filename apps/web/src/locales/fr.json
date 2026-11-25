@@ -428,8 +428,6 @@
     "wsName": "Nom de l’espace",
     "identity": "Identité",
     "identityHelp": "Visible par les membres et dans les e-mails d’invitation.",
-    "changeLogo": "Changer le logo",
-    "logoHelp": "PNG ou SVG carré, 512 px au moins.",
     "website": "Site web",
     "sharing": "Confidentialité et partage",
     "sharingHelp": "Ce que voient les visiteurs de vos démos publiées.",
@@ -454,7 +452,9 @@
     "privacyPlaceholder": "https://…",
     "supportPlaceholder": "nom@domaine.fr",
     "ownDemos_one": "sa démo",
-    "ownDemos_other": "ses {{n}} démos"
+    "ownDemos_other": "ses {{n}} démos",
+    "logoWhere": "Il se règle dans Thème et couleurs.",
+    "logoOpen": "Ouvrir Thème et couleurs"
   },
   "errors": {
     "generic": "Une erreur est survenue : {{message}}",
@@ -4684,7 +4684,8 @@
     "setSupport": "Renseigner le lien du support",
     "requestSubject": "Demande de connexion",
     "emailingWhy": "En attendant, un webhook peut alimenter ces outils.",
-    "useWebhook": "Utiliser un webhook"
+    "useWebhook": "Utiliser un webhook",
+    "open": "Ouvrir"
   },
   "glossary": {
     "playerTitle": "Dans le lecteur",

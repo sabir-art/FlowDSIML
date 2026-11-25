@@ -428,8 +428,6 @@
     "wsName": "Workspace name",
     "identity": "Identity",
     "identityHelp": "Visible to members and in invitation emails.",
-    "changeLogo": "Change logo",
-    "logoHelp": "Square PNG or SVG, 512 px minimum",
     "website": "Website",
     "sharing": "Privacy and sharing",
     "sharingHelp": "What visitors of your published demos see.",
@@ -454,7 +452,9 @@
     "privacyPlaceholder": "https://…",
     "supportPlaceholder": "name@domain.com",
     "ownDemos_one": "its demo",
-    "ownDemos_other": "its {{n}} demos"
+    "ownDemos_other": "its {{n}} demos",
+    "logoWhere": "It is set in Theme and colours.",
+    "logoOpen": "Open Theme and colours"
   },
   "errors": {
     "generic": "Something went wrong: {{message}}",
@@ -4684,7 +4684,8 @@
     "setSupport": "Set the support link",
     "requestSubject": "Connection request",
     "emailingWhy": "Meanwhile, a webhook can feed these tools.",
-    "useWebhook": "Use a webhook"
+    "useWebhook": "Use a webhook",
+    "open": "Open"
   },
   "glossary": {
     "playerTitle": "In the player",
