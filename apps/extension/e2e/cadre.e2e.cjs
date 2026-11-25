@@ -143,6 +143,17 @@ const WS = '11111111-1111-1111-1111-111111111111';
       )) === 'zone',
     'Zone : voile, encart « Tracez la zone à garder », zone focalisée et nommée',
   );
+  // Le voile est autour de la zone ; l'intérieur reste transparent : on voit ce qu'on garde
+  const veil = await zone.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundColor, shadow: cs.boxShadow, outline: `${cs.outlineWidth} ${cs.outlineColor}` };
+  });
+  ok(
+    veil.bg === 'rgba(0, 0, 0, 0)' &&
+      /rgba\(0, 0, 0, 0\.5\)/.test(veil.shadow) &&
+      /^2px rgb\(255, 255, 255\)/.test(veil.outline),
+    `Zone : intérieur transparent, voile à 50 % autour, contour blanc de 2 px (${veil.bg})`,
+  );
   const z0 = await zone.boundingBox();
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('Shift+ArrowDown');
@@ -207,6 +218,12 @@ const WS = '11111111-1111-1111-1111-111111111111';
       ),
     `vérification : nature de chaque cadre (${natures.map((t) => t.trim()).join(' | ')})`,
   );
+  // Clic sur un bloc plus grand qu'un bouton : son premier titre, jamais des textes collés
+  const names = await review.locator('.rv-cap__text b').allInnerTexts();
+  ok(
+    names[2] === 'Cliquez sur « App de test »' && names.every((n) => !/projetSuivan/.test(n)),
+    `titres des étapes lisibles (${names.join(' | ')})`,
+  );
   const seg = (n) => review.getByRole('radiogroup', { name: `Cadre de la capture ${n}` });
   const checked = async (n) => seg(n).locator('[aria-checked=true]').getAttribute('aria-label');
   ok(
@@ -231,7 +248,27 @@ const WS = '11111111-1111-1111-1111-111111111111';
     frame2.w < 0.5 && frame2.h < 0.5,
     `vignette : cadre de l’élément (${Math.round(frame2.w * 100)} % de la largeur)`,
   );
-  if (SHOTS) await review.screenshot({ path: `${SHOTS}/verification-cadre.png`, fullPage: true });
+  // Section alignée sur les bords du contenu (grille capture et détections), avant le pied fixe
+  const edges = await review.evaluate(() => {
+    const r = (q) => document.querySelector(q).getBoundingClientRect();
+    return { caps: r('#caps'), main: r('#main'), foot: r('.rv-foot'), vh: innerHeight };
+  });
+  ok(
+    Math.abs(edges.caps.left - edges.main.left) <= 1 &&
+      Math.abs(edges.caps.right - edges.main.right) <= 1 &&
+      edges.caps.top >= edges.main.bottom,
+    'vérification : « Captures · n » sous la grille, alignée sur ses bords',
+  );
+  ok(
+    Math.round(edges.foot.bottom) === edges.vh && Math.round(edges.foot.width) === 1440,
+    'vérification : le pied reste fixé en bas, sur toute la largeur',
+  );
+  if (SHOTS) {
+    await review.screenshot({ path: `${SHOTS}/verification-cadre-haut.png` });
+    await review.locator('#caps').scrollIntoViewIfNeeded();
+    await review.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await review.screenshot({ path: `${SHOTS}/verification-cadre.png` });
+  }
   // Changer le cadre d'une capture avant l'envoi : capture 1 de « Page » à « Élément », au clavier
   await seg(1).getByRole('radio', { name: 'Page' }).focus();
   await review.keyboard.press('ArrowRight');
@@ -254,7 +291,31 @@ const WS = '11111111-1111-1111-1111-111111111111';
       (await seg(2).getByRole('radio', { name: 'Élément' }).count()) === 1,
     '390 px : icônes seules, nom accessible conservé',
   );
-  if (SHOTS) await review.screenshot({ path: `${SHOTS}/verification-cadre-390.png`, fullPage: true });
+  const foot = await review.evaluate(() => {
+    const r = (el) => el.getBoundingClientRect();
+    const f = document.querySelector('.rv-foot');
+    const [a, b] = [...f.querySelectorAll('.btn')].map(r);
+    const p = r(f.querySelector('.rv-privacy'));
+    const last = r(document.querySelector('#caps'));
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    return {
+      bottom: Math.round(r(f).bottom),
+      width: Math.round(r(f).width),
+      vh: innerHeight,
+      above: p.bottom <= a.top + 1,
+      sameRow: Math.abs(a.top - b.top) <= 1,
+      half: Math.abs(a.width - b.width) <= 2,
+      // En bas de page, la dernière ligne de la section reste au-dessus du pied
+      clear: r(document.querySelector('#caps')).bottom <= r(f).top + 1,
+      capsH: Math.round(last.height),
+    };
+  });
+  ok(
+    foot.bottom === foot.vh && foot.width === 390 && foot.above && foot.sameRow && foot.half,
+    '390 px : pied fixé en bas sur toute la largeur, phrase au-dessus des deux boutons à 50 %',
+  );
+  ok(foot.clear, '390 px : en bas de page, le pied ne recouvre pas la section « Captures »');
+  if (SHOTS) await review.screenshot({ path: `${SHOTS}/verification-cadre-390.png` });
   await review.setViewportSize({ width: 1440, height: 900 });
 
   // ===== Envoi : recadrage non destructif, hotspot relatif au cadre =====

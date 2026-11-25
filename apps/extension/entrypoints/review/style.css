@@ -512,12 +512,9 @@ dialog::backdrop {
   box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.28);
   pointer-events: none;
 }
-.rv-stage {
-  overflow: hidden;
-}
 .rv-caps {
-  max-width: 792px;
-  margin: 24px auto 0;
+  /* Dans le contenu, sous la grille capture et détections, sur ses bords ; le pied reste en dernier */
+  margin: 16px 0 0;
   border: 1px solid var(--fd-color-border);
   border-radius: 12px;
   background: var(--fd-color-surface);
@@ -649,6 +646,28 @@ dialog::backdrop {
   outline: none;
   box-shadow: var(--fd-shadow-focus);
 }
+/* Sous 640 px : le pied reste fixé en bas sur toute la largeur ; la phrase passe au-dessus des boutons,
+   qui prennent chacun la moitié */
+@media (max-width: 639px) {
+  .rv {
+    padding-bottom: 168px;
+  }
+  .rv-foot {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  .rv-privacy {
+    flex: 0 0 100%;
+    align-items: flex-start;
+  }
+  .rv-foot .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 12px;
+  }
+}
 /* À 390 px : icônes seules (nom accessible conservé), texte sous la vignette */
 @media (max-width: 599px) {
   .rv-seg button span {
@@ -657,8 +676,15 @@ dialog::backdrop {
   .rv-seg button {
     padding: 0 10px;
   }
+  /* Le titre garde la largeur ; le segmenté passe dessous, calé à droite */
   .rv-cap {
     flex-wrap: wrap;
+  }
+  .rv-cap .rv-seg {
+    margin-left: auto;
+  }
+  .rv-cap__text {
+    flex-basis: calc(100% - 124px);
   }
   .rv-cap__thumb {
     width: 64px;
