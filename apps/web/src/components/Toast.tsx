@@ -40,10 +40,10 @@ const DURATION = 4000;
 const DURATION_WARNING = 6000;
 
 /**
- * CAD-08 (révisé le 25/11, préférence du client) : toasts en haut à droite, sous la barre du haut (16 px
- * du bord, 360 px au plus ; sous 600 px, toute la largeur moins 16 px de chaque côté). Icône, texte,
- * « Fermer ». Trois au plus, le plus récent en haut. Fermeture après 4 s, suspendue tant que la souris
- * ou le focus est sur la pile. Annoncés aux lecteurs d'écran (role=status).
+ * CAD-08 (révisé le 25/11, décision du client) : toasts en bas au milieu, à 24 px du bas (16 px sous
+ * 600 px, et 16 px au-dessus de la barre « Modifications non enregistrées » quand elle est là), 420 px
+ * au plus. Icône, texte, « Fermer ». Trois au plus, le plus récent en bas. Fermeture après 4 s,
+ * suspendue tant que la souris ou le focus est sur la pile. Annoncés aux lecteurs d'écran (role=status).
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -94,8 +94,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         !action || action.durationMs
           ? (action?.durationMs ?? (opts?.tone === 'warning' ? DURATION_WARNING : DURATION))
           : undefined;
-      // Le plus récent en haut ; trois au plus
-      setToasts((l) => [{ id, text, detail: opts?.detail, action, tone: opts?.tone, ms }, ...l.slice(0, 2)]);
+      // Le plus récent en bas ; trois au plus
+      setToasts((l) => [...l.slice(-2), { id, text, detail: opts?.detail, action, tone: opts?.tone, ms }]);
       arm({ id, ms });
       return () => close(id);
     },

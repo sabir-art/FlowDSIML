@@ -58,35 +58,13 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await toasts.first().waitFor({ state: 'detached' });
   ok((await toasts.count()) === 0, 'Précédent du navigateur : le toast est fermé');
 
-  // CAD-08 (révisé le 25/11) : en haut à droite sous la barre du haut, le plus récent en haut, 4 s,
-  // fermeture suspendue au survol ; sous 600 px, toute la largeur moins 16 px de chaque côté
+  // CAD-08 (révisé le 25/11) : en bas au milieu, le plus récent en bas, 4 s, fermeture suspendue au
+  // survol ; sous 600 px, toute la largeur moins 16 px de chaque côté, et 16 px au-dessus de la barre
+  // « Modifications non enregistrées » quand elle est là
   for (const width of [1440, 390]) {
     const p2 = await b.newPage({ viewport: { width, height: 800 } });
     p2.on('pageerror', (e) => errors.push(e.message));
     await install(p2, seedMaquette());
-    // Hors Paramètres : 16 px sous la barre du haut (8 px sous 600 px)
-    await p2.goto(`${APP}/#/media`);
-    await p2.locator('#media-page-file').waitFor({ state: 'attached' });
-    await p2
-      .locator('#media-page-file')
-      .setInputFiles({ name: 'repere.svg', mimeType: 'image/svg+xml', buffer: svg });
-    await p2.locator('.toasts .toast').first().waitFor();
-    await p2
-      .locator('.toasts .toast')
-      .first()
-      .evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
-    const under = await p2.evaluate(() => {
-      const bar = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--fd-layout-topbar-height'),
-      );
-      return Math.round(document.querySelector('.toasts .toast').getBoundingClientRect().top - bar);
-    });
-    ok(
-      under === (width >= 600 ? 16 : 8),
-      `toasts à ${width} px, hors Paramètres : ${under} px sous la barre du haut`,
-    );
-    await p2.locator('.toasts .toast button[aria-label="Fermer"]').click();
-    await p2.locator('.toasts .toast').first().waitFor({ state: 'detached' });
     await p2.goto(`${APP}/#/settings/members`);
     // Deux confirmations simples (sans action) : deux changements de rôle
     const setRole = async (role) => {
@@ -101,68 +79,86 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     await setRole('Éditeur');
     await p2.waitForFunction(() => document.querySelectorAll('.toasts .toast').length === 2);
     // La souris sur la pile suspend la fermeture
-    await list.first().hover();
+    await list.last().hover();
     await p2.waitForFunction(() =>
       [...document.querySelectorAll('.toasts .toast')].every((el) => el.getAnimations().length === 0),
     );
     const m = await p2.evaluate(() => {
       const els = [...document.querySelectorAll('.toasts .toast')];
       const r = els.map((el) => el.getBoundingClientRect());
-      // Paramètres : l'en-tête porte les actions de la page, la pile commence sous sa bande
-      const head = document.querySelector('.stg-page');
-      const acts = document.querySelector('.stg-page__acts')?.getBoundingClientRect();
-      const bar = head.getBoundingClientRect().bottom + scrollY;
+      const vw = document.documentElement.clientWidth;
       const probe = document.createElement('i');
       probe.style.borderRadius = 'var(--fd-radius-surface)';
       document.body.append(probe);
       const surface = getComputedStyle(probe).borderTopLeftRadius;
       probe.remove();
-      const tools = [...document.querySelectorAll('[aria-label="Aide"], [aria-label="Notifications"]')]
-        .map((x) => x.getBoundingClientRect())
-        .filter((x) => x.width > 0);
+      const last = r.at(-1);
       return {
-        top: Math.round(r[0].top - bar),
-        right: Math.round(document.documentElement.clientWidth - r[0].right),
-        left: Math.round(r[0].left),
-        w: Math.round(r[0].width),
+        bottom: Math.round(innerHeight - last.bottom),
+        centre: Math.abs((last.left + last.right) / 2 - vw / 2) <= 1,
+        left: Math.round(last.left),
+        w: Math.round(last.width),
         order: els.map((el) => (el.textContent.includes('Éditeur') ? 'second' : 'premier')).join('|'),
         stacked: r[1].top >= r[0].bottom + 8 - 0.5,
         radius: getComputedStyle(els[0]).borderTopLeftRadius === surface,
         live: els[0].closest('[role="status"]')?.getAttribute('aria-live'),
-        overTools: tools.some((t) =>
-          r.some((x) => x.top < t.bottom && x.bottom > t.top && x.left < t.right && x.right > t.left),
-        ),
         close: !!els[0].querySelector('button[aria-label="Fermer"]'),
-        overActs:
-          !!acts &&
-          r.some(
-            (x) => x.top < acts.bottom && x.bottom > acts.top && x.left < acts.right && x.right > acts.left,
-          ),
+        // La pile laisse passer les clics hors des toasts
+        through: getComputedStyle(document.querySelector('.toasts')).pointerEvents === 'none',
       };
     });
     ok(
-      m.order === 'second|premier' &&
+      m.order === 'premier|second' &&
         m.stacked &&
         m.radius &&
         m.live === 'polite' &&
         m.close &&
-        !m.overTools &&
-        !m.overActs &&
-        m.right === 16 &&
-        (width >= 600 ? m.top === 16 && m.w <= 360 : m.top === 8 && m.left === 16),
-      `toasts à ${width} px : en haut à droite sous l’en-tête des Paramètres, le plus récent en haut, sans couvrir l’aide, la cloche ni les actions de la page (${JSON.stringify(m)})`,
+        m.through &&
+        m.centre &&
+        (width >= 600
+          ? m.bottom === 24 && m.w <= 420
+          : m.bottom === 16 && m.left === 16 && m.w === width - 32),
+      `toasts à ${width} px : en bas au milieu, le plus récent en bas (${JSON.stringify(m)})`,
     );
     // Souris sur la pile : rien ne se ferme, même après la durée d'affichage ; souris partie : tout se ferme
     const t0 = Date.now();
     await p2.waitForFunction((t) => Date.now() - t > 4600, t0);
     const kept = await list.count();
-    await p2.mouse.move(2, 700);
+    await p2.mouse.move(2, 2);
     await list.first().waitFor({ state: 'detached', timeout: 8000 });
     ok(
       kept === 2 && (await list.count()) === 0,
       `toasts à ${width} px : fermeture suspendue au survol, puis reprise (${kept} gardés)`,
     );
     await p2.close();
+  }
+  // Sous 600 px, barre « Modifications non enregistrées » affichée : la pile se pose 16 px au-dessus
+  {
+    const p3 = await b.newPage({ viewport: { width: 390, height: 800 } });
+    p3.on('pageerror', (e) => errors.push(e.message));
+    await install(p3, seed());
+    await p3.goto(`${APP}/#/settings/workspace`);
+    const name = p3.locator('#ws-name');
+    await name.waitFor();
+    const bar = p3.getByRole('region', { name: 'Modifications non enregistrées' });
+    // Saisie tenue : si l'espace finit de se charger après coup, le formulaire reprend ses valeurs
+    const typed = async () => {
+      await name.fill('Acme modifié');
+      await p3.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await p3.waitForLoadState('networkidle');
+      return (await name.inputValue()) === 'Acme modifié';
+    };
+    for (let i = 0; i < 5 && !(await typed()); i++);
+    await bar.waitFor();
+    await bar.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+    // La pile (vide ici) est ancrée par son bas : c'est là que se pose le prochain toast
+    const gap = await p3.evaluate(() => {
+      const t = document.querySelector('.toasts').getBoundingClientRect();
+      const s = document.querySelector('.stg-savebar').getBoundingClientRect();
+      return Math.round(s.top - t.bottom);
+    });
+    ok(gap === 16, `390 px : la pile des toasts se pose 16 px au-dessus de la barre collée (${gap})`);
+    await p3.close();
   }
 
   ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);

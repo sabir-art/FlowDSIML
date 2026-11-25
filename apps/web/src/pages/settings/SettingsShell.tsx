@@ -234,28 +234,6 @@ export function SettingsShell({
     return () => io.disconnect();
   }, [watch]);
   const bar = watch && !actsSeen;
-  // Toasts (en haut à droite) : sur une page dont l'en-tête porte des actions, la pile commence sous
-  // la bande de l'en-tête, pour ne jamais couvrir « Enregistrer » ou « Inviter »
-  const hasActs = !!(search || actions);
-  useLayoutEffect(() => {
-    const head = acts.current?.closest<HTMLElement>('.stg-page');
-    if (!hasActs || !head) return;
-    const root = document.documentElement;
-    const sync = () =>
-      root.style.setProperty(
-        '--fd-toast-anchor',
-        `${Math.round(head.getBoundingClientRect().bottom + scrollY)}px`,
-      );
-    sync();
-    const ro = new ResizeObserver(sync);
-    ro.observe(head);
-    addEventListener('resize', sync);
-    return () => {
-      ro.disconnect();
-      removeEventListener('resize', sync);
-      root.style.removeProperty('--fd-toast-anchor');
-    };
-  }, [hasActs, narrow]);
   const key = sub ? null : (here?.entry.to?.replace('/settings/', '').replace('/', '-') ?? null);
   const desc = own ?? (key ? t(`settings.desc.${key}`, { defaultValue: '' }) : '');
   return (
