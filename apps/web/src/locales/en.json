@@ -316,7 +316,6 @@
     "inviteCreated": "Invitation created. Send this link to the invitee:",
     "pending": "Pending invitations",
     "copyLink": "Copy link",
-    "revoke": "Revoke",
     "remove": "Remove",
     "leave": "Leave",
     "confirmRemove": "Remove {{email}}?",
@@ -402,6 +401,10 @@
     "emptyBody": "Each person receives an invitation email, with the role you choose.",
     "changeRole": "Role",
     "copyInviteLink": "Copy invitation link",
+    "removeInvite": "Remove invitation…",
+    "removeInviteTitle": "Remove the invitation?",
+    "removeInviteBody": "The link sent to {{email}} will stop working. You can invite this address again.",
+    "removeInviteConfirm": "Remove invitation",
     "noMatch": "No member matches this search.",
     "roleHelp": {
       "viewer": "Views demos and analytics.",

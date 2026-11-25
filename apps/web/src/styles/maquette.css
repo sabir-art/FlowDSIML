@@ -806,7 +806,8 @@
 .mk .toasts {
   position: fixed;
   bottom: 24px;
-  left: 50%;
+  /* Milieu de la zone de contenu principale (posé par Toast.tsx) ; à défaut, celui de la fenêtre */
+  left: var(--fd-toast-x, 50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -870,6 +871,7 @@
 @media (max-width: 599px) {
   .mk .toasts {
     bottom: 16px;
+    left: 50%;
     width: calc(100vw - 32px);
   }
   .mk .toast {
