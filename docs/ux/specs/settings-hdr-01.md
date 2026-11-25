@@ -2,7 +2,7 @@
 
 Choix de l'utilisateur du 25/11 : l'en-tête compact de la variante E, posé dans la bande pleine largeur avec filet de la variante B. Rien d'autre ne change : fond du contenu (`--fd-color-content-bg`), palette, navigation des Paramètres, sections et lignes de réglage restent comme aujourd'hui. Les boutons et champs de l'en-tête suivent RADIUS-01 (`--fd-radius-control`). À livrer après l'étape 1 de RADIUS-01 (`packages/ui`).
 
-Captures de référence : `docs/ux/propositions/en-tete-parametres/planche-EB-1440.png` et `planche-EB-390.png` (Équipe, Général, Glossaire, Notifications ; clair et sombre).
+Captures de référence : `docs/ux/propositions/en-tete-parametres/planche-EB-1440.png` et `planche-EB-390.png` (Équipe, Général, Glossaire, Notifications ; clair et sombre). En cas d'écart entre ces captures (montage rapide) et le texte, **le texte fait foi**.
 
 ## 1. Anatomie (1440 et au-dessus de 600 px)
 
@@ -26,11 +26,11 @@ Captures de référence : `docs/ux/propositions/en-tete-parametres/planche-EB-14
 - **Titre (h1)** : `600 18px/1.4 var(--fd-font-sans)`, couleur `--fd-color-text`. Il reste le seul h1 de la page (PAGE-01).
 - **Sous-titre** : `400 13px/1.5`, couleur `--fd-color-text-muted`, 620 px au plus de large, 2 px sous le titre. Il peut passer sur deux lignes, sans troncature.
 - **Actions** : centrées verticalement sur le bloc texte, alignées à droite, ordre fixe de gauche à droite :
-  1. la recherche de la page s'il y en a une (240 px, hauteur des contrôles, avec `kbd` « Ctrl K ») ;
+  1. la recherche de la page s'il y en a une (260 px, hauteur des contrôles, avec `kbd` « Ctrl K » ; le texte indicatif reste entier) ;
   2. les actions secondaires (bouton secondaire) ;
   3. « Annuler » (secondaire) ;
   4. l'action principale (primaire), une seule au plus.
-- **Barre du haut** : elle ne garde que le fil d'Ariane, l'aide et la cloche. Aucun bouton d'action de page n'y reste.
+- **Barre du haut** : elle ne garde que le fil d'Ariane, l'aide et la cloche. Aucun bouton d'action de page n'y reste. Le filet vertical qui séparait les actions de l'aide disparaît quand rien ne le précède (règle valable sur toutes les pages).
 - La première section qui porte le titre de la page (`data-page-title`) continue de ne pas répéter son intitulé.
 
 ## 2. Pages et actions
@@ -70,6 +70,7 @@ Règles :
   - Avec trois boutons ou plus (Page publique), les secondaires passent dans un menu ⋯ (`fd-btn--icon`, 40 px) à gauche du primaire. Exemple : ⋯ (Voir la page, Annuler) · **Enregistrer**.
 - **Formulaires** (Annuler / Enregistrer) : quand des modifications sont en attente et que l'en-tête est sorti de l'écran, une barre collée en bas affiche les deux mêmes boutons :
   - 64 px de haut, fond `--fd-color-surface`, filet en haut ;
+  - à gauche, le texte visible « Modifications non enregistrées » (13 px, `--fd-color-text-muted`, deux lignes possibles) ; à droite, Annuler puis Enregistrer, qui ne rétrécissent pas ;
   - elle disparaît une fois l'enregistrement fait ou les modifications annulées ;
   - en mouvement réduit, elle apparaît d'un coup.
 - La barre secondaire mobile (‹ Titre) reste comme aujourd'hui. Elle ne porte plus de bouton d'action.
