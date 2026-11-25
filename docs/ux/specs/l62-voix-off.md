@@ -96,7 +96,7 @@ Aujourd'hui, une fois une voix enregistrée, il faut la supprimer pour retrouver
 
 Planche : `docs/ux/propositions/l62/planche-l62-orbe.png`.
 
-Animation : `docs/ux/propositions/l62/orbe/orbe-animation.gif` (et `.webm`). Démo vivante : `orbe/orbe-demo.html`. Code de référence : `orbe/orbe.js`, un canvas 2D sans dépendance d'environ 120 lignes.
+Animation : `docs/ux/propositions/l62/orbe/orbe-animation.gif` (et `.webm`). Démo vivante : `orbe/orbe-demo.html`. Code de référence : `orbe/orbe.js`, un canvas 2D sans dépendance d'environ 85 lignes.
 
 - **Réglage « Lecteur audio »** : dans le panneau, sous « Pour toute la démo », il remplace la liste.
   - Ce sont 3 cartes radio (`role="radiogroup"`), Bulle, Orbe et Barre. Chacune a un mini-aperçu de 44 px qui bouge au survol (rien en mouvement réduit), son nom et une aide d'une ligne : « Avec l'onde », « Voix visible », « Durée, avance ».
