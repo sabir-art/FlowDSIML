@@ -44,7 +44,8 @@ export function FileDropzone({
   /** Icône de la tuile à vide (par défaut une image ; FileUp pour un CSV, un son, des sous-titres). */
   icon?: ReactNode;
   /** Fichier en place : son nom, ses détails (type, poids, date) et son aperçu. */
-  file?: { name: string; meta?: string; preview?: ReactNode } | null;
+  /** `tile: 'logo'` : aperçu en tuile carrée de 72 px sur damier (logo, transparence visible). */
+  file?: { name: string; meta?: string; preview?: ReactNode; tile?: 'logo' } | null;
   busy?: boolean;
   /** Nom de la barre d'envoi (« Envoi du logo »). */
   busyLabel?: string;
@@ -133,7 +134,11 @@ export function FileDropzone({
         />
       )}
       <span
-        className={`fd-dz__pre${file?.preview && !drag && !error ? ' fd-dz__pre--img' : ''}`}
+        className={`fd-dz__pre${
+          file?.preview && !drag && !error
+            ? ` fd-dz__pre--img${file.tile === 'logo' ? ' fd-dz__pre--logo' : ''}`
+            : ''
+        }`}
         aria-hidden="true"
       >
         {drag ? <Upload /> : error ? <CircleAlert /> : (file?.preview ?? icon ?? <ImageUp />)}

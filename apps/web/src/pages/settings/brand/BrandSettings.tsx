@@ -169,6 +169,7 @@ function LogoSection({ ws, isAdmin }: { ws: Tables<'workspaces'>; isAdmin: boole
                     name: t('brand.logoFile', { name: ws.name }),
                     meta: ws.logo_path.split('.').pop()?.toUpperCase(),
                     preview: <img src={url} alt="" />,
+                    tile: 'logo',
                   }
                 : null
             }
