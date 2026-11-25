@@ -1267,6 +1267,7 @@ export type Database = {
       };
       notification_settings: {
         Row: {
+          alert_email_cleared_at: string | null;
           email: boolean;
           email_frequency: string;
           email_prefs: NonNullable<Json>;
@@ -1277,6 +1278,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          alert_email_cleared_at?: string | null;
           email?: boolean;
           email_frequency?: string;
           email_prefs?: NonNullable<Json>;
@@ -1286,6 +1288,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
+          alert_email_cleared_at?: string | null;
           email?: boolean;
           email_frequency?: string;
           email_prefs?: NonNullable<Json>;
@@ -1304,6 +1307,7 @@ export type Database = {
           created_at: string;
           data: Json;
           demo_id: string | null;
+          email_forced: boolean;
           emailed_at: string | null;
           id: string;
           kind: string;
@@ -1320,6 +1324,7 @@ export type Database = {
           created_at?: string;
           data?: Json;
           demo_id?: string | null;
+          email_forced?: boolean;
           emailed_at?: string | null;
           id?: string;
           kind: string;
@@ -1335,6 +1340,7 @@ export type Database = {
           created_at?: string;
           data?: Json;
           demo_id?: string | null;
+          email_forced?: boolean;
           emailed_at?: string | null;
           id?: string;
           kind?: string;

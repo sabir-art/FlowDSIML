@@ -37,7 +37,7 @@ select throws_ok($$ insert into public.alerts (workspace_id, trigger, threshold)
 select throws_ok($$ insert into public.alerts (workspace_id, trigger) values ((select ws from ctx), 'structure_below_goal') $$,
   '23514', null, 'parcours obligatoire pour une structure');
 select throws_ok($$ insert into public.alerts (workspace_id, trigger, channels) values ((select ws from ctx), 'cta', array['email']) $$,
-  '23514', null, 'canal e-mail refusé (Bientôt)');
+  '23514', null, 'canal e-mail seul refusé (toujours avec « Dans l''app »)');
 select throws_ok($$ insert into public.alerts (workspace_id, trigger, demo_id) values ((select ws from ctx), 'cta', '00000000-0000-0000-0000-00000000ee02') $$,
   '23514', 'ALERT_SCOPE', 'démo d''un autre workspace refusée');
 select throws_ok($$ update public.alerts set pending = 99 $$, '42501', null, 'état interne non modifiable');

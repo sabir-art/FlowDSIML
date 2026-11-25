@@ -16,6 +16,8 @@ import {
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../../lib/supabase';
 import { useToast } from '../../../components/Toast';
+import { useAuth } from '../../../auth/AuthProvider';
+import { emailDigestAvailable } from '../../../components/notifications/useNotifications';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Loading } from '../../../components/guards';
 import type { Segment } from './SegmentsTab';
@@ -68,6 +70,32 @@ export function AlertsTab({
   const [alerts, setAlerts] = useState<Alert[] | null>(null);
   const [paths, setPaths] = useState<Array<{ id: string; title: string }>>([]);
   const [editing, setEditing] = useState<Alert | 'new' | null>(null);
+  const toast = useToast();
+  const { user } = useAuth();
+  // ALERT-01 §4 : après « Ne plus recevoir ces e-mails », l'app le dit une fois
+  useEffect(() => {
+    if (!user) return;
+    let live = true;
+    void supabase
+      .from('notification_settings')
+      .select('alert_email_cleared_at')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!live || !data?.alert_email_cleared_at) return;
+        toast(t('analytics.adv.al.emailCleared'));
+        // La requête ne part qu'une fois attendue (then)
+        void supabase
+          .from('notification_settings')
+          .update({ alert_email_cleared_at: null })
+          .eq('user_id', user.id)
+          .then(() => undefined);
+      });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const load = async () => {
     const { data } = await supabase
@@ -226,6 +254,19 @@ function AlertDialog({
   const [err, setErr] = useState<string | null>(null);
   // Domaine du webhook abonné (lisible par les administrateurs seulement, RLS de webhooks)
   const [hook, setHook] = useState<string | null | undefined>(undefined);
+  // ALERT-01 : l'e-mail part à l'adresse de la personne qui a créé l'alerte ; case active seulement si
+  // l'envoi d'e-mails est configuré (même contrôle que Paramètres › Notifications) et si c'est son alerte
+  const { user } = useAuth();
+  const [mailOk, setMailOk] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void emailDigestAvailable().then((ok) => live && setMailOk(ok));
+    return () => {
+      live = false;
+    };
+  }, []);
+  const mine = !alert || alert.created_by === user?.id;
+  const mail = channels.includes('email');
 
   useEffect(() => {
     const d = ref.current;
@@ -254,7 +295,11 @@ function AlertDialog({
     if (!thresholdOk)
       return setErr(pct ? t('analytics.adv.al.thresholdPct') : t('analytics.adv.al.thresholdViews'));
     if (trigger === 'structure_below_goal' && !path) return setErr(t('analytics.adv.al.pathRequired'));
-    const chans = channels.filter((c) => c === 'app' || (c === 'webhook' && !webhookOff));
+    const chans = channels.filter(
+      (c) => c === 'app' || (c === 'webhook' && !webhookOff) || (c === 'email' && (mailOk || !mine)),
+    );
+    // « E-mail » : l'alerte reste toujours visible dans l'app
+    if (chans.includes('email') && !chans.includes('app')) chans.unshift('app');
     if (!chans.length) return setErr(t('analytics.adv.al.channelRequired'));
     const row = {
       trigger,
@@ -385,13 +430,20 @@ function AlertDialog({
           <fieldset className="l19-fs">
             <legend className="t-label">{t('analytics.adv.al.notify')}</legend>
             <div className="col l19-checks">
-              <label className="check">
+              <label className="check" data-tip={mail ? t('analytics.adv.al.appLocked') : undefined}>
                 <input
                   type="checkbox"
-                  checked={channels.includes('app')}
+                  checked={mail || channels.includes('app')}
+                  disabled={mail}
+                  aria-describedby={mail ? `${id}-al` : undefined}
                   onChange={(e) => toggleCh('app', e.target.checked)}
                 />
                 {t('analytics.adv.al.inApp')}
+                {mail && (
+                  <span id={`${id}-al`} className="sr-only">
+                    {t('analytics.adv.al.appLocked')}
+                  </span>
+                )}
               </label>
               <label className="check" aria-disabled={webhookOff || undefined}>
                 <input
@@ -410,10 +462,28 @@ function AlertDialog({
               ) : (
                 !isAdmin && <p className="help l19-indent">{t('analytics.adv.al.webhookHelp')}</p>
               )}
-              <label className="check is-soon" aria-disabled="true">
-                <input type="checkbox" disabled />
-                {t('analytics.adv.al.email')} <span className="soon-text">{t('shell.soon')}</span>
-              </label>
+              {mailOk ? (
+                <>
+                  <label className="check" aria-disabled={!mine || undefined}>
+                    <input
+                      type="checkbox"
+                      disabled={!mine}
+                      checked={mail}
+                      aria-describedby={`${id}-em`}
+                      onChange={(e) => toggleCh('email', e.target.checked)}
+                    />
+                    {t('analytics.adv.al.email')}
+                  </label>
+                  <p className="help l19-indent" id={`${id}-em`}>
+                    {t(mine ? 'analytics.adv.al.emailHelp' : 'analytics.adv.al.emailOwner')}
+                  </p>
+                </>
+              ) : (
+                <label className="check is-soon" aria-disabled="true">
+                  <input type="checkbox" disabled checked={mail} readOnly />
+                  {t('analytics.adv.al.email')} <span className="soon-text">{t('shell.soon')}</span>
+                </label>
+              )}
               <label className="check is-soon" aria-disabled="true">
                 <input type="checkbox" disabled />
                 {t('analytics.adv.al.slack')} <span className="soon-text">{t('shell.soon')}</span>

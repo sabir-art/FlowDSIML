@@ -477,6 +477,85 @@ const live = (n) => ({
   await page.getByText('Clic sur le bouton d’action', { exact: true }).waitFor();
   ok(state.tables.alerts[1].trigger === 'cta', 'alerte modifiée');
 
+  // ===== ALERT-01 : canal « E-mail » des alertes (envoi d'e-mails configuré, clé factice) =====
+  {
+    state.brevoKey = 'cle-factice';
+    // Après « Ne plus recevoir ces e-mails » : l'app le dit une fois, puis l'oublie
+    (state.tables.notification_settings ||= []).push({
+      user_id: state.user.id,
+      email: false,
+      alert_email_cleared_at: '2026-11-25T08:00:00Z',
+    });
+    const pm = await ctx.newPage();
+    pm.on('pageerror', (e) => errors.push(e.message));
+    await install(pm, state);
+    await pm.goto(`${APP}/#/analytics`);
+    await pm.locator('.an-more').click();
+    await pm.getByRole('menuitem', { name: 'Alertes' }).click();
+    await pm.getByText('E-mail désactivé sur vos alertes').waitFor();
+    ok(true, 'après une désinscription : toast « E-mail désactivé sur vos alertes »');
+    await pm.waitForFunction(() => true);
+    await pm.getByRole('button', { name: 'Nouvelle alerte' }).click();
+    const d2 = pm.getByRole('dialog', { name: 'Nouvelle alerte' });
+    const mailBox = d2.getByRole('checkbox', { name: 'E-mail' });
+    const appBox = d2.getByRole('checkbox', { name: /^Dans l’app/ });
+    await mailBox.waitFor();
+    ok(
+      (await mailBox.isEnabled()) &&
+        (await d2.getByText('Envoyé à votre adresse, en moins de 15 minutes.').count()) === 1,
+      'envoi configuré : case « E-mail » active, avec son aide',
+    );
+    ok(
+      (await d2.locator('.is-soon .soon-text').count()) === 1 &&
+        (await d2.getByRole('checkbox', { name: /Slack/ }).isDisabled()),
+      'Slack reste « Bientôt »',
+    );
+    await appBox.uncheck();
+    await mailBox.check();
+    ok(
+      (await appBox.isChecked()) &&
+        (await appBox.isDisabled()) &&
+        (await d2.locator('label[data-tip="Toujours affichée dans l’app"]').count()) === 1,
+      '« E-mail » cochée : « Dans l’app » cochée et verrouillée, infobulle « Toujours affichée dans l’app »',
+    );
+    const before = state.tables.alerts.length;
+    await d2.getByRole('button', { name: 'Créer l’alerte' }).click();
+    await d2.waitFor({ state: 'detached' });
+    const made = state.tables.alerts[before];
+    ok(
+      !!made && made.channels.join() === 'app,email',
+      `alerte créée avec « Dans l’app » et « E-mail » (${made?.channels.join()})`,
+    );
+    await pm
+      .getByText(/dans l’app et e-mail/)
+      .first()
+      .waitFor();
+    ok(true, 'liste : canaux « dans l’app et e-mail »');
+    ok(
+      state.tables.notification_settings.find((x) => x.user_id === state.user.id).alert_email_cleared_at ===
+        null,
+      'message de désinscription acquitté (il ne revient pas)',
+    );
+    // L'alerte d'une autre personne : la case montre son état, sans pouvoir le changer
+    made.created_by = '0b5c1f0e-0000-4000-8000-0000000000ff';
+    await pm.reload();
+    await pm.locator('.an-more').click();
+    await pm.getByRole('menuitem', { name: 'Alertes' }).click();
+    await pm
+      .getByRole('button', { name: /Nouveau lead/ })
+      .last()
+      .click();
+    const d3 = pm.getByRole('dialog', { name: 'Modifier l’alerte' });
+    ok(
+      (await d3.getByRole('checkbox', { name: 'E-mail' }).isDisabled()) &&
+        (await d3.getByRole('checkbox', { name: 'E-mail' }).isChecked()) &&
+        (await d3.getByText(/Envoyé à la personne qui a créé l’alerte/).count()) === 1,
+      'alerte d’une autre personne : « E-mail » visible, non modifiable, avec l’explication',
+    );
+    await pm.close();
+    state.brevoKey = null;
+  }
+
   // ===== Captures du lot, même état de données (1 alerte active, segments enregistrés), sans toast =====
   if (SHOTS) {
     state.tables.segments.push(

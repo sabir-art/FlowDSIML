@@ -2991,6 +2991,11 @@
         "create": "Créer l’alerte",
         "deleteTitle": "Supprimer l’alerte ?",
         "deleteBody": "Vous ne serez plus prévenu pour ce déclencheur.",
+        "ch_email": "e-mail",
+        "emailHelp": "Envoyé à votre adresse, en moins de 15 minutes.",
+        "emailOwner": "Envoyé à la personne qui a créé l’alerte. Elle seule peut changer ce réglage.",
+        "appLocked": "Toujours affichée dans l’app",
+        "emailCleared": "E-mail désactivé sur vos alertes",
         "chWebhookLabel": "Webhook",
         "emptyTitle": "Créez votre première alerte"
       },
