@@ -54,6 +54,10 @@ Le modèle est celui d'un gestionnaire de mots de passe.
   - le préfixe est tronqué **par la gauche** (« …ample/acme-analytics/ »), pour garder la fin utile ;
   - il prend 55 % de la largeur au plus ;
   - les deux bouts sont arrondis.
+- **Sous 600 px** :
+  - le préfixe passe **au-dessus** du champ, en une ligne de texte discret (12 px, gris, 4 px au-dessus du champ) ;
+  - le slug prend toute la largeur, dans un champ de 40 px ;
+  - dans le bandeau d'accès, « Changer l'accès » devient un **lien** sous l'aide, à la place du bouton, et le bandeau tient en 3 lignes au plus.
 
 ## 3. Assistant IA
 
