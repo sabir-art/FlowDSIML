@@ -170,6 +170,27 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(sp(await logo.getByRole('alert').innerText()) === 'Le fichier dépasse 2 Mo.', 'logo : 2 Mo au plus');
   await file.setInputFiles(path.join(__dirname, 'fixture.png'));
   await zone.locator('.fd-dz__pre--img img').waitFor();
+  // Retours du 24/11 (2e série) §2 : tuile de 72 × 72 sur damier, filet de 1 px, marge de 10 px, logo entier
+  const tile = await zone.locator('.fd-dz__pre--logo').evaluate((el) => {
+    const cs = getComputedStyle(el);
+    const img = el.querySelector('img');
+    const [r, i] = [el.getBoundingClientRect(), img.getBoundingClientRect()];
+    return {
+      w: Math.round(r.width),
+      h: Math.round(r.height),
+      pad: cs.paddingTop,
+      border: cs.borderTopWidth,
+      checker: cs.backgroundImage.includes('linear-gradient'),
+      fit: getComputedStyle(img).objectFit,
+      inside:
+        i.left >= r.left + 10 && i.right <= r.right - 10 && i.top >= r.top + 10 && i.bottom <= r.bottom - 10,
+    };
+  });
+  ok(
+    tile.w === 72 && tile.h === 72 && tile.pad === '10px' && tile.border === '1px' && tile.checker,
+    `logo : tuile de 72 × 72 sur damier, filet de 1 px, marge de 10 px (${JSON.stringify(tile)})`,
+  );
+  ok(tile.fit === 'contain' && tile.inside, 'logo : image entière dans la tuile (contain), jamais rognée');
   ok(
     (await zone.evaluate((el) => el.classList.contains('is-filled'))) &&
       /Logo de /.test(sp(await zone.innerText())),

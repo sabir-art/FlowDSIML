@@ -2288,6 +2288,27 @@ button.fd-nav__item:hover {
   height: 100%;
   object-fit: contain;
 }
+/* Retours du 24/11 (2e série) §2 : tuile du logo, 72 × 72, damier léger (la transparence se voit), filet
+   de 1 px, marge intérieure de 10 px ; le logo y tient en entier. */
+.fd-dz__pre--logo {
+  box-sizing: border-box;
+  width: 72px;
+  height: 72px;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: var(--fd-color-surface);
+  background-image:
+    linear-gradient(45deg, var(--fd-color-surface-sunken) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--fd-color-surface-sunken) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--fd-color-surface-sunken) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--fd-color-surface-sunken) 75%);
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
+  background-size: 12px 12px;
+}
 .fd-dz.is-drag .fd-dz__pre {
   background: color-mix(in srgb, var(--fd-color-primary) 12%, transparent);
   color: var(--fd-color-primary);
@@ -2423,6 +2444,7 @@ button.fd-nav__item:hover {
     opacity var(--fd-motion-duration-fast) var(--fd-motion-ease-standard);
 }
 .fd-mt__pic > img {
+  /* Photo de profil (ronde) : elle remplit son cercle ; un logo (carré) reste entier, ci-dessous */
   width: 100%;
   height: 100%;
   object-fit: cover;

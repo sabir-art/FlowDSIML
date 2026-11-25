@@ -679,3 +679,8 @@
   display: grid;
   gap: 4px;
 }
+
+/* Retours du 24/11 (2e série) §2 : un logo n'est jamais rogné dans son aperçu */
+img.ctr-logo {
+  object-fit: contain;
+}
