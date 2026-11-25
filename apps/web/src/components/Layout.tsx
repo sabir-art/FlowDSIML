@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useShiftFlip } from '../lib/shiftFlip';
 import { useMediaQuery } from '../lib/useMediaQuery';
 import { AvatarPhoto } from './AvatarPhoto';
 import { BrandMark } from './BrandMark';
@@ -75,9 +76,15 @@ export function Layout() {
   const [pinned, setPinned] = useState(savedPinned);
   const rail = !drawer && !pinned;
   const collapsedRail = rail;
+  // MOTION-01 §3 : la barre change de largeur d'un coup, le contenu suit par FLIP (200 ms) et les
+  // libellés apparaissent en fondu après un dépli (jamais au premier affichage)
+  const main = useRef<HTMLElement>(null);
+  const [unfold, setUnfold] = useState(false);
+  useShiftFlip(main, pinned ? 'pinned' : 'rail', { clip: () => main.current?.parentElement ?? null });
   const togglePin = () => {
     const next = !pinned;
     setPinned(next);
+    setUnfold(next);
     try {
       localStorage.setItem(SIDEBAR_KEY, next ? 'pinned' : 'rail');
     } catch {
@@ -153,7 +160,7 @@ export function Layout() {
 
   return (
     <div
-      className={`shell${open ? ' nav-open' : ''}${rail ? ' shell--rail' : ''}`}
+      className={`shell${open ? ' nav-open' : ''}${rail ? ' shell--rail' : ''}${unfold && !rail ? ' shell--unfold' : ''}`}
       /* §18.6 : colonnes de la mise en page (barre latérale, contenu) */ data-gap-exempt=""
     >
       <a
@@ -200,6 +207,7 @@ export function Layout() {
         aria-modal={drawer && open ? true : undefined}
         aria-label={drawer ? t('nav.main') : undefined}
         data-expanded={rail ? 'false' : undefined}
+        onAnimationEnd={unfold ? () => setUnfold(false) : undefined}
       >
         {/* NAV-04 (COMP-01 §14) : logo à gauche et bouton de repli à droite sur une ligne, filet dessous.
             Rail replié : le bouton seul ; déplié au survol, il garde sa place et le logo vient à sa droite. */}
@@ -346,7 +354,7 @@ export function Layout() {
           menuBtn.current?.focus();
         }}
       />
-      <main className="main" id="main" tabIndex={-1}>
+      <main ref={main} className="main" id="main" tabIndex={-1}>
         {/* Changement d'espace : la page est remontée, ses données et requêtes de l'ancien espace abandonnées */}
         <Outlet key={current?.id ?? 'none'} />
       </main>

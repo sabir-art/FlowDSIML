@@ -48,6 +48,8 @@ function seed() {
         await page.waitForFunction(
           () => document.querySelector('.fcol-slot').getBoundingClientRect().width === 232,
         );
+        // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+        await page.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
         ok(
           (await page.locator('.demos-main').boundingBox()).x === left + 232,
           `${tag} : dépliée, la colonne de 232 px pousse le contenu`,

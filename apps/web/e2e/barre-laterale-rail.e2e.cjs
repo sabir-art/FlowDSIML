@@ -195,6 +195,8 @@ const geo = (p) =>
 
   // Épingler : pousse le contenu, retenu ; le bouton passe à droite du logo
   await p.locator('.sidebar__pin').click();
+  // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+  await p.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
   await p.mouse.move(700, 400);
   await p.locator('.sidebar .brand img').first().waitFor();
   await p.waitForFunction(() => document.querySelector('#sidebar').getBoundingClientRect().width === 256);
@@ -222,6 +224,8 @@ const geo = (p) =>
   await p.locator('main h1').waitFor();
   ok((await geo(p)).sb === 256, 'après rechargement : toujours épinglée');
   await p.locator('.sidebar__pin').click();
+  // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+  await p.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
   await p.mouse.move(700, 400);
   await p.waitForFunction(() => document.querySelector('#sidebar').getBoundingClientRect().width === 64);
   ok(
@@ -233,6 +237,8 @@ const geo = (p) =>
   await p.goto(`${APP}/#/settings/profile`);
   await p.locator('.st-nav').waitFor();
   await p.locator('.sidebar__pin').click();
+  // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+  await p.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
   ok(
     /#\/settings\/profile$/.test(p.url()),
     '§14 ter : dans le rail, le bouton déplie la barre sans naviguer',
@@ -251,6 +257,8 @@ const geo = (p) =>
   await p.locator('.fd-nav__item[aria-current="page"]', { hasText: 'Démos' }).waitFor();
   ok((await home.getAttribute('aria-current')) === null, '§14 ter : pas d’aria-current sur le logo');
   await p.locator('.sidebar__pin').click();
+  // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+  await p.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
   ok(p.errors.length === 0, `aucune erreur JS (${p.errors.join(' | ')})`);
   await p.context().close();
 

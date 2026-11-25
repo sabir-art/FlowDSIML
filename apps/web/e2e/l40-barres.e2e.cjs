@@ -98,7 +98,7 @@ const measure = (bar) =>
 
     for (const w of [1024, 390]) {
       const p = await open('/#/', w);
-      await p.locator('.demos-section .list-toolbar').waitFor();
+      await p.locator('.demos-section .list-toolbar').first().waitFor();
       await p.waitForTimeout(300);
       ok(await noHScroll(p), `Démos ${w} px : pas de défilement horizontal`);
       if (w === 390) {
