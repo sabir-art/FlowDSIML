@@ -4,7 +4,9 @@ Retour de l'utilisateur du 25/11 : la page d'un lien d'invitation (`/#/invite/:j
 
 Le gabarit des pages d'accès ne change pas : logo, colonne de gauche, illustration à droite, pied (langue, mentions). Seul le contenu sous le logo change. Les boutons suivent RADIUS-01.
 
-Planche (6 états, clair et sombre, 1440 et 390) : `docs/ux/propositions/invite-01/planche-invite-01.png`.
+Planches :
+- côté visiteur (6 états, clair et sombre, 1440 et 390) : `docs/ux/propositions/invite-01/planche-invite-01.png` ;
+- côté admin (Paramètres › Équipe) et palette BADGE-01 : `docs/ux/propositions/invite-01/planche-invite-01-admin.png`.
 
 ## 1. Anatomie commune
 
@@ -36,6 +38,7 @@ De haut en bas, sous le logo :
 | b) Annulée par un admin | Ban, avertissement | Cette invitation a été annulée | L'espace {Espace} l'a retirée. Si c'est une erreur, demandez-en une nouvelle à {Prénom I.}. | Espace, Invité par, Adresse | **Demander une nouvelle invitation** · lien « Retour à l'accueil » |
 | c) Déjà acceptée | CircleCheck, réussite | Vous avez déjà rejoint {Espace} | Cette invitation a été acceptée le {date} avec votre compte. | — | **Ouvrir l'espace** (bascule sur cet espace et ouvre Démos) |
 | d) Mauvais compte connecté | UserX, avertissement | Cette invitation est adressée à un autre compte | Elle a été envoyée à {adresse masquée}. Vous êtes connecté avec {votre adresse masquée}. | Espace, Invité par | **Changer de compte** (déconnecte puis ouvre la connexion avec l'invitation en attente) · bouton secondaire « Se déconnecter » |
+| e′) Lien remplacé par un renvoi plus récent | RefreshCw, neutre | Ce lien a été remplacé | Une invitation plus récente vous a été envoyée le {date}. Ouvrez le dernier e-mail reçu de TutoClick. | Espace, Adresse | lien « Retour à l'accueil » |
 | e) Lien inconnu ou abîmé | Link2Off, neutre | Ce lien n'est pas valide | Il a peut-être été copié en partie. Demandez un nouveau lien à la personne qui vous a invité. | — (rien n'est révélé) | lien « Retour à l'accueil » |
 | Confirmation (après a ou b) | Send, réussite | Demande envoyée à {Prénom I.} | Vous recevrez un nouvel e-mail d'invitation dès que {cette personne} l'aura renvoyée. Vous pourrez redemander dans 24 h si rien n'arrive. | Espace, Adresse | lien « Retour à l'accueil » |
 
@@ -85,3 +88,88 @@ Le test vérifie aussi :
 - **Demande** : un clic sur « Demander une nouvelle invitation » mène à la confirmation et crée la notification. Un second clic dans les 24 h mène à la confirmation « déjà demandé ».
 - **Limite par IP** : le message apparaît au-delà de 5 demandes.
 - **Rayons** : les boutons ont `--fd-radius-control`.
+
+## 7. Côté admin — Paramètres › Équipe
+
+### 7.1 États d'une invitation
+
+Chaque invitation en attente est une ligne du tableau, avec une pastille de statut (palette BADGE-01) et une ligne de détail courte sous le nom.
+
+| État | Pastille (famille) | Détail sous le nom (13 px, gris) | Condition |
+|---|---|---|---|
+| Envoyée | « Envoyée » (bleu) | « Expire le {date} » | e-mail parti, moins de 14 jours |
+| Expire bientôt | « Expire bientôt » (orange) | « Expire {demain / le date} » | moins de 48 h avant l'expiration |
+| Demande reçue | « Demande reçue » (orange) | « Renvoi demandé {aujourd'hui / le date} à {heure} » | une demande INVITE-01 §3 en attente ; prioritaire sur les autres états |
+| Expirée | « Expirée » (framboise) | « Depuis le {date} » | plus de 14 jours |
+| Pas envoyée | « Pas envoyée » (framboise) | « {raison courte} · {date} » : « Adresse refusée », « Service d'e-mail indisponible » | l'envoi a échoué ou n'a pas eu lieu |
+
+### 7.2 Colonne Nom, sans répéter l'adresse
+
+- **À 1440** :
+  - la colonne Nom affiche « En attente » (texte 14 px, `--fd-color-text-muted`) avec le détail dessous ;
+  - l'avatar porte l'initiale de l'adresse sur fond neutre ;
+  - l'adresse n'apparaît que dans la colonne E-mail.
+- **Sous 600 px**, la colonne E-mail est masquée. La colonne Nom affiche alors l'adresse avec le détail dessous, sans « En attente » : c'est la pastille qui porte l'état.
+
+### 7.3 Renvoyer l'invitation
+
+- **Accès** : « Renvoyer l'invitation » est toujours disponible dans le menu ⋯ (fini le `disabled: !!i.sent_at` dans `Members.tsx`), et elle reste possible quel que soit l'état.
+- **État Demande reçue** :
+  - un bouton « Renvoyer » (secondaire, petit) apparaît sur la ligne, à gauche du ⋯ ;
+  - sous 600 px, il devient le premier élément du menu ⋯ ;
+  - la notification de la cloche porte le même bouton.
+- **Effet du renvoi** :
+  - un **nouveau lien** est créé ; l'ancien devient invalide et mène à l'état e′ (« Ce lien a été remplacé ») ;
+  - l'expiration repart à **14 jours** à partir du renvoi ;
+  - le rôle choisi est conservé ;
+  - une demande de renvoi en attente est close.
+
+  Pourquoi un nouveau lien plutôt qu'une simple prolongation : l'ancien lien a pu être transféré ou traîner dans une boîte. Le principe « le dernier e-mail reçu est le seul valable » est simple à expliquer et plus sûr.
+- **Limite** : un renvoi par invitation et par heure.
+  - Avant l'heure, l'élément du menu reste visible mais `aria-disabled`, avec l'aide « Renvoyée à {heure}. Nouveau renvoi possible à {heure + 1 h}. ».
+  - Le bouton de ligne suit la même règle.
+- **Retours** :
+  - succès : toast « Invitation renvoyée à {adresse} » ;
+  - échec d'envoi : la ligne passe en « Pas envoyée », toast d'erreur « L'invitation n'a pas pu être envoyée. Réessayez plus tard. ».
+- **Retirer l'invitation** : inchangé, avec confirmation. Le lien retiré mène au cas b côté visiteur.
+
+## 8. Pastilles de statut — BADGE-01 (règle générale, toute l'app)
+
+Les pastilles de statut suivent la même famille visuelle que les pastilles de type des démos : fond teinté et texte de la même teinte. Elles ont le rayon des étiquettes de RADIUS-01 (6 px).
+
+**Forme** :
+- 22 px de haut, 8 px de retrait horizontal ;
+- texte `500 12px/1` ;
+- pas de bordure, pas de point ;
+- le texte porte le sens et la couleur le renforce : un statut n'est jamais une couleur seule.
+
+**Palette sémantique** (jetons existants). Le prune est réservé à la marque et aux types de démo, jamais à un statut.
+
+| Famille | Sens | Clair : fond / texte | Sombre : fond / texte | Contraste (clair / sombre) |
+|---|---|---|---|---|
+| vert | Réussite, en service | `--fd-vert-100` / `--fd-vert-800` | `color-mix(--fd-vert-500 22 %, surface)` / `--fd-vert-200` | 6,7 / 8,4 |
+| bleu | En cours, information | `--fd-bleu-100` / `--fd-bleu-800` | idem bleu | 6,6 / 8,0 |
+| orange | À traiter, attention | `--fd-orange-100` / `--fd-orange-800` | idem orange | 5,6 / 8,3 |
+| framboise | Problème, fin | `--fd-framboise-100` / `--fd-framboise-800` | idem framboise | 7,3 / 7,6 |
+| ardoise | Neutre, inactif | `--fd-ardoise-100` / `--fd-ardoise-800` | idem ardoise | 12,5 / 11,4 |
+
+La famille orange en 700 ne passe pas AA sur son fond 100 (3,9). D'où le 800 pour toutes les familles en clair.
+
+**Composant** : `<StatusBadge tone="success|info|attention|danger|neutral">` dans `packages/ui`. Les classes actuelles (`.stg-pill`, `.fd-status--*`) passent par lui.
+
+**Inventaire** (voir la planche admin) :
+
+| Famille | Statuts |
+|---|---|
+| vert | Membres « Actif », Démos « Publiée », Webhooks « Actif », Clés « Active », Alertes « Active », Intégrations « Connecté », Apprenants « Terminé », Leads « Qualifié » |
+| bleu | Invitations « Envoyée », Démos « Planifiée », Apprenants « En cours », Exports « En préparation », Leads « Nouveau », Test A/B « En cours » |
+| orange | Invitations « Demande reçue », « Expire bientôt », Démos « Modifications non publiées », Webhooks « Lent », Utilisation « Quota à 90 % » |
+| framboise | Invitations « Expirée », « Pas envoyée », Webhooks « En échec », Clés « Révoquée », Démos « Lien expiré », Exports « Échec » |
+| ardoise | Démos « Brouillon », « Archivée », Alertes « En pause », Membres « Désactivé », Webhooks « Désactivé » |
+
+« Bientôt » n'est pas un statut : il reste un texte gris de 13 px, sans fond.
+
+**e2e** : sur chaque écran de l'inventaire, en clair et sombre, chaque pastille de statut doit :
+- avoir un rayon de 6 px ;
+- avoir un contraste ≥ 4,5 ;
+- utiliser la famille attendue pour son libellé (table de correspondance dans le test).
