@@ -284,6 +284,50 @@ const SHOTS = process.env.SHOTS_DIR;
     await sw.check();
   }
 
+  // Écran de fin (dernière étape de texte) : bouton secondaire « Recommencer », masquable et renommable.
+  // Page neuve : dans celle du test, l'écran de fin n'est plus la dernière étape (réordonné plus haut).
+  {
+    const pe = await b.newPage({ viewport: { width: 1440, height: 900 } });
+    pe.on('pageerror', (e) => errors.push(e.message));
+    const st = await install(pe);
+    await pe.goto(page.url());
+    await pe.locator('.rail-list .step').last().click();
+    await pe.locator(`.ed-rail button[aria-label="Bouton d'action"]`).click();
+    const sec = pe.locator('.sec', { hasText: 'Bouton secondaire' });
+    await sec.waitFor();
+    const on = sec.locator('#st-sec-on');
+    const label = sec.locator('#st-sec');
+    ok(
+      (await on.isChecked()) &&
+        (await sec.locator('.soon-text').count()) === 0 &&
+        (await label.getAttribute('aria-placeholder')) === 'Recommencer',
+      'écran de fin : bouton secondaire actif, « Recommencer » en exemple, sans « Bientôt »',
+    );
+    await label.fill('Revoir la démo');
+    const patched = (test) =>
+      st.calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/steps') && test(c.body?.options ?? {}));
+    for (let i = 0; i < 40 && !patched((o) => o.restartLabel === 'Revoir la démo'); i++)
+      await pe.waitForTimeout(100);
+    ok(
+      patched((o) => o.restartLabel === 'Revoir la démo'),
+      'écran de fin : libellé du bouton secondaire enregistré',
+    );
+    await on.uncheck();
+    for (let i = 0; i < 40 && !patched((o) => o.restartShow === false); i++) await pe.waitForTimeout(100);
+    ok(
+      patched((o) => o.restartShow === false) && (await sec.locator('#st-sec').count()) === 0,
+      'écran de fin : bouton secondaire masqué, son libellé n’est plus demandé',
+    );
+    // Le bouton principal de cette étape est absent : l'avertissement prévient, sans bloquer
+    ok(
+      (await sec
+        .getByText('L’écran de fin n’aura aucun bouton. Le visiteur pourra seulement fermer la démo.')
+        .count()) === ((await pe.locator('#st-cta-on').isChecked()) ? 0 : 1),
+      'écran de fin sans aucun bouton : avertissement sous l’interrupteur',
+    );
+    await pe.close();
+  }
+
   // F1 : menu de choix ajouté depuis le rail
   await tool('Étape');
   await page.locator('.rail-foot').getByRole('button', { name: 'Ajouter une étape' }).click();

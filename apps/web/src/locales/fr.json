@@ -1051,6 +1051,7 @@
       "stepCta": "Bouton d’action",
       "showButton": "Afficher le bouton",
       "secondary": "Bouton secondaire",
+      "noButton": "L’écran de fin n’aura aucun bouton. Le visiteur pourra seulement fermer la démo.",
       "restart": "Recommencer",
       "zoomOn": "Zoom sur une zone",
       "organisation": "Organisation"

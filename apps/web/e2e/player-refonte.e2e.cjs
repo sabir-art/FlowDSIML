@@ -149,6 +149,46 @@ const manifest = require('./player-maquette.cjs');
       (await p3.locator('.p-end-text').getByText('Précédent').count()) === 0,
     'EDT-09 : bouton principal + Recommencer, sans Précédent',
   );
+  // Bouton secondaire de l'écran de fin : libellé choisi dans l'éditeur, ou bouton masqué
+  const p3b = await open(
+    { width: 1440, height: 900 },
+    {
+      ...manifest,
+      forms: [],
+      steps: [
+        { ...manifest.steps[0], gateFormId: null },
+        { ...endStep, options: { ...(endStep.options ?? {}), restartLabel: 'Revoir la démo' } },
+      ],
+    },
+  );
+  await next(p3b);
+  await p3b.waitForSelector('.p-end-text');
+  ok(
+    (await p3b.locator('.p-end-text').getByRole('button', { name: 'Revoir la démo' }).count()) === 1 &&
+      (await p3b.locator('.p-end-text').getByText('Recommencer').count()) === 0,
+    'écran de fin : le libellé saisi remplace « Recommencer »',
+  );
+  await p3b.locator('.p-end-text').getByRole('button', { name: 'Revoir la démo' }).click();
+  await p3b.waitForFunction(() => document.querySelector('.p-controls .p-count')?.textContent === '1 / 2');
+  ok(true, 'écran de fin : le bouton renommé revient à l’étape 1');
+  const p3c = await open(
+    { width: 1440, height: 900 },
+    {
+      ...manifest,
+      forms: [],
+      steps: [
+        { ...manifest.steps[0], gateFormId: null },
+        { ...endStep, options: { ...(endStep.options ?? {}), restartShow: false } },
+      ],
+    },
+  );
+  await next(p3c);
+  await p3c.waitForSelector('.p-end-text');
+  ok(
+    (await p3c.locator('.p-end-text').getByText('Recommencer').count()) === 0 &&
+      (await p3c.locator('.p-end-text .p-btn-primary').count()) === 1,
+    'écran de fin : bouton secondaire masqué, le bouton principal reste',
+  );
 
   // Mobile : feuille du bas, méta et langue masquées
   const m = await open({ width: 390, height: 844 });
