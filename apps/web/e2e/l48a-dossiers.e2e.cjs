@@ -173,8 +173,49 @@ const seed = () => {
   const sorts = (await page.getByRole('menuitem').allTextContents()).map((s) => s.trim());
   ok(sorts[0] === 'Modifiées récemment' && sorts[1] === 'Date de création', 'tri « Date de création » en 2e');
   await page.keyboard.press('Escape');
+  // §10 : « Installer l'extension » seulement si l'extension est publiée (VITE_EXTENSION_URL) et pas
+  // encore détectée : bouton secondaire à gauche de « Nouvelle démo », qui reste le seul primaire
+  {
+    const head = page.locator('.fd-page-header').first();
+    const install = head.getByRole('link', { name: 'Installer l’extension' });
+    if (await install.count()) {
+      const a = await install.boundingBox();
+      const b = await head.getByRole('button', { name: 'Nouvelle démo' }).boundingBox();
+      ok(
+        (await install.getAttribute('href')) === '#/extension' &&
+          !(await install.getAttribute('class')).includes('fd-btn--primary') &&
+          a.x + a.width <= b.x &&
+          (await head.locator('.fd-btn--primary').count()) === 1,
+        'extension publiée et non détectée : « Installer l’extension » secondaire, à gauche du seul primaire',
+      );
+    } else ok(true, 'extension non publiée ici : pas de bouton « Installer l’extension »');
+  }
   await page.getByRole('button', { name: /^Créé par\s*: Tous/ }).click();
-  await page.getByRole('menuitem', { name: 'Moi' }).click();
+  // §10 : recherche de membres, avatar (photo ou initiales) et nombre de démos ; « Moi » en premier
+  {
+    const items = page.getByRole('menuitemradio');
+    const names = (await items.allInnerTexts()).map((x) => x.replace(/\s+/g, ' ').trim());
+    const mine = live.filter((d) => d.created_by === 'u-alice').length;
+    ok(
+      /^Tous \d+ /.test(names[0]) && new RegExp(`^[A-Z]{1,2} Moi ${mine} ${mine} démos?$`).test(names[1]),
+      `« Créé par » : « Tous » puis « Moi » en premier, avec le nombre de démos (${names.slice(0, 3).join(' | ')})`,
+    );
+    ok(
+      (await items.nth(1).locator('.avatar').count()) === 1 &&
+        (await items.nth(0).getAttribute('aria-checked')) === 'true',
+      '« Créé par » : avatar du membre, choix en cours coché',
+    );
+    const search = page.getByRole('searchbox', { name: 'Rechercher un membre' });
+    ok((await search.count()) === 1, '« Créé par » : recherche de membres');
+    await search.fill('zzz-introuvable');
+    await page.getByText('Aucun membre trouvé').waitFor();
+    ok(
+      (await page.getByRole('menuitemradio').count()) === 2,
+      '« Créé par » : recherche sans résultat, « Tous » et « Moi » restent proposés',
+    );
+    await search.fill('');
+  }
+  await page.getByRole('menuitemradio', { name: /^Moi/ }).click();
   await page.waitForTimeout(200);
   ok(await cardsAre(live.filter((d) => d.created_by === 'u-alice').length), '« Créé par : Moi »');
   const axe = await new AxeBuilder({ page }).exclude('.demo-cover').analyze();

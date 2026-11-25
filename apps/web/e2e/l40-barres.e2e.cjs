@@ -74,7 +74,7 @@ const measure = (bar) =>
     );
     // L48-A : le dossier est dans la colonne Dossiers ; « Créé par » est un filtre de la barre
     await page.getByRole('button', { name: /^Créé par\s*: Tous/ }).click();
-    await page.getByRole('menuitem', { name: 'Moi' }).click();
+    await page.getByRole('menuitemradio', { name: /^Moi/ }).click();
     await page.getByRole('button', { name: /^Publiées/ }).click();
     await page.waitForTimeout(300);
     const authorBtn = page.getByRole('button', { name: /^Créé par\s*: Moi$/ });

@@ -71,7 +71,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await q.locator('.demo-card').first().waitFor();
   await q.getByRole('button', { name: /^Publiées/ }).click();
   await q.getByRole('button', { name: /^Créé par\s*: Tous/ }).click();
-  await q.getByRole('menuitem', { name: 'Moi' }).click();
+  await q.getByRole('menuitemradio', { name: /^Moi/ }).click();
   await q.getByRole('searchbox', { name: 'Rechercher une démo' }).fill('zzz');
   const nm = q.locator('.fd-empty--search');
   await nm.waitFor();
