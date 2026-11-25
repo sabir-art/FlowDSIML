@@ -423,3 +423,25 @@
   vertical-align: -3px;
   margin-right: 4px;
 }
+
+/* Ouverte depuis Partager : « ← Partager » au-dessus du titre, sur toute la largeur de la fenêtre */
+.x15-dlg > .x15-back {
+  grid-column: 1;
+  justify-self: start;
+  margin: 16px 0 -12px 18px;
+}
+/* Le volet d'aperçu garde toute la hauteur, à côté du retour et des options */
+.x15-dlg:has(> .x15-back) > .x15-side {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.x15-small > .x15-back {
+  align-self: flex-start;
+  margin: -4px 0 -4px -6px;
+}
+@media (max-width: 1100px) {
+  .x15-dlg:has(> .x15-back) > .x15-side {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}

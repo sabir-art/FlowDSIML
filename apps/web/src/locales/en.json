@@ -2435,9 +2435,10 @@
       "indexableHelp": "When off, the page carries noindex.",
       "indexableProtected": "Protected demo (password, invitation or domain): the page is never indexed.",
       "open": "Open the demo page in a new tab",
-      "ogSoonText": "Rich preview when shared (image and Open Graph tags served by the server)",
+      "ogSoonText": "Rich preview",
       "more": "More settings",
-      "copyAddress": "Copy the page address"
+      "copyAddress": "Copy the page address",
+      "savedShort": "Saved"
     },
     "ackLine": "GDPR confirmation: {{name}}, {{date}}",
     "ackUnknown": "former member",
@@ -4089,7 +4090,8 @@
     },
     "bubbles": "Bubbles on screenshots",
     "bubblesHelp": "Each step’s text in its bubble, as in the player",
-    "bubblesLocked": "No screenshots, no bubbles"
+    "bubblesLocked": "No screenshots, no bubbles",
+    "backToShare": "Share"
   },
   "onb": {
     "panelTitle": "Getting started",

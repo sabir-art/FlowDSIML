@@ -1,6 +1,6 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, SlidersHorizontal } from 'lucide-react';
+import { Check, ExternalLink, SlidersHorizontal } from 'lucide-react';
 import { Switch } from '@flowdsiml/ui';
 import type { Tables, TablesUpdate } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
@@ -69,6 +69,9 @@ export function PublicPagePanel({
   const [form, setForm] = useState<Form>(fromRow(null));
   const [saving, setSaving] = useState(false);
   const [tried, setTried] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const savedTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(savedTimer.current), []);
   const url = publicPageUrl(demoId);
 
   useEffect(() => {
@@ -115,7 +118,12 @@ export function PublicPagePanel({
       indexable: form.indexable,
     });
     setSaving(false);
-    if (ok) toast(t('share.page.saved'));
+    // Confirmation sur le bouton (« Enregistré », 2 s), pas de second toast
+    if (ok) {
+      setSaved(true);
+      window.clearTimeout(savedTimer.current);
+      savedTimer.current = window.setTimeout(() => setSaved(false), 2000);
+    }
   }
 
   return (
@@ -281,7 +289,7 @@ export function PublicPagePanel({
                   />
                   {/* L19b-01 : « Bientôt » en gris, jamais caché */}
                   <p className="she-soon" aria-disabled="true">
-                    {t('share.page.ogSoonText')} <span className="soon-text">{t('shell.soon')}</span>
+                    {t('share.page.ogSoonText')} <span className="fd-badge">{t('shell.soon')}</span>
                   </p>
                 </div>
               </Fold>
@@ -290,8 +298,12 @@ export function PublicPagePanel({
           {editable && (
             <div className="row sh-page-actions">
               <button type="submit" className="fd-btn fd-btn--primary" disabled={saving}>
-                {t('common.save')}
+                {saved && <Check aria-hidden="true" />}
+                {saved ? t('share.page.savedShort') : t('common.save')}
               </button>
+              <span className="sr-only" role="status">
+                {saved ? t('share.page.saved') : ''}
+              </span>
             </div>
           )}
         </form>

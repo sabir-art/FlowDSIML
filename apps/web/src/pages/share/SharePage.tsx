@@ -55,7 +55,6 @@ import {
   personalPageErrors,
   type PersonalPageDraft,
 } from './PersonalPageFields';
-import { ExportDialog } from '../export/ExportDialog';
 import { AddressField } from './AddressField';
 import { TargetGuide, TargetPicker, useEmbedTarget } from './EmbedGuide';
 import { addressOnly, popupAllowed } from './snippets';
@@ -114,12 +113,15 @@ export function SharePanel({
   onView,
   onClose,
   onPublish,
+  onExport,
   justPublished = false,
 }: {
   demoId: string;
   view: ShareView;
   onView: (v: ShareView) => void;
   onClose: () => void;
+  /** « Exporter » : la fenêtre d'export remplace la fenêtre Partager, sur le fichier choisi. */
+  onExport: (fmt: 'pdf' | 'gif' | 'mp4') => void;
   /** « Publier » du bandeau d'une démo non publiée (la publication vit dans l'éditeur). */
   onPublish: () => void;
   /** La démo vient d'être publiée : message de confirmation en tête. */
@@ -168,7 +170,6 @@ export function SharePanel({
       )
     : links;
   const [creating, setCreating] = useState(false);
-  const [exporting, setExporting] = useState<false | 'pdf' | 'gif' | 'mp4'>(false);
   const [exportFmt, setExportFmt] = useState<'pdf' | 'gif' | 'mp4'>('pdf');
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
@@ -332,9 +333,6 @@ export function SharePanel({
 
   return (
     <div className={`mk sh shd${view === 'menu' ? ' is-menu' : ''}`}>
-      {exporting && (
-        <ExportDialog demoId={demoId} initialFormat={exporting} onClose={() => setExporting(false)} />
-      )}
       <aside className="shd-side">
         <div className="shd-head">
           <span className="shd-tile" aria-hidden="true">
@@ -916,7 +914,7 @@ export function SharePanel({
                     className="fd-btn fd-btn--primary"
                     aria-disabled={rules.exports_allowed ? undefined : true}
                     title={rules.exports_allowed ? undefined : t('rules.errExports')}
-                    onClick={() => rules.exports_allowed && setExporting(exportFmt)}
+                    onClick={() => rules.exports_allowed && onExport(exportFmt)}
                   >
                     <Download aria-hidden="true" />
                     {t('share.exportGo')}

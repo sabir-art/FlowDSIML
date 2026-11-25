@@ -81,7 +81,11 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     )
     .then((h) => h.jsonValue());
   ok(loaded === 'gif', `mode « Exporter » : la fenêtre d’export s’ouvre, GIF prêt (${loaded})`);
-  await page.keyboard.press('Escape');
+  // La fenêtre d'export remplace Partager : « ← Partager » y revient
+  await page
+    .locator('dialog.x15-dialog[open]')
+    .getByRole('button', { name: 'Partager', exact: true })
+    .click();
   await page.locator('dialog.x15-dialog').waitFor({ state: 'detached' });
   await page.locator('.shd-nav').getByRole('button', { name: 'Lien', exact: true }).click();
   await page.locator('#sh-panel-link').waitFor();

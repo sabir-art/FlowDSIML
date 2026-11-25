@@ -2435,9 +2435,10 @@
       "indexableHelp": "Désactivée, la page porte noindex.",
       "indexableProtected": "Démo protégée (mot de passe, invitation ou domaine) : la page n’est jamais indexée.",
       "open": "Ouvrir la page de la démo dans un nouvel onglet",
-      "ogSoonText": "Aperçu enrichi lors d’un partage (image et balises Open Graph côté serveur)",
+      "ogSoonText": "Aperçu enrichi",
       "more": "Plus de réglages",
-      "copyAddress": "Copier l’adresse de la page"
+      "copyAddress": "Copier l’adresse de la page",
+      "savedShort": "Enregistré"
     },
     "ackLine": "Confirmation RGPD : {{name}}, le {{date}}",
     "ackUnknown": "membre retiré",
@@ -4089,7 +4090,8 @@
     },
     "bubbles": "Bulles sur les captures",
     "bubblesHelp": "Texte de chaque étape dans sa bulle, comme dans le lecteur",
-    "bubblesLocked": "Sans captures, pas de bulles"
+    "bubblesLocked": "Sans captures, pas de bulles",
+    "backToShare": "Partager"
   },
   "onb": {
     "panelTitle": "Prise en main",
