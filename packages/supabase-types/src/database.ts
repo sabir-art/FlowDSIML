@@ -2390,6 +2390,10 @@ export type Database = {
       rename_api_key: { Args: { p_id: string; p_name: string }; Returns: undefined };
       revoke_api_key: { Args: { p_id: string }; Returns: undefined };
       answer_invitation: { Args: { p_accept: boolean; p_invitation: string }; Returns: string | null };
+      set_invitation_role: {
+        Args: { p_invitation: string; p_role: Database['public']['Enums']['workspace_role'] };
+        Returns: undefined;
+      };
       email_budget_today: { Args: { p_workspace: string }; Returns: Json };
       invite_quota: { Args: { p_workspace: string }; Returns: Json };
       shares_workspace: { Args: { p_other: string }; Returns: boolean };
