@@ -2644,16 +2644,16 @@
     "allDemos": "Toutes les démos",
     "allSources": "Toutes les sources",
     "src": {
-      "direct": "Lien public",
-      "embed": "Intégration (embed)",
+      "direct": "Lien",
+      "embed": "Intégration",
       "link": "Liens personnalisés",
-      "page": "Page publique"
+      "page": "Page de la démo"
     },
     "srcLong": {
-      "direct": "Lien public",
-      "embed": "Intégration sur le site",
+      "direct": "Lien",
+      "embed": "Intégration",
       "link": "Liens personnalisés",
-      "page": "Page publique"
+      "page": "Page de la démo"
     },
     "dates": "Dates",
     "views_label": "Vues",
@@ -6272,7 +6272,7 @@
       "direct": "Lien",
       "embed": "Intégration",
       "link": "Liens personnalisés",
-      "page": "Page publique"
+      "page": "Page de la démo"
     }
   }
 }

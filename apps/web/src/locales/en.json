@@ -2644,16 +2644,16 @@
     "allDemos": "All demos",
     "allSources": "All sources",
     "src": {
-      "direct": "Public link",
+      "direct": "Link",
       "embed": "Embed",
       "link": "Personalised links",
-      "page": "Public page"
+      "page": "Demo page"
     },
     "srcLong": {
-      "direct": "Public link",
-      "embed": "Embedded on a site",
+      "direct": "Link",
+      "embed": "Embed",
       "link": "Personalised links",
-      "page": "Public page"
+      "page": "Demo page"
     },
     "dates": "Dates",
     "views_label": "Views",
@@ -6272,7 +6272,7 @@
       "direct": "Link",
       "embed": "Embed",
       "link": "Personalised links",
-      "page": "Public page"
+      "page": "Demo page"
     }
   }
 }

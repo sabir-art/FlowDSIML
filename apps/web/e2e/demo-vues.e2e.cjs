@@ -145,7 +145,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(
     (await page.getByRole('group', { name: 'Moyen de partage' }).getByRole('button').allTextContents()).join(
       '|',
-    ) === 'Tous|Lien|Intégration|Liens personnalisés|Page publique',
+    ) === 'Tous|Lien|Intégration|Liens personnalisés|Page de la démo',
     'Visiteurs : filtre par moyen de partage (mêmes noms que la fenêtre Partager)',
   );
   ok(

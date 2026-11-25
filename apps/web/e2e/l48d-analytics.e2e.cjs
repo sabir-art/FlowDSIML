@@ -163,7 +163,7 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   ]);
   const csv = fs.readFileSync(await dl.path(), 'utf8');
   ok(
-    /Intégration sur le site/.test(csv) && csv.trim().split('\n').length === 5,
+    /Intégration/.test(csv) && !/Lien public|embed/.test(csv) && csv.trim().split('\n').length === 5,
     'Sources › Exporter en CSV : 4 lignes',
   );
   await axe(p, 'vue d’ensemble');
