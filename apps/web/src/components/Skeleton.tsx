@@ -21,6 +21,68 @@ export function Sk({
 export type LoadPhase = 'blank' | 'skeleton' | 'content';
 
 /**
+ * MOTION-01 §3 « Squelette vers contenu » : fondu croisé. Au moment où le contenu remplace le squelette,
+ * une copie inerte du squelette (repérée par `data-skeleton`) reste posée au même endroit et s'efface en
+ * 200 ms au-dessus du contenu, qui apparaît dessous : jamais un contenu qui « saute ». Opacité seule ;
+ * rien en mouvement réduit (durée du jeton à 0).
+ */
+type SkeletonSnapshot = { node: HTMLElement; rect: DOMRect };
+/** Copie décorative du squelette affiché (prise tant qu'il est à l'écran). */
+function snapshotSkeleton(): SkeletonSnapshot | null {
+  const src = document.querySelector<HTMLElement>('[data-skeleton]');
+  if (!src) return null;
+  const rect = src.getBoundingClientRect();
+  if (!rect.width || !rect.height) return null;
+  const node = src.cloneNode(true) as HTMLElement;
+  // Ni identifiants en double, ni rôle, ni références ARIA
+  for (const el of [node, ...node.querySelectorAll<HTMLElement>('*')])
+    for (const a of [
+      'id',
+      'role',
+      'aria-busy',
+      'aria-labelledby',
+      'aria-describedby',
+      'aria-controls',
+      'for',
+    ])
+      el.removeAttribute(a);
+  node.removeAttribute('data-skeleton');
+  return { node, rect };
+}
+function fadeSkeletonOut(snap: SkeletonSnapshot | null) {
+  if (!snap) return;
+  const v = getComputedStyle(document.documentElement).getPropertyValue('--fd-motion-duration-base').trim();
+  const ms = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 0;
+  if (!(ms > 0)) return;
+  // Posée dans le corps de la page (son conteneur d'origine est remplacé par le contenu), dans une
+  // enveloppe inerte qui garde la portée des styles de l'app
+  const wrap = document.createElement('div');
+  wrap.className = 'mk sk-ghost';
+  wrap.setAttribute('aria-hidden', 'true');
+  wrap.setAttribute('inert', '');
+  wrap.appendChild(snap.node);
+  Object.assign(snap.node.style, { width: '100%', height: '100%', margin: '0' });
+  Object.assign(wrap.style, {
+    position: 'fixed',
+    left: `${snap.rect.left}px`,
+    top: `${snap.rect.top}px`,
+    width: `${snap.rect.width}px`,
+    height: `${snap.rect.height}px`,
+    overflow: 'hidden',
+    pointerEvents: 'none',
+    zIndex: '5',
+  });
+  document.body.appendChild(wrap);
+  const done = () => wrap.remove();
+  const anim = wrap.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: ms,
+    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  });
+  anim.onfinish = done;
+  anim.oncancel = done;
+}
+
+/**
  * Délais de la spec L32 §1.4 et §4 : squelette seulement au-delà de 200 ms, puis visible 300 ms au moins ;
  * ligne « plus long que prévu » à 10 s, erreur à 30 s. `loading` = requête de démarrage en cours.
  */
@@ -32,6 +94,13 @@ export function useSkeleton(loading: boolean) {
   const shownAt = useRef(0);
   const startedAt = useRef(Date.now());
   const [longLoad, setLongLoad] = useState(false);
+  // MOTION-01 : copie du squelette, prise quand il vient de s'afficher (à l'arrivée du contenu, React
+  // l'a déjà retiré)
+  const ghost = useRef<SkeletonSnapshot | null>(null);
+  useEffect(() => {
+    if (shown) ghost.current = snapshotSkeleton();
+    else ghost.current = null;
+  }, [shown]);
 
   useEffect(() => {
     if (loading) {
@@ -56,11 +125,15 @@ export function useSkeleton(loading: boolean) {
     if (!shown) return;
     const left = 300 - (Date.now() - shownAt.current);
     if (left <= 0) {
+      fadeSkeletonOut(ghost.current);
+      ghost.current = null;
       setShown(false);
       return;
     }
     setHold(true);
     const t = window.setTimeout(() => {
+      fadeSkeletonOut(ghost.current);
+      ghost.current = null;
       setHold(false);
       setShown(false);
     }, left);

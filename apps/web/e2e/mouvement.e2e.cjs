@@ -525,6 +525,82 @@ function act(target) {
   await tabs(false);
   await tabs(true);
 
+  // ===== §3 : squelette vers contenu, fondu croisé (page Démos, chargement ralenti) =====
+  const skeleton = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    const data = seed();
+    data.homeDelay = 900;
+    await install(page, data);
+    // Relevé image par image, posé avant le chargement : copie du squelette, contenu, identifiants
+    await page.addInitScript(() => {
+      window.__sk = {
+        ghost: 0,
+        both: 0,
+        dupIds: 0,
+        hidden: true,
+        props: [],
+        duration: null,
+        seenSkeleton: false,
+      };
+      const tick = () => {
+        const g = document.querySelector('.sk-ghost');
+        if (document.querySelector('[data-skeleton]')) window.__sk.seenSkeleton = true;
+        if (g) {
+          const k = window.__sk;
+          k.ghost++;
+          // Vraies cartes (le squelette a aussi des cartes, sans menu)
+          if (document.querySelector('.demo-card .menu-trigger')) k.both++;
+          const ids = [...document.querySelectorAll('[id]')].map((e) => e.id);
+          if (new Set(ids).size !== ids.length) k.dupIds++;
+          k.hidden = k.hidden && g.getAttribute('aria-hidden') === 'true' && g.hasAttribute('inert');
+          const a = g.getAnimations()[0];
+          if (a) {
+            k.duration = a.effect.getTiming().duration;
+            k.props = [...new Set(a.effect.getKeyframes().flatMap((f) => Object.keys(f)))].filter(
+              (n) => !/^(offset|easing|composite|computedOffset)$/.test(n),
+            );
+          }
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await page.goto(`${APP}/#/`);
+    await page.locator('.demo-card .menu-trigger').first().waitFor();
+    await page.waitForFunction(() => !document.querySelector('.sk-ghost'));
+    const k = await page.evaluate(() => window.__sk);
+    const tag = reduced ? 'mouvement réduit' : 'squelette';
+    ok(k.seenSkeleton, `${tag} : le squelette s’est affiché pendant le chargement`);
+    if (reduced) ok(k.ghost === 0, `${tag} : le contenu remplace le squelette sans fondu`);
+    else {
+      ok(
+        k.ghost >= 2 && k.both >= 2,
+        `squelette : il s’efface au-dessus du contenu déjà affiché (${k.both} image(s))`,
+      );
+      ok(
+        k.duration === 200 && k.props.join() === 'opacity',
+        `squelette : fondu de 200 ms, opacité seule (${k.duration} ms, ${k.props.join()})`,
+      );
+      ok(
+        k.hidden && k.dupIds === 0,
+        'squelette : copie inerte, masquée aux lecteurs d’écran, sans identifiant en double',
+      );
+    }
+    ok(
+      (await page.locator('.sk-ghost, [data-skeleton]').count()) === 0,
+      `${tag} : à la fin, plus de squelette`,
+    );
+    await ctx.close();
+  };
+  await skeleton(false);
+  await skeleton(true);
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

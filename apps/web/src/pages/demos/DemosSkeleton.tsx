@@ -12,7 +12,7 @@ export function DemosSkeleton() {
   const { t } = useTranslation();
   return (
     <>
-      <section aria-labelledby="demos-list-title" className="demos-section">
+      <section aria-labelledby="demos-list-title" className="demos-section" data-skeleton="">
         <h2 id="demos-list-title" className="sr-only">
           {t('demos.allDemos')}
         </h2>

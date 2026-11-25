@@ -64,6 +64,8 @@ export function EditorSkeleton({
       className={`mk ed${children ? ' on-content' : ''}`}
       id="main"
       aria-busy={showBlocks || !children ? 'true' : 'false'}
+      /* MOTION-01 : le squelette s'efface en fondu au-dessus de l'éditeur chargé */
+      data-skeleton={showBlocks ? '' : undefined}
     >
       {status}
       <h1 className="sr-only">{t('loading.editor')}</h1>
