@@ -2,7 +2,8 @@
  * EXT-02 §8 : « Capturer de nouvelles étapes » depuis l'éditeur (extension 0.3.0).
  *  - menu « Ajouter une étape » : l'entrée n'est plus « Bientôt » ; menu ⋯ d'une étape : « Capturer après
  *    cette étape » préremplit l'étape d'insertion ;
- *  - fenêtre (MODAL-01) : « Insérer après » (« Au début » en premier), type de capture (HTML en « Bientôt »),
+ *  - fenêtre (MODAL-01) : « Insérer après » (« Au début » en premier), type de capture (« HTML » désactivé
+ *    avec sa raison : extension trop ancienne, réglage de l'espace, domaine hors liste),
  *    page de départ reprise de l'étape, état de l'extension (détectée, requise, « Vérifier à nouveau »),
  *    « Importer des images à cet endroit », erreurs de l'extension en role=alert ;
  *  - message à l'extension : schéma strict, aucun jeton ;
@@ -123,6 +124,37 @@ function fakeExtension(version) {
     await ctx.close();
   }
 
+  // ===== Réglage « Captures HTML » de l'espace (L49) : « HTML » désactivé avec sa raison =====
+  for (const [rule, reason, label] of [
+    [
+      { mode: 'disabled', domains: [] },
+      'HTML indisponible : les captures HTML sont désactivées dans votre espace.',
+      'captures HTML désactivées dans l’espace',
+    ],
+    [
+      { mode: 'domains', domains: ['crm.autre.example'] },
+      'HTML indisponible : app.example.com n’est pas dans la liste des domaines autorisés de votre espace.',
+      'domaine de la page de départ hors de la liste',
+    ],
+  ]) {
+    const d = seed();
+    d.tables.workspaces[0].settings = { ...(d.tables.workspaces[0].settings ?? {}), htmlCapture: rule };
+    const { page, ctx } = await open(d, '0.3.1');
+    await page.getByRole('button', { name: 'Actions de l’étape 1' }).click();
+    await page.getByRole('menuitem', { name: 'Capturer après cette étape' }).click();
+    const dlg = page.getByRole('dialog', { name: /Capturer de nouvelles étapes/ });
+    await dlg.getByText('Extension TutoClick 0.3.1 détectée.').waitFor();
+    await dlg.getByText(reason).waitFor();
+    const html = dlg.getByRole('radio', { name: 'HTML' });
+    ok(
+      (await html.getAttribute('aria-disabled')) === 'true' &&
+        (await html.getAttribute('aria-describedby')) !== null &&
+        (await dlg.getByRole('radio', { name: 'Captures d’écran' }).getAttribute('aria-checked')) === 'true',
+      `« HTML » désactivé, raison reliée : ${label}`,
+    );
+    await ctx.close();
+  }
+
   // ===== Fenêtre, envoi, bandeau, insertion =====
   const data = seed();
   const { page, ctx } = await open(data, '0.3.0');
@@ -151,11 +183,40 @@ function fakeExtension(version) {
     'page de départ reprise de l’étape d’insertion',
   );
   const types = dlg.getByRole('radiogroup', { name: 'Type de capture' });
+  const shots = types.getByRole('radio', { name: 'Captures d’écran' });
+  const html = types.getByRole('radio', { name: 'HTML' });
+  // Extension 0.3.0 : les captures d'écran s'ajoutent ; « HTML » demande la 0.3.1 et le dit
   ok(
-    (await types.getByRole('radio', { name: 'Captures d’écran' }).getAttribute('aria-checked')) === 'true' &&
-      (await types.getByRole('radio', { name: /HTML/ }).getAttribute('aria-disabled')) === 'true' &&
-      /Bientôt/.test(await types.getByRole('radio', { name: /HTML/ }).innerText()),
-    'type : « Captures d’écran » choisi ; « HTML » grisé, visible, « Bientôt »',
+    (await shots.getAttribute('aria-checked')) === 'true' &&
+      (await html.getAttribute('aria-disabled')) === 'true' &&
+      (await html.isVisible()) &&
+      (await dlg.getByText('HTML indisponible : il faut l’extension 0.3.1.').count()) === 1,
+    'extension 0.3.0 : « HTML » visible et désactivé, avec sa raison (extension 0.3.1)',
+  );
+  await html.click({ force: true });
+  ok((await shots.getAttribute('aria-checked')) === 'true', '« HTML » désactivé ne se choisit pas');
+  // Extension 0.3.1 : « HTML » disponible, choisi au clavier
+  await page.evaluate(() => (window.__ext.version = '0.3.1'));
+  await dlg.getByRole('button', { name: 'Fermer' }).click();
+  await page.getByRole('button', { name: 'Actions de l’étape 1' }).click();
+  await page.getByRole('menuitem', { name: 'Capturer après cette étape' }).click();
+  await dlg.getByText('Extension TutoClick 0.3.1 détectée.').waitFor();
+  ok(
+    (await html.getAttribute('aria-disabled')) === null &&
+      (await dlg.getByText(/^HTML indisponible/).count()) === 0,
+    'extension 0.3.1 : « HTML » disponible, sans « Bientôt »',
+  );
+  await shots.focus();
+  await page.keyboard.press('ArrowRight');
+  ok(
+    (await html.getAttribute('aria-checked')) === 'true' &&
+      (await html.evaluate((el) => el === document.activeElement)),
+    'type de capture : flèche droite choisit « HTML »',
+  );
+  await page.keyboard.press('ArrowLeft');
+  ok(
+    (await shots.getAttribute('aria-checked')) === 'true',
+    'type de capture : flèche gauche revient aux captures d’écran',
   );
   ok(
     (await dlg.getByRole('button', { name: 'Importer des images à cet endroit' }).count()) === 1 &&
@@ -264,6 +325,8 @@ function fakeExtension(version) {
       title: `Nouvelle capture ${i + 1}`,
       page_url: 'https://crm.acme.example/opportunites/nouvelle',
       options: i === 0 ? { crop: { x: 0.2, y: 0.2, w: 0.5, h: 0.5 } } : {},
+      // La seconde est une étape HTML : les deux types se mélangent dans la démo
+      ...(i === 1 ? { kind: 'html', image_path: null } : {}),
     });
   await page.evaluate(() => (window.__ext.status = { state: 'sent', steps: 2, stepIds: ['n1', 'n2'] }));
   const toast = page.getByText('2 étapes ajoutées après l’étape 2');
@@ -272,6 +335,11 @@ function fakeExtension(version) {
   ok(
     titles.join(' | ') === 'Écran 2 | Écran 1 | Nouvelle capture 1 | Nouvelle capture 2 | Merci !',
     `étapes insérées après l’étape choisie (${titles.join(' | ')})`,
+  );
+  ok(
+    (await page.locator('.rail-list .step').nth(3).locator('.th svg.lucide-code').count()) === 1 &&
+      (await page.locator('.rail-list .step').nth(2).locator('.th svg.lucide-code').count()) === 0,
+    'mélange : l’étape HTML porte l’icône Code, la capture d’écran garde sa vignette',
   );
   ok(
     (await page.locator('.rail-new').count()) === 2 &&
@@ -301,12 +369,24 @@ function fakeExtension(version) {
   // ===== « Annuler l'ajout » =====
   await (await addMenu(page)).click();
   await dlg.waitFor();
-  await dlg.getByText('Extension TutoClick 0.3.0 détectée.').waitFor();
+  await dlg.getByText('Extension TutoClick 0.3.1 détectée.').waitFor();
   await dlg.getByRole('combobox', { name: 'Insérer après' }).click();
   await page.getByRole('option', { name: 'Au début' }).click();
   await url.fill('https://crm.acme.example/');
+  // Capture HTML : le message porte « mode: html », rien d'autre en plus
+  await html.click();
+  await page.evaluate(() => (window.__sent = []));
   await start.click();
   await banner.waitFor();
+  {
+    const m = (await sent(page, 'fd:add-steps'))[0];
+    ok(
+      m &&
+        m.msg.mode === 'html' &&
+        Object.keys(m.msg).sort().join() === 'afterStepId,demoId,mode,type,url,v,workspaceId',
+      `capture HTML : message avec « mode: html » (${m && Object.keys(m.msg).sort().join()})`,
+    );
+  }
   ok(
     /Les étapes arriveront au début de la démo\./.test(await banner.innerText()) &&
       (await page.locator('.rail-list > :first-child').getAttribute('class')).includes('cm-marker'),

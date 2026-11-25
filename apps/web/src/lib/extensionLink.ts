@@ -61,6 +61,8 @@ function ask<T>(msg: Record<string, unknown>): Promise<T | null> {
 
 /** Version de l'extension capable d'ajouter des étapes à une démo. */
 export const ADD_STEPS_MIN = '0.3.0';
+/** Version à partir de laquelle l'ajout accepte une capture HTML. */
+export const ADD_HTML_MIN = '0.3.1';
 export function versionAtLeast(v: string, min: string): boolean {
   const a = v.split('.').map((n) => parseInt(n, 10) || 0);
   const b = min.split('.').map((n) => parseInt(n, 10) || 0);
@@ -69,10 +71,14 @@ export function versionAtLeast(v: string, min: string): boolean {
 }
 
 /** Extension présente et à jour ? (null : absente, ou trop ancienne pour répondre) */
-export async function pingExtension(): Promise<{ version: string; ready: boolean } | null> {
+export async function pingExtension(): Promise<{ version: string; ready: boolean; html: boolean } | null> {
   const r = await ask<{ ok: boolean; version?: string }>({ type: 'fd:ping' });
   if (!r?.ok || typeof r.version !== 'string') return null;
-  return { version: r.version, ready: versionAtLeast(r.version, ADD_STEPS_MIN) };
+  return {
+    version: r.version,
+    ready: versionAtLeast(r.version, ADD_STEPS_MIN),
+    html: versionAtLeast(r.version, ADD_HTML_MIN),
+  };
 }
 
 export type AddStepsError = 'unavailable' | 'signed-out' | 'busy' | 'origin' | 'schema' | 'demo';
@@ -82,6 +88,8 @@ export async function addStepsInExtension(req: {
   workspaceId: string;
   afterStepId: string | null;
   url: string;
+  /** Captures d'écran (défaut) ou capture HTML ; « html » n'est envoyé qu'à une extension qui le comprend. */
+  mode?: 'clicks' | 'html';
 }): Promise<AddStepsResult> {
   return (
     (await ask<AddStepsResult>({
@@ -90,6 +98,7 @@ export async function addStepsInExtension(req: {
       workspaceId: req.workspaceId,
       afterStepId: req.afterStepId,
       url: req.url,
+      ...(req.mode === 'html' ? { mode: 'html' } : {}),
     })) ?? { ok: false, error: 'unavailable' }
   );
 }

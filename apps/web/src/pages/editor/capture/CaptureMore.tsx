@@ -21,7 +21,9 @@ import {
 } from 'lucide-react';
 import { Alert, Modal, Select } from '@flowdsiml/ui';
 import { useToast } from '../../../components/Toast';
+import { hostAllowed, useHtmlCapture } from '../../../lib/htmlCapture';
 import {
+  ADD_HTML_MIN,
   ADD_STEPS_MIN,
   addStatus,
   addStepsInExtension,
@@ -219,6 +221,9 @@ export function CaptureMoreDialog({
   const [urlError, setUrlError] = useState<string | null>(null);
   const [ext, setExt] = useState<Ext>('checking');
   const [version, setVersion] = useState<string | null>(null);
+  const [mode, setMode] = useState<'clicks' | 'html'>('clicks');
+  const [htmlExt, setHtmlExt] = useState(false);
+  const rule = useHtmlCapture(workspaceId);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const urlRef = useRef<HTMLInputElement>(null);
@@ -228,6 +233,7 @@ export function CaptureMoreDialog({
     setExt('checking');
     const r = await pingExtension();
     setVersion(r?.version ?? null);
+    setHtmlExt(!!r?.html);
     setExt(r?.ready ? 'ready' : 'missing');
   }, []);
   // À l'ouverture : étape d'insertion, page de départ reprise de cette étape, état de l'extension
@@ -239,6 +245,7 @@ export function CaptureMoreDialog({
     setUrlError(null);
     setError(null);
     setSending(false);
+    setMode('clicks');
     void check();
     // L'ouverture seule relance ces réglages (pas chaque modification de la démo)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -247,6 +254,23 @@ export function CaptureMoreDialog({
   const afterId = after === START ? null : after;
   const known = afterId ? stepUrl(afterId) : '';
   const afterN = afterId ? editor.steps.findIndex((s) => s.id === afterId) + 1 : 0;
+  // HTML : selon l'extension (0.3.1), le réglage de l'espace (L49) et le domaine de la page de départ
+  let host = '';
+  try {
+    const u = new URL(url.trim());
+    if (u.protocol === 'https:' || u.protocol === 'http:') host = u.hostname;
+  } catch {
+    host = '';
+  }
+  const htmlWhy =
+    rule.mode === 'disabled'
+      ? t('editor.captureMore.htmlOff')
+      : rule.mode === 'domains' && host && !hostAllowed(host, rule.domains)
+        ? t('editor.captureMore.htmlDomain', { domain: host })
+        : ext === 'ready' && !htmlExt
+          ? t('editor.captureMore.htmlVersion', { version: ADD_HTML_MIN })
+          : null;
+  const picked = mode === 'html' && !htmlWhy ? 'html' : 'clicks';
   const submit = async () => {
     if (ext !== 'ready' || sending) return;
     let target: URL | null = null;
@@ -268,6 +292,7 @@ export function CaptureMoreDialog({
       workspaceId,
       afterStepId: afterId,
       url: target.href,
+      mode: picked,
     });
     setSending(false);
     if (r.ok) return capture.started(afterId);
@@ -345,17 +370,49 @@ export function CaptureMoreDialog({
           aria-labelledby={`${id}-type-l`}
           aria-describedby={`${id}-type-h`}
         >
-          <button type="button" role="radio" aria-checked="true" tabIndex={0}>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={picked === 'clicks'}
+            tabIndex={picked === 'clicks' ? 0 : -1}
+            onClick={() => setMode('clicks')}
+            onKeyDown={(e) => {
+              if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && !htmlWhy) {
+                e.preventDefault();
+                setMode('html');
+                (e.currentTarget.nextElementSibling as HTMLElement | null)?.focus();
+              }
+            }}
+          >
             <ImageIcon aria-hidden="true" />
             {t('editor.captureMore.typeShots')}
           </button>
-          {/* HTML dans une démo de captures : pas encore disponible, grisé et visible */}
-          <button type="button" role="radio" aria-checked="false" aria-disabled="true" tabIndex={-1}>
+          {/* HTML : désactivé avec sa raison si l'espace, le domaine ou la version de l'extension l'empêche */}
+          <button
+            type="button"
+            role="radio"
+            aria-checked={picked === 'html'}
+            aria-disabled={htmlWhy ? true : undefined}
+            aria-describedby={htmlWhy ? `${id}-html-why` : undefined}
+            tabIndex={picked === 'html' ? 0 : -1}
+            onClick={() => !htmlWhy && setMode('html')}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                setMode('clicks');
+                (e.currentTarget.previousElementSibling as HTMLElement | null)?.focus();
+              }
+            }}
+          >
             <Code aria-hidden="true" />
             {t('editor.captureMore.typeHtml')}
-            <span className="fd-badge">{t('shell.soon')}</span>
           </button>
         </div>
+        {htmlWhy && (
+          <p className="cm-help cm-help--why" id={`${id}-html-why`}>
+            {htmlWhy}
+          </p>
+        )}
         <p className="cm-help" id={`${id}-type-h`}>
           {t('editor.captureMore.typeHelp')}
         </p>
