@@ -92,7 +92,7 @@ Deno.test('providerRefusal : la cause est nommée sans secret, le message du fou
   assertEquals(providerRefusal(null, null), { error: 'PROVIDER', http: 502, log: 'network' });
   // Un code hors format (phrase, majuscules, trop long) n'est jamais journalisé
   for (const bad of ['Clé sk_secret refusée', 'QUOTA', 'a'.repeat(60), 42 as unknown as string])
-    assertEquals(providerRefusal(400, { detail: { status: bad } }).log, '400');
+    assertEquals(providerRefusal(400, { detail: { status: bad } }).log, '400 (status)');
   assert(
     !providerRefusal(401, d('quota_exceeded', 'cle-factice dans le message')).log.includes('cle-factice'),
   );
