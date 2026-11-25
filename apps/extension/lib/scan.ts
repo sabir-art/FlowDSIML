@@ -43,6 +43,22 @@ function fieldLabel(el: HTMLElement): string {
     .join(' | ');
 }
 
+/** Boutons, liens, onglets, entrées de menu : leur texte est une commande, jamais une valeur. */
+const COMMAND =
+  'button,a[href],summary,[role="button"],[role="link"],[role="tab"],[role="menuitem"],[role="option"],[role="switch"]';
+
+/**
+ * L60 (faux positifs) : l'élément précédent n'est un libellé que s'il est affiché, s'il n'est pas une
+ * commande, et s'il a la forme d'un libellé : pas une phrase (« Indiquez votre nom. »), pas un couple
+ * « libellé : valeur » déjà complet (« Ville : Lyon »), quatre mots au plus.
+ */
+function isLabelLike(el: Element, text: string): boolean {
+  if (el.matches(COMMAND) || el.closest('[hidden],[aria-hidden="true"]')) return false;
+  if ((el as HTMLElement).getClientRects?.().length === 0) return false;
+  if (/[.!?…]$/.test(text) || /:\s*\S/.test(text)) return false;
+  return text.split(' ').length <= 4;
+}
+
 /** Libellé de contexte d'un texte affiché : en-tête de colonne, terme <dt>, libellé voisin. */
 function contextLabel(el: Element): string {
   const cell = el.closest('td,[role="cell"],[role="gridcell"]');
@@ -66,7 +82,7 @@ function contextLabel(el: Element): string {
     const prev = host.previousElementSibling;
     const t = clean(prev?.textContent);
     // Un libellé, pas une donnée : court, sans chiffre ni @
-    if (prev && t && t.length <= 30 && !/[\d@]/.test(t)) return t;
+    if (prev && t && t.length <= 30 && !/[\d@]/.test(t) && isLabelLike(prev, t)) return t;
     host = host.parentElement;
   }
   return '';
@@ -154,7 +170,9 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
     )
       continue;
     n++;
-    const ctx = contextLabel(parent);
+    // Le texte d'une commande (bouton, lien, onglet) n'est pas la valeur du libellé voisin ; les motifs
+    // (adresse e-mail, téléphone…) y restent cherchés
+    const ctx = parent.closest(COMMAND) ? '' : contextLabel(parent);
     const ctxType = labelType(ctx);
     const trimmed = text.trim();
     if (ctxType && trimmed.length <= 120 && !labelType(trimmed)) {

@@ -523,6 +523,18 @@ jobs:
         run: |
           cd apps/extension && node e2e/html-spa.e2e.cjs | tee /tmp/e2e-ext.log
           ! grep -q '^NOT OK' /tmp/e2e-ext.log
+      - name: 'L60 : banc de la capture HTML (6 sites fictifs : tous les états retrouvés, aucun flou à tort, données personnelles masquées, noms lisibles)'
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension
+          node e2e/banc/serveur.cjs > /tmp/banc.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:54410/menu >/dev/null && break
+            sleep 1
+          done
+          node e2e/banc/etat-html.cjs > /tmp/banc-etat.json
       - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
         if: always()
         env:
