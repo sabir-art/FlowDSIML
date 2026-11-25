@@ -547,6 +547,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     );
     await xp.getByRole('button', { name: 'Partager', exact: true }).click();
     await dlg(page).waitFor();
+    // La fenêtre Partager recharge la démo avant d'afficher le mode : on attend le volet
+    await d.locator('#sh-panel-export').waitFor();
     ok(
       /share=exporter$/.test(page.url()) &&
         (await page.locator('dialog.x15-dialog').count()) === 0 &&
