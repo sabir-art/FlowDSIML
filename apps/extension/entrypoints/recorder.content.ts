@@ -412,12 +412,20 @@ export default defineContentScript({
     });
     bar.addEventListener('pointerup', () => (drag = null));
 
+    const INTERACTIVE = 'a,button,input,select,textarea,label,[role],[onclick],[tabindex]';
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
       return { left: r.left, top: r.top, width: r.width, height: r.height };
     };
-    const pick = (target: Element | null) =>
-      target?.closest('a,button,input,select,textarea,label,[role],[onclick],[tabindex]') ?? target;
+    /**
+     * Texte du libellé : celui de l'élément s'il est interactif ou sans enfant ; pour un bloc plus grand
+     * (section, page), son premier titre, sinon rien (« Cliquez ici ») : jamais des textes collés.
+     */
+    const labelText = (el: Element) =>
+      el.matches(INTERACTIVE) || !el.firstElementChild
+        ? (el.textContent ?? '')
+        : (el.querySelector('h1,h2,h3,h4,h5,h6')?.textContent ?? '');
+    const pick = (target: Element | null) => target?.closest(INTERACTIVE) ?? target;
 
     // Mode Élément : au survol, le cadre qui sera gardé (pointillé, étiquette dans le coin)
     function onPointerMove(ev: PointerEvent) {
@@ -452,7 +460,7 @@ export default defineContentScript({
         element: el ? rect(el) : null,
         label: el
           ? elementLabel({
-              text: el instanceof HTMLInputElement ? null : (el.textContent ?? ''),
+              text: el instanceof HTMLInputElement ? null : labelText(el),
               ariaLabel: el.getAttribute('aria-label'),
               placeholder: el.getAttribute('placeholder'),
               title: el.getAttribute('title'),
