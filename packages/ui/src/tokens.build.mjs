@@ -85,6 +85,7 @@ ${block('.fd-player-scope', [...themed('light'), ['color-scheme', 'light']])}
   :root {
     --fd-motion-duration-fast: 0ms;
     --fd-motion-duration-base: 0ms;
+    --fd-motion-duration-exit: 0ms;
     --fd-motion-duration-slow: 0ms;
   }
 }
