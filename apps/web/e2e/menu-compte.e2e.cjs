@@ -34,6 +34,8 @@ const ok = (c, l) => {
       await p.getByRole('button', { name: /Mon compte/ }).click();
       const menu = p.getByRole('menu');
       await menu.waitFor();
+      // MOTION-01 : le menu s'ouvre de 96 % à 100 % ; les mesures se font une fois l'animation finie
+      await menu.evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
       await p.addStyleTag({ content: '*{transition:none!important}' });
       const m = await menu.evaluate((root) => {
         const kids = [...root.children];
