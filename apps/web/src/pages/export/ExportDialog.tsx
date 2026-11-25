@@ -5,9 +5,10 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Accessibility,
   ArrowLeft,
   ArrowRight,
-  Accessibility,
+  ChevronLeft,
   CircleAlert,
   CircleCheck,
   Download,
@@ -100,9 +101,15 @@ export function ExportDialog({
   demoId,
   onClose,
   initialFormat,
+  onBack,
 }: {
   demoId: string;
   onClose: () => void;
+  /**
+   * Ouverte depuis Partager › Exporter : elle remplace la fenêtre Partager (jamais deux fenêtres l'une sur
+   * l'autre) ; « ← Partager » y revient et le titre prend le focus.
+   */
+  onBack?: () => void;
   /** REV-10 : « GIF / vidéo » de Partager ouvre l'export sur le GIF. */
   initialFormat?: Fmt;
 }) {
@@ -141,6 +148,23 @@ export function ExportDialog({
     const d = ref.current;
     if (d && !d.open) d.showModal();
   }, []);
+  // Venue de Partager : le titre prend le focus dès qu'il est rendu (les lecteurs d'écran l'annoncent)
+  // (le titre change avec l'état : options, erreur, export en cours ; on ne reprend jamais le focus
+  // d'un contrôle que la personne utilise)
+  const titled = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!onBack) return;
+    const d = ref.current;
+    const h = d?.querySelector<HTMLElement>('h2');
+    if (!d || !h || h === titled.current) return;
+    const active = document.activeElement;
+    const free = !active || active === document.body || active === d || active === titled.current;
+    const first = titled.current === null;
+    titled.current = h;
+    if (!first && !free) return;
+    h.tabIndex = -1;
+    h.focus();
+  });
 
   useEffect(() => {
     let alive = true;
@@ -883,6 +907,20 @@ export function ExportDialog({
       }}
       onClose={onClose}
     >
+      {/* Venue de Partager : « ← Partager » y revient (sauf pendant un export, qu'on annule d'abord) */}
+      {onBack && phase.kind !== 'running' && (
+        <button
+          type="button"
+          className="fd-back x15-back"
+          onClick={() => {
+            abort.current?.abort();
+            onBack();
+          }}
+        >
+          <ChevronLeft size={16} aria-hidden="true" />
+          <span>{t('export.backToShare')}</span>
+        </button>
+      )}
       {body}
     </dialog>
   );

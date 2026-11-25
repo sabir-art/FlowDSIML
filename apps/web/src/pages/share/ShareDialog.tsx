@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SHARE_MODES, SharePanel, type ShareMode, type ShareView } from './SharePage';
+import { ExportDialog } from '../export/ExportDialog';
 import './share-dialog.css';
 
 const isView = (v: string | null): v is ShareView =>
@@ -44,12 +45,39 @@ export function useShareWindow() {
  * piégé, Échap, clic sur le voile) de 960 × 640 px ; feuille plein écran sous 640 px. À la fermeture, le
  * focus revient au bouton « Partager ».
  */
-export function ShareDialog({
+export function ShareDialog(props: {
+  demoId: string;
+  view: ShareView;
+  onView: (v: ShareView) => void;
+  onClose: () => void;
+  onPublish?: () => void;
+  justPublished?: boolean;
+}) {
+  // Exporter : la fenêtre d'export REMPLACE la fenêtre Partager (jamais deux fenêtres modales l'une sur
+  // l'autre). « ← Partager » y revient, sur le mode Exporter ; Échap ou « Fermer » rend la main à la démo.
+  const [exporting, setExporting] = useState<null | 'pdf' | 'gif' | 'mp4'>(null);
+  if (exporting)
+    return (
+      <ExportDialog
+        demoId={props.demoId}
+        initialFormat={exporting}
+        onBack={() => setExporting(null)}
+        onClose={() => {
+          setExporting(null);
+          props.onClose();
+        }}
+      />
+    );
+  return <ShareWindow {...props} onExport={setExporting} />;
+}
+
+function ShareWindow({
   demoId,
   view,
   onView,
   onClose,
   onPublish,
+  onExport,
   justPublished,
 }: {
   demoId: string;
@@ -57,6 +85,7 @@ export function ShareDialog({
   onView: (v: ShareView) => void;
   onClose: () => void;
   onPublish?: () => void;
+  onExport: (fmt: 'pdf' | 'gif' | 'mp4') => void;
   justPublished?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -102,6 +131,7 @@ export function ShareDialog({
         view={view}
         onView={onView}
         onClose={onClose}
+        onExport={onExport}
         onPublish={
           onPublish ??
           (() => {

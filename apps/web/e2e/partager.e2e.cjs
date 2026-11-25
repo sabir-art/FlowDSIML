@@ -362,7 +362,15 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
           'Page de la démo : un seul « Enregistrer »',
         );
         await pg.getByRole('button', { name: 'Enregistrer' }).click();
-        await page.getByText('Page de la démo enregistrée.').waitFor();
+        // Retour UX : la confirmation est sur le bouton (« Enregistré », 2 s), pas un second toast
+        await pg.getByRole('button', { name: 'Enregistré', exact: true }).waitFor();
+        ok(
+          (await page.locator('.toast', { hasText: 'enregistrée' }).count()) === 0 &&
+            (await pg.locator('.she-soon').innerText()).replace(/\s+/g, ' ').trim() ===
+              'Aperçu enrichi Bientôt' &&
+            (await pg.locator('.she-soon .fd-badge').count()) === 1,
+          'Page de la démo : enregistrement confirmé sur le bouton ; « Aperçu enrichi » avec la pastille « Bientôt »',
+        );
         ok(
           state.tables.demo_pages[0].title === 'Découvrir le CRM' &&
             state.tables.demo_pages[0].related === true,
@@ -527,9 +535,32 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       )
       .then((h) => h.jsonValue());
     ok(picked === 'mp4', `Exporter : la fenêtre d’export s’ouvre sur le fichier choisi (${picked})`);
+    // Retour UX : la fenêtre d'export REMPLACE Partager (jamais deux fenêtres modales l'une sur l'autre)
+    const xp = page.locator('dialog.x15-dialog[open]');
+    ok(
+      (await dlg(page).count()) === 0 && (await page.locator('dialog[open]').count()) === 1,
+      'Exporter : la fenêtre d’export remplace la fenêtre Partager (une seule fenêtre)',
+    );
+    ok(
+      await xp.locator('h2').evaluate((h) => h === document.activeElement),
+      'Exporter : le titre de la fenêtre d’export a le focus',
+    );
+    await xp.getByRole('button', { name: 'Partager', exact: true }).click();
+    await dlg(page).waitFor();
+    ok(
+      /share=exporter$/.test(page.url()) &&
+        (await page.locator('dialog.x15-dialog').count()) === 0 &&
+        (await d.locator('#sh-panel-export').count()) === 1,
+      'Exporter : « ← Partager » rouvre la fenêtre Partager sur le mode Exporter',
+    );
+    await d.locator('#sh-panel-export').getByRole('button', { name: 'Exporter', exact: true }).click();
+    await xp.waitFor();
     await page.keyboard.press('Escape');
-    await page.locator('dialog.x15-dialog').waitFor({ state: 'detached' });
-    ok((await dlg(page).count()) === 1, 'Échap ferme l’export, pas la fenêtre Partager');
+    await page.waitForFunction(() => !document.querySelector('dialog[open]'));
+    ok(!/share=/.test(page.url()), 'Exporter : Échap ferme l’export et rend la main à la démo');
+    await page.locator('[data-share-open]').first().click();
+    await dlg(page).waitFor();
+    await mode(page, 'Lien');
 
     // Accès : pas de pastille ; un mot de passe enregistré met la pastille à jour partout
     await d.locator('.shd-access').getByRole('button', { name: 'Modifier' }).click();
