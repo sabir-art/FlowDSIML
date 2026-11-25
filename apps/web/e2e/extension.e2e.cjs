@@ -59,6 +59,12 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         'absente : un seul bouton primaire, vers la boutique, dans un nouvel onglet',
       );
       ok(
+        (await install.evaluate((el) =>
+          [...el.querySelectorAll('svg')].map((x) => x.getAttribute('class')).join(' '),
+        )) === 'lucide lucide-arrow-up-right',
+        'absente : lien externe, une seule icône (ArrowUpRight) à droite',
+      );
+      ok(
         (await hero.locator('.xt-help').innerText()) ===
           'Déjà installée ? Rechargez cette page pour la relier à l’espace.' &&
           (await hero.locator('.xt-ill img').count()) === 0,
