@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { motionMs } from '../lib/flip';
 import { MoreHorizontal, ChevronDown } from 'lucide-react';
 import { computePosition, getPortal, type Placement } from '../lib/floating';
 
@@ -11,6 +12,54 @@ export interface MenuRadioGroup {
     options: Array<{ value: string; label: string; icon: ReactNode }>;
     onChange: (value: string) => void;
   };
+}
+
+/**
+ * MOTION-01 §3, sortie d'un menu : le menu fermé est retiré tout de suite (focus, rôle, clavier), et une
+ * copie inerte s'efface à sa place en 120 ms (opacité, 100 % vers 96 %, courbe de sortie). La feuille
+ * mobile et le mouvement réduit ferment d'un coup.
+ */
+function fadeMenuOut(el: HTMLElement | null) {
+  if (!el || !el.parentElement || el.classList.contains('menu-list--sheet')) return;
+  const ms = motionMs('--fd-motion-duration-fast');
+  if (!(ms > 0)) return;
+  const r = el.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const ghost = el.cloneNode(true) as HTMLElement;
+  for (const n of [ghost, ...ghost.querySelectorAll<HTMLElement>('*')])
+    for (const a of [
+      'id',
+      'role',
+      'tabindex',
+      'aria-label',
+      'aria-labelledby',
+      'aria-checked',
+      'aria-current',
+    ])
+      n.removeAttribute(a);
+  ghost.setAttribute('aria-hidden', 'true');
+  ghost.setAttribute('inert', '');
+  Object.assign(ghost.style, {
+    position: 'fixed',
+    left: `${r.left}px`,
+    top: `${r.top}px`,
+    width: `${r.width}px`,
+    margin: '0',
+    pointerEvents: 'none',
+    // Pas de nouvelle entrée : seule la sortie est jouée
+    animation: 'none',
+  });
+  el.parentElement.appendChild(ghost);
+  const done = () => ghost.remove();
+  const anim = ghost.animate(
+    [
+      { opacity: 1, transform: 'none' },
+      { opacity: 0, transform: 'scale(0.96)' },
+    ],
+    { duration: ms, easing: 'cubic-bezier(0.4, 0, 1, 1)' },
+  );
+  anim.onfinish = done;
+  anim.oncancel = done;
 }
 
 export interface MenuItem {
@@ -103,6 +152,7 @@ export function Menu({
     : items;
 
   const close = useCallback((restoreFocus: boolean) => {
+    fadeMenuOut(list.current);
     setOpen(false);
     if (restoreFocus) btn.current?.focus();
   }, []);
@@ -203,7 +253,8 @@ export function Menu({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setOpen(!open);
+          if (open) close(false);
+          else setOpen(true);
         }}
       >
         {custom ? (
