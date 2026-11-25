@@ -51,7 +51,7 @@ const MOBILE = WIDTH < 768;
   // 1. Liste vide, puis création
   {
     const { page, state } = await open();
-    await page.getByRole('heading', { name: 'Aucune clé pour l’instant', level: 3 }).waitFor();
+    await page.getByRole('heading', { name: 'Aucune clé pour l’instant', level: 2 }).waitFor();
     ok(
       (await page
         .getByText(

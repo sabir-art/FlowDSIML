@@ -16,7 +16,8 @@ import {
   Users,
   Webhook as WebhookIcon,
 } from 'lucide-react';
-import { Button } from '@flowdsiml/ui';
+import { Button, EmptyState } from '@flowdsiml/ui';
+import { ConnectionsPreview } from '../../../components/EmptyPreviews';
 import { SettingsShell } from '../SettingsShell';
 import slackLogo from '../../../assets/brands/slack.svg';
 import zapierLogo from '../../../assets/brands/zapier.svg';
@@ -271,15 +272,13 @@ export function IntegrationsPage() {
               {slack && slackRow}
             </ul>
           ) : (
-            <div className="stg-empty">
-              <span className="stg-empty__tile" aria-hidden="true">
-                <Unlink size={20} />
-              </span>
-              <h2>{t('integrations.noneConnected')}</h2>
-              <div className="stg-empty__acts">
-                <Button onClick={() => setAdding(true)}>{t('integrations.add')}</Button>
-              </div>
-            </div>
+            // EMPTY-01 : l'état vide ne répète pas « Ajouter un webhook » ; il renvoie à la liste complète
+            <EmptyState
+              preview={<ConnectionsPreview />}
+              title={t('integrations.noneConnected')}
+              body={t('integrations.noneConnectedBody')}
+              action={<Button onClick={() => setFilter('all')}>{t('integrations.seeAll')}</Button>}
+            />
           )
         ) : (
           (filter === 'all' ? CATS : [filter]).map((c) => (

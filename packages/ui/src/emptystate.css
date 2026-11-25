@@ -1,0 +1,182 @@
+/* EMPTY-01 : état vide unique. Les deux dégradés (fond du socle, effacement de l'aperçu) sont la seule
+   exception de l'outil, réservée à ce composant. Aucun mouvement. */
+.fd-es {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* En retrait intérieur : les 40 px s'ajoutent aux 24 px qui suivent l'en-tête, sans fusion de marges */
+  padding: 40px 0 48px;
+  text-align: center;
+}
+.fd-es__base {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px 32px 0;
+  border-radius: var(--fd-radius-surface);
+  background: linear-gradient(var(--fd-color-surface-sunken), var(--fd-color-content-bg));
+  pointer-events: none;
+  user-select: none;
+}
+.fd-es__preview {
+  overflow: hidden;
+  /* Deux lignes et demie : la dernière s'efface vers le bas */
+  height: 124px;
+  border: 1px solid var(--fd-color-border);
+  border-bottom: 0;
+  border-radius: var(--fd-radius-surface) var(--fd-radius-surface) 0 0;
+  background: var(--fd-color-surface);
+  opacity: 0.92;
+  text-align: left;
+  mask-image: linear-gradient(#000 45%, transparent);
+}
+.fd-es__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--fd-radius-surface);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.fd-es__icon svg {
+  width: 20px;
+  height: 20px;
+}
+.fd-es__title {
+  margin: 24px 0 0;
+  font: 600 16px / 1.4 var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.fd-es__icon + .fd-es__title {
+  margin-top: 16px;
+}
+.fd-es__body {
+  max-width: 420px;
+  margin: 4px 0 0;
+  font: 400 14px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.fd-es__action {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.fd-es--compact {
+  display: block;
+  margin: 0;
+  padding: 16px;
+  font: 400 13px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+
+/* Briques des aperçus : lignes à filet, textes, pastilles. Jetons seulement (clair et sombre). */
+.fd-es-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 50px;
+  padding: 6px 16px;
+  font: 400 13px / 1.4 var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.fd-es-row + .fd-es-row {
+  border-top: 1px solid var(--fd-color-border);
+}
+.fd-es-row > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.fd-es-main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.fd-es-main > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fd-es-muted {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.fd-es-end {
+  flex: none;
+  margin-left: auto;
+}
+.fd-es-box {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-control-sm);
+  color: var(--fd-color-text-muted);
+}
+.fd-es-box svg {
+  width: 14px;
+  height: 14px;
+}
+.fd-es-thumb {
+  flex: none;
+  width: 52px;
+  height: 34px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-tag);
+  background: var(--fd-color-surface-sunken);
+}
+.fd-es-avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--fd-radius-round);
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary);
+  font: 600 12px var(--fd-font-sans);
+}
+.fd-es-tags {
+  display: flex;
+  gap: 6px;
+}
+.fd-es-tag {
+  padding: 1px 6px;
+  border-radius: var(--fd-radius-tag);
+  background: var(--fd-color-surface-sunken);
+  font: 500 11px / 1.5 var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.fd-es-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+.fd-es-dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: var(--fd-radius-round);
+  background: var(--fd-color-success);
+}
+.fd-es-mono {
+  font-family: var(--fd-font-mono);
+  font-size: 12px;
+}
+@media (max-width: 599px) {
+  .fd-es {
+    padding: 24px 0 32px;
+  }
+  .fd-es__base {
+    padding: 20px 16px 0;
+  }
+}

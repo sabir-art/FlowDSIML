@@ -147,6 +147,9 @@ jobs:
       - name: 'SETTINGS-HDR-01 : en-tête des pages Paramètres (bande et filet, ordre des actions, 390 px, barre collée en bas)'
         if: always()
         run: cd apps/web && node e2e/parametres-entete.e2e.cjs
+      - name: 'EMPTY-01 : états vides (aucun bouton qui répète l’en-tête, aperçu décoratif, clair et sombre, 1440 et 390 px)'
+        if: always()
+        run: cd apps/web && node e2e/etats-vides.e2e.cjs
       - name: Barres de liste L40 (40 px, une ligne à 1 440 px, feuille Filtres sous 768 px)
         if: always()
         run: cd apps/web && node e2e/l40-barres.e2e.cjs

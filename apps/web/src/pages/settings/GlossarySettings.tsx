@@ -23,7 +23,8 @@ import {
   type ImportPreview,
 } from './glossaryCsv';
 import './glossary.css';
-import { Button, Modal } from '@flowdsiml/ui';
+import { Button, Modal, EmptyState } from '@flowdsiml/ui';
+import { GlossaryPreview } from '../../components/EmptyPreviews';
 import { FileUp } from 'lucide-react';
 import { FileDropzone, isCsvFile } from '../../components/FileDropzone';
 
@@ -142,18 +143,12 @@ export function GlossarySettings() {
         </div>
 
         {terms && terms.length === 0 ? (
-          <div className="stg-empty">
-            <span className="stg-empty__tile" aria-hidden="true">
-              <BookA size={20} />
-            </span>
-            <h3>{t('glossary.emptyTitle')}</h3>
-            <p>{t('glossary.emptyBody')}</p>
-            <div className="stg-empty__acts">
-              <Button variant="primary" icon={<Plus size={16} />} onClick={() => setEditing('new')}>
-                {t('glossary.add')}
-              </Button>
-            </div>
-          </div>
+          // EMPTY-01 : « Ajouter un terme » n'est que dans l'en-tête de la page
+          <EmptyState
+            preview={<GlossaryPreview />}
+            title={t('glossary.emptyTitle')}
+            body={t('glossary.emptyBody')}
+          />
         ) : (
           <>
             <p className="sr-only" role="status">

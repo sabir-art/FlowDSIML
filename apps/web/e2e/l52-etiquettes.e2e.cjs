@@ -549,11 +549,13 @@ const NAMES = ['Outil CRM', 'Accueil', 'Agenda', 'Facturation', 'RH', 'Archives'
   // État vide et limite de 20
   {
     const { page } = await openPage(pageSeed({ tags: [] }));
-    await page.getByText('Aucune étiquette pour l’instant').waitFor();
+    await page.getByText('Créez votre première étiquette').waitFor();
     ok(
-      (await page.getByText('Créez-en une ici, ou depuis la carte d’une démo.').count()) === 1 &&
-        (await page.locator('.stg-empty').getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 1,
-      'état vide : titre, phrase, bouton',
+      (await page.getByText('Classez vos démos par équipe, produit ou public.', { exact: false }).count()) ===
+        1 &&
+        (await page.locator('.fd-es').getByRole('button').count()) === 0 &&
+        (await page.locator('.stg-page').getByRole('button', { name: 'Nouvelle étiquette' }).count()) === 1,
+      'état vide : titre, phrase, aperçu ; « Nouvelle étiquette » seulement dans l’en-tête (EMPTY-01)',
     );
     await page.context().close();
     const twenty = Array.from({ length: 20 }, (_, i) => [
