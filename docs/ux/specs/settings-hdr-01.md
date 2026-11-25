@@ -8,7 +8,7 @@ Captures de référence : `docs/ux/propositions/en-tete-parametres/planche-EB-14
 
 ```
 | ← bande : toute la largeur de la colonne de contenu (bord gauche → bord droit de .st-main) → |
-|   Titre de la page (h1)                          [Recherche 240 px] [Secondaire] [Primaire] |
+|   Titre de la page (h1)                          [Recherche 260 px] [Secondaire] [Primaire] |
 |   Sous-titre gris                                                                            |
 |──────────────────────────── filet 1 px, pleine largeur de la colonne ────────────────────────|
     24 px
