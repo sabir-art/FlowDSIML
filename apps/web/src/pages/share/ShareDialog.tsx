@@ -62,10 +62,9 @@ export function ShareDialog(props: {
         demoId={props.demoId}
         initialFormat={exporting}
         onBack={() => setExporting(null)}
-        onClose={() => {
-          setExporting(null);
-          props.onClose();
-        }}
+        // Fermeture : on rend la main à la démo. L'état « export » est gardé jusqu'au démontage, sinon la
+        // fenêtre Partager réapparaîtrait un instant, le temps que l'adresse perde ?share
+        onClose={props.onClose}
       />
     );
   return <ShareWindow {...props} onExport={setExporting} />;

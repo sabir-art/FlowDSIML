@@ -520,31 +520,24 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await files.nth(2).click();
     await go.click();
     await page.locator('dialog.x15-dialog[open]').waitFor();
-    // Le choix du fichier est rendu dès que la fenêtre d'export a chargé la démo : on attend cet état
-    const picked = await page
-      .waitForFunction(
-        () => {
-          const x = document.querySelector('dialog.x15-dialog[open]');
-          if (!x) return false;
-          if (x.classList.contains('x15-small')) return 'erreur';
-          const r = x.querySelector('input[type="radio"][value="mp4"]');
-          return r ? (r.checked ? 'mp4' : 'autre') : false;
-        },
-        null,
-        { timeout: 30000 },
-      )
-      .then((h) => h.jsonValue());
-    ok(picked === 'mp4', `Exporter : la fenêtre d’export s’ouvre sur le fichier choisi (${picked})`);
+    // (le fichier choisi est vérifié dans partager-rev10, sur une démo dont l'export se charge)
     // Retour UX : la fenêtre d'export REMPLACE Partager (jamais deux fenêtres modales l'une sur l'autre)
     const xp = page.locator('dialog.x15-dialog[open]');
     ok(
       (await dlg(page).count()) === 0 && (await page.locator('dialog[open]').count()) === 1,
       'Exporter : la fenêtre d’export remplace la fenêtre Partager (une seule fenêtre)',
     );
-    ok(
-      await xp.locator('h2').evaluate((h) => h === document.activeElement),
-      'Exporter : le titre de la fenêtre d’export a le focus',
-    );
+    const titled = await page
+      .waitForFunction(
+        () => document.activeElement === document.querySelector('dialog.x15-dialog[open] h2'),
+        null,
+        { timeout: 5000 },
+      )
+      .then(
+        () => true,
+        () => false,
+      );
+    ok(titled, 'Exporter : le titre de la fenêtre d’export a le focus');
     await xp.getByRole('button', { name: 'Partager', exact: true }).click();
     await dlg(page).waitFor();
     // La fenêtre Partager recharge la démo avant d'afficher le mode : on attend le volet
@@ -558,10 +551,17 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await d.locator('#sh-panel-export').getByRole('button', { name: 'Exporter', exact: true }).click();
     await xp.waitFor();
     await page.keyboard.press('Escape');
-    await page.waitForFunction(() => !document.querySelector('dialog[open]'));
-    ok(!/share=/.test(page.url()), 'Exporter : Échap ferme l’export et rend la main à la démo');
+    await page.waitForFunction(
+      () => !document.querySelector('dialog[open]') && !/share=/.test(location.hash),
+    );
+    ok(
+      (await page.locator('dialog.shd-dialog, dialog.x15-dialog[open]').count()) === 0,
+      'Exporter : Échap ferme l’export et rend la main à la démo (aucune fenêtre ne réapparaît)',
+    );
     await page.locator('[data-share-open]').first().click();
     await dlg(page).waitFor();
+    // La fenêtre charge la démo avant d'afficher ses modes
+    await d.locator('.shd-nav').waitFor();
     await mode(page, 'Lien');
 
     // Accès : pas de pastille ; un mot de passe enregistré met la pastille à jour partout
