@@ -879,6 +879,30 @@ export function useDemoEditor(demoId: string) {
     }
   }
 
+  // L62 : voix off des étapes (bucket voices), signées pour l'Aperçu. Une voix enregistrée ou générée
+  // change voice_path sans passer par signImages : les adresses manquantes sont signées ici.
+  const voiceKey = steps
+    .map((s) => s.voice_path)
+    .filter((p): p is string => !!p && !imageUrls[p])
+    .join('|');
+  useEffect(() => {
+    if (!voiceKey) return;
+    let live = true;
+    void supabase.storage
+      .from('voices')
+      .createSignedUrls(voiceKey.split('|'), 3600)
+      .then(({ data }) => {
+        if (!live || !data) return;
+        setImageUrls((prev) => {
+          const next = { ...prev };
+          for (const d of data) if (d.path && d.signedUrl) next[d.path] = d.signedUrl;
+          return next;
+        });
+      });
+    return () => {
+      live = false;
+    };
+  }, [voiceKey]);
   return {
     loading,
     notFound,

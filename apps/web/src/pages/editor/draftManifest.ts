@@ -117,6 +117,17 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
               };
             })()
           : null,
+      // L62 : voix off de l'étape (adresse signée du bucket voices), comme à la publication : sans elle
+      // l'Aperçu restait muet
+      voice:
+        s.voice_path && ed.imageUrls[s.voice_path] && s.voice_duration_ms
+          ? {
+              src: ed.imageUrls[s.voice_path]!,
+              durationMs: Math.min(120000, Math.max(1, Math.round(s.voice_duration_ms))),
+              transcript: (s.voice_transcript ?? '').trim().slice(0, 4000),
+              autoplay: s.voice_autoplay !== false,
+            }
+          : null,
       title: s.title,
       body: s.body,
       blurs: asRects(s.blurs),
