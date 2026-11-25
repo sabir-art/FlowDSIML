@@ -858,11 +858,26 @@ input[type='radio']:disabled:checked::after {
   /* MOTION-01 §6 : un indicateur de chargement ne reste jamais figé ; sa rotation devient un battement
      d'opacité, lent */
   .spin,
-  .spinner {
+  .spinner,
+  .fd-dz__bar > span,
+  .ai-progress::after,
+  .vo-indet::after,
+  .st-mydata-bar {
     animation: fd-wait var(--fd-motion-duration-pulse) ease-in-out infinite !important;
+  }
+  /* Barres indéterminées : pleines, sans déplacement ; seul le battement dit que ça charge */
+  .fd-dz__bar > span,
+  .ai-progress::after,
+  .vo-indet::after {
+    width: 100%;
+    transform: none;
   }
 }
 @keyframes fd-wait {
+  0%,
+  100% {
+    opacity: 1;
+  }
   50% {
     opacity: 0.35;
   }

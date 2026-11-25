@@ -142,6 +142,43 @@ ok(
   literal.length === 0,
   `aucune durée en dur hors des jetons${literal.length ? ` :\n  ${literal.join('\n  ')}` : ''}`,
 );
+// Mouvement réduit : un indicateur de chargement (rotation, barre indéterminée) n'est jamais figé ; il bat
+// en opacité seule, sans déplacement
+{
+  const base = fs
+    .readFileSync(path.join(ROOT, 'packages/ui/src/base.css'), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const reduced = base.slice(base.indexOf('@media (prefers-reduced-motion: reduce)'));
+  const rule = reduced.match(
+    /([^{}]*)\{\s*animation: fd-wait var\(--fd-motion-duration-pulse\) ease-in-out infinite !important;/,
+  );
+  const sels = rule ? rule[1].split(',').map((x) => x.trim()) : [];
+  const WAIT = [
+    '.spin',
+    '.spinner',
+    '.fd-dz__bar > span',
+    '.ai-progress::after',
+    '.vo-indet::after',
+    '.st-mydata-bar',
+  ];
+  ok(
+    WAIT.every((x) => sels.includes(x)),
+    `mouvement réduit : rotations et barres indéterminées battent au lieu de se figer (${sels.join(', ')})`,
+  );
+  const kf = base.match(/@keyframes fd-wait\s*\{([\s\S]*?)\n\}/);
+  const props = kf ? [...kf[1].matchAll(/([\w-]+)\s*:/g)].map((x) => x[1]) : [];
+  ok(
+    props.length > 0 && props.every((x) => x === 'opacity'),
+    `mouvement réduit : battement en opacité seule (${[...new Set(props)].join(', ')})`,
+  );
+  // Chaque sélecteur de la liste existe encore dans l'app
+  const all = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+  const gone = WAIT.filter((x) => !all.includes(`${x.replace(' > span', '')}`.replace(/::after$/, '')));
+  ok(
+    gone.length === 0,
+    `mouvement réduit : les indicateurs listés existent encore${gone.length ? ` (${gone.join(', ')})` : ''}`,
+  );
+}
 ok(
   allowedSeen.size === ALLOWED.length,
   `les ${ALLOWED.length} exceptions listées existent encore (sinon, les retirer de la liste)`,
