@@ -15,11 +15,11 @@ Captures de référence : `docs/ux/propositions/en-tete-parametres/planche-EB-14
     1re section…
 ```
 
-- **Bande** : elle déborde du retrait horizontal de la colonne, de sorte que le filet touche les deux bords de la colonne de contenu. Le texte et les actions restent alignés sur le retrait des sections. Elle n'a pas de fond propre : elle garde `--fd-color-content-bg`, et seul le filet la distingue.
+- **Bande** : elle déborde du retrait horizontal de la colonne, de sorte que le filet touche les deux bords de la colonne de contenu. Le texte et les actions restent alignés sur le retrait des sections. **Fond de la bande : `--fd-color-surface-muted`** (choix de l'utilisateur du 25/11, variante C de `en-tete-espacement.png`), du haut de la colonne de contenu jusqu'au filet et d'un bord à l'autre de la colonne ; le reste de la page garde `--fd-color-content-bg`.
 - **Espacements** :
   - 32 px du haut de la colonne au titre, comme aujourd'hui ;
   - 20 px du bas du bloc (texte ou actions, le plus bas des deux) au filet ;
-  - 24 px du filet à la première section ;
+  - **40 px** du filet à la première section (variante C du 25/11 ; 24 px auparavant) ;
   - 16 px entre le bloc texte et le bloc actions ;
   - 8 px entre deux actions.
 - **Filet** : `1px solid var(--fd-color-border)`, en clair comme en sombre.
@@ -62,7 +62,7 @@ Règles :
 
 ## 3. À 390 px (moins de 600 px)
 
-- La bande garde le filet sur toute la largeur de l'écran. Le retrait horizontal est de 16 px, 16 px en haut et 16 px avant le filet.
+- La bande garde le filet et son fond sur toute la largeur de l'écran. Le retrait horizontal est de 16 px, 16 px en haut et 16 px avant le filet ; 32 px du filet à la première section.
 - **Bloc texte** : en haut, sur toute la largeur.
 - **Bloc actions** : dessous, 12 px plus bas, sur une ligne pleine largeur.
   - Avec une recherche, elle prend la place restante et l'action principale reste à sa taille, à droite.
@@ -86,7 +86,8 @@ Règles :
 - `parametres-espacement`, `l48f-integrations`, `espacements` et `a11y` : le titre et les actions sont dans `.stg-page`, et il ne reste plus de bouton d'action de page dans la barre du haut.
 - Nouveau contrôle, sur toutes les pages du §2, en clair et sombre, à 1440 et 390 :
   - le filet touche les deux bords de la colonne ;
-  - il y a 24 px du filet à la première section ;
+  - il y a 40 px du filet à la première section ;
+  - le fond de la bande vaut `--fd-color-surface-muted`, celui du contenu `--fd-color-content-bg` ;
   - les actions sont dans l'ordre fixé ;
   - il y a au plus un primaire ;
   - le rayon des contrôles vaut `--fd-radius-control` ;
