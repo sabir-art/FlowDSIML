@@ -7,7 +7,7 @@ import { APP_URL, DEBUGGER } from '@/lib/config';
 import { APP_NAME, htmlCaptureVerdict, parseHtmlCapture } from '@flowdsiml/core';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
-import { attachFor, type PendingAttach } from '@/lib/external';
+import { ADD_KEY, attachFor, liveTarget, type AddTarget, type PendingAttach } from '@/lib/external';
 import {
   ArrowLeft,
   Box,
@@ -361,6 +361,11 @@ async function loadWorkspaces() {
   const { data: u } = await supabase.auth.getUser();
   // L26-01 : « Installer l'extension » se coche quand l'extension a répondu au moins une fois
   void supabase.rpc('extension_seen').then(() => undefined);
+  // §7 : la page Extension de l'app affiche la version installée
+  void supabase.rpc('extension_report', { p_version: browser.runtime.getManifest().version }).then(
+    () => undefined,
+    () => undefined,
+  );
   const { data, error: err } = await supabase
     .from('members')
     .select('role, workspaces(id, name)')
@@ -476,6 +481,16 @@ async function render() {
     $('rec-label').textContent = status.paused ? strings.paused : strings.recording;
     $('rec-label').classList.toggle('paused', status.paused);
     $('pause-label').textContent = status.paused ? strings.resume : strings.pause;
+    // EXT-02 §8.3 : capture lancée depuis l'éditeur : carte de cible, « Annuler l'ajout »
+    const add = status.addTo;
+    show('target', !!add);
+    if (add) {
+      $('target-title').textContent = (add.after ? strings.addCardAfter : strings.addCardStart)
+        .replace('{{demo}}', add.title)
+        .replace('{{n}}', String(add.after?.n ?? ''));
+      $('target-after').textContent = add.after?.title ?? '';
+    }
+    $('cancel-label').textContent = add ? strings.addCancel : strings.cancel;
     const ico = $('pause').querySelector('svg');
     if (ico && ico.dataset.state !== String(status.paused)) {
       const fresh = document.createElement('i');
@@ -509,7 +524,22 @@ async function syncAttach() {
     PendingAttach | undefined;
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   const a = attachFor(pendingAttach, tab?.url, Date.now());
-  show('attach-note', !!a);
+  // EXT-02 §8 : cible posée par l'éditeur, en attente du démarrage (accès au site à accorder)
+  const add = liveTarget(
+    (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined,
+    Date.now(),
+  );
+  const adding = add?.state === 'pending' ? add : null;
+  $('attach-note').textContent = adding
+    ? strings.addNote.replace('{{demo}}', adding.title)
+    : strings.attachNote;
+  show('attach-note', !!a || !!adding);
+  show('title-field', !adding && !(fill.value && mode() === 'clicks'));
+  if (adding) {
+    if (workspace.options().some((o) => o.value === adding.workspaceId))
+      workspace.set(adding.workspaceId, true);
+    if (mode() !== 'clicks') type.set('clicks', true);
+  }
   if (!a) return;
   if (workspace.options().some((o) => o.value === a.workspaceId)) workspace.set(a.workspaceId, true);
   if (htmlVerdict === 'ok' && mode() !== 'html') type.set('sandbox', true);

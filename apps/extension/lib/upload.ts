@@ -22,8 +22,12 @@ export async function sendCaptures(
     device?: 'desktop' | 'mobile';
     viewport?: { w: number; h: number } | null;
     fill?: FillTarget | null;
+    /** EXT-02 §8 : ajout à une démo existante (les étapes vont à la fin ; l'éditeur les place). */
+    appendTo?: string | null;
   },
   onProgress: (done: number) => void,
+  /** Identifiants des étapes créées, dans l'ordre (rempli par l'envoi). */
+  created: string[] = [],
 ): Promise<string> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) throw new Error('Non connecté');
@@ -46,6 +50,16 @@ export async function sendCaptures(
       const r = byId.get(id);
       return r ? [{ id, options: (r.options ?? {}) as Record<string, unknown> }] : [];
     });
+    const last = await supabase
+      .from('steps')
+      .select('position')
+      .eq('demo_id', demoId)
+      .order('position', { ascending: false })
+      .limit(1);
+    if (last.error) throw last.error;
+    base = (last.data?.[0]?.position ?? -1) + 1;
+  } else if (target.appendTo) {
+    demoId = target.appendTo;
     const last = await supabase
       .from('steps')
       .select('position')
@@ -181,6 +195,7 @@ export async function sendCaptures(
       element_meta: elementMeta,
     });
     if (ins.error) throw ins.error;
+    created.push(stepId);
     const hot = await supabase.from('hotspots').insert({
       step_id: stepId,
       demo_id: demoId,
