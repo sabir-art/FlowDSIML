@@ -2745,6 +2745,7 @@
         "feed_lead": "Lead on “{{demo}}”",
         "endsToday": "Demos finished today",
         "liveSince": "Live · updated {{n}} s ago",
+        "liveNow": "Live · updated just now",
         "paused": "Paused",
         "pauseLabel": "Pause the refresh",
         "export": "Export as CSV",

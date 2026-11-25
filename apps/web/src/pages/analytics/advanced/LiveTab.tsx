@@ -17,7 +17,7 @@ const REFRESH_MS = 10_000;
 
 /**
  * Temps réel de l'espace (retours du 24/11, 2e série §5 ; live_space, interrogée toutes les 10 s).
- * Filtre Démo avec recherche, indicateur « En direct · actualisé il y a n s » et bouton icône de pause,
+ * Filtre Démo avec recherche, indicateur « En direct · actualisé à l’instant » (sous 5 s) puis « il y a n s » et bouton icône de pause,
  * quatre indicateurs, « Sur les démos maintenant » (tableau à colonnes fixes) et fil d'activité.
  * L'identité d'un visiteur (apprenant, e-mail du lead) n'est renvoyée par la base qu'aux éditeurs.
  * Les changements sont annoncés une fois par minute au plus, jamais ligne par ligne.
@@ -132,7 +132,9 @@ export function LiveTab({
           <i aria-hidden="true" />
           {paused
             ? t('analytics.adv.live.paused')
-            : t('analytics.adv.live.liveSince', { n: Math.max(0, Math.round((now - at) / 1000)) })}
+            : now - at < 5000
+              ? t('analytics.adv.live.liveNow')
+              : t('analytics.adv.live.liveSince', { n: Math.round((now - at) / 1000) })}
         </span>
         <button
           type="button"

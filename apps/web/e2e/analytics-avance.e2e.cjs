@@ -249,8 +249,10 @@ const live = (n) => ({
     'pause : bouton icône de 32 px (aria-pressed)',
   );
   ok(
-    /^En direct · actualisé il y a \d+ s$/.test((await liveP.locator('.lv-state').innerText()).trim()),
-    `indicateur « En direct · actualisé il y a n s » (${await liveP.locator('.lv-state').innerText()})`,
+    /^En direct · actualisé (à l’instant|il y a ([5-9]|\d{2,}) s)$/.test(
+      (await liveP.locator('.lv-state').innerText()).trim(),
+    ),
+    `indicateur « En direct · actualisé à l’instant » sous 5 s, puis « il y a n s » (${await liveP.locator('.lv-state').innerText()})`,
   );
   await pause.click();
   ok(
