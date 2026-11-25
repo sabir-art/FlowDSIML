@@ -502,6 +502,13 @@ jobs:
         run: |
           cd apps/extension && node e2e/html-spa.e2e.cjs | tee /tmp/e2e-ext.log
           ! grep -q '^NOT OK' /tmp/e2e-ext.log
+      - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/popup.e2e.cjs | tee /tmp/e2e-ext-popup.log
+          ! grep -q '^NOT OK' /tmp/e2e-ext-popup.log
       - name: Vérifier avant l'envoi (titre, type, pages, six groupes, « Garder » une donnée ou un lien, lien refusé)
         if: always()
         env:

@@ -5,6 +5,7 @@
  * vérification est alimenté par un enregistrement déposé dans le stockage local de l'extension.
  */
 const { chromium } = require('playwright');
+const ui = require('./popup-ui.cjs');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -36,26 +37,26 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
 
   // L21-01 : trois cartes de type, options propres à chacun
-  const cards = await popup.$$eval('.type-card b', (b) => b.map((x) => x.textContent));
+  const cards = (await ui.options(popup, 'type')).map((o) => o.label);
   ok(
-    cards.length === 4 &&
-      /clic/.test(cards[0]) &&
-      /HTML/.test(cards[1]) &&
-      /Vidéo/.test(cards[2]) &&
-      /mobile/.test(cards[3]),
-    'types de capture (clics, HTML, vidéo, mobile)',
+    cards.join(' | ') === 'Captures | HTML guidée | Sandbox | Vidéo | Format mobile',
+    `types de capture (${cards.join(', ')})`,
   );
+  await ui.openOptions(popup);
   ok(
-    (await popup.$('#opt-video[hidden]')) && (await popup.$('#opt-mobile[hidden]')),
-    'aucune option en mode clics',
+    (await ui.rows(popup)).join(' | ') === 'Taille de l’onglet | Suivre les nouveaux onglets',
+    'captures : ni option vidéo ni option mobile',
   );
-  await popup.click('.type-card:has(input[value=video])');
-  ok(await popup.isVisible('#opt-video'), 'options vidéo affichées');
-  ok(!(await popup.isChecked('#webcam')), 'webcam désactivée par défaut');
+  await ui.pick(popup, 'type', 'video');
+  ok(
+    (await ui.rows(popup)).join(' | ') === 'Ma voix | Webcam dans un coin | Masquer en direct',
+    'options vidéo affichées',
+  );
+  ok(!(await ui.isOn(popup, 'webcam')), 'webcam désactivée par défaut');
   // EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
   const live = popup.getByRole('switch', { name: 'Masquer en direct' });
   ok(
@@ -74,23 +75,25 @@ const WS = '11111111-1111-1111-1111-111111111111';
     async () => (await chrome.storage.local.get('fd.liveMask'))['fd.liveMask'] === false,
   );
   ok(true, '« Masquer en direct » : choix mémorisé');
-  // Le focus revient sur les cartes de type (suite : parcours au clavier)
-  await popup.focus('input[value=video]');
-  ok(/enregistrement/.test(await popup.textContent('#start')), 'bouton « Démarrer l’enregistrement »');
+  // La liste des types se parcourt au clavier
+  ok((await popup.textContent('#start')).trim() === 'Démarrer', 'bouton « Démarrer »');
+  await popup.focus('#type');
   await popup.keyboard.press('ArrowDown');
-  ok(await popup.isChecked('input[value=mobile]'), 'les cartes se parcourent au clavier');
-  ok(await popup.isVisible('#opt-mobile'), 'options mobile affichées');
-  await popup.selectOption('#device', 'custom');
+  await popup.keyboard.press('ArrowDown');
+  await popup.keyboard.press('Enter');
+  ok(/^Format mobile/.test((await popup.innerText('#type')).trim()), 'les types se parcourent au clavier');
+  ok((await ui.rows(popup)).includes('Appareil'), 'options mobile affichées');
+  await ui.pick(popup, 'device', 'custom');
   ok(await popup.isVisible('#custom-size'), 'taille personnalisée');
-  await popup.selectOption('#device', 'phone');
+  await ui.pick(popup, 'device', 'phone');
   await shot(popup, 'l21-01-popup-mobile', true);
-  await popup.click('.type-card:has(input[value=video])');
+  await ui.pick(popup, 'type', 'video');
   await shot(popup, 'l21-01-popup-video', true);
-  // L21-01 : carte « Capture HTML » choisie
-  await popup.click('.type-card:has(input[value=html])');
-  ok(await popup.isChecked('input[value=html]'), 'carte « Capture HTML » sélectionnable');
+  // L21-01 : « HTML guidée » choisie
+  await ui.pick(popup, 'type', 'html');
+  ok(/^HTML guidée/.test((await popup.innerText('#type')).trim()), '« HTML guidée » sélectionnable');
   await shot(popup, 'l21-01-popup-html', true);
-  await popup.click('.type-card:has(input[value=clicks])');
+  await ui.pick(popup, 'type', 'clicks');
 
   // Format mobile : l'onglet est émulé (390 px, tactile), la démo est créée en mobile
   const tabId = await popup.evaluate(

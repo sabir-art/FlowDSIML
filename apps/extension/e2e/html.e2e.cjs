@@ -3,6 +3,7 @@
  * capture.e2e.cjs, puis node e2e/html.e2e.cjs. SHOTS_DIR pour les captures.
  */
 const { chromium } = require('playwright');
+const ui = require('./popup-ui.cjs');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -33,7 +34,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
   // L49 §2.1 : réglage de l'espace ; « Capture HTML » visible, désactivée, avec la raison
   const rule = (r) =>
@@ -44,9 +45,11 @@ const WS = '11111111-1111-1111-1111-111111111111';
     await popup.reload();
     await popup.waitForSelector('#setup:not([hidden])');
     await popup.waitForTimeout(400);
+    const types = await ui.options(popup, 'type');
     return {
-      disabled: await popup.isDisabled('input[name="mode"][value="html"]'),
-      help: await popup.textContent('#html-help'),
+      disabled: types.filter((t) => t.value === 'html' || t.value === 'sandbox').every((t) => t.disabled),
+      clicks: !types.find((t) => t.value === 'clicks').disabled,
+      help: await popup.textContent('#type-note'),
     };
   };
   await rule({ mode: 'disabled', domains: [] });
@@ -61,17 +64,17 @@ const WS = '11111111-1111-1111-1111-111111111111';
     hc.disabled && hc.help.startsWith('Non autorisée sur ce site\u202f: localhost n’est pas dans la liste'),
     `L49 : domaine hors liste, raison (${hc.help})`,
   );
-  ok(
-    !(await popup.isDisabled('input[name="mode"][value="clicks"]')),
-    'L49 : capture d’écran toujours proposée',
-  );
+  ok(hc.clicks, 'L49 : capture d’écran toujours proposée');
   await rule({ mode: 'allowed', domains: [] });
   hc = await htmlCard();
-  ok(!hc.disabled, 'L49 : autorisées, carte active');
-  await popup.click('.type-card:has(input[value=html])');
-  ok((await popup.$$('.type-card')).length === 4, 'quatrième carte « Capture HTML »');
-  ok(await popup.isVisible('#opt-html'), 'aide de la capture HTML');
-  ok(/HTML/.test(await popup.textContent('#start')), 'bouton « Démarrer la capture HTML »');
+  ok(!hc.disabled, 'L49 : autorisées, « HTML guidée » et « Sandbox » actives');
+  await ui.pick(popup, 'type', 'html');
+  ok(
+    (await popup.locator('#type').innerText()).replace(/\s+/g, ' ').trim() ===
+      'HTML guidée La page, rejouée étape par étape',
+    '« HTML guidée » choisie, avec sa description',
+  );
+  ok((await popup.textContent('#start')).trim() === 'Démarrer', 'bouton « Démarrer »');
   await shot(popup, 'l20-00-popup-html');
 
   const tabId = await popup.evaluate(

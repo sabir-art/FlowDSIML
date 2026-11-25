@@ -5,6 +5,7 @@
  * Usage : comme capture.e2e.cjs, puis node e2e/guided.e2e.cjs
  */
 const { chromium } = require('playwright');
+const ui = require('./popup-ui.cjs');
 (async () => {
   const path = require('path');
   const os = require('os');
@@ -29,11 +30,11 @@ const { chromium } = require('playwright');
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
   await popup.waitForSelector('#fill-field:not([hidden])');
-  const fillOpts = await popup.$$eval('#fill option', (o) => o.map((x) => x.textContent));
-  await popup.selectOption('#fill', '33333333-3333-3333-3333-333333333333');
+  const fillOpts = (await ui.options(popup, 'fill')).map((o) => o.label);
+  await ui.pick(popup, 'fill', '33333333-3333-3333-3333-333333333333');
   const titleHidden = await popup.$eval('#title-field', (e) => e.hidden);
   if (process.env.SHOTS_DIR)
     await popup.screenshot({ path: `${process.env.SHOTS_DIR}/l26-04-extension-popup.png` });

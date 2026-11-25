@@ -4,6 +4,7 @@
  * SHOTS_DIR=… node e2e/tabs.e2e.cjs (captures de la popup en clair et en sombre).
  */
 const { chromium } = require('playwright');
+const ui = require('./popup-ui.cjs');
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
@@ -36,52 +37,42 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
 
   // ===== Popup (L25-01) =====
-  const cards = await popup.$$eval('.type-card b', (b) => b.map((x) => x.textContent));
-  ok(/HTML/.test(cards[1]), 'la capture HTML est la 2e carte');
-  ok(!(await popup.isChecked('#follow')), '« Suivre les nouveaux onglets » désactivé par défaut');
+  const cards = (await ui.options(popup, 'type')).map((o) => o.label);
+  ok(/HTML/.test(cards[1]), 'la capture HTML est le 2e type');
+  await ui.openOptions(popup);
+  ok(!(await ui.isOn(popup, 'follow')), '« Suivre les nouveaux onglets » désactivé par défaut');
   ok(
-    (await popup.$eval('#checkdata', (i) => i.checked && i.disabled)) === true,
-    'vérification des données toujours active',
+    (await popup.locator('.ppf .ok').innerText()).trim() === 'Données vérifiées',
+    'vérification des données toujours active (pied du popup)',
   );
   ok(
-    /L’onglet est redimensionné le temps de la capture/.test(await popup.textContent('#tabsize-h')),
+    /L’onglet prend cette taille pendant la capture/.test(await popup.textContent('#tabsize-h')),
     'aide de la taille de l’onglet',
   );
-  ok(await popup.isVisible('#opt-full'), 'mention de la capture pleine page');
-  await popup.click('.type-card:has(input[value=video])');
-  ok(!(await popup.isVisible('#opt-desk')), 'vidéo : options multi-onglets masquées');
-  await popup.click('.type-card:has(input[value=mobile])');
+  await ui.pick(popup, 'type', 'video');
+  ok(!(await popup.isVisible('#follow')), 'vidéo : options multi-onglets masquées');
+  await ui.pick(popup, 'type', 'mobile');
   ok(
     (await popup.isVisible('#follow')) && !(await popup.isVisible('#tabsize')),
     'mobile : taille de l’onglet masquée, suivi des onglets proposé',
   );
-  await popup.click('.type-card:has(input[value=clicks])');
-  await popup.check('#follow');
-  // Libellé « Taille actuelle · l × h » : la popup ouverte ici dans un onglet est elle-même l'onglet
-  // actif ; on recalcule le libellé pour l'onglet de la page, comme dans la vraie popup.
-  ok(
-    /^Taille actuelle · \d/.test(await popup.textContent('#tabsize-current')),
-    'taille actuelle de l’onglet',
-  );
-  await popup.evaluate(async () => {
-    const [t] = await chrome.tabs.query({ url: 'http://localhost:54400/tabs*' });
-    const f = (n) => n.toLocaleString('fr');
-    document.getElementById('tabsize-current').textContent =
-      `Taille actuelle · ${f(t.width)} × ${f(t.height)}`;
-  });
+  await ui.pick(popup, 'type', 'clicks');
+  await ui.setSwitch(popup, 'follow', true);
+  // « Actuelle » porte la taille de l'onglet courant dans la liste
+  ok(/^\d/.test((await ui.options(popup, 'tabsize'))[0].desc), 'taille actuelle de l’onglet');
   for (const theme of ['light', 'dark']) {
     await popup.emulateMedia({ colorScheme: theme });
     const sfx = theme === 'dark' ? '-sombre' : '';
-    await popup.check('#follow');
-    await popup.selectOption('#tabsize', 'current');
+    await ui.setSwitch(popup, 'follow', true);
+    await ui.pick(popup, 'tabsize', 'current');
     if (SHOTS) await popup.screenshot({ path: `${SHOTS}/l25-01-suivi${sfx}.png`, fullPage: true });
     // Vue « Taille personnalisée » : suivi des onglets à sa valeur par défaut (désactivé)
-    await popup.uncheck('#follow');
-    await popup.selectOption('#tabsize', 'custom');
+    await ui.setSwitch(popup, 'follow', false);
+    await ui.pick(popup, 'tabsize', 'custom');
     await popup.fill('#dw', '1600');
     await popup.fill('#dh', '900');
     await popup.locator('#dh').blur();

@@ -8,6 +8,7 @@
  *   node e2e/permissions.e2e.cjs
  */
 const { chromium } = require('playwright');
+const ui = require('./popup-ui.cjs');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -45,39 +46,40 @@ const ok = (c, m) => {
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
-  ok((await popup.locator('label[for="workspace"]').innerText()) === 'Espace', 'popup : « Espace »');
+  ok((await popup.locator('#workspace-l').innerText()) === 'Espace', 'popup : « Espace »');
   ok(
     (await popup.locator('#perm').isHidden()) && (await popup.locator('#start').isVisible()),
     'rien demandé à l’ouverture',
   );
 
   // Option B : Format mobile visible, désactivé, « Bientôt » ; page entière en « Bientôt »
-  const mobile = popup.locator('input[name="mode"][value="mobile"]');
+  await popup.click('#type');
+  const mobile = popup.locator('#type + [role=listbox] [data-value=mobile]');
   ok(
-    (await mobile.isDisabled()) &&
-      (await popup.locator('#mobile-soon').innerText()) === 'Bientôt' &&
-      (await popup.locator('#mobile-help').innerText()) ===
+    (await mobile.getAttribute('aria-disabled')) === 'true' &&
+      (await mobile.locator('.pill').innerText()) === 'Bientôt' &&
+      (await mobile.locator('small').innerText()) ===
         'Pas encore disponible dans cette version de l’extension.',
     'Format mobile : visible, désactivé, « Bientôt »',
   );
-  // « Bientôt » sur la ligne du nom, à droite ; l'aide prend toute la largeur du texte (2 lignes au plus)
+  // « Bientôt » à droite du nom ; l'aide tient sur 2 lignes au plus
   const [nameBox, soonBox, helpBox] = await Promise.all(
-    ['.type-name b', '#mobile-soon', '#mobile-help'].map((s) => popup.locator(s).first().boundingBox()),
+    ['b', '.pill', 'small'].map((s) => mobile.locator(s).boundingBox()),
   );
   ok(
-    Math.abs(soonBox.y + soonBox.height - (nameBox.y + nameBox.height)) <= 3 &&
-      soonBox.x > nameBox.x + nameBox.width &&
-      helpBox.height < 40,
-    `« Bientôt » sur la ligne du nom, aide sur 2 lignes au plus (${Math.round(helpBox.height)} px)`,
+    soonBox.x > nameBox.x + nameBox.width && helpBox.height < 40,
+    `« Bientôt » à droite du nom, aide sur 2 lignes au plus (${Math.round(helpBox.height)} px)`,
   );
-  await popup.check('input[name="mode"][value="clicks"]');
+  await popup.keyboard.press('Escape');
+  await ui.openOptions(popup);
+  const full = popup.locator('#full-row');
   ok(
-    (await popup.locator('#opt-full').innerText()) ===
-      'Chaque clic donne une capture de la partie visible de la page.' &&
-      (await popup.locator('#full-soon').innerText()) === 'Page entière · Bientôt',
-    'page entière : partie visible, « Page entière · Bientôt »',
+    (await full.locator('.k').innerText()).trim() === 'Page entière' &&
+      (await full.locator('.pill').innerText()) === 'Bientôt' &&
+      (await full.isVisible()),
+    'page entière : ligne visible, « Bientôt »',
   );
   ok(
     (await popup.locator('#tabsize-h').innerText()).startsWith(
@@ -85,7 +87,13 @@ const ok = (c, m) => {
     ),
     'taille de l’onglet : par la fenêtre',
   );
-  await popup.check('input[name="mode"][value="html"]');
+  await ui.pick(popup, 'type', 'html');
+  // Comme dans le vrai popup, l'onglet actif est la page à capturer (sinon « Démarrer » est désactivé)
+  const target = await ctx.newPage();
+  await target.goto('http://localhost:54400/page');
+  await target.bringToFront();
+  await popup.evaluate(() => document.getElementById('error-retry').click());
+  await popup.waitForSelector('#start[aria-disabled=false]');
   await popup.click('#start');
   await popup.locator('#perm').waitFor();
   ok(await popup.locator('#start').isHidden(), 'encart à la place de « Démarrer »');

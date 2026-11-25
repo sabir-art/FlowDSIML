@@ -29,9 +29,10 @@ const { chromium } = require('playwright');
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
-  const wsOpts = await popup.$$eval('#workspace option', (o) => o.map((x) => x.textContent));
+  await popup.waitForSelector('#workspace-field:not([hidden])');
+  const wsOpts = [(await popup.locator('#workspace-one').innerText()).trim()];
   // Démarrage via message (le popup ouvert dans un onglet n'a pas l'onglet test comme onglet actif)
   const tabId = await popup.evaluate(
     async () => (await chrome.tabs.query({ url: 'http://localhost:54400/*' }))[0].id,
