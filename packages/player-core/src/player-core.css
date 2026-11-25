@@ -216,9 +216,8 @@
   background: transparent;
   box-shadow: 0 0 0 3px var(--p-hotspot);
   cursor: pointer;
-  /* MOTION-01 §6 : la zone suit le zoom par translate et scale (lecteur, Player.tsx), jamais par
-     left, top, width ou height */
-  transform-origin: 0 0;
+  /* MOTION-01 §6 : pendant un zoom la zone est masquée, puis apparaît en fondu (lecteur, Player.tsx) ;
+     jamais de transition sur left, top, width ou height */
 }
 .p-veil {
   position: absolute;
