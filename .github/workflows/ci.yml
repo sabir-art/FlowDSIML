@@ -541,6 +541,25 @@ jobs:
           # Vidéo de bout en bout sur un faux flux d'onglet (build des e2e seulement)
           node e2e/banc/etat-video.cjs | tee /tmp/banc-video.log
           ! grep -q '^NOT OK' /tmp/banc-video.log
+      - name: "L60 lot B : captures du banc envoyées puis ouvertes dans l'app (éditeur, plan du Sandbox, aperçu du lecteur : chaque page à son rang, sous son nom, rendue)"
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+          VITE_SUPABASE_ANON_KEY: test
+          # Hôtes fictifs : le faux Supabase et l'adresse publique du lecteur sont servis par le test
+          VITE_SUPABASE_URL: https://api.tutoclick.example
+          VITE_PLAYER_URL: https://demos.tutoclick.example
+          VITE_APP_ORIGIN: http://localhost:5173
+          VITE_EXTENSION_ID: abcdefghijklmnopabcdefghijklmnop
+        run: |
+          (cd apps/web && nohup pnpm exec vite --port 5173 --strictPort > /tmp/web.log 2>&1 &)
+          (cd apps/player && nohup pnpm exec vite --port 5174 --strictPort > /tmp/player.log 2>&1 &)
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:5173/ >/dev/null && curl -sf http://localhost:5174/ >/dev/null && break
+            sleep 1
+          done
+          cd apps/extension && node e2e/banc/bout-en-bout.cjs | tee /tmp/banc-bout.log
+          ! grep -q '^NOT OK' /tmp/banc-bout.log
       - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
         if: always()
         env:
