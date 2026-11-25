@@ -1982,7 +1982,6 @@ button.fd-nav__item:hover {
     /* Même marge haute qu'épinglée : le bouton d'épinglage ne bouge pas */
     padding: 16px 10px;
     overflow-x: hidden;
-    transition: width var(--fd-motion-duration-fast, 120ms) var(--fd-motion-ease-standard, ease);
   }
   /* Rail : le bouton seul en tête, à 16 px du bord (le rail ne se déplie plus au survol) */
   .shell--rail .sidebar__head {
@@ -2049,9 +2048,11 @@ button.fd-nav__item:hover {
     opacity: 0;
   }
 }
-@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
-  .shell--rail .sidebar {
-    transition: none;
+/* MOTION-01 §3 : après un dépli par le bouton, les libellés apparaissent en fondu (la largeur, elle,
+   change d'un seul coup ; le contenu suit par FLIP, lib/shiftFlip.ts) */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .shell--unfold .sidebar :is(.fd-nav__label, .fd-nav__section, .ws-text, .user-text, .brand) {
+    animation: fd-fade var(--fd-motion-duration-base) var(--fd-motion-ease-standard) backwards;
   }
 }
 

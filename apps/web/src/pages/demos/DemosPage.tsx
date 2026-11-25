@@ -80,6 +80,7 @@ import { CardTags, TagFilter, TagsDialog, useWorkspaceTags } from '../../compone
 import './demos.css';
 import { DEMO_DRAG, FolderColumn, type Scope } from './FolderColumn';
 import { ColumnGrip, useColumn, type ColumnBounds } from '../../components/ColumnGrip';
+import { useShiftFlip } from '../../lib/shiftFlip';
 
 /** COL-02 : colonne Dossiers de 200 à 360 px, 232 par défaut */
 const FOLDERS_BOUNDS: ColumnBounds = { min: 200, max: 360, def: 232 };
@@ -231,6 +232,20 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const wide = useMediaQuery('(min-width: 1024px)');
   // COL-02 (COMP-01 §19) : largeur et repli gardés pour la personne ; repliée par défaut sous 1 280 px
   const col = useColumn(`fd.folders.col.${user?.id ?? ''}`, FOLDERS_BOUNDS, colClosedByDefault(user?.id));
+  // MOTION-01 §3 : la colonne bascule d'un coup, le contenu suit par FLIP (320 ms) ; à l'ouverture
+  // par le bouton, la colonne entre en fondu (jamais au premier affichage)
+  const demosMain = useRef<HTMLDivElement>(null);
+  useShiftFlip(demosMain, col.closed ? 'closed' : 'open', {
+    token: '--fd-motion-duration-slow',
+    clip: () => demosMain.current?.parentElement ?? null,
+  });
+  const [colOpening, setColOpening] = useState(false);
+  const colWasClosed = useRef(col.closed);
+  useEffect(() => {
+    if (colWasClosed.current === col.closed) return;
+    colWasClosed.current = col.closed;
+    setColOpening(!col.closed);
+  }, [col.closed]);
   const [colDrag, setColDrag] = useState(false);
   const [drawer, setDrawer] = useState(false);
   // Lot 2 : sous 1 024 px, la bascule « Dossiers » est dans la barre mobile et ouvre un tiroir
@@ -914,7 +929,8 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       )}
       {wide && (
         <div
-          className={`fcol-slot${col.closed ? ' is-closed' : ''}${colDrag ? ' is-drag' : ''}`}
+          className={`fcol-slot${col.closed ? ' is-closed' : ''}${colDrag ? ' is-drag' : ''}${colOpening ? ' is-opening' : ''}`}
+          onAnimationEnd={colOpening ? () => setColOpening(false) : undefined}
           style={{ '--fcol-w': `${col.width}px` } as CSSProperties}
         >
           <div className="fcol-clip">
@@ -955,6 +971,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
         </div>
       )}
       <div
+        ref={demosMain}
         className={`demos-main${onbShown ? ' demos-main--onb' : ''}${fileOver ? ' is-file-over' : ''}`}
         // MEDIA-01 §18.3 : pas de zone visible ; des images glissées sur la page affichent un voile
         onDragEnter={(e) => {

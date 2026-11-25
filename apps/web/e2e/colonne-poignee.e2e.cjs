@@ -131,6 +131,8 @@ const slotIs = (page, w) =>
     await page.waitForFunction(
       () => getComputedStyle(document.querySelector('.fcol-clip')).visibility === 'hidden',
     );
+    // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
     const b1 = await box(btn);
     const main = await box(page.locator('.demos-main'));
     ok(
@@ -152,14 +154,17 @@ const slotIs = (page, w) =>
 
     // ----- Mémoire -----
     await page.reload();
-    await page.locator('.demos-section .list-toolbar').waitFor();
+    await page.locator('.demos-section .list-toolbar').first().waitFor();
     ok((await box(slot)).w === 0, `${tag} : repli gardé après rechargement`);
     await btn.click();
+    // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
     await slotIs(page, 300);
     ok(true, `${tag} : dépliée à la largeur gardée (300 px)`);
+    // MOTION-01 §3 : la largeur change d'un coup, c'est le contenu qui glisse (mouvement.e2e.cjs)
     ok(
-      (await slot.evaluate((e) => getComputedStyle(e).transitionDuration)) === '0.2s',
-      `${tag} : repli et dépli animés en 200 ms`,
+      (await slot.evaluate((e) => getComputedStyle(e).transitionDuration)) === '0s',
+      `${tag} : repli et dépli sans transition de largeur`,
     );
     const axeOpen = await new AxeBuilder({ page }).exclude('.demo-cover').analyze();
     const badOpen = axeOpen.violations.filter((v) => ['serious', 'critical'].includes(v.impact));
@@ -237,6 +242,8 @@ const slotIs = (page, w) =>
 
     // ----- Repliée -----
     await btn.click();
+    // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
     await railIs(48);
     const b1 = await box(btn);
     ok(
@@ -284,6 +291,8 @@ const slotIs = (page, w) =>
     await page.locator('.ed-title:not(.ed-title--sk)').waitFor();
     ok(Math.round((await box(rail)).w) === 48, `${tag} : repli gardé après rechargement`);
     await btn.click();
+    // MOTION-01 §3 : le contenu glisse à sa place ; on mesure une fois le mouvement fini
+    await page.waitForFunction(() => !document.getAnimations().some((a) => a.id === 'fd-shift'));
     await railIs(300);
     ok(true, `${tag} : dépliée à la largeur gardée (300 px)`);
     await ctx.close();
@@ -307,7 +316,7 @@ const slotIs = (page, w) =>
     const page = await b.newPage({ viewport: { width: 390, height: 844 } });
     await install(page, seedMaquette());
     await page.goto(`${APP}/#/`);
-    await page.locator('.demos-section .list-toolbar').waitFor();
+    await page.locator('.demos-section .list-toolbar').first().waitFor();
     ok(
       (await page.locator('.fd-cgrip').count()) === 0 &&
         (await page.getByRole('separator', { name: 'Largeur des dossiers' }).count()) === 0,

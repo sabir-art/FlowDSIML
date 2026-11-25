@@ -953,6 +953,150 @@ function act(target) {
   await pill(false);
   await pill(true);
 
+  // ===== §3 : bascule de la barre latérale et de la colonne Dossiers (largeur d'un coup, contenu en FLIP) =====
+  const shift = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    await ctx.addInitScript(() => {
+      if (!sessionStorage.getItem('fd.test.init')) {
+        sessionStorage.setItem('fd.test.init', '1');
+        localStorage.setItem('fd.sidebar', 'pinned');
+      }
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, require('./maquette-data.cjs').seedMaquette());
+    await page.goto(`${APP}/#/`);
+    await page.getByRole('navigation', { name: 'Dossiers' }).waitFor();
+    const mode = reduced ? 'mouvement réduit' : 'bascule';
+    ok(
+      await page.evaluate(
+        () =>
+          !document.getAnimations().some((a) => a.id === 'fd-shift') &&
+          getComputedStyle(document.querySelector('.sidebar .fd-nav__label')).animationName === 'none' &&
+          getComputedStyle(document.querySelector('.fcol')).animationName === 'none',
+      ),
+      `${mode} : premier affichage sans mouvement (contenu, libellés, colonne)`,
+    );
+    // Clic sur un bouton, puis relevé image par image du contenu voisin et de la colonne
+    const toggle = (button, column, content, fade) =>
+      page.evaluate(
+        ([button, column, content, fade]) => {
+          const el = document.querySelector(content);
+          const col = document.querySelector(column);
+          const left0 = el.getBoundingClientRect().left;
+          const w0 = col.getBoundingClientRect().width;
+          document.querySelector(button).click();
+          return new Promise((resolve) => {
+            const frames = [];
+            let fadeName = 'none';
+            const t0 = performance.now();
+            const tick = () => {
+              const a = el.getAnimations().find((x) => x.id === 'fd-shift');
+              const f = fade ? document.querySelector(fade) : null;
+              if (f && getComputedStyle(f).animationName !== 'none') {
+                const cs = getComputedStyle(f);
+                fadeName = `${cs.animationName} ${cs.animationDuration}`;
+              }
+              if (a) {
+                const tm = a.effect.getTiming();
+                frames.push({
+                  left: el.getBoundingClientRect().left,
+                  colW: col.getBoundingClientRect().width,
+                  colTransition: getComputedStyle(col).transitionProperty,
+                  colDur: getComputedStyle(col).transitionDuration,
+                  props: a.effect.getKeyframes().flatMap((k) => Object.keys(k)),
+                  duration: tm.duration,
+                  easing: tm.easing,
+                  scroll: document.documentElement.scrollWidth - innerWidth,
+                });
+              }
+              if ((frames.length && !a) || performance.now() - t0 > 1500) {
+                resolve({
+                  frames,
+                  fadeName,
+                  left0,
+                  w0,
+                  left1: el.getBoundingClientRect().left,
+                  w1: col.getBoundingClientRect().width,
+                  clip: el.parentElement.style.overflowX,
+                });
+              } else requestAnimationFrame(tick);
+            };
+            tick();
+          });
+        },
+        [button, column, content, fade],
+      );
+    const check = (tag, r, ms, grows) => {
+      const f = r.frames;
+      if (reduced) {
+        ok(
+          f.length === 0 && r.w1 !== r.w0 && r.left1 !== r.left0,
+          `${mode}, ${tag} : la colonne bascule sans mouvement`,
+        );
+        return;
+      }
+      ok(
+        f.length >= 3 && f.every((x) => Math.abs(x.colW - r.w1) < 1),
+        `${tag} : la colonne prend sa largeur d’un seul coup (${Math.round(r.w0)} → ${Math.round(r.w1)} px, ${f.length} image(s))`,
+      );
+      ok(
+        f.every((x) => !/width|flex-basis|grid/.test(x.colTransition) || parseFloat(x.colDur) === 0),
+        `${tag} : aucune transition de largeur sur la colonne`,
+      );
+      ok(
+        f.length > 0 && Math.abs(f[0].left - r.left0) <= 4 && Math.abs(r.left1 - r.left0) > 100,
+        `${tag} : le contenu part de son ancienne place (${Math.round(f[0]?.left)} px, ${Math.round(r.left0)} attendus) et rejoint ${Math.round(r.left1)} px`,
+      );
+      ok(
+        f.every((x, i) => i === 0 || (grows ? x.left >= f[i - 1].left - 0.5 : x.left <= f[i - 1].left + 0.5)),
+        `${tag} : trajet continu, sans saut ni retour`,
+      );
+      ok(
+        f.length > 0 && f[0].duration === ms && f[0].easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `${tag} : ${ms} ms, ${f[0]?.easing}`,
+      );
+      ok(
+        f.every((x) =>
+          x.props.every((n) => n === 'transform' || /^(offset|easing|composite|computedOffset)$/.test(n)),
+        ),
+        `${tag} : transform seul`,
+      );
+      ok(
+        f.every((x) => x.scroll <= 0) && r.clip === '',
+        `${tag} : pas de défilement horizontal pendant le trajet, rien de laissé sur la page`,
+      );
+    };
+    // Barre latérale : repli (le contenu va vers la gauche), puis dépli (libellés en fondu)
+    const fold = await toggle('.sidebar__pin', '.sidebar', '#main', null);
+    check('barre latérale, repli', fold, 200, false);
+    const unfold = await toggle('.sidebar__pin', '.sidebar', '#main', '.sidebar .fd-nav__label');
+    check('barre latérale, dépli', unfold, 200, true);
+    ok(
+      reduced ? unfold.fadeName === 'none' : unfold.fadeName === 'fd-fade 0.2s',
+      `${mode}, barre latérale : libellés ${reduced ? 'sans fondu' : 'en fondu après le dépli'} (${unfold.fadeName})`,
+    );
+    await page.waitForFunction(
+      () => getComputedStyle(document.querySelector('.sidebar .fd-nav__label')).animationName === 'none',
+    );
+    // Colonne Dossiers : repli, puis dépli (la colonne entre en fondu, 16 px)
+    const close = await toggle('.fd-cgrip__btn', '.fcol-slot', '.demos-main', null);
+    check('colonne Dossiers, repli', close, 320, false);
+    const open = await toggle('.fd-cgrip__btn', '.fcol-slot', '.demos-main', '.fcol');
+    check('colonne Dossiers, dépli', open, 320, true);
+    ok(
+      reduced ? open.fadeName === 'none' : open.fadeName === 'fcol-in 0.32s',
+      `${mode}, colonne Dossiers : ${reduced ? 'ouverture sans mouvement' : 'la colonne entre en fondu'} (${open.fadeName})`,
+    );
+    await ctx.close();
+  };
+  await shift(false);
+  await shift(true);
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

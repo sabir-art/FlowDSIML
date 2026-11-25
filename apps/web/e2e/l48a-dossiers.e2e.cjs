@@ -226,7 +226,7 @@ const seed = () => {
   // COL-02 (COMP-01 §19) : la poignée du bord replie la colonne (largeur 0) ; le choix est gardé
   await page.getByRole('button', { name: 'Replier les dossiers' }).click();
   await page.reload();
-  await page.locator('.demos-section .list-toolbar').waitFor();
+  await page.locator('.demos-section .list-toolbar').first().waitFor();
   ok(
     (await page.locator('.fcol-slot').evaluate((e) => e.getBoundingClientRect().width)) === 0 &&
       (await page.getByRole('navigation', { name: 'Dossiers' }).count()) === 0,
@@ -247,7 +247,7 @@ const seed = () => {
   ).newPage();
   await install(p2, seed());
   await p2.goto(`${APP}/#/`);
-  await p2.locator('.demos-section .list-toolbar').waitFor();
+  await p2.locator('.demos-section .list-toolbar').first().waitFor();
   ok(
     (await p2.getByRole('navigation', { name: 'Dossiers' }).count()) === 0 &&
       (await p2.getByRole('button', { name: /^Dossier\s*:/ }).count()) === 0 &&
