@@ -78,9 +78,18 @@ export function attachFor(p: PendingAttach | undefined, tabUrl: string | undefin
  */
 export type AddRequest =
   | { type: 'fd:ping' }
-  | { type: 'fd:add-steps'; demoId: string; workspaceId: string; afterStepId: string | null; url: string }
+  | {
+      type: 'fd:add-steps';
+      demoId: string;
+      workspaceId: string;
+      afterStepId: string | null;
+      url: string;
+      /** Captures d'écran (défaut), ou capture HTML (extension 0.3.1). */
+      mode: AddMode;
+    }
   | { type: 'fd:add-status' | 'fd:add-focus' | 'fd:add-clear'; demoId: string };
 
+export type AddMode = 'clicks' | 'html';
 const ADD_KEYS: Record<string, string[]> = {
   'fd:ping': ['type', 'v'],
   'fd:add-steps': ['afterStepId', 'demoId', 'type', 'url', 'v', 'workspaceId'],
@@ -99,7 +108,10 @@ export function parseAdd(
   if (typeof type !== 'string' || !(type in ADD_KEYS)) return null;
   if (!appOrigin || !senderOrigin || senderOrigin !== appOrigin) return { ok: false, error: 'origin' };
   const m = msg as Record<string, unknown>;
-  const keys = Object.keys(m).sort();
+  // « mode » est facultatif (absent : captures d'écran) ; aucune autre clé en plus
+  const keys = Object.keys(m)
+    .filter((k) => !(type === 'fd:add-steps' && k === 'mode'))
+    .sort();
   const want = ADD_KEYS[type]!;
   if (keys.length !== want.length || keys.some((k, i) => k !== want[i]) || m.v !== 1)
     return { ok: false, error: 'schema' };
@@ -121,9 +133,17 @@ export function parseAdd(
     return { ok: false, error: 'schema' };
   }
   if (u.protocol !== 'https:' && u.protocol !== 'http:') return { ok: false, error: 'schema' };
+  if ('mode' in m && m.mode !== 'clicks' && m.mode !== 'html') return { ok: false, error: 'schema' };
   return {
     ok: true,
-    req: { type, demoId: m.demoId, workspaceId: m.workspaceId, afterStepId: m.afterStepId, url: u.href },
+    req: {
+      type,
+      demoId: m.demoId,
+      workspaceId: m.workspaceId,
+      afterStepId: m.afterStepId,
+      url: u.href,
+      mode: m.mode === 'html' ? 'html' : 'clicks',
+    },
   };
 }
 
@@ -141,6 +161,8 @@ export interface AddTarget {
   editorTabId: number | null;
   captureTabId: number | null;
   stepIds: string[];
+  /** Type de capture demandé (absent : captures d'écran). */
+  mode?: AddMode;
 }
 
 /** Une cible expire après 30 minutes sans démarrage (EXT-02 §8.5). */

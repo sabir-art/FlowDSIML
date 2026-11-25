@@ -52,7 +52,7 @@ export async function sendHtml(
   pages: SendPage[],
   target: { workspaceId: string; title: string; kind: HtmlDemoKind; appendTo?: string },
   onProgress: (done: number) => void,
-): Promise<{ demoId: string; dropped: DroppedLink[] }> {
+): Promise<{ demoId: string; dropped: DroppedLink[]; stepIds: string[] }> {
   const { data: s } = await supabase.auth.getSession();
   const user = s.session?.user;
   if (!user || !s.session) throw new Error('Non connecté');
@@ -140,5 +140,5 @@ export async function sendHtml(
     if (ins.error) throw ins.error;
     onProgress(i + 1);
   }
-  return { demoId, dropped };
+  return { demoId, dropped, stepIds };
 }

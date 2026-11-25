@@ -94,12 +94,17 @@ describe('EXT-02 §8 : messages de l’ajout d’étapes', () => {
         workspaceId: WS,
         afterStepId: STEP,
         url: 'https://crm.example/clients',
+        mode: 'clicks',
       },
     });
     expect(parseAdd({ ...add, afterStepId: null }, APP, APP)).toMatchObject({
       ok: true,
       req: { afterStepId: null },
     });
+    // « mode » facultatif : absent, ce sont des captures d'écran ; « html » demande une capture HTML
+    expect(parseAdd(add, APP, APP)).toMatchObject({ ok: true, req: { mode: 'clicks' } });
+    expect(parseAdd({ ...add, mode: 'html' }, APP, APP)).toMatchObject({ ok: true, req: { mode: 'html' } });
+    expect(parseAdd({ ...add, mode: 'video' }, APP, APP)).toEqual({ ok: false, error: 'schema' });
   });
   it('refuse une clé en plus, une version inconnue, un identifiant ou une adresse invalides', () => {
     for (const bad of [

@@ -56,7 +56,7 @@ const ok = (c, l) => {
   };
   const status = (page) => send(page, { type: 'fd:add-status', v: 1, demoId: DEMO });
 
-  ok(manifest.version === '0.3.0', `manifeste : version ${manifest.version}`);
+  ok(manifest.version === '0.3.1', `manifeste : version ${manifest.version}`);
   ok(
     JSON.stringify(manifest.externally_connectable) ===
       JSON.stringify({ matches: ['http://localhost:54400/*'] }),
@@ -74,7 +74,7 @@ const ok = (c, l) => {
   await editor.goto('http://localhost:54400/page');
   const ping = await send(editor, { type: 'fd:ping', v: 1 });
   ok(
-    ping && ping.ok === true && ping.version === '0.3.0',
+    ping && ping.ok === true && ping.version === '0.3.1',
     `ping : version de l’extension (${JSON.stringify(ping)})`,
   );
   ok(
@@ -87,6 +87,7 @@ const ok = (c, l) => {
     { ...add, demoId: 'pas-un-uuid' },
     { ...add, afterStepId: 'x' },
     { ...add, url: 'javascript:alert(1)' },
+    { ...add, mode: 'video' },
     { type: 'fd:ping', v: 1, plus: true },
   ]) {
     const r = await send(editor, bad);
@@ -249,5 +250,69 @@ const ok = (c, l) => {
     !end.recording && (await status(editor)).state === 'none',
     '« Annuler l’ajout » : capture annulée, cible effacée',
   );
+
+  // ===== Capture HTML ajoutée à la démo (extension 0.3.1) : « mode: html » =====
+  const opened3 = ctx.waitForEvent('page', { predicate: (p) => p.url().includes('/page2') });
+  const rH = await send(editor, { ...add, mode: 'html' });
+  const hpage = await opened3;
+  ok(rH && rH.ok === true && rH.started === true, `capture HTML acceptée (${JSON.stringify(rH)})`);
+  const stH = await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:status' }));
+  ok(
+    stH.recording && stH.mode === 'html' && stH.addTo?.demoId === DEMO,
+    'capture HTML en cours, cible : la démo',
+  );
+  // La page de départ est copiée dès l'injection de la barre
+  {
+    const until = Date.now() + 15000;
+    let n = 0;
+    while (n < 1 && Date.now() < until) {
+      await new Promise((r) => setTimeout(r, 150));
+      n = (await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:status' }))).steps;
+    }
+    ok(n >= 1, `capture HTML : page de départ copiée (${n})`);
+  }
+  await hpage.bringToFront();
+  const logH = (await (await fetch('http://localhost:54400/__log')).json()).length;
+  const hreviewP = ctx.waitForEvent('page', { predicate: (p) => p.url().includes('/html-review.html') });
+  await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
+  const hreview = await hreviewP;
+  await hreview.waitForSelector('#send:not([disabled])');
+  const destH = (await hreview.locator('#kline').innerText()).replace(/\s+/g, ' ').trim();
+  ok(
+    /^Destination : ajout à « Démo CRM », après l’étape 2 · Créer une opportunité$/.test(destH) &&
+      !(await hreview.isVisible('#kind')) &&
+      !(await hreview.isVisible('#vt')),
+    `vérification HTML : ${destH}, sans titre ni choix du type`,
+  );
+  ok(
+    (await hreview.locator('#send').innerText()).trim() === 'Ajouter 1 étape',
+    `vérification HTML : « ${(await hreview.locator('#send').innerText()).trim()} »`,
+  );
+  ok((await status(editor)).state === 'review', 'capture HTML : état lu par l’éditeur, review');
+  const closedH = hreview.waitForEvent('close');
+  await hreview.click('#send');
+  await closedH;
+  const postsH = (await (await fetch('http://localhost:54400/__log')).json())
+    .slice(logH)
+    .filter((l) => l.m === 'POST');
+  const stepsH = postsH
+    .filter((l) => l.u.startsWith('/rest/v1/steps') && l.body)
+    .flatMap((l) => [JSON.parse(l.body)].flat());
+  ok(!postsH.some((l) => l.u.startsWith('/rest/v1/demos')), 'capture HTML : aucune démo créée');
+  ok(
+    stepsH.length === 1 && stepsH[0].kind === 'html' && stepsH[0].demo_id === DEMO,
+    `capture HTML : étape de type html ajoutée à la démo (${stepsH.map((x) => x.kind).join()})`,
+  );
+  const sH = await status(editor);
+  ok(
+    sH.state === 'sent' && sH.stepIds.length === 1 && sH.stepIds[0] === stepsH[0]?.id,
+    'capture HTML : étapes envoyées lues par l’éditeur, avec leurs identifiants',
+  );
+  ok(
+    await editor.evaluate(() => document.visibilityState === 'visible'),
+    'capture HTML : retour à l’onglet de l’éditeur',
+  );
+  await send(editor, { type: 'fd:add-clear', v: 1, demoId: DEMO });
+  ok((await status(editor)).state === 'none', 'capture HTML : cible effacée après l’insertion');
   await ctx.close();
 })();
