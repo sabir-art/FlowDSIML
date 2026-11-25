@@ -450,18 +450,42 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         await shot(page, 'partager-integrer');
       }
     }
-    // Exporter : le fichier se prépare dans la fenêtre d'export
-    await d
-      .locator('#sh-panel-export')
-      .getByRole('button', { name: /^Exporter/ })
-      .click();
-    await page.locator('dialog.x15-dialog[open]').waitFor();
+    // Exporter : trois fichiers en cartes radio, un seul « Exporter » avec la mise en garde à sa gauche
+    const exp = d.locator('#sh-panel-export');
+    const files = exp.getByRole('radiogroup', { name: 'Fichier à exporter' }).getByRole('radio');
     ok(
-      (await d.locator('#sh-panel-export').textContent()).includes(
-        'Le fichier n’est pas protégé par l’accès.',
-      ),
-      'Exporter : « Le fichier n’est pas protégé par l’accès. », la fenêtre d’export s’ouvre',
+      (await files.allInnerTexts()).map((x) => x.trim()).join('|') === 'PDF|GIF|Vidéo MP4' &&
+        (await files.nth(0).getAttribute('aria-checked')) === 'true',
+      'Exporter : cartes radio PDF · GIF · Vidéo MP4, PDF choisi',
     );
+    const go = exp.getByRole('button', { name: 'Exporter', exact: true });
+    const help = exp.locator('.shx-foot .help');
+    const [hb, gb] = [await help.boundingBox(), await go.boundingBox()];
+    ok(
+      (await exp.getByRole('button').count()) === 1 &&
+        (await help.textContent()) === 'Le fichier n’est pas protégé par l’accès.' &&
+        (MOBILE || hb.x + hb.width <= gb.x),
+      'Exporter : un seul bouton « Exporter », « Le fichier n’est pas protégé par l’accès. » à sa gauche',
+    );
+    await shot(page, 'partager-exporter');
+    await files.nth(2).click();
+    await go.click();
+    await page.locator('dialog.x15-dialog[open]').waitFor();
+    // Le choix du fichier est rendu dès que la fenêtre d'export a chargé la démo : on attend cet état
+    const picked = await page
+      .waitForFunction(
+        () => {
+          const x = document.querySelector('dialog.x15-dialog[open]');
+          if (!x) return false;
+          if (x.classList.contains('x15-small')) return 'erreur';
+          const r = x.querySelector('input[type="radio"][value="mp4"]');
+          return r ? (r.checked ? 'mp4' : 'autre') : false;
+        },
+        null,
+        { timeout: 30000 },
+      )
+      .then((h) => h.jsonValue());
+    ok(picked === 'mp4', `Exporter : la fenêtre d’export s’ouvre sur le fichier choisi (${picked})`);
     await page.keyboard.press('Escape');
     await page.locator('dialog.x15-dialog').waitFor({ state: 'detached' });
     ok((await dlg(page).count()) === 1, 'Échap ferme l’export, pas la fenêtre Partager');

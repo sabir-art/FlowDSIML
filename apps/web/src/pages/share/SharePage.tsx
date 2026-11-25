@@ -6,12 +6,15 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleAlert,
+  Clapperboard,
   Code,
   Copy,
   Download,
   ExternalLink,
+  FileText,
   Globe,
   GraduationCap,
+  ImagePlay,
   Info,
   KeyRound,
   Link2,
@@ -165,7 +168,8 @@ export function SharePanel({
       )
     : links;
   const [creating, setCreating] = useState(false);
-  const [exporting, setExporting] = useState<boolean | 'gif'>(false);
+  const [exporting, setExporting] = useState<false | 'pdf' | 'gif' | 'mp4'>(false);
+  const [exportFmt, setExportFmt] = useState<'pdf' | 'gif' | 'mp4'>('pdf');
   const { error, success, run } = useAction();
   const editable = can('demo.edit');
 
@@ -329,11 +333,7 @@ export function SharePanel({
   return (
     <div className={`mk sh shd${view === 'menu' ? ' is-menu' : ''}`}>
       {exporting && (
-        <ExportDialog
-          demoId={demoId}
-          initialFormat={exporting === 'gif' ? 'gif' : undefined}
-          onClose={() => setExporting(false)}
-        />
+        <ExportDialog demoId={demoId} initialFormat={exporting} onClose={() => setExporting(false)} />
       )}
       <aside className="shd-side">
         <div className="shd-head">
@@ -881,18 +881,45 @@ export function SharePanel({
             )}
             {tab === 'export' && (
               <section id="sh-panel-export" aria-labelledby="shd-mode">
-                <p className="help sh-help">{t('share.exportHelp')}</p>
-                <div className="row wrap">
+                {/* §1.3 : trois fichiers en cartes radio ; un seul « Exporter », avec la mise en garde à sa
+                    gauche. Les réglages du fichier (langue, format, résolution, délai), l'aperçu et
+                    l'avancement sont dans la fenêtre d'export. */}
+                <RadioCards
+                  className="shx-formats"
+                  label={t('share.exportFormat')}
+                  value={exportFmt}
+                  onChange={setExportFmt}
+                  options={[
+                    {
+                      value: 'pdf',
+                      label: t('share.exportPdf'),
+                      art: <FileText className="shx-art" />,
+                    },
+                    {
+                      value: 'gif',
+                      label: t('share.exportGif'),
+                      art: <ImagePlay className="shx-art" />,
+                    },
+                    {
+                      value: 'mp4',
+                      label: t('share.exportMp4'),
+                      art: <Clapperboard className="shx-art" />,
+                    },
+                  ]}
+                />
+                <p className="help shx-what">{t(`share.exportWhat_${exportFmt}`)}</p>
+                <div className="shx-foot">
+                  <p className="help">{t('share.exportHelp')}</p>
                   {/* L27 : exports hors de l'app interdits par les règles de l'espace */}
                   <button
                     type="button"
                     className="fd-btn fd-btn--primary"
                     aria-disabled={rules.exports_allowed ? undefined : true}
                     title={rules.exports_allowed ? undefined : t('rules.errExports')}
-                    onClick={() => rules.exports_allowed && setExporting(true)}
+                    onClick={() => rules.exports_allowed && setExporting(exportFmt)}
                   >
                     <Download aria-hidden="true" />
-                    {t('export.menu')}
+                    {t('share.exportGo')}
                   </button>
                 </div>
               </section>

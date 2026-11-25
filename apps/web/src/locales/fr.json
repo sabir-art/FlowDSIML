@@ -2588,7 +2588,15 @@
     "embedSizeFixed": "Fixe",
     "embedSize_width": "Largeur",
     "embedSize_height": "Hauteur",
-    "embedSizeUnit": "en pixels"
+    "embedSizeUnit": "en pixels",
+    "exportFormat": "Fichier à exporter",
+    "exportPdf": "PDF",
+    "exportGif": "GIF",
+    "exportMp4": "Vidéo MP4",
+    "exportGo": "Exporter",
+    "exportWhat_pdf": "Un guide pas à pas, à imprimer ou à joindre.",
+    "exportWhat_gif": "Une animation courte, pour un e-mail ou une messagerie.",
+    "exportWhat_mp4": "Une vidéo de la démo, avec sous-titres si besoin."
   },
   "analytics": {
     "title": "Analytics",

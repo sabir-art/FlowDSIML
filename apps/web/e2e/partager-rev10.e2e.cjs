@@ -60,8 +60,9 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     await page.locator('#sh-panel-link').screenshot({ path: `${SHOTS}/rev-10-partager${sfx}.png` });
   }
   await exp.click();
-  await page.locator('#sh-panel-export').getByRole('button', { name: 'Exporter (PDF, GIF)' }).click();
-  await page.locator('dialog.x15-dialog[open] input[type="radio"][value="gif"]').check({ force: true });
+  // §1.3 : le fichier se choisit par une carte radio du volet ; « Exporter » ouvre l'export sur ce fichier
+  await page.locator('#sh-panel-export').getByRole('radio', { name: 'GIF', exact: true }).click();
+  await page.locator('#sh-panel-export').getByRole('button', { name: 'Exporter', exact: true }).click();
   // État final de l'export : démo chargée (aperçu prêt), GIF coché ; pas d'écran d'erreur
   const loaded = await page
     .waitForFunction(
