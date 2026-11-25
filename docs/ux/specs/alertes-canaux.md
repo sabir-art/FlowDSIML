@@ -10,6 +10,7 @@ Décisions UX du 25/11 (levée des « Bientôt »). Écran : Analytics avancé �
 3. **« Dans l'app » toujours présent** : quand « E-mail » est cochée, « Dans l'app » est cochée et verrouillée, avec l'infobulle « Toujours affichée dans l'app ».
 4. **Désinscription** : le lien « Ne plus recevoir ces e-mails » décoche aussi « E-mail » sur les alertes de la personne. Au prochain affichage, un toast le dit : « E-mail désactivé sur vos alertes ».
 5. **Contenu** : le déclencheur, le nombre et la démo, comme dans le résumé. Jamais de donnée de visiteur.
+5 bis. **Alerte créée par une autre personne** (un admin l'ouvre) : la case « E-mail » montre son état mais n'est pas modifiable (`aria-disabled`, reste atteignable au clavier). Aide : « Envoyé à la personne qui a créé l'alerte. Elle seule peut changer ce réglage. »
 6. **Envoi non configuré** : la case reste grisée avec « Bientôt », avec le même contrôle que Paramètres › Notifications.
 
 ## Slack
