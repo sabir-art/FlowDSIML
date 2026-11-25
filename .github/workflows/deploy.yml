@@ -74,7 +74,7 @@ jobs:
       VITE_EXTENSION_URL: ${{ vars.VITE_EXTENSION_URL || 'https://chromewebstore.google.com/detail/ffcicmbpigdbhkhaidngefnmphodkfld' }}
       VITE_EXTENSION_ID: ${{ vars.VITE_EXTENSION_ID || 'ffcicmbpigdbhkhaidngefnmphodkfld' }}
       # Dernière version publiée sur le Chrome Web Store (la page Extension compare à cette valeur)
-      VITE_EXTENSION_VERSION: ${{ vars.VITE_EXTENSION_VERSION || '0.1.0' }}
+      VITE_EXTENSION_VERSION: ${{ vars.VITE_EXTENSION_VERSION || '0.3.1' }}
     steps:
       - uses: actions/checkout@v4
         with:
