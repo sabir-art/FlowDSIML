@@ -644,7 +644,7 @@ const APP_PAGES = [
     name: 'Analytics · temps réel',
     route: '/#/analytics?tab=live',
     seed: seedL19,
-    open: (p) => p.waitForSelector('.l19-now'),
+    open: (p) => p.waitForSelector('.lv-kpis'),
   },
   {
     name: 'Analytics · sondages et tests',

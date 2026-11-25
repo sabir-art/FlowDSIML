@@ -2548,6 +2548,7 @@ export type Database = {
       public_page: { Args: { p_demo: string }; Returns: Json };
       personal_page: { Args: { p_demo: string; p_code: string }; Returns: Json };
       live_demo: { Args: { p_demo: string }; Returns: Json };
+      live_space: { Args: { p_workspace: string; p_demo?: string }; Returns: Json };
       live_visits: { Args: { p_demo: string }; Returns: Json };
       present_remote_start: { Args: { p_demo: string }; Returns: Json };
       present_remote_new_code: { Args: { p_id: string }; Returns: Json };

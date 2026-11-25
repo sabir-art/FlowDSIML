@@ -147,20 +147,28 @@ const live = (n) => ({
   ];
   await install(page, state);
 
-  // ===== L19-01 : temps réel =====
+  // ===== §5 (retours du 24/11, 2e série) : temps réel de l'espace =====
   await page.goto(`${APP}/#/analytics?tab=live`);
-  await page.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
+  const liveP = page.locator('#an-panel-live');
+  await liveP.getByRole('heading', { name: 'Sur les démos maintenant' }).waitFor();
   ok(
     (await page.locator('.an-more.is-active').innerText()).includes('Temps réel'),
     'onglet Temps réel ouvert depuis l’URL (« Plus » prend son nom, L48-D)',
   );
-  ok((await page.locator('.kpis .kpi').count()) === 4, '4 KPI');
-  ok((await page.locator('.l19-now .value').textContent()) === '7', 'visiteurs en ce moment');
-  // État des lieux UX du 24/11 : un seul sélecteur de démo (celui de la page), tuiles sans aplat,
-  // progression dans la couleur de la marque, « Clics sur le bouton de fin »
+  ok(
+    (await liveP.locator('.lv-kpi dt').allTextContents()).join('|') ===
+      'Visiteurs en ce moment|Vues · 30 dernières minutes|Fins de démo aujourd’hui|Leads aujourd’hui' &&
+      (await liveP.locator('.lv-kpi dd').first().textContent()) === '7',
+    'quatre indicateurs compacts, visiteurs en ce moment',
+  );
+  // La page n'a plus sa barre de filtres sur cet onglet : le temps réel a la sienne
+  ok(
+    (await page.locator('.an-toolbar').count()) === 0 &&
+      (await page.getByRole('radiogroup', { name: 'Période' }).count()) === 0,
+    'temps réel : ni filtre Source ni période (le direct n’en dépend pas)',
+  );
   {
-    const live = page.locator('#an-panel-live');
-    const css = await live.evaluate((el) => {
+    const css = await liveP.evaluate((el) => {
       const probe = (v) => {
         const s = document.createElement('span');
         s.style.color = `var(${v})`;
@@ -172,78 +180,141 @@ const live = (n) => ({
       const bg = (q) => [...el.querySelectorAll(q)].map((x) => getComputedStyle(x).backgroundColor);
       return {
         primary: probe('--fd-color-primary'),
-        tile: bg('.l19-now')[0],
-        other: bg('.kpi:not(.l19-now)')[0],
-        steps: [...new Set(bg('.steps-mini i.on, .steps-mini i.cur'))],
+        tiles: [...new Set(bg('.lv-kpi'))],
+        bars: [...new Set(bg('.lv-prog__bar > i'))],
       };
     });
+    ok(css.tiles.length === 1, `temps réel : tuiles sans aplat (${css.tiles.join(', ')})`);
     ok(
-      (await live.locator('select, [role="combobox"]').count()) === 0,
-      'temps réel : pas de second sélecteur de démo',
-    );
-    // Le direct ne dépend ni de la source ni de la période : seul le filtre Démo reste sur cet onglet
-    ok(
-      (await page.getByRole('radiogroup', { name: 'Période' }).count()) === 0 &&
-        (await page
-          .locator('.an-toolbar')
-          .getByRole('button', { name: /Source/ })
-          .count()) === 0 &&
-        (await page.locator('.an-toolbar').getByRole('button', { name: /Démo/ }).count()) === 1,
-      'temps réel : filtres Source et période masqués, filtre Démo gardé',
-    );
-    ok(css.tile === css.other, `temps réel : première tuile sans aplat (${css.tile})`);
-    ok(
-      css.steps.length === 1 && css.steps[0] === css.primary,
-      `temps réel : progression dans la couleur de la marque (${css.steps.join(', ')})`,
-    );
-    ok(
-      (await live.getByText('Clics sur le bouton de fin aujourd’hui').count()) === 1 &&
-        (await live.getByText(/CTA/).count()) === 0,
-      'temps réel : « Clics sur le bouton de fin aujourd’hui »',
+      css.bars.length === 1 && css.bars[0] === css.primary,
+      `temps réel : progression dans la couleur de la marque (${css.bars.join(', ')})`,
     );
   }
-  ok((await page.getByText('Léa Martin').count()) === 1, 'identité renvoyée par la base (éditeur)');
+  // Tableau à colonnes fixes : Visiteur · Démo · Progression · Depuis
   ok(
-    (await page.getByText('Apprenant · Équipe Nord').count()) === 1,
-    'apprenant : sous-ligne avec la structure',
+    (await liveP.locator('.lv-table thead th:not(.lv-c-av)').allInnerTexts())
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .join('|') === 'Visiteur|Démo|Progression|Depuis' &&
+      (await liveP.locator('.lv-table').evaluate((el) => getComputedStyle(el).tableLayout)) === 'fixed',
+    'tableau à colonnes fixes : Visiteur, Démo, Progression, Depuis',
   );
+  const rowsH = await liveP
+    .locator('.lv-table tbody tr')
+    .evaluateAll((l) => l.map((r) => Math.round(r.getBoundingClientRect().height)));
+  ok(rowsH.length === 3 && rowsH.every((h) => h >= 48 && h <= 50), `lignes de 48 px (${rowsH.join(', ')})`);
+  ok((await liveP.getByText('Léa Martin').count()) === 1, 'identité renvoyée par la base (éditeur)');
   ok(
-    (await page.locator('.avatar').getByText('LM', { exact: true }).count()) === 1,
+    (await liveP.locator('.lv-av').getByText('LM', { exact: true }).count()) === 1,
     'apprenant : deux initiales',
   );
   ok(
-    (await page.locator('tbody b').getByText('Visiteur anonyme', { exact: true }).count()) === 2,
-    'anonymes : « Visiteur anonyme »',
+    (await liveP.locator('.lv-who__t').allTextContents()).slice(1).join('|') ===
+      'Visiteur · Belgique|Visiteur anonyme',
+    'anonymes : « Visiteur · pays » (lieu approximatif), « Visiteur anonyme » sans pays',
+  );
+  // Colonne Démo : pastille du type puis le nom, sur une seule ligne
+  const demoCell = await liveP
+    .locator('.lv-demo')
+    .first()
+    .evaluate((el) => ({
+      first: el.firstElementChild?.className ?? '',
+      nowrap: getComputedStyle(el).whiteSpace,
+      title: el.querySelector('.lv-demo__t')?.getAttribute('title'),
+      text: el.querySelector('.lv-demo__t')?.textContent,
+    }));
+  ok(
+    /ct-badge/.test(demoCell.first) &&
+      demoCell.nowrap === 'nowrap' &&
+      !!demoCell.title &&
+      demoCell.title === demoCell.text,
+    `colonne Démo : pastille du type puis nom, sur une ligne, nom complet en infobulle (${JSON.stringify(demoCell)})`,
   );
   ok(
-    /^Démo CRM · actualisé toutes les 10\ss$/.test(
-      (await page.locator('.l19-livehead p').textContent()).replace(/\s+/g, ' ').trim(),
-    ),
-    'en-tête : démo nommée, sans « · » orphelin',
+    (await liveP.getByRole('img', { name: '4 étapes vues sur 6' }).count()) === 1 &&
+      (await liveP.locator('.lv-prog__t').first().textContent()) === 'Étape 4/6',
+    'progression : barre nommée et « Étape n/N »',
   );
-  ok((await page.getByRole('img', { name: '4 étapes vues sur 6' }).count()) === 1, 'mini-progression nommée');
-  ok((await page.getByText(/4 autres visiteurs anonymes/).count()) === 1, 'visiteurs restants');
-  ok((await page.locator('table[aria-live="off"]').count()) === 1, 'tableau en aria-live off');
-  const pause = page.getByRole('button', { name: 'Mettre en pause' });
+  ok((await liveP.getByText(/4 autres visiteurs anonymes/).count()) === 1, 'visiteurs restants');
+  ok((await liveP.locator('table[aria-live="off"]').count()) === 1, 'tableau en aria-live off');
+  ok(
+    (await liveP.locator('[role=status][aria-live=polite]').count()) === 1,
+    'changements annoncés par un résumé poli, pas ligne par ligne',
+  );
+  // Pause : bouton icône de 32 px à bascule ; l'indicateur passe de « En direct » à « En pause »
+  const pause = liveP.getByRole('button', { name: 'Mettre en pause l’actualisation' });
+  const pb = await pause.boundingBox();
+  ok(
+    pb.width === 32 && pb.height === 32 && (await pause.getAttribute('aria-pressed')) === 'false',
+    'pause : bouton icône de 32 px (aria-pressed)',
+  );
+  ok(
+    /^En direct · actualisé il y a \d+ s$/.test((await liveP.locator('.lv-state').innerText()).trim()),
+    `indicateur « En direct · actualisé il y a n s » (${await liveP.locator('.lv-state').innerText()})`,
+  );
   await pause.click();
   ok(
-    (await page.getByRole('button', { name: 'Reprendre' }).getAttribute('aria-pressed')) === 'true',
-    'pause à bascule',
+    (await pause.getAttribute('aria-pressed')) === 'true' &&
+      (await liveP.locator('.lv-state').innerText()).trim() === 'En pause',
+    'pause à bascule : « En pause »',
   );
-  await page.getByRole('button', { name: 'Reprendre' }).click();
+  await pause.click();
   ok(
-    state.calls.some((c) => c.path.endsWith('/live_demo') && c.body.p_demo),
-    'live_demo interrogée',
+    state.calls.some((c) => c.path.endsWith('/live_space') && c.body.p_workspace),
+    'live_space interrogée',
+  );
+  // Filtre Démo : combobox avec recherche et listbox groupée
+  await liveP.getByRole('button', { name: 'Démo : Toutes les démos' }).click();
+  const combo = liveP.getByRole('combobox', { name: 'Rechercher une démo' });
+  await combo.waitFor();
+  const list = liveP.getByRole('listbox', { name: 'Démo' });
+  ok(
+    (await list.getByRole('option').first().innerText()).replace(/\s+/g, ' ').trim() ===
+      'Toutes les démos 7 en direct' &&
+      (await list.getByRole('group', { name: 'En direct' }).getByRole('option').count()) === 1 &&
+      (await list.locator('.lv-dot').count()) >= 1,
+    'filtre : « Toutes les démos », groupe « En direct » avec le nombre de visiteurs, pastille du type',
+  );
+  ok(
+    (await combo.getAttribute('aria-controls')) === (await list.getAttribute('id')) &&
+      !!(await combo.getAttribute('aria-activedescendant')),
+    'filtre : combobox reliée à sa liste, option active annoncée',
+  );
+  await combo.fill('zzz');
+  ok((await list.getByText('Aucune démo ne correspond').count()) === 1, 'filtre : recherche sans résultat');
+  await combo.fill('');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('.lv-pop'));
+  ok(
+    state.calls.some((c) => c.path.endsWith('/live_space') && c.body.p_demo),
+    'filtre : la démo choisie au clavier filtre le direct',
+  );
+  await liveP.locator('.lv-filter__btn').click();
+  await page.keyboard.press('Escape');
+  ok(
+    (await page.locator('.lv-pop').count()) === 0 &&
+      (await page.evaluate(() => document.activeElement?.classList.contains('lv-filter__btn'))),
+    'filtre : Échap ferme la liste, le focus revient au bouton',
+  );
+  ok(
+    (await liveP.getByRole('button', { name: 'Exporter en CSV' }).count()) === 1,
+    'export : bouton icône nommé',
   );
 
-  // ===== L19-02 : temps réel vide =====
+  // ===== temps réel vide =====
   state.live = live(0);
+  await page.goto(`${APP}/#/analytics?tab=live`);
   await page.reload();
-  await page.getByRole('heading', { name: 'Personne sur la démo en ce moment' }).waitFor();
-  ok((await page.locator('.l19-now .value').textContent()) === '0', 'vide : KPI à 0');
+  await liveP.getByRole('heading', { name: 'Personne sur les démos en ce moment' }).waitFor();
+  ok((await liveP.locator('.lv-kpi dd').first().textContent()) === '0', 'vide : indicateur à 0');
   ok(
-    (await page.locator('.kpis .kpi .value').nth(2).textContent()) === '2',
-    'vide : clics du jour conservés',
+    (await liveP.locator('.lv-kpi dd').nth(2).textContent()) === '2',
+    'vide : fins de démo du jour conservées',
+  );
+  ok(
+    (await liveP.getByText('Rien dans la dernière heure.').count()) === 1,
+    'vide : fil d’activité sans ligne',
   );
 
   // ===== L19-03 : sondages et tests =====
@@ -416,11 +487,12 @@ const live = (n) => ({
     );
     state.live = live(1);
     await page.goto(`${APP}/#/analytics?tab=live`);
-    await page.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
+    await page.getByRole('heading', { name: 'Sur les démos maintenant' }).waitFor();
+    await page.locator('.lv-table').waitFor();
     await shot('l19-01-temps-reel');
     state.live = live(0);
     await page.reload();
-    await page.getByRole('heading', { name: 'Personne sur la démo en ce moment' }).waitFor();
+    await page.getByRole('heading', { name: 'Personne sur les démos en ce moment' }).waitFor();
     await shot('l19-02-temps-reel-vide');
     await page.locator('.an-more').click();
     await page.getByRole('menuitem', { name: 'Sondages et tests' }).click();
@@ -492,9 +564,9 @@ const live = (n) => ({
   const p2 = await ctx.newPage();
   await install(p2, vs);
   await p2.goto(`${APP}/#/analytics?tab=live`);
-  await p2.getByRole('heading', { name: 'Visiteurs actifs' }).waitFor();
+  await p2.locator('.lv-table').waitFor();
   ok(
-    (await p2.locator('tbody b').getByText('Apprenant identifié', { exact: true }).count()) === 1 &&
+    (await p2.locator('.lv-who__t').getByText('Apprenant identifié', { exact: true }).count()) === 1 &&
       (await p2.getByText('Léa Martin').count()) === 0,
     'lecteur : « Apprenant identifié », sans nom',
   );
