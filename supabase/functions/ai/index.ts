@@ -21,6 +21,7 @@ import {
   mp3DurationMs,
   parseCaptions,
   parseVoice,
+  providerRefusal,
 } from './audio.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -83,12 +84,23 @@ async function availableVoices(key: string): Promise<string[]> {
   const res = await fetch(`${ELEVEN}/voices?show_legacy=true`, { headers: { 'xi-api-key': key } }).catch(
     () => null,
   );
-  if (!res?.ok) return Object.keys(VOICES);
+  if (!res?.ok) {
+    console.error('ai: voices', await refusalOf(res).then((r) => r.log));
+    return Object.keys(VOICES);
+  }
   const out = (await res.json().catch(() => ({}))) as { voices?: Array<{ voice_id?: string }> };
   const ids = new Set((out.voices ?? []).map((v) => v.voice_id));
   const keys = Object.keys(VOICES).filter((k) => ids.has(VOICES[k]));
+  // Aucune des voix prévues sur le compte : c'est un réglage à corriger, le journal le dit
+  if (!keys.length) console.error('ai: voices none_of_catalog', ids.size);
   catalog = { at: Date.now(), keys };
   return keys;
+}
+
+/** Refus du fournisseur : statut et code court, jamais le message (il peut reprendre le texte envoyé). */
+async function refusalOf(res: Response | null | undefined) {
+  if (!res) return providerRefusal(null, null);
+  return providerRefusal(res.status, await res.json().catch(() => null));
 }
 
 /** Suppression immédiate côté fournisseur après génération (historique TTS, transcription STT). */
@@ -102,12 +114,21 @@ async function voiceSample(key: string, voice: string) {
   const id = VOICES[voice];
   if (!id || !(await availableVoices(key)).includes(voice)) return json(400, { error: 'BAD_VOICE' });
   const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
-  const url = meta?.ok
-    ? ((await meta.json().catch(() => ({}))) as { preview_url?: string }).preview_url
-    : null;
-  if (!url || !/^https:\/\//.test(url)) return json(502, { error: 'PROVIDER' });
+  if (!meta?.ok) {
+    const r = await refusalOf(meta);
+    console.error('ai: sample', r.log);
+    return json(r.http, { error: r.error });
+  }
+  const url = ((await meta.json().catch(() => ({}))) as { preview_url?: string }).preview_url;
+  if (!url || !/^https:\/\//.test(url)) {
+    console.error('ai: sample no_preview_url');
+    return json(502, { error: 'PROVIDER_VOICE' });
+  }
   const mp3 = await fetch(url).catch(() => null);
-  if (!mp3?.ok) return json(502, { error: 'PROVIDER' });
+  if (!mp3?.ok) {
+    console.error('ai: sample preview', mp3?.status ?? 'network');
+    return json(502, { error: 'PROVIDER' });
+  }
   const bytes = new Uint8Array(await mp3.arrayBuffer());
   if (bytes.byteLength > 1024 * 1024) return json(502, { error: 'PROVIDER' });
   let bin = '';
@@ -159,8 +180,9 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     }).catch(() => null);
     if (!res || !res.ok) {
       await refund();
-      console.error('ai: tts', res?.status ?? 'network');
-      return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
+      const r = await refusalOf(res);
+      console.error('ai: tts', r.log);
+      return json(r.http, { error: r.error });
     }
     const bytes = new Uint8Array(await res.arrayBuffer());
     // Historique de la génération supprimé chez le fournisseur (identifiant renvoyé dans l'en-tête)
@@ -211,8 +233,9 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   }).catch(() => null);
   if (!res || !res.ok) {
     await refund();
-    console.error('ai: stt', res?.status ?? 'network');
-    return json(res?.status === 429 ? 503 : 502, { error: 'PROVIDER' });
+    const r = await refusalOf(res);
+    console.error('ai: stt', r.log);
+    return json(r.http, { error: r.error });
   }
   const out = (await res.json().catch(() => ({}))) as {
     text?: string;

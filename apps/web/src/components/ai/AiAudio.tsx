@@ -63,10 +63,20 @@ export function useAudioText() {
       .filter(Boolean)
       .join(' ');
   };
+  /** L62 : le service audio refuse (clé, crédits, voix) : la cause est dite, à transmettre à un admin. */
+  const providerText = (code: string) =>
+    code === 'PROVIDER_KEY'
+      ? t('ai.audio.providerKey')
+      : code === 'PROVIDER_QUOTA'
+        ? t('ai.audio.providerQuota')
+        : code === 'PROVIDER_VOICE'
+          ? t('ai.audio.providerVoice')
+          : '';
   return {
     disabled: (f: AudioFeature) => t(`ai.audio.disabled_${f}`),
     quota,
     /** Blocage avant envoi : quota audio de la fonction, sinon message commun (règle 4). */
+    provider: providerText,
     block: (f: AudioFeature, s: AiStatus | null) => {
       const b = aiBlock(s, f);
       if (b === 'quota' && audioLeft(s, f) === 0) return quota(f, s);
@@ -82,6 +92,9 @@ export function useAudioText() {
         if (e.code === 'PII_IN_TEXT') return t('ai.voice.pii');
         if (e.code === 'TOO_LONG' || e.code === 'TOO_LONG_TEXT')
           return f === 'voice' ? t('ai.voice.tooLong') : t('ai.captions.tooLong');
+        // L62 : refus du fournisseur audio, nommé (réessayer ne changerait rien)
+        const provider = providerText(e.code);
+        if (provider) return provider;
       }
       return t('ai.error');
     },
