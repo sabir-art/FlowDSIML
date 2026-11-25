@@ -1108,8 +1108,25 @@ fieldset.stg-row {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 0 0 24px;
+  /* Variante C (choix du client, 25/11) : 40 px du filet à la première section */
+  margin: 0 0 40px;
   padding-bottom: 20px;
+  /* Le fond de la bande reste derrière le texte et les actions, devant le fond de la page */
+  isolation: isolate;
+}
+/* Fond de la bande : du haut de la colonne de contenu jusqu'au filet, d'un bord à l'autre (coupé
+   aux bords de la colonne par .st-main) */
+.stg-page::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--st-pad-top, 32px));
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  background: var(--fd-color-surface-muted);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 .stg-page::after {
   content: '';
@@ -1158,6 +1175,7 @@ fieldset.stg-row {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    margin-bottom: 32px;
     padding-bottom: 16px;
   }
   .stg-page__acts .stg-search {

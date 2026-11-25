@@ -90,9 +90,11 @@ a.st-nav__item:hover {
   background: none;
 }
 .st-wrap {
+  /* Retrait du haut : la bande de l'en-tête (settings.css) remonte d'autant, jusqu'au bord */
+  --st-pad-top: 32px;
   max-width: 880px;
   margin: 0 auto;
-  padding: 32px 32px 64px;
+  padding: var(--st-pad-top) 32px 64px;
 }
 
 @media (max-width: 767px) {
@@ -104,7 +106,8 @@ a.st-nav__item:hover {
     display: none;
   }
   .st-wrap {
-    padding: 16px 16px 48px;
+    --st-pad-top: 16px;
+    padding: var(--st-pad-top) 16px 48px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
