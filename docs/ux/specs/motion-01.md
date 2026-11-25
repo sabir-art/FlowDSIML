@@ -85,7 +85,7 @@
 | **Infobulles** | `opacity`, après le délai existant de 300 ms | 120 ms |
 | **Modales** | Voile en `opacity` ; boîte en `opacity` et `translateY(8px) scale(.98)` vers `none` | 200 ms `standard` ; sortie en 160 ms `exit` |
 | **Tiroirs** (mobile, Dossiers sous 1280 px) | `translateX(-100 %)` vers 0, voile en `opacity` | 320 ms `standard` ; sortie en 240 ms `exit` |
-| **Toasts** | Entrée par le bas : `translateY(8px)` et `opacity` ; les autres toasts remontent par FLIP | 200 ms `standard` |
+| **Toasts** | En haut à droite (décision du 25/11, préférence de l'utilisateur) : entrée par le haut, `translateY(-8px)` et `opacity` ; les autres toasts descendent par FLIP ; sortie en 160 ms `exit`. Position : 16 px du bord droit, 16 px sous la barre du haut, 360 px au plus ; à 390, pleine largeur moins 16 px de chaque côté. Icône (CircleCheck, CircleAlert, Info), texte, croix « Fermer ». Trois au plus, le plus récent en haut ; 4 s (erreurs 6 s), pause au survol et au focus | 200 ms `standard` |
 | **Squelette vers contenu** | Fondu croisé : squelette de 1 à 0, contenu de 0 à 1. Jamais un contenu qui « saute » | 200 ms |
 | **Onglets** (onglets segmentés, en-tête de l'éditeur P2-2, Partager) | Le soulignement ou la pastille active glisse d'un onglet à l'autre par `transform: translateX() scaleX()` sur un seul élément | 200 ms `standard` |
 | **Réordonnancement de liste** (étapes, chapitres, glisser-déposer) | FLIP sur les éléments déplacés | 200 ms `standard` |
