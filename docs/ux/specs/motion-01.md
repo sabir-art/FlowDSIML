@@ -25,6 +25,23 @@
 - Exceptions écrites dans la garde §6, toutes deux dans `packages/ui/base.css` : la remise à zéro globale du mouvement réduit (0,01 ms) et l'astuce du remplissage automatique des champs (transition de 600000 s).
 - Les noms courts proposés par le chef (`--fd-motion-fast`, `-base`, `-slow`) ne sont pas créés. Ce seraient des doublons des jetons existants.
 
+### 1 bis. Jetons du lecteur (player-core, valables aussi dans l'aperçu de l'éditeur)
+
+| Jeton | Valeur | Usage |
+|---|---|---|
+| `--p-motion-duration-fast` | 120 ms | Boutons de choix, apparition du projecteur |
+| `--p-motion-duration-base` | 200 ms | Changement d'étape en fondu croisé |
+| `--p-motion-duration-slow` | 320 ms | Barres de progression (lecture, quiz, checklist), onglets de capture |
+| `--p-motion-duration-zoom` | 600 ms | Zoom d'une étape : image, pastilles et bulle |
+| `--p-motion-duration-pulse` | 1800 ms | Pulsations |
+| `--p-motion-duration-loop` | 1200 ms | Curseur de saisie, barres indéterminées |
+| `--p-motion-ease-standard` | celle de l'app | Par défaut |
+| `--p-motion-ease-zoom` | `cubic-bezier(0.2, 0.7, 0.2, 1)` | Zoom d'une étape |
+
+- Barres de progression : remplissage pleine largeur déplacé en `translateX` dans la piste ; rôles et valeurs ARIA inchangés.
+- Zoom : pastilles et bulle rejoignent leur place en `translate`. Le projecteur (`.p-spotlight`) est masqué pendant le zoom puis apparaît en fondu (fast) à l'arrivée : jamais de contour mis à l'échelle.
+- Rien en mouvement réduit ni en transition « Directe ».
+
 ## 2. Éditeur : la scène suit les panneaux (FLIP)
 
 ### 2.1 Ce qui bouge
