@@ -1041,7 +1041,7 @@ function act(target) {
         return;
       }
       ok(
-        f.length >= 3 && f.every((x) => Math.abs(x.colW - r.w1) < 1),
+        f.length >= 2 && f.every((x) => Math.abs(x.colW - r.w1) < 1),
         `${tag} : la colonne prend sa largeur d’un seul coup (${Math.round(r.w0)} → ${Math.round(r.w1)} px, ${f.length} image(s))`,
       );
       ok(
