@@ -30,7 +30,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [badCredentials, setBadCredentials] = useState(false);
-  const { busy, error, success, run } = useAction();
+  const { busy, error, success, run } = useAction({ inline: true });
 
   if (user) return <Navigate to={redirect} replace />;
 

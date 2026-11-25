@@ -23,7 +23,7 @@ export function Signup() {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [sentTo, setSentTo] = useState('');
   const { busy, error, run } = useAction();
-  const resend = useAction();
+  const resend = useAction({ inline: true });
   const [pwTouched, setPwTouched] = useState(false);
   const [pwFailed, setPwFailed] = useState(false);
 

@@ -50,11 +50,14 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     page.waitForEvent('download'),
     card.getByRole('button', { name: 'Télécharger (.zip)' }).click(),
   ]);
-  await card
-    .getByRole('status')
+  await page
+    .locator('.toasts[role="status"]')
     .getByText('Fichier téléchargé. Il n’est pas conservé sur nos serveurs.')
     .waitFor();
-  ok(true, 'après le téléchargement : « Fichier téléchargé. Il n’est pas conservé sur nos serveurs. »');
+  ok(
+    !(await card.innerText()).includes('Fichier téléchargé'),
+    'après le téléchargement : « Fichier téléchargé. Il n’est pas conservé sur nos serveurs. » en toast, rien dans la carte',
+  );
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await card.screenshot({ path: `${SHOTS}/l28-07-mes-donnees${sfx}.png` });

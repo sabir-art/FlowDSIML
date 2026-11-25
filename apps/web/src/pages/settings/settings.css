@@ -319,15 +319,6 @@
   color: var(--fd-color-text);
   box-shadow: 0 1px 2px rgb(8 10 14 / 0.08);
 }
-/* Message d'état sous un en-tête de section (export terminé) */
-.stg-status {
-  margin: 12px 0 0;
-  font-size: 13px;
-  color: var(--fd-color-text-muted);
-}
-.stg-status:empty {
-  display: none;
-}
 .st-wrap--plain .st-mydata-bar {
   height: 4px;
   margin-top: 12px;

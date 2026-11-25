@@ -32,7 +32,7 @@ import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { SettingsShell } from './SettingsShell';
-import { Button, Modal, Select, computePosition, getPortal } from '@flowdsiml/ui';
+import { Alert, Button, Modal, Select, computePosition, getPortal } from '@flowdsiml/ui';
 import { useToast } from '../../components/Toast';
 import { EmailChips, isEmail, splitEmails } from '../../components/EmailChips';
 
@@ -91,7 +91,7 @@ export function Members() {
     () => new URLSearchParams(location.hash.split('?')[1] ?? '').get('invite') === '1',
   );
   const toast = useToast();
-  const { error, success, run } = useAction();
+  const { error, run } = useAction();
   const ws = current!;
   const myRole = ws.role as Role;
   const canManage = can('members.manage');
@@ -231,16 +231,7 @@ export function Members() {
             </label>
           </div>
         </div>
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="alert alert-success" role="status">
-            {success}
-          </div>
-        )}
+        {error && <Alert kind="error">{error}</Alert>}
         <p className="sr-only" role="status">
           {t('members.resultCount', { count: shown.length + shownInvites.length })}
         </p>
@@ -657,13 +648,13 @@ function InviteDialog({
       {sent ? (
         <>
           {undelivered.length ? (
-            <div className="alert alert-warning" role="alert">
+            <div className="fd-alert fd-alert--warning" role="alert">
               <Info aria-hidden="true" />
-              <span>
+              <div className="fd-alert__body">
                 {undelivered.every((r) => r.status === 'rate_limit')
                   ? t('members.rateLimit', { time: nextAt })
                   : t('members.emailFailed')}
-              </span>
+              </div>
             </div>
           ) : (
             <p role="status">{t('members.sentBody', { count: results.length })}</p>
@@ -692,11 +683,7 @@ function InviteDialog({
         </>
       ) : (
         <form id="inv-form" className="st-invite__form" onSubmit={submit} noValidate>
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
+          {error && <Alert kind="error">{error}</Alert>}
           <div className="fd-modal__field">
             <label htmlFor="inv-email">{t('members.emails')}</label>
             <EmailChips

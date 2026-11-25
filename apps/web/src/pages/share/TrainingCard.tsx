@@ -31,7 +31,7 @@ export function TrainingCard({
 }) {
   const { t } = useTranslation();
   const ids = useId();
-  const { error, success, run } = useAction();
+  const { error, run } = useAction();
   const ordered = (pathId: string) =>
     modules.filter((m) => m.path_id === pathId).sort((a, b) => a.position - b.position);
   const mine = paths
@@ -126,11 +126,6 @@ export function TrainingCard({
         <p className="error-msg" role="alert">
           <CircleAlert aria-hidden="true" />
           {error}
-        </p>
-      )}
-      {success && (
-        <p className="help" role="status">
-          {success}
         </p>
       )}
       <p className="sh-training-scorm">

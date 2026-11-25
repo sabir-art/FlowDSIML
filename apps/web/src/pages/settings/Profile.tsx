@@ -13,7 +13,7 @@ import {
 } from '../../components/PasswordField';
 import { useAuth } from '../../auth/AuthProvider';
 import { setLocale } from '../../i18n';
-import { Button, Select } from '@flowdsiml/ui';
+import { Alert, Button, Select } from '@flowdsiml/ui';
 import { ThemeSwitcher } from '../../components/ThemeSwitcher';
 import { useToast } from '../../components/Toast';
 import { MyDataCard } from './MyDataCard';
@@ -151,11 +151,7 @@ export function Profile() {
       }
     >
       <form id="pf-form" className="st-pf" onSubmit={saveProfile}>
-        {info.error && (
-          <div className="alert alert-danger" role="alert">
-            {info.error}
-          </div>
-        )}
+        {info.error && <Alert kind="error">{info.error}</Alert>}
         <section className="stg-sec" aria-labelledby="pf-sec-info">
           <div className="stg-sec__head">
             <div>
@@ -285,11 +281,7 @@ export function Profile() {
             )}
           </div>
         </div>
-        {pwOpen && pwd.error && (
-          <div className="alert alert-danger" role="alert">
-            {pwd.error}
-          </div>
-        )}
+        {pwOpen && pwd.error && <Alert kind="error">{pwd.error}</Alert>}
         {pwOpen && hasPassword && (
           <div className="stg-row">
             <div className="stg-text" data-gap-exempt="">

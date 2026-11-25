@@ -10,7 +10,7 @@ import { AuthLayout } from './AuthLayout';
 export function ForgotPassword() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
-  const { busy, error, success, run } = useAction();
+  const { busy, error, success, run } = useAction({ inline: true });
 
   async function submit(e: FormEvent) {
     e.preventDefault();

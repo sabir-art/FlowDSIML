@@ -9,7 +9,7 @@ import { formatNumber } from '../../lib/format';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { CircleAlert } from 'lucide-react';
-import { Button, Select } from '@flowdsiml/ui';
+import { Alert, Button, Select } from '@flowdsiml/ui';
 import { SUPPORT_EMAIL_RE, SUPPORT_HTTPS_RE } from '../../lib/support';
 
 const HTTPS = /^https:\/\/\S+$/;
@@ -157,11 +157,7 @@ export function WorkspaceSettings() {
     >
       {dialog}
       <form id="ws-form" onSubmit={save} noValidate={false}>
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
-        )}
+        {error && <Alert kind="error">{error}</Alert>}
         <section className="stg-sec" aria-labelledby="ws-sec-identity">
           <div className="stg-sec__head">
             <div>
