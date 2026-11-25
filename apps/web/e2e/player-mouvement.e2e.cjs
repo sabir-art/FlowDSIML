@@ -243,6 +243,91 @@ function sampler() {
     );
     await ctx.close();
   }
+  // ===== MOTION-01 §6 : zone du projecteur pendant un zoom : masquée, puis fondu de 120 ms, sans échelle =====
+  for (const reduced of [false, true]) {
+    const ctx = await b.newContext({
+      viewport: { width: 1280, height: 800 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    const spot = {
+      ...manifest,
+      steps: [
+        {
+          ...first,
+          zoom: { x: 0.2, y: 0.5, scale: 1.6, transition: 'smooth', keep: false },
+          hotspots: first.hotspots.map((h) => ({ ...h, style: 'spotlight' })),
+        },
+        last,
+      ],
+    };
+    await page.route('**/functions/v1/open-demo', (r) =>
+      r.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ status: 'ok', manifest: spot }),
+        headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' },
+      }),
+    );
+    await page.route('**/assets/*.webp', (r) => r.fulfill({ contentType: 'image/png', body: png }));
+    await page.route('**/functions/v1/track', (r) => r.fulfill({ status: 200, body: '{}' }));
+    await page.addInitScript(() => {
+      window.__s = { anim: null, css: [], hidden: 0, frames: 0 };
+      const tick = () => {
+        const el = document.querySelector('.p-stage > .p-spotlight');
+        if (el) {
+          const cs = getComputedStyle(el);
+          if (
+            /left|top|width|height|all/.test(cs.transitionProperty) &&
+            parseFloat(cs.transitionDuration) > 0.001
+          )
+            window.__s.css.push(`${cs.transitionProperty} ${cs.transitionDuration}`);
+          const a = el.getAnimations().find((x) => !x.animationName);
+          if (a) {
+            window.__s.frames++;
+            if (parseFloat(cs.opacity) === 0) window.__s.hidden++;
+            if (!window.__s.anim) {
+              const kf = a.effect.getKeyframes();
+              window.__s.anim = {
+                props: [...new Set(kf.flatMap((f) => Object.keys(f)))].filter(
+                  (n) => !/^(offset|easing|composite|computedOffset)$/.test(n),
+                ),
+                duration: a.effect.getTiming().duration,
+                hold: kf[1]?.computedOffset,
+              };
+            }
+          }
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+    await page.goto(`${PLAYER}/#/d/${DEMO}`);
+    await page.locator('.p-stage > .p-spotlight').waitFor({ state: 'attached' });
+    await page.waitForFunction(() => /scale\(1\.6\)/.test(document.querySelector('.p-zoom').style.transform));
+    await page.waitForFunction(() => {
+      const el = document.querySelector('.p-stage > .p-spotlight');
+      return !el.getAnimations().some((x) => !x.animationName) && getComputedStyle(el).opacity === '1';
+    });
+    const z = await page.evaluate(() => window.__s);
+    const tag = reduced ? 'mouvement réduit, projecteur' : 'projecteur';
+    ok(
+      z.css.length === 0,
+      `${tag} : aucune transition de position ni de taille sur la zone (${z.css[0] ?? ''})`,
+    );
+    if (reduced) ok(!z.anim, `${tag} : la zone est en place sans mouvement`);
+    else
+      ok(
+        !!z.anim &&
+          z.anim.props.join() === 'opacity' &&
+          z.anim.duration === 720 &&
+          Math.abs(z.anim.hold - 600 / 720) < 0.001 &&
+          z.hidden >= 2,
+        `projecteur : masquée pendant les 600 ms du zoom, puis fondu de 120 ms, opacité seule (${z.anim?.props.join()}, ${z.anim?.duration} ms, ${z.hidden} image(s) masquée(s))`,
+      );
+    await ctx.close();
+  }
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

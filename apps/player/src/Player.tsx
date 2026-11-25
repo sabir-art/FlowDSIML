@@ -1749,14 +1749,19 @@ function ImageStep({
   const origin = `${o.x * 100}% ${o.y * 100}%`;
   const screen = <T extends Hotspot>(h: T): T => zoomBox(h, o, scale);
   // MOTION-01 §6 : quand le zoom change, pastilles et bulle rejoignent leur place par `translate`
-  // (même durée et même courbe que le calque zoomé), jamais par une transition de left/top
+  // (même durée et même courbe que le calque zoomé), jamais par une transition de left/top. La zone du
+  // projecteur change aussi de taille : elle reste masquée pendant le zoom, puis apparaît en fondu.
   const placed = useRef(new Map<Element, { x: number; y: number; w: number; h: number }>());
   const still = reducedMotion || zoom?.transition === 'instant';
   useLayoutEffect(() => {
     const root = stage.current;
     if (!root) return;
-    const v = getComputedStyle(root).getPropertyValue('--p-motion-duration-zoom').trim();
-    const ms = v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 0;
+    const read = (name: string) => {
+      const v = getComputedStyle(root).getPropertyValue(name).trim();
+      return v.endsWith('ms') ? parseFloat(v) : v.endsWith('s') ? parseFloat(v) * 1000 : 0;
+    };
+    const ms = read('--p-motion-duration-zoom');
+    const fade = read('--p-motion-duration-fast');
     const next = new Map<Element, { x: number; y: number; w: number; h: number }>();
     for (const el of root.querySelectorAll<HTMLElement>(
       ':scope > .p-beacon, :scope > .p-tip, :scope > .p-spotlight',
@@ -1766,18 +1771,18 @@ function ImageStep({
       const zone = el.classList.contains('p-spotlight');
       const moved =
         !!was && (was.x !== now.x || was.y !== now.y || (zone && (was.w !== now.w || was.h !== now.h)));
-      if (was && moved && !still && ms > 0 && now.w > 0 && now.h > 0) {
-        const from = `${was.x - now.x}px ${was.y - now.y}px`;
-        el.animate(
-          zone
-            ? // La zone du projecteur change aussi de taille (origine en haut à gauche)
-              [
-                { translate: from, scale: `${was.w / now.w} ${was.h / now.h}` },
-                { translate: '0px 0px', scale: '1 1' },
-              ]
-            : [{ translate: from }, { translate: '0px 0px' }],
-          { duration: ms, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)', composite: zone ? 'replace' : 'add' },
-        );
+      if (was && moved && !still && ms > 0) {
+        if (zone)
+          el.animate([{ opacity: 0 }, { opacity: 0, offset: ms / (ms + fade) }, { opacity: 1 }], {
+            duration: ms + fade,
+            easing: 'linear',
+          });
+        else
+          el.animate([{ translate: `${was.x - now.x}px ${was.y - now.y}px` }, { translate: '0px 0px' }], {
+            duration: ms,
+            easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)',
+            composite: 'add',
+          });
       }
       next.set(el, now);
     }
