@@ -73,7 +73,6 @@ export function SettingsTab({
     editor.updateDemo({ settings: { ...settings, ...patch } as DemoSettings as never });
   const autoplay = { enabled: false, delayMs: 4000, ...settings.autoplay };
   const checklist = { enabled: false, title: '', position: 'right' as const, ...settings.checklist };
-  const soon = <span className="soon-text">{t('shell.soon')}</span>;
   const wsGlossary =
     (ws?.settings as { glossary?: { underline?: boolean } } | null)?.glossary?.underline !== false;
   const form = editor.forms[0];
@@ -181,9 +180,22 @@ export function SettingsTab({
               {t(wsGlossary ? 'editor.settings.glossaryHelp' : 'editor.settings.glossaryOff')}
             </p>
           </div>
+          {/* Barre de progression du lecteur (réglage de la démo, rangé dans son thème) */}
           <div className="fd-stack fd-stack--help">
-            <SettingSwitch id="pg-on" label={t('editor.settings.progress')} checked disabled badge={soon} />
-            <p className="help">{t('editor.settings.progressHelp')}</p>
+            <SettingSwitch
+              id="pg-on"
+              label={t('editor.settings.progress')}
+              checked={settings.theme?.progress !== false}
+              disabled={readOnly}
+              onChange={(v) => set({ theme: { ...settings.theme, progress: v } })}
+            />
+            <p className="help">
+              {t(
+                settings.theme?.progress !== false
+                  ? 'editor.settings.progressHelp'
+                  : 'editor.settings.progressOffHelp',
+              )}
+            </p>
           </div>
         </div>
       </div>

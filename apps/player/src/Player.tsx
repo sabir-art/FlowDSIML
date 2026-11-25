@@ -1543,7 +1543,8 @@ export function Player({
             </button>
           )}
           <div
-            class="p-progress"
+            // Barre masquée par la démo (theme.progress) : l'avancement reste annoncé, sans le trait
+            class={theme.progress === false ? 'p-progress p-progress--hidden' : 'p-progress'}
             role="progressbar"
             aria-valuemin={1}
             aria-valuemax={m.steps.length}

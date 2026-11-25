@@ -708,6 +708,11 @@ export const themeSchema = z.object({
   /** Fond dégradé du lecteur (maquette editeur.html, onglet Design › Cadre). */
   backgroundGradient: z.boolean().default(false),
   /**
+   * Barre de progression du lecteur (éditeur › Réglages). false : le trait n'est plus affiché ; le
+   * compteur « 2 / 8 » et l'annonce de l'avancement restent. Absent des manifestes plus anciens : affichée.
+   */
+  progress: z.boolean().default(true).catch(true),
+  /**
    * L25-03 : cadre du navigateur autour des captures (toute la démo). Absent dans les manifestes
    * publiés avant L25 : pas de cadre. L'adresse affichée n'est jamais celle de la capture d'office :
    * seule une adresse saisie dans l'éditeur est publiée.

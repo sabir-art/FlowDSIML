@@ -3542,3 +3542,15 @@ h1.p-title {
 .p-online-only[hidden] {
   display: none;
 }
+
+/* Barre masquée par la démo : plus de trait à l'écran, l'avancement reste annoncé (role progressbar) */
+.p-root .p-controls .p-progress.p-progress--hidden {
+  position: absolute;
+  flex: none;
+  width: 1px;
+  min-width: 0;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

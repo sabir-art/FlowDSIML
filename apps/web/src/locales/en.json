@@ -1000,7 +1000,8 @@
     "settings": {
       "reading": "Playback",
       "progress": "Progress bar",
-      "progressHelp": "The progress bar is always shown in the player.",
+      "progressHelp": "The progress bar is shown in the player.",
+      "progressOffHelp": "The player only shows the step counter (“2 / 8”).",
       "language": "Demo language",
       "variables": "Variables used",
       "defaultIs": "default:",

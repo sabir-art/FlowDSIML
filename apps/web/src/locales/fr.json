@@ -1000,7 +1000,8 @@
     "settings": {
       "reading": "Lecture",
       "progress": "Barre de progression",
-      "progressHelp": "La barre de progression est toujours affichée dans le lecteur.",
+      "progressHelp": "La barre de progression est affichée dans le lecteur.",
+      "progressOffHelp": "Le lecteur n’affiche que le compteur d’étapes (« 2 / 8 »).",
       "language": "Langue de la démo",
       "variables": "Variables utilisées",
       "defaultIs": "par défaut :",
