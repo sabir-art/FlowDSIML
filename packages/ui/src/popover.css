@@ -2,8 +2,9 @@
    Rayon de 10 px, filet de 1 px, ombre md, padding de 4 px, fond surface. Rendu dans le portail. */
 .fd-pop {
   position: fixed;
-  /* Au-dessus des voiles de modale (overlay, modal) : une liste ouverte depuis une modale reste cliquable */
-  z-index: var(--fd-z-popover);
+  /* Au-dessus des voiles de modale (overlay, modal) : une liste ouverte depuis une modale reste
+     cliquable. Devant les toasts aussi (CAD-08), sous les infobulles. */
+  z-index: calc(var(--fd-z-toast) + 50);
   display: flex;
   flex-direction: column;
   padding: 4px;

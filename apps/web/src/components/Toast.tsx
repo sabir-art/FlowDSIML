@@ -90,11 +90,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       else el.style.removeProperty('--fd-toast-x');
     };
     sync();
+    // La zone change de largeur quand une barre latérale se replie ou que la fenêtre change
     const ro = new ResizeObserver(sync);
     const z = zone();
     if (z) ro.observe(z);
-    ro.observe(document.documentElement);
-    return () => ro.disconnect();
+    addEventListener('resize', sync);
+    return () => {
+      ro.disconnect();
+      removeEventListener('resize', sync);
+    };
   }, [count]);
   const latest = useRef<Toast[]>([]);
   latest.current = toasts;

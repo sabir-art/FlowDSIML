@@ -431,7 +431,8 @@
 /* Menus : rendus dans #fd-portal, positionnés en fixed par lib/floating.ts (composants.md §15.7) */
 .menu-list {
   position: fixed;
-  z-index: var(--fd-z-dropdown);
+  /* Un menu ouvert passe devant les toasts (CAD-08), sous les infobulles */
+  z-index: calc(var(--fd-z-toast) + 50);
   min-width: 180px;
   max-width: min(320px, calc(100vw - 16px));
   overflow-y: auto;
