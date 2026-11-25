@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, useEffect } from 'react';
+import { useMediaQuery } from '../../lib/useMediaQuery';
 import { Link, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -158,13 +159,30 @@ export function SettingsShell({
   children,
   sub,
   actions,
+  actionsNarrow,
+  pending,
+  pendingActions,
+  search,
   legacy = true,
 }: {
   children: ReactNode;
   /** L48-F : sous-page d'une entrée (ex. Webhooks) : l'entrée devient un élément du fil, `title` est le h1. */
   sub?: { title: string; trail?: Crumb[] };
-  /** Actions de la page (Annuler, Enregistrer, Inviter…), à droite du PageHeader. */
+  /**
+   * SETTINGS-HDR-01 : actions de la page, dans l'en-tête du contenu (plus dans la barre du haut).
+   * Ordre de gauche à droite : secondaires, « Annuler », puis l'action principale (une au plus).
+   */
   actions?: ReactNode;
+  /** Sous 600 px, à la place de `actions` : avec trois boutons ou plus, les secondaires dans un menu ⋯. */
+  actionsNarrow?: ReactNode;
+  /**
+   * Formulaire avec des modifications en attente. Sous 600 px, quand l'en-tête est sorti de l'écran, une
+   * barre collée en bas reprend « Annuler » et « Enregistrer » (`pendingActions`, sinon `actions`).
+   */
+  pending?: boolean;
+  pendingActions?: ReactNode;
+  /** SETTINGS-HDR-01 : recherche de la page (240 px), à gauche des actions. */
+  search?: ReactNode;
   /**
    * Page pas encore passée au gabarit du §11 : son contenu garde les styles hérités (« .mk »).
    * Les pages refaites passent `legacy={false}` (classes « stg- » de settings.css).
@@ -201,6 +219,20 @@ export function SettingsShell({
     mo.observe(el, { childList: true, subtree: true, characterData: true });
     return () => mo.disconnect();
   }, [title]);
+  // SETTINGS-HDR-01 §3 : sous 600 px, la barre collée en bas n'existe que si des modifications sont en
+  // attente et que les actions de l'en-tête ne sont plus à l'écran
+  const narrow = useMediaQuery('(max-width: 599px)');
+  const acts = useRef<HTMLDivElement>(null);
+  const [actsSeen, setActsSeen] = useState(true);
+  const watch = narrow && !!pending;
+  useEffect(() => {
+    const el = acts.current;
+    if (!watch || !el) return setActsSeen(true);
+    const io = new IntersectionObserver(([e]) => setActsSeen(!!e?.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [watch]);
+  const bar = watch && !actsSeen;
   const key = sub ? null : (here?.entry.to?.replace('/settings/', '').replace('/', '-') ?? null);
   const desc = own ?? (key ? t(`settings.desc.${key}`, { defaultValue: '' }) : '');
   return (
@@ -211,19 +243,40 @@ export function SettingsShell({
           title={title}
           crumbs={crumbs}
           mobileBack={{ to: '/settings', ariaLabel: t('settings.backTo') }}
-          actions={actions}
           tools={<NotificationBell />}
           labels={{ breadcrumb: t('settings.breadcrumb') }}
           as={CrumbLink}
           headingInPage
         />
-        <div ref={wrap} className={legacy ? 'mk st-wrap' : 'st-wrap st-wrap--plain'}>
+        <div
+          ref={wrap}
+          className={`${legacy ? 'mk st-wrap' : 'st-wrap st-wrap--plain'}${bar ? ' st-wrap--bar' : ''}`}
+        >
+          {/* SETTINGS-HDR-01 : en-tête compact (titre, sous-titre, recherche et actions à droite) dans
+              une bande dont le filet va d'un bord à l'autre de la colonne de contenu */}
           <header className="stg-page">
-            <h1>{title}</h1>
-            {desc && <p>{desc}</p>}
+            <div className="stg-page__txt">
+              <h1>{title}</h1>
+              {desc && <p>{desc}</p>}
+            </div>
+            {(search || actions) && (
+              <div className="stg-page__acts" ref={acts}>
+                {search}
+                {(narrow && actionsNarrow) || actions}
+              </div>
+            )}
           </header>
           {children}
         </div>
+        {/* Annoncée une fois, à son apparition : la région de texte existe avant la barre */}
+        <p className="sr-only" aria-live="polite">
+          {bar ? t('settings.unsaved') : ''}
+        </p>
+        {bar && (
+          <div className="stg-savebar" role="region" aria-label={t('settings.unsaved')}>
+            {pendingActions ?? actions}
+          </div>
+        )}
       </div>
     </div>
   );

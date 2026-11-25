@@ -53,6 +53,7 @@ export function SecuritySettings() {
   return (
     <SettingsShell
       legacy={false}
+      pending={can('workspace.settings') && parts.dirty}
       actions={
         can('workspace.settings') ? (
           <>

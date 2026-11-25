@@ -81,6 +81,8 @@ export function Profile() {
   };
 
   useEffect(reset, [profile]);
+  const dirty =
+    !!profile && (fullName !== profile.full_name || locale !== (profile.locale === 'en' ? 'en' : 'fr'));
 
   async function saveProfile(e: FormEvent) {
     e.preventDefault();
@@ -139,6 +141,7 @@ export function Profile() {
   return (
     <SettingsShell
       legacy={false}
+      pending={dirty}
       actions={
         <>
           <Button onClick={reset} disabled={info.busy}>

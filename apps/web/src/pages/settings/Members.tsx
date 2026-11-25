@@ -196,6 +196,22 @@ export function Members() {
   return (
     <SettingsShell
       legacy={false}
+      // SETTINGS-HDR-01 : la recherche de la page est dans l'en-tête, à gauche de « Inviter »
+      search={
+        <label className="stg-search">
+          <span className="sr-only">{t('members.search')}</span>
+          <Search size={16} aria-hidden="true" />
+          <input
+            ref={searchRef}
+            type="search"
+            placeholder={t('members.search')}
+            aria-keyshortcuts="Control+K Meta+K"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <kbd aria-hidden="true">{IS_MAC ? '⌘K' : 'Ctrl K'}</kbd>
+        </label>
+      }
       actions={
         can('members.invite') ? (
           <Button variant="primary" icon={<UserPlus aria-hidden="true" />} onClick={() => setInviting(true)}>
@@ -214,21 +230,6 @@ export function Members() {
                 ? t('members.subUnlimited', { count: members.length })
                 : t('members.subOf', { count: members.length, limit })}
             </p>
-          </div>
-          <div className="stg-sec__acts">
-            <label className="stg-search">
-              <span className="sr-only">{t('members.search')}</span>
-              <Search size={16} aria-hidden="true" />
-              <input
-                ref={searchRef}
-                type="search"
-                placeholder={t('members.search')}
-                aria-keyshortcuts="Control+K Meta+K"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
-              <kbd aria-hidden="true">{IS_MAC ? '⌘K' : 'Ctrl K'}</kbd>
-            </label>
           </div>
         </div>
         {error && <Alert kind="error">{error}</Alert>}

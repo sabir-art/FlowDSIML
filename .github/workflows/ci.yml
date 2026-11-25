@@ -144,6 +144,9 @@ jobs:
       - name: Paramètres, 24 px entre les blocs (clair et sombre)
         if: always()
         run: cd apps/web && node e2e/parametres-espacement.e2e.cjs
+      - name: 'SETTINGS-HDR-01 : en-tête des pages Paramètres (bande et filet, ordre des actions, 390 px, barre collée en bas)'
+        if: always()
+        run: cd apps/web && node e2e/parametres-entete.e2e.cjs
       - name: Barres de liste L40 (40 px, une ligne à 1 440 px, feuille Filtres sous 768 px)
         if: always()
         run: cd apps/web && node e2e/l40-barres.e2e.cjs

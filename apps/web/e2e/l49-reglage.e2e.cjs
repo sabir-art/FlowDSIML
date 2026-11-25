@@ -63,10 +63,10 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     }
   };
   await settled(card.getByRole('radio', { name: /^Autorisées/, checked: true }));
-  await settled(p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer', disabled: true }));
+  await settled(p.locator('.stg-page').getByRole('button', { name: 'Enregistrer', disabled: true }));
   ok(await radio('Autorisées').isChecked(), 'par défaut : Autorisées');
   ok(
-    await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).isDisabled(),
+    await p.locator('.stg-page').getByRole('button', { name: 'Enregistrer' }).isDisabled(),
     '«\u202fEnregistrer\u202f» désactivé sans changement',
   );
   ok((await card.locator('.hc-notice').innerText()).includes(NOTICE), 'mention d’autorisation, sans encadré');
@@ -109,10 +109,8 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
     .waitFor({ state: 'detached' })
     .catch(() => {});
   ok((await card.locator('.hc-chip').count()) === 2, '«\u202fRetirer vieux.example.org\u202f»');
-  await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
-  await p.waitForFunction(
-    () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
-  );
+  await p.locator('.stg-page').getByRole('button', { name: 'Enregistrer' }).click();
+  await p.waitForFunction(() => document.querySelector('.stg-page .fd-btn--primary')?.disabled === true);
   // L'enregistrement est lu côté serveur (faux Supabase) : on attend qu'il y soit
   await until(() => ws.settings?.htmlCapture?.mode === 'domains');
   ok(
@@ -145,10 +143,8 @@ const NOTICE = 'Capturez uniquement des logiciels que vous êtes autorisé à re
   await p.goto(`${APP}/#/settings/security`);
   await card.waitFor();
   await radio('Désactivées').check();
-  await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
-  await p.waitForFunction(
-    () => document.querySelector('.fd-page-header .fd-btn--primary')?.disabled === true,
-  );
+  await p.locator('.stg-page').getByRole('button', { name: 'Enregistrer' }).click();
+  await p.waitForFunction(() => document.querySelector('.stg-page .fd-btn--primary')?.disabled === true);
   await until(() => ws.settings?.htmlCapture?.mode === 'disabled');
   ok(ws.settings.htmlCapture.mode === 'disabled', 'désactivées : enregistré');
   await p.goto(`${APP}/#/`);

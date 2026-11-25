@@ -1100,12 +1100,44 @@ fieldset.stg-row {
 /* §6 (retours du 24/11, 2e série) : en-tête de page des Paramètres. Seul changement de mise en page :
    le titre de la page (h1, 24 px en 700) et sa description (14 px, atténuée) se détachent des sections
    (16 px en 600), avec 24 px avant la première. */
+/* SETTINGS-HDR-01 : bande de l'en-tête. 20 px sous le bloc, filet d'un bord à l'autre de la colonne de
+   contenu (.st-main le coupe à ses bords), puis 24 px avant la première section */
 .stg-page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin: 0 0 24px;
+  padding-bottom: 20px;
+}
+.stg-page::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  border-bottom: 1px solid var(--fd-color-border);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.stg-page__txt {
+  min-width: 0;
+}
+.stg-page__acts {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.stg-page__acts .stg-search {
+  width: 240px;
+  height: 40px;
 }
 .stg-page h1 {
   margin: 0;
-  font: 700 24px / 1.25 var(--fd-font-sans);
+  font: 600 18px / 1.4 var(--fd-font-sans);
   color: var(--fd-color-text);
   overflow-wrap: anywhere;
 }
@@ -1114,9 +1146,55 @@ fieldset.stg-row {
 }
 .stg-page p {
   max-width: 620px;
-  margin: 4px 0 0;
-  font: 400 14px / 1.5 var(--fd-font-sans);
+  margin: 2px 0 0;
+  font: 400 13px / 1.5 var(--fd-font-sans);
   color: var(--fd-color-text-muted);
+}
+/* Sous 600 px : le texte en haut, puis les actions sur une ligne pleine largeur, 12 px plus bas ; la
+   recherche prend la place restante, l'action principale garde sa taille à droite */
+@media (max-width: 599px) {
+  .stg-page {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  .stg-page__acts .stg-search {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+}
+/* SETTINGS-HDR-01 §3 : barre collée en bas (sous 600 px, modifications en attente, en-tête hors écran) */
+.stg-savebar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  box-sizing: border-box;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding: 0 16px env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--fd-color-border);
+  background: var(--fd-color-surface);
+  animation: stg-savebar-in var(--fd-motion-duration-base) var(--fd-motion-ease-standard);
+}
+@keyframes stg-savebar-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stg-savebar {
+    animation: none;
+  }
+}
+/* Le bas de la page reste lisible au-dessus de la barre */
+.st-wrap.st-wrap--bar {
+  padding-bottom: 112px;
 }
 /* Première section au titre de la page : son intitulé n'est pas répété (ses actions restent) */
 .stg-sec__head[data-page-title] > div:first-child {

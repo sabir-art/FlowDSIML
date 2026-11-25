@@ -63,7 +63,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     (await card.getByRole('link', { name: 'Voir les plans' }).count()) === 0,
     'L48-A : plus de « Voir les plans »',
   );
-  await page.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).waitFor();
+  await page.locator('.stg-page').getByRole('button', { name: 'Enregistrer' }).waitFor();
   ok(true, 'L48-A : offre Free, règles modifiables par un admin');
   await shot('l27-10-regles-plan');
 
@@ -72,7 +72,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.reload();
   await card.waitFor();
   // Lot 1 : un seul « Enregistrer », dans la barre de page
-  const save = page.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' });
+  const save = page.locator('.stg-page').getByRole('button', { name: 'Enregistrer' });
   await save.waitFor();
   ok(await save.isDisabled(), 'Enregistrer inactif sans changement');
   ok(

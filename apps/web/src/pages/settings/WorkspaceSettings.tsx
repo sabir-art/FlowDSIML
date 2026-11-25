@@ -55,6 +55,12 @@ export function WorkspaceSettings() {
   };
 
   useEffect(reset, [ws.name, ws.slug, savedPrivacy, savedWebsite, savedHelp]);
+  const dirty =
+    name !== ws.name ||
+    slug !== ws.slug ||
+    website !== savedWebsite ||
+    privacyUrl !== savedPrivacy ||
+    helpContact !== savedHelp;
 
   // PRM-06 / PRM-11 : conséquences chiffrées de la suppression
   useEffect(() => {
@@ -142,6 +148,7 @@ export function WorkspaceSettings() {
   return (
     <SettingsShell
       legacy={false}
+      pending={editable && dirty}
       actions={
         editable ? (
           <>

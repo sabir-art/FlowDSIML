@@ -791,7 +791,7 @@ const APP_PAGES = [
     },
     open: async (p) => {
       await p.getByRole('checkbox', { name: 'Toute personne avec le lien' }).uncheck();
-      await p.locator('.fd-page-header').getByRole('button', { name: 'Enregistrer' }).click();
+      await p.locator('.stg-page').getByRole('button', { name: 'Enregistrer' }).click();
       await p.waitForSelector('dialog[open]');
     },
   },

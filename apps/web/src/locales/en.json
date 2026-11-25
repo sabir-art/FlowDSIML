@@ -3259,6 +3259,8 @@
     "notifications": "Notifications",
     "breadcrumb": "Breadcrumb",
     "backTo": "Back to Settings",
+    "unsaved": "Unsaved changes",
+    "moreActions": "More actions",
     "grp": {
       "space": "Workspace",
       "brand": "Brand",
