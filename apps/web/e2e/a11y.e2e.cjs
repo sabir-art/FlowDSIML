@@ -589,6 +589,19 @@ const APP_PAGES = [
     },
   },
   { name: 'Diffuser', route: `/#/demos/${DEMO}/distribute` },
+  {
+    // §8 : onglet « Hors ligne » (démo du jeu de test non publiée : l'état « à publier » est contrôlé)
+    name: 'Diffuser · hors ligne',
+    route: `/#/demos/${DEMO}/distribute`,
+    open: async (p) => {
+      await p.locator('dialog.dif-dialog[open]').waitFor();
+      const tab = p.getByRole('tab', { name: 'Hors ligne' });
+      if ((await tab.getAttribute('aria-disabled')) !== 'true') {
+        await tab.click();
+        await p.locator('.dif-off').waitFor();
+      }
+    },
+  },
   { name: 'Présentateur', route: `/#/demos/${DEMO}/present` },
   {
     name: 'Présenter · lancement',
