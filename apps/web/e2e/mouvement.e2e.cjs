@@ -842,6 +842,117 @@ function act(target) {
   await skeleton(false);
   await skeleton(true);
 
+  // ===== §3 : la pastille des onglets segmentés glisse d'une option à l'autre (cloche) =====
+  const pill = async (reduced) => {
+    const ctx = await b.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: 'fr-FR',
+      ...(reduced ? { reducedMotion: 'reduce' } : {}),
+    });
+    const page = await ctx.newPage();
+    page.on('pageerror', (e) => errors.push(e.message));
+    await install(page, seed());
+    await page.goto(`${APP}/#/demos`);
+    await page
+      .getByRole('button', { name: /^Notifications/ })
+      .first()
+      .click();
+    await page.waitForSelector('.fd-segmented [role=tab][aria-selected=true]');
+    const tag = reduced ? 'mouvement réduit' : 'pastille';
+    ok(
+      (await page.locator('.fd-pill-glide').count()) === 0,
+      `${tag} : premier affichage sans pastille mobile`,
+    );
+    const r = await page.evaluate(() => {
+      const list = document.querySelector('.fd-segmented[role=tablist]');
+      const all = [...list.querySelectorAll('[role=tab]')];
+      const from = all.find((x) => x.getAttribute('aria-selected') === 'true');
+      const to = all[all.length - 1];
+      const rf = from.getBoundingClientRect();
+      const rt = to.getBoundingClientRect();
+      const rest = getComputedStyle(from).backgroundColor;
+      to.click();
+      return new Promise((resolve) => {
+        const frames = [];
+        const t0 = performance.now();
+        const tick = () => {
+          const bar = list.querySelector('.fd-pill-glide');
+          if (bar) {
+            const a = bar.getAnimations()[0];
+            const tm = a?.effect?.getTiming();
+            const rb = bar.getBoundingClientRect();
+            frames.push({
+              count: list.querySelectorAll('.fd-pill-glide').length,
+              left: rb.left,
+              width: rb.width,
+              bg: getComputedStyle(bar).backgroundColor,
+              props: a ? a.effect.getKeyframes().flatMap((k) => Object.keys(k)) : [],
+              duration: tm?.duration,
+              easing: tm?.easing,
+              toBg: getComputedStyle(to).backgroundColor,
+            });
+          }
+          if ((frames.length && !bar) || performance.now() - t0 > 2000) {
+            resolve({
+              frames,
+              rest,
+              from: { left: rf.left, width: rf.width },
+              to: { left: rt.left, width: rt.width },
+              endBg: getComputedStyle(to).backgroundColor,
+              endFrom: getComputedStyle(from).backgroundColor,
+              left:
+                !!list.querySelector('.fd-pill-glide') ||
+                list.hasAttribute('data-pill-gliding') ||
+                !!list.querySelector('[data-pill-to]') ||
+                list.getAttribute('style'),
+              selected: to.getAttribute('aria-selected'),
+            });
+          } else requestAnimationFrame(tick);
+        };
+        tick();
+      });
+    });
+    if (reduced) {
+      ok(r.frames.length === 0 && r.selected === 'true', `${tag} : l’option change sans pastille mobile`);
+    } else {
+      const f = r.frames;
+      ok(
+        f.length >= 3 && f.every((x) => x.count === 1),
+        `pastille : un seul élément mobile pendant ${f.length} image(s)`,
+      );
+      ok(
+        f.length > 0 && Math.abs(f[0].left - r.from.left) <= 3 && Math.abs(f[0].width - r.from.width) <= 6,
+        `pastille : elle part de l’ancienne option (${Math.round(f[0]?.left)} px × ${Math.round(f[0]?.width)}, ${Math.round(r.from.left)} × ${Math.round(r.from.width)} attendus)`,
+      );
+      const last = f[f.length - 1];
+      ok(
+        !!last && Math.abs(last.left - r.to.left) <= 3 && Math.abs(last.width - r.to.width) <= 6,
+        'pastille : elle arrive sous la nouvelle option',
+      );
+      ok(
+        f.length > 0 && f[0].duration === 200 && f[0].easing === 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+        `pastille : 200 ms, ${f[0]?.easing}`,
+      );
+      ok(
+        f.every((x) =>
+          x.props.every((n) => n === 'transform' || /^(offset|easing|composite|computedOffset)$/.test(n)),
+        ),
+        'pastille : transform seul',
+      );
+      ok(
+        f.every((x) => x.toBg === 'rgba(0, 0, 0, 0)' && x.bg === r.endBg),
+        'pastille : elle porte le fond de l’option choisie, qui laisse voir à travers elle pendant le trajet',
+      );
+    }
+    ok(
+      !r.left && r.endBg !== 'rgba(0, 0, 0, 0)' && r.endFrom === 'rgba(0, 0, 0, 0)',
+      `${tag} : à la fin, pastille retirée, fond de l’option rétabli, contrôle sans style ajouté`,
+    );
+    await ctx.close();
+  };
+  await pill(false);
+  await pill(true);
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' | ')}` : ''}`);
   await b.close();
 })().catch((e) => {

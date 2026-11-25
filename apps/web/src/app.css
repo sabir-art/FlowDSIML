@@ -77,6 +77,14 @@
 [data-tab-gliding] > * > [role='tab'][aria-selected='true'] {
   border-bottom-color: transparent !important;
 }
+/* MOTION-01 §3 : pendant le glissement de la pastille (lib/pillGlide.ts), les options laissent voir
+   la pastille mobile ; l'ombre de l'option choisie est portée par la pastille (sauf trait de focus) */
+[data-pill-gliding] > button {
+  background-color: transparent !important;
+}
+[data-pill-gliding] > [data-pill-to]:not(:focus-visible) {
+  box-shadow: none !important;
+}
 .tabs button[aria-selected='true'] {
   color: var(--fd-color-text);
   border-bottom-color: var(--fd-color-primary);
