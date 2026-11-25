@@ -307,7 +307,16 @@ export function SharePanel({
     void load();
   }, [load]);
 
-  if (!demo) return <Loading />;
+  // Pendant le chargement, la fenêtre garde un nom (aria-labelledby="shd-title" de ShareDialog)
+  if (!demo)
+    return (
+      <>
+        <h2 id="shd-title" className="sr-only">
+          {t('share.title')}
+        </h2>
+        <Loading />
+      </>
+    );
   const published = demo.status === 'published';
   const url = publicDemoUrl(demo.id);
   // L28-01 : le lien public et ses partages prennent l'adresse personnalisée ; intégrations, liens
