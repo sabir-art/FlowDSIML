@@ -6,6 +6,7 @@
  */
 const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
+const { seedMaquette } = require('./maquette-data.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
 
 (async () => {
@@ -56,6 +57,83 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
   await page.waitForFunction(() => location.hash === '#/');
   await toasts.first().waitFor({ state: 'detached' });
   ok((await toasts.count()) === 0, 'Précédent du navigateur : le toast est fermé');
+
+  // CAD-08 (révisé le 25/11) : en haut à droite sous la barre du haut, le plus récent en haut, 4 s,
+  // fermeture suspendue au survol ; sous 600 px, toute la largeur moins 16 px de chaque côté
+  for (const width of [1440, 390]) {
+    const p2 = await b.newPage({ viewport: { width, height: 800 } });
+    p2.on('pageerror', (e) => errors.push(e.message));
+    await install(p2, seedMaquette());
+    await p2.goto(`${APP}/#/settings/members`);
+    // Deux confirmations simples (sans action) : deux changements de rôle
+    const setRole = async (role) => {
+      await p2.getByRole('button', { name: 'Actions pour Nina Roux' }).click();
+      await p2.getByRole('menuitemradio', { name: role }).click();
+    };
+    const list = p2.locator('.toasts .toast');
+    await p2.getByRole('button', { name: 'Actions pour Nina Roux' }).waitFor();
+    await setRole('Admin');
+    await list.first().waitFor();
+    await list.first().evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
+    await setRole('Éditeur');
+    await p2.waitForFunction(() => document.querySelectorAll('.toasts .toast').length === 2);
+    // La souris sur la pile suspend la fermeture
+    await list.first().hover();
+    await p2.waitForFunction(() =>
+      [...document.querySelectorAll('.toasts .toast')].every((el) => el.getAnimations().length === 0),
+    );
+    const m = await p2.evaluate(() => {
+      const els = [...document.querySelectorAll('.toasts .toast')];
+      const r = els.map((el) => el.getBoundingClientRect());
+      const bar = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--fd-layout-topbar-height'),
+      );
+      const probe = document.createElement('i');
+      probe.style.borderRadius = 'var(--fd-radius-surface)';
+      document.body.append(probe);
+      const surface = getComputedStyle(probe).borderTopLeftRadius;
+      probe.remove();
+      const tools = [...document.querySelectorAll('[aria-label="Aide"], [aria-label="Notifications"]')]
+        .map((x) => x.getBoundingClientRect())
+        .filter((x) => x.width > 0);
+      return {
+        top: Math.round(r[0].top - bar),
+        right: Math.round(document.documentElement.clientWidth - r[0].right),
+        left: Math.round(r[0].left),
+        w: Math.round(r[0].width),
+        order: els.map((el) => (el.textContent.includes('Éditeur') ? 'second' : 'premier')).join('|'),
+        stacked: r[1].top >= r[0].bottom + 8 - 0.5,
+        radius: getComputedStyle(els[0]).borderTopLeftRadius === surface,
+        live: els[0].closest('[role="status"]')?.getAttribute('aria-live'),
+        overTools: tools.some((t) =>
+          r.some((x) => x.top < t.bottom && x.bottom > t.top && x.left < t.right && x.right > t.left),
+        ),
+        close: !!els[0].querySelector('button[aria-label="Fermer"]'),
+      };
+    });
+    ok(
+      m.order === 'second|premier' &&
+        m.stacked &&
+        m.radius &&
+        m.live === 'polite' &&
+        m.close &&
+        !m.overTools &&
+        m.right === 16 &&
+        (width >= 600 ? m.top === 16 && m.w <= 360 : m.top === 8 && m.left === 16),
+      `toasts à ${width} px : en haut à droite sous la barre, le plus récent en haut, sans couvrir l’aide ni la cloche (${JSON.stringify(m)})`,
+    );
+    // Souris sur la pile : rien ne se ferme, même après la durée d'affichage ; souris partie : tout se ferme
+    const t0 = Date.now();
+    await p2.waitForFunction((t) => Date.now() - t > 4600, t0);
+    const kept = await list.count();
+    await p2.mouse.move(2, 700);
+    await list.first().waitFor({ state: 'detached', timeout: 8000 });
+    ok(
+      kept === 2 && (await list.count()) === 0,
+      `toasts à ${width} px : fermeture suspendue au survol, puis reprise (${kept} gardés)`,
+    );
+    await p2.close();
+  }
 
   ok(errors.length === 0, `aucune erreur JavaScript (${errors.join(' | ')})`);
   await b.close();

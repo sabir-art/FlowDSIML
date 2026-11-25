@@ -653,7 +653,7 @@ function act(target) {
         `FLIP : transform seul, 200 ms, courbe standard (${steps.map((a) => a.from).join(' | ')})`,
       );
     }
-    // Deux toasts : le premier remonte quand le second entre
+    // Deux toasts : le plus récent entre en haut, le premier descend d'un cran
     await page.locator('.rail-list .step').nth(0).focus();
     await page.keyboard.press('Delete');
     await page.locator('.toast').first().waitFor();
@@ -669,8 +669,8 @@ function act(target) {
     if (reduced) ok(toasts.length === 0, `${tag} : le toast en place ne glisse pas`);
     else
       ok(
-        toasts.length === 1 && toasts[0].duration === 200 && /translate\(0px, [3-9]\d/.test(toasts[0].from),
-        `FLIP : le toast en place remonte en glissant quand un autre entre (${toasts.map((a) => a.from).join()})`,
+        toasts.length === 1 && toasts[0].duration === 200 && /translate\(0px, -[3-9]\d/.test(toasts[0].from),
+        `FLIP : le toast en place descend en glissant quand un autre entre au-dessus (${toasts.map((a) => a.from).join()})`,
       );
     await ctx.close();
   };

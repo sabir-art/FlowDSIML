@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { CircleCheck, TriangleAlert, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useFlip } from '../lib/flip';
+import { motionMs, useFlip } from '../lib/flip';
 import '../styles/maquette.css';
 import '../styles/maquette-ajouts.css';
 import '../styles/maquette-peau.css';
@@ -19,18 +19,31 @@ export type ToastOptions = {
   /** Deuxième ligne, en texte atténué, sous le message en gras (ex. la raison d'un classement). */
   detail?: string;
 };
-type Toast = { id: number; text: string; detail?: string; action?: ToastAction; tone?: 'warning' };
+type Toast = {
+  id: number;
+  text: string;
+  detail?: string;
+  action?: ToastAction;
+  tone?: 'warning';
+  /** Délai avant fermeture ; absent : le toast reste jusqu'à sa fermeture (action sans durée). */
+  ms?: number;
+  /** En train de sortir (fondu de 160 ms), avant d'être retiré. */
+  leaving?: boolean;
+};
 /** Affiche un toast ; renvoie de quoi le fermer avant son délai (consigne devenue inutile, A8). */
 const Ctx = createContext<(text: string, action?: ToastAction, opts?: ToastOptions) => () => void>(
   () => () => {},
 );
 
-/** Durée d'affichage d'un toast (maquette : 5 s). */
-const DURATION = 5000;
+/** Durée d'affichage d'un toast (CAD-08 : 4 s ; avertissement : 6 s). */
+const DURATION = 4000;
+const DURATION_WARNING = 6000;
 
 /**
- * CAD-08 : toasts de confirmation de la maquette (carte en bas à droite, icône de succès, Fermer,
- * disparition après 5 s, pleine largeur sous 640 px), annoncés aux lecteurs d'écran (role=status).
+ * CAD-08 (révisé le 25/11, préférence du client) : toasts en haut à droite, sous la barre du haut (16 px
+ * du bord, 360 px au plus ; sous 600 px, toute la largeur moins 16 px de chaque côté). Icône, texte,
+ * « Fermer ». Trois au plus, le plus récent en haut. Fermeture après 4 s, suspendue tant que la souris
+ * ou le focus est sur la pile. Annoncés aux lecteurs d'écran (role=status).
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
@@ -39,19 +52,54 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   // MOTION-01 : quand un toast entre ou sort, les autres rejoignent leur place en glissant (FLIP)
   const stack = useRef<HTMLDivElement>(null);
   useFlip(stack, toasts.map((x) => x.id).join(), 'viewport');
-  const close = useCallback((id: number) => setToasts((l) => l.filter((x) => x.id !== id)), []);
+  // Sortie : fondu de 160 ms (120 ms en mouvement réduit), puis le toast est retiré
+  const close = useCallback((id: number) => {
+    setToasts((l) => l.map((x) => (x.id === id ? { ...x, leaving: true } : x)));
+    window.setTimeout(
+      () => setToasts((l) => l.filter((x) => x.id !== id)),
+      motionMs('--fd-motion-duration-exit'),
+    );
+  }, []);
+  // Délais de fermeture : suspendus (et repris en entier) tant que la souris ou le focus est sur la pile
+  const timers = useRef(new Map<number, number>());
+  const held = useRef(false);
+  const arm = useCallback(
+    (x: Pick<Toast, 'id' | 'ms'>) => {
+      if (!x.ms || held.current) return;
+      window.clearTimeout(timers.current.get(x.id));
+      timers.current.set(
+        x.id,
+        window.setTimeout(() => {
+          timers.current.delete(x.id);
+          close(x.id);
+        }, x.ms),
+      );
+    },
+    [close],
+  );
+  const latest = useRef<Toast[]>([]);
+  latest.current = toasts;
+  const hold = (on: boolean) => {
+    if (held.current === on) return;
+    held.current = on;
+    if (on) {
+      for (const id of timers.current.values()) window.clearTimeout(id);
+      timers.current.clear();
+    } else for (const x of latest.current) if (!x.leaving) arm(x);
+  };
   const show = useCallback(
     (text: string, action?: ToastAction, opts?: ToastOptions) => {
       const id = ++seq.current;
-      setToasts((l) => [...l.slice(-2), { id, text, detail: opts?.detail, action, tone: opts?.tone }]);
-      if (!action || action.durationMs)
-        window.setTimeout(
-          () => close(id),
-          action?.durationMs ?? (opts?.tone === 'warning' ? 8000 : DURATION),
-        );
+      const ms =
+        !action || action.durationMs
+          ? (action?.durationMs ?? (opts?.tone === 'warning' ? DURATION_WARNING : DURATION))
+          : undefined;
+      // Le plus récent en haut ; trois au plus
+      setToasts((l) => [{ id, text, detail: opts?.detail, action, tone: opts?.tone, ms }, ...l.slice(0, 2)]);
+      arm({ id, ms });
       return () => close(id);
     },
-    [close],
+    [close, arm],
   );
   // Une navigation décidée par la personne (lien de l'application, Précédent ou Suivant du navigateur)
   // ferme les toasts affichés : ils parlent de la page qu'elle quitte. Une redirection qui suit une
@@ -72,12 +120,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={show}>
       {children}
       <div className="mk mk-toasts">
-        <div className="toasts" role="status" aria-live="polite" ref={stack}>
+        <div
+          className="toasts"
+          role="status"
+          aria-live="polite"
+          ref={stack}
+          onMouseEnter={() => hold(true)}
+          onMouseLeave={() => hold(false)}
+          onFocus={() => hold(true)}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) hold(false);
+          }}
+        >
           {toasts.map((x) => (
             <div
               key={x.id}
               data-flip={x.id}
-              className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}${x.detail ? ' toast--rich' : ''}`}
+              className={`toast${x.tone === 'warning' ? ' toast--warning' : ''}${x.detail ? ' toast--rich' : ''}${x.leaving ? ' toast--leaving' : ''}`}
             >
               {x.tone === 'warning' ? (
                 <TriangleAlert aria-hidden="true" />

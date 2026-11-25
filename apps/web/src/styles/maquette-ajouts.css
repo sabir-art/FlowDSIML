@@ -1773,6 +1773,7 @@
 }
 .mk .toast-close {
   margin: -4px -8px 0 0;
+  border-radius: var(--fd-radius-control-sm);
 }
 /* ---- EDT-04 : point de hotspot sur les vignettes, flèches sans masquer le titre, étape saisie ---- */
 .mk .step .th-dot {
