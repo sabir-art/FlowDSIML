@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../../lib/supabase';
 import { check } from '../../../lib/useAction';
+import { changesChannel } from '../../../lib/channelName';
 
 export type StepComment = Tables<'step_comments'>;
 export interface CommentAuthor {
@@ -45,7 +46,7 @@ export function useStepComments(demoId: string, workspaceId: string | undefined,
     void reload();
     // Temps réel (best effort) : un collègue commente, résout ou supprime → rafraîchissement + annonce.
     const channel = supabase
-      .channel(`step_comments:${demoId}`)
+      .channel(changesChannel(`step_comments:${demoId}`))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'step_comments', filter: `demo_id=eq.${demoId}` },

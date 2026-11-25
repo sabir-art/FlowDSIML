@@ -14,6 +14,7 @@ import {
   type NotificationPrefs,
   type NotificationRow,
 } from './notifications';
+import { changesChannel } from '../../lib/channelName';
 
 export interface NotificationItem extends NotificationRow {
   actorName: string;
@@ -141,7 +142,7 @@ export function useNotifications() {
     void reload();
     // La pastille se met à jour sans recharger ; rien n'est annoncé (seul le nombre change)
     const channel = supabase
-      .channel(`notifications:${me}`)
+      .channel(changesChannel(`notifications:${me}`))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${me}` },
