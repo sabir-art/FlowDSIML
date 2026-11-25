@@ -242,7 +242,20 @@ function aligns() {
     ...PLAYER_PAGES.map((s) => ({ ...s, kind: 'player' })),
   ].filter((s) => !only.length || only.some((o) => s.name.toLowerCase().includes(o.toLowerCase())));
   let bad = 0;
-  const check = (p) => p.evaluate(gaps, { min: MIN, cards: CARDS });
+  // MOTION-01 : fenêtres et menus entrent en 96–98 % ; on mesure une fois les animations finies (hors boucles infinies)
+  const settle = (p) =>
+    p.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          .filter((a) => a.effect?.getTiming?.().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => {})),
+      ),
+    );
+  const check = async (p) => {
+    await settle(p);
+    return p.evaluate(gaps, { min: MIN, cards: CARDS });
+  };
   // THEMES=light / WIDTHS=1440 : relance locale réduite
   const widths = (process.env.WIDTHS || '1440,390').split(',').map(Number);
   const themes = (process.env.THEMES || 'light,dark').split(',');
