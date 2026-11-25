@@ -16,11 +16,13 @@ import {
   Check,
   CircleAlert,
   Copy,
+  Ellipsis,
   ExternalLink,
   Globe,
   GripVertical,
   Images,
   Info,
+  Undo2,
 } from 'lucide-react';
 import { Button } from '@flowdsiml/ui';
 import type { ContentType } from '@flowdsiml/core';
@@ -30,6 +32,7 @@ import { PLAYER_URL } from '../../../lib/env';
 import { loadDemoTypes } from '../../../lib/demoTypes';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
 import { useToast } from '../../../components/Toast';
+import { Menu } from '../../../components/Menu';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { MediaLibrary, mediaUrl } from '../../../components/media/MediaLibrary';
 import { errorMessage } from '../../../lib/errors';
@@ -263,6 +266,18 @@ export function PublicPage() {
   const logoSrc = form.logo ? mediaUrl(form.logo) : wsLogo;
   const count = picked.length;
 
+  const cancel = () => (setForm(saved), setSlugTaken(false));
+  const cancelBtn = (
+    <Button onClick={cancel} disabled={busy || !dirty}>
+      {t('common.cancel')}
+    </Button>
+  );
+  const saveBtn = (
+    <Button variant="primary" onClick={() => void save()} disabled={!canSave}>
+      {t('common.save')}
+    </Button>
+  );
+
   return (
     <SettingsShell
       legacy={false}
@@ -284,12 +299,48 @@ export function PublicPage() {
               {t('publicPage.view')}
             </Button>
           )}
-          <Button onClick={() => (setForm(saved), setSlugTaken(false))} disabled={busy || !dirty}>
-            {t('common.cancel')}
-          </Button>
-          <Button variant="primary" onClick={() => void save()} disabled={!canSave}>
-            {t('common.save')}
-          </Button>
+          {cancelBtn}
+          {saveBtn}
+        </>
+      }
+      // Sous 600 px, trois boutons ne tiennent pas : les secondaires passent dans un menu ⋯
+      actionsNarrow={
+        <>
+          <Menu
+            label={t('settings.moreActions')}
+            // Bouton de 40 px, comme les autres actions de l'en-tête (SETTINGS-HDR-01 §3)
+            custom={{
+              className: 'fd-btn fd-btn--icon',
+              content: (
+                <>
+                  <Ellipsis aria-hidden="true" />
+                  <span className="sr-only">{t('settings.moreActions')}</span>
+                </>
+              ),
+            }}
+            items={[
+              {
+                label: t('publicPage.view'),
+                icon: <ExternalLink />,
+                disabled: !saved.enabled,
+                onSelect: () => void window.open(centerUrl(PLAYER_URL, saved.slug), '_blank', 'noopener'),
+              },
+              {
+                label: t('common.cancel'),
+                icon: <Undo2 />,
+                disabled: busy || !dirty,
+                onSelect: cancel,
+              },
+            ]}
+          />
+          {saveBtn}
+        </>
+      }
+      pending={dirty}
+      pendingActions={
+        <>
+          {cancelBtn}
+          {saveBtn}
         </>
       }
     >

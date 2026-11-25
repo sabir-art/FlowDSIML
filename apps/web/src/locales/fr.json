@@ -3259,6 +3259,8 @@
     "notifications": "Notifications",
     "breadcrumb": "Fil d’Ariane",
     "backTo": "Retour à Paramètres",
+    "unsaved": "Modifications non enregistrées",
+    "moreActions": "Autres actions",
     "grp": {
       "space": "Espace",
       "brand": "Marque",

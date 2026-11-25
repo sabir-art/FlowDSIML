@@ -85,7 +85,7 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   await page.goto(`${APP}/#/settings/brand`);
   const logo = page.getByRole('region', { name: 'Logo' });
   await logo.waitFor();
-  const header = page.locator('.fd-page-header');
+  const header = page.locator('.stg-page');
   ok(
     (await page.locator('.stg-sec__head h2').allTextContents()).join('|') ===
       'Logo|Couleurs de la marque|Styles des démos',

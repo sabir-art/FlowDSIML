@@ -92,7 +92,7 @@ const TOKENS = {
               (el) =>
                 el.children.length === 0 &&
                 el.textContent.trim() === h1s[0]?.textContent.trim() &&
-                parseFloat(getComputedStyle(el).fontSize) >= 24,
+                parseFloat(getComputedStyle(el).fontSize) >= 18,
             ).length,
             tools: tools.map((t) => ({
               name: t.getAttribute('aria-label'),
@@ -141,7 +141,7 @@ const TOKENS = {
           m.h1Count === 1 && m.h1Text === title && m.h1Current === 'page' && m.h1InPage,
           `${who} : un seul h1, dans l'en-tête de page ; la page courante du fil d'Ariane est un texte (${m.h1Count}, « ${m.h1Text} »)`,
         );
-        // §6 (retours du 24/11, 2e série) : le titre de la page est le h1 de 24 px de l'en-tête de page
+        // SETTINGS-HDR-01 : le titre de la page est le h1 de 18 px de l'en-tête de page, seul titre de cette taille
         ok(m.bigTitles === 1, `${who} : un seul grand titre, celui de l'en-tête de page (${m.bigTitles})`);
         ok(
           m.crumbLabel === 'Fil d’Ariane' &&
@@ -270,8 +270,8 @@ const TOKENS = {
       );
       ok(m.h1.length === 1 && m.h1[0] === 'Général', `${who} : le titre de la barre est le seul h1`);
       ok(
-        m.actions.length === 1 && m.actions[0] === 'Enregistrer',
-        `${who} : l'action principale seule dans la barre (${m.actions.join(', ')})`,
+        m.actions.length === 0,
+        `${who} : aucune action dans la barre, elles sont dans l'en-tête de page (${m.actions.join(', ')})`,
       );
       ok(
         m.headerTools === 0 &&

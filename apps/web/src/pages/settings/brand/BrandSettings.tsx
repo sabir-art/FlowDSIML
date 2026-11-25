@@ -64,6 +64,7 @@ export function BrandSettings() {
   return (
     <SettingsShell
       legacy={false}
+      pending={isAdmin && dirty}
       actions={
         isAdmin ? (
           <>
