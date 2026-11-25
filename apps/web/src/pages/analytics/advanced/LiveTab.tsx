@@ -1,105 +1,79 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pause, Play } from 'lucide-react';
-import { VisitBadge } from '../returning';
+import { Download, Flag, Mail, Pause, Play, Radio } from 'lucide-react';
+import type { ContentType } from '@flowdsiml/core';
+import { Empty } from '@flowdsiml/ui';
 import { supabase } from '../../../lib/supabase';
 import { formatNumber, formatRelativeShort } from '../../../lib/format';
 import { initials } from '../../../lib/initials';
 import { Loading } from '../../../components/guards';
-import { Empty } from '@flowdsiml/ui';
-import { Radio } from 'lucide-react';
-
-interface LiveVisitor {
-  key: string;
-  lastAt: string;
-  since: string;
-  stepIndex: number | null;
-  stepTitle: string | null;
-  device: string | null;
-  country: string | null;
-  lastType: string;
-  identity: string | null;
-  /** L19-01 : visiteur rattaché à un apprenant (même sans droit au suivi nominatif). */
-  learner?: boolean;
-  /** L19-01 : structure de l'apprenant (rôles avec suivi nominatif). */
-  structure?: string | null;
-}
-interface Live {
-  kpis: { live: number; views30: number; ctaToday: number; leadsToday: number };
-  stepsTotal: number;
-  more: number;
-  visitors: LiveVisitor[];
-}
+import { TypeBadge } from '../../../components/TypeBadge';
+import { VisitBadge } from '../returning';
+import { LiveDemoFilter } from './LiveDemoFilter';
+import { elapsedShort, liveCsv, type LiveSpace } from './live';
+import './live.css';
 
 const REFRESH_MS = 10_000;
 
-/** Démo la plus vue aujourd'hui (temps réel avec « Toutes les démos »). */
-async function topDemoToday(wsId: string): Promise<string | null> {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const { data } = await supabase
-    .from('events')
-    .select('demo_id')
-    .eq('workspace_id', wsId)
-    .eq('type', 'demo_view')
-    .gte('occurred_at', start.toISOString())
-    .limit(2000);
-  const n = new Map<string, number>();
-  for (const r of (data ?? []) as Array<{ demo_id: string }>) n.set(r.demo_id, (n.get(r.demo_id) ?? 0) + 1);
-  return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-}
-
 /**
- * L19-01 / 02 : temps réel d'une démo (live_demo, interrogée toutes les 10 s ; « Mettre en pause » fige
- * la liste). Identité (e-mail de l'apprenant ou du lead) renvoyée par la base aux éditeurs seulement.
+ * Temps réel de l'espace (retours du 24/11, 2e série §5 ; live_space, interrogée toutes les 10 s).
+ * Filtre Démo avec recherche, indicateur « En direct · actualisé il y a n s » et bouton icône de pause,
+ * quatre indicateurs, « Sur les démos maintenant » (tableau à colonnes fixes) et fil d'activité.
+ * L'identité d'un visiteur (apprenant, e-mail du lead) n'est renvoyée par la base qu'aux éditeurs.
+ * Les changements sont annoncés une fois par minute au plus, jamais ligne par ligne.
  */
 export function LiveTab({
   wsId,
   demo,
+  onDemo,
   demos,
+  types,
 }: {
   wsId: string;
   demo: string;
-  demos: Array<{ id: string; title: string }>;
+  onDemo: (id: string) => void;
+  demos: Array<{ id: string; title: string; folder: string | null }>;
+  types: Record<string, ContentType>;
 }) {
   const { t } = useTranslation();
-  const [target, setTarget] = useState<string | null>(demo || null);
-  const [visits, setVisits] = useState<Record<string, number>>({});
-  const [data, setData] = useState<Live | null>(null);
+  const [data, setData] = useState<LiveSpace | null>(null);
   const [paused, setPaused] = useState(false);
+  const [at, setAt] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
   const [announce, setAnnounce] = useState('');
   const lastAnnounce = useRef({ at: 0, text: '' });
+  /** L26-07 : numéro de visite par visiteur (`démo:clé`), vide si la mesure est désactivée. */
+  const [visits, setVisits] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    if (demo) return setTarget(demo);
-    let off = false;
-    void topDemoToday(wsId).then((id) => !off && setTarget(id ?? demos[0]?.id ?? null));
-    return () => {
-      off = true;
-    };
-  }, [wsId, demo, demos]);
-
-  useEffect(() => {
-    if (!target || paused) return;
+    if (paused) return;
     let off = false;
     const load = () =>
-      Promise.all([
-        supabase.rpc('live_demo', { p_demo: target }),
-        // L26-07 : nouveau ou récurrent (vide si la mesure est désactivée)
-        supabase.rpc('live_visits', { p_demo: target }),
-      ]).then(([{ data: d }, { data: lv }]) => {
+      supabase.rpc('live_space', { p_workspace: wsId, p_demo: demo || undefined }).then(({ data: d }) => {
         if (off || !d) return;
-        const live = d as unknown as Live;
-        setVisits((lv as Record<string, number> | null) ?? {});
+        const live = d as unknown as LiveSpace;
         setData(live);
-        // KPI annoncés au plus une fois par minute, et seulement s'ils changent
-        const text = t('analytics.adv.live.announce', {
-          live: live.kpis.live,
-          views: live.kpis.views30,
-        });
-        const now = Date.now();
-        if (text !== lastAnnounce.current.text && now - lastAnnounce.current.at >= 60_000) {
-          lastAnnounce.current = { at: now, text };
+        setAt(Date.now());
+        // L26-07 : nouveau ou récurrent, pour les démos où quelqu'un est en direct (six au plus)
+        void Promise.all(
+          live.demos
+            .slice(0, 6)
+            .map((x) =>
+              supabase
+                .rpc('live_visits', { p_demo: x.demoId })
+                .then(({ data: lv }) =>
+                  Object.entries((lv as Record<string, number> | null) ?? {}).map(
+                    ([key, no]) => [`${x.demoId}:${key}`, no] as const,
+                  ),
+                ),
+            ),
+        ).then((all) => !off && setVisits(Object.fromEntries(all.flat())));
+        setNow(Date.now());
+        // Indicateurs annoncés au plus une fois par minute, et seulement s'ils changent
+        const text = t('analytics.adv.live.announce', { live: live.kpis.live, views: live.kpis.views30 });
+        const stamp = Date.now();
+        if (text !== lastAnnounce.current.text && stamp - lastAnnounce.current.at >= 60_000) {
+          lastAnnounce.current = { at: stamp, text };
           setAnnounce(text);
         }
       });
@@ -109,150 +83,213 @@ export function LiveTab({
       off = true;
       window.clearInterval(timer);
     };
-  }, [target, paused, t]);
+  }, [wsId, demo, paused, t]);
+  // « actualisé il y a n s » : l'horloge de l'écran avance chaque seconde (figée en pause)
+  useEffect(() => {
+    if (paused) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [paused]);
 
-  if (!target) return <div className="card empty">{t('analytics.adv.live.noDemo')}</div>;
+  const liveBy = useMemo(() => new Map((data?.demos ?? []).map((d) => [d.demoId, d.live])), [data]);
+  const options = useMemo(
+    () => demos.map((d) => ({ ...d, type: types[d.id], live: liveBy.get(d.id) ?? 0 })),
+    [demos, types, liveBy],
+  );
+  const titleOf = (id: string) => demos.find((d) => d.id === id)?.title ?? t('demos.untitled');
+
   if (!data) return <Loading />;
-  const title = demos.find((d) => d.id === target)?.title ?? '—';
   const k = data.kpis;
-  const total = data.stepsTotal;
+  const totalLive = demo ? [...liveBy.values()].reduce((a, b) => a + b, 0) : k.live;
   let anon = 0;
 
+  const exportCsv = () => {
+    const csv = liveCsv(
+      data,
+      titleOf,
+      {
+        visitor: t('analytics.visitor'),
+        demo: t('analytics.demoLabel'),
+        step: t('analytics.progress'),
+        since: t('analytics.adv.live.since'),
+        anon: t('analytics.adv.live.anon'),
+        learner: t('analytics.adv.live.learner'),
+      },
+      now,
+    );
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿', csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'temps-reel.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   return (
-    <div className="l19">
-      <div className="row between wrap l19-livehead">
-        {/* L19-01 / 02 : la démo est toujours nommée en tête de ligne (« Démo CRM · actualisé… ») */}
-        <div className="l19-livehead-l">
-          {/* Un seul sélecteur de démo, celui de la page ; sans choix, la démo la plus vue du jour */}
-          <p className="muted">
-            <b>{title}</b> · {t('analytics.adv.live.refresh')}
-          </p>
-        </div>
+    <div className="lv">
+      <div className="lv-bar">
+        <LiveDemoFilter value={demo} options={options} totalLive={totalLive} onChange={onDemo} />
+        <span className={`lv-state${paused ? ' is-paused' : ''}`}>
+          <i aria-hidden="true" />
+          {paused
+            ? t('analytics.adv.live.paused')
+            : t('analytics.adv.live.liveSince', { n: Math.max(0, Math.round((now - at) / 1000)) })}
+        </span>
         <button
           type="button"
-          className="btn btn-secondary btn-sm"
+          className="fd-btn fd-btn--icon fd-btn--sm lv-pause"
           aria-pressed={paused}
+          aria-label={t('analytics.adv.live.pauseLabel')}
+          title={paused ? t('analytics.adv.live.resume') : t('analytics.adv.live.pauseLabel')}
           onClick={() => setPaused((p) => !p)}
         >
           {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
-          {paused ? t('analytics.adv.live.resume') : t('analytics.adv.live.pause')}
+        </button>
+        <span className="lv-bar__grow" />
+        <button
+          type="button"
+          className="fd-btn fd-btn--icon lv-export"
+          aria-label={t('analytics.adv.live.export')}
+          title={t('analytics.adv.live.export')}
+          onClick={exportCsv}
+        >
+          <Download aria-hidden="true" />
         </button>
       </div>
-      <span className="sr-only" role="status">
+      <span className="sr-only" role="status" aria-live="polite">
         {announce}
       </span>
-      <div className="kpis">
-        <div className="card kpi l19-now">
-          <span className="t-caption muted">
-            <span className="live-dot" aria-hidden="true" /> {t('analytics.adv.live.now')}
-          </span>
-          <div className="value">{formatNumber(k.live)}</div>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.adv.live.views30')}</span>
-          <div className="value">{formatNumber(k.views30)}</div>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.adv.live.ctaToday')}</span>
-          <div className="value">{formatNumber(k.ctaToday)}</div>
-        </div>
-        <div className="card kpi">
-          <span className="t-caption muted">{t('analytics.adv.live.leadsToday')}</span>
-          <div className="value">{formatNumber(k.leadsToday)}</div>
-        </div>
-      </div>
-      {data.visitors.length === 0 ? (
-        <Empty
-          live
-          className="l19-gap"
-          icon={<Radio />}
-          title={t('analytics.adv.live.emptyTitle')}
-          body={t('analytics.adv.live.emptyBody')}
-        />
-      ) : (
-        <div className="card l19-gap">
-          <div className="card-head">
-            <h2 className="t-h3">{t('analytics.adv.live.active')}</h2>
-            <span className="t-caption muted">{t('analytics.adv.live.count', { count: k.live })}</span>
+
+      <dl className="lv-kpis">
+        {(
+          [
+            ['now', k.live],
+            ['views30', k.views30],
+            ['endsToday', k.endsToday],
+            ['leadsToday', k.leadsToday],
+          ] as const
+        ).map(([key, n]) => (
+          <div key={key} className="lv-kpi">
+            <dd>{formatNumber(n)}</dd>
+            <dt>{t(`analytics.adv.live.${key}`)}</dt>
           </div>
-          <div className="table-wrap">
-            <table className="table" aria-live="off">
-              <caption className="sr-only">{t('analytics.adv.live.active')}</caption>
-              <thead>
-                <tr>
-                  <th>{t('analytics.visitor')}</th>
-                  <th>{t('analytics.adv.live.place')}</th>
-                  <th>{t('analytics.progress')}</th>
-                  <th>{t('analytics.adv.live.since')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.visitors.map((v) => {
-                  const seen = v.stepIndex === null ? 0 : v.stepIndex + 1;
-                  // L19-01 : apprenant identifié (nom si droit au suivi nominatif), sinon visiteur anonyme
-                  const label =
-                    v.identity ??
-                    (v.learner ? t('analytics.adv.live.learner') : t('analytics.adv.live.anon'));
-                  const avatar = v.identity ? initials(v.identity) : v.learner ? 'AI' : `V${++anon}`;
-                  const sub = v.learner
-                    ? [t('analytics.adv.live.learnerSub'), v.structure].filter(Boolean).join(' · ')
-                    : null;
-                  return (
-                    <tr key={v.key}>
-                      <td>
-                        <div className="row">
-                          <span
-                            className={`avatar avatar-sm${v.identity || v.learner ? '' : ' an-anon'}`}
-                            aria-hidden="true"
-                          >
+        ))}
+      </dl>
+
+      <div className="lv-cols">
+        <section className="lv-card" aria-labelledby="lv-now-t">
+          <h2 id="lv-now-t">{t('analytics.adv.live.nowTitle')}</h2>
+          {data.visitors.length === 0 ? (
+            <Empty
+              live
+              variant="compact"
+              icon={<Radio />}
+              title={t('analytics.adv.live.emptyTitle')}
+              body={t('analytics.adv.live.emptyBody')}
+            />
+          ) : (
+            <>
+              <table className="lv-table" aria-live="off">
+                <caption className="sr-only">{t('analytics.adv.live.nowTitle')}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" className="lv-c-av">
+                      <span className="sr-only">{t('analytics.adv.live.avatar')}</span>
+                    </th>
+                    <th scope="col">{t('analytics.visitor')}</th>
+                    <th scope="col">{t('analytics.demoLabel')}</th>
+                    <th scope="col">{t('analytics.progress')}</th>
+                    <th scope="col" className="lv-c-since">
+                      {t('analytics.adv.live.since')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.visitors.map((v) => {
+                    const seen = v.stepIndex === null ? 0 : v.stepIndex + 1;
+                    const total = Math.max(v.stepsTotal, seen);
+                    // Lieu approximatif (pays), ou l'adresse si la personne s'est identifiée par un lead
+                    const label =
+                      v.identity ??
+                      (v.learner
+                        ? t('analytics.adv.live.learner')
+                        : v.country
+                          ? t('analytics.adv.live.visitorFrom', { place: regionName(v.country) })
+                          : t('analytics.adv.live.anon'));
+                    const avatar = v.identity ? initials(v.identity) : v.learner ? 'AI' : `V${++anon}`;
+                    const name = titleOf(v.demoId);
+                    const type = types[v.demoId];
+                    return (
+                      <tr key={`${v.demoId}:${v.key}`}>
+                        <td className="lv-c-av">
+                          <span className={`lv-av lv-av--${(anon + avatar.length) % 3}`} aria-hidden="true">
                             {avatar}
                           </span>
-                          <span className="l19-who">
-                            <b>{label}</b>
-                            {sub && <span className="t-caption muted">{sub}</span>}
-                            <VisitBadge no={visits[v.key]} />
+                        </td>
+                        <th scope="row" className="lv-who" title={label}>
+                          <span className="lv-who__t">{label}</span>
+                          <VisitBadge no={visits[`${v.demoId}:${v.key}`]} />
+                        </th>
+                        <td>
+                          <span className="lv-demo">
+                            {type && <TypeBadge type={type} tone />}
+                            <span className="lv-demo__t" title={name}>
+                              {name}
+                            </span>
                           </span>
-                        </div>
-                      </td>
-                      <td>
-                        {[
-                          v.country ? regionName(v.country) : t('analytics.adv.live.unknownPlace'),
-                          v.device ? t(`analytics.adv.dev.${v.device}`) : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </td>
-                      <td>
-                        <span
-                          className="steps-mini"
-                          /* §18.6 : points d’étapes accolés */ data-gap-exempt=""
-                          role="img"
-                          aria-label={t('analytics.adv.live.stepsSeen', { n: seen, total })}
-                        >
-                          {Array.from({ length: Math.min(total, 20) }, (_, i) => (
-                            <i key={i} className={i < seen - 1 ? 'on' : i === seen - 1 ? 'cur' : undefined} />
-                          ))}
-                        </span>{' '}
-                        {seen > 0 && (
-                          <span className="t-caption">
-                            {t('analytics.adv.live.stepN', { n: seen })}
-                            {v.stepTitle ? ` · ${v.stepTitle}` : ''}
+                        </td>
+                        <td>
+                          <span className="lv-prog">
+                            <span
+                              className="lv-prog__bar"
+                              role="img"
+                              aria-label={t('analytics.adv.live.stepsSeen', { n: seen, total })}
+                            >
+                              <i style={{ width: `${total ? Math.round((seen / total) * 100) : 0}%` }} />
+                            </span>
+                            <span className="lv-prog__t" aria-hidden="true">
+                              {t('analytics.adv.live.stepOf', { n: seen, total })}
+                            </span>
                           </span>
-                        )}
-                      </td>
-                      <td className="muted">{formatRelativeShort(v.since)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <p className="t-caption muted l19-foot">
-            {data.more > 0 && `${t('analytics.adv.live.more', { count: data.more })} `}
-            {t('analytics.adv.live.privacy')}
-          </p>
-        </div>
-      )}
+                        </td>
+                        <td className="lv-c-since">{elapsedShort(v.since, now)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <p className="lv-foot">
+                {data.more > 0 && `${t('analytics.adv.live.more', { count: data.more })} `}
+                {t('analytics.adv.live.privacy')}
+              </p>
+            </>
+          )}
+        </section>
+
+        <section className="lv-card" aria-labelledby="lv-feed-t">
+          <h2 id="lv-feed-t">{t('analytics.adv.live.feedTitle')}</h2>
+          {data.feed.length === 0 ? (
+            <p className="lv-none">{t('analytics.adv.live.feedNone')}</p>
+          ) : (
+            <ul className="lv-feed">
+              {data.feed.map((f) => (
+                <li key={`${f.kind}-${f.demoId}-${f.at}`}>
+                  {f.kind === 'lead' ? (
+                    <Mail aria-hidden="true" />
+                  ) : f.kind === 'end' ? (
+                    <Flag aria-hidden="true" />
+                  ) : (
+                    <Play aria-hidden="true" />
+                  )}
+                  <span className="lv-feed__t">
+                    {t(`analytics.adv.live.feed_${f.kind}`, { demo: titleOf(f.demoId) })}
+                  </span>
+                  <span className="lv-feed__at">{formatRelativeShort(f.at, now)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

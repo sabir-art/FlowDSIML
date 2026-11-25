@@ -349,111 +349,109 @@ export function AnalyticsPage() {
         />
       </div>
 
-      {/* L48-D §2 : Démo, Source | période, Exporter */}
-      <ListToolbar
-        className="an-toolbar"
-        // Temps réel : le direct ne dépend ni de la source ni de la période, seul le filtre Démo reste
-        activeCount={(demo ? 1 : 0) + (source && tab !== 'live' ? 1 : 0)}
-        onReset={() => {
-          setDemo('');
-          setSource('');
-        }}
-        status={
-          tab === 'live'
-            ? t('analytics.filteredOnDemo', { demo: demo ? title(demo) : t('analytics.allDemos') })
-            : t('analytics.filteredOn', {
-                demo: demo ? title(demo) : t('analytics.allDemos'),
-                source: source ? t(`analytics.src.${source}`) : t('analytics.allSources'),
-              })
-        }
-        filters={
-          <>
-            <FilterMenu
-              icon={<Monitor />}
-              label={t('analytics.demoLabel')}
-              value={demo ? title(demo) : t('analytics.allDemos')}
-              active={!!demo}
-              search={
-                demos.length > SEARCH_MIN
-                  ? { label: t('analytics.searchDemo'), empty: t('analytics.noDemoMatch'), keep: 1 }
-                  : undefined
-              }
-              items={[
-                {
-                  label: t('analytics.allDemos'),
-                  icon: demo ? <span /> : <Check />,
-                  onSelect: () => setDemo(''),
-                },
-                ...demos.map((d) => ({
-                  label: d.title,
-                  icon: demo === d.id ? <Check /> : <span />,
-                  // Pastille colorée par type, aux jetons --fd-type-* (comme les cartes Démos)
-                  end: types[d.id] ? <TypeBadge type={types[d.id]!} tone /> : undefined,
-                  onSelect: () => setDemo(d.id),
-                })),
-              ]}
-            />
-            {tab !== 'live' && (
+      {/* L48-D §2 : Démo, Source | période, Exporter. Temps réel (§5) : sa propre barre (filtre Démo avec
+          recherche, état du direct, pause, export), le direct ne dépend ni de la source ni de la période */}
+      {tab !== 'live' && (
+        <ListToolbar
+          className="an-toolbar"
+          activeCount={(demo ? 1 : 0) + (source ? 1 : 0)}
+          onReset={() => {
+            setDemo('');
+            setSource('');
+          }}
+          status={t('analytics.filteredOn', {
+            demo: demo ? title(demo) : t('analytics.allDemos'),
+            source: source ? t(`analytics.src.${source}`) : t('analytics.allSources'),
+          })}
+          filters={
+            <>
               <FilterMenu
-                icon={<Link2 />}
-                label={t('analytics.sourceLabel')}
-                value={source ? t(`analytics.src.${source}`) : t('analytics.allSources')}
-                active={!!source}
+                icon={<Monitor />}
+                label={t('analytics.demoLabel')}
+                value={demo ? title(demo) : t('analytics.allDemos')}
+                active={!!demo}
+                search={
+                  demos.length > SEARCH_MIN
+                    ? { label: t('analytics.searchDemo'), empty: t('analytics.noDemoMatch'), keep: 1 }
+                    : undefined
+                }
                 items={[
                   {
-                    label: t('analytics.allSources'),
-                    icon: source ? <span /> : <Check />,
-                    onSelect: () => setSource(''),
+                    label: t('analytics.allDemos'),
+                    icon: demo ? <span /> : <Check />,
+                    onSelect: () => setDemo(''),
                   },
-                  ...(['direct', 'embed', 'link', 'page'] as Source[]).map((k) => ({
-                    label: t(`analytics.src.${k}`),
-                    icon: source === k ? <Check /> : <span />,
-                    onSelect: () => setSource(k),
+                  ...demos.map((d) => ({
+                    label: d.title,
+                    icon: demo === d.id ? <Check /> : <span />,
+                    // Pastille colorée par type, aux jetons --fd-type-* (comme les cartes Démos)
+                    end: types[d.id] ? <TypeBadge type={types[d.id]!} tone /> : undefined,
+                    onSelect: () => setDemo(d.id),
                   })),
                 ]}
               />
-            )}
-            {FILTERED.includes(tab) && (
-              <FilterBar
-                def={segId ? null : filters}
-                segment={segment}
-                segments={segments}
-                demos={demos}
-                canEdit={canEdit}
-                onChange={(d) => patchParams({ f: d ? encodeDef(d) : null, seg: null })}
-                onSegment={(x) => patchParams({ seg: x?.id ?? null, f: null })}
-                onSave={() => {
-                  setSegInitial(filters);
-                  selectTab('segments');
-                }}
-              />
-            )}
-          </>
-        }
-        end={
-          <div className="an-toolbar__end">
-            {tab !== 'live' && (
-              <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
-                {PERIODS.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    role="radio"
-                    aria-checked={days === p}
-                    onClick={() => setDays(p)}
-                  >
-                    {t('analytics.daysShort', { count: p })}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
-              <Download aria-hidden="true" />
-              {t('analytics.export')}
-            </button>
-          </div>
-        }
-      />
+              {
+                <FilterMenu
+                  icon={<Link2 />}
+                  label={t('analytics.sourceLabel')}
+                  value={source ? t(`analytics.src.${source}`) : t('analytics.allSources')}
+                  active={!!source}
+                  items={[
+                    {
+                      label: t('analytics.allSources'),
+                      icon: source ? <span /> : <Check />,
+                      onSelect: () => setSource(''),
+                    },
+                    ...(['direct', 'embed', 'link', 'page'] as Source[]).map((k) => ({
+                      label: t(`analytics.src.${k}`),
+                      icon: source === k ? <Check /> : <span />,
+                      onSelect: () => setSource(k),
+                    })),
+                  ]}
+                />
+              }
+              {FILTERED.includes(tab) && (
+                <FilterBar
+                  def={segId ? null : filters}
+                  segment={segment}
+                  segments={segments}
+                  demos={demos}
+                  canEdit={canEdit}
+                  onChange={(d) => patchParams({ f: d ? encodeDef(d) : null, seg: null })}
+                  onSegment={(x) => patchParams({ seg: x?.id ?? null, f: null })}
+                  onSave={() => {
+                    setSegInitial(filters);
+                    selectTab('segments');
+                  }}
+                />
+              )}
+            </>
+          }
+          end={
+            <div className="an-toolbar__end">
+              {
+                <div className="fd-segmented" role="radiogroup" aria-label={t('analytics.period')}>
+                  {PERIODS.map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      role="radio"
+                      aria-checked={days === p}
+                      onClick={() => setDays(p)}
+                    >
+                      {t('analytics.daysShort', { count: p })}
+                    </button>
+                  ))}
+                </div>
+              }
+              <button type="button" className="btn btn-secondary" onClick={() => void exportCsv()}>
+                <Download aria-hidden="true" />
+                {t('analytics.export')}
+              </button>
+            </div>
+          }
+        />
+      )}
 
       {FILTERED.includes(tab) && data.segmentVisitors != null && data.segmentVisitors < 5 && (
         <p className="help l19-small" role="status">
@@ -523,7 +521,7 @@ export function AnalyticsPage() {
       )}
       {tab === 'live' && (
         <section role="tabpanel" id="an-panel-live" aria-label={t('analytics.tab.live')}>
-          <LiveTab wsId={ws.id} demo={demo} demos={demos} />
+          <LiveTab wsId={ws.id} demo={demo} onDemo={setDemo} demos={demos} types={types} />
         </section>
       )}
       {tab === 'tests' && (

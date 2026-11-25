@@ -2254,6 +2254,51 @@ async function install(page, state = seed()) {
         }
         case 'live_visits':
           return json(route, 200, state.liveVisits || {});
+        // §5 : temps réel de l'espace. `state.liveSpace` (forme de live_space) ; à défaut, dérivé de
+        // `state.live` (forme de live_demo), sur la démo demandée ou la première de l'espace
+        case 'live_space': {
+          if (state.liveSpace) {
+            const sp = state.liveSpace;
+            if (!a.p_demo) return json(route, 200, sp);
+            const visitors = sp.visitors.filter((v) => v.demoId === a.p_demo);
+            return json(route, 200, {
+              ...sp,
+              kpis: { ...sp.kpis, live: visitors.length },
+              visitors,
+              feed: sp.feed.filter((f) => f.demoId === a.p_demo),
+            });
+          }
+          const one = state.live || {
+            kpis: { live: 0, views30: 0, ctaToday: 0, leadsToday: 0 },
+            stepsTotal: 0,
+            more: 0,
+            visitors: [],
+          };
+          const demoId = a.p_demo || (t.demos.find((d) => !d.deleted_at) || {}).id;
+          return json(route, 200, {
+            kpis: {
+              live: one.kpis.live,
+              views30: one.kpis.views30,
+              endsToday: one.kpis.ctaToday,
+              leadsToday: one.kpis.leadsToday,
+            },
+            more: one.more,
+            demos: one.kpis.live ? [{ demoId, live: one.kpis.live }] : [],
+            visitors: one.visitors.map((v) => ({
+              key: v.key,
+              demoId,
+              lastAt: v.lastAt,
+              since: v.since,
+              stepIndex: v.stepIndex,
+              stepsTotal: one.stepsTotal,
+              device: v.device,
+              country: v.country,
+              learner: v.learner,
+              identity: v.identity,
+            })),
+            feed: [],
+          });
+        }
         // ===== L19 : analytics avancées =====
         case 'live_demo':
           return json(
