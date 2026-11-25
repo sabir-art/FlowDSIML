@@ -10,7 +10,8 @@ import { TagChip } from './Tags';
 
 const Row = ({ children }: { children: ReactNode }) => <div className="fd-es-row">{children}</div>;
 const Main = ({ a, b }: { a: ReactNode; b?: ReactNode }) => (
-  <span className="fd-es-main">
+  // data-gap-exempt : maquette réduite, lignes de texte serrées comme dans une vraie liste (§18.6)
+  <span className="fd-es-main" data-gap-exempt="">
     <span>{a}</span>
     {b && <span className="fd-es-muted">{b}</span>}
   </span>
@@ -43,7 +44,7 @@ export function TagsPreview() {
         <Main
           a={t('emptyPreview.demo1')}
           b={
-            <span className="fd-es-tags">
+            <span className="fd-es-tags" data-gap-exempt="">
               {sales}
               <TagChip tag={{ name: t('emptyPreview.tagTraining'), color: 'green' }} />
             </span>
@@ -52,7 +53,14 @@ export function TagsPreview() {
       </Row>
       <Row>
         <span className="fd-es-thumb" />
-        <Main a={t('emptyPreview.demo2')} b={<span className="fd-es-tags">{sales}</span>} />
+        <Main
+          a={t('emptyPreview.demo2')}
+          b={
+            <span className="fd-es-tags" data-gap-exempt="">
+              {sales}
+            </span>
+          }
+        />
       </Row>
     </>
   );
