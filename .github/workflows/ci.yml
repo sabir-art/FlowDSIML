@@ -331,6 +331,9 @@ jobs:
       - name: 'Lecteur : navigation, clavier, fin de démo'
         if: always()
         run: cd apps/web && node e2e/player-ux.e2e.cjs
+      - name: Lecteur, changement d'étape (MOTION-01) (capture en fondu croisé 200 ms, bulle en opacité et 4 px, mouvement réduit)
+        if: always()
+        run: cd apps/web && node e2e/player-mouvement.e2e.cjs
       - name: 'Aide intégrée (tiroir, recherche, articles de la page)'
         if: always()
         run: cd apps/web && node e2e/aide.e2e.cjs

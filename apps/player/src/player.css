@@ -169,6 +169,34 @@ body {
   object-fit: contain;
   user-select: none;
 }
+/* MOTION-01 §3, changement d'étape : la capture quittée reste au-dessus de la nouvelle et s'efface en
+   200 ms (opacité seule) ; la bulle entre en fondu, 4 px plus bas. Le zoom d'étape garde sa durée. */
+.p-img-out {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+.p-img-out.is-go {
+  animation: p-img-out 200ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes p-img-out {
+  to {
+    opacity: 0;
+  }
+}
+.p-stage.is-step-change > .p-tip {
+  animation: p-tip-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes p-tip-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
 /* L38-11 / MOB-01 M5 : bascule du cadrage automatique (petit écran), en lien de 14 px sous la capture */
 .p-autozoom {
   align-self: flex-end;
