@@ -104,6 +104,20 @@ const PAGES = {
      <p class="erreur" hidden>Indiquez votre nom.</p>
      <button class="btn">Modifier la fiche</button> <a href="/donnees">Voir l’historique</a></main>`,
   ),
+  // 7. Page piège (recette UX du 25/11) : rien de personnel, donc aucune détection attendue. En-têtes
+  //    de tableau « Nom / Statut / Actions », les mêmes en mots collés, une ville seule, un avis signé
+  //    d'un prénom et d'une initiale.
+  '/piege': page(
+    'Offres',
+    `${entete}</header><main><h1>Offres</h1>
+     <table class="carte"><thead><tr><th>Nom</th><th>Statut</th><th>Actions</th></tr></thead>
+     <tbody><tr><td>Offre essentielle</td><td>Active</td><td><button class="btn">Ouvrir</button></td></tr>
+     <tr><td>Offre avancée</td><td>Brouillon</td><td><button class="btn">Ouvrir</button></td></tr></tbody></table>
+     <div class="carte" id="colles"><span>Nom</span><span>Statut</span><span>Actions</span></div>
+     <div class="carte" id="grille"><div>Nom</div><div>Statut</div><div>Actions</div></div>
+     <p class="carte" id="ville">Ville : Lyon</p>
+     <p class="carte" id="avis">Avis : « Très bon outil », Camille D.</p></main>`,
+  ),
   '/menu/logiciels': page(
     'Logiciels',
     `${entete}<a href="/menu">Catalogue</a></header><main><h1>Logiciels</h1><p class="carte">ExempleCRM, ExempleFacture.</p></main>`,

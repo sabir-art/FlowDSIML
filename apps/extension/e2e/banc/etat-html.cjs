@@ -32,7 +32,8 @@ const CAS = [
     attendus: [
       ['Accueil', 'Bienvenue dans ExempleCRM.'],
       ['Liste des clients (chargée en différé)', 'Maison Leroy'],
-      ['Fiche du client', 'Ajouter une note'],
+      ['Fiche du client (bouton lisible)', 'Ajouter une note'],
+      ['Ville seule lisible', 'Ville : Lyon'],
     ],
   },
   {
@@ -119,6 +120,23 @@ const CAS = [
     ],
     // Ce qui ne doit PAS rester lisible dans la copie
     interdits: ['Camille Durand', 'camille.durand@acme.example'],
+  },
+  {
+    id: 'piege',
+    nom: 'Page piège (aucune donnée personnelle)',
+    depart: '/piege',
+    pret: (p) => p.getByRole('heading', { name: 'Offres' }).waitFor(),
+    gestes: async () => {},
+    // Tout doit rester lisible : aucun remplacement
+    attendus: [
+      ['En-têtes du tableau', 'Statut'],
+      ['Mots collés', 'NomStatutActions'],
+      ['En-têtes en blocs', 'Actions'],
+      ['Ville seule lisible', 'Ville : Lyon'],
+      ['Avis signé', 'Camille D.'],
+      ['Lignes du tableau', 'Offre essentielle'],
+    ],
+    remplacements: 0,
   },
 ];
 
@@ -287,6 +305,9 @@ async function relire(b, cas, pages) {
       verification: groupes,
       erreur,
       fuites: (cas.interdits ?? []).filter((t) => vues.some((v) => v.texte.includes(t))),
+      // Nombre de remplacements faits dans les copies (données personnelles repérées)
+      remplacements: pages.reduce((n, p) => n + (p.security?.piiReplaced ?? 0), 0),
+      remplacementsAttendus: cas.remplacements ?? null,
       vues: vues.map(({ texte, ...v }) => v),
     });
     console.error(
@@ -304,9 +325,10 @@ async function relire(b, cas, pages) {
       !r.erreur &&
       r.rendu.startsWith('styles') &&
       !r.fuites.length &&
-      nomsOk;
+      nomsOk &&
+      (r.remplacementsAttendus === null || r.remplacements === r.remplacementsAttendus);
     console.error(
-      `${ok ? 'ok' : 'NOT OK'} - ${r.nom} : ${r.etatsCaptures}/${r.etatsAttendus} états, ${r.rendu}${r.fuites.length ? `, données lisibles : ${r.fuites.join(', ')}` : ''}${nomsOk ? '' : `, noms d’écran à revoir : ${JSON.stringify(r.noms)}`}${r.erreur ? `, ${r.erreur}` : ''}`,
+      `${ok ? 'ok' : 'NOT OK'} - ${r.nom} : ${r.etatsCaptures}/${r.etatsAttendus} états, ${r.rendu}${r.fuites.length ? `, données lisibles : ${r.fuites.join(', ')}` : ''}${r.remplacementsAttendus !== null ? `, ${r.remplacements} remplacement(s) (${r.remplacementsAttendus} attendu)` : ''}${nomsOk ? '' : `, noms d’écran à revoir : ${JSON.stringify(r.noms)}`}${r.erreur ? `, ${r.erreur}` : ''}`,
     );
     if (!ok) process.exitCode = 1;
   }
