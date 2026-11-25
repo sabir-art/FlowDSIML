@@ -58,6 +58,29 @@ http
         return send(200, [
           { role: 'owner', workspaces: { id: '11111111-1111-1111-1111-111111111111', name: 'Acme' } },
         ]);
+      // EXT-02 §8 : ajout d'étapes à une démo existante (titre de la démo, étapes dans l'ordre)
+      if (req.method === 'GET' && req.url.startsWith('/rest/v1/demos') && req.url.includes('workspace_id'))
+        return send(
+          200,
+          req.url.includes('22222222-2222-4222-8222-222222222222')
+            ? {
+                id: '22222222-2222-4222-8222-222222222222',
+                title: 'Démo CRM',
+                workspace_id: '11111111-1111-1111-1111-111111111111',
+              }
+            : null,
+        );
+      if (
+        req.method === 'GET' &&
+        req.url.startsWith('/rest/v1/steps') &&
+        req.url.includes('select=id%2Ctitle') &&
+        !req.url.includes('to_capture')
+      )
+        return send(200, [
+          { id: '44444444-4444-4444-8444-444444444441', title: 'Ouvrir les clients' },
+          { id: '44444444-4444-4444-8444-444444444442', title: 'Créer une opportunité' },
+          { id: '44444444-4444-4444-8444-444444444443', title: 'Merci !' },
+        ]);
       // L26-04 : étapes « À capturer » d'une démo créée depuis un modèle (capture guidée)
       if (req.url.startsWith('/rest/v1/steps') && req.method === 'GET') {
         if (req.url.includes('to_capture=eq.true') && req.url.includes('demos'))

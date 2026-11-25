@@ -36,6 +36,8 @@ import { rs, tr } from '@/lib/reviewStrings';
 import { strings } from '@/lib/i18n';
 import { defaultHotspotTitle } from '@/lib/geometry';
 import { frameFor, type FrameMode } from '@/lib/frame';
+import { ADD_KEY, type AddTarget } from '@/lib/external';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Écran de vérification des flous avant envoi (spec f1-formation §1). Tout se passe dans le
@@ -88,7 +90,14 @@ let target: {
   viewport?: { w: number; h: number } | null;
   /** L26-04 : capture guidée d'une démo créée depuis un modèle. */
   fill?: FillTarget | null;
+  /** EXT-02 §8 : ajout à la démo ouverte dans l'éditeur, après l'étape choisie. */
+  addTo?: { demoId: string; title: string; after: { n: number; title: string } | null } | null;
 } | null = null;
+/** Libellé du bouton principal : « Flouter et envoyer n captures », ou « Ajouter n étapes » (§8.4). */
+const sendLabel = (n: number) =>
+  target?.addTo
+    ? (n === 1 ? strings.addSend_one : strings.addSend_other).replace('{{count}}', String(n))
+    : tr('send', { count: n });
 const urls = new Map<string, string>();
 
 const detected = (c: PendingCapture) => c.zones.filter((z) => !z.manual);
@@ -122,7 +131,12 @@ async function boot() {
   $('main').setAttribute('aria-busy', 'false');
   $('state-text').textContent = tr('done');
   $('state').classList.add('is-done');
-  $('subtitle').textContent = tr('subtitle', { demo: target?.title ?? '', count: captures.length });
+  $('subtitle').textContent = target?.addTo
+    ? (target.addTo.after ? strings.addDestAfter : strings.addDestStart)
+        .replace('{{demo}}', target.addTo.title)
+        .replace('{{n}}', String(target.addTo.after?.n ?? ''))
+        .replace('{{title}}', target.addTo.after?.title ?? '')
+    : tr('subtitle', { demo: target?.title ?? '', count: captures.length });
   if (!captures.length || !target) {
     $('summary').hidden = false;
     $('summary').textContent = tr('empty');
@@ -158,8 +172,7 @@ function render() {
   renderStage();
   renderPanel();
   renderFrames();
-  const n = captures.length;
-  $('send-text').textContent = tr('send', { count: n });
+  $('send-text').textContent = sendLabel(captures.length);
 }
 
 function renderRail() {
@@ -531,18 +544,50 @@ $('send').addEventListener('click', async () => {
   $('error').hidden = true;
   const ordered = [...captures].sort((a, b) => a.order - b.order);
   try {
-    const demoId = await sendCaptures(ordered, target, (done) => {
-      $('send-text').textContent = tr('sending', { done, total: ordered.length });
-    });
+    const created: string[] = [];
+    const demoId = await sendCaptures(
+      ordered,
+      { ...target, appendTo: target.addTo?.demoId ?? null },
+      (done) => {
+        $('send-text').textContent = tr('sending', { done, total: ordered.length });
+      },
+      created,
+    );
     await pending.clear();
     await browser.storage.local.remove('fd.review');
-    location.href = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
+    // L'app lit l'état de l'extension (version, dernière capture, dernière démo)
+    void supabase
+      .rpc('extension_report', { p_version: browser.runtime.getManifest().version, p_demo: demoId })
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+    const editor = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
+    if (target.addTo) {
+      // EXT-02 §8.4 : l'extension rend la main à l'onglet de l'éditeur, qui insère les étapes
+      const t = (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined;
+      if (t && t.demoId === demoId) {
+        await browser.storage.local.set({ [ADD_KEY]: { ...t, state: 'sent', stepIds: created } });
+        const back =
+          t.editorTabId !== null
+            ? await browser.tabs.update(t.editorTabId, { active: true }).catch(() => null)
+            : null;
+        if (back) {
+          if (back.windowId !== undefined)
+            await browser.windows.update(back.windowId, { focused: true }).catch(() => undefined);
+          const self = await browser.tabs.getCurrent();
+          if (self?.id !== undefined) return void browser.tabs.remove(self.id);
+        }
+      }
+    }
+    location.href = editor;
   } catch (err) {
     $('error').hidden = false;
-    $('error').textContent = (err as Error).message ?? String(err);
+    // §8.5 : démo supprimée ou droits retirés entre-temps : message clair, les captures restent ici
+    $('error').textContent = target.addTo ? strings.addGone : ((err as Error).message ?? String(err));
     send.disabled = false;
     $('cancel').removeAttribute('disabled');
-    $('send-text').textContent = tr('send', { count: ordered.length });
+    $('send-text').textContent = sendLabel(ordered.length);
   }
 });
 

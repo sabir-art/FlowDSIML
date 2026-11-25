@@ -2,6 +2,19 @@
 import { APP_NAME } from '@flowdsiml/core';
 
 const fr = {
+  // EXT-02 §8 : capturer de nouvelles étapes depuis l'éditeur
+  addChipAfter: '{{demo}} · après l’étape {{n}}',
+  addChipStart: '{{demo}} · au début',
+  addCardAfter: 'Ajout à « {{demo}} » · après l’étape {{n}}',
+  addCardStart: 'Ajout à « {{demo}} » · au début',
+  addCancel: 'Annuler l’ajout',
+  addNote: 'Les captures seront ajoutées à « {{demo}} ».',
+  addDestAfter: 'Destination : ajout à « {{demo}} », après l’étape {{n}} · {{title}}',
+  addDestStart: 'Destination : ajout à « {{demo}} », au début',
+  addSend_one: 'Ajouter {{count}} étape',
+  addSend_other: 'Ajouter {{count}} étapes',
+  addGone:
+    'Cette démo n’existe plus ou vous ne pouvez plus la modifier. Les captures restent ici : annulez l’ajout dans l’éditeur, puis relancez une capture pour une nouvelle démo.',
   // EXT-02 §5 : barre d'enregistrement et cadre des captures
   capBar: 'Capture',
   frameGroup: 'Cadre des prochaines captures',
@@ -293,6 +306,19 @@ const fr = {
   hrSendN_other: 'Envoyer {{n}} pages',
 };
 const en: typeof fr = {
+  // EXT-02 §8: capture new steps from the editor
+  addChipAfter: '{{demo}} · after step {{n}}',
+  addChipStart: '{{demo}} · at the start',
+  addCardAfter: 'Adding to “{{demo}}” · after step {{n}}',
+  addCardStart: 'Adding to “{{demo}}” · at the start',
+  addCancel: 'Cancel the addition',
+  addNote: 'The captures will be added to “{{demo}}”.',
+  addDestAfter: 'Destination: adding to “{{demo}}”, after step {{n}} · {{title}}',
+  addDestStart: 'Destination: adding to “{{demo}}”, at the start',
+  addSend_one: 'Add {{count}} step',
+  addSend_other: 'Add {{count}} steps',
+  addGone:
+    'This demo no longer exists or you can no longer edit it. The captures stay here: cancel the addition in the editor, then start a capture for a new demo.',
   // EXT-02 §5: recording bar and capture frame
   capBar: 'Capture',
   frameGroup: 'Frame for the next captures',

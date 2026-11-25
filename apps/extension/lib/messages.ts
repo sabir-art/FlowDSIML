@@ -120,6 +120,8 @@ export interface RecordingStatus {
   tabId: number | null;
   steps: number;
   lastError: string | null;
+  /** EXT-02 §8 : capture lancée depuis l'éditeur, à ajouter à cette démo après l'étape choisie. */
+  addTo?: { demoId: string; title: string; after: { n: number; title: string } | null } | null;
   /** F7 : type de capture en cours (absent : captures à chaque clic). */
   mode?: CaptureMode;
   /** F7 : démo mobile (taille émulée), null sinon. */

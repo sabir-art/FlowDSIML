@@ -17,6 +17,7 @@ import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
 import { APP_URL, DEBUGGER } from '@/lib/config';
 import { asFrameMode, frameFor } from '@/lib/frame';
+import { strings } from '@/lib/i18n';
 import {
   ASSET_MAX_BYTES,
   ASSET_TIMEOUT_MS,
@@ -25,7 +26,17 @@ import {
   assetTypeAllowed,
   type AssetKind,
 } from '@/lib/assetPolicy';
-import { ATTACH_TTL_MS, originOf, parseAttach, type PendingAttach } from '@/lib/external';
+import {
+  ADD_KEY,
+  ATTACH_TTL_MS,
+  liveTarget,
+  originOf,
+  parseAdd,
+  parseAttach,
+  type AddRequest,
+  type AddTarget,
+  type PendingAttach,
+} from '@/lib/external';
 
 /**
  * Service worker MV3. L'état d'enregistrement vit dans storage.session (le worker peut être arrêté).
@@ -43,6 +54,7 @@ const EMPTY: RecordingStatus = {
   tabId: null,
   steps: 0,
   lastError: null,
+  addTo: null,
 };
 
 async function getState(): Promise<RecordingStatus> {
@@ -396,7 +408,19 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
   }
   if (mode === 'html') await htmlStore.clear();
   if (mode === 'clicks' || mode === 'html') await prepareTab(req.tabId, { ...(await getState()), mode });
+  // EXT-02 §8 : une cible posée par l'éditeur vaut pour cette capture (captures d'écran, même espace)
+  const wanted = await addTarget();
+  const adding =
+    wanted &&
+    wanted.state === 'pending' &&
+    mode === 'clicks' &&
+    !req.fill &&
+    wanted.workspaceId === req.workspaceId
+      ? wanted
+      : null;
+  if (adding) await saveTarget({ ...adding, state: 'recording', captureTabId: req.tabId });
   const state = await setState({
+    addTo: adding ? { demoId: adding.demoId, title: adding.title, after: adding.after } : null,
     recording: true,
     mode,
     demoId: null,
@@ -619,11 +643,102 @@ function tabLoaded(tabId: number): Promise<void> {
  * Sandbox. Avec l'accès au site déjà accordé, la capture démarre aussitôt ; sinon l'utilisateur clique sur
  * l'extension dans le nouvel onglet (« Démarrer » demande l'accès, comme d'habitude) : aucune permission de plus.
  */
+// ===== EXT-02 §8 : capturer de nouvelles étapes pour une démo ouverte dans l'éditeur =====
+async function addTarget(): Promise<AddTarget | null> {
+  const t = liveTarget(
+    (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined,
+    Date.now(),
+  );
+  if (!t) await browser.storage.local.remove(ADD_KEY);
+  return t;
+}
+const saveTarget = (t: AddTarget) => browser.storage.local.set({ [ADD_KEY]: t });
+async function onAdd(
+  req: AddRequest,
+  sender: Browser.runtime.MessageSender,
+): Promise<Record<string, unknown>> {
+  if (req.type === 'fd:ping') return { ok: true, version: browser.runtime.getManifest().version };
+  const current = await addTarget();
+  const mine = current && current.demoId === req.demoId ? current : null;
+  if (req.type === 'fd:add-status') {
+    if (!mine) return { ok: true, state: 'none', steps: 0, stepIds: [] };
+    const steps = mine.state === 'recording' ? (await getState()).steps : mine.stepIds.length;
+    // « pending » (accès au site à accorder dans le popup) se lit comme une capture en cours
+    return {
+      ok: true,
+      state: mine.state === 'pending' ? 'recording' : mine.state,
+      steps,
+      stepIds: mine.stepIds,
+    };
+  }
+  if (req.type === 'fd:add-focus') {
+    if (!mine) return { ok: false, error: 'none' };
+    const review = (await browser.tabs.query({ url: browser.runtime.getURL('/review.html') }))[0];
+    const id = mine.state === 'review' ? review?.id : mine.captureTabId;
+    if (id === undefined || id === null) return { ok: false, error: 'tab' };
+    const tab = await browser.tabs.update(id, { active: true }).catch(() => null);
+    if (tab?.windowId !== undefined)
+      await browser.windows.update(tab.windowId, { focused: true }).catch(() => undefined);
+    return { ok: !!tab };
+  }
+  if (req.type === 'fd:add-clear') {
+    if (!mine) return { ok: true };
+    const s = await getState();
+    if (s.recording && s.addTo?.demoId === req.demoId) await cancel();
+    if (mine.state === 'review') await pending.clear();
+    await browser.storage.local.remove([ADD_KEY, 'fd.review']);
+    return { ok: true };
+  }
+  if (req.type !== 'fd:add-steps') return { ok: false, error: 'schema' };
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return { ok: false, error: 'signed-out' };
+  if ((await getState()).recording) return { ok: false, error: 'busy' };
+  // Titre de la démo et étape d'insertion : lus avec la session de l'extension (RLS)
+  const demo = await supabase
+    .from('demos')
+    .select('id, title, workspace_id')
+    .eq('id', req.demoId)
+    .maybeSingle();
+  if (!demo.data || demo.data.workspace_id !== req.workspaceId) return { ok: false, error: 'demo' };
+  let after: AddTarget['after'] = null;
+  if (req.afterStepId) {
+    const rows = await supabase.from('steps').select('id, title').eq('demo_id', req.demoId).order('position');
+    const i = (rows.data ?? []).findIndex((r) => r.id === req.afterStepId);
+    if (i < 0) return { ok: false, error: 'demo' };
+    after = { n: i + 1, title: (rows.data![i]!.title ?? '').slice(0, 120) };
+  }
+  const tab = await browser.tabs.create({ url: req.url, active: true });
+  if (tab.id === undefined) return { ok: false, error: 'tab' };
+  const target: AddTarget = {
+    demoId: req.demoId,
+    workspaceId: req.workspaceId,
+    afterStepId: req.afterStepId,
+    title: (demo.data.title ?? '').slice(0, 160),
+    after,
+    at: Date.now(),
+    state: 'pending',
+    editorTabId: sender.tab?.id ?? null,
+    captureTabId: tab.id,
+    stepIds: [],
+  };
+  await saveTarget(target);
+  const origin = originOf(req.url)!;
+  const granted = await browser.permissions.contains({ origins: [`${origin}/*`] }).catch(() => false);
+  // Sans accès au site : l'onglet est ouvert, le popup demande l'autorisation puis démarre
+  if (!granted) return { ok: true, started: false };
+  await tabLoaded(tab.id);
+  await start({ type: 'fd:start', workspaceId: req.workspaceId, title: '', tabId: tab.id, mode: 'clicks' });
+  return { ok: true, started: true };
+}
+
 async function onExternal(
   msg: unknown,
   sender: Browser.runtime.MessageSender,
-): Promise<{ ok: true; started: boolean } | { ok: false; error: string }> {
+): Promise<Record<string, unknown>> {
   const from = sender.origin ?? (sender.url ? (originOf(sender.url) ?? undefined) : undefined);
+  // EXT-02 §8 : messages de l'ajout d'étapes depuis l'éditeur
+  const add = parseAdd(msg, from, originOf(APP_URL));
+  if (add) return add.ok ? onAdd(add.req, sender) : add;
   const parsed = parseAttach(msg, from, originOf(APP_URL));
   if (!parsed.ok) return parsed;
   const { data } = await supabase.auth.getUser();
@@ -682,10 +797,16 @@ async function stop(): Promise<RecordingStatus> {
         device: state.mode === 'mobile' ? 'mobile' : 'desktop',
         viewport: state.mode === 'mobile' ? (state.viewport ?? null) : null,
         fill: state.fill ?? null,
+        // EXT-02 §8 : ajout à la démo ouverte dans l'éditeur
+        addTo: state.addTo ?? null,
       },
     });
+    if (state.addTo) {
+      const t = await addTarget();
+      if (t && t.demoId === state.addTo.demoId) await saveTarget({ ...t, state: 'review' });
+    }
     await browser.tabs.create({ url: browser.runtime.getURL('/review.html') });
-  }
+  } else if (state.addTo) await browser.storage.local.remove(ADD_KEY);
   return setState({ ...EMPTY });
 }
 
@@ -702,6 +823,8 @@ async function cancel(): Promise<RecordingStatus> {
     await videoStore.clear();
   }
   await pending.clear();
+  // EXT-02 §8 : la cible ne vaut que pour une capture, elle est effacée à l'annulation
+  if (state.addTo) await browser.storage.local.remove(ADD_KEY);
   return setState({ ...EMPTY });
 }
 
@@ -745,9 +868,15 @@ export default defineBackground(() => {
         const next = s.fill?.steps[s.steps];
         const guide =
           s.fill && next ? { title: next.title, n: s.steps + 1, total: s.fill.steps.length } : null;
+        // EXT-02 §8 : pastille de cible « Démo CRM · après l'étape 3 »
+        const target = s.addTo
+          ? (s.addTo.after ? strings.addChipAfter : strings.addChipStart)
+              .replace('{{demo}}', s.addTo.title)
+              .replace('{{n}}', String(s.addTo.after?.n ?? ''))
+          : null;
         // EXT-02 §5 : la barre affiche « Capture · n »
-        if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide, steps: s.steps };
-        return { n: 1, title: '', guide, steps: s.steps };
+        if (t) return { n: t.n, title: sender.tab?.title ?? t.title, guide, steps: s.steps, target };
+        return { n: 1, title: '', guide, steps: s.steps, target };
       });
     const p = m as PopupRequest;
     if (p.type === 'fd:status') return getState();
