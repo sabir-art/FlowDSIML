@@ -1,28 +1,43 @@
 import '@flowdsiml/ui/tokens.css';
-import '@flowdsiml/ui/select.css';
-import '@flowdsiml/ui/tooltip.css';
+import '@/lib/fonts.css';
 import './style.css';
 import { browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
 import { APP_URL, DEBUGGER } from '@/lib/config';
 import { APP_NAME, htmlCaptureVerdict, parseHtmlCapture } from '@flowdsiml/core';
-import { installTooltips } from '@flowdsiml/ui/tooltip';
 import type { CaptureMode, FillTarget, PopupRequest, RecordingStatus } from '@/lib/messages';
 import { lang, stepsCaptured, strings } from '@/lib/i18n';
 import { attachFor, type PendingAttach } from '@/lib/external';
 import {
+  ArrowLeft,
+  Box,
+  Building2,
   Check,
+  ChevronDown,
+  CircleQuestionMark,
   Code,
+  Crop,
+  Ellipsis,
+  ExternalLink,
   EyeOff,
-  Film,
   Layers,
+  ListPlus,
   LogIn,
   LogOut,
+  Mic,
+  Monitor,
   MousePointerClick,
   Pause,
   Play,
+  RotateCw,
+  ScrollText,
+  Settings,
+  ShieldCheck,
+  SlidersHorizontal,
   Smartphone,
+  TriangleAlert,
   Video,
+  Webcam,
   X,
   createIcons,
 } from 'lucide';
@@ -35,125 +50,313 @@ import {
   startsWithout,
   type PermissionNeed,
 } from '@/lib/permissions';
+import { createSelect, createSwitch, installHelps, type Option } from './ui';
 
+/**
+ * Popup de l'extension, variante B (EXT-02 §1.2) : titre, type de capture en liste décrite, espace,
+ * options repliables résumées en une ligne, « Démarrer » dans le pied. Contrôles maison (COMP-01).
+ */
 document.documentElement.lang = lang;
 document.title = APP_NAME;
-for (const el of document.querySelectorAll<HTMLElement>('[data-app-name]')) el.textContent = APP_NAME;
 for (const el of document.querySelectorAll<HTMLElement>('[data-i18n]'))
   el.textContent = strings[el.dataset.i18n as keyof typeof strings];
-(document.getElementById('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
 const ICONS = {
+  ArrowLeft,
+  Building2,
   Check,
-  Code,
+  ChevronDown,
+  CircleQuestionMark,
+  Crop,
+  Ellipsis,
+  ExternalLink,
   EyeOff,
-  Film,
   Layers,
+  ListPlus,
   LogIn,
   LogOut,
-  MousePointerClick,
+  Mic,
+  Monitor,
   Pause,
   Play,
+  RotateCw,
+  ScrollText,
+  Settings,
+  ShieldCheck,
+  SlidersHorizontal,
   Smartphone,
-  Video,
+  TriangleAlert,
+  Webcam,
   X,
 };
-installTooltips();
 createIcons({ icons: ICONS, attrs: { width: 16, height: 16, 'stroke-width': 2, 'aria-hidden': 'true' } });
+for (const svg of document.querySelectorAll<SVGElement>('.pph .ib svg')) {
+  svg.setAttribute('width', '20');
+  svg.setAttribute('height', '20');
+}
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const show = (id: string, visible: boolean) => ($(id).hidden = !visible);
+const app = APP_URL.replace(/\/$/, '');
 
-// EXT-STORE, option B : sans debugger, Format mobile et page entière restent visibles en « Bientôt »
-if (!DEBUGGER) {
-  const mobile = document.querySelector<HTMLInputElement>('input[name="mode"][value="mobile"]')!;
-  mobile.disabled = true;
-  mobile.closest('label')?.classList.add('is-soon');
-  $('mobile-help').textContent = strings.typeMobileSoonHelp;
-  $('mobile-soon').textContent = strings.soon;
-  $('mobile-soon').hidden = false;
-  $('opt-full').textContent = strings.fullPageHelpVisible;
-  $('full-soon').textContent = strings.fullPageSoon;
-  $('tabsize-h').textContent = strings.tabSizeHelpWindow;
-}
+($('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
+// Aides « ? » : nom accessible « Aide : <libellé de la ligne> »
+for (const q of document.querySelectorAll<HTMLButtonElement>('button.q[data-help]'))
+  q.setAttribute(
+    'aria-label',
+    strings.helpFor.replace('{{label}}', strings[q.dataset.help as keyof typeof strings]),
+  );
+installHelps($('opts-body'));
+if (!DEBUGGER) $('tabsize-h').textContent = strings.tabSizeHelpWindow;
 
-// F7 : type de capture (clics, vidéo de l'onglet, format mobile)
-const mode = (): CaptureMode =>
-  (document.querySelector<HTMLInputElement>('input[name="mode"]:checked')?.value as CaptureMode) ?? 'clicks';
-function syncMode() {
-  const m = mode();
-  show('opt-video', m === 'video');
-  show('opt-mobile', m === 'mobile');
-  show('opt-html', m === 'html');
-  // L25-01 : multi-onglets et taille pour les captures d'écran et HTML ; taille masquée en mobile
-  show('opt-desk', m !== 'video');
-  show('size-field', m === 'clicks' || m === 'html');
-  show('opt-full', m === 'clicks' || m === 'mobile');
-  show('full-soon', !DEBUGGER && m === 'clicks');
-  // L25-01 : l'aide de la vérification est portée par l'interrupteur « Vérifier les données »
-  show('hint', false);
-  for (const el of document.querySelectorAll<HTMLElement>('.start-ico')) el.hidden = el.dataset.for !== m;
-  $('start-label').textContent =
-    m === 'video'
-      ? strings.startVideo
-      : m === 'mobile'
-        ? strings.startMobile
-        : m === 'html'
-          ? strings.startHtml
-          : strings.start;
+// ===== En-tête : aide (nouvel onglet) et menu ⋯ =====
+$<HTMLAnchorElement>('help').href = `${app}/#/extension`;
+$('help').setAttribute('aria-label', strings.helpTab);
+$('more').setAttribute('aria-label', strings.more);
+$<HTMLAnchorElement>('open-app').href = `${app}/`;
+$('open-app').querySelector('span')!.textContent = strings.openApp;
+const menu = $('more-menu');
+const menuItems = () => [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([hidden])')];
+function toggleMenu(open: boolean, focus = true) {
+  menu.hidden = !open;
+  $('more').setAttribute('aria-expanded', String(open));
+  if (open) menuItems()[0]?.focus();
+  else if (focus) $('more').focus();
 }
-for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
-  r.addEventListener('change', () => {
+$('more').addEventListener('click', () => toggleMenu(menu.hidden));
+menu.addEventListener('keydown', (e) => {
+  const items = menuItems();
+  const i = items.indexOf(document.activeElement as HTMLElement);
+  if (e.key === 'ArrowDown') items[(i + 1) % items.length]?.focus();
+  else if (e.key === 'ArrowUp') items[(i - 1 + items.length) % items.length]?.focus();
+  else if (e.key === 'Home') items[0]?.focus();
+  else if (e.key === 'End') items[items.length - 1]?.focus();
+  else if (e.key === 'Escape') toggleMenu(false);
+  else if (e.key === 'Tab') return toggleMenu(false, false);
+  else return;
+  e.preventDefault();
+});
+menu.addEventListener('click', () => toggleMenu(false, false));
+document.addEventListener('pointerdown', (e) => {
+  if (!menu.hidden && !(e.target as HTMLElement).closest('#more-menu, #more')) toggleMenu(false, false);
+});
+
+// ===== Type de capture (liste décrite). « HTML guidée » et « Sandbox » sont deux sorties de la capture HTML =====
+type TypeKey = 'clicks' | 'html' | 'sandbox' | 'video' | 'mobile';
+let htmlVerdict: 'ok' | 'disabled' | 'domain' = 'ok';
+let htmlHost = '';
+const typeOptions = (): Option[] => [
+  { value: 'clicks', label: strings.tClicks, desc: strings.tClicksD, icon: MousePointerClick },
+  { value: 'html', label: strings.tHtml, desc: strings.tHtmlD, icon: Code, disabled: htmlVerdict !== 'ok' },
+  {
+    value: 'sandbox',
+    label: strings.tSandbox,
+    desc: strings.tSandboxD,
+    icon: Box,
+    disabled: htmlVerdict !== 'ok',
+  },
+  { value: 'video', label: strings.tVideo, desc: strings.tVideoD, icon: Video },
+  // EXT-STORE, option B : sans l'outil de débogage, Format mobile reste visible en « Bientôt »
+  {
+    value: 'mobile',
+    label: strings.typeMobile,
+    desc: DEBUGGER ? strings.typeMobileHelp : strings.typeMobileSoonHelp,
+    icon: Smartphone,
+    disabled: !DEBUGGER,
+    pill: strings.soon,
+  },
+];
+const type = createSelect($<HTMLButtonElement>('type'), {
+  options: typeOptions(),
+  value: 'clicks',
+  described: true,
+  onChange: () => {
     syncMode();
     syncFill();
-    void browser.storage.local.set({ 'fd.lastMode': mode() });
+    void browser.storage.local.set({ 'fd.lastMode': type.value });
+    void refreshDenied();
+  },
+});
+const typeKey = () => type.value as TypeKey;
+const mode = (): CaptureMode => (typeKey() === 'sandbox' ? 'html' : (typeKey() as CaptureMode));
+
+// ===== Options =====
+const tabsize = createSelect($<HTMLButtonElement>('tabsize'), {
+  options: [
+    { value: 'current', label: strings.sizeCurrentShort },
+    { value: '1280x720', label: '1 280 × 720' },
+    { value: '1440x900', label: '1 440 × 900' },
+    { value: '1920x1080', label: '1 920 × 1 080' },
+    { value: 'custom', label: strings.sizeCustomShort },
+  ],
+  value: 'current',
+  onChange: () => syncMode(),
+});
+const device = createSelect($<HTMLButtonElement>('device'), {
+  options: [
+    { value: 'phone', label: strings.devicePhone },
+    { value: 'large', label: strings.deviceLarge },
+    { value: 'tablet', label: strings.deviceTablet },
+    { value: 'custom', label: strings.deviceCustom },
+  ],
+  value: 'phone',
+  onChange: () => syncMode(),
+});
+const orient = createSelect($<HTMLButtonElement>('orient'), {
+  options: [
+    { value: 'portrait', label: strings.portrait },
+    { value: 'landscape', label: strings.landscape },
+  ],
+  value: 'portrait',
+});
+const follow = createSwitch($<HTMLButtonElement>('follow'), { onChange: () => syncSummary() });
+const mic = createSwitch($<HTMLButtonElement>('mic'), { onChange: () => syncSummary() });
+const webcam = createSwitch($<HTMLButtonElement>('webcam'), { onChange: () => syncSummary() });
+// EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
+const liveMask = createSwitch($<HTMLButtonElement>('live-mask'), {
+  onChange: (on) => {
+    void browser.storage.local.set({ 'fd.liveMask': on });
+    syncSummary();
+  },
+});
+void browser.storage.local.get('fd.liveMask').then((r) => {
+  liveMask.checked = r['fd.liveMask'] === true;
+  syncSummary();
+});
+$('opts-toggle').addEventListener('click', () => {
+  const open = $('opts-toggle').getAttribute('aria-expanded') !== 'true';
+  $('opts-toggle').setAttribute('aria-expanded', String(open));
+  show('opts-body', open);
+  syncSummary();
+});
+for (const id of ['dw', 'dh', 'vw', 'vh'])
+  $<HTMLInputElement>(id).addEventListener('input', (e) => {
+    const el = e.currentTarget as HTMLInputElement;
+    el.value = el.value.replace(/\D/g, '');
   });
-$<HTMLSelectElement>('tabsize').addEventListener('change', () => {
-  const custom = $<HTMLSelectElement>('tabsize').value === 'custom';
-  show('desk-size', custom);
-  show('desk-range', custom);
-});
-// « Taille actuelle · 1 512 × 862 » : taille de l'onglet courant
+
+/** Repliée, la section dit ses réglages en une ligne (« Taille actuelle, nouveaux onglets suivis »). */
+function syncSummary() {
+  const m = mode();
+  const size = tabsize.options().find((o) => o.value === tabsize.value)?.label ?? '';
+  const parts =
+    m === 'video'
+      ? [
+          mic.checked ? strings.sumMicOn : strings.sumMicOff,
+          webcam.checked ? strings.sumCamOn : strings.sumCamOff,
+          ...(liveMask.checked ? [strings.sumMaskOn] : []),
+        ]
+      : [
+          m === 'mobile'
+            ? (device.options().find((o) => o.value === device.value)?.label ?? '')
+            : tabsize.value === 'current'
+              ? strings.sumSizeCurrent
+              : tabsize.value === 'custom'
+                ? strings.sumSizeCustom
+                : strings.sumSize.replace('{{s}}', size),
+          follow.checked ? strings.sumFollowOn : strings.sumFollowOff,
+        ];
+  const text = parts.join(', ');
+  $('opts-sum').textContent =
+    $('opts-toggle').getAttribute('aria-expanded') === 'true'
+      ? ''
+      : text.charAt(0).toUpperCase() + text.slice(1);
+}
+function syncMode() {
+  const m = mode();
+  const group = m === 'video' ? 'video' : m === 'mobile' ? 'mobile' : 'desk';
+  for (const el of document.querySelectorAll<HTMLElement>('#opts-body [data-for]')) {
+    const tags = el.dataset.for!.split(' ');
+    // Format mobile suit aussi les nouveaux onglets ; la taille d'onglet ne vaut pas pour lui
+    const on =
+      (tags.includes(group) || (m === 'mobile' && tags.includes('desk') && !tags.includes('size'))) &&
+      !(m === 'mobile' && tags.includes('size'));
+    // Une aide ne s'affiche que dépliée par son bouton
+    if (el.classList.contains('hlp')) {
+      if (!on) el.hidden = true;
+    } else el.hidden = !on;
+  }
+  for (const q of document.querySelectorAll<HTMLButtonElement>('#opts-body button.q'))
+    if (document.getElementById(q.getAttribute('aria-controls')!)?.hidden)
+      q.setAttribute('aria-expanded', 'false');
+  show('desk-size', m !== 'video' && m !== 'mobile' && tabsize.value === 'custom');
+  show('custom-size', m === 'mobile' && device.value === 'custom');
+  show('full-row', !DEBUGGER && m === 'clicks');
+  // Raison d'une capture HTML refusée par la règle de l'espace (L49 §2.1)
+  const note =
+    htmlVerdict === 'disabled'
+      ? strings.htmlBlockedDisabled
+      : htmlVerdict === 'domain'
+        ? strings.htmlBlockedDomain.replace('{{domain}}', htmlHost)
+        : '';
+  $('type-note').textContent = note;
+  show('type-note', !!note);
+  syncSummary();
+}
+// « Actuelle · 1 512 × 862 » : taille de l'onglet courant, dans la liste
 void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-  if (tab?.width && tab.height)
-    $('tabsize-current').textContent = strings.tabSizeCurrentWH
-      .replace('{{w}}', tab.width.toLocaleString(lang))
-      .replace('{{h}}', tab.height.toLocaleString(lang));
+  if (!tab?.width || !tab.height) return;
+  const opts = tabsize.options();
+  opts[0] = {
+    ...opts[0]!,
+    desc: `${tab.width.toLocaleString(lang)} × ${tab.height.toLocaleString(lang)}`,
+  };
+  tabsize.setOptions(opts);
 });
-$<HTMLSelectElement>('device').addEventListener('change', () =>
-  show('custom-size', $<HTMLSelectElement>('device').value === 'custom'),
-);
 function viewport(): { w: number; h: number } {
-  const landscape =
-    document.querySelector<HTMLInputElement>('input[name="orient"]:checked')?.value === 'landscape';
-  return viewportFor($<HTMLSelectElement>('device').value as DeviceKey, landscape, {
+  return viewportFor(device.value as DeviceKey, orient.value === 'landscape', {
     w: +$<HTMLInputElement>('vw').value || 390,
     h: +$<HTMLInputElement>('vh').value || 844,
   });
 }
-// EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
-void browser.storage.local.get('fd.liveMask').then((r) => {
-  const box = $<HTMLInputElement>('live-mask');
-  box.checked = r['fd.liveMask'] === true;
-  box.addEventListener('change', () => void browser.storage.local.set({ 'fd.liveMask': box.checked }));
-});
 void browser.storage.local.get('fd.lastMode').then((r) => {
   const saved = r['fd.lastMode'] as string | undefined;
-  const input = document.querySelector<HTMLInputElement>(`input[name="mode"][value="${saved}"]`);
-  if (input && !input.disabled) input.checked = true;
+  if (saved && type.options().some((o) => o.value === saved && !o.disabled)) type.set(saved);
   syncMode();
 });
 syncMode();
 
-function error(msg: string | null) {
-  const el = $('error');
-  el.textContent = msg ?? '';
-  el.hidden = !msg;
+// ===== Bandeau d'erreur (EXT-02 §1.3) : titre, phrase, action ; « Démarrer » désactivé, jamais masqué =====
+type Problem = { title?: string; text: string; retry?: boolean; blocking?: boolean };
+let blocked = false;
+function problem(p: Problem | null) {
+  $('error-title').textContent = p?.title ?? '';
+  $('error-text').textContent = p ? ` ${p.text} ` : '';
+  show('error-retry', !!p?.retry);
+  $('error').hidden = !p;
+  blocked = !!p?.blocking;
+  $('start').setAttribute('aria-disabled', String(blocked));
 }
+const error = (msg: string | null) => problem(msg ? { text: msg } : null);
+/** Page système, hors ligne : la capture ne peut pas démarrer d'ici. */
+async function checkPage(): Promise<boolean> {
+  if (!navigator.onLine) {
+    problem({ title: strings.errOfflineTitle, text: strings.errOfflineText, retry: true, blocking: true });
+    return false;
+  }
+  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id || !tab.url || !/^https?:/.test(tab.url)) {
+    problem({ title: strings.errPageTitle, text: strings.errPageText, retry: true, blocking: true });
+    return false;
+  }
+  if (blocked) problem(null);
+  return true;
+}
+$('error-retry').addEventListener('click', () => void checkPage());
 
 function send<T>(req: PopupRequest): Promise<T> {
   return browser.runtime.sendMessage(req) as Promise<T>;
 }
 
+// ===== Espace : liste seulement s'il y en a plusieurs, sinon le nom seul =====
+const workspace = createSelect($<HTMLButtonElement>('workspace'), {
+  options: [],
+  value: '',
+  lead: Building2,
+  onChange: () => {
+    void loadFills();
+    void syncHtmlRule();
+  },
+});
 async function loadWorkspaces() {
   const { data: u } = await supabase.auth.getUser();
   // L26-01 : « Installer l'extension » se coche quand l'extension a répondu au moins une fois
@@ -164,27 +367,31 @@ async function loadWorkspaces() {
     .eq('user_id', u.user!.id)
     .in('role', ['editor', 'admin', 'owner']);
   if (err) return error(err.message);
-  const select = $<HTMLSelectElement>('workspace');
-  select.innerHTML = '';
+  const opts: Option[] = [];
   for (const m of data ?? []) {
     const ws = m.workspaces as unknown as { id: string; name: string } | null;
-    if (!ws) continue;
-    const o = document.createElement('option');
-    o.value = ws.id;
-    o.textContent = ws.name;
-    select.appendChild(o);
+    if (ws) opts.push({ value: ws.id, label: ws.name });
   }
-  if (!select.options.length) error(strings.noWorkspace);
+  workspace.setOptions(opts);
+  if (!opts.length) problem({ text: strings.noWorkspace, blocking: true });
   const saved = (await browser.storage.local.get('fd.lastWorkspace'))['fd.lastWorkspace'] as
     string | undefined;
-  if (saved && [...select.options].some((o) => o.value === saved)) select.value = saved;
+  if (saved) workspace.set(saved);
+  show('workspace', opts.length > 1);
+  show('workspace-one', opts.length === 1);
+  $('workspace-one').querySelector('span')!.textContent = opts[0]?.label ?? '';
+  show('workspace-field', opts.length > 0);
 }
 
 // L26-04 : démos de l'espace qui ont des étapes « À capturer » (capture guidée)
 let fills: FillTarget[] = [];
+const fill = createSelect($<HTMLButtonElement>('fill'), {
+  options: [{ value: '', label: strings.fillNew }],
+  value: '',
+  onChange: () => syncFill(),
+});
 async function loadFills() {
-  const ws = $<HTMLSelectElement>('workspace').value;
-  const select = $<HTMLSelectElement>('fill');
+  const ws = workspace.value;
   fills = [];
   if (ws) {
     const { data } = await supabase
@@ -208,39 +415,26 @@ async function loadFills() {
     }
     fills = [...byDemo.values()];
   }
-  select.innerHTML = '';
-  const none = document.createElement('option');
-  none.value = '';
-  none.textContent = strings.fillNew;
-  select.appendChild(none);
-  for (const f of fills) {
-    const o = document.createElement('option');
-    o.value = f.demoId;
-    o.textContent = strings.fillOption
-      .replace('{{title}}', f.title)
-      .replace('{{count}}', String(f.steps.length));
-    select.appendChild(o);
-  }
-  show('fill-field', fills.length > 0);
+  fill.setOptions([
+    { value: '', label: strings.fillNew },
+    ...fills.map((f) => ({
+      value: f.demoId,
+      label: strings.fillOption.replace('{{title}}', f.title).replace('{{count}}', String(f.steps.length)),
+    })),
+  ]);
   syncFill();
 }
 function syncFill() {
-  const filling = !!$<HTMLSelectElement>('fill').value && mode() === 'clicks';
-  show('title-field', !filling);
+  show('fill-field', fills.length > 0 && mode() === 'clicks');
+  show('title-field', !(fill.value && mode() === 'clicks'));
 }
-$<HTMLSelectElement>('workspace').addEventListener('change', () => {
-  void loadFills();
-  void syncHtmlRule();
-});
 
 /**
- * L49 §2.1 : réglage « Captures HTML » de l'espace. Hors réglage, « Capture HTML » reste visible et
- * désactivée avec la raison ; la capture d'écran reste proposée. Le serveur refuse de toute façon.
+ * L49 §2.1 : réglage « Captures HTML » de l'espace. Hors réglage, « HTML guidée » et « Sandbox » restent
+ * visibles et désactivées, avec la raison ; la capture d'écran reste proposée. Le serveur refuse de toute façon.
  */
 async function syncHtmlRule() {
-  const ws = $<HTMLSelectElement>('workspace').value;
-  const html = document.querySelector<HTMLInputElement>('input[name="mode"][value="html"]')!;
-  const card = html.closest('label')!;
+  const ws = workspace.value;
   const [{ data }, [tab]] = await Promise.all([
     ws
       ? supabase.from('workspaces').select('settings').eq('id', ws).maybeSingle()
@@ -248,45 +442,45 @@ async function syncHtmlRule() {
     browser.tabs.query({ active: true, currentWindow: true }),
   ]);
   const rule = parseHtmlCapture((data?.settings as Record<string, unknown> | null)?.htmlCapture);
-  let host = '';
+  htmlHost = '';
   try {
     const u = new URL(tab?.url ?? '');
-    if (u.protocol === 'http:' || u.protocol === 'https:') host = u.hostname;
+    if (u.protocol === 'http:' || u.protocol === 'https:') htmlHost = u.hostname;
   } catch {
     /* onglet sans adresse : seul le mode « désactivées » s'applique ici */
   }
-  const v = rule.mode === 'disabled' || host ? htmlCaptureVerdict(rule, host) : 'ok';
-  html.disabled = v !== 'ok';
-  card.classList.toggle('is-soon', v !== 'ok');
-  $('html-help').textContent =
-    v === 'disabled'
-      ? strings.htmlBlockedDisabled
-      : v === 'domain'
-        ? strings.htmlBlockedDomain.replace('{{domain}}', host)
-        : strings.typeHtmlHelp;
-  if (v !== 'ok' && html.checked) {
-    document.querySelector<HTMLInputElement>('input[name="mode"][value="clicks"]')!.checked = true;
-    syncMode();
-  }
+  htmlVerdict = rule.mode === 'disabled' || htmlHost ? htmlCaptureVerdict(rule, htmlHost) : 'ok';
+  type.setOptions(typeOptions());
+  syncMode();
 }
-$<HTMLSelectElement>('fill').addEventListener('change', syncFill);
+
+// ===== Vues : connexion, réglage de la capture, réglages de l'extension, capture en cours =====
+type View = 'login' | 'setup' | 'settings' | 'recording';
+function view(v: View) {
+  for (const id of ['login', 'setup', 'settings', 'recording']) show(id, id === v);
+  show('foot-login', v === 'login');
+  show('foot-setup', v === 'setup');
+  show('foot-recording', v === 'recording');
+  // Hors session : ni réglages ni déconnexion dans le menu
+  show('open-settings', v !== 'login');
+  show('logout', v !== 'login');
+  menu.querySelector('hr')!.hidden = v === 'login';
+}
 
 async function render() {
   const status = await send<RecordingStatus>({ type: 'fd:status' });
   error(status.lastError);
   if (status.recording) {
-    show('login', false);
-    show('setup', false);
-    show('recording', true);
+    view('recording');
     $('count').textContent = stepsCaptured(status.steps);
     $('rec-label').textContent = status.paused ? strings.paused : strings.recording;
     $('rec-label').classList.toggle('paused', status.paused);
     $('pause-label').textContent = status.paused ? strings.resume : strings.pause;
-    const icon = $('pause').querySelector('svg');
-    if (icon && icon.dataset.state !== String(status.paused)) {
+    const ico = $('pause').querySelector('svg');
+    if (ico && ico.dataset.state !== String(status.paused)) {
       const fresh = document.createElement('i');
       fresh.setAttribute('data-lucide', status.paused ? 'play' : 'pause');
-      icon.replaceWith(fresh);
+      ico.replaceWith(fresh);
       createIcons({
         icons: ICONS,
         attrs: {
@@ -300,18 +494,13 @@ async function render() {
     }
     return;
   }
-  show('recording', false);
   const { data } = await supabase.auth.getSession();
-  if (!data.session) {
-    show('setup', false);
-    show('login', true);
-    return;
-  }
-  show('login', false);
-  show('setup', true);
+  if (!data.session) return view('login');
+  if ($('settings').hidden) view('setup');
   await loadWorkspaces();
   await Promise.all([loadFills(), syncHtmlRule()]);
   await syncAttach();
+  await checkPage();
 }
 
 /** EXT-CONNECT : onglet ouvert depuis un Sandbox de l'app : capture HTML et espace du Sandbox présélectionnés. */
@@ -322,17 +511,34 @@ async function syncAttach() {
   const a = attachFor(pendingAttach, tab?.url, Date.now());
   show('attach-note', !!a);
   if (!a) return;
-  const ws = $<HTMLSelectElement>('workspace');
-  if ([...ws.options].some((o) => o.value === a.workspaceId) && ws.value !== a.workspaceId) {
-    ws.value = a.workspaceId;
-    ws.dispatchEvent(new Event('change'));
-  }
-  const html = document.querySelector<HTMLInputElement>('input[name="mode"][value="html"]');
-  if (html && !html.checked && !html.disabled) {
-    html.checked = true;
-    html.dispatchEvent(new Event('change', { bubbles: true }));
-  }
+  if (workspace.options().some((o) => o.value === a.workspaceId)) workspace.set(a.workspaceId, true);
+  if (htmlVerdict === 'ok' && mode() !== 'html') type.set('sandbox', true);
 }
+
+// ===== Réglages de l'extension (EXT-02 §5) : cadre par défaut des captures, réglé par chaque personne =====
+const frame = createSelect($<HTMLButtonElement>('frame'), {
+  options: [
+    { value: 'page', label: strings.framePage },
+    { value: 'element', label: strings.frameElement },
+    { value: 'zone', label: strings.frameZone },
+  ],
+  value: 'page',
+  onChange: (v) => void browser.storage.local.set({ 'fd.frame': v }),
+});
+void browser.storage.local.get('fd.frame').then((r) => {
+  const v = r['fd.frame'] as string | undefined;
+  if (v) frame.set(v);
+});
+$('version').textContent = strings.versionLine.replace('{{v}}', browser.runtime.getManifest().version);
+$('settings-back').setAttribute('aria-label', strings.back);
+$('open-settings').addEventListener('click', () => {
+  view('settings');
+  $('settings-back').focus();
+});
+$('settings-back').addEventListener('click', () => {
+  view('setup');
+  $('more').focus();
+});
 
 $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/signup`;
 
@@ -353,15 +559,14 @@ $('login').addEventListener('submit', async (e) => {
   await render();
 });
 
-$('logout').addEventListener('click', async (e) => {
-  e.preventDefault();
+$('logout').addEventListener('click', async () => {
   await supabase.auth.signOut();
   await render();
 });
 
 // ===== EXT-STORE §6 : autorisations facultatives (debugger, accès aux sites), demandées au démarrage =====
 let need: PermissionNeed = { debugger: null, sites: false };
-const sizeKey = () => $<HTMLSelectElement>('tabsize').value;
+const sizeKey = () => tabsize.value;
 async function currentNeed(): Promise<PermissionNeed> {
   const [hasDebugger, hasSites, later] = await Promise.all([
     browser.permissions.contains({ permissions: ['debugger'] }),
@@ -396,12 +601,12 @@ function showPanel(n: PermissionNeed) {
     ...lines.map((l) => Object.assign(document.createElement('li'), { textContent: l })),
   );
   show('perm', true);
-  show('start', false);
+  show('foot-setup', false);
   $<HTMLButtonElement>('perm-allow').focus();
 }
 function hidePanel() {
   show('perm', false);
-  show('start', true);
+  show('foot-setup', true);
 }
 /** Après la réponse (fenêtre de Chrome ou « Pas maintenant ») : démarre, ou explique pourquoi pas. */
 async function afterAnswer(n: PermissionNeed) {
@@ -438,8 +643,6 @@ async function refreshDenied() {
   if (mode() === 'clicks' && later && !hasDebugger) denied(strings.dbgDeniedFull, strings.dbgAllowFull);
   else if (!n.debugger) denied(null);
 }
-for (const r of document.querySelectorAll<HTMLInputElement>('input[name="mode"]'))
-  r.addEventListener('change', () => void refreshDenied());
 void refreshDenied();
 // « Autoriser » (Format mobile refusé) ou « Autoriser la page entière » : relance la demande
 $('perm-again').addEventListener('click', () => {
@@ -455,16 +658,18 @@ $('perm-again').addEventListener('click', () => {
 
 $('start').addEventListener('click', async () => {
   const btn = $<HTMLButtonElement>('start');
-  btn.disabled = true;
-  error(null);
+  if (btn.getAttribute('aria-disabled') === 'true' || btn.dataset.busy) return;
+  btn.dataset.busy = '1';
   try {
+    if (!(await checkPage())) return;
+    error(null);
     need = await currentNeed();
     if (need.debugger || need.sites) return showPanel(need);
     await startCapture(true);
   } catch (err) {
     error((err as Error).message);
   } finally {
-    btn.disabled = false;
+    delete btn.dataset.busy;
   }
 });
 
@@ -473,11 +678,14 @@ async function startCapture(hasDebugger: boolean) {
   error(null);
   try {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    if (!tab?.id || !tab.url || !/^https?:/.test(tab.url))
-      throw new Error('Ouvrez une page web (http/https) à enregistrer.');
-    const workspaceId = $<HTMLSelectElement>('workspace').value;
-    await browser.storage.local.set({ 'fd.lastWorkspace': workspaceId });
+    if (!tab?.id || !tab.url || !/^https?:/.test(tab.url)) return void (await checkPage());
+    const workspaceId = workspace.value;
     const m = mode();
+    // « HTML guidée » ou « Sandbox » : la vérification présélectionne cette sortie
+    await browser.storage.local.set({
+      'fd.lastWorkspace': workspaceId,
+      'fd.htmlKind': typeKey() === 'sandbox' ? 'sandbox' : typeKey() === 'html' ? 'guided' : null,
+    });
     let streamId: string | undefined;
     if (m === 'video') {
       // L'identifiant du flux s'obtient depuis un geste dans la popup (onglet courant uniquement)
@@ -494,16 +702,15 @@ async function startCapture(hasDebugger: boolean) {
       tabId: tab.id,
       mode: m,
       streamId,
-      mic: m === 'video' && $<HTMLInputElement>('mic').checked,
-      webcam: m === 'video' && $<HTMLInputElement>('webcam').checked,
-      liveMask: m === 'video' && $<HTMLInputElement>('live-mask').checked,
+      mic: m === 'video' && mic.checked,
+      webcam: m === 'video' && webcam.checked,
+      liveMask: m === 'video' && liveMask.checked,
       viewport: m === 'mobile' ? viewport() : undefined,
-      followTabs: m !== 'video' && $<HTMLInputElement>('follow').checked,
-      fill:
-        m === 'clicks' ? (fills.find((f) => f.demoId === $<HTMLSelectElement>('fill').value) ?? null) : null,
+      followTabs: m !== 'video' && follow.checked,
+      fill: m === 'clicks' ? (fills.find((f) => f.demoId === fill.value) ?? null) : null,
       size:
         (m === 'clicks' || m === 'html') && hasDebugger
-          ? tabSize($<HTMLSelectElement>('tabsize').value as TabSizeKey, {
+          ? tabSize(tabsize.value as TabSizeKey, {
               w: +$<HTMLInputElement>('dw').value,
               h: +$<HTMLInputElement>('dh').value,
             })
@@ -520,8 +727,17 @@ $('pause').addEventListener('click', async () => {
   await render();
 });
 
-$('cancel').addEventListener('click', async () => {
-  if (!confirm(strings.confirmCancel)) return;
+// Annuler la capture : confirmation dans le popup (pas de fenêtre du navigateur)
+$('cancel').addEventListener('click', () => {
+  show('cancel-ask', true);
+  $('cancel-no').focus();
+});
+$('cancel-no').addEventListener('click', () => {
+  show('cancel-ask', false);
+  $('cancel').focus();
+});
+$('cancel-yes').addEventListener('click', async () => {
+  show('cancel-ask', false);
   await send({ type: 'fd:cancel' });
   await render();
 });

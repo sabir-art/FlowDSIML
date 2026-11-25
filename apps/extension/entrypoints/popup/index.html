@@ -5,193 +5,314 @@
     <title>TutoClick</title>
   </head>
   <body>
-    <main>
-      <header>
+    <!-- EXT-02 §1.2 : popup en formulaire court (variante B), 360 px, en-tête et pied fixes -->
+    <main class="pp">
+      <header class="pph">
         <!-- L21-01 : logo clair ou sombre selon le thème du navigateur -->
         <picture class="logo">
           <source srcset="/logo-tutoclick-compact-sombre.svg" media="(prefers-color-scheme: dark)" />
-          <img src="/logo-tutoclick-compact.svg" width="116" height="32" alt="TutoClick" />
+          <img src="/logo-tutoclick-compact.svg" width="102" height="28" alt="TutoClick" />
         </picture>
-        <span class="muted" data-i18n="subtitle"></span>
+        <a id="help" class="ib" target="_blank" rel="noopener"><i data-lucide="circle-question-mark"></i></a>
+        <button
+          type="button"
+          id="more"
+          class="ib"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="more-menu"
+        >
+          <i data-lucide="ellipsis"></i>
+        </button>
+        <div id="more-menu" class="menu" role="menu" hidden>
+          <a id="open-app" role="menuitem" tabindex="-1" target="_blank" rel="noopener"
+            ><i data-lucide="external-link"></i><span></span
+          ></a>
+          <button type="button" id="open-settings" role="menuitem" tabindex="-1">
+            <i data-lucide="settings"></i><span data-i18n="extSettings"></span>
+          </button>
+          <hr />
+          <button type="button" id="logout" role="menuitem" tabindex="-1">
+            <i data-lucide="log-out"></i><span data-i18n="signOut"></span>
+          </button>
+        </div>
       </header>
-      <div id="error" class="alert" role="alert" hidden></div>
 
-      <form id="login" hidden novalidate>
-        <label for="email" data-i18n="email"></label>
-        <input id="email" type="email" autocomplete="email" required />
-        <label for="password" data-i18n="password"></label>
-        <input id="password" type="password" autocomplete="current-password" required />
-        <button type="submit" class="btn btn-primary">
+      <div class="ppb">
+        <div id="error" class="err" role="alert" hidden>
+          <i data-lucide="triangle-alert"></i>
+          <span
+            ><b id="error-title"></b><span id="error-text"></span>
+            <button type="button" id="error-retry" class="link-button" data-i18n="retry" hidden></button
+          ></span>
+        </div>
+
+        <form id="login" hidden novalidate>
+          <div>
+            <label class="fl" for="email" data-i18n="email"></label>
+            <input class="inp" id="email" type="email" autocomplete="email" required />
+          </div>
+          <div>
+            <label class="fl" for="password" data-i18n="password"></label>
+            <input class="inp" id="password" type="password" autocomplete="current-password" required />
+          </div>
+          <p class="muted small">
+            <span data-i18n="noAccount"></span>
+            <a id="signup-link" target="_blank" rel="noopener" data-i18n="signUp"></a>
+          </p>
+        </form>
+
+        <section id="setup" hidden>
+          <p id="attach-note" class="note" data-i18n="attachNote" hidden></p>
+          <div id="title-field">
+            <label class="fl" for="title"
+              ><span data-i18n="demoTitle"></span> <span class="muted opt" data-i18n="optional"></span
+            ></label>
+            <input class="inp" id="title" maxlength="160" />
+          </div>
+          <div>
+            <span class="fl" id="type-l" data-i18n="captureType"></span>
+            <button id="type" aria-labelledby="type-l type"></button>
+            <p id="type-note" class="muted small help" hidden></p>
+          </div>
+          <div id="workspace-field">
+            <span class="fl" id="workspace-l" data-i18n="workspace"></span>
+            <button id="workspace" aria-labelledby="workspace-l workspace"></button>
+            <p id="workspace-one" class="one" hidden><i data-lucide="building-2"></i><span></span></p>
+          </div>
+          <div id="fill-field" hidden>
+            <span class="fl" id="fill-l" data-i18n="fillLabel"></span>
+            <button id="fill" aria-labelledby="fill-l fill" aria-describedby="fill-h"></button>
+            <p class="muted small help" id="fill-h" data-i18n="fillHelp"></p>
+          </div>
+
+          <!-- Options : repliée, une ligne résume les réglages ; dépliée, lignes ALIGN-01 -->
+          <div class="rs" id="opts">
+            <button
+              type="button"
+              id="opts-toggle"
+              class="dis"
+              aria-expanded="false"
+              aria-controls="opts-body"
+            >
+              <i data-lucide="sliders-horizontal"></i><b data-i18n="options"></b><span id="opts-sum"></span
+              ><i data-lucide="chevron-down" class="chev"></i>
+            </button>
+            <div id="opts-body" hidden>
+              <!-- Captures, HTML guidée, Sandbox -->
+              <div class="rw" data-for="desk size">
+                <span class="k" id="tabsize-l"
+                  ><i data-lucide="monitor"></i><span data-i18n="tabSize"></span
+                ></span>
+                <button
+                  type="button"
+                  class="q"
+                  aria-expanded="false"
+                  aria-controls="tabsize-h"
+                  data-help="tabSize"
+                >
+                  <i data-lucide="circle-question-mark"></i>
+                </button>
+                <span class="v"><button id="tabsize" aria-labelledby="tabsize-l tabsize"></button></span>
+              </div>
+              <p class="hlp" id="tabsize-h" data-i18n="tabSizeHelpShort" data-for="desk size" hidden></p>
+              <div id="desk-size" class="rw rw--fields" hidden>
+                <span
+                  ><label class="fl" for="dw" data-i18n="widthPx"></label
+                  ><input
+                    class="inp"
+                    id="dw"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="4"
+                    value="1600"
+                    aria-describedby="desk-range"
+                /></span>
+                <span
+                  ><label class="fl" for="dh" data-i18n="heightPx"></label
+                  ><input
+                    class="inp"
+                    id="dh"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="4"
+                    value="900"
+                    aria-describedby="desk-range"
+                /></span>
+                <p id="desk-range" class="muted small" data-i18n="sizeRange"></p>
+              </div>
+              <!-- Format mobile (version avec l'outil de débogage) -->
+              <div class="rw" data-for="mobile">
+                <span class="k" id="device-l"
+                  ><i data-lucide="smartphone"></i><span data-i18n="device"></span
+                ></span>
+                <button
+                  type="button"
+                  class="q"
+                  aria-expanded="false"
+                  aria-controls="device-h"
+                  data-help="device"
+                >
+                  <i data-lucide="circle-question-mark"></i>
+                </button>
+                <span class="v v--wide"><button id="device" aria-labelledby="device-l device"></button></span>
+              </div>
+              <p class="hlp" id="device-h" data-i18n="mobileHelp" data-for="mobile" hidden></p>
+              <div id="custom-size" class="rw rw--fields" hidden>
+                <span
+                  ><label class="fl" for="vw" data-i18n="width"></label
+                  ><input class="inp" id="vw" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="390"
+                /></span>
+                <span
+                  ><label class="fl" for="vh" data-i18n="height"></label
+                  ><input class="inp" id="vh" inputmode="numeric" pattern="[0-9]*" maxlength="4" value="844"
+                /></span>
+              </div>
+              <div class="rw" data-for="mobile">
+                <span class="k" id="orient-l"
+                  ><i data-lucide="rotate-cw"></i><span data-i18n="orientation"></span
+                ></span>
+                <span class="v"><button id="orient" aria-labelledby="orient-l orient"></button></span>
+              </div>
+              <div class="rw" data-for="desk">
+                <span class="k" id="follow-l"
+                  ><i data-lucide="layers"></i><span data-i18n="followTabs"></span
+                ></span>
+                <button
+                  type="button"
+                  class="q"
+                  aria-expanded="false"
+                  aria-controls="follow-h"
+                  data-help="followTabs"
+                >
+                  <i data-lucide="circle-question-mark"></i>
+                </button>
+                <button id="follow" aria-labelledby="follow-l"></button>
+              </div>
+              <p class="hlp" id="follow-h" data-i18n="followTabsHelp" data-for="desk" hidden></p>
+              <!-- EXT-STORE, option B : la page entière reste visible en « Bientôt » -->
+              <div class="rw" id="full-row" aria-disabled="true" hidden>
+                <span class="k"><i data-lucide="scroll-text"></i><span data-i18n="fullPage"></span></span>
+                <span class="pill" data-i18n="soon"></span>
+              </div>
+              <!-- Vidéo -->
+              <div class="rw" data-for="video">
+                <span class="k" id="mic-l"><i data-lucide="mic"></i><span data-i18n="micShort"></span></span>
+                <button
+                  type="button"
+                  class="q"
+                  aria-expanded="false"
+                  aria-controls="mic-h"
+                  data-help="micShort"
+                >
+                  <i data-lucide="circle-question-mark"></i>
+                </button>
+                <button id="mic" aria-labelledby="mic-l"></button>
+              </div>
+              <p class="hlp" id="mic-h" data-i18n="videoHelp" data-for="video" hidden></p>
+              <div class="rw" data-for="video">
+                <span class="k" id="webcam-l"
+                  ><i data-lucide="webcam"></i><span data-i18n="optWebcam"></span
+                ></span>
+                <button id="webcam" aria-labelledby="webcam-l"></button>
+              </div>
+              <div class="rw" data-for="video">
+                <span class="k" id="live-mask-l"
+                  ><i data-lucide="eye-off"></i><span data-i18n="optLiveMask"></span
+                ></span>
+                <button
+                  type="button"
+                  class="q"
+                  aria-expanded="false"
+                  aria-controls="live-mask-help"
+                  data-help="optLiveMask"
+                >
+                  <i data-lucide="circle-question-mark"></i>
+                </button>
+                <button id="live-mask" aria-labelledby="live-mask-l"></button>
+              </div>
+              <p class="hlp" id="live-mask-help" data-i18n="liveMaskHelp" data-for="video" hidden></p>
+            </div>
+          </div>
+
+          <!-- EXT-STORE §6.3 : autorisation refusée (texte sous les options, lien pour la redemander) -->
+          <p id="perm-denied" class="small perm-denied" aria-live="polite" hidden>
+            <span id="perm-denied-text"></span>
+            <button type="button" id="perm-again" class="link-button"></button>
+          </p>
+          <!-- EXT-STORE §6.2 : encart d'explication avant la fenêtre d'autorisation de Chrome -->
+          <section id="perm" class="perm" aria-labelledby="perm-t" hidden>
+            <h2 id="perm-t" data-i18n="dbgTitle"></h2>
+            <p id="perm-why"></p>
+            <ul id="perm-what" class="muted"></ul>
+            <div class="perm-acts">
+              <button type="button" id="perm-later" class="btn" data-i18n="dbgLater"></button>
+              <button type="button" id="perm-allow" class="btn btn-primary" data-i18n="dbgAllow"></button>
+            </div>
+            <p class="perm-foot muted" data-i18n="dbgRevoke"></p>
+          </section>
+        </section>
+
+        <!-- Réglages de l'extension (EXT-02 §5 : cadre par défaut des captures) -->
+        <section id="settings" aria-labelledby="settings-t" hidden>
+          <div class="sub-head">
+            <button type="button" id="settings-back" class="ib"><i data-lucide="arrow-left"></i></button>
+            <h2 id="settings-t" data-i18n="extSettings"></h2>
+          </div>
+          <div class="rs">
+            <div class="rw">
+              <span class="k" id="frame-l"
+                ><i data-lucide="crop"></i><span data-i18n="defaultFrame"></span
+              ></span>
+              <span class="v"
+                ><button id="frame" aria-labelledby="frame-l frame" aria-describedby="frame-h"></button
+              ></span>
+            </div>
+            <p class="hlp" id="frame-h" data-i18n="frameHelp"></p>
+          </div>
+          <p class="muted small" id="version"></p>
+        </section>
+
+        <section id="recording" hidden>
+          <!-- EXT-02 §8.3 : capture lancée depuis l'éditeur, carte de cible -->
+          <div id="target" class="target" hidden>
+            <i data-lucide="list-plus"></i>
+            <span><b id="target-title"></b><small id="target-after"></small></span>
+          </div>
+          <p class="rec" id="rec-label" aria-live="polite"></p>
+          <p id="count" aria-live="polite"></p>
+          <div id="cancel-ask" class="ask" role="alertdialog" aria-labelledby="cancel-q" hidden>
+            <p id="cancel-q" data-i18n="confirmCancel"></p>
+            <div class="row">
+              <button type="button" id="cancel-no" class="btn" data-i18n="cancelNo"></button>
+              <button type="button" id="cancel-yes" class="btn btn-danger" data-i18n="cancelYes"></button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="ppf" id="foot-setup" hidden>
+        <span class="ok"><i data-lucide="shield-check"></i><span data-i18n="verified"></span></span>
+        <button type="button" id="start" class="btn btn-primary">
+          <i data-lucide="play"></i><span id="start-label" data-i18n="startShort"></span>
+        </button>
+      </footer>
+      <footer class="ppf" id="foot-login" hidden>
+        <button type="submit" form="login" class="btn btn-primary">
           <i data-lucide="log-in"></i><span data-i18n="signIn"></span>
         </button>
-        <p class="muted small">
-          <span data-i18n="noAccount"></span>
-          <a id="signup-link" target="_blank" rel="noopener" data-i18n="signUp"></a>
-        </p>
-      </form>
-
-      <section id="setup" hidden>
-        <label for="workspace" data-i18n="workspace"></label>
-        <select id="workspace"></select>
-        <div id="fill-field" hidden>
-          <label for="fill" data-i18n="fillLabel"></label>
-          <select id="fill" aria-describedby="fill-h"></select>
-          <p class="muted small help" id="fill-h" data-i18n="fillHelp"></p>
-        </div>
-        <div id="title-field">
-          <label for="title" data-i18n="demoTitle"></label>
-          <input id="title" maxlength="160" />
-        </div>
-        <fieldset class="types">
-          <legend data-i18n="captureType"></legend>
-          <label class="type-card"
-            ><input type="radio" name="mode" value="clicks" checked /><i data-lucide="mouse-pointer-click"></i
-            ><span><b data-i18n="typeClicks"></b><small data-i18n="typeClicksHelp"></small></span
-          ></label>
-          <!-- L25-01 : la capture HTML en 2e carte, comme la maquette -->
-          <label class="type-card"
-            ><input type="radio" name="mode" value="html" /><i data-lucide="code"></i
-            ><span><b data-i18n="typeHtml"></b><small id="html-help" data-i18n="typeHtmlHelp"></small></span
-          ></label>
-          <label class="type-card"
-            ><input type="radio" name="mode" value="video" /><i data-lucide="film"></i
-            ><span><b data-i18n="typeVideo"></b><small data-i18n="typeVideoHelp"></small></span
-          ></label>
-          <label class="type-card"
-            ><input type="radio" name="mode" value="mobile" /><i data-lucide="smartphone"></i
-            ><span
-              ><span class="type-name"
-                ><b data-i18n="typeMobile"></b><em id="mobile-soon" class="type-soon" hidden></em></span
-              ><small id="mobile-help" data-i18n="typeMobileHelp"></small></span
-          ></label>
-        </fieldset>
-        <p id="opt-html" class="muted small opts" data-i18n="htmlHelp" hidden></p>
-        <p id="attach-note" class="muted small opts" data-i18n="attachNote" hidden></p>
-        <!-- L25-01 : options des captures d'écran et HTML (pas pour la vidéo) -->
-        <div id="opt-desk" class="opts sub">
-          <label class="switch-row" for="follow"
-            ><i data-lucide="layers"></i
-            ><span><span data-i18n="followTabs"></span><small data-i18n="followTabsHelp"></small></span
-            ><span class="switch"><input type="checkbox" role="switch" id="follow" /><span></span></span
-          ></label>
-          <div id="size-field">
-            <label for="tabsize" data-i18n="tabSize"></label>
-            <select id="tabsize" aria-describedby="tabsize-h">
-              <option value="current" id="tabsize-current" data-i18n="tabSizeCurrent"></option>
-              <option value="1280x720">1&#8239;280 × 720</option>
-              <option value="1440x900">1&#8239;440 × 900</option>
-              <option value="1920x1080">1&#8239;920 × 1&#8239;080</option>
-              <option value="custom" data-i18n="tabSizeCustom"></option>
-            </select>
-            <p class="muted small help" id="tabsize-h" data-i18n="tabSizeHelp"></p>
-            <div id="desk-size" class="row" hidden>
-              <span
-                ><label for="dw" data-i18n="widthPx"></label
-                ><input id="dw" type="number" min="800" max="2560" value="1600" inputmode="numeric"
-              /></span>
-              <span
-                ><label for="dh" data-i18n="heightPx"></label
-                ><input id="dh" type="number" min="800" max="2560" value="900" inputmode="numeric"
-              /></span>
-            </div>
-            <p id="desk-range" class="muted small help" data-i18n="sizeRange" hidden></p>
-          </div>
-          <label class="switch-row" for="checkdata"
-            ><i data-lucide="eye-off"></i
-            ><span><span data-i18n="checkData"></span><small data-i18n="checkDataHelp"></small></span
-            ><span class="switch"
-              ><input type="checkbox" role="switch" id="checkdata" checked disabled /><span></span></span
-          ></label>
-        </div>
-        <p id="opt-full" class="muted small opts" data-i18n="fullPageHelp"></p>
-        <p id="full-soon" class="muted small opts" hidden></p>
-        <!-- EXT-STORE §6.3 : autorisation refusée (texte sous le type, lien pour la redemander) -->
-        <p id="perm-denied" class="small perm-denied" aria-live="polite" hidden>
-          <span id="perm-denied-text"></span>
-          <button type="button" id="perm-again" class="link-button"></button>
-        </p>
-        <div id="opt-video" class="opts" hidden>
-          <label class="check"><input type="checkbox" id="mic" /><span data-i18n="optMic"></span></label>
-          <label class="check"
-            ><input type="checkbox" id="webcam" /><span data-i18n="optWebcam"></span
-          ></label>
-          <label class="check"
-            ><input type="checkbox" role="switch" id="live-mask" aria-describedby="live-mask-help" /><span
-              data-i18n="optLiveMask"
-            ></span
-          ></label>
-          <p class="muted small" id="live-mask-help" data-i18n="liveMaskHelp"></p>
-          <p class="muted small" data-i18n="videoHelp"></p>
-        </div>
-        <div id="opt-mobile" class="opts" hidden>
-          <label for="device" data-i18n="device"></label>
-          <select id="device">
-            <option value="phone" data-i18n="devicePhone"></option>
-            <option value="large" data-i18n="deviceLarge"></option>
-            <option value="tablet" data-i18n="deviceTablet"></option>
-            <option value="custom" data-i18n="deviceCustom"></option>
-          </select>
-          <div id="custom-size" class="row" hidden>
-            <span
-              ><label for="vw" data-i18n="width"></label
-              ><input id="vw" type="number" min="320" max="1280" value="390" inputmode="numeric"
-            /></span>
-            <span
-              ><label for="vh" data-i18n="height"></label
-              ><input id="vh" type="number" min="480" max="1400" value="844" inputmode="numeric"
-            /></span>
-          </div>
-          <fieldset class="inline">
-            <legend data-i18n="orientation"></legend>
-            <label class="check"
-              ><input type="radio" name="orient" value="portrait" checked /><span data-i18n="portrait"></span
-            ></label>
-            <label class="check"
-              ><input type="radio" name="orient" value="landscape" /><span data-i18n="landscape"></span
-            ></label>
-          </fieldset>
-          <p class="muted small" data-i18n="mobileHelp"></p>
-        </div>
-        <!-- EXT-STORE §6.2 : encart d'explication avant la fenêtre d'autorisation de Chrome -->
-        <section id="perm" class="perm" aria-labelledby="perm-t" hidden>
-          <h2 id="perm-t" data-i18n="dbgTitle"></h2>
-          <p id="perm-why"></p>
-          <ul id="perm-what" class="muted"></ul>
-          <button type="button" id="perm-allow" class="btn btn-primary" data-i18n="dbgAllow"></button>
-          <button type="button" id="perm-later" class="link-button" data-i18n="dbgLater"></button>
-          <p class="perm-foot muted" data-i18n="dbgRevoke"></p>
-        </section>
-        <button id="start" class="btn btn-accent">
-          <!-- L21-01 : icône selon le type de capture (smartphone pour le format mobile) -->
-          <span class="start-ico" data-for="clicks"><i data-lucide="mouse-pointer-click"></i></span
-          ><span class="start-ico" data-for="video" hidden><i data-lucide="video"></i></span
-          ><span class="start-ico" data-for="mobile" hidden><i data-lucide="smartphone"></i></span
-          ><span class="start-ico" data-for="html" hidden><i data-lucide="code"></i></span
-          ><span id="start-label" data-i18n="start"></span>
+      </footer>
+      <footer class="ppf" id="foot-recording" hidden>
+        <button type="button" id="cancel" class="btn btn-ghost-danger">
+          <i data-lucide="x"></i><span id="cancel-label" data-i18n="cancel"></span>
         </button>
-        <p class="muted small" id="hint" data-i18n="hint"></p>
-        <p class="small">
-          <a id="logout" href="#" class="link-icon"
-            ><i data-lucide="log-out"></i><span data-i18n="signOut"></span
-          ></a>
-        </p>
-      </section>
-
-      <section id="recording" hidden>
-        <p class="rec" id="rec-label" aria-live="polite"></p>
-        <p id="count" aria-live="polite"></p>
-        <div class="row">
-          <button id="pause" class="btn">
-            <i data-lucide="pause" id="pause-icon"></i><span id="pause-label"></span>
-          </button>
-          <button id="stop" class="btn btn-primary">
-            <i data-lucide="check"></i><span data-i18n="finish"></span>
-          </button>
-        </div>
-        <button id="cancel" class="btn btn-ghost-danger">
-          <i data-lucide="x"></i><span data-i18n="cancel"></span>
+        <button type="button" id="pause" class="btn">
+          <i data-lucide="pause" id="pause-icon"></i><span id="pause-label"></span>
         </button>
-      </section>
+        <button type="button" id="stop" class="btn btn-primary">
+          <i data-lucide="check"></i><span data-i18n="finish"></span>
+        </button>
+      </footer>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

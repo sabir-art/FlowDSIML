@@ -53,7 +53,7 @@ const MOCK = 'http://localhost:54400';
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
   const tabId = await popup.evaluate(
     async () => (await chrome.tabs.query({ url: 'http://localhost:54400/*' }))[0].id,

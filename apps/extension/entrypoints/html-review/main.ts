@@ -700,7 +700,18 @@ async function main() {
     .then(({ data }) => data.user?.user_metadata?.content_type as unknown)
     .catch(() => null);
   const linked = pages.length > 2 && pages.filter((p) => p.clickSel).length < pages.length - 1;
-  kind = chosen === 'sandbox' ? 'sandbox' : chosen === 'html' ? 'guided' : linked ? 'sandbox' : 'guided';
+  // EXT-02 §1.2 : « HTML guidée » ou « Sandbox » choisi dans le popup au démarrage, prioritaire
+  const asked = (await browser.storage.local.get('fd.htmlKind'))['fd.htmlKind'] as unknown;
+  kind =
+    asked === 'sandbox' || asked === 'guided'
+      ? asked
+      : chosen === 'sandbox'
+        ? 'sandbox'
+        : chosen === 'html'
+          ? 'guided'
+          : linked
+            ? 'sandbox'
+            : 'guided';
   if (target.appendTo) {
     // Capture lancée depuis un Sandbox de l'app : les pages s'y ajoutent, ni titre ni type à choisir
     $('kind').hidden = true;

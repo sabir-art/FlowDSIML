@@ -92,7 +92,7 @@ const WS = '11111111-1111-4111-8111-111111111111';
   await popup.goto(`chrome-extension://${extId}/popup.html`);
   await popup.fill('#email', 'a@b.c');
   await popup.fill('#password', 'x');
-  await popup.click('#login button[type=submit]');
+  await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
   const opened = ctx.waitForEvent('page', { predicate: (p) => p.url().includes('/page2') });
   const r2 = await send(app, msg);
