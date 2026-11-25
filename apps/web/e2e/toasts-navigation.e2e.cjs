@@ -64,6 +64,29 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     const p2 = await b.newPage({ viewport: { width, height: 800 } });
     p2.on('pageerror', (e) => errors.push(e.message));
     await install(p2, seedMaquette());
+    // Hors Paramètres : 16 px sous la barre du haut (8 px sous 600 px)
+    await p2.goto(`${APP}/#/media`);
+    await p2.locator('#media-page-file').waitFor({ state: 'attached' });
+    await p2
+      .locator('#media-page-file')
+      .setInputFiles({ name: 'repere.svg', mimeType: 'image/svg+xml', buffer: svg });
+    await p2.locator('.toasts .toast').first().waitFor();
+    await p2
+      .locator('.toasts .toast')
+      .first()
+      .evaluate((el) => Promise.all(el.getAnimations().map((x) => x.finished)));
+    const under = await p2.evaluate(() => {
+      const bar = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--fd-layout-topbar-height'),
+      );
+      return Math.round(document.querySelector('.toasts .toast').getBoundingClientRect().top - bar);
+    });
+    ok(
+      under === (width >= 600 ? 16 : 8),
+      `toasts à ${width} px, hors Paramètres : ${under} px sous la barre du haut`,
+    );
+    await p2.locator('.toasts .toast button[aria-label="Fermer"]').click();
+    await p2.locator('.toasts .toast').first().waitFor({ state: 'detached' });
     await p2.goto(`${APP}/#/settings/members`);
     // Deux confirmations simples (sans action) : deux changements de rôle
     const setRole = async (role) => {
@@ -85,9 +108,10 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
     const m = await p2.evaluate(() => {
       const els = [...document.querySelectorAll('.toasts .toast')];
       const r = els.map((el) => el.getBoundingClientRect());
-      const bar = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--fd-layout-topbar-height'),
-      );
+      // Paramètres : l'en-tête porte les actions de la page, la pile commence sous sa bande
+      const head = document.querySelector('.stg-page');
+      const acts = document.querySelector('.stg-page__acts')?.getBoundingClientRect();
+      const bar = head.getBoundingClientRect().bottom + scrollY;
       const probe = document.createElement('i');
       probe.style.borderRadius = 'var(--fd-radius-surface)';
       document.body.append(probe);
@@ -109,6 +133,11 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
           r.some((x) => x.top < t.bottom && x.bottom > t.top && x.left < t.right && x.right > t.left),
         ),
         close: !!els[0].querySelector('button[aria-label="Fermer"]'),
+        overActs:
+          !!acts &&
+          r.some(
+            (x) => x.top < acts.bottom && x.bottom > acts.top && x.left < acts.right && x.right > acts.left,
+          ),
       };
     });
     ok(
@@ -118,9 +147,10 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
         m.live === 'polite' &&
         m.close &&
         !m.overTools &&
+        !m.overActs &&
         m.right === 16 &&
         (width >= 600 ? m.top === 16 && m.w <= 360 : m.top === 8 && m.left === 16),
-      `toasts à ${width} px : en haut à droite sous la barre, le plus récent en haut, sans couvrir l’aide ni la cloche (${JSON.stringify(m)})`,
+      `toasts à ${width} px : en haut à droite sous l’en-tête des Paramètres, le plus récent en haut, sans couvrir l’aide, la cloche ni les actions de la page (${JSON.stringify(m)})`,
     );
     // Souris sur la pile : rien ne se ferme, même après la durée d'affichage ; souris partie : tout se ferme
     const t0 = Date.now();

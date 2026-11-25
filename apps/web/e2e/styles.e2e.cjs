@@ -68,7 +68,8 @@ const N = ' ';
 
   // Annuler (toast)
   await group.getByRole('button', { name: 'Nuit' }).click();
-  await page.locator('.toast').getByRole('button', { name: 'Annuler' }).last().click();
+  // Le toast le plus récent est en haut de la pile (CAD-08 révisé)
+  await page.locator('.toast').getByRole('button', { name: 'Annuler' }).first().click();
   await page.waitForTimeout(900);
   ok(theme().primary === '#95C11F', '« Annuler » rétablit le style précédent');
 
