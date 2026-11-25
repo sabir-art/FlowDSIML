@@ -1,6 +1,6 @@
 /**
  * Recette L48-F (spec docs/ux/specs/l48f-integrations.md §5). Données fictives (acme.example).
- *  - « Toutes » : 4 groupes, Webhooks seule disponible, les autres « Bientôt » sans focus ni clic ;
+ *  - « Toutes » : 4 groupes, Webhooks et Clés d'API disponibles, les autres « Bientôt » sans focus ni clic ;
  *  - « Connectées » vide puis avec 2 webhooks actifs ; « Connecter » ouvre « Ajouter un webhook » ;
  *  - demande à la DSI (mailto avec sujet) ou « Renseigner le lien du support » ; page Webhooks et détail ;
  *  - 390 px : select « Catégorie », pas de défilement horizontal ; segmenté aux flèches ; axe.
@@ -63,12 +63,12 @@ const hook = (id, state, ws) => ({
   const rows = p.locator('.int-list > li');
   const soon = p.locator('.int-list > li .int-soon');
   ok(
-    (await rows.count()) === 11 && (await soon.count()) === 10,
-    `11 lignes dont 10 « Bientôt » (${await rows.count()})`,
+    (await rows.count()) === 11 && (await soon.count()) === 9,
+    `11 lignes dont 9 « Bientôt » : Webhooks et Clés d’API sont disponibles (${await rows.count()}, ${await soon.count()})`,
   );
   ok(
-    (await p.locator('.int-list > li[aria-disabled="true"]').count()) === 9,
-    'lignes « Bientôt » aria-disabled (hors e-mailing)',
+    (await p.locator('.int-list > li[aria-disabled="true"]').count()) === 8,
+    `lignes « Bientôt » aria-disabled, hors e-mailing (${await p.locator('.int-list > li[aria-disabled="true"]').count()})`,
   );
   ok(
     (await p
@@ -134,7 +134,7 @@ const hook = (id, state, ws) => ({
     '« Renseigner le lien du support » : focus sur le champ',
   );
   await q.goto(`${APP}/#/settings/integrations`);
-  await q.locator('.int-row--link').click();
+  await q.locator('.int-row--link', { hasText: 'Webhooks' }).click();
   await q.waitForURL(/settings\/integrations\/webhooks$/);
   await q.locator('.l23 tbody tr').first().waitFor();
   ok((await q.locator('.l23 tbody tr').count()) === 3, 'page Webhooks : la liste');
