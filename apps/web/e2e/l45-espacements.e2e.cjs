@@ -162,14 +162,15 @@ async function gap(p, a, b) {
       const panel = document.querySelector('#sh-panel-embed');
       const r = (sel) => panel.querySelector(sel).getBoundingClientRect();
       return {
-        a: Math.round(r('.she-code').top - r('.she-formats').bottom),
+        z: Math.round(r('.she-size').top - r('.she-formats').bottom),
+        a: Math.round(r('.she-code').top - r('.she-size').bottom),
         b: Math.round(r('.sh-embed-actions').top - r('.she-code').bottom),
         c: Math.round(r('.she-prev').top - r('.sh-embed-actions').bottom),
       };
     });
     ok(
-      near(e13.a, 16) && near(e13.b, 16) && near(e13.c, 16),
-      `E13 : formats → code → copie → aperçu à ${e13.a}, ${e13.b} et ${e13.c} px (16)`,
+      near(e13.z, 16) && near(e13.a, 16) && near(e13.b, 16) && near(e13.c, 16),
+      `E13 : formats → taille → code → copie → aperçu à ${e13.z}, ${e13.a}, ${e13.b} et ${e13.c} px (16)`,
     );
     await p.getByRole('button', { name: 'Sites autorisés', exact: true }).click();
     await p.locator('#sh-origins').waitFor();

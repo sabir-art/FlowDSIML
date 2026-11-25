@@ -2,6 +2,7 @@ import {
   AtSign,
   Blocks,
   Braces,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
@@ -30,7 +31,7 @@ import {
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useId, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { extractVariableKeys } from '@flowdsiml/core';
@@ -68,9 +69,10 @@ import '../../styles/maquette-peau.css';
 import { Status, Select } from '@flowdsiml/ui';
 import { CopyField } from '../../components/CopyField';
 import { Qr } from '../present/RemoteDialogs';
-import { useToast } from '../../components/Toast';
 import { Fold } from './Fold';
 import { RadioCards } from './RadioCards';
+import { useCopied } from '../../components/useCopied';
+import { useEmbedSize } from './embedSize';
 
 type Tab = 'link' | 'embed' | 'perso' | 'access' | 'export' | 'page';
 /** Modes de la fenêtre Partager, tels qu'ils figurent dans l'adresse (?share=…). */
@@ -150,8 +152,8 @@ export function SharePanel({
   const [importing, setImporting] = useState(false);
   /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
   const tab: Tab = TAB_OF[mode];
-  const toast = useToast();
   const [qr, setQr] = useState(false);
+  const [msgCopied, copyMsg] = useCopied();
   const [persoQ, setPersoQ] = useState('');
   const needle = persoQ.trim().toLocaleLowerCase();
   const shownLinks = needle
@@ -304,9 +306,6 @@ export function SharePanel({
   // personnalisés et paquets gardent l'identifiant
   const publicUrl = address ? addressUrl(address) : url;
   const publicLinksOff = current?.public_links_enabled === false;
-  // Modifications non publiées : démo modifiée après la publication de la version en ligne
-  const pending =
-    published && publishedAt ? Date.parse(demo.updated_at) > Date.parse(publishedAt) + 2000 : false;
   const paramExample = usedKeys
     .slice(0, 2)
     .map((k, i) => [i ? '&' : '?', `${k}=`, variables.find((v) => v.key === k)?.default_value || k] as const);
@@ -445,13 +444,6 @@ export function SharePanel({
               )}
             </div>
           )}
-          {published && pending && (
-            <p className="muted sh-sub">
-              <Link to={`/demos/${demoId}/edit`} onClick={onClose}>
-                {t('share.pendingChanges')}
-              </Link>
-            </p>
-          )}
           {published && ack && (
             <p className="muted sh-sub sh-ack">
               <ShieldCheck size={14} aria-hidden="true" />
@@ -491,7 +483,7 @@ export function SharePanel({
                     label={t('share.publicLink')}
                     value={publicUrl}
                     copyLabel={t('share.copyLink')}
-                    copiedText={t('share.linkCopied')}
+                    copiedText={t('common.copied')}
                     disabled={!published}
                   />
                   {published ? (
@@ -511,48 +503,64 @@ export function SharePanel({
                       className="fd-btn fd-btn--icon"
                       aria-disabled="true"
                       aria-label={t('share.openLink')}
-                      title={t('share.openWhyNot')}
+                      title={t('share.publishFirst')}
                     >
                       <ExternalLink size={16} aria-hidden="true" />
                     </button>
                   )}
                 </div>
                 <div className="shl-acts" role="group" aria-label={t('share.elsewhere')}>
-                  <a
-                    className="fd-btn fd-btn--icon"
-                    href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
-                    aria-label={t('share.byEmail')}
-                    title={t('share.byEmail')}
-                    aria-disabled={published ? undefined : 'true'}
-                  >
-                    <Mail size={16} aria-hidden="true" />
-                  </a>
+                  {published ? (
+                    <a
+                      className="fd-btn fd-btn--icon"
+                      href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
+                      aria-label={t('share.byEmail')}
+                      title={t('share.byEmail')}
+                    >
+                      <Mail size={16} aria-hidden="true" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className="fd-btn fd-btn--icon"
+                      aria-disabled="true"
+                      aria-label={t('share.byEmail')}
+                      title={t('share.publishFirst')}
+                    >
+                      <Mail size={16} aria-hidden="true" />
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="fd-btn fd-btn--icon"
                     aria-label={t('share.copyMessage')}
-                    title={t('share.copyMessage')}
+                    title={published ? t('share.copyMessage') : t('share.publishFirst')}
                     aria-disabled={published ? undefined : 'true'}
-                    onClick={() => {
-                      if (!published) return;
-                      void navigator.clipboard
-                        ?.writeText(t('share.messageText', { title: demo.title, url: publicUrl }))
-                        .then(() => toast(t('share.messageCopied')));
-                    }}
+                    onClick={() =>
+                      published && void copyMsg(t('share.messageText', { title: demo.title, url: publicUrl }))
+                    }
                   >
-                    <MessageSquareText size={16} aria-hidden="true" />
+                    {msgCopied ? (
+                      <Check size={16} aria-hidden="true" />
+                    ) : (
+                      <MessageSquareText size={16} aria-hidden="true" />
+                    )}
                   </button>
                   <button
                     type="button"
                     className="fd-btn fd-btn--icon"
                     aria-label={t('share.qrCode')}
-                    title={t('share.qrCode')}
-                    aria-expanded={qr}
+                    title={published ? t('share.qrCode') : t('share.publishFirst')}
+                    aria-expanded={published ? qr : undefined}
                     aria-disabled={published ? undefined : 'true'}
                     onClick={() => published && setQr((v) => !v)}
                   >
                     <QrCode size={16} aria-hidden="true" />
                   </button>
+                  {/* Confirmation sur place (pas de toast) : toujours présente, annoncée poliment */}
+                  <span className="shl-ok" role="status">
+                    {msgCopied ? t('common.copied') : ''}
+                  </span>
                 </div>
                 {qr && published && (
                   <div className="shl-qr">
@@ -1032,8 +1040,10 @@ function EmbedPanel({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const toast = useToast();
   const [format, setFormat] = useState<'responsive' | 'popup' | 'full'>('responsive');
+  // Encadré : taille automatique (suit la largeur de la page) ou fixe, en pixels ; gardée par démo
+  const [size, setSize] = useEmbedSize(demoId);
+  const [copied, copyValue] = useCopied();
   // L29-01 : outil cible ; l'adresse personnalisée (L28-01) est reprise si elle existe
   const [target, setTarget] = useEmbedTarget();
   const limitId = useId();
@@ -1048,20 +1058,14 @@ function EmbedPanel({
           label: t('share.popupLabel'),
           float: false,
         })
-      : mode === 'responsive'
-        ? embedSnippet(url, title)
-        : `<iframe src="${url}" title="${safe}" loading="lazy" allow="fullscreen; clipboard-write" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`;
+      : mode === 'full'
+        ? `<iframe src="${url}" title="${safe}" loading="lazy" allow="fullscreen; clipboard-write" style="position:fixed;inset:0;width:100%;height:100%;border:0"></iframe>`
+        : size.fixed
+          ? `<iframe src="${url}" title="${safe}" width="${size.width}" height="${size.height}" loading="lazy" allow="fullscreen; clipboard-write" style="border:0;border-radius:12px"></iframe>`
+          : embedSnippet(url, title);
   // L29-01 : certains outils ne prennent qu'une adresse
   const onlyAddress = addressOnly(target);
   const value = onlyAddress ? url : code;
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-      toast(onlyAddress ? t('snippets.addressCopied') : t('snippets.codeCopied'));
-    } catch {
-      toast(t('distribute.copyFailed'));
-    }
-  };
   const host = new URL(url).host;
   return (
     <>
@@ -1090,6 +1094,60 @@ function EmbedPanel({
           { value: 'full', label: t('share.embedFull'), art: <span className="she-art she-art--full" /> },
         ]}
       />
+      {mode === 'responsive' && (
+        <div className="she-size">
+          <div className="she-size__row">
+            <span className="t-label" id="she-size-l">
+              {t('share.embedSize')}
+            </span>
+            <div className="segmented" role="radiogroup" aria-labelledby="she-size-l">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!size.fixed}
+                onClick={() => setSize({ ...size, fixed: false })}
+              >
+                {t('share.embedSizeAuto')}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={size.fixed}
+                onClick={() => setSize({ ...size, fixed: true })}
+              >
+                {t('share.embedSizeFixed')}
+              </button>
+            </div>
+            {size.fixed && (
+              <div className="she-size__px">
+                {(['width', 'height'] as const).map((k) => (
+                  <label key={k} className="she-size__f">
+                    <span>{t(`share.embedSize_${k}`)}</span>
+                    <input
+                      className="input"
+                      inputMode="numeric"
+                      value={String(size[k])}
+                      aria-describedby="she-size-u"
+                      onChange={(e) => {
+                        const n = Number(e.target.value.replace(/\D/g, '').slice(0, 4));
+                        setSize({ ...size, [k]: n });
+                      }}
+                      onBlur={() => setSize({ ...size, [k]: Math.min(4000, Math.max(200, size[k])) })}
+                    />
+                  </label>
+                ))}
+                <span className="help" id="she-size-u">
+                  {t('share.embedSizeUnit')}
+                </span>
+              </div>
+            )}
+          </div>
+          {/* « Bientôt » : en gris, jamais caché */}
+          <p className="she-soon" aria-disabled="true">
+            {t('share.clickToStart')} <span className="soon-text">{t('shell.soon')}</span>
+          </p>
+        </div>
+      )}
       <pre
         className="code sh-code she-code"
         aria-label={onlyAddress ? t('snippets.addressLabel') : t('snippets.codeLabel')}
@@ -1102,12 +1160,15 @@ function EmbedPanel({
           type="button"
           className="fd-btn fd-btn--primary"
           aria-disabled={!published || undefined}
-          title={published ? undefined : t('share.publishToEnable')}
-          onClick={() => published && void copy()}
+          title={published ? undefined : t('share.publishFirst')}
+          onClick={() => published && void copyValue(value)}
         >
-          <Copy aria-hidden="true" />
-          {onlyAddress ? t('snippets.copyAddress') : t('snippets.copyCode')}
+          {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+          {copied ? t('common.copied') : onlyAddress ? t('snippets.copyAddress') : t('snippets.copyCode')}
         </button>
+        <span className="sr-only" role="status">
+          {copied ? t('common.copied') : ''}
+        </span>
       </div>
       <div className={`she-prev she-prev--${mode}`} role="img" aria-label={t(`share.embedPreview_${mode}`)}>
         <span className="she-prev__page">

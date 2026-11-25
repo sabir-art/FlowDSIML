@@ -2339,7 +2339,6 @@
     "pageTitle": "Share the demo",
     "crumb": "Share",
     "publishedOn": "Version published on {{date}}",
-    "pendingChanges": "unpublished changes",
     "neverPublished": "“{{title}}” is not published yet",
     "mode": "Sharing mode",
     "tab": {
@@ -2568,13 +2567,10 @@
       "off": "The workspace’s public page is offline"
     },
     "copyLink": "Copy the link",
-    "linkCopied": "Link copied",
     "openLink": "Open the demo in a new tab",
-    "openWhyNot": "Publish the demo to open the link",
     "byEmail": "Send by email",
     "copyMessage": "Copy a ready-to-send message",
     "messageText": "Hello, here is the demo “{{title}}”: {{url}}",
-    "messageCopied": "Message copied",
     "qrCode": "Show the QR code",
     "qrLabel": "QR code of the link to “{{title}}”",
     "qrHelp": "Scan it with a phone camera.",
@@ -2590,7 +2586,14 @@
     "persoSearch": "Search a link",
     "persoRecipient": "Recipient",
     "persoCreated": "Created",
-    "persoNoMatch": "No link matches the search."
+    "persoNoMatch": "No link matches the search.",
+    "publishFirst": "Publish the demo first",
+    "embedSize": "Size",
+    "embedSizeAuto": "Automatic",
+    "embedSizeFixed": "Fixed",
+    "embedSize_width": "Width",
+    "embedSize_height": "Height",
+    "embedSizeUnit": "in pixels"
   },
   "analytics": {
     "title": "Analytics",

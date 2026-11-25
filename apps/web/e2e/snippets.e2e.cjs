@@ -101,8 +101,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   const pre = (await panel.locator('pre').innerText()).trim();
   ok(/^https:\/\/\S+#\/l\/prise-en-main-Ab3dE9$/.test(pre), `SharePoint : adresse seule (${pre})`);
   await panel.getByRole('button', { name: 'Copier l’adresse' }).click();
-  await page.getByText('Adresse copiée.').waitFor();
-  ok((await page.evaluate(() => navigator.clipboard.readText())).trim() === pre, 'adresse copiée, toast');
+  // Confirmation sur place : le bouton passe à « Copié », aucun toast
+  await panel.getByRole('button', { name: 'Copié', exact: true }).waitFor();
+  ok((await page.locator('.toast').count()) === 0, 'copie : confirmation sur place, pas de toast');
+  ok((await page.evaluate(() => navigator.clipboard.readText())).trim() === pre, 'adresse copiée');
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await page.waitForTimeout(3500);

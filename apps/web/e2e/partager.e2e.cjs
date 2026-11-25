@@ -209,6 +209,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const link = await d.locator('#sh-pub').inputValue();
     const lien = d.locator('#sh-panel-link');
     await lien.getByRole('button', { name: 'Copier le lien', exact: true }).click();
+    await lien.locator('.fd-copy__ok', { hasText: 'Copié' }).waitFor();
+    if (MOBILE) {
+      const pill = await d.locator('.shd-access').boundingBox();
+      ok(
+        pill.x >= 16 && pill.x + pill.width <= WIDTH - 16,
+        `390 : la pastille d’accès garde 16 px de marge (${Math.round(pill.x)} → ${Math.round(pill.x + pill.width)})`,
+      );
+    }
     ok(
       (await page.evaluate(() => navigator.clipboard.readText())) === link && /\/d\/|\/l\//.test(link),
       'Lien : « Copier » met le lien public dans le presse-papiers',
@@ -230,6 +238,16 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await acts.getByRole('button', { name: 'Copier un message prêt à envoyer' }).click();
     const msg = await page.evaluate(() => navigator.clipboard.readText());
     ok(msg.includes(link) && msg.startsWith('Bonjour'), `Lien : message prêt à envoyer copié (${msg})`);
+    // Retour UX : la copie se confirme sur place (« Copié », région polie), jamais par un toast
+    ok(
+      (await acts.getByRole('status').textContent()) === 'Copié' &&
+        (await page.locator('.toast').count()) === 0,
+      'Lien : copies confirmées sur place par « Copié », aucun toast',
+    );
+    ok(
+      (await d.getByRole('link', { name: 'modifications non publiées' }).count()) === 0,
+      'fenêtre sobre : pas de lien « modifications non publiées »',
+    );
     const qrBtn = acts.getByRole('button', { name: 'Afficher le QR code' });
     ok((await qrBtn.getAttribute('aria-expanded')) === 'false', 'Lien : QR code masqué par défaut');
     await qrBtn.click();
@@ -324,7 +342,41 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
           'Intégrer : aperçu du format choisi',
         );
         await cards.nth(0).click();
+        // Encadré : taille automatique ou fixe (gardée par démo), « Démarrer au clic » en gris « Bientôt »
+        const sizes = emb.getByRole('radiogroup', { name: 'Taille' });
+        ok(
+          (await sizes.getByRole('radio', { name: 'Automatique' }).getAttribute('aria-checked')) === 'true' &&
+            (await emb.locator('.she-soon').innerText()).includes('Bientôt') &&
+            (await emb.locator('.she-soon').getAttribute('aria-disabled')) === 'true',
+          'Intégrer : taille Automatique par défaut ; « Démarrer au clic » en gris, « Bientôt »',
+        );
+        await sizes.getByRole('radio', { name: 'Fixe' }).click();
+        await emb.getByLabel('Largeur').fill('800');
+        await emb.getByLabel('Hauteur').fill('500');
+        ok(
+          /width="800" height="500"/.test(await pre.innerText()),
+          'Intégrer : taille fixe, largeur et hauteur dans le code',
+        );
+        await mode(page, 'Lien');
+        await mode(page, 'Intégrer');
+        ok(
+          (await sizes.getByRole('radio', { name: 'Fixe' }).getAttribute('aria-checked')) === 'true' &&
+            (await emb.getByLabel('Largeur').inputValue()) === '800',
+          'Intégrer : une intégration en taille fixe se rouvre sur « Fixe » avec ses valeurs',
+        );
+        await sizes.getByRole('radio', { name: 'Automatique' }).click();
+        await cards.nth(2).click();
+        ok(
+          (await emb.locator('.she-size').count()) === 0,
+          'Intégrer : la taille ne vaut que pour « Encadré »',
+        );
+        await cards.nth(0).click();
         await emb.getByRole('button', { name: 'Copier le code' }).click();
+        await emb.getByRole('button', { name: 'Copié', exact: true }).waitFor();
+        ok(
+          (await page.locator('.toast').count()) === 0,
+          'Intégrer : copie confirmée sur le bouton, aucun toast',
+        );
         ok(
           (await page.evaluate(() => navigator.clipboard.readText())).includes('<iframe'),
           'Intégrer : « Copier le code » met le code dans le presse-papiers',
@@ -333,8 +385,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         ok(
           (await folds.allTextContents()).join('|') === 'Adapter à un outil|Sites autorisés' &&
             (await folds.evaluateAll((l) => l.every((b) => b.getAttribute('aria-expanded') === 'false'))) &&
-            (await emb.locator('.alert, .soon-text').count()) === 0,
-          'Intégrer : réglages rares repliés, aucun encadré, aucun « Bientôt »',
+            (await emb.locator('.alert').count()) === 0,
+          'Intégrer : réglages rares repliés, aucun encadré',
         );
         await shot(page, 'partager-integrer');
       }
@@ -526,6 +578,21 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       (await d.locator('#sh-pub').isDisabled()) &&
         (await d.getByRole('link', { name: 'Ouvrir la démo dans un nouvel onglet' }).count()) === 0,
       'non publiée : le lien est grisé, « Ouvrir » indisponible',
+    );
+    const off = await d
+      .locator('.shl-acts .fd-btn--icon')
+      .evaluateAll((l) =>
+        l.map(
+          (b) =>
+            b.tagName === 'BUTTON' &&
+            b.getAttribute('aria-disabled') === 'true' &&
+            (b.title || b.dataset.tipTitle) === 'Publiez la démo d’abord' &&
+            Number(getComputedStyle(b).opacity) < 1,
+        ),
+      );
+    ok(
+      off.length === 3 && off.every(Boolean),
+      'non publiée : e-mail, message et QR code désactivés, grisés, avec la raison',
     );
     ok((await d.locator('.shd-access').count()) === 1, 'non publiée : l’accès se règle déjà');
     await shot(page, 'partager-nonpubliee');

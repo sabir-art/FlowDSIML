@@ -265,9 +265,11 @@
   /* La pastille d'accès passe sur sa propre ligne, sous le titre */
   .mk .shd-access {
     order: 3;
-    flex: 1 0 100%;
+    flex: 1 0 calc(100% - 32px);
     justify-content: space-between;
-    margin: 0 4px 4px 8px;
+    box-sizing: border-box;
+    max-width: calc(100vw - 32px);
+    margin: 0 16px 4px;
   }
   .mk .shd-body {
     padding: 16px;
@@ -587,4 +589,45 @@
     padding: 0 8px;
     font-size: 0;
   }
+}
+
+/* Confirmation de copie sur place (pas de toast) */
+.mk .shl-acts {
+  align-items: center;
+}
+.mk .shl-ok {
+  color: var(--fd-color-success-text, var(--fd-color-text-muted));
+  font: 500 13px var(--fd-font-sans);
+}
+/* Intégrer › Encadré : taille automatique ou fixe, et le réglage à venir en gris */
+.mk .she-size {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+.mk .she-size__row,
+.mk .she-size__px {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.mk .she-size__f {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 13px var(--fd-font-sans);
+}
+.mk .she-size__f .input {
+  width: 76px;
+}
+.mk .she-size__px .help {
+  margin: 0;
+}
+.mk .she-soon {
+  margin: 0;
+  color: var(--fd-color-text-muted);
+  font: 400 14px var(--fd-font-sans);
+  opacity: 0.7;
 }

@@ -2339,7 +2339,6 @@
     "pageTitle": "Partager la démo",
     "crumb": "Partager",
     "publishedOn": "Version publiée le {{date}}",
-    "pendingChanges": "modifications non publiées",
     "neverPublished": "« {{title}} » n’est pas encore publiée",
     "mode": "Mode de partage",
     "tab": {
@@ -2568,13 +2567,10 @@
       "off": "La page publique de l’espace est hors ligne"
     },
     "copyLink": "Copier le lien",
-    "linkCopied": "Lien copié",
     "openLink": "Ouvrir la démo dans un nouvel onglet",
-    "openWhyNot": "Publiez la démo pour ouvrir le lien",
     "byEmail": "Envoyer par e-mail",
     "copyMessage": "Copier un message prêt à envoyer",
     "messageText": "Bonjour, voici la démo « {{title}} » : {{url}}",
-    "messageCopied": "Message copié",
     "qrCode": "Afficher le QR code",
     "qrLabel": "QR code du lien de « {{title}} »",
     "qrHelp": "À scanner avec l’appareil photo d’un téléphone.",
@@ -2590,7 +2586,14 @@
     "persoSearch": "Rechercher un lien",
     "persoRecipient": "Destinataire",
     "persoCreated": "Créé le",
-    "persoNoMatch": "Aucun lien ne correspond à la recherche."
+    "persoNoMatch": "Aucun lien ne correspond à la recherche.",
+    "publishFirst": "Publiez la démo d’abord",
+    "embedSize": "Taille",
+    "embedSizeAuto": "Automatique",
+    "embedSizeFixed": "Fixe",
+    "embedSize_width": "Largeur",
+    "embedSize_height": "Hauteur",
+    "embedSizeUnit": "en pixels"
   },
   "analytics": {
     "title": "Analytics",
