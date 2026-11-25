@@ -2991,6 +2991,11 @@
         "create": "Create alert",
         "deleteTitle": "Delete this alert?",
         "deleteBody": "You will no longer be notified for this trigger.",
+        "ch_email": "email",
+        "emailHelp": "Sent to your address within 15 minutes.",
+        "emailOwner": "Sent to the person who created the alert. Only they can change this setting.",
+        "appLocked": "Always shown in the app",
+        "emailCleared": "Email turned off on your alerts",
         "chWebhookLabel": "Webhook",
         "emptyTitle": "Create your first alert"
       },
