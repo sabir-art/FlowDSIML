@@ -640,7 +640,7 @@ async function install(page, state = seed()) {
         });
       // L62 : le service audio refuse (state.aiProvider : PROVIDER_KEY, PROVIDER_QUOTA, PROVIDER_VOICE)
       if (state.aiProvider && ['voice_sample', 'voice', 'captions'].includes(body.task))
-        return json(route, state.aiProvider === 'PROVIDER_QUOTA' ? 503 : 502, { error: state.aiProvider });
+        return json(route, 424, { error: state.aiProvider });
       if (body.task === 'voice_sample')
         return json(route, 200, { result: { audio: 'data:audio/mpeg;base64,' }, redacted: 0 });
       const audio = { voice: ['ttsUsed', 'ttsQuota'], captions: ['sttUsed', 'sttQuota'] }[body.task];

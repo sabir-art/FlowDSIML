@@ -128,7 +128,7 @@ async function voiceSample(key: string, voice: string) {
   const url = ((await meta.json().catch(() => ({}))) as { preview_url?: string }).preview_url;
   if (!url || !/^https:\/\//.test(url)) {
     console.error('ai: sample no_preview_url');
-    return json(502, { error: 'PROVIDER_VOICE' });
+    return json(424, { error: 'PROVIDER_VOICE' });
   }
   const mp3 = await fetch(url).catch(() => null);
   if (!mp3?.ok) {
