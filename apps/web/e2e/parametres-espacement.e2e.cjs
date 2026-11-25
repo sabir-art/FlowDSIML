@@ -103,8 +103,8 @@ const ok = (c, l) => {
           : null;
       });
       ok(
-        !!head && head.gap === 24 && head.size === '18px' && head.weight === '600',
-        `${p} (${scheme}) : en-tête de page (SETTINGS-HDR-01), h1 de 18 px en 600, 24 px du filet au premier bloc (${JSON.stringify(head)})`,
+        !!head && head.gap === 40 && head.size === '18px' && head.weight === '600',
+        `${p} (${scheme}) : en-tête de page (SETTINGS-HDR-01), h1 de 18 px en 600, 40 px du filet au premier bloc (variante C) (${JSON.stringify(head)})`,
       );
     }
     await page.close();

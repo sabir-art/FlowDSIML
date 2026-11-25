@@ -103,6 +103,23 @@ const PAGES = [
             ].length,
             h1: document.querySelectorAll('h1').length,
             scroll: document.documentElement.scrollWidth - innerWidth,
+            band: (() => {
+              const b = getComputedStyle(h, '::before');
+              const probe = document.createElement('i');
+              probe.style.background = 'var(--fd-color-surface-muted)';
+              document.body.append(probe);
+              const muted = getComputedStyle(probe).backgroundColor;
+              probe.remove();
+              const wrapTop = document.querySelector('.st-wrap').getBoundingClientRect().top;
+              const top = hr.top + parseFloat(b.top);
+              const out = {
+                bg: b.backgroundColor === muted,
+                w: parseFloat(b.width) >= col.width,
+                top: Math.abs(top - wrapTop) <= 1,
+                bottom: parseFloat(b.bottom) === 0,
+              };
+              return { ...out, ok: out.bg && out.w && out.top && out.bottom };
+            })(),
             searchW: h.querySelector('.stg-search')?.getBoundingClientRect().width ?? null,
             searchCut: (() => {
               const i = h.querySelector('.stg-search input');
@@ -129,8 +146,15 @@ const PAGES = [
           );
         if (!(m.ruleW >= m.colW && m.clip === 'clip' && m.ruleBorder === '1px'))
           bad.push(`${where} : filet ${m.ruleW} px pour une colonne de ${m.colW} px (${m.clip})`);
-        if (m.gap === null || Math.abs(m.gap - 24) > 1)
-          bad.push(`${where} : ${m.gap} px du filet à la première section (24 attendus)`);
+        // Variante C : 40 px du filet à la première section (32 px sous 600 px)
+        const gapWant = width < 600 ? 32 : 40;
+        if (m.gap === null || Math.abs(m.gap - gapWant) > 1)
+          bad.push(`${where} : ${m.gap} px du filet à la première section (${gapWant} attendus)`);
+        // Variante C : fond de la bande (surface-muted) du haut de la colonne jusqu'au filet, bord à bord
+        if (!m.band.ok)
+          bad.push(
+            `${where} : fond de la bande ${JSON.stringify(m.band)} (surface-muted, du haut de la colonne au filet, bord à bord)`,
+          );
         const got = m.labels.filter((l) => !l.startsWith('['));
         // Sous 600 px, avec trois boutons ou plus, les secondaires sont dans un menu ⋯ (40 px)
         const want =
