@@ -48,6 +48,7 @@ import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
+import { CaptureMoreDialog, CaptureMoreMarker, type CaptureMore } from './capture/CaptureMore';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { deleteFormWithUndo } from './formDelete';
 import { copyStepToClipboard, readStepClipboard, useStepClipboard, type StepClip } from './stepClipboard';
@@ -70,7 +71,10 @@ export function StepList({
   onReplaceImage,
   onEdit,
   collapsed = false,
+  capture,
 }: {
+  /** EXT-02 §8 : capturer de nouvelles étapes avec l'extension (fenêtre, repère, pastille « Nouveau »). */
+  capture?: CaptureMore;
   /** Lot 3 : colonne repliée en rail de 48 px (pastilles numérotées, « Ajouter une étape » en icône). */
   collapsed?: boolean;
   /** P1-1 : « Lire depuis ici » ouvre l'aperçu à cette étape. */
@@ -111,6 +115,8 @@ export function StepList({
   /** Carte d'étape survolée avec un fichier (dépôt pour remplacer la capture) */
   const [fileOver, setFileOver] = useState<number | null>(null);
   const file = useRef<HTMLInputElement>(null);
+  /** Index après lequel insérer l'image choisie depuis « Capturer de nouvelles étapes ». */
+  const importAfter = useRef<number | undefined>(undefined);
   const chapterTitle = (id: string | null) => editor.chapters.find((c) => c.id === id)?.title;
 
   // ===== P1-1 : actions d'une étape (menu « … », clic droit et raccourcis de la liste) =====
@@ -200,6 +206,16 @@ export function StepList({
               onSelect: () => copyStep(s, i),
             },
           ]),
+      // EXT-02 §8.1 : la capture s'insère après cette étape
+      ...(capture && !end
+        ? [
+            {
+              label: t('editor.captureMore.afterStep'),
+              icon: <MousePointerClick />,
+              onSelect: () => capture.open(s.id),
+            },
+          ]
+        : []),
       {
         label: t('editor.stepMenu.pasteAfter'),
         icon: <ClipboardPaste />,
@@ -280,9 +296,7 @@ export function StepList({
     {
       label: t('editor.add.capture'),
       icon: <MousePointerClick />,
-      disabled: true,
-      end: <span className="soon-text">{t('shell.soon')}</span>,
-      onSelect: () => {},
+      onSelect: () => capture?.open(editor.steps[current]?.id ?? null),
     },
     { label: t('editor.add.image'), icon: <ImagePlus />, onSelect: () => file.current?.click() },
     {
@@ -462,10 +476,13 @@ export function StepList({
             accept="image/png,image/jpeg,image/webp"
             onChange={(e) => {
               const f = e.target.files?.[0];
+              // EXT-02 §8.2 : « Importer des images à cet endroit » insère après l'étape choisie
+              const at = importAfter.current === undefined ? current : importAfter.current;
+              importAfter.current = undefined;
               // REV-07 : avertissement à l'import (aucune détection automatique)
               if (f)
-                void editor.addImageStep(current, f).then((r) => {
-                  onSelect(current + 1);
+                void editor.addImageStep(at, f).then((r) => {
+                  onSelect(at + 1);
                   if (r) toast(t('editor.importWarn'), undefined, { tone: 'warning' });
                 });
               e.target.value = '';
@@ -476,7 +493,19 @@ export function StepList({
       <span className="sr-only" aria-live="assertive">
         {announce}
       </span>
+      {capture && ws && (
+        <CaptureMoreDialog
+          capture={capture}
+          editor={editor}
+          workspaceId={ws.id}
+          onImport={(afterId) => {
+            importAfter.current = afterId ? editor.steps.findIndex((x) => x.id === afterId) : -1;
+            file.current?.click();
+          }}
+        />
+      )}
       <ol className="rail-list" aria-label={t('editor.railLabel')} ref={listRef}>
+        {capture?.pending && capture.pending.afterId === null && <CaptureMoreMarker n={0} />}
         {editor.steps.map((s, i) => {
           // F7 : vignette d'une étape vidéo = image de sa première pause, sinon icône de lecture
           const firstFrame = s.kind === 'video' ? Object.values(asVideo(s.video).frames)[0] : undefined;
@@ -662,6 +691,10 @@ export function StepList({
                   </span>
                   <span className="meta">
                     <b>{s.title || t('editor.untitled')}</b>
+                    {/* EXT-02 §8.4 : étape ajoutée par la capture, jusqu'à sa première ouverture */}
+                    {capture?.fresh.includes(s.id) && (
+                      <span className="fd-badge rail-new">{t('editor.captureMore.new')}</span>
+                    )}
                     {/* L25-06 : l'étape change d'onglet */}
                     {tabChanged(editor.steps, i) && (
                       <span className="rail-tab">
@@ -709,6 +742,7 @@ export function StepList({
                   )}
                 </span>
               </li>
+              {capture?.pending?.afterId === s.id && <CaptureMoreMarker n={i + 1} />}
             </Fragment>
           );
         })}

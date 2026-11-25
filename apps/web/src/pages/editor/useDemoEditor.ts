@@ -538,6 +538,41 @@ export function useDemoEditor(demoId: string) {
           return data;
         }),
 
+      /**
+       * EXT-02 §8 : étapes capturées par l'extension pour cette démo (ajoutées en fin de démo côté
+       * serveur). L'éditeur les lit, les place après l'étape choisie (suivie par son identifiant, pas
+       * par son numéro) et renvoie les étapes ajoutées. `afterId` null : au début.
+       */
+      adoptSteps: (ids: string[], afterId: string | null) =>
+        run(async () => {
+          await flush();
+          const wanted = ids.filter((id) => !steps.some((s) => s.id === id));
+          if (!wanted.length) return [] as StepRow[];
+          const [st, hs] = await Promise.all([
+            supabase.from('steps').select('*').eq('demo_id', demoId).in('id', wanted).order('position'),
+            supabase.from('hotspots').select('*').eq('demo_id', demoId).in('step_id', wanted),
+          ]);
+          if (st.error) throw st.error;
+          if (hs.error) throw hs.error;
+          const added = (st.data ?? []) as StepRow[];
+          if (!added.length) return added;
+          setHotspots((l) => [...l, ...((hs.data ?? []) as HotspotRow[])]);
+          const at = afterId ? steps.findIndex((s) => s.id === afterId) : -1;
+          const next = [...steps];
+          // Étape d'insertion supprimée entre-temps : les nouvelles étapes vont à la fin
+          next.splice(afterId && at < 0 ? next.length : at + 1, 0, ...added);
+          await persistOrder(next);
+          await signImages(added);
+          return added;
+        }),
+      /** « Annuler » du toast d'ajout : retire les étapes insérées. */
+      dropSteps: (ids: string[]) =>
+        run(async () => {
+          const { error } = await supabase.from('steps').delete().eq('demo_id', demoId).in('id', ids);
+          if (error) throw error;
+          setHotspots((l) => l.filter((h) => !ids.includes(h.step_id)));
+          await persistOrder(steps.filter((s) => !ids.includes(s.id)));
+        }),
       deleteStep: (id: string) =>
         run(async () => {
           const { error } = await supabase.from('steps').delete().eq('id', id);

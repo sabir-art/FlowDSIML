@@ -44,6 +44,7 @@ import { TranslateDialog } from '../../components/ai/TranslateDialog';
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -69,6 +70,7 @@ import { BrowserBar } from './capture/BrowserBar';
 import { demoFrame } from './capture/FrameFields';
 import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/Crop';
 import { StepList } from './StepList';
+import { CaptureMoreBanner, useCaptureMore } from './capture/CaptureMore';
 import { useStepComments } from './comments/useStepComments';
 import { CommentsDock, readDock, storeDock, type DockState } from './comments/CommentsDock';
 import { useDockFit, useScrollable } from './comments/useDockFit';
@@ -252,6 +254,21 @@ export function EditorPage() {
   // L18 : test A/B en cours de la démo
   const ab = useAbTest(demoId);
   const [selection, setSelection] = useState<Selection>({ kind: 'step' });
+  // EXT-02 §8 : capturer de nouvelles étapes avec l'extension, insérées après l'étape choisie
+  const selectStep = useCallback((i: number) => {
+    setIndex(i);
+    setSelection({ kind: 'step' });
+  }, []);
+  const capture = useCaptureMore(editor, demoId, selectStep);
+  // Une étape ajoutée perd sa pastille « Nouveau » à sa première ouverture
+  const openedStep = editor.steps[index]?.id;
+  const seenStep = capture.seen;
+  const firstFresh = capture.fresh[0];
+  useEffect(() => {
+    // La première étape ajoutée est sélectionnée par l'insertion : elle garde sa pastille jusqu'à ce
+    // qu'on en ouvre une autre
+    if (openedStep && openedStep !== firstFresh) seenStep(openedStep);
+  }, [openedStep, firstFresh, seenStep]);
   /** Outils du rail visibles (Assistant : éditeurs), dans l'ordre (raccourcis Alt + 1 à 9). */
   const railOrder = TOOL_ORDER.filter((x) => x !== 'assistant' || can('demo.edit'));
   const [params] = useSearchParams();
@@ -1177,6 +1194,7 @@ export function EditorPage() {
           </div>
         </div>
       )}
+      <CaptureMoreBanner capture={capture} />
       <div
         className={`ed-body${stepsDrag ? ' is-col-drag' : ''}`}
         style={{ '--rail-w': `${stepsCol.width}px` } as CSSProperties}
@@ -1188,6 +1206,7 @@ export function EditorPage() {
         >
           <StepList
             collapsed={stepsCollapsed}
+            capture={readOnly ? undefined : capture}
             editor={editor}
             current={index}
             onSelect={(i) => {
