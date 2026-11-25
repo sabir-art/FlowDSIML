@@ -284,6 +284,65 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       ok((await d.locator('.shd-access').count()) === 1, `${m} : pastille d’accès présente`);
       ok(await noScroll(page), `${m} : pas de défilement horizontal`);
       await axe(page, m);
+      if (m === 'Page de la démo') {
+        // §1.3 : interrupteur seul tant que la page est désactivée ; puis adresse, champs, « Plus de réglages »
+        const pg = d.locator('#sh-panel-page');
+        const on = pg.getByRole('switch', { name: 'Activer la page de la démo' });
+        await on.waitFor();
+        ok(
+          !(await on.isChecked()) &&
+            (await pg.locator('.alert').count()) === 0 &&
+            (await pg.getByRole('button', { name: 'Enregistrer' }).count()) === 0,
+          'Page de la démo : désactivée, l’interrupteur seul, aucun encadré',
+        );
+        await on.check({ force: true });
+        await pg.getByLabel('Titre', { exact: true }).waitFor();
+        ok(state.tables.demo_pages?.[0]?.enabled === true, 'Page de la démo : activation enregistrée');
+        const addr = await pg.getByRole('textbox', { name: 'Adresse de la page' }).inputValue();
+        ok(
+          /#\/p\//.test(addr) &&
+            (await pg
+              .getByRole('link', { name: 'Ouvrir la page de la démo dans un nouvel onglet' })
+              .getAttribute('href')) === addr,
+          'Page de la démo : adresse à copier + icône « Ouvrir »',
+        );
+        ok(
+          (await pg.getByLabel('Titre', { exact: true }).getAttribute('maxlength')) === '70' &&
+            (await pg.getByLabel('Description').getAttribute('maxlength')) === '200' &&
+            (await pg.getByRole('radiogroup', { name: 'Style' }).getByRole('radio').allInnerTexts()).join(
+              '|',
+            ) === 'Démo|Clair|Sombre',
+          'Page de la démo : Titre (70), Description (200), Style Démo · Clair · Sombre',
+        );
+        const more = pg.getByRole('button', { name: 'Plus de réglages', exact: true });
+        ok(
+          (await more.getAttribute('aria-expanded')) === 'false' &&
+            (await pg.getByRole('switch').count()) === 1,
+          'Page de la démo : « Plus de réglages » repliée',
+        );
+        await more.click();
+        ok(
+          (await pg.getByRole('switch', { name: /Proposer d’autres démos/ }).count()) === 1 &&
+            (await pg.getByRole('switch', { name: /Indexation par les moteurs de recherche/ }).count()) === 1,
+          'Page de la démo : Autres démos et Indexation dans « Plus de réglages »',
+        );
+        await pg.getByLabel('Titre', { exact: true }).fill('Découvrir le CRM');
+        await pg.getByRole('switch', { name: /Proposer d’autres démos/ }).check({ force: true });
+        ok(
+          (await pg.getByRole('button', { name: 'Enregistrer' }).count()) === 1,
+          'Page de la démo : un seul « Enregistrer »',
+        );
+        await pg.getByRole('button', { name: 'Enregistrer' }).click();
+        await page.getByText('Page de la démo enregistrée.').waitFor();
+        ok(
+          state.tables.demo_pages[0].title === 'Découvrir le CRM' &&
+            state.tables.demo_pages[0].related === true,
+          'Page de la démo : titre et « Autres démos » enregistrés ensemble',
+        );
+        ok(await noScroll(page), 'Page de la démo : pas de défilement horizontal (réglages ouverts)');
+        await shot(page, 'partager-page');
+        await axe(page, 'Page de la démo (active)');
+      }
       if (m === 'Liens personnalisés') {
         // §1.3 : « Créer un lien » et « Importer (CSV) » en bas ; pas de phrase d'aide ni de boutons en tête
         const perso = d.locator('#sh-panel-perso');

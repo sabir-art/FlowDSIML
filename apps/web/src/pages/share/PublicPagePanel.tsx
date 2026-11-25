@@ -1,11 +1,13 @@
 import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, Info } from 'lucide-react';
+import { ExternalLink, SlidersHorizontal } from 'lucide-react';
+import { Switch } from '@flowdsiml/ui';
 import type { Tables, TablesUpdate } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { publicPageUrl } from '../../lib/embed';
 import { useToast } from '../../components/Toast';
-import { CopyButton } from './codeBlock';
+import { CopyField } from '../../components/CopyField';
+import { Fold } from './Fold';
 
 type Page = Tables<'demo_pages'>;
 type Style = 'demo' | 'light' | 'dark';
@@ -118,43 +120,24 @@ export function PublicPagePanel({
 
   return (
     <div className="sh-page">
-      {!published && (
-        <div className="alert alert-info sh-alert" role="status">
-          <Info aria-hidden="true" />
-          <span>{t('share.page.notPublished')}</span>
-        </div>
-      )}
-      <div className="setting sh-first">
-        <div>
-          <b id={`${id}-on`}>{t('share.page.toggle')}</b>
-          <p className="t-caption muted">{t('share.page.toggleHelp')}</p>
-        </div>
-        <span className="switch">
-          <input
-            type="checkbox"
-            role="switch"
-            aria-labelledby={`${id}-on`}
-            checked={enabled}
-            disabled={!editable}
-            onChange={(e) => {
-              const on = e.target.checked;
-              // Affichage immédiat ; rétabli si l'écriture échoue
-              const before = row;
-              setRow((r) => ({ ...(r ?? ({} as Page)), enabled: on }));
-              void write({ enabled: on }).then((ok) =>
-                ok ? toast(on ? t('share.page.enabled') : t('share.page.disabled')) : setRow(before),
-              );
-            }}
-          />
-          <span />
-        </span>
-      </div>
-      {!enabled ? (
-        <div className="alert alert-info sh-alert" role="status">
-          <Info aria-hidden="true" />
-          <span>{t('share.page.offInfo')}</span>
-        </div>
-      ) : (
+      {/* §1.3 : mode sobre. Un interrupteur ; l'adresse se copie et s'ouvre ; les réglages rares sont
+          repliés ; un seul « Enregistrer ». Le bandeau de la fenêtre dit déjà qu'il faut publier. */}
+      <Switch
+        className="shg-on"
+        label={t('share.page.toggle')}
+        checked={enabled}
+        disabled={!editable}
+        onChange={(e) => {
+          const on = e.target.checked;
+          // Affichage immédiat ; rétabli si l'écriture échoue
+          const before = row;
+          setRow((r) => ({ ...(r ?? ({} as Page)), enabled: on }));
+          void write({ enabled: on }).then((ok) =>
+            ok ? toast(on ? t('share.page.enabled') : t('share.page.disabled')) : setRow(before),
+          );
+        }}
+      />
+      {enabled && (
         <form
           className="col sh-page-form"
           onSubmit={(e) => {
@@ -162,14 +145,39 @@ export function PublicPagePanel({
             void save();
           }}
         >
+          <div className="shl-link">
+            <CopyField
+              id={`${id}-url`}
+              label={t('share.page.address')}
+              value={url}
+              copyLabel={t('share.page.copyAddress')}
+              copiedText={t('common.copied')}
+              disabled={!published}
+            />
+            {published ? (
+              <a
+                className="fd-btn fd-btn--icon"
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t('share.page.open')}
+                title={t('share.page.open')}
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="fd-btn fd-btn--icon"
+                aria-disabled="true"
+                aria-label={t('share.page.open')}
+                title={t('share.publishFirst')}
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+              </button>
+            )}
+          </div>
           <fieldset disabled={!editable} className="sh-page-fs">
-            <div className="field">
-              <label htmlFor={`${id}-url`}>{t('share.page.address')}</label>
-              <div className="input-group">
-                <input id={`${id}-url`} className="input t-mono" readOnly value={url} />
-                <CopyButton value={url} />
-              </div>
-            </div>
             <div className="field">
               <label htmlFor={`${id}-t`}>{t('share.page.title')}</label>
               <input
@@ -180,7 +188,6 @@ export function PublicPagePanel({
                 value={form.title}
                 onChange={(e) => set('title', e.target.value)}
               />
-              <span className="help">{t('share.page.titleHelp')}</span>
             </div>
             <div className="field">
               <label htmlFor={`${id}-d`}>{t('share.page.description')}</label>
@@ -226,16 +233,12 @@ export function PublicPagePanel({
                   maxLength={500}
                   value={form.ctaUrl}
                   aria-invalid={(tried && !!errs.url) || undefined}
-                  aria-describedby={tried && errs.url ? `${id}-cue` : `${id}-cuh`}
+                  aria-describedby={tried && errs.url ? `${id}-cue` : undefined}
                   onChange={(e) => set('ctaUrl', e.target.value)}
                 />
-                {tried && errs.url ? (
+                {tried && errs.url && (
                   <span className="help is-error" id={`${id}-cue`}>
                     {t(`share.page.${errs.url}`)}
-                  </span>
-                ) : (
-                  <span className="help" id={`${id}-cuh`}>
-                    {t('share.page.ctaHelp')}
                   </span>
                 )}
               </div>
@@ -258,58 +261,39 @@ export function PublicPagePanel({
                 ))}
               </div>
             </div>
-            <div className="setting">
-              <div>
-                <b id={`${id}-rl`}>{t('share.page.related')}</b>
-                <p className="t-caption muted">{t('share.page.relatedHelp')}</p>
-              </div>
-              <span className="switch">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  aria-labelledby={`${id}-rl`}
-                  checked={form.related}
-                  onChange={(e) => set('related', e.target.checked)}
-                />
-                <span />
-              </span>
+            <div className="shd-folds">
+              <Fold icon={<SlidersHorizontal aria-hidden="true" />} title={t('share.page.more')}>
+                <div className="shg-more">
+                  <Switch
+                    label={t('share.page.related')}
+                    hint={t('share.page.relatedHelp')}
+                    checked={form.related}
+                    onChange={(e) => set('related', e.target.checked)}
+                  />
+                  <Switch
+                    label={t('share.page.indexable')}
+                    hint={
+                      protectedAccess ? t('share.page.indexableProtected') : t('share.page.indexableHelp')
+                    }
+                    checked={form.indexable && !protectedAccess}
+                    disabled={protectedAccess}
+                    onChange={(e) => set('indexable', e.target.checked)}
+                  />
+                  {/* L19b-01 : « Bientôt » en gris, jamais caché */}
+                  <p className="she-soon" aria-disabled="true">
+                    {t('share.page.ogSoonText')} <span className="soon-text">{t('shell.soon')}</span>
+                  </p>
+                </div>
+              </Fold>
             </div>
-            <div className="setting">
-              <div>
-                <b id={`${id}-ix`}>{t('share.page.indexable')}</b>
-                <p className="t-caption muted">
-                  {protectedAccess ? t('share.page.indexableProtected') : t('share.page.indexableHelp')}
-                </p>
-              </div>
-              <span className="switch">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  aria-labelledby={`${id}-ix`}
-                  checked={form.indexable && !protectedAccess}
-                  disabled={protectedAccess}
-                  onChange={(e) => set('indexable', e.target.checked)}
-                />
-                <span />
-              </span>
-            </div>
-            {/* L19b-01 : badge « Bientôt » standard */}
-            <p className="help">
-              {t('share.page.ogSoonText')} <span className="soon-text">{t('shell.soon')}</span>
-            </p>
           </fieldset>
-          <div className="row sh-page-actions">
-            <a className="btn btn-secondary" href={url} target="_blank" rel="noreferrer">
-              <ExternalLink aria-hidden="true" />
-              {t('share.page.open')}
-            </a>
-            <span className="help">{t('share.page.newTab')}</span>
-            {editable && (
-              <button type="submit" className="btn btn-primary" disabled={saving}>
+          {editable && (
+            <div className="row sh-page-actions">
+              <button type="submit" className="fd-btn fd-btn--primary" disabled={saving}>
                 {t('common.save')}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </form>
       )}
     </div>

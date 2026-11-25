@@ -70,6 +70,7 @@ import { Status, Select } from '@flowdsiml/ui';
 import { CopyField } from '../../components/CopyField';
 import { Qr } from '../present/RemoteDialogs';
 import { Fold } from './Fold';
+import { CopyAction } from './CopyAction';
 import { RadioCards } from './RadioCards';
 import { useCopied } from '../../components/useCopied';
 import { useEmbedSize } from './embedSize';
@@ -743,21 +744,12 @@ export function SharePanel({
                                           >
                                             {`…/${l.page_code}`}
                                           </span>
-                                          <button
-                                            type="button"
+                                          <CopyAction
                                             className="btn btn-ghost btn-sm btn-icon"
-                                            aria-label={t('share.pp.copyPage', { name: l.name || '—' })}
+                                            label={t('share.pp.copyPage', { name: l.name || '—' })}
                                             title={t('share.pp.copyPage', { name: l.name || '—' })}
-                                            onClick={() =>
-                                              void navigator.clipboard
-                                                ?.writeText(personalPageUrl(demoId, l.page_code!))
-                                                .then(() =>
-                                                  run(async () => undefined, t('members.linkCopied')),
-                                                )
-                                            }
-                                          >
-                                            <Copy aria-hidden="true" />
-                                          </button>
+                                            text={personalPageUrl(demoId, l.page_code)}
+                                          />
                                         </span>
                                       </div>
                                     ) : null}
@@ -779,25 +771,19 @@ export function SharePanel({
                               <td className="r">
                                 <div className="row sh-actions">
                                   {centerModule && (
-                                    <button
-                                      type="button"
+                                    <CopyAction
                                       className="btn btn-secondary btn-sm"
-                                      aria-label={t('share.centerLinkOf', { name: l.name || '—' })}
+                                      label={t('share.centerLinkOf', { name: l.name || '—' })}
                                       title={t('share.centerLinkOf', { name: l.name || '—' })}
-                                      onClick={() =>
-                                        void navigator.clipboard
-                                          ?.writeText(centerLinkUrl(PLAYER_URL, centerModule.slug, l.token))
-                                          .then(() => run(async () => undefined, t('members.linkCopied')))
-                                      }
+                                      text={centerLinkUrl(PLAYER_URL, centerModule.slug, l.token)}
+                                      icon={<GraduationCap aria-hidden="true" />}
                                     >
-                                      <GraduationCap aria-hidden="true" />
                                       {t('share.centerLink')}
-                                    </button>
+                                    </CopyAction>
                                   )}
-                                  <button
-                                    type="button"
+                                  <CopyAction
                                     className="btn btn-ghost btn-sm btn-icon"
-                                    aria-label={
+                                    label={
                                       centerModule
                                         ? t('share.demoLinkOf', { name: l.name || '—' })
                                         : t('share.copyLinkOf', { name: l.name || '—' })
@@ -807,14 +793,8 @@ export function SharePanel({
                                         ? t('share.demoLinkOf', { name: l.name || '—' })
                                         : undefined
                                     }
-                                    onClick={() =>
-                                      void navigator.clipboard
-                                        ?.writeText(shareLinkUrl(l.token))
-                                        .then(() => run(async () => undefined, t('members.linkCopied')))
-                                    }
-                                  >
-                                    <Copy aria-hidden="true" />
-                                  </button>
+                                    text={shareLinkUrl(l.token)}
+                                  />
                                   {editable && (
                                     <Menu
                                       label={t('members.actionsFor', { name: l.name || '—' })}
