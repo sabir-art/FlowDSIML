@@ -133,6 +133,27 @@ Chaque invitation en attente est une ligne du tableau, avec une pastille de stat
   - échec d'envoi : la ligne passe en « Pas envoyée », toast d'erreur « L'invitation n'a pas pu être envoyée. Réessayez plus tard. ».
 - **Retirer l'invitation** : inchangé, avec confirmation. Le lien retiré mène au cas b côté visiteur.
 
+### 7.4 Menu ⋯ d'une invitation
+
+Ordre des éléments :
+1. **Renvoyer l'invitation** (§7.3).
+2. **Changer le rôle…** : ouvre le même sélecteur de rôle que pour un membre (Admin, Éditeur, Lecteur), avec le rôle actuel coché.
+   - Le changement s'applique à l'invitation en attente, sans renvoi automatique ni nouveau lien. Le lien actuel donnera le nouveau rôle à l'acceptation.
+   - Toast « Rôle de l'invitation changé : {rôle} ».
+   - La colonne Rôle se met à jour.
+   - Le rôle Propriétaire n'est pas proposé pour une invitation.
+   - L'action est réservée aux propriétaires et admins. Un admin ne peut pas donner le rôle Admin si les règles de l'espace le réservent aux propriétaires : l'option est alors `aria-disabled`, avec l'aide « Réservé aux propriétaires ».
+3. **Copier le lien d'invitation** : toast « Lien d'invitation copié », jamais en texte brut dans la page.
+4. séparateur
+5. **Retirer l'invitation…** (danger), avec confirmation.
+
+### 7.5 Réinviter après une révocation
+
+Inviter de nouveau une adresse dont l'invitation a été retirée, ou dont le compte a été retiré de l'espace, envoie un **vrai e-mail d'invitation**, comme une première invitation. La ligne passe en « Envoyée ». Si l'envoi échoue, elle passe en « Pas envoyée ».
+
+L'existence d'un compte ne doit jamais faire basculer en « notification seule ». La notification dans l'app s'ajoute à l'e-mail, elle ne le remplace pas.
+
+
 ## 8. Pastilles de statut — BADGE-01 (règle générale, toute l'app)
 
 Les pastilles de statut suivent la même famille visuelle que les pastilles de type des démos : fond teinté et texte de la même teinte. Elles ont le rayon des étiquettes de RADIUS-01 (6 px).
