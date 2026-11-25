@@ -435,6 +435,23 @@ function wav(sec) {
     'Activer le son : la voix démarre',
   );
   ok((await soundBtn.count()) === 0, 'bouton retiré une fois le son actif');
+  // L62 : voix lancée automatiquement, le visiteur peut la mettre en pause et la reprendre
+  {
+    const pause = pl.locator('.p-controls').getByRole('button', { name: 'Mettre la voix en pause' });
+    await pause.waitFor();
+    await pause.click();
+    await pl.waitForFunction(() => document.querySelector('audio').paused);
+    const resume = pl.locator('.p-controls').getByRole('button', { name: 'Écouter la voix off' });
+    await resume.waitFor();
+    ok(
+      (await pause.count()) === 0,
+      'barre du lecteur : la voix automatique se met en pause, le bouton devient « Écouter »',
+    );
+    await resume.click();
+    await pl.waitForFunction(() => !document.querySelector('audio').paused);
+    await pause.waitFor();
+    ok(true, 'barre du lecteur : la voix reprend, le bouton redevient « Mettre la voix en pause »');
+  }
 
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();

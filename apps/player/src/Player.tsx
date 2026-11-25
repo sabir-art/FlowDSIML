@@ -712,6 +712,19 @@ export function Player({
         : null,
     [voice, m.voice.player, step.id, voiceCc, t],
   );
+  // L62 : le visiteur garde la main sur la voix, même lancée automatiquement (pause, reprise)
+  const [voicePlaying, setVoicePlaying] = useState(false);
+  useEffect(() => {
+    const a = voiceRef.current;
+    if (!a) return setVoicePlaying(false);
+    const sync = () => setVoicePlaying(!a.paused && !a.ended);
+    sync();
+    const events = ['play', 'pause', 'ended', 'emptied'] as const;
+    for (const e of events) a.addEventListener(e, sync);
+    return () => {
+      for (const e of events) a.removeEventListener(e, sync);
+    };
+  }, [step.id, voice]);
   function toggleVoice() {
     const a = voiceRef.current;
     if (!a) return;
@@ -1585,9 +1598,13 @@ export function Player({
               {t.voice.enableSound}
             </button>
           )}
-          {voice && !voiceHosted && soundOn && !voice.autoplay && (
-            <button class="p-icon-btn p-icon-btn--ghost" onClick={toggleVoice} aria-label={t.voice.listen}>
-              <Volume2 {...ICON} />
+          {voice && !voiceHosted && soundOn && (
+            <button
+              class="p-icon-btn p-icon-btn--ghost p-voice-toggle"
+              onClick={toggleVoice}
+              aria-label={voicePlaying ? t.voice.pause : t.voice.listen}
+            >
+              {voicePlaying ? <Pause {...ICON} /> : <Volume2 {...ICON} />}
             </button>
           )}
           {m.spotlight && (
