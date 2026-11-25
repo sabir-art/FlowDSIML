@@ -23,3 +23,16 @@ export function versionState(
   const version = reported || LEGACY_VERSION;
   return { version, known: !!reported, upToDate: compareVersions(version, latest) >= 0 };
 }
+
+/**
+ * §10 : « Installer l'extension » dans l'en-tête de la page Démos. Seulement si l'extension est publiée
+ * (une fiche de boutique est configurée), qu'elle n'a jamais été détectée pour ce compte, et que la
+ * personne peut créer des démos. Il disparaît dès que l'extension est détectée.
+ */
+export function offerInstall(o: {
+  storeUrl: string;
+  seenAt: string | null | undefined;
+  editable: boolean;
+}): boolean {
+  return o.editable && !!o.storeUrl.trim() && !o.seenAt;
+}

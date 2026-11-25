@@ -3169,6 +3169,7 @@
       "example": "Voir un exemple"
     },
     "newShort": "Nouvelle",
+    "installExtension": "Installer l’extension",
     "newImportPick": "Choisir des images…",
     "newImportCount_one": "{{count}} image",
     "newImportCount_other": "{{count}} images",
@@ -5919,6 +5920,10 @@
     "breadcrumb": "Fil d’Ariane",
     "author": "Créé par",
     "me": "Moi",
+    "authorSearch": "Rechercher un membre",
+    "authorNone": "Aucun membre trouvé",
+    "authorCount_one": "{{count}} démo",
+    "authorCount_other": "{{count}} démos",
     "access": "Accès au dossier",
     "backTo": "Retour à {{page}}",
     "visibleAll": "Tout l’espace peut voir ce dossier."

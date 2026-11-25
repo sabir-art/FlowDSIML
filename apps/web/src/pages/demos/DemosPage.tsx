@@ -12,6 +12,10 @@ import {
   type ReactNode,
 } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { EXTENSION_URL } from '../../lib/env';
+import { offerInstall } from '../extension/extension';
+import { initials } from '../../lib/initials';
+import { AvatarPhoto } from '../../components/AvatarPhoto';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { withRestLocale } from '../../i18n';
@@ -37,6 +41,7 @@ import {
   Share2,
   Tag,
   Trash2,
+  Puzzle,
   Users,
   Shapes,
   Upload,
@@ -141,7 +146,7 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { current, can } = useWorkspace();
   const publicPage = usePublicPageList(current?.id);
   const ws = current!;
@@ -204,6 +209,24 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
       );
   }, [ws.id]);
   const byAuthor = (d: Demo) => author === 'all' || d.created_by === (author === 'me' ? user?.id : author);
+  // §10 : nombre de démos par membre, dans la vue en cours (dossier ou toutes les démos)
+  const inFolder = (demos ?? []).filter((d) => inScope(d));
+  const authorCount = (id: string | undefined) => inFolder.filter((d) => d.created_by === id).length;
+  const authorAvatar = (id: string | undefined, name: string) => (
+    <span className="avatar demos-author__av" aria-hidden="true">
+      {initials(name)}
+      <AvatarPhoto userId={id} />
+    </span>
+  );
+  const authorEnd = (on: boolean, n: number) => (
+    <span className="demos-author__end">
+      <span className="demos-author__n">
+        <span aria-hidden="true">{n}</span>
+        <span className="sr-only">{t('folders.authorCount', { count: n })}</span>
+      </span>
+      {on && <Check aria-hidden="true" />}
+    </span>
+  );
   // L48-A §2 : colonne Dossiers au-dessus de 1 024 px ; repli gardé pour la personne
   const wide = useMediaQuery('(min-width: 1024px)');
   // COL-02 (COMP-01 §19) : largeur et repli gardés pour la personne ; repliée par défaut sous 1 280 px
@@ -642,6 +665,15 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
             {!sandbox && !scopeName && !loading && (
               <OnboardingButton onb={onb} open={onbOpen} onToggle={() => setOnbOpen(!onbOpen)} />
             )}
+            {/* §10 : tant que l'extension publiée n'a pas été détectée, un bouton secondaire mène à la
+                page Extension ; « Nouvelle démo » reste le seul primaire */}
+            {!sandbox &&
+              offerInstall({ storeUrl: EXTENSION_URL, seenAt: profile?.extension_seen_at, editable }) && (
+                <Link className="fd-btn demos-ext" to="/extension" aria-label={t('demos.installExtension')}>
+                  <Puzzle aria-hidden="true" />
+                  <span className="ph-wide">{t('demos.installExtension')}</span>
+                </Link>
+              )}
             {/* L48-B : liste vide, une seule action principale (au centre de l'état vide) */}
             {editable && !(demos && demos.length === 0) && (
               <Button
@@ -1043,23 +1075,36 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                               : (people.find((p) => p.user_id === author)?.full_name ?? t('toolbar.all'))
                         }
                         active={author !== 'all'}
+                        /* §10 : recherche de membres, avatar (photo ou initiales) et nombre de démos ;
+                           « Moi » en premier */
+                        search={{ label: t('folders.authorSearch'), empty: t('folders.authorNone'), keep: 2 }}
                         items={[
                           {
                             label: t('toolbar.all'),
-                            icon: author === 'all' ? <Check /> : <span />,
+                            icon: <Users />,
+                            radio: true,
+                            current: author === 'all',
+                            end: authorEnd(author === 'all', inFolder.length),
                             onSelect: () => setAuthor('all'),
                           },
                           {
                             label: t('folders.me'),
-                            icon: author === 'me' ? <Check /> : <span />,
+                            icon: authorAvatar(user?.id, profile?.full_name || user?.email || ''),
+                            radio: true,
+                            current: author === 'me',
+                            end: authorEnd(author === 'me', authorCount(user?.id)),
                             onSelect: () => setAuthor('me'),
                           },
                           ...(people.some((p) => p.user_id !== user?.id) ? (['separator'] as const) : []),
                           ...people
                             .filter((p) => p.user_id !== user?.id)
+                            .sort((a, b) => (a.full_name || a.email).localeCompare(b.full_name || b.email))
                             .map((p) => ({
                               label: p.full_name || p.email,
-                              icon: author === p.user_id ? <Check /> : <span />,
+                              icon: authorAvatar(p.user_id, p.full_name || p.email),
+                              radio: true,
+                              current: author === p.user_id,
+                              end: authorEnd(author === p.user_id, authorCount(p.user_id)),
                               onSelect: () => setAuthor(p.user_id),
                             })),
                         ]}
