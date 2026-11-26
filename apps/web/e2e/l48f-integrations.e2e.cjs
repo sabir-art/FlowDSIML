@@ -119,82 +119,106 @@ const hook = (id, state, ws) => ({
     'Slack : ligne disponible, plus de « Bientôt »',
   );
   await slackLi.getByRole('button', { name: 'Connecter Slack' }).click();
+  // Planche 4 : en-tête standard, événements en lignes, lien d'aide, Connecter (test), état masqué
   const sd = p.getByRole('dialog', { name: 'Slack' });
   await sd.waitFor();
   const field = sd.getByLabel('Adresse du webhook entrant');
   ok(
-    (await field.getAttribute('placeholder')) === 'https://hooks.slack.com/services/…' &&
-      (await field.evaluate((el) => el === document.activeElement)),
-    'fenêtre Slack : champ « Adresse du webhook entrant » avec son exemple, focus dessus',
+    (await sd.locator('.fd-modal__sub').innerText()) === 'Les alertes de l’espace dans un canal.' &&
+      (await field.getAttribute('placeholder')) === 'https://hooks.slack.com/services/…' &&
+      (await field.evaluate((el) => el === document.activeElement)) &&
+      Math.round((await field.boundingBox()).height) === 40,
+    'fenêtre Slack : sous-titre d’une ligne, champ de 40 px avec l’exemple, focus dessus',
   );
   ok(
     (await sd.locator('.fd-modal__foot button').allInnerTexts()).map((x) => x.trim()).join(' | ') ===
-      'Envoyer un test | Enregistrer',
-    'boutons « Envoyer un test » (secondaire) et « Enregistrer » (primaire)',
+      'Annuler | Connecter',
+    'non connecté : « Annuler » et « Connecter »',
+  );
+  const evRows = sd.locator('.int-slack__ev > li');
+  const rowGeo = await evRows.evaluateAll((l) =>
+    l.map((x) => ({
+      h: Math.round(x.getBoundingClientRect().height),
+      state: Math.round(x.querySelector('.int-slack__state').getBoundingClientRect().width),
+      tile: Math.round(x.querySelector('.int-slack__tile').getBoundingClientRect().width),
+    })),
   );
   ok(
-    (await sd.locator('.int-slack__scope li[aria-disabled="true"] .soon-text').count()) === 2 &&
-      (await sd.getByText('Ce qui arrive dans le canal').count()) === 1 &&
-      (await sd.locator('.int-slack__scope li').first().locator('svg').count()) === 1 &&
-      /Nouveaux leads/.test(await sd.locator('.int-slack__scope').innerText()) &&
-      /Commentaires/.test(await sd.locator('.int-slack__scope').innerText()),
-    'leads et commentaires : visibles en gris, « Bientôt »',
+    (await evRows.count()) === 3 &&
+      rowGeo.every((g) => g.h >= 56 && g.state === 64 && g.tile === 32) &&
+      (await sd.getByRole('switch', { name: 'Alertes analytics' }).isChecked()) &&
+      (await sd.locator('.int-slack__soon').allInnerTexts()).join('|') === 'Bientôt|Bientôt' &&
+      (await sd.locator('.int-slack__ev').evaluate((e) => getComputedStyle(e).borderRadius)) === '12px',
+    `événements : liste encadrée (rayon 12), lignes de 56 px, tuile 32, colonne d’état 64 ; interrupteur des alertes, « Bientôt » pour leads et commentaires (${JSON.stringify(rowGeo)})`,
+  );
+  const how = sd.getByRole('link', { name: 'Comment obtenir l’adresse ?' });
+  ok(
+    (await how.getAttribute('target')) === '_blank' &&
+      /^https:\/\/api\.slack\.com\//.test(await how.getAttribute('href')) &&
+      (await sd.locator(`#${await field.getAttribute('aria-describedby')}`).innerText()) ===
+        'Elle est masquée une fois enregistrée.',
+    'lien « Comment obtenir l’adresse ? » (nouvel onglet) ; aide sans l’exemple répété',
   );
   // Adresse refusée : autre hôte
   await field.fill('https://hooks.slack.com.evil.example/services/T000FICTIF/B000FICTIF/cle-factice');
-  await sd.getByRole('button', { name: 'Enregistrer' }).click();
+  await sd.getByRole('button', { name: 'Connecter' }).click();
   await sd.getByText('Indiquez une adresse https://hooks.slack.com/services/…').waitFor();
   ok(
     (await field.getAttribute('aria-invalid')) === 'true' && !s.slack,
     'autre hôte que hooks.slack.com : erreur sous le champ, rien n’est enregistré',
   );
   await axe(p, 'Intégrations, fenêtre Slack (erreur)');
-  // « Envoyer un test » enregistre l'adresse puis envoie le test
+  // Slack refuse le message de test : erreur sous le champ, rien n'est gardé
+  s.slackTestFails = true;
   await field.fill(FAKE_HOOK);
-  await sd.getByRole('button', { name: 'Envoyer un test' }).click();
-  await p.getByText('Test envoyé dans Slack').waitFor();
+  await sd.getByRole('button', { name: 'Connecter' }).click();
+  await sd.getByText('Slack n’a pas accepté le message de test. Vérifiez l’adresse.').waitFor();
+  ok(!s.slack, 'Connecter : test refusé, erreur sous le champ, rien n’est gardé');
+  s.slackTestFails = false;
+  // Connecter : adresse vérifiée par un test
+  await field.fill(FAKE_HOOK);
+  await sd.getByRole('button', { name: 'Connecter' }).click();
+  await p.getByText('Slack connecté').waitFor();
   ok(
     s.slack?.url === FAKE_HOOK && s.slack.tests === 1 && !('app_url' in s.slack),
-    '« Envoyer un test » : adresse enregistrée, un test envoyé ; le navigateur n’envoie pas l’adresse de l’app',
+    'Connecter : adresse enregistrée, un message de test envoyé ; le navigateur n’envoie pas l’adresse de l’app',
   );
-  await sd.getByText('Connecté', { exact: true }).waitFor();
+  await sd.locator('.int-slack__on').waitFor();
+  const tb = await sd.locator('.fd-modal__titlerow h2').boundingBox();
+  const bb = await sd.locator('.int-slack__on').boundingBox();
+  ok(Math.round(bb.x - (tb.x + tb.width)) === 8, 'étiquette « Connecté » à côté du titre (8 px)');
   ok(
-    (await sd.getByLabel('Adresse du webhook entrant').count()) === 0 &&
+    (await sd.locator('.int-slack__on').innerText()) === 'Connecté' &&
+      (await sd.locator('.int-slack__ro').innerText()).trim() === 'hooks.slack.com/services/T000…/••••' &&
+      (await sd.getByLabel('Adresse du webhook entrant').count()) === 0 &&
       !(await sd.innerText()).includes('cle-factice') &&
-      (await sd.getByRole('button', { name: 'Retirer' }).count()) === 1,
-    'connecté : pastille « Connecté », action « Retirer », l’adresse n’est plus affichée',
+      (await sd.getByText('Pour changer de canal, déconnectez Slack puis reconnectez-le.').count()) === 1,
+    'connecté : étiquette « Connecté » près du titre, adresse masquée en lecture seule, aide pour changer de canal',
   );
-  {
-    // Le bouton vient d'apparaître : on lit ses couleurs une fois sa transition finie
-    await p.waitForFunction(() => {
-      const cs = getComputedStyle(document.querySelector('.fd-modal__foot .int-slack__remove'));
-      return cs.backgroundColor === 'rgba(0, 0, 0, 0)' && cs.borderTopColor === cs.color;
-    });
-    const foot = await sd.evaluate((d) => {
-      const [rm, test] = [...d.querySelectorAll('.fd-modal__foot button')];
-      const cs = getComputedStyle(rm);
-      return {
-        order: [rm.textContent.trim(), test.textContent.trim()].join(' | '),
-        left: rm.getBoundingClientRect().right < test.getBoundingClientRect().left,
-        gap: test.getBoundingClientRect().left - rm.getBoundingClientRect().right,
-        outline: `${cs.backgroundColor} | ${cs.borderTopColor} | ${cs.color}`,
-      };
-    });
-    ok(
-      foot.order === 'Retirer | Envoyer un test' &&
-        foot.left &&
-        foot.gap > 40 &&
-        // Fond transparent, contour et texte de la même couleur (rouge de danger)
-        /^rgba\(0, 0, 0, 0\) \| (rgb\([^)]+\)) \| \1$/.test(foot.outline),
-      `connecté : « Retirer » en danger secondaire (contour), à gauche ; « Envoyer un test » à droite (${foot.order}, écart ${Math.round(foot.gap)} px, ${foot.outline})`,
-    );
-    ok(
-      (await sd.getByText(/Pour changer de canal, retirez Slack puis reconnectez-le\./).count()) === 1 &&
-        (await sd.getByText(/Collez l’adresse/).count()) === 0,
-      'connecté : l’introduction dit comment changer de canal',
-    );
-  }
+  const save = sd.getByRole('button', { name: 'Enregistrer' });
+  const foot = await sd.evaluate((d) => {
+    const [rm, test, sv] = [...d.querySelectorAll('.fd-modal__foot button')];
+    return {
+      order: [rm, test, sv].map((b) => b.textContent.trim()).join(' | '),
+      left: rm.getBoundingClientRect().right < test.getBoundingClientRect().left - 40,
+      danger: getComputedStyle(rm).color,
+    };
+  });
+  ok(
+    foot.order === 'Déconnecter | Envoyer un test | Enregistrer' && foot.left && (await save.isDisabled()),
+    `connecté : « Déconnecter » à gauche, « Envoyer un test » et « Enregistrer » (désactivé) à droite (${foot.order})`,
+  );
   await axe(p, 'Intégrations, fenêtre Slack (connecté)');
+  // Interrupteur : Enregistrer s'active, puis enregistre
+  await sd.getByRole('switch', { name: 'Alertes analytics' }).click({ force: true });
+  ok(!(await save.isDisabled()), 'interrupteur changé : « Enregistrer » actif');
+  await save.click();
+  await p.waitForFunction(() => true);
+  for (let i = 0; i < 30 && s.slack.alerts !== false; i++) await p.waitForTimeout(100);
+  ok(
+    s.slack.alerts === false && (await save.isDisabled()),
+    'Enregistrer : alertes coupées, bouton à nouveau désactivé',
+  );
   await p.keyboard.press('Escape');
   await sd.waitFor({ state: 'detached' });
   ok(/Connecté/.test(await slackLi.innerText()), 'ligne Slack : « Connecté »');
@@ -208,16 +232,20 @@ const hook = (id, state, ws) => ({
   );
   // Slack refuse le test : le message le dit
   await p.getByRole('button', { name: 'Ouvrir Slack' }).click();
+  await sd.locator('.int-slack__on').waitFor();
   s.slackTestFails = true;
   await sd.getByRole('button', { name: 'Envoyer un test' }).click();
   await p.getByText('Le test n’a pas pu être envoyé').waitFor();
   ok(s.slack.tests === 1, 'test refusé par Slack : « Le test n’a pas pu être envoyé »');
   s.slackTestFails = false;
-  // Retrait, avec confirmation
-  await sd.getByRole('button', { name: 'Retirer' }).click();
-  await p.getByRole('dialog', { name: 'Retirer Slack ?' }).getByRole('button', { name: 'Retirer' }).click();
-  await p.getByText('Slack retiré').waitFor();
-  ok(s.slack === null, '« Retirer » (confirmé) : webhook retiré');
+  // Déconnexion, avec confirmation
+  await sd.getByRole('button', { name: 'Déconnecter' }).click();
+  await p
+    .getByRole('dialog', { name: 'Déconnecter Slack ?' })
+    .getByRole('button', { name: 'Déconnecter' })
+    .click();
+  await p.getByText('Slack déconnecté').waitFor();
+  ok(s.slack === null, '« Déconnecter » (confirmé) : webhook retiré');
   await p.keyboard.press('Escape');
   await p.context().close();
 

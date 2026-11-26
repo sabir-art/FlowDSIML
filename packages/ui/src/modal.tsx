@@ -14,6 +14,7 @@ export function Modal({
   icon,
   title,
   subtitle,
+  titleEnd,
   footerLead,
   size = 'sm',
   tone = 'default',
@@ -33,6 +34,8 @@ export function Modal({
   title: string;
   /** Ligne de 13 px sous le titre (ex. « Étape 1 sur 2 · Type de contenu ») ; elle complète le nom de la modale. */
   subtitle?: ReactNode;
+  /** À côté du titre (ex. étiquette verte « Connecté » d'une intégration). */
+  titleEnd?: ReactNode;
   /** Texte d'aide à gauche du pied (12 px), masqué sous 480 px. */
   footerLead?: ReactNode;
   /** sm = 400 px, md = 560 px, lg = 720 px, xl = 960 px ; plein écran sous 480 px. */
@@ -71,7 +74,7 @@ export function Modal({
     setWasOpen(open);
     setClosing(!open);
   }
-  const live = { icon, title, subtitle, footerLead, footer, children };
+  const live = { icon, title, subtitle, titleEnd, footerLead, footer, children };
   const kept = useRef(live);
   if (open) kept.current = live;
   const view = open ? live : kept.current;
@@ -135,7 +138,14 @@ export function Modal({
             </span>
             {view.subtitle ? (
               <div className="fd-modal__titles">
-                <h2 id={`${id}-t`}>{view.title}</h2>
+                {view.titleEnd ? (
+                  <div className="fd-modal__titlerow">
+                    <h2 id={`${id}-t`}>{view.title}</h2>
+                    {view.titleEnd}
+                  </div>
+                ) : (
+                  <h2 id={`${id}-t`}>{view.title}</h2>
+                )}
                 <p className="fd-modal__sub" id={`${id}-s`}>
                   {view.subtitle}
                 </p>

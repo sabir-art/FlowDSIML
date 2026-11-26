@@ -272,3 +272,14 @@ dialog[open]:not(.fd-modal)::backdrop {
     display: none;
   }
 }
+/* Titre et ce qui l'accompagne (étiquette « Connecté » d'une intégration) */
+.fd-modal__titlerow {
+  display: flex;
+  align-items: center;
+  gap: var(--fd-space-2);
+  min-width: 0;
+}
+.fd-modal__titlerow > h2 {
+  flex: 0 1 auto;
+  min-width: 0;
+}

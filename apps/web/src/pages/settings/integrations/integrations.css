@@ -337,50 +337,164 @@ a.int-row--link:focus-visible {
   align-items: center;
   gap: 12px;
 }
+/* Retours client, planche 4 : fenêtre Slack (MODAL-01) */
 .int-slack {
   display: grid;
-  gap: 16px;
+  gap: var(--fd-space-6, 24px);
 }
 .int-slack p {
   margin: 0;
 }
-.int-slack__t {
-  margin: 0 0 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fd-color-text-muted);
+.int-slack__on {
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
 }
-.int-slack__scope {
-  display: grid;
-  gap: 8px;
+.int-slack__t {
+  margin: 0 0 var(--fd-space-2, 8px);
+  font: 600 13px var(--fd-font-sans);
+  color: var(--fd-color-text);
+}
+/* Ce qui arrive dans le canal : liste encadrée, lignes de 56 px, colonne d'état de 64 px */
+.int-slack__ev {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
 }
-.int-slack__scope > li {
+.int-slack__ev > li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px;
+}
+.int-slack__ev > li + li {
+  border-top: 1px solid var(--fd-color-border);
+}
+.int-slack__tile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+}
+.int-slack__tile svg {
+  width: 16px;
+  height: 16px;
+}
+.int-slack__tx {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.int-slack__tx b {
+  font: 500 14px/1.3 var(--fd-font-sans);
+}
+.int-slack__tx small {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.int-slack__state {
+  flex: 0 0 64px;
+  width: 64px;
+  display: flex;
+  justify-content: flex-end;
+}
+.int-slack__soon {
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}
+.int-slack__ev [aria-disabled='true'] .int-slack__tx b {
+  color: var(--fd-color-text-muted);
+}
+/* Adresse du webhook : libellé (et lien d'aide), champ de 40 px, aide d'une ligne */
+.int-slack__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fd-space-2, 8px);
+}
+.int-slack__lblrow {
   display: flex;
   align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.int-slack__lbl {
+  font: 500 14px var(--fd-font-sans);
+}
+.int-slack__how {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--fd-color-primary);
+}
+.int-slack__input {
+  height: 40px;
+}
+.int-slack__ro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 10px;
+  background: var(--fd-color-surface-sunken);
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.int-slack__ro svg {
+  flex: none;
+  color: var(--fd-color-text-muted);
+}
+.int-slack__ro span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Pied connecté : Déconnecter à gauche (danger), Envoyer un test et Enregistrer à droite */
+.int-slack__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.int-slack__remove {
+  margin-right: auto;
+  color: var(--fd-color-danger);
+  font-weight: 500;
+  text-decoration: none;
+}
+.int-slack__remove:hover {
+  text-decoration: underline;
+}
+.int-slack__acts {
+  display: flex;
   gap: 8px;
 }
-.int-slack__scope svg {
-  flex: none;
-  align-self: center;
-  color: var(--fd-color-success);
-}
-/* « Retirer » : danger secondaire (contour et texte rouges), à gauche du pied ; l'action utile à droite */
-.fd-modal__foot .int-slack__remove {
-  margin-right: auto;
-  border-color: var(--fd-color-danger);
-  background: transparent;
-  color: var(--fd-color-danger);
-  box-shadow: none;
-}
-.fd-modal__foot .int-slack__remove:hover {
-  background: var(--fd-color-danger-soft);
-}
-.int-slack__scope [aria-disabled='true'] {
-  color: var(--fd-color-text-muted);
+@media (max-width: 599px) {
+  .int-slack__lblrow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  /* Envoyer un test et Enregistrer se partagent la ligne ; Déconnecter passe dessous, centré */
+  .int-slack__foot {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .int-slack__acts > * {
+    flex: 1;
+  }
+  .int-slack__remove {
+    margin: 0 auto;
+  }
 }
 .int-need {
   margin: 24px 0 0;
