@@ -1,11 +1,11 @@
 /**
  * Sandbox v2, étape 3 (docs/tech/sandbox-v2.md §6) : capture v2 RÉELLE sur le banc. L'extension construite
  * et chargée capture chaque site d'essai en mode Sandbox (enregistreur dans le monde de la page, document
- * source, scripts, réponses), l'écran « Vérifier avant l'envoi » montre le groupe « Sandbox vivant », la
+ * source, scripts, réponses), l’écran « Vérifier avant l’envoi » montre le groupe « Scripts », la
  * démo est envoyée (faux Supabase), puis chaque enregistrement vivant TEL QU'IL A ÉTÉ ENVOYÉ est relu par
  * buildLiveSrcdoc et le parcours du visiteur y est joué.
  *
- * Contrôles : groupe « Sandbox vivant » et Garder / Bloquer dans l'écran de vérification ; enregistrement
+ * Contrôles : groupe « Scripts » et Garder / Bloquer dans l'écran de vérification ; enregistrement
  * envoyé (marques de scripts, réponses, aucune donnée personnelle lisible) ; critères à 100 % b, c, d ;
  * fidélité d'interaction relevée (objectif 90 %).
  * Prérequis : node e2e/mock-supabase.cjs, node e2e/banc/serveur.cjs, build WXT_E2E=1.
@@ -31,11 +31,11 @@ async function envoyer(s) {
     { ...s, gestes: s.capture },
     async (review) => {
       await review.click('#kind [data-kind="sandbox"]');
-      const reg = review.getByRole('region', { name: 'Sandbox vivant', exact: true });
+      const reg = review.getByRole('region', { name: 'Scripts', exact: true });
       groupe = { present: (await reg.count()) === 1 };
       if (groupe.present) {
         groupe.etat = (await reg.locator('.mu').first().innerText()).trim();
-        await reg.getByRole('button', { name: 'Voir : Sandbox vivant' }).click();
+        await reg.getByRole('button', { name: 'Voir : Scripts' }).click();
         groupe.lignes = await reg.locator('li.el2').allInnerTexts();
         if (SHOTS)
           await review.screenshot({ path: `${SHOTS}/capture-v2-${s.id}-verification.png`, fullPage: true });
@@ -140,7 +140,10 @@ async function principal() {
       'Chaque page capturée a son enregistrement vivant, envoyé et rattaché à son étape ; démo « live »',
       rapport.every((x) => x.vivantes === x.pages && x.stepsVivantes === x.pages && x.demoLive),
     ],
-    ['« Sandbox vivant » dans l’écran de vérification', rapport.every((x) => x.groupe?.present)],
+    [
+      'Groupe « Scripts » du Sandbox vivant dans l’écran de vérification',
+      rapport.every((x) => x.groupe?.present || x.scripts.length === 0),
+    ],
     ['Scripts à leur place (marques) dans chaque enregistrement', rapport.every((x) => x.marques)],
     [
       'b) Scripts d’un autre site bloqués par défaut (fiche envoyée, rétablissable), ceux de la page gardés',
