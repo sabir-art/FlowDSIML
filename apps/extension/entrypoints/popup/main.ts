@@ -786,6 +786,12 @@ $('dest-kind').addEventListener('keydown', (e) => {
 const backFromDest = () => {
   view('setup');
   $('dest-change').focus();
+  // La ligne destination à jour est surlignée 1,2 s (fond et bord primaires)
+  const row = $('dest-row');
+  row.classList.remove('is-flash');
+  void row.offsetWidth;
+  row.classList.add('is-flash');
+  setTimeout(() => row.classList.remove('is-flash'), 1200);
 };
 const pickFolder = (li: HTMLElement) => {
   folderId = li.dataset.folder || null;

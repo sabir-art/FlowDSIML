@@ -431,6 +431,20 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
         (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Ventes · Nouvelle démo',
       `${tag} · dossier choisi : retour automatique, focus sur « Changer », destination « Dans Acme · Ventes · Nouvelle démo »`,
     );
+    // Ligne destination surlignée 1,2 s (fond primaire doux), puis rendue à son état normal
+    const flash = await popup.evaluate(() => {
+      const r = document.getElementById('dest-row');
+      return { on: r.classList.contains('is-flash'), bg: getComputedStyle(r).backgroundColor };
+    });
+    await popup.waitForTimeout(1400);
+    const after = await popup.evaluate(() => {
+      const r = document.getElementById('dest-row');
+      return { on: r.classList.contains('is-flash'), bg: getComputedStyle(r).backgroundColor };
+    });
+    ok(
+      flash.on && !after.on && flash.bg !== after.bg,
+      `${tag} · destination surlignée au retour puis normale après 1,2 s (${flash.bg} → ${after.bg})`,
+    );
     await popup.reload();
     await popup.waitForFunction(() => /Ventes/.test(document.getElementById('dest-text').textContent));
     ok(true, `${tag} · le dossier choisi est mémorisé après une nouvelle ouverture`);

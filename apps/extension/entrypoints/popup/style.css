@@ -778,6 +778,11 @@ a {
   border-radius: 12px;
   font-size: 13px;
 }
+/* Retours client 0.3.3 : destination choisie, ligne surlignée 1,2 s au retour */
+.dest.is-flash {
+  background: var(--fd-color-primary-soft);
+  border-color: var(--fd-color-primary);
+}
 .dest > svg {
   flex: none;
   color: var(--fd-color-text-muted);
