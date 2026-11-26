@@ -5575,7 +5575,16 @@
         "claude-haiku-5-5": "Le plus rapide, pour les textes courts"
       }
     },
-    "mentionModel": "Généré par IA ({{model}}), à vérifier"
+    "mentionModel": "Généré par IA ({{model}}), à vérifier",
+    "models": {
+      "title": "Modèles proposés dans l’assistant",
+      "help": "La liste est définie par TutoClick. Vous pouvez retirer des modèles pour votre espace, pas en ajouter.",
+      "keepHelp": "Gardez au moins un modèle coché. Les nouveaux modèles ajoutés par TutoClick arrivent décochés.",
+      "always": "Toujours proposé",
+      "ownersOnly": "Réservé aux propriétaires",
+      "keepOne": "Gardez au moins un modèle coché.",
+      "saved": "Modèles de l’assistant enregistrés"
+    }
   },
   "loading": {
     "demos": "Chargement des démos…",

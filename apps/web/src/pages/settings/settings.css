@@ -1265,3 +1265,31 @@ fieldset.stg-row {
     gap: 4px;
   }
 }
+
+/* L41 étape 5 : modèles proposés dans l'assistant (Paramètres › Assistance IA) */
+.stg-readonly {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+}
+.stg-readonly svg {
+  width: 14px;
+  height: 14px;
+}
+.ai-models__tx {
+  display: grid;
+  gap: 2px;
+}
+.ai-models__tx small {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.ai-models__always,
+.ai-models__tag {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}

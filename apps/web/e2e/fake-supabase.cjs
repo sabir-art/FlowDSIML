@@ -656,8 +656,11 @@ async function install(page, state = seed()) {
     if (p.startsWith('/functions/v1/ai') && String(body.action || '').startsWith('console_'))
       return aiConsole(state, body, route, json);
     // L41 étape 4 : menu de l'assistant (state.aiAssistant : liste de la Console simulée)
+    // L41 étape 5 : menu filtré par l'espace (state.aiWsModels, null = tous les modèles proposés)
     if (p.startsWith('/functions/v1/ai') && body.action === 'assistant_models')
-      return json(route, 200, { result: { models: assistantMenu(state) } });
+      return json(route, 200, {
+        result: { models: wsMenu(state), all: assistantMenu(state), chosen: state.aiWsModels ?? null },
+      });
     if (p.startsWith('/functions/v1/ai')) {
       (state.aiCalls ||= []).push(body);
       const ai = aiState(state);
@@ -715,7 +718,7 @@ async function install(page, state = seed()) {
       if (delay) await new Promise((res) => setTimeout(res, delay));
       // Planche 3 : modèle réellement utilisé, rendu par le serveur (Auto : Sonnet pour l'assistant)
       // L41 étape 4 : un modèle hors du menu est refusé (403 MODEL) ; Auto : Sonnet
-      const menu = assistantMenu(state);
+      const menu = wsMenu(state);
       const asked = body.task === 'assistant' ? (body.model ?? 'auto') : 'auto';
       const askedId = { sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5' }[asked] ?? asked;
       if (asked !== 'auto' && !menu.some((m) => m.id === askedId))
@@ -1054,6 +1057,20 @@ async function install(page, state = seed()) {
               meta: { old, new: a.p_on === true },
             });
           return json(route, 200, a.p_on === true);
+        }
+        // L41 étape 5 : propriétaire seulement, retrait seulement, au moins un modèle
+        case 'set_ai_models': {
+          if (t.members[0].role !== 'owner') return json(route, 403, { code: '42501', message: 'FORBIDDEN' });
+          const list = [...new Set(a.p_models ?? [])];
+          if (!list.length) return json(route, 400, { code: 'P0001', message: 'LAST_MODEL' });
+          const proposed = assistantRows(state).filter((r) => r.proposed);
+          if (!list.every((m) => proposed.some((r) => r.model === m)))
+            return json(route, 400, { code: 'P0001', message: 'NOT_PROPOSED' });
+          state.aiWsModels = [...proposed]
+            .sort((x, y) => x.position - y.position)
+            .map((r) => r.model)
+            .filter((m) => list.includes(m));
+          return json(route, 200, { models: state.aiWsModels });
         }
         case 'set_ai_settings': {
           const ai = aiState(state);
@@ -3198,6 +3215,10 @@ function assistantRows(state) {
     { model: 'claude-opus-5-5', position: 2, proposed: true, tag: 'recommended' },
     { model: 'claude-haiku-5-5', position: 3, proposed: false, tag: 'none' },
   ]);
+}
+function wsMenu(state) {
+  const all = assistantMenu(state);
+  return Array.isArray(state.aiWsModels) ? all.filter((m) => state.aiWsModels.includes(m.id)) : all;
 }
 function assistantMenu(state) {
   // Sans clé Anthropic simulée (state.aiNoAnthropic), aucun modèle n'est utilisable

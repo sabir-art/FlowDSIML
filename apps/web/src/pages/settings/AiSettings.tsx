@@ -15,6 +15,7 @@ import {
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
+import { AiModelsSection } from './AiModelsSection';
 import '../../components/ai/ai.css';
 
 /** Fonctions à venir, listées sous les cases (§2) : toujours désactivées, mention « Bientôt ». */
@@ -179,6 +180,8 @@ export function AiSettings() {
           </>
         )}
       </section>
+      {/* L41 étape 5 : modèles de l'assistant gardés par l'espace (propriétaire ; admins en lecture) */}
+      {status?.enabled && current && <AiModelsSection ws={current.id} role={current.role} />}
       {status?.enabled && (
         /* L30b §2 : voix et sous-titres, consentement séparé (ElevenLabs, audio) */
         <section className="stg-sec ai-features ai-audio" aria-labelledby="ai-audio-title">

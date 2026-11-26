@@ -147,6 +147,30 @@ export function useAssistantModels(ws: string | undefined) {
   return models;
 }
 
+/**
+ * L41 étape 5 : Paramètres › Assistance IA. `all` : modèles proposés par la Console (ordre, étiquette) ;
+ * `chosen` : modèles gardés par l'espace (null tant que le propriétaire n'a rien enregistré = tous).
+ */
+export function useWorkspaceModels(ws: string | undefined) {
+  const [st, setSt] = useState<{ all: AssistantModel[]; chosen: string[] | null } | null>(null);
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!ws) return;
+    let alive = true;
+    void supabase.functions
+      .invoke('ai', { body: { action: 'assistant_models', ws } })
+      .then(({ data, error }) => {
+        if (!alive) return;
+        const r = (data as { result?: { all?: AssistantModel[]; chosen?: string[] | null } })?.result;
+        setSt(error ? { all: [], chosen: null } : { all: r?.all ?? [], chosen: r?.chosen ?? null });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [ws, n]);
+  return { state: st, set: setSt, reload: () => setN((x) => x + 1) };
+}
+
 /** Comme callAi, avec le modèle demandé ; rend aussi le modèle réellement utilisé (« Claude Sonnet »). */
 export async function callAiWith<T>(
   ws: string,

@@ -5575,7 +5575,16 @@
         "claude-haiku-5-5": "Fastest, for short texts"
       }
     },
-    "mentionModel": "AI-generated ({{model}}), please review"
+    "mentionModel": "AI-generated ({{model}}), please review",
+    "models": {
+      "title": "Models offered in the assistant",
+      "help": "The list is set by TutoClick. You can remove models for your workspace, not add any.",
+      "keepHelp": "Keep at least one model checked. New models added by TutoClick arrive unchecked.",
+      "always": "Always offered",
+      "ownersOnly": "Owners only",
+      "keepOne": "Keep at least one model checked.",
+      "saved": "Assistant models saved"
+    }
   },
   "loading": {
     "demos": "Loading demos…",

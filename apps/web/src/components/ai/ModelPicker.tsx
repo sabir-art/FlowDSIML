@@ -233,7 +233,8 @@ export function ModelPicker({
                 {others.map((m) => (
                   <div key={m.id}>{row(m.id, <span className="aim-mono">{m.label[0]}</span>)}</div>
                 ))}
-                {/* « Le propriétaire choisit les modèles… » reviendra avec l'étape 5 (section de l'espace) */}
+                {/* L41 étape 5 : la section de l'espace existe (Paramètres › Assistance IA) */}
+                <p className="aim-note">{t('ai.model.ownerNote')}</p>
               </div>
             )}
           </>,
