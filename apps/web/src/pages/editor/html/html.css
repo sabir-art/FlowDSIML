@@ -557,3 +557,12 @@
 .gd-remove {
   margin-top: 16px;
 }
+
+/* Étape 4 : lien jamais ouvert par sécurité (déconnexion, suppression, fichier) à la place de « Capturer » */
+.sb-deadlist__safe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text-muted);
+}

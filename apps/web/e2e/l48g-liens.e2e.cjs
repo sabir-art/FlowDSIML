@@ -300,6 +300,78 @@ const pages = [
       'colonne : « Tous les Sandbox », « Mes Sandbox »',
     );
 
+  // ===== Sandbox v2 étape 4 (décision du chef) : même règle que la capture en série =====
+  // Déconnexion, suppression, fichier : pas de « Capturer cette page », « Jamais ouverte par sécurité »
+  {
+    const s2 = seed();
+    const base2 = s2.tables.steps.find((s) => s.demo_id === DEMO);
+    const ws2 = s2.tables.workspaces[0].id;
+    const d2 = s2.tables.demos.find((d) => d.id === DEMO);
+    d2.kind = 'sandbox';
+    d2.sandbox = { start: ID(1), autoLink: true, unlinked: 'toast', guide: false, keyPages: [] };
+    const path = `${ws2}/${DEMO}/${ID(1)}.html`;
+    s2.htmlPages = { [path]: '<!doctype html><html><body><h1>Mon compte</h1></body></html>' };
+    s2.tables.steps = s2.tables.steps.filter((s) => s.demo_id !== DEMO);
+    s2.tables.steps.push({
+      ...base2,
+      id: ID(1),
+      position: 0,
+      kind: 'html',
+      title: 'Mon compte',
+      image_path: null,
+      html_path: path,
+      html_ops: [],
+      html_meta: {
+        title: 'Mon compte',
+        url: `${U}/compte`,
+        viewport: { w: 1280, h: 720 },
+        links: [
+          { sel: '#a1', href: `${U}/factures`, label: 'Factures' },
+          { sel: '#a2', href: `${U}/deconnexion`, label: 'Se déconnecter' },
+          { sel: '#a3', href: `${U}/compte/supprimer`, label: 'Supprimer mon compte' },
+          { sel: '#a4', href: `${U}/tarifs.pdf`, label: 'Tarifs (PDF)' },
+          { sel: '#a5', href: `${U}/lettre?action=unsubscribe`, label: 'Ne plus recevoir la lettre' },
+        ],
+      },
+    });
+    const ctx2 = await b.newContext({ viewport: { width: 1440, height: 900 }, locale: 'fr-FR' });
+    const p2 = await ctx2.newPage();
+    p2.on('pageerror', (e) => {
+      if (!/lacks the 'allow-same-origin' flag/.test(e.message)) errors.push(e.message);
+    });
+    await install(p2, s2);
+    await p2.goto(`${APP}/#/demos/${DEMO}/edit`);
+    await p2.frameLocator('.html-stage iframe').locator('h1').waitFor();
+    await p2
+      .getByRole('radiogroup', { name: 'Affichage du canevas' })
+      .getByRole('radio', { name: 'Plan' })
+      .click();
+    const rows = p2.locator('.sb-deadpanel .sb-deadlist:not(.sb-deadlist--left) > li');
+    await rows.first().waitFor();
+    const etat = await rows.evaluateAll((ls) =>
+      ls.map((l) => ({
+        label: l.querySelector('b').textContent.trim(),
+        capture: [...l.querySelectorAll('button')].some((x) => /Capturer cette page/.test(x.textContent)),
+        safe: l.querySelector('.sb-deadlist__safe')?.textContent.trim() ?? '',
+      })),
+    );
+    const risky = etat.filter((x) => x.label !== 'Factures');
+    ok(
+      etat.length === 5 &&
+        etat.find((x) => x.label === 'Factures')?.capture === true &&
+        risky.length === 4 &&
+        risky.every((x) => !x.capture && x.safe === 'Jamais ouverte par sécurité'),
+      `liens à risque : pas de « Capturer cette page », « Jamais ouverte par sécurité » ; les autres gardent l’action (${JSON.stringify(etat)})`,
+    );
+    const bad = (
+      await new AxeBuilder({ page: p2 }).include('.sb-deadpanel').withTags(['wcag2a', 'wcag2aa']).analyze()
+    ).violations.map((v) => v.id);
+    ok(bad.length === 0, `axe, liens à risque (${bad.join(', ')})`);
+    if (process.env.SHOTS_DIR)
+      await p2.locator('.sb-deadpanel').screenshot({ path: `${process.env.SHOTS_DIR}/liens-risque.png` });
+    await ctx2.close();
+  }
+
   ok(errors.length === 0, `aucune erreur de page${errors.length ? ` : ${errors.join(' / ')}` : ''}`);
   await b.close();
 })();

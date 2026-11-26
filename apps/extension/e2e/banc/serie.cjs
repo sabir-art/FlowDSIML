@@ -189,6 +189,12 @@ const chemin = (u) => new URL(u).pathname;
       ),
     `« Liens sans page » : seulement les 3 pièges du même site (${morts.map((m) => m.slice(0, 40)).join(' | ')})`,
   );
+  // Même règle que la série dans le plan : pas de « Capturer cette page » sur les pièges
+  ok(
+    (await panel.locator('.sb-deadlist > li button', { hasText: 'Capturer cette page' }).count()) === 0 &&
+      (await panel.locator('.sb-deadlist__safe', { hasText: 'Jamais ouverte par sécurité' }).count()) === 3,
+    'plan : les 3 pièges « Jamais ouverte par sécurité », sans « Capturer cette page »',
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/serie-plan.png`, fullPage: true });
   // L'auteur laisse les trois pièges (« Laisser le message »)
   for (const l of ['Se déconnecter', 'Guide (PDF)', 'Supprimer mon compte']) {
