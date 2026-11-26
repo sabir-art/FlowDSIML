@@ -94,6 +94,23 @@ async function openEditor(b, state) {
   ok((await proj.count()) === 1, 'Deux fenêtres : aide du vidéoprojecteur');
   await dlg.getByRole('radio', { name: /Un seul écran/ }).check();
   ok((await proj.count()) === 0, 'Un seul écran : plus d’aide du vidéoprojecteur');
+  // WCAG 2.4.7 : la carte cochée change à l'écran quand son radio prend le focus au clavier
+  const look = () =>
+    dlg.locator('.lx-card.is-on').evaluate((c) => {
+      const s = getComputedStyle(c);
+      return `${s.outlineStyle} ${s.outlineWidth} ${s.outlineColor} ${s.outlineOffset} | ${s.borderColor} ${s.boxShadow}`;
+    });
+  const mouse = await look();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  const keyb = await look();
+  ok(
+    (await dlg.locator('.lx-card.is-on input').evaluate((i) => i.matches(':focus-visible'))) &&
+      keyb !== mouse &&
+      /^solid 2px .* 2px \|/.test(keyb) &&
+      keyb.split(' | ')[1] === mouse.split(' | ')[1],
+    `carte cochée : contour de focus de 2 px au clavier, sélection inchangée (souris « ${mouse} » ; clavier « ${keyb} »)`,
+  );
   ok((await dlg.locator('.lx-info, .fd-alert').count()) === 0, 'plus de bloc bleu d’information');
   const start = await dlg.getByRole('combobox', { name: 'Commencer à' }).boundingBox();
   const timer = dlg.getByRole('combobox', { name: 'Minuteur' });

@@ -857,9 +857,10 @@ html[data-remote] body {
   box-shadow: 0 0 0 1px var(--fd-color-primary);
 }
 .lxm .lx-card:has(input:focus-visible) {
-  /* FIELD-01 : bordure prune et trait intérieur, sans ombre extérieure */
-  border-color: var(--fd-color-focus);
-  box-shadow: inset 0 0 0 1px var(--fd-color-focus);
+  /* WCAG 2.4.7 (recette UX de ceab0ef) : la sélection garde bordure et trait ; le focus clavier ajoute un
+     contour décalé, visible aussi sur la carte cochée */
+  outline: 2px solid var(--fd-color-focus);
+  outline-offset: 2px;
 }
 .lxm .lx-art {
   display: grid;
