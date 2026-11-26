@@ -182,7 +182,7 @@ export function CaptureMoreBanner({ capture }: { capture: CaptureMore }) {
       <p>
         {/*
           Recette UX lot E : les étapes arrivent à l'envoi. Pendant la capture : « Capture en cours dans
-          l'extension · 3 étapes · elles arriveront à la fin. » ; à l'envoi : « Réception… »
+          l'extension · 3 étapes · elles arriveront à la fin de la capture. » ; à l'envoi : « Réception… »
         */}
         <b>{t(capture.receiving ? 'editor.captureMore.receivingAll' : 'editor.captureMore.live')}</b>
         {' · '}
