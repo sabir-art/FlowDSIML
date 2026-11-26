@@ -5,6 +5,8 @@ import {
   autoPick,
   fallbackOf,
   replacementOf,
+  workspaceMenu,
+  autoMenuOf,
   kindOf,
   menuOf,
   requested,
@@ -204,3 +206,27 @@ Deno.test(
     assertEquals(x.labels.at(-1), 'Auto · modèle indisponible · le suivant de la liste → Claude Haiku');
   },
 );
+
+Deno.test('L41 étape 5 : modèles gardés par l’espace, retrait seulement ; Auto prend le relais', () => {
+  const menu = menuOf(ROWS, ALL);
+  // Jamais enregistré : tous les modèles proposés
+  assertEquals(workspaceMenu(menu, undefined), menu);
+  // Liste de l'espace : filtre ; un modèle hors du menu de la Console (retiré, inconnu) est ignoré
+  assertEquals(
+    workspaceMenu(menu, ['claude-opus-5-5', 'claude-haiku-5-5', 'gpt-inconnu']).map((m) => m.id),
+    ['claude-opus-5-5'],
+  );
+  // Ordre de la Console, pas celui de l'espace
+  assertEquals(
+    workspaceMenu(menu, ['claude-opus-5-5', 'claude-sonnet-5-5']).map((m) => m.id),
+    ['claude-sonnet-5-5', 'claude-opus-5-5'],
+  );
+  // Plus aucun modèle de l'espace dans le menu : Auto choisit dans celui de la Console
+  const none = workspaceMenu(menu, ['claude-haiku-5-5']);
+  assertEquals(none, []);
+  assertEquals(requested('claude-sonnet-5-5', none), null);
+  assertEquals(autoPick(DEFAULT_RULES, autoMenuOf(none, menu), 'court'), 'claude-sonnet-5-5');
+  // Espace avec Opus seul : Auto reste dans son menu (règle Sonnet → remplaçant Opus)
+  const opus = workspaceMenu(menu, ['claude-opus-5-5']);
+  assertEquals(autoPick(DEFAULT_RULES, autoMenuOf(opus, menu), 'court'), 'claude-opus-5-5');
+});

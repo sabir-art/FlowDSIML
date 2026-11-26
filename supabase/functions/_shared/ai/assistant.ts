@@ -81,6 +81,19 @@ export function fallbackOf(
   return menu[i + 1]?.id ?? (i > 0 ? menu[0]!.id : null);
 }
 
+/**
+ * L41 étape 5 (spec UX §5) : modèles gardés par l'espace (workspaces.settings.ai.models). Absent : tous
+ * les modèles proposés. L'espace ne peut que retirer : un modèle hors du menu de la Console est ignoré.
+ */
+export function workspaceMenu<T extends { id: string }>(menu: T[], chosen: unknown): T[] {
+  if (!Array.isArray(chosen)) return menu;
+  const keep = new Set(chosen.filter((x): x is string => typeof x === 'string'));
+  return menu.filter((m) => keep.has(m.id));
+}
+
+/** Menu dans lequel Auto choisit : celui de l'espace ; s'il est vide, Auto prend le relais sur la Console. */
+export const autoMenuOf = <T>(ws: T[], all: T[]): T[] => (ws.length ? ws : all);
+
 /** Anciens choix de l'éditeur (« sonnet », « opus ») : le modèle du catalogue correspondant. */
 export const LEGACY: Record<string, string> = { sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5' };
 

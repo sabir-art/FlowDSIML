@@ -14,10 +14,12 @@ import { CONSOLE_ACTIONS, consoleAction, type ProviderRow } from '../_shared/ai/
 import { FN_OF_TASK, FUNCTIONS, cutFeatures, resolve, type Fn } from '../_shared/ai/functions.ts';
 import {
   DEFAULT_RULES,
+  autoMenuOf,
   autoPick,
   fallbackOf,
   menuOf,
   requested,
+  workspaceMenu,
   type AssistantRow,
   type AutoRules,
 } from '../_shared/ai/assistant.ts';
@@ -106,9 +108,18 @@ async function assistantConfig(fresh = false) {
   };
   return asstCache;
 }
-async function assistantMenu() {
+/**
+ * Menu de l'assistant pour un espace (L41 étape 5) : modèles de la Console, utilisables, gardés par
+ * l'espace. `all` : le menu de la Console (Paramètres de l'espace, relais d'Auto) ; `chosen` : la liste de
+ * l'espace, null tant qu'elle n'a jamais été enregistrée.
+ */
+async function assistantMenu(ws: string) {
   const c = await assistantConfig();
-  return { menu: menuOf(c.rows, await keySet()), rules: c.rules };
+  const all = menuOf(c.rows, await keySet());
+  const { data } = await admin.from('workspaces').select('settings').eq('id', ws).maybeSingle();
+  const raw = (data?.settings as { ai?: { models?: unknown } } | null)?.ai?.models;
+  const chosen = Array.isArray(raw) ? (raw as string[]) : null;
+  return { menu: workspaceMenu(all, chosen), all, chosen, rules: c.rules };
 }
 
 /** Fonctions coupées tenues à jour pour les espaces (ai_cut), au plus une écriture par changement. */
@@ -497,8 +508,10 @@ Deno.serve(async (req) => {
   if (!uid) return json(403, { error: 'FORBIDDEN' });
 
   // L41 étape 4 : menu de l'assistant (modèles proposés par la Console, utilisables), sans quota
-  if (body.action === 'assistant_models')
-    return json(200, { result: { models: (await assistantMenu()).menu } });
+  if (body.action === 'assistant_models') {
+    const a = await assistantMenu(ws);
+    return json(200, { result: { models: a.menu, all: a.all, chosen: a.chosen } });
+  }
 
   if (
     body.task === 'voice' ||
@@ -524,11 +537,13 @@ Deno.serve(async (req) => {
   let assistantModel: string | null = null;
   let asst: Awaited<ReturnType<typeof assistantMenu>> | null = null;
   if (parsed.task === 'assistant') {
-    asst = await assistantMenu();
+    asst = await assistantMenu(ws);
     const want = requested(String(parsed.model), asst.menu);
     if (!want) return json(403, { error: 'MODEL' });
     const msgs = (parsed.payload.messages ?? []) as Array<{ text: string }>;
-    assistantModel = want.auto ? autoPick(asst.rules, asst.menu, msgs.at(-1)?.text ?? '') : want.model;
+    assistantModel = want.auto
+      ? autoPick(asst.rules, autoMenuOf(asst.menu, asst.all), msgs.at(-1)?.text ?? '')
+      : want.model;
     if (!assistantModel) return json(503, { error: 'UNAVAILABLE' });
   }
 
@@ -565,7 +580,7 @@ Deno.serve(async (req) => {
       // L41 étape 4 : Auto, modèle indisponible ou surchargé : un essai sur le repli (règle de la Console)
       const fb =
         asst && parsed.model === 'auto' && claude.failure(first).error === 'PROVIDER'
-          ? fallbackOf(asst.rules, asst.menu, prompt.model)
+          ? fallbackOf(asst.rules, autoMenuOf(asst.menu, asst.all), prompt.model)
           : null;
       if (!fb) throw first;
       prompt = { ...prompt, model: fb };
