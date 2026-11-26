@@ -58,10 +58,17 @@ Principe : on garde la barre commune et le popup. La barre gagne **un** bouton �
   - et le lien « Voir les liens », qui ouvre la liste existante des liens sans page (Capturer, Relier, Laisser le message).
 - Les liens laissés ne comptent pas dans le total (décision du chef) : t = capturées + à capturer.
 - À 100 % : « Toutes les pages liées sont capturées ({c}) ». La jauge est pleine, et « Voir les liens » disparaît s'il n'y a ni lien laissé ni lien refusé.
+- **Liens refusés dans le plan (ajout du 26/11, remarque du dev)** : un lien que la série ne capture jamais (adresse de déconnexion, de suppression de compte ou de désabonnement, fichier à télécharger, autre site, mêmes règles qu'au §1) garde dans le plan l'état qu'il a dans la barre de capture :
+  - dans la liste « Voir les liens », la ligne porte la pastille « Refusée » et la raison en clair (« Se déconnecter · adresse de déconnexion », « Supprimer mon compte · adresse de suppression de compte ») ;
+  - **pas d'action « Capturer cette page »**, ni dans la liste, ni dans le menu du hotspot, ni dans le panneau du lien. Les deux actions restantes sont « Relier à une étape » (par exemple vers un écran de fin) et « Laisser le message » (« Page non disponible ») ;
+  - au survol ou au focus de la pastille, l'infobulle dit : « Jamais ouverte, pour ne pas agir sur votre compte. Reliez-la à une étape si besoin. » ;
+  - ces liens ne comptent pas dans la couverture (comme les liens laissés) : t = capturées + à capturer. La ligne sous le titre ajoute « · {r} refusé(s) » en gris, après les laissés ;
+  - un lien refusé ne passe jamais à « à capturer », même par « Tout capturer ».
+- e2e : dans le plan, « Se déconnecter » et « Supprimer mon compte » ont la pastille « Refusée », aucun bouton « Capturer cette page », et ne comptent pas dans « {c} pages sur {t} liens ».
 
 ## Textes (FR)
 
-`Pages liées` · `Liens de {{site}} vus sur vos pages` · `{{n}} capturées` · `{{n}} à capturer` · `{{n}} laissée(s)` · `{{n}} jamais ouvertes` · `{{n}} en erreur` · `Laisser` · `Reprendre` · `Réessayer` · `Refusée` · `adresse de déconnexion` · `autre site` · `page introuvable (404)` · `Capturer les {{n}} pages liées` · `Pages liées : {{i}} sur {{n}} · {{titre}}` · `Arrêter` · `En cours…` · `En attente` · `Arrêté : {{k}} page liée capturée` · `Vérifier et envoyer` · `Pages liées non capturées` · `{{c}} pages sur {{t}} liens` · `Voir les liens`.
+`Pages liées` · `Liens de {{site}} vus sur vos pages` · `{{n}} capturées` · `{{n}} à capturer` · `{{n}} laissée(s)` · `{{n}} jamais ouvertes` · `{{n}} en erreur` · `Laisser` · `Reprendre` · `Réessayer` · `Refusée` · `adresse de déconnexion` · `autre site` · `page introuvable (404)` · `Capturer les {{n}} pages liées` · `Pages liées : {{i}} sur {{n}} · {{titre}}` · `Arrêter` · `En cours…` · `En attente` · `Arrêté : {{k}} page liée capturée` · `Vérifier et envoyer` · `Pages liées non capturées` · `{{c}} pages sur {{t}} liens` · `Voir les liens` · `{{r}} refusé(s)` · `Relier à une étape` · `Jamais ouverte, pour ne pas agir sur votre compte. Reliez-la à une étape si besoin.`.
 
 ## e2e proposés
 
