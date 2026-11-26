@@ -1,7 +1,8 @@
 /**
  * L60 : banc de sites d'essai de la capture (données fictives, servis en local). Cinq cas tirés des
  * retours du client : application à page unique, formulaire envoyé, scripts de tiers, onglets chargés en
- * différé, menu ouvert au survol. Port 54410 (le site) et 54411 (le « tiers » : mesure d'audience, chat).
+ * différé, menu ouvert au survol. Sandbox v2 (étape 1) : site de plusieurs pages, liste filtrée chargée
+ * par fetch, panier gardé dans localStorage. Port 54410 (le site) et 54411 (le « tiers » : mesure d'audience, chat).
  * Usage : node e2e/banc/serveur.cjs
  */
 const http = require('http');
@@ -27,6 +28,19 @@ const page = (title, body, script = '') => `<!doctype html><html lang="fr"><head
 <title>${title}</title><link rel="stylesheet" href="/banc.css"></head><body>${body}
 ${script ? `<script>${script}</script>` : ''}</body></html>`;
 const entete = `<header><img src="/logo.svg" width="32" height="32" alt="ExempleCRM"><strong>ExempleCRM</strong>`;
+
+/** Page du site statique : barre de navigation commune vers les 4 pages. */
+const site4 = (titre, texte) =>
+  page(
+    titre,
+    `${entete}<nav><a href="/site">Accueil</a> <a href="/site/offres">Offres</a> <a href="/site/equipe">Équipe</a> <a href="/site/contact">Contact</a></nav></header>
+     <main><h1>${titre}</h1><p class="carte">${texte}</p></main>`,
+  );
+const PRODUITS = [
+  { nom: 'ExempleCRM', prix: '19 € par mois' },
+  { nom: 'ExempleFacture', prix: '9 € par mois' },
+  { nom: 'ExempleAgenda', prix: '5 € par mois' },
+];
 
 const CLIENTS = [
   { id: 1, nom: 'Atelier Durand', ville: 'Lyon' },
@@ -132,6 +146,37 @@ const PAGES = {
      <table class="carte" id="piege-sans-thead"><tr><th>Nom</th><th>Statut</th><th>Actions</th></tr>
      <tr><td>Projet Alpha</td><td>Active</td><td>Ouvrir</td></tr></table></main>`,
   ),
+  // Sandbox v2, étape 1 : les trois sites d'essai qui manquaient au banc (note sandbox-v2.md §4)
+  // 8. Site de plusieurs pages statiques : la page Contact n'est jamais visitée pendant la capture
+  '/site': site4('Accueil', 'Bienvenue sur le site d’ExempleCRM.'),
+  '/site/offres': site4('Nos offres', 'Essentielle, Avancée, Entreprise.'),
+  '/site/equipe': site4('Notre équipe', 'Douze personnes à Lyon et à Nantes.'),
+  '/site/contact': site4('Nous écrire', 'Réponse sous 24 h ouvrées.'),
+  // 9. Liste chargée par fetch, avec un filtre (chaque frappe interroge le serveur)
+  '/liste': page(
+    'Produits',
+    `${entete}</header><main><h1>Produits</h1>
+     <label class="carte">Filtrer <input id="filtre" type="search" placeholder="Nom du produit"></label>
+     <div id="liste"><p>Chargement…</p></div></main>`,
+    `const liste = document.getElementById('liste');
+     async function charger(q) {
+       const l = await (await fetch('/api/produits?q=' + encodeURIComponent(q))).json();
+       liste.innerHTML = l.length ? l.map(p => '<p class="carte"><b>' + p.nom + '</b> · ' + p.prix + '</p>').join('') : '<p class="carte">Aucun produit.</p>';
+     }
+     document.getElementById('filtre').addEventListener('input', e => charger(e.target.value)); charger('');`,
+  ),
+  // 10. Application qui dépend de localStorage : un panier gardé dans le navigateur
+  '/stockage': page(
+    'Panier',
+    `${entete}</header><main><h1>Panier</h1><p class="carte" id="panier">Panier : …</p>
+     <button class="btn" id="ajout">Ajouter au panier</button> <button class="btn" id="vider">Vider le panier</button></main>`,
+    `const el = document.getElementById('panier');
+     const lire = () => Number(localStorage.getItem('panier') || 0);
+     const montrer = () => (el.textContent = 'Panier : ' + lire());
+     document.getElementById('ajout').onclick = () => { localStorage.setItem('panier', lire() + 1); montrer(); };
+     document.getElementById('vider').onclick = () => { localStorage.removeItem('panier'); montrer(); };
+     montrer();`,
+  ),
   '/menu/logiciels': page(
     'Logiciels',
     `${entete}<a href="/menu">Catalogue</a></header><main><h1>Logiciels</h1><p class="carte">ExempleCRM, ExempleFacture.</p></main>`,
@@ -162,6 +207,12 @@ function site(req, res) {
   if (u.pathname === '/logo.svg') return send('image/svg+xml', LOGO);
   if (u.pathname === '/api/clients')
     return attendre(250, () => send('application/json', JSON.stringify(CLIENTS)));
+  if (u.pathname === '/api/produits') {
+    const q = (u.searchParams.get('q') ?? '').toLowerCase();
+    return attendre(150, () =>
+      send('application/json', JSON.stringify(PRODUITS.filter((p) => p.nom.toLowerCase().includes(q)))),
+    );
+  }
   if (u.pathname.startsWith('/api/onglet/'))
     return attendre(350, () =>
       send('application/json', JSON.stringify({ html: ONGLETS[u.pathname.split('/').pop()] ?? '' })),

@@ -159,7 +159,8 @@ const CAS = [
   },
 ];
 
-async function capturer(cas, apres) {
+/** opts.vu(page, n) : appelé quand la n-ième page est capturée (mesure Sandbox v2 : vue du site vivant). */
+async function capturer(cas, apres, opts = {}) {
   const ctx = await chromium.launchPersistentContext(fs.mkdtempSync(path.join(os.tmpdir(), 'fd-banc-')), {
     headless: true,
     locale: 'fr-FR',
@@ -200,7 +201,10 @@ async function capturer(cas, apres) {
     pages: async (n) => {
       const fin = Date.now() + 8000;
       while (Date.now() < fin) {
-        if ((await steps()) >= n) return true;
+        if ((await steps()) >= n) {
+          if (opts.vu) await opts.vu(page, n);
+          return true;
+        }
         await new Promise((r) => setTimeout(r, 200));
       }
       manques.push(n);
