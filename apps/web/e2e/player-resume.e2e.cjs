@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const manifest = require('./player-maquette.cjs');
+/** NUM-01 : espaces insécables ramenées à des espaces ordinaires avant de comparer. */
+const sp = (s) => (s || '').replace(/\s/g, ' ');
 const SHOTS = process.env.SHOTS_DIR;
 
 const RESUME = {
@@ -78,7 +80,7 @@ const RESUME = {
   );
   ok(await p.evaluate(() => document.activeElement?.id === 'p-rs-t'), 'L13 : focus sur le titre');
   ok(
-    (await card.textContent()).includes('l’étape 4 sur 6 du module « Fiches usagers »'),
+    sp(await card.textContent()).includes(sp('l’étape 4 sur 6 du module « Fiches usagers »')),
     'L13 : étape où reprendre',
   );
   ok((await card.locator('.p-resume-steps span.on').count()) === 4, 'L13 : barre d’étapes');

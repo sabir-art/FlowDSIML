@@ -370,7 +370,8 @@ export function csvTable(
       out.push(
         ...mods.map(({ m }) => {
           const x = r.raw.modules.find((mm) => mm.demoId === m.demoId);
-          return x ? `${L.moduleValue(x.status)} (${Math.round(modulePct(x) * 100)} %)` : '';
+          // NUM-01 non applicable : donnée d'un export CSV (tableur), pas un texte affiché
+          return x ? `${L.moduleValue(x.status)} (${Math.round(modulePct(x) * 100)} %)` : ''; // num01-donnee
         }),
       );
     return out;

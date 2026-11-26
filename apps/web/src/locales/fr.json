@@ -529,8 +529,8 @@
     "mismatch": "Les deux mots de passe ne sont pas identiques.",
     "met": "respectée",
     "unmet": "non respectée",
-    "count_one": "{{count}} règle sur {{total}} respectée",
-    "count_other": "{{count}} règles sur {{total}} respectées",
+    "count_one": "{{count}} règle sur {{total}} respectée",
+    "count_other": "{{count}} règles sur {{total}} respectées",
     "confirmLabel": "Confirmer le mot de passe"
   },
   "editor": {
@@ -2154,7 +2154,7 @@
       "tooBig": "Image trop lourde : 5 Mo au plus.",
       "alt": "Texte alternatif",
       "altHelp": "Laissez vide si l’image est décorative.",
-      "stepOf": "Étape {{n}} sur {{total}}",
+      "stepOf": "Étape {{n}} sur {{total}}",
       "esc": "Échap pour fermer",
       "prev": "Précédent",
       "button": "Libellé du bouton"
@@ -2411,7 +2411,7 @@
       "download": "Télécharger l’archive",
       "downloadAgain": "Télécharger de nouveau",
       "generating": "Préparation de l’archive…",
-      "progress": "Fichiers {{done}} sur {{total}}",
+      "progress": "Fichiers {{done}} sur {{total}}",
       "progressLabel": "Avancement de l’archive",
       "readyTitle": "Archive prête.",
       "readyText": "Le téléchargement a démarré.",
@@ -4590,9 +4590,9 @@
     "measured": "Mesuré pendant la présentation. Une présentation n’est pas comptée comme une vue de la démo.",
     "historyTitle": "Historique des présentations",
     "kept": "Gardé 90 jours, visible par vous seul.",
-    "timerName": "{{elapsed}} écoulées sur {{total}}",
+    "timerName": "{{elapsed}} écoulées sur {{total}}",
     "timerNameFree": "{{elapsed}} écoulées",
-    "ofTotal": "sur {{total}}",
+    "ofTotal": "sur {{total}}",
     "twoLeft": "Plus que 2 min"
   },
   "notifications": {
@@ -5350,7 +5350,7 @@
         "h": "Titre de la bulle",
         "p": "Titre de la pause"
       },
-      "limited": "Analyse limitée aux {{max}} premiers textes sur {{total}} : les textes suivants, à partir de l’étape {{n}}, ne sont pas analysés.",
+      "limited": "Analyse limitée aux {{max}} premiers textes sur {{total}} : les textes suivants, à partir de l’étape {{n}}, ne sont pas analysés.",
       "tooLong": "Bulle de {{n}} caractères : au-delà de {{max}}, elle est difficile à lire.",
       "type": {
         "clarity": "Clarté",
@@ -6356,7 +6356,7 @@
     "pick": "Choisir une vidéo…",
     "pickOther": "Choisir une autre vidéo",
     "seeUsage": "Voir l’utilisation",
-    "sending": "Envoi… {{pct}} % · {{sent}} sur {{total}} Mo",
+    "sending": "Envoi… {{pct}} % · {{sent}} sur {{total}} Mo",
     "stalled": "Envoi interrompu · {{pct}} %",
     "resume": "Reprendre",
     "progress": "Envoi de la vidéo",
@@ -6389,7 +6389,7 @@
       "body": "L’envoi a échoué. Réessayez."
     },
     "quota": {
-      "title": "Le stockage de l’espace est plein ({{used}} sur {{total}}).",
+      "title": "Le stockage de l’espace est plein ({{used}} sur {{total}}).",
       "body": "Supprimez des vidéos ou demandez plus d’espace à la DSI."
     },
     "stop": "Arrêter l’envoi"
@@ -6531,7 +6531,7 @@
         },
         "stats": {
           "name": "Les statistiques d’une démo",
-          "help": "Vues, visiteurs, complétion, sur 30 jours par défaut."
+          "help": "Vues, visiteurs, complétion, sur 30 jours par défaut."
         },
         "leads": {
           "name": "Les leads d’une démo",

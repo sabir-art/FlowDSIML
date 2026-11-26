@@ -213,7 +213,7 @@ const manifests = {
     'recette 3 : clic dans la zone, l’étape « next » ne change pas',
   );
   await bubble(p).getByRole('button', { name: 'Suivant' }).click();
-  await p.waitForFunction(() => /Étape 2 sur 4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
+  await p.waitForFunction(() => /Étape 2 sur\s4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   ok(
     !(await bubble(p).getByRole('button', { name: 'Suivant' }).count()),
     'étape au clic : pas de « Suivant »',
@@ -222,7 +222,7 @@ const manifests = {
   // ===== 2. Clic dans la zone, sur un lien relié : la page change, bulle 3 =====
   await frame(p).locator('#menu > a:nth-of-type(2)').click();
   await onPage(p, 'Agenda');
-  await p.waitForFunction(() => /Étape 3 sur 4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
+  await p.waitForFunction(() => /Étape 3 sur\s4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   ok(/La semaine/.test(await bubble(p).innerText()), 'recette 2 : page Agenda, bulle 3');
   await p.locator('.p-gd-ring').waitFor();
   const r3 = await p.locator('.p-gd-ring').boundingBox();
@@ -259,7 +259,7 @@ const manifests = {
 
   // ===== 6. Dernière étape, fin =====
   await bubble(p).getByRole('button', { name: 'Suivant' }).click();
-  await p.waitForFunction(() => /Étape 4 sur 4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
+  await p.waitForFunction(() => /Étape 4 sur\s4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   await frame(p).locator('#new').click();
   await p.waitForFunction(() => /Guide terminé/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   await p.waitForTimeout(300);
@@ -285,7 +285,7 @@ const manifests = {
   const q = await open(MAIN, { width: 1440, height: 900 });
   await bubble(q).waitFor();
   await bubble(q).getByRole('button', { name: 'Suivant' }).click();
-  await q.waitForFunction(() => /Étape 2 sur 4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
+  await q.waitForFunction(() => /Étape 2 sur\s4/.test(document.querySelector('.p-gd')?.textContent ?? ''));
   await bubble(q).getByRole('button', { name: 'Explorer sans guide' }).click();
   ok(!(await bubble(q).count()), 'recette 5 : aucune bulle');
   ok((await pill(q).innerText()).includes('Reprendre le guide'), 'recette 5 : « Reprendre le guide »');

@@ -181,7 +181,7 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
     const { p } = await center(`/f/${F('f1')}?l=jeton-alex-0001`);
     await p.waitForSelector('.fp-list');
     ok(
-      (await p.locator('.fp-list li.cur').textContent()).includes('étape 4 sur 7') &&
+      (await p.locator('.fp-list li.cur').textContent()).replace(/\s+/g, ' ').includes('étape 4 sur 7') &&
         (await p.locator('.fp-list').textContent()).includes('Après le module 2'),
       'L14-05 : module en cours avec l’étape, module verrouillé (ordre imposé)',
     );
@@ -205,7 +205,9 @@ const F = (id) => `00000000-0000-4000-8000-0000000000${id}`;
       'L14-05 : score du module validé',
     );
     ok(
-      (await p.locator('.fp-head .fp-progress').textContent()).includes('1 sur 3 validé'),
+      (await p.locator('.fp-head .fp-progress').textContent())
+        .replace(/\s+/g, ' ')
+        .includes('1 sur 3 validé'),
       'L14-05 : l’expiré ne compte pas dans la progression',
     );
     await p.goto(`${PLAYER}/#/c/ml-exemple`);

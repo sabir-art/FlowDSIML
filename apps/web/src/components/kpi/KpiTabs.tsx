@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { completionRate, trendDirection, type Trend } from '@flowdsiml/core';
-import { formatDate, formatNumber } from '../../lib/format';
+import { formatDate, formatNumber, unit } from '../../lib/format';
 import { Sk } from '../Skeleton';
 import './kpi.css';
 import { Empty } from '@flowdsiml/ui';
@@ -291,8 +291,8 @@ export function TrendChart({
           </svg>
           {rate && (
             <span className="kpi-chart__axis" aria-hidden="true">
-              <span>100 %</span>
-              <span>0 %</span>
+              <span>{unit(100, '%')}</span>
+              <span>{unit(0, '%')}</span>
             </span>
           )}
           <span className="kpi-chart__dates" aria-hidden="true">

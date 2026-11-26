@@ -6,6 +6,7 @@
  */
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { unit } from '../lib/format';
 
 export interface ColumnBounds {
   min: number;
@@ -147,7 +148,7 @@ export function ColumnGrip({
         aria-valuemin={bounds.min}
         aria-valuemax={bounds.max}
         aria-valuenow={width}
-        aria-valuetext={`${width} px`}
+        aria-valuetext={unit(width, 'px')}
         tabIndex={0}
         onPointerDown={onDown}
         onPointerMove={onMove}

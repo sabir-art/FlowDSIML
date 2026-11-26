@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { RectFields } from './RectFields';
 import type { DemoEditor } from '../useDemoEditor';
 import { asMasks, type MaskRect, type Selection, type StepRow } from '../types';
+import { unit } from '../../../lib/format';
 
 type Style = NonNullable<MaskRect['style']>;
 const SWATCHES = [
@@ -252,7 +253,7 @@ export function BlurPanel({
                 min={MASK_INTENSITY.min}
                 max={MASK_INTENSITY.max}
                 value={intensity}
-                valueText={`${intensity} px`}
+                valueText={unit(intensity, 'px')}
                 disabled={readOnly}
                 onChange={(v) => patch({ intensity: v })}
               />
