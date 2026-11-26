@@ -328,6 +328,8 @@ export function Player({
   const [glossOpen, setGlossOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const theme = m.theme;
+  /** Gêne lot B : cadre des démos HTML et Sandbox, « Barre d’adresse » quand le manifeste n’en a pas. */
+  const htmlFrame = theme.frame ?? DEFAULT_FRAME;
   const gateForm =
     step.gateFormId && !gateDone.has(step.gateFormId)
       ? m.forms.find((f) => f.id === step.gateFormId)
@@ -1106,7 +1108,8 @@ export function Player({
           ) : step.kind === 'html' && step.html ? (
             <HtmlWindow
               on={!sandbox}
-              frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+              // Gêne lot B : « Barre d'adresse » par défaut des démos HTML et Sandbox (manifeste sans cadre)
+              frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : htmlFrame}
               address={step.options.address}
               title={m.title}
               ratio={(step.html.viewport?.w ?? 1280) / (step.html.viewport?.h ?? 800)}
@@ -1120,13 +1123,11 @@ export function Player({
                 onGo={goStep}
                 chrome={
                   // Lot B : le Sandbox prend le même cadre, avec l'adresse de la page courante
-                  sandbox && !mobile && theme.frame && theme.frame.style !== 'none'
+                  sandbox && !mobile && htmlFrame.style !== 'none'
                     ? {
-                        style: theme.frame.style,
-                        dots: theme.frame.windowButtons,
-                        address: theme.frame.addressBar
-                          ? (step.options.address ?? theme.frame.address)
-                          : null,
+                        style: htmlFrame.style,
+                        dots: htmlFrame.windowButtons,
+                        address: htmlFrame.addressBar ? (step.options.address ?? htmlFrame.address) : null,
                       }
                     : undefined
                 }
