@@ -217,7 +217,17 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       m.titleH <= 32 && Math.abs(m.gap - 12) <= 1 && Math.abs(m.left) <= 1 && m.subLines <= 3,
       `390 px : titre sur une ligne, bouton sous le texte à 12 px, aligné à gauche (${JSON.stringify(m)})`,
     );
-    if (SHOTS) await pg.screenshot({ path: `${SHOTS}/console-modeles-390${sfx}.png` });
+    // Règles d'Auto empilées : 8 px entre deux règles (décision du chef)
+    await pg.locator('.console-ai-rule').first().waitFor();
+    const rg = await pg.evaluate(() => {
+      const rs = [...document.querySelectorAll('.console-ai-rule')].map((r) => r.getBoundingClientRect());
+      return rs.slice(1).map((r, i) => Math.round(r.top - rs[i].bottom));
+    });
+    ok(
+      rg.length === 2 && rg.every((g) => g === 8),
+      `390 px : 8 px entre deux règles d’Auto (${rg.join(', ')})`,
+    );
+    if (SHOTS) await pg.screenshot({ path: `${SHOTS}/console-modeles-390${sfx}.png`, fullPage: true });
     await c.close();
   }
 
@@ -429,12 +439,16 @@ const GOOD2 = 'sk-fictive-bonne-000333';
         .trim();
     ok(
       (await preview()) ===
-        'Auto Équilibre la vitesse, l’effort et le coût Recommandé Claude Sonnet Claude Opus Autres modèles',
-      `départ : Sonnet et Opus recommandés dans l’aperçu (${await preview()})`,
+        'Auto Équilibre la vitesse, l’effort et le coût Recommandé Claude Sonnet Claude Opus',
+      `départ : Sonnet et Opus recommandés ; pas d’« Autres modèles » vide dans l’aperçu (${await preview()})`,
     );
     // Haiku proposé, étiquette « Recommandé », monté en tête : l'aperçu suit
     await p5.locator('#ai-as-p-claude-haiku-5-5').check();
     await p5.getByText('Liste de l’assistant enregistrée').first().waitFor();
+    ok(
+      (await preview()).endsWith('Autres modèles'),
+      'Haiku proposé sans étiquette : « Autres modèles » apparaît dans l’aperçu',
+    );
     await p5.locator('#ai-as-tag-claude-haiku-5-5').click();
     await p5.getByRole('option', { name: 'Recommandé' }).click();
     await p5.waitForTimeout(300);
@@ -442,6 +456,12 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await p5.waitForTimeout(300);
     await p5.getByRole('button', { name: 'Monter : Claude Haiku' }).click();
     await p5.waitForTimeout(400);
+    ok(
+      (await p5.locator('.toast', { hasText: 'Liste de l’assistant enregistrée' }).count()) === 1,
+      `quatre enregistrements de suite : un seul toast « Liste de l’assistant enregistrée » (${await p5
+        .locator('.toast', { hasText: 'Liste de l’assistant enregistrée' })
+        .count()})`,
+    );
     ok(
       (await preview()).includes('Recommandé Claude Haiku Claude Sonnet Claude Opus') &&
         s5.aiAssistant.map((r) => r.model).join(',') ===
@@ -474,6 +494,42 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       (await p5.locator('#ai-rule-short').innerText()).includes('Claude Sonnet (non proposé)'),
       'règle dont le modèle n’est plus proposé : la valeur reste visible, « (non proposé) »',
     );
+    // Même motif que « Modèle retiré » : bordure orange, phrase sous la règle, ligne dans le bandeau
+    const rw = await p5.evaluate(() => {
+      const sel = document.querySelector('#ai-rule-short');
+      const box = sel?.closest('.fd-sel') ?? sel;
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--fd-color-warning)';
+      document.body.append(probe);
+      const warnColor = getComputedStyle(probe).color;
+      probe.remove();
+      const w = document.getElementById('ai-rule-short-w');
+      return {
+        border: getComputedStyle(box).borderTopColor,
+        warnColor,
+        text: w?.textContent ?? '',
+        described: sel?.getAttribute('aria-describedby'),
+        clipped:
+          (w ? w.scrollWidth > w.clientWidth + 1 : true) ||
+          [...document.querySelectorAll('.console-ai-rule .fd-sel__value')].some(
+            (v) => v.scrollWidth > v.clientWidth + 1,
+          ),
+        others: ['whole_demo', 'fallback'].filter((r) => document.getElementById(`ai-rule-${r}-w`)),
+      };
+    });
+    ok(
+      rw.border === rw.warnColor &&
+        rw.text.trim() === 'Non proposé : Auto utilise Claude Opus' &&
+        rw.described === 'ai-rule-short-w' &&
+        !rw.clipped &&
+        rw.others.length === 0,
+      `règle « Demandes courtes » : bordure orange, « ${rw.text.trim()} » sans troncature (phrase et valeur des listes), rattachée à la liste`,
+    );
+    const banner = (await p5.locator('.console-ai-attention').innerText()).replace(/\s+/g, ' ');
+    ok(
+      banner.includes('1 règle d’Auto vise un modèle qui n’est plus proposé : demandes courtes.'),
+      `bandeau d’attention : « ${banner.trim()} »`,
+    );
     if (SHOTS) await p5.screenshot({ path: `${SHOTS}/console-modeles-assistant${sfx}.png`, fullPage: true });
     await axe(p5, 'liste de l’assistant');
     await p5.getByRole('link', { name: 'Historique des changements' }).click();
@@ -483,9 +539,12 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       .replace(/\s+/g, ' ');
     ok(
       jr.includes('Auto · analyse de toute la démo · Claude Sonnet → Claude Opus') &&
-        jr.includes('Liste de l’assistant : Claude Haiku, Claude Sonnet, Claude Opus') &&
+        jr.includes('Liste de l’assistant · Claude Haiku : proposé') &&
+        jr.includes('Liste de l’assistant · Claude Haiku : étiquette Recommandé') &&
+        jr.includes('Liste de l’assistant · Ordre : Claude Haiku, Claude Sonnet, Claude Opus') &&
+        jr.includes('Liste de l’assistant · Claude Sonnet : retiré') &&
         !/claude-/.test(jr),
-      'journal lisible : liste et règle d’Auto',
+      'journal lisible : proposé, étiquette et ordre distingués ; règle d’Auto',
     );
     // Éditeur : le menu de l'assistant suit la liste de la Console (Opus seul, recommandé)
     await p5.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
@@ -499,6 +558,11 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     ok(
       items.join(',') === 'Auto,Claude Opus',
       `éditeur : menu Auto, Claude Opus seulement (${items.join(', ')})`,
+    );
+    ok(
+      (await p5.locator('.aim-menu [data-more]').count()) === 0 &&
+        !/Autres modèles|Le propriétaire choisit/.test(await p5.locator('.aim-menu').innerText()),
+      'éditeur : pas d’« Autres modèles » quand le sous-menu serait vide, pas de note du propriétaire',
     );
     await c5.close();
   }

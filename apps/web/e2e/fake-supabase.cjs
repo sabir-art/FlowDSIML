@@ -3357,6 +3357,31 @@ function aiConsole(state, body, route, json) {
     if (!list.length || !list.every((r) => ASSISTANT_CATALOGUE[r.model]))
       return json(route, 400, { error: 'BAD_LIST' });
     if (!list.some((r) => r.proposed)) return json(route, 409, { error: 'LAST_MODEL' });
+    // Même libellé que l'Edge Function (assistantChange) : ce qui change, ordre et étiquette distingués
+    const before = assistantRows(state);
+    const TAG = { none: 'sans étiquette', recommended: 'étiquette Recommandé', beta: 'étiquette Bêta' };
+    const lab = (m) => ASSISTANT_CATALOGUE[m].label;
+    const parts = [];
+    list.forEach((r) => {
+      const o = before.find((x) => x.model === r.model);
+      if (r.proposed !== (o?.proposed ?? false))
+        parts.push(`${lab(r.model)} : ${r.proposed ? 'proposé' : 'retiré'}`);
+      if (r.tag !== (o?.tag ?? 'none')) parts.push(`${lab(r.model)} : ${TAG[r.tag]}`);
+    });
+    const ord = (xs) =>
+      [...xs]
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+        .filter((r) => r.proposed)
+        .map((r) => r.model);
+    const after = list.map((r, i) => ({ ...r, position: i + 1 }));
+    const kept = ord(before).filter((m) => ord(after).includes(m));
+    if (
+      kept.join() !==
+      ord(after)
+        .filter((m) => kept.includes(m))
+        .join()
+    )
+      parts.push(`Ordre : ${ord(after).map(lab).join(', ')}`);
     state.aiAssistant = list.map((r, i) => ({
       model: r.model,
       position: i + 1,
@@ -3365,10 +3390,7 @@ function aiConsole(state, body, route, json) {
     }));
     log(
       'ai.assistant_list',
-      `Liste de l’assistant : ${list
-        .filter((r) => r.proposed)
-        .map((r) => ASSISTANT_CATALOGUE[r.model].label)
-        .join(', ')}`,
+      `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`,
     );
     return json(route, 200, { result: asstState() });
   }

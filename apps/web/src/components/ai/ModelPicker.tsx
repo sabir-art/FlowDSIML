@@ -186,30 +186,35 @@ export function ModelPicker({
                   </div>
                 </>
               )}
-              <div role="separator" className="aim-sep" />
-              <div
-                role="menuitem"
-                tabIndex={-1}
-                aria-haspopup="menu"
-                aria-expanded={more}
-                data-more=""
-                className="aim-item aim-more"
-                onClick={() => setMore((v) => !v)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setMore(true);
-                  }
-                }}
-              >
-                <span className="aim-tile" aria-hidden="true" />
-                <span className="aim-tx">
-                  <b>{t('ai.model.others')}</b>
-                </span>
-                <ChevronRight className="aim-check" aria-hidden="true" />
-              </div>
+              {/* Recette UX L41 étape 4 : pas d'entrée « Autres modèles » quand le sous-menu serait vide */}
+              {others.length > 0 && (
+                <>
+                  <div role="separator" className="aim-sep" />
+                  <div
+                    role="menuitem"
+                    tabIndex={-1}
+                    aria-haspopup="menu"
+                    aria-expanded={more}
+                    data-more=""
+                    className="aim-item aim-more"
+                    onClick={() => setMore((v) => !v)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setMore(true);
+                      }
+                    }}
+                  >
+                    <span className="aim-tile" aria-hidden="true" />
+                    <span className="aim-tx">
+                      <b>{t('ai.model.others')}</b>
+                    </span>
+                    <ChevronRight className="aim-check" aria-hidden="true" />
+                  </div>
+                </>
+              )}
             </div>
-            {more && (
+            {more && others.length > 0 && (
               <div
                 ref={sub}
                 role="menu"
@@ -228,7 +233,7 @@ export function ModelPicker({
                 {others.map((m) => (
                   <div key={m.id}>{row(m.id, <span className="aim-mono">{m.label[0]}</span>)}</div>
                 ))}
-                <p className="aim-note">{t('ai.model.ownerNote')}</p>
+                {/* « Le propriétaire choisit les modèles… » reviendra avec l'étape 5 (section de l'espace) */}
               </div>
             )}
           </>,

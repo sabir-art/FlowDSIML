@@ -117,8 +117,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         !action || action.durationMs
           ? (action?.durationMs ?? (opts?.tone === 'warning' ? DURATION_WARNING : DURATION))
           : undefined;
-      // Le plus récent en bas ; trois au plus
-      setToasts((l) => [...l.slice(-2), { id, text, detail: opts?.detail, action, tone: opts?.tone, ms }]);
+      // Le plus récent en bas ; trois au plus. Le même message (sans action) remplace le précédent au
+      // lieu de s'empiler (recette UX L41 étape 4)
+      setToasts((l) => {
+        const same = (x: Toast) => !action && !x.action && x.text === text && x.detail === opts?.detail;
+        for (const x of l) if (same(x)) window.clearTimeout(timers.current.get(x.id));
+        return [
+          ...l.filter((x) => !same(x)).slice(-2),
+          { id, text, detail: opts?.detail, action, tone: opts?.tone, ms },
+        ];
+      });
       arm({ id, ms });
       return () => close(id);
     },
