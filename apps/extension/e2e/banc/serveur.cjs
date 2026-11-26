@@ -95,18 +95,23 @@ const PAGES = {
      <main><h1>Catalogue</h1><p class="carte">Survolez « Produits » pour ouvrir le menu.</p></main>`,
     `const m = document.getElementById('m'); m.addEventListener('mouseenter', () => m.classList.add('ouvert')); m.addEventListener('mouseleave', () => m.classList.remove('ouvert'));`,
   ),
-  // 6. Fiche avec de vraies données personnelles (fictives) : elles doivent être remplacées, pas les commandes
+  // 6. Fiche avec de vraies données personnelles (fictives) : elles doivent être remplacées, pas les commandes.
+  //    Petit lot UX : libellés de rôle (Client, Responsable, Interlocutrice) et nom d'un seul mot sous « Nom »
   '/donnees': page(
     'Fiche contact',
     `${entete}</header><main><h1>Fiche contact</h1>
      <p class="carte"><span>Nom</span> <span id="v-nom">Camille Durand</span></p>
      <p class="carte"><span>E-mail</span> <span id="v-mail">camille.durand@acme.example</span></p>
      <p class="erreur" hidden>Indiquez votre nom.</p>
-     <button class="btn">Modifier la fiche</button> <a href="/donnees">Voir l’historique</a></main>`,
+     <button class="btn">Modifier la fiche</button> <a href="/donnees">Voir l’historique</a>
+     <p class="carte" id="v-client">Client : Léa Martin</p>
+     <dl class="carte"><dt>Responsable</dt><dd>Hugo Bernard</dd><dt>Interlocutrice</dt><dd>Inès Petit</dd></dl>
+     <table class="carte"><thead><tr><th>Nom</th><th>Contact</th><th>Statut</th></tr></thead>
+     <tbody><tr><td>Moreau</td><td>Julie Roux</td><td>Active</td></tr></tbody></table></main>`,
   ),
   // 7. Page piège (recette UX du 25/11) : rien de personnel, donc aucune détection attendue. En-têtes
   //    de tableau « Nom / Statut / Actions », les mêmes en mots collés, une ville seule, un avis signé
-  //    d'un prénom et d'une initiale.
+  //    d'un prénom et d'une initiale, un rôle tenu par un service, une colonne « Client » sans nom.
   '/piege': page(
     'Offres',
     `${entete}</header><main><h1>Offres</h1>
@@ -116,7 +121,11 @@ const PAGES = {
      <div class="carte" id="colles"><span>Nom</span><span>Statut</span><span>Actions</span></div>
      <div class="carte" id="grille"><div>Nom</div><div>Statut</div><div>Actions</div></div>
      <p class="carte" id="ville">Ville : Lyon</p>
-     <p class="carte" id="avis">Avis : « Très bon outil », Camille D.</p></main>`,
+     <p class="carte" id="avis">Avis : « Très bon outil », Camille D.</p>
+     <p class="carte" id="role">Responsable : Service RH</p>
+     <label class="carte">Type de client <select><option>Entreprise</option><option>Particulier</option></select></label>
+     <table class="carte"><thead><tr><th>Client</th><th>Formule</th></tr></thead>
+     <tbody><tr><td>Brouillon</td><td>Mensuelle</td></tr><tr><td>Actions</td><td>Annuelle</td></tr></tbody></table></main>`,
   ),
   '/menu/logiciels': page(
     'Logiciels',
