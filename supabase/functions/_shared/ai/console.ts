@@ -4,7 +4,7 @@
 // testée, et n'est enregistrée qu'en cas de succès ; aucune réponse ne contient de clé.
 import { PROVIDERS, publicCatalogue, type Provider } from './catalogue.ts';
 import { forgetKey, providerKey, type VaultRead } from './keys.ts';
-import { FUNCTIONS, choicesFor, cutFeatures, resolve, type Fn } from './functions.ts';
+import { FUNCTIONS, changeLabel, choicesFor, cutFeatures, resolve, type Fn } from './functions.ts';
 import type { KeyTest } from './providers/anthropic.ts';
 
 export interface ProviderRow {
@@ -66,7 +66,8 @@ export interface ConsoleDeps {
   env?: (n: string) => string | undefined;
   /** L41 étape 3 : modèles choisis par fonction (ai_function_models). */
   fnModels: () => Promise<Partial<Record<Fn, string>>>;
-  setModel: (fn: Fn, model: string | null, uid: string) => Promise<{ old: string | null }>;
+  /** label : libellé lisible du journal (« Traduction · Claude Sonnet (défaut) → Claude Opus »). */
+  setModel: (fn: Fn, model: string | null, uid: string, label: string) => Promise<{ old: string | null }>;
   /** Fonctions de l'espace coupées (ai_cut), tenues à jour à chaque lecture. */
   setCut: (features: string[]) => Promise<void>;
 }
@@ -125,7 +126,8 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     const allowed = choicesFor(def, new Set(PROVIDERS.map((p) => p.id))).map((c) => c.id);
     if (model !== null && (typeof model !== 'string' || !allowed.includes(model)))
       return { status: 400, body: { error: 'BAD_MODEL' } };
-    const { old } = await d.setModel(def.fn, model, who.uid);
+    const before = (await d.fnModels())[def.fn] ?? null;
+    const { old } = await d.setModel(def.fn, model, who.uid, changeLabel(def, before, model));
     return { status: 200, body: { result: { old, functions: await functionStates(d) } } };
   }
   const provider = body.provider;
