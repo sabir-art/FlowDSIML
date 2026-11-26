@@ -5521,7 +5521,23 @@
       "quota_voice": "Quota de voix de synthèse atteint pour ce mois ({{quota}} s).",
       "quota_captions": "Quota de sous-titres automatiques atteint pour ce mois ({{quota}} s).",
       "over": "Il reste {{left}} s ce mois-ci, la demande en demande environ {{need}} s."
-    }
+    },
+    "model": {
+      "auto": "Auto",
+      "autoHelp": "Équilibre la vitesse, l’effort et le coût",
+      "sonnet": "Claude Sonnet",
+      "sonnetHelp": "Rapide, pour la plupart des textes",
+      "opus": "Claude Opus",
+      "opusHelp": "Plus précis, plus lent",
+      "recommended": "Recommandé",
+      "others": "Autres modèles",
+      "openai": "Modèles OpenAI",
+      "openaiHelp": "Pas encore proposés dans l’espace",
+      "ownerNote": "Le propriétaire choisit les modèles dans Paramètres › Assistance IA.",
+      "pick": "Modèle : {{model}}",
+      "menu": "Modèle de l’assistant"
+    },
+    "mentionModel": "Généré par IA ({{model}}), à vérifier"
   },
   "loading": {
     "demos": "Chargement des démos…",

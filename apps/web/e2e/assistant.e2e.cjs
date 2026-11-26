@@ -96,7 +96,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     (await panel.locator('.ai-as-author').allTextContents()).join('|') === 'Vous|Assistant',
     'Auteurs « Vous » et « Assistant »',
   );
-  ok((await panel.getByText('Généré par IA, à vérifier').count()) === 1, 'Mention de la règle 2');
+  // Planche 3 : la mention dit le modèle réellement utilisé (« Auto » par défaut)
+  ok(
+    (await panel.getByText('Généré par IA (Auto · Claude Sonnet), à vérifier').count()) === 1,
+    'Mention de la règle 2, avec le modèle',
+  );
   ok(hs('h1').body !== 'Cliquez sur « + Nouvelle opportunité ».', 'Rien n’est modifié sans « Appliquer »');
   await shot('l30-08-proposition');
   await panel.getByRole('button', { name: 'Appliquer' }).click();

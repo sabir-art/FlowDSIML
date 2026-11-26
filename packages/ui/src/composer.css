@@ -179,3 +179,13 @@
   font-size: 12px;
   color: var(--fd-color-text-muted);
 }
+
+/* Contrôles avant Envoyer (pilule du modèle de l'assistant) : même centre, 4 px d'écart */
+.fd-composer__end:has(.fd-composer__trailing) {
+  gap: 4px;
+}
+.fd-composer__trailing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -693,7 +693,10 @@ async function install(page, state = seed()) {
           : { text: `${body.input.text || body.input.title} (proposition)` };
       const delay = state.aiDelay || 0;
       if (delay) await new Promise((res) => setTimeout(res, delay));
-      return json(route, 200, { result: r, redacted: 0 });
+      // Planche 3 : modèle réellement utilisé, rendu par le serveur (Auto : Sonnet pour l'assistant)
+      const model =
+        body.task === 'assistant' ? (body.model === 'opus' ? 'Claude Opus' : 'Claude Sonnet') : undefined;
+      return json(route, 200, { result: r, redacted: 0, ...(model ? { model } : {}) });
     }
     if (p.startsWith('/functions/v1/media')) {
       const list = (t.media_files ||= []);
