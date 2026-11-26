@@ -27,7 +27,7 @@ Source : lawsofux.com/fr. La v1 est gardée telle quelle ; chaque loi ne change 
 | --- | --- | --- |
 | **Proximité** | L'écart dit le lien : **4 px** entre deux lignes d'un groupe, **8 px** du titre de section au contenu, **12 px** d'un groupe à l'action qui en dépend, **25 px** entre deux sections (12 + filet + 12). | Titre → contenu passe de 6 à 8 px ; l'action passe de 4 à 12 px sous son groupe (« Régénérer la voix », « Ajouter un hotspot », « Ajouter une règle », « Centrer sur le hotspot », « Remplacer la capture »…). |
 | **Similarité** | Un champ est gris rempli, sans contour (v1). Une action ne l'est **jamais** : secondaire = contour de 1 px sur fond transparent (`.btn.line`), primaire = fond de marque, destructive = texte rouge au pied. | « Régénérer la voix », « Garder l'actuelle », « Annuler » et « Ignorer » perdent leur fond gris et prennent un contour. Tous les réglages oui / non sont des interrupteurs (la case « Animation de pulsation » du Hotspot en devient un). |
-| **Région commune** | Ce qui forme un tout est posé sur une même surface : carte de la voix, carte « Nouvelle voix », chaque règle de Suite du parcours, la proposition de l'Assistant. | Les règles de Suite du parcours ont chacune leur surface encadrée. |
+| **Région commune** | Ce qui forme un tout est posé sur une même surface : carte de la voix, carte « Nouvelle voix », chaque règle de Suite du parcours, la proposition de l'Assistant. | Voix off : Langue et Voix forment la région « Synthèse », et « Régénérer la voix » est posé 12 px dessous, hors de la région. Les règles de Suite du parcours ont chacune leur surface encadrée. |
 | **Connexité** | Le lien entre deux objets se dessine : flèche « Alors aller à » entre condition et destination ; pastille numérotée identique au canevas ; cadre de zoom, halo et cadrage montrés sur la vignette de la capture. | Aperçus en tête de Recadrage (repris de la v2), de Zoom et de Projecteur. |
 | **Prägnanz** | Une colonne, des lignes « libellé \| contrôle » de 36 px, un seul rayon par niveau ; pas de paragraphe visible, les aides sont derrière « ? ». | Les paragraphes de Zoom, Projecteur et Hotspot passent derrière « ? ». |
 | **Hick** | 5 options au plus dans un segmenté ; au-delà, une liste. Les réglages rares sont repliés. | Réglages de la démo : 5 sections repliées avec leur résumé (Lecture, Variables, Jeu de données, Collaboration, Notes de la démo). |
@@ -64,9 +64,9 @@ Les jetons du §1 ne changent pas. Les ajouts sont dans `docs/ux/propositions/in
 | Bouton d'action | Lignes Libellé, Lien | Interrupteur sur sa ligne et aperçu du bouton. |
 | Points d'intérêt | — | Liste de lignes de 36 px, avec la pastille du canevas ; « Ajouter un hotspot » à contour, 12 px dessous. |
 | Hotspot sélectionné | Segmenté Guidage ; X / Y / L / H en 2 × 2, comme la Zone du Recadrage | Retour ‹ ; aperçu de la bulle ; Pulsation en interrupteur. |
-| Voix off | **Inchangée** : Source IA · Micro · Fichier et point vert, carte « Voix en place », Texte lu, Langue, Voix, Lecteur | Régénérer à contour et 12 px sous Voix ; « Garder l'actuelle » à contour ; ⋯ à 28 px ; « Toute la démo » sur Lecteur. |
+| Voix off | **Inchangée** : Source IA · Micro · Fichier et point vert, carte « Voix en place », Texte lu, Langue, Voix, Lecteur | Langue et Voix dans la région « Synthèse » ; Régénérer à contour, 12 px sous la région ; « Garder l'actuelle » à contour ; ⋯ à 28 px ; « Toute la démo » sur Lecteur. |
 | Suite du parcours | Listes déroulantes v1 | Règle sur sa surface, flèche, erreur sous le champ ; « Ajouter une règle » à contour. |
-| Flou | Segmenté Flou / Pixels / Masque | Liste des zones, réglages de la zone choisie. |
+| Flou | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Zoom | Segmentés Niveau et Transition ; H / V | Interrupteur pleine ligne ; cadre sur la vignette ; « Centrer sur le hotspot » à contour. |
 | Projecteur | — | Halo sur la vignette ; Taille et Assombrir en curseurs ; aides derrière « ? ». |
 | Recadrage | **Inchangé** : Format, Zone L / H / X / Y avec lien, Appliquer à, pied Réinitialiser / Annuler / Recadrer | Aperçu du cadrage en tête ; Annuler à contour. |
@@ -109,7 +109,6 @@ Légende :
 Écarts et points à tenir :
 - **Hotspot sélectionné · Hick (écart)** : « Libre · Bientôt » ajoute une option qu'on ne peut pas choisir. Je la garde pour la règle « Bientôt » : grisée, non cliquable.
 - **Voix off · Tesler (écart)** : le Lecteur vaut pour toute la démo mais reste dans Voix off, comme dans la v1 retenue par le client. La section porte « Toute la démo ».
-- **Flou · Position sérielle (écart)** : Annuler et Appliquer le flou restent en tête de la fenêtre, alors que le Recadrage les met au pied. Je propose de les passer au pied ; c'est au chef de décider.
 - **Voix off, Assistant, Image · Doherty (à tenir)** : un état dès le clic au-delà de 400 ms.
 
 e2e à ajouter, sur chaque panneau ouvert, en clair et en sombre :
