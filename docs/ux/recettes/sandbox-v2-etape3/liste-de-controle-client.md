@@ -31,7 +31,7 @@ Prenez un site que vous avez le droit de reproduire, de préférence une page de
    - l'élément du script gardé au point 3 est affiché, ceux des scripts bloqués ne le sont pas.
 
 7. **Désactivation.** Revenez dans Paramètres › Sécurité, désactivez « Autoriser le Sandbox vivant » et enregistrez. Rouvrez la démo dans l'éditeur.
-   *Attendu* : le réglage « Sandbox vivant » de la démo est grisé, avec sa raison, et la démo publiée redevient une copie fixe. Réactivez ensuite le réglage si vous voulez garder ce fonctionnement.
+   *Attendu* : le réglage « Sandbox vivant » de la démo est grisé, avec sa raison. Réactivez ensuite le réglage si vous voulez garder ce fonctionnement.
 
 **Limites connues, ce n'est pas un défaut :**
 - une page, un onglet ou un résultat de filtre que vous n'avez pas ouvert pendant la capture n'est pas disponible dans la démo (prévu dans une prochaine étape) ;
