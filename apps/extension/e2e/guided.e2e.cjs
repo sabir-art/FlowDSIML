@@ -5,6 +5,8 @@
  * Usage : comme capture.e2e.cjs, puis node e2e/guided.e2e.cjs
  */
 const { chromium } = require('playwright');
+// L'éditeur s'ouvre après l'envoi sur le faux serveur : construction vérifiée avant tout
+require('./build-app-url.cjs')();
 const ui = require('./popup-ui.cjs');
 (async () => {
   const path = require('path');

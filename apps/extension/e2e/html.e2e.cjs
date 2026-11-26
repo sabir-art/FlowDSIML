@@ -3,6 +3,8 @@
  * capture.e2e.cjs, puis node e2e/html.e2e.cjs. SHOTS_DIR pour les captures.
  */
 const { chromium } = require('playwright');
+// L'éditeur s'ouvre après l'envoi sur le faux serveur : construction vérifiée avant tout
+require('./build-app-url.cjs')();
 const ui = require('./popup-ui.cjs');
 const fs = require('fs');
 const path = require('path');
