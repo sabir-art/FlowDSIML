@@ -52,3 +52,16 @@ Captures : `popup-6-vues-clair.png` et `popup-6-vues-sombre.png` (modes, dernier
 ## Pour la suite
 
 La Vidéo, démarrée depuis le popup, sera à vérifier sur un vrai poste. Le VERT ne couvre pas ce point.
+
+---
+
+# Contrôle des arbitrages et des gênes (2723813) : VERT
+
+J'ai reconstruit l'extension sur 2723813 et rejoué le parcours. `popup.e2e` : 74/74 en clair et en sombre (`v2-erreur-reglages-connexion.png`).
+
+- **Page impossible** : il n'y a plus ni destination ni aide. Le popup fait **543 px** et ne défile pas.
+- **Réglages** :
+  - le segmenté « Actuelle · 1440 · Mobile » et la liste « Cadre par défaut » sont **sous** leur libellé, en pleine largeur ;
+  - les aides tiennent sur une ligne (« Mobile : captures d'écran seulement. », « Cadre au démarrage, modifiable dans la barre. »).
+  - La vue atteint encore 600 px et défile, ce qui est normal pour 6 réglages.
+- **Vue Connexion** : le pied est à 12 / 16 px, comme dans les autres vues.
