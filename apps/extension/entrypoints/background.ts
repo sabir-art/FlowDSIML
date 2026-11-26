@@ -397,14 +397,19 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
       tabId: req.tabId,
       steps: 0,
       lastError: null,
+      // L60 §2 : compte à rebours de 3 s dans la page, enregistrement en pause d'ici là (temps exclu)
       startedAt: Date.now(),
-      pausedAt: null,
+      pausedAt: Date.now(),
       pausedMs: 0,
+      countdown: true,
       micDenied: !!r?.micDenied,
+      micOn: !!req.mic && !r?.micDenied,
+      micMuted: false,
       blurredZones: 0,
       liveMask: !!req.liveMask,
       viewport: null,
     });
+    await browser.runtime.sendMessage({ type: 'fd:rec-pause' }).catch(() => undefined);
     await inject(req.tabId, 'video');
     return state;
   }
@@ -462,6 +467,24 @@ async function stopVideo(): Promise<RecordingStatus> {
   return setState({ ...EMPTY });
 }
 
+/**
+ * L60 §2 : pause des captures (clics, HTML), depuis la barre, le popup ou Alt + Maj + P. Les barres des
+ * onglets suivis sont prévenues. Un même geste peut arriver deux fois (raccourci de Chrome et de la page) :
+ * une seule bascule par 400 ms.
+ */
+let lastPauseToggle = 0;
+async function togglePaused() {
+  const s = await getState();
+  if (!s.recording || Date.now() - lastPauseToggle < 400) return s;
+  lastPauseToggle = Date.now();
+  const next = await setState({ paused: !s.paused });
+  const ids = new Set([s.tabId, ...(s.tabs ?? []).map((t) => t.id)]);
+  for (const id of ids)
+    if (typeof id === 'number')
+      void browser.tabs.sendMessage(id, { type: 'fd:paused', paused: next.paused }).catch(() => undefined);
+  return next;
+}
+
 async function onVideoBar(m: VideoBarRequest): Promise<unknown> {
   const s = await getState();
   if (!s.recording || s.mode !== 'video') return null;
@@ -482,7 +505,23 @@ async function onVideoBar(m: VideoBarRequest): Promise<unknown> {
       })
       .catch(() => null);
   }
+  if (m.type === 'fd:video-go') {
+    // Fin du compte à rebours : l'enregistrement commence vraiment
+    if (!s.countdown) return s;
+    await browser.runtime.sendMessage({ type: 'fd:rec-resume' }).catch(() => undefined);
+    return setState({
+      countdown: false,
+      pausedMs: (s.pausedMs ?? 0) + Date.now() - (s.pausedAt ?? Date.now()),
+      pausedAt: null,
+    });
+  }
+  if (m.type === 'fd:video-mic') {
+    if (!s.micOn) return s;
+    await browser.runtime.sendMessage({ type: 'fd:rec-mic', on: !!s.micMuted }).catch(() => undefined);
+    return setState({ micMuted: !s.micMuted });
+  }
   if (m.type === 'fd:video-pause') {
+    if (s.countdown) return s;
     if (s.pausedAt) {
       await browser.runtime.sendMessage({ type: 'fd:rec-resume' }).catch(() => undefined);
       return setState({ pausedMs: (s.pausedMs ?? 0) + Date.now() - s.pausedAt, pausedAt: null });
@@ -879,9 +918,11 @@ export default defineBackground(() => {
         if (cmd === 'rec-mark' && s.tabId !== null)
           void browser.tabs.sendMessage(s.tabId, { type: 'fd:html-capture' }).catch(() => undefined);
         if (cmd === 'rec-stop') void stop();
+        if (cmd === 'rec-pause') void togglePaused();
         return;
       }
-      if (cmd === 'rec-pause') void onVideoBar({ type: 'fd:video-pause' });
+      if (cmd === 'rec-pause')
+        void (s.mode === 'video' ? onVideoBar({ type: 'fd:video-pause' }) : togglePaused());
       if (cmd === 'rec-mark') void onVideoBar({ type: 'fd:video-mark', label: '', manual: true });
       if (cmd === 'rec-stop') void onVideoBar({ type: 'fd:video-stop' });
     });
@@ -923,7 +964,7 @@ export default defineBackground(() => {
     if (m.type === 'fd:stop') return stop();
     if (m.type === 'fd:pause')
       return getState().then((s) =>
-        s.mode === 'video' ? onVideoBar({ type: 'fd:video-pause' }) : setState({ paused: !s.paused }),
+        s.mode === 'video' ? onVideoBar({ type: 'fd:video-pause' }) : togglePaused(),
       );
     if (m.type === 'fd:cancel') return cancel();
     return undefined;

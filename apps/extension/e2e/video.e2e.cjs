@@ -152,8 +152,8 @@ const WS = '11111111-1111-1111-1111-111111111111';
   });
   ok(bar.timer, 'chronomètre role=timer');
   ok(
-    bar.buttons.some((t) => /Alt \+ Maj \+ M/.test(t)),
-    'raccourcis rappelés au survol',
+    bar.buttons.some((t) => /Alt \+ Maj \+ P/.test(t)) && bar.buttons.some((t) => /Alt \+ Maj \+ S/.test(t)),
+    'raccourcis rappelés au survol (Pause, Terminer)',
   );
   ok(bar.blurred >= 5, `données personnelles floutées dans la page (${bar.blurred})`);
   await shot(page, 'l21-02-barre');
