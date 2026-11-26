@@ -80,6 +80,8 @@ export function Models() {
   const [failed, setFailed] = useState(false);
   const [keyFor, setKeyFor] = useState<ProviderState | null>(null);
   const [fns, setFns] = useState<FnState[] | null>(null);
+  // Règles d'Auto dont le modèle n'est plus proposé (signalées par la section de l'assistant)
+  const [ruleWarn, setRuleWarn] = useState<string[]>([]);
   const load = useCallback(() => {
     void consoleAi<ProviderState[]>('console_providers').then((r) => {
       if (r.ok) setList(r.result);
@@ -132,6 +134,19 @@ export function Models() {
         ? [{ key: 'retired', text: t('console.ai.attentionRetired', { count: xs.length, list: names(xs) }) }]
         : [];
     })(),
+    ...(ruleWarn.length
+      ? [
+          {
+            key: 'rules',
+            text: t('console.ai.attentionRules', {
+              count: ruleWarn.length,
+              list: new Intl.ListFormat(i18n.language === 'en' ? 'en' : 'fr', { type: 'conjunction' }).format(
+                ruleWarn.map((r) => t(`console.ai.ruleShort.${r}`)),
+              ),
+            }),
+          },
+        ]
+      : []),
   ];
   return (
     <div className="console-stack">
@@ -145,7 +160,7 @@ export function Models() {
           {t('console.ai.history')}
         </Link>
       </div>
-      {!none && attention.length > 0 && (
+      {!none && groups.length > 0 && (
         <p className="console-ai-attention" role="status">
           <TriangleAlert aria-hidden="true" />
           {/* Décision du chef : une phrase par cause (« 4 fonctions coupées faute de clé Anthropic : A, B, C et D. ») */}
@@ -194,7 +209,7 @@ export function Models() {
         </ul>
       </section>
       {fns && <FunctionModels fns={fns} onChanged={setFns} />}
-      {fns && <AssistantModels />}
+      {fns && <AssistantModels onWarn={setRuleWarn} />}
       {keyFor && (
         <KeyDialog
           p={keyFor}
@@ -531,7 +546,7 @@ interface AsstState {
  * Spec UX §4 : modèles proposés dans l'assistant (ordre, case Proposer, étiquette), règles d'« Auto »
  * et aperçu du menu tel que les utilisateurs le voient, mis à jour en direct. Au moins un modèle coché.
  */
-function AssistantModels() {
+function AssistantModels({ onWarn }: { onWarn: (rules: string[]) => void }) {
   const { t } = useTranslation();
   const toast = useToast();
   const ro = useConsoleRole() !== 'admin';
@@ -541,6 +556,17 @@ function AssistantModels() {
   useEffect(() => {
     void consoleAi<AsstState>('console_assistant').then((r) => r.ok && setSt(r.result));
   }, []);
+  // Bandeau d'attention de la page : règles d'Auto dont le modèle n'est plus proposé
+  const staleKey = st
+    ? (['short', 'whole_demo', 'fallback'] as const)
+        .filter(
+          (r) =>
+            st.rules[r] !== 'next' &&
+            !st.models.some((m) => m.model === st.rules[r] && m.proposed && m.available),
+        )
+        .join(',')
+    : '';
+  useEffect(() => onWarn(staleKey ? staleKey.split(',') : []), [staleKey, onWarn]);
   if (!st) return null;
   const save = async (models: AsstRow[], focusId?: string) => {
     if (ro) return;
@@ -577,6 +603,11 @@ function AssistantModels() {
   };
   const checked = st.models.filter((m) => m.proposed && m.available);
   const rec = checked.filter((m) => m.tag === 'recommended');
+  const others = checked.filter((m) => m.tag !== 'recommended');
+  // Même remplaçant que le serveur (replacementOf) : premier Recommandé du menu, sinon le premier
+  const replacement = (rec[0] ?? checked[0])?.label ?? '';
+  const RULES = ['short', 'whole_demo', 'fallback'] as const;
+  const stale = staleKey.split(',');
   const ruleOptions = (withNext: boolean) => (
     <>
       {withNext && <option value="next">{t('console.ai.nextInList')}</option>}
@@ -693,21 +724,34 @@ function AssistantModels() {
               <Sparkles aria-hidden="true" />
               {t('console.ai.autoTitle')}
             </h4>
-            {(['short', 'whole_demo', 'fallback'] as const).map((rule) => (
-              <div key={rule} className="console-ai-rule">
-                <label htmlFor={`ai-rule-${rule}`}>{t(`console.ai.rule.${rule}`)}</label>
-                <ChevronRight aria-hidden="true" className="console-ai-arrow" />
-                <Select
-                  id={`ai-rule-${rule}`}
-                  size="md"
-                  value={st.rules[rule]}
-                  disabled={ro}
-                  onChange={(e) => void setRule(rule, e.target.value)}
-                >
-                  {ruleOptions(rule === 'fallback')}
-                </Select>
-              </div>
-            ))}
+            {RULES.map((rule) => {
+              const warn = stale.includes(rule);
+              return (
+                <div key={rule} className="console-ai-rule">
+                  <label htmlFor={`ai-rule-${rule}`}>{t(`console.ai.rule.${rule}`)}</label>
+                  <ChevronRight aria-hidden="true" className="console-ai-arrow" />
+                  {/* Recette UX : même motif que « Modèle retiré » (bordure orange, phrase dessous) */}
+                  <div className={`console-ai-pick${warn ? ' is-retired' : ''}`}>
+                    <Select
+                      id={`ai-rule-${rule}`}
+                      size="md"
+                      value={st.rules[rule]}
+                      disabled={ro}
+                      aria-describedby={warn ? `ai-rule-${rule}-w` : undefined}
+                      onChange={(e) => void setRule(rule, e.target.value)}
+                    >
+                      {ruleOptions(rule === 'fallback')}
+                    </Select>
+                  </div>
+                  {warn && (
+                    <span className="console-ai-warn console-ai-rule__warn" id={`ai-rule-${rule}-w`}>
+                      <TriangleAlert aria-hidden="true" />
+                      {t('console.ai.ruleNotProposed', { model: replacement })}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
             <p className="fd-muted console-ai-help">{t('console.ai.autoHelp')}</p>
           </div>
         </div>
@@ -742,14 +786,19 @@ function AssistantModels() {
                 ))}
               </>
             )}
-            <div className="aim-sep" />
-            <div className="aim-item aim-more">
-              <span className="aim-tile" aria-hidden="true" />
-              <span className="aim-tx">
-                <b>{t('ai.model.others')}</b>
-              </span>
-              <ChevronRight className="aim-check" aria-hidden="true" />
-            </div>
+            {/* Comme dans l'éditeur : pas d'« Autres modèles » quand le sous-menu serait vide */}
+            {others.length > 0 && (
+              <>
+                <div className="aim-sep" />
+                <div className="aim-item aim-more">
+                  <span className="aim-tile" aria-hidden="true" />
+                  <span className="aim-tx">
+                    <b>{t('ai.model.others')}</b>
+                  </span>
+                  <ChevronRight className="aim-check" aria-hidden="true" />
+                </div>
+              </>
+            )}
           </div>
           <p className="fd-muted console-ai-help">{t('console.ai.previewHelp')}</p>
         </div>

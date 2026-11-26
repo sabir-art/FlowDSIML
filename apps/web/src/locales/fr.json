@@ -6111,7 +6111,15 @@
       "autoHelp": "Le modèle réellement utilisé s’affiche sur chaque réponse (« Auto · Claude Sonnet »).",
       "preview": "Aperçu du menu dans l’éditeur",
       "previewHelp": "Les modèles non cochés n’apparaissent pas. Un fournisseur sans clé n’apparaît pas non plus.",
-      "notProposed": "{{name}} (non proposé)"
+      "notProposed": "{{name}} (non proposé)",
+      "ruleNotProposed": "Non proposé : Auto utilise {{model}}",
+      "attentionRules_one": "1 règle d’Auto vise un modèle qui n’est plus proposé : {{list}}.",
+      "attentionRules_other": "{{count}} règles d’Auto visent un modèle qui n’est plus proposé : {{list}}.",
+      "ruleShort": {
+        "short": "demandes courtes",
+        "whole_demo": "analyse de toute la démo",
+        "fallback": "modèle indisponible"
+      }
     }
   },
   "news": {

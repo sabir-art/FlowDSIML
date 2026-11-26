@@ -890,7 +890,7 @@
 }
 .console-ai-rule {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 16px 220px;
+  grid-template-columns: minmax(0, 1fr) 16px 272px;
   align-items: center;
   gap: 8px;
   min-height: 48px;
@@ -903,6 +903,13 @@
 }
 .console-ai-rule .fd-sel {
   width: 100%;
+}
+/* Règle dont le modèle n'est plus proposé : phrase sous la règle, sur toute la largeur, sans troncature */
+.console-ai-rule__warn {
+  grid-column: 1 / -1;
+  justify-self: end;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .console-ai-preview__t {
   margin: 0 0 8px;
@@ -926,6 +933,14 @@
   }
   .console-ai-rule {
     grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  /* Recette UX : 8 px entre deux règles empilées */
+  .console-ai-rule + .console-ai-rule {
+    margin-top: 8px;
+  }
+  .console-ai-rule__warn {
+    justify-self: start;
   }
   .console-ai-arrow {
     display: none;

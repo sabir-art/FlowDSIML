@@ -224,7 +224,10 @@ nouvelle valeur.
    (menu, choix d'Auto, repli, contrôle du modèle demandé ; 403 `MODEL` hors menu ; un échec du
    fournisseur sous Auto est relancé une fois sur le repli). Console : liste ordonnée (glisser,
    Monter/Descendre), case Proposer, étiquette, règles d'Auto, aperçu du menu ; une règle dont le
-   modèle n'est plus proposé reste affichée « (non proposé) » et Auto prend alors le premier du menu.
+   modèle n'est plus proposé reste affichée « (non proposé) », avec le motif « Modèle retiré » (bordure,
+   « Non proposé : Auto utilise … », bandeau) ; Auto prend alors le premier Recommandé du menu, sinon le
+   premier (jamais un Bêta avant un Recommandé : `replacementOf`). Journal : ce qui change (proposé,
+   retiré, étiquette, ordre).
    `ModelPicker` lit le menu ; `ALLOWED_MODELS` disparaît. **Écart** : le menu est servi par l'action
    `assistant_models` de l'Edge Function `ai`, pas par une RPC `ai_models_for` : seule l'Edge Function
    sait quels fournisseurs ont une clé (coffre et déploiement). Le filtre par espace (§7) viendra à

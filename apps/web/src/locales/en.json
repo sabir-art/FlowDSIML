@@ -6111,7 +6111,15 @@
       "autoHelp": "The model actually used is shown on each answer (“Auto · Claude Sonnet”).",
       "preview": "Menu preview in the editor",
       "previewHelp": "Unchecked models do not appear. A provider without a key does not appear either.",
-      "notProposed": "{{name}} (not proposed)"
+      "notProposed": "{{name}} (not proposed)",
+      "ruleNotProposed": "Not offered: Auto uses {{model}}",
+      "attentionRules_one": "1 Auto rule points to a model that is no longer offered: {{list}}.",
+      "attentionRules_other": "{{count}} Auto rules point to a model that is no longer offered: {{list}}.",
+      "ruleShort": {
+        "short": "short requests",
+        "whole_demo": "whole-demo analysis",
+        "fallback": "model unavailable"
+      }
     }
   },
   "news": {
