@@ -208,9 +208,21 @@ Chaque étape est livrable seule et laisse le mode inerte intact.
    > site, and personal data found in the copied data is replaced before upload. Replayed demos run
    > in an isolated frame with no network access.
 
-3. **Critères de l'étape 1, à 100 %** (lecture à confirmer par le chef) : chaque site d'essai est
-   servi ; chaque parcours réussit entièrement sur le site vivant ; chaque site est capturé sans
-   erreur et mesuré ; aucune sortie réseau de la reprise, détecteur vérifié par un témoin. Ils sont
-   contrôlés par `apps/extension/e2e/banc/mesure-sandbox.cjs` (échec du script sinon). Les taux de la
-   v1 sont relevés, pas exigés : interaction 53,6 %, visuel 99,9 %, réponses rejouées 0 %, plan
-   81,3 %, sorties 0.
+3. **Objectif de fidélité** : 90 % d'interactions réussies sur le banc, suffisant pour la première
+   démonstration au client. Les taux de la v1 sont relevés, ce n'est pas un seuil.
+4. **Sites du client** : non, on ne touche pas à ses données. Le banc est fait de sites d'essai
+   locaux qui reproduisent ses cas (application à page unique, formulaire POST, scripts de tiers,
+   onglets chargés en différé, menu au survol).
+5. **Critères à 100 %** (besoin exprimé par le client), contrôlés à chaque passage du banc :
+   - a) chaque page capturée apparaît dans le plan du Sandbox ;
+   - b) aucun script n'est bloqué sans moyen de le réactiver (« Garder » / « Rétablir ») ;
+   - c) aucune sortie réseau réelle depuis le lecteur : toute requête est bloquée ou servie
+     localement ;
+   - d) aucune écriture réelle : toute écriture est neutralisée, avec un succès fictif ;
+   - et, pour le banc lui-même : chaque site d'essai est servi, chaque parcours réussit entièrement sur
+     le site vivant, chaque site est capturé et mesuré, la mesure est publiée à chaque passage.
+
+   L'étape 1 (v1) contrôle déjà c) et le banc ; a), b) et d) entrent dans les critères de l'étape 2
+   (lecture v2) et des suivantes. Mesure de la v1 : interaction 53,6 %, visuel 99,9 %, réponses
+   rejouées 0 %, plan 81,3 %, sorties 0
+   (`docs/tech/recettes/sandbox-v2-etape1/mesure-v1.md`).
