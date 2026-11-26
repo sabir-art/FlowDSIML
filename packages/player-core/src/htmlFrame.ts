@@ -849,5 +849,19 @@ export async function buildSrcdoc(html: string): Promise<string> {
     : doc + script;
 }
 
+/**
+ * Lot B (recette UX) : vignette d'une page HTML dans la liste des étapes. Même CSP que la page, mais
+ * aucun script, pas même le nôtre ; l'iframe qui l'affiche est en sandbox vide.
+ */
+export function thumbSrcdoc(html: string): string {
+  const head =
+    `<meta http-equiv="Content-Security-Policy" content="${frameCsp("'none'")}">` +
+    '<meta name="referrer" content="no-referrer">';
+  const doc = html
+    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '')
+    .replace(/<meta[^>]+http-equiv[^>]*>/gi, '');
+  return /<head[^>]*>/i.test(doc) ? doc.replace(/<head([^>]*)>/i, (m) => m + head) : head + doc;
+}
+
 /** Attributs de l'iframe (jamais allow-same-origin, ni popups, ni navigation, ni formulaires). */
 export const FRAME_SANDBOX = 'allow-scripts';
