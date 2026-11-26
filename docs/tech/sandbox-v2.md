@@ -237,3 +237,24 @@ Chaque étape est livrable seule et laisse le mode inerte intact.
 | 3b. Capture (extension) | enregistreur dans le monde de la page (`world: 'MAIN'`, GET de `fetch` / XHR) et reprise des échanges antérieurs par `performance` ; document source avec CSS et images intégrés, scripts à leur place (marques) ; repérage des données personnelles dans le document et les réponses ; écran de vérification : « Scripts de la page » avec Garder / Bloquer, « Réponses du site » ; envoi de la seconde requête | livrée (89,3 % en capture réelle) |
 | 3c. Lecture dans l’app | publication (copie de l'enregistrement, manifeste `step.html.live`), lecteur `HtmlStep` en mode vivant (navigation par adresse), aperçu de l'éditeur ; réglage « Sandbox vivant » de la démo | livrée |
 | 3d. Banc | capture v2 réelle sur le banc avec l'extension construite, mesure de bout en bout (objectif 90 %) et critères a à d ; recette UX | livrée (89,3 % de bout en bout) ; recette UX demandée |
+
+## 10. Étape 4 : découpage (pages liées)
+
+L'existant : chaque page capturée garde ses liens (`html_meta.links`). Le plan de l'éditeur liste déjà
+les « liens sans page » du même site (`deadLinks`), avec « Capturer », « Relier » et « Laisser le
+message ».
+
+| Livraison | Contenu | Planche UX |
+|---|---|---|
+| 4a. Couverture dans le plan | fonction pure `coverage` (pages capturées / destinations du même site, hors ancres et hors adresse de la page) ; ligne « 14 pages sur 17 liens du site » dans le plan, avec la barre de progression | à confirmer : texte, place, compte des liens laissés par l'auteur |
+| 4b. Pages liées pendant la capture | liste « Pages liées » dans la barre de capture : liens du même site et routes vues, état « capturée » / « à capturer », mise à jour à chaque page | à demander |
+| 4c. Capture en série | « Capturer les pages liées » : ouverture une à une dans l'onglet courant, profondeur 1, 20 pages au plus par passe, arrêt à tout moment, puis écran de vérification ; pages en erreur ou refusées signalées | à demander |
+| 4d. Banc | site d'essai de plusieurs pages statiques capturé en série, critère a) « chaque page capturée apparaît dans le plan » et couverture à 100 % ; recette UX | — |
+
+Règles retenues pour la capture en série :
+
+- même origine que la page de départ seulement ;
+- jamais d'adresse de déconnexion ou d'action, repérée par son libellé ou son chemin
+  (`logout`, `déconnexion`, `delete`, `supprimer`…) ;
+- GET seulement, comme un clic de l'utilisateur ;
+- rien ne part avant l'écran de vérification.
