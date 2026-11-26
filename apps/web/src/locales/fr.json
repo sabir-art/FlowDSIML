@@ -2206,6 +2206,12 @@
       "dropAdd": "Déposer pour ajouter une image",
       "dropReplace": "Déposer pour remplacer la capture",
       "svgHelp": "Converti en image à la pose. L’original reste dans la médiathèque."
+    },
+    "arrival": {
+      "ready_one": "Démo prête : {{count}} étape capturée",
+      "ready_other": "Démo prête : {{count}} étapes capturées",
+      "preview": "Aperçu",
+      "new": "Nouvelle"
     }
   },
   "status": {

@@ -788,7 +788,8 @@ async function main() {
       );
       await htmlStore.clear();
       await browser.storage.local.remove(['fd.htmlReview', 'fd.attach']);
-      const url = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
+      // L60 §3 : « ready » : toast « Démo prête » et étapes « Nouvelle » dans l'éditeur (nouvelle démo)
+      const url = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit${target.addTo || target.appendTo ? '' : `?ready=${batch.length}`}`;
       void supabase
         .rpc('extension_report', { p_version: browser.runtime.getManifest().version, p_demo: demoId })
         .then(
