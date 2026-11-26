@@ -1,3 +1,4 @@
+import type { RelRect } from './geometry';
 import type { HtmlCapture } from './htmlCapture';
 
 /**
@@ -9,6 +10,8 @@ export interface PendingHtmlPage extends HtmlCapture {
   /** Clic fait sur cette page avant la page suivante (lien proposé vers l'étape suivante). */
   clickSel?: string;
   clickLabel?: string;
+  /** Lot B : place de l'élément cliqué, position de secours de la bulle d'une démo guidée. */
+  clickRect?: RelRect;
 }
 
 const DB = 'fd-html';
