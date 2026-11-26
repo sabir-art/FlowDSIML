@@ -5,6 +5,8 @@
 export const FEATURE_OF = {
   write: 'write',
   write_all: 'write',
+  // L64 §3 : rédaction automatique d'une étape pendant la capture (extension)
+  step_draft: 'write',
   translate: 'translate',
   suggest: 'suggest',
   generate: 'generate',
@@ -171,6 +173,16 @@ export function parseRequest(body: Record<string, unknown>): Request {
     case 'write_all':
       payload = { items: ri(items(input.items, 100, 2000)) };
       break;
+    case 'step_draft':
+      // Seuls le libellé du clic, le titre de la page et le texte visible de l'élément cliqué : jamais
+      // d'image, et les données personnelles restantes sont masquées ici
+      payload = {
+        label: r(str(input.label, 200, 'LABEL', false)),
+        page: r(str(input.page, 200, 'PAGE', false)),
+        text: r(str(input.text, 300, 'TEXT', false)),
+      };
+      if (!payload.label && !payload.text) throw new AiError('MISSING_LABEL');
+      break;
     case 'translate': {
       const target = lang(input.target);
       if (!input.target || target === l) throw new AiError('BAD_TARGET');
@@ -322,6 +334,19 @@ export function buildPrompt(req: Request): Prompt {
         maxTokens: 1500,
       };
     }
+    case 'step_draft':
+      return {
+        model: HAIKU,
+        system:
+          `${BASE} Rédige le titre (5 mots au plus) et le texte de la bulle (une phrase à l'impératif, ` +
+          `140 caractères au plus) d'une étape de démo produit, à partir du clic décrit. N'invente aucun nom ` +
+          `ni aucune donnée. ${inLang}`,
+        messages: user(
+          `Page : ${p.page || '(sans titre)'}\nÉlément cliqué : ${p.label || '-'}\nTexte visible : ${p.text || '-'}`,
+        ),
+        schema: obj({ title: S, text: S }),
+        maxTokens: 400,
+      };
     case 'write_all':
       return {
         model: HAIKU,
@@ -487,6 +512,10 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
     case 'write':
       if (!isStr(out?.text) || !out.text.trim()) throw new AiError('EMPTY', 502);
       return { text: out.text.trim() };
+    case 'step_draft':
+      if (!isStr(out?.title) || !isStr(out?.text) || !out.title.trim() || !out.text.trim())
+        throw new AiError('EMPTY', 502);
+      return { title: out.title.trim().slice(0, 80), text: out.text.trim().slice(0, 280) };
     case 'write_all':
     case 'translate':
       if (!Array.isArray(out?.items)) throw new AiError('EMPTY', 502);
