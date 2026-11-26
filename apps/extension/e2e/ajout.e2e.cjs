@@ -140,7 +140,7 @@ const ok = (c, l) => {
   await bar.waitFor();
   await page.waitForFunction(() =>
     /Démo CRM · après l’étape 2/.test(
-      document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.count').textContent,
+      document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.chips').textContent,
     ),
   );
   ok(true, 'barre : pastille de cible « Démo CRM · après l’étape 2 »');
@@ -189,7 +189,7 @@ const ok = (c, l) => {
   await page.bringToFront();
   await page.click('h1');
   await page.waitForFunction(() =>
-    /· 1 ·/.test(document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.count').textContent),
+    /^1 étape$/.test(document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.pill').textContent),
   );
 
   // Vérification : destination, « Ajouter 1 étape »

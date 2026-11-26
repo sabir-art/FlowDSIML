@@ -32,6 +32,10 @@ const ui = require('./popup-ui.cjs');
   await popup.fill('#password', 'x');
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
+  // Comme dans le vrai popup, l'onglet actif est la page à capturer (sinon la destination est masquée)
+  await page.bringToFront();
+  await popup.reload();
+  await popup.waitForSelector('#dest-row:not([hidden])');
   // L60 §1 : la démo à compléter se choisit dans la destination (« Changer »)
   await popup.click('#dest-change');
   await popup.waitForSelector('#fill-field:not([hidden])');
@@ -66,12 +70,12 @@ const ui = require('./popup-ui.cjs');
   );
   await page.bringToFront();
   await page.waitForTimeout(900);
-  const badge1 = await page.locator('[data-fd-ui] .count').textContent();
+  const badge1 = await page.locator('[data-fd-ui] .chips').textContent();
   if (process.env.SHOTS_DIR)
     await page.screenshot({ path: `${process.env.SHOTS_DIR}/l26-04-extension-barre.png` });
   await page.click('#go');
   await page.waitForTimeout(2500);
-  const badge2 = await page.locator('[data-fd-ui] .count').textContent();
+  const badge2 = await page.locator('[data-fd-ui] .chips').textContent();
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
   const review = await reviewP;

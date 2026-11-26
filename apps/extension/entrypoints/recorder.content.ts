@@ -1,12 +1,13 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
-import { Check, Crop, Monitor, Square, SquareMousePointer, createElement, type IconNode } from 'lucide';
+import { Check, Crop, Monitor, SquareMousePointer, createElement, type IconNode } from 'lucide';
+import { BAR_CSS, barMarkup, togglePause, wireBar } from '@/lib/captureBar';
 import { elementLabel, type PxRect } from '@/lib/geometry';
 import { INTERACTIVE, labelText } from '@/lib/labelText';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
 import { scanFullPage, scanPage } from '@/lib/scan';
-import { guideChip, strings, tabChip } from '@/lib/i18n';
+import { barCount, guideChip, strings, tabChip } from '@/lib/i18n';
 import { asFrameMode, elementCrop, type FrameMode } from '@/lib/frame';
 
 /**
@@ -45,11 +46,13 @@ export default defineContentScript({
         [hidden]{display:none!important}
         .dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);pointer-events:auto;display:flex;
           flex-direction:column;align-items:center;gap:8px;font:500 13px system-ui,sans-serif}
-        .bar{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 14px;border-radius:999px;background:#141311;
-          color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.3);cursor:grab;user-select:none;white-space:nowrap}
-        .dot{width:10px;height:10px;border-radius:50%;background:#e5484d;flex:none}
-        .sep{width:1px;height:20px;background:#3a3734;flex:none}
-        .seg{display:flex;gap:2px;padding:2px;border-radius:999px;background:#2b2926}
+        ${BAR_CSS}
+        .seg{box-sizing:border-box;height:36px;display:flex;align-items:center;gap:2px;padding:2px;border-radius:999px;
+          background:rgba(255,255,255,.08)}
+        .bar .seg button{height:32px;background:transparent;color:#d6d3d1}
+        .bar .seg button:hover{color:#fff}
+        .bar .seg [aria-checked=true]{background:#fff;color:#16181d}
+        .chips{color:#b8bcc6}
         button{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:0;border-radius:999px;
           background:transparent;color:#d6d3d1;font:inherit;cursor:pointer}
         button:hover{color:#fff}
@@ -57,7 +60,7 @@ export default defineContentScript({
         .seg [aria-checked=true]{background:#fff;color:#141311}
         .btn{height:32px;padding:0 12px;background:#2b2926;color:#fff}
         .btn:hover{background:#3a3734}
-        .stop,.ok{background:#fff;color:#141311}.stop:hover,.ok:hover{background:#e7e5e4;color:#141311}
+        .ok{background:#fff;color:#141311}.ok:hover{background:#e7e5e4;color:#141311}
         svg{flex:none}
         .hint{width:420px;max-width:calc(100vw - 32px);padding:16px;border-radius:12px;background:#141311;color:#fff;
           box-shadow:0 8px 24px rgba(0,0,0,.3);white-space:normal}
@@ -75,7 +78,7 @@ export default defineContentScript({
         .hd{position:absolute;width:12px;height:12px;background:#fff;border:2px solid #141311;border-radius:2px}
         .size{position:absolute;right:0;bottom:-30px;padding:2px 8px;border-radius:4px;background:#141311;color:#fff;
           font:600 12px system-ui,sans-serif;white-space:nowrap}
-        @media (max-width:600px){.seg span,.count-l{display:none}}
+        @media (max-width:600px){.seg span,.chips{display:none}}
       </style>
       <div class="sr" role="status"></div>
       <div class="kept el" hidden><span>${s.keptElement}</span></div>
@@ -95,14 +98,13 @@ export default defineContentScript({
             <button type="button" class="btn ok"></button>
           </div>
         </div>
-        <div class="bar" role="toolbar" aria-label="${s.recording}">
-          <span class="dot" aria-hidden="true"></span>
-          <span class="count"></span>
-          <span class="sep" aria-hidden="true"></span>
-          <div class="seg" role="radiogroup" aria-label="${s.frameGroup}"></div>
-          <button type="button" class="btn redraw" hidden>${s.redraw}</button>
-          <button type="button" class="btn stop"></button>
-        </div>
+        ${barMarkup({
+          label: s.recording,
+          name: s.barClicks,
+          middle: `<span class="chips" hidden></span>
+            <div class="seg" role="radiogroup" aria-label="${s.frameGroup}"></div>
+            <button type="button" class="btn redraw" hidden>${s.redraw}</button>`,
+        })}
       </div>`;
     document.documentElement.appendChild(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
@@ -114,9 +116,20 @@ export default defineContentScript({
       return svg;
     };
     const dock = $<HTMLDivElement>('.dock');
-    const bar = $<HTMLDivElement>('.bar');
     const live = $<HTMLDivElement>('.sr');
-    const count = $<HTMLSpanElement>('.count');
+    const chips = $<HTMLSpanElement>('.chips');
+    // L60 §2 : barre commune (état, pastille, Pause, Terminer, déplacement)
+    const ui = wireBar(root, {
+      name: s.barClicks,
+      mover: dock,
+      onPause: togglePause,
+      onStop: () => void browser.runtime.sendMessage({ type: 'fd:stop' }).catch(() => undefined),
+      shortcut: true,
+    });
+    void browser.runtime
+      .sendMessage({ type: 'fd:status' })
+      .then((st: unknown) => ui.setPaused(!!(st as { paused?: boolean } | null)?.paused))
+      .catch(() => undefined);
     const seg = $<HTMLDivElement>('.seg');
     const redraw = $<HTMLButtonElement>('.redraw');
     const keptEl = $<HTMLDivElement>('.kept.el');
@@ -124,8 +137,6 @@ export default defineContentScript({
     const veil = $<HTMLDivElement>('.veil');
     const zoneEl = $<HTMLDivElement>('.zone');
     const hint = $<HTMLDivElement>('.hint');
-    const stopBtn = $<HTMLButtonElement>('.stop');
-    stopBtn.append(icon(Square), s.finish);
     $<HTMLButtonElement>('.ok').append(icon(Check), s.traceOk);
     redraw.title = s.redrawTitle;
 
@@ -370,7 +381,7 @@ export default defineContentScript({
             guide?: { title: string; n: number; total: number } | null;
             target?: string | null;
           } | null;
-          const parts = [`<span class="count-l">${s.capBar} · </span>${info?.steps ?? 0}`];
+          ui.setCount(barCount('steps', info?.steps ?? 0));
           const text: string[] = [];
           const said: string[] = [];
           if (info?.target) text.push(info.target);
@@ -384,34 +395,12 @@ export default defineContentScript({
             text.push(g);
             said.push(g);
           }
-          count.innerHTML = parts.join('');
-          for (const t of text) count.append(` · ${t}`);
+          chips.textContent = text.join(' · ');
+          chips.hidden = !text.length;
           if (said.length) live.textContent = said.join('. ');
         })
         .catch(() => undefined);
     void refresh();
-
-    stopBtn.addEventListener(
-      'click',
-      () => void browser.runtime.sendMessage({ type: 'fd:stop' }).catch(() => undefined),
-    );
-
-    // Déplacement de la barre à la souris
-    let drag: { x: number; y: number; left: number; top: number } | null = null;
-    bar.addEventListener('pointerdown', (e) => {
-      if ((e.target as Element).closest('button')) return;
-      const r = dock.getBoundingClientRect();
-      drag = { x: e.clientX, y: e.clientY, left: r.left, top: r.top };
-      bar.setPointerCapture(e.pointerId);
-    });
-    bar.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      dock.style.transform = 'none';
-      dock.style.bottom = 'auto';
-      dock.style.left = `${Math.max(0, drag.left + e.clientX - drag.x)}px`;
-      dock.style.top = `${Math.max(0, drag.top + e.clientY - drag.y)}px`;
-    });
-    bar.addEventListener('pointerup', () => (drag = null));
 
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
@@ -439,7 +428,8 @@ export default defineContentScript({
 
     let last = 0;
     function onPointerDown(ev: PointerEvent) {
-      if (!ev.isTrusted || ev.button !== 0 || tracing) return;
+      // En pause, les clics ne sont pas capturés (L60 §2)
+      if (!ev.isTrusted || ev.button !== 0 || tracing || ui.paused) return;
       const now = Date.now();
       if (now - last < 400) return; // anti double-clic
       const target = ev.target instanceof Element ? ev.target : null;

@@ -63,12 +63,12 @@ const WS = '11111111-1111-1111-1111-111111111111';
     { tabId, WS },
   );
   await page.bringToFront();
-  /** La barre affiche « Capture · n » : la capture est gardée et la barre est revenue. */
+  /** La pastille dit « n étapes » (L60 §2) : la capture est gardée et la barre est revenue. */
   const counted = (n) =>
     page.waitForFunction(
       (n) =>
-        new RegExp(`· ${n}$`).test(
-          document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.count').textContent.trim(),
+        new RegExp(`^${n} étapes?$`).test(
+          document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.pill').textContent.trim(),
         ),
       n,
     );
@@ -84,21 +84,68 @@ const WS = '11111111-1111-1111-1111-111111111111';
     'barre : segmenté « Page / Élément / Zone », « Page » par défaut',
   );
   ok(
-    /^Capture · 0/.test((await bar.locator('.count').innerText()).trim()) &&
+    (await bar.locator('.st').innerText()).replace(/\s+/g, ' ').trim() === 'Captures 0 étape' &&
       (await bar.getByRole('button', { name: 'Terminer' }).count()) === 1,
-    `barre : « ${(await bar.locator('.count').innerText()).trim()} », « Terminer »`,
+    `barre : « ${(await bar.locator('.st').innerText()).replace(/\s+/g, ' ').trim()} », « Terminer »`,
   );
   const box = await bar.boundingBox();
   ok(
     Math.abs(box.x + box.width / 2 - 720) <= 2 && box.y + box.height <= 900 - 16,
     'barre : pilule centrée en bas',
   );
+  // L60 §2 : capsule de 48 px, contrôles de 36 px sur le même centre ; Pause, puis un clic : pas d'étape
+  const geo = await page.evaluate(() => {
+    const b = document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.bar');
+    const r = b.getBoundingClientRect();
+    const ctl = [...b.querySelectorAll(':scope > button, .mid > button, .mid > .seg')].filter(
+      (e) => e.getClientRects().length,
+    );
+    return {
+      h: Math.round(r.height),
+      bottom: Math.round(innerHeight - r.bottom),
+      bg: getComputedStyle(b).backgroundColor,
+      hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
+      centers: ctl.map((e) =>
+        Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2),
+      ),
+      mid: Math.round(r.top + r.height / 2),
+    };
+  });
+  ok(
+    geo.h === 48 &&
+      geo.bottom === 20 &&
+      geo.bg === 'rgb(22, 24, 29)' &&
+      geo.hs.every((h) => h === 36) &&
+      geo.centers.every((c) => Math.abs(c - geo.mid) <= 1),
+    `barre : 48 px, à 20 px du bas, fond #16181d, contrôles de 36 px sur le même centre (${JSON.stringify(geo)})`,
+  );
+  await bar.getByRole('button', { name: 'Pause' }).click();
+  await page.waitForFunction(
+    () => document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.nm').textContent === 'En pause',
+  );
+  ok(
+    (await bar.locator('.pz').isVisible()) &&
+      (await bar.locator('.pz').innerText()) === 'Vos clics ne sont pas capturés' &&
+      (await bar.getByRole('button', { name: 'Reprendre' }).count()) === 1 &&
+      (await bar.locator('.mid').isHidden()),
+    'Pause : « En pause », « Vos clics ne sont pas capturés », « Reprendre »',
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/barre-pause.png` });
+  await page.click('#go');
+  await page.waitForTimeout(800);
+  ok((await status()).steps === 0, 'Pause : un clic sur la page ne crée pas d’étape');
+  await page.keyboard.press('Alt+Shift+P');
+  await page.waitForFunction(
+    () => document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.nm').textContent === 'Captures',
+  );
+  ok(!(await status()).paused, 'Alt + Maj + P : la capture reprend');
+  await page.waitForTimeout(450);
 
   // ===== 1. Page =====
   await page.click('#go');
   ok((await steps(1)) === 1, 'Page : un clic crée une capture');
   await counted(1);
-  ok(true, 'barre : « Capture · 1 » après la capture');
+  ok(true, 'barre : pastille « 1 étape » après la capture');
 
   // ===== 2. Élément =====
   await radio('Élément').click();
