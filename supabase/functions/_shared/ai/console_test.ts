@@ -44,8 +44,8 @@ function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
       ),
     env: (n) => (n === 'ELEVENLABS_API_KEY' ? 'xi-fictive-deploiement' : undefined),
     fnModels: () => Promise.resolve({ ...chosen }),
-    setModel: (fn, model, _uid, label) => {
-      labels.push(label);
+    setModel: (fn, model, _uid, label, was, next) => {
+      labels.push(`${label} · ${was} → ${next}`);
       const old = chosen[fn] ?? null;
       if (model === null) delete chosen[fn];
       else chosen[fn] = model;

@@ -26,14 +26,11 @@ export const FN_LABEL: Record<Fn, string> = {
   captions: 'Transcription',
 };
 
-/** Libellé lisible d'un changement : « Traduction · Claude Sonnet (défaut) → Claude Opus ». */
-export function changeLabel(def: FnDef, from: string | null, to: string | null): string {
-  const name = (id: string | null) => {
-    const m = id ?? def.defaultModel;
-    const label = m === 'auto' ? 'Auto' : (modelById(m)?.label ?? 'Ancien modèle (retiré)');
-    return id === null ? `${label} (défaut)` : label;
-  };
-  return `${FN_LABEL[def.fn]} · ${name(from)} → ${name(to)}`;
+/** Nom lisible d'un modèle de fonction (« Claude Sonnet (défaut) »). */
+export function fnModelName(def: FnDef, id: string | null): string {
+  const m = id ?? def.defaultModel;
+  const label = m === 'auto' ? 'Auto' : (modelById(m)?.label ?? 'Ancien modèle (retiré)');
+  return id === null ? `${label} (défaut)` : label;
 }
 
 export const FUNCTIONS: FnDef[] = [
