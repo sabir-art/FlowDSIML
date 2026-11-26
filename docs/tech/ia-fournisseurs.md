@@ -1,6 +1,6 @@
 # Fournisseurs et modèles IA : note d'architecture (L41)
 
-Statut : proposition à valider par le chef, **avant tout code**. Spec UX :
+Statut : approuvée par le chef le 26/11 (réponses au §12). À développer après le Sandbox v2 (étapes 3 et 4). Spec UX :
 `docs/ux/specs/l41-console-modeles-ia.md` (branche UX), planche `l41-modeles-ia`.
 
 ## 1. Le besoin
@@ -212,3 +212,15 @@ Chaque étape est livrable seule. Jusqu'à l'étape 4, l'assistant garde Sonnet 
 3. **Modèle retiré** : la détection par erreur du fournisseur en plus du catalogue (§3) suffit-elle,
    ou faut-il interroger la liste des modèles du fournisseur chaque jour ?
 4. **Sous-traitants** : qui met à jour `docs/legal` pour OpenAI avant la première clé ?
+
+## 12. Réponses du chef (26/11)
+
+1. **Transcription** : ElevenLabs reste le défaut. OpenAI est une option, proposée dès qu'une clé
+   OpenAI existe ; pas de bascule.
+2. **Transition** : oui, repli sur les variables d'environnement actuelles, sans toucher à
+   `deploy.yml`.
+3. **Modèle retiré** : la détection par le catalogue et par l'erreur du fournisseur suffit. Le bouton
+   « Tester » de la Console revérifie à la demande.
+4. **Sous-traitant OpenAI** : le dev prépare la mise à jour de `docs/legal` (sous-traitant, finalité,
+   données envoyées, région). Elle n'est publiée qu'à l'ajout de la première clé OpenAI, sur décision
+   du client, signalée au chef le moment venu.
