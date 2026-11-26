@@ -82,6 +82,11 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       (await p.locator('.console-ai-row.is-soon').innerText()).includes('Bientôt'),
     'Fournisseurs : « Clé manquante », « Autres fournisseurs · Bientôt »',
   );
+  ok(
+    (await p.locator('main .fd-btn--primary').count()) === 1 &&
+      (await p.locator('main .fd-btn--primary').innerText()).includes('Ajouter une clé'),
+    'état vide : un seul bouton primaire, « Ajouter une clé » (les lignes en secondaire)',
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/console-modeles-vide${sfx}.png`, fullPage: true });
   await axe(p, 'état vide');
 
@@ -105,6 +110,14 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       (await field.inputValue()) === '',
     'échec du test : erreur sous le champ, rien n’est enregistré, champ vidé',
   );
+  ok(
+    await dlg.evaluate(() => {
+      const e = document.getElementById('ai-key-e');
+      const h = document.getElementById('ai-key-h');
+      return document.getElementById('ai-key').nextElementSibling === e && e.nextElementSibling === h;
+    }),
+    'erreur juste sous le champ, avant l’aide',
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/console-modeles-echec${sfx}.png` });
   await axe(p, 'fenêtre en erreur');
   await dlg.getByRole('button', { name: 'Annuler' }).click();
@@ -126,7 +139,12 @@ const GOOD2 = 'sk-fictive-bonne-000333';
   // Tester
   await p.getByRole('button', { name: 'Tester la clé Anthropic' }).click();
   await p.getByText('Anthropic répond (320 ms)').waitFor();
-  ok(true, 'Tester : toast « Anthropic répond (320 ms) »');
+  const toasts = await p.locator('.toast').allInnerTexts();
+  ok(
+    toasts.some((x) => x.includes('320\u00a0ms')) &&
+      !toasts.some((x) => / ms\)/.test(x.replace(/\u00a0/g, '·'))),
+    'Tester : toast « Anthropic répond (320 ms) », espace insécable avant « ms » (NUM-01)',
+  );
 
   // Remplacer
   await p.getByRole('button', { name: 'Remplacer la clé Anthropic' }).click();

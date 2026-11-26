@@ -97,7 +97,7 @@ export function Models() {
         <p className="fd-muted console-ai-help">{t('console.ai.providersHelp')}</p>
         <ul className="console-ai-list" role="list">
           {list.map((p) => (
-            <ProviderRow key={p.provider} p={p} onKey={() => setKeyFor(p)} onTested={load} />
+            <ProviderRow key={p.provider} p={p} quiet={none} onKey={() => setKeyFor(p)} onTested={load} />
           ))}
           <li className="console-ai-row is-soon">
             <span className="console-ai-tile" aria-hidden="true">
@@ -144,7 +144,18 @@ function causeText(
   return t(`console.ai.cause.${known.includes(cause ?? '') ? cause : 'PROVIDER'}`, { status: status ?? '' });
 }
 
-function ProviderRow({ p, onKey, onTested }: { p: ProviderState; onKey: () => void; onTested: () => void }) {
+function ProviderRow({
+  p,
+  quiet,
+  onKey,
+  onTested,
+}: {
+  p: ProviderState;
+  /** État vide : « Ajouter la clé » en secondaire, « Ajouter une clé » reste le seul bouton primaire. */
+  quiet: boolean;
+  onKey: () => void;
+  onTested: () => void;
+}) {
   const { t } = useTranslation();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -216,7 +227,7 @@ function ProviderRow({ p, onKey, onTested }: { p: ProviderState; onKey: () => vo
           </WriteButton>
         )}
         <WriteButton
-          className={`fd-btn fd-btn--sm${has ? '' : ' fd-btn--primary'}`}
+          className={`fd-btn fd-btn--sm${has || quiet ? '' : ' fd-btn--primary'}`}
           label={t(has ? 'console.ai.replaceOf' : 'console.ai.addOf', { name: p.label })}
           onClick={onKey}
         >
@@ -290,14 +301,14 @@ function KeyDialog({ p, onClose, onSaved }: { p: ProviderState; onClose: () => v
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
-        <span className="help" id="ai-key-h">
-          {t('console.ai.keyHelp')}
-        </span>
         {err && (
           <span className="field-error" id="ai-key-e" role="alert">
             {err}
           </span>
         )}
+        <span className="help" id="ai-key-h">
+          {t('console.ai.keyHelp')}
+        </span>
       </form>
     </Modal>
   );
