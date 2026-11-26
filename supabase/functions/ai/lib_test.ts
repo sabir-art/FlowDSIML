@@ -261,3 +261,32 @@ Deno.test('generate depuis une capture HTML : page masquée, éléments numérot
     'TOO_LONG_PAGE_TEXT',
   );
 });
+
+Deno.test('step_draft : libellé, page et texte bornés et masqués, réponse titre + texte', () => {
+  const req = parseRequest({
+    task: 'step_draft',
+    lang: 'fr',
+    input: {
+      label: 'Nouvelle opportunité',
+      page: 'ExampleCRM',
+      text: 'Contact : camille.martin@exemple.example',
+    },
+  });
+  assertEquals(req.task, 'step_draft');
+  assertEquals(req.payload.label, 'Nouvelle opportunité');
+  assert(!String(req.payload.text).includes('camille.martin@exemple.example'));
+  assert(req.redacted >= 1);
+  assertThrows(() => parseRequest({ task: 'step_draft', lang: 'fr', input: {} }));
+  const p = buildPrompt(req);
+  assertEquals(p.model, HAIKU);
+  assert(JSON.stringify(p.messages).includes('Nouvelle opportunité'));
+  assertEquals(
+    checkOutput(
+      'step_draft',
+      { title: ' Créer une opportunité ', text: 'Cliquez sur « Nouvelle opportunité ».' },
+      {},
+    ),
+    { title: 'Créer une opportunité', text: 'Cliquez sur « Nouvelle opportunité ».' },
+  );
+  assertThrows(() => checkOutput('step_draft', { title: '', text: 'x' }, {}));
+});
