@@ -70,3 +70,30 @@ J'ai comparé l'extension et l'éditeur à `propositions/l60/planche-l60-capture
 - La vidéo avec « Ajouter à une démo » grisé, et non masqué.
 - Le texte du bandeau « en direct » (écart 1).
 - Le test `arrivee-capture` en sombre, avec le thème posé.
+
+---
+
+# Nouvelle recette après 2ab2ee7 → acc93dd : VERT pour l'extension, bandeau à confirmer par la CI
+
+J'ai reconstruit l'extension avec `WXT_APP_URL` et rejoué les parcours avec un faux serveur neuf :
+
+| Parcours | Résultat |
+|---|---|
+| extension : popup | 110 |
+| extension : redaction | 13 |
+| extension : terminer | 11 |
+| extension : ajout | 51 |
+| extension : capture | 26 |
+| extension : video | 34 |
+| éditeur : arrivee-capture | 12/12 en clair, 12/12 en sombre (thème posé) |
+
+- **(A) Destination** (`v2-destination.png`) :
+  - l'onglet « Nouvelle démo » ne contient plus que les dossiers, l'aide et la ligne Espace ;
+  - la démo à compléter est en tête de « Ajouter à une démo », avec « 2 étapes à capturer », contrôlé en clair et en sombre.
+- **(B) Vidéo vers une démo existante** : la ligne Vidéo reste visible, grisée, avec « Vidéo : nouvelle démo seulement ». Comme la destination se choisit avant le mode, c'est la bonne place : **confirmé**.
+- **(D) Délai de 4 s** : ni repère IA ni crédit décompté, et la carte garde « Rédaction… » (redaction 13/13).
+- **(E) Test arrivee-capture** : il est maintenant en vrai sombre.
+- **(C) Bandeau « Capture en cours dans l'extension… »** : je n'ai pas pu le voir en local.
+  - `capture-etapes.e2e.cjs` s'arrête avant, sur la détection de la version de l'extension : « La version 0.2.0 est installée… » et « Extension TutoClick 0.3.0 détectée. » n'apparaissent jamais.
+  - Il échoue de la même façon sur 136d6a8, avant ces commits : ce n'est donc pas une régression du lot.
+  - La CI de acc93dd fera foi pour le bandeau. À expliquer par le dev : est-ce le banc local, ou la détection de version ?
