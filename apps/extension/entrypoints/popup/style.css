@@ -1136,3 +1136,14 @@ a {
   opacity: 0.45;
   cursor: not-allowed;
 }
+/* Recette UX lot E : démo à compléter, pastille « n étapes à capturer » */
+.dlist .todo {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}

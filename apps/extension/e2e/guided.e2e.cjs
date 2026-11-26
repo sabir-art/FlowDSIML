@@ -39,11 +39,28 @@ const ui = require('./popup-ui.cjs');
   await popup.reload();
   await popup.waitForSelector('#dest-row:not([hidden])');
   // L60 §1 : la démo à compléter se choisit dans la destination (« Changer »)
+  // Recette UX lot E : plus de liste « Démo » dans « Nouvelle démo » ; la démo à compléter est en tête de
+  // « Ajouter à une démo », avec la pastille « n étapes à capturer »
   await popup.click('#dest-change');
-  await popup.waitForSelector('#fill-field:not([hidden])');
-  const fillOpts = (await ui.options(popup, 'fill')).map((o) => o.label);
-  await ui.pick(popup, 'fill', '33333333-3333-3333-3333-333333333333');
+  await popup.click('#dest-kind [data-value="new"]');
+  const newTab = {
+    lists: await popup.locator('#dest [role="listbox"]:visible, #dest button#fill').count(),
+    texts: await popup.locator('#dest').innerText(),
+  };
+  await popup.click('#dest-kind [data-value="append"]');
+  const first = popup.locator('#demos [role="option"]').first();
+  await first.waitFor();
+  const firstRow = {
+    id: await first.getAttribute('data-demo'),
+    text: (await first.innerText()).replace(/\s+/g, ' '),
+    todo: await first.locator('.todo').innerText(),
+  };
+  await first.click();
+  const help = await popup.locator('#demos-h').innerText();
+  // La vidéo crée toujours une nouvelle démo : sa ligne reste visible, grisée, avec la raison
   await popup.click('#dest-back');
+  const video = popup.locator('.mode[data-mode="video"]');
+  const videoRow = { off: await video.getAttribute('aria-disabled'), text: await video.innerText() };
   const destLine = await popup.locator('#dest-text').innerText();
   const noTitle = (await popup.locator('#title').count()) === 0;
   if (process.env.SHOTS_DIR)
@@ -97,8 +114,22 @@ const ui = require('./popup-ui.cjs');
   };
   const sp = (s) => (s || '').replace(/[  ]/g, ' ');
   ok(
-    fillOpts.some((o) => /Compléter : Prise en main \(2 à capturer\)/.test(sp(o))),
-    'popup : « Compléter : … »',
+    newTab.lists === 0 && !/Démo\s*\n\s*Nouvelle démo|Compléter/.test(newTab.texts),
+    'popup : l’onglet « Nouvelle démo » n’a pas de liste « Démo »',
+  );
+  ok(
+    firstRow.id === '33333333-3333-3333-3333-333333333333' &&
+      /Prise en main/.test(firstRow.text) &&
+      sp(firstRow.todo) === '2 étapes à capturer',
+    `popup : démo à compléter en tête de « Ajouter à une démo », pastille « 2 étapes à capturer » (${firstRow.text})`,
+  );
+  ok(
+    sp(help) === 'Chaque clic remplit l’étape « À capturer » suivante.',
+    `popup : aide de la démo à compléter (« ${help} »)`,
+  );
+  ok(
+    videoRow.off === 'true' && /Vidéo : nouvelle démo seulement/.test(sp(videoRow.text)),
+    `popup : Vidéo grisée avec la raison quand la destination est une démo existante (${sp(videoRow.text)})`,
   );
   ok(
     destLine === 'Dans Acme · Prise en main' && noTitle,

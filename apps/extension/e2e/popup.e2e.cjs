@@ -432,10 +432,22 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     await popup.waitForFunction(() => /Ventes/.test(document.getElementById('dest-text').textContent));
     ok(true, `${tag} · le dossier choisi est mémorisé après une nouvelle ouverture`);
     await popup.click('#dest-change');
-    await popup.locator('#dest-kind [data-value=append]').click();
-    await popup.waitForFunction(() => document.querySelectorAll('#demos [role=option]').length === 3);
+    // Recette UX lot E : l'onglet « Nouvelle démo » n'a que l'arbre, l'aide et la ligne Espace
     ok(
-      (await popup.locator('#demos [role=option] small').first().innerText()) === 'Ventes · 4 étapes' &&
+      (await popup.locator('#dest #fill, #dest-view-fill, #fill-field').count()) === 0 &&
+        !/Compléter/.test(await popup.locator('#dest').innerText()),
+      `${tag} · « Nouvelle démo » : aucune liste « Démo »`,
+    );
+    await popup.locator('#dest-kind [data-value=append]').click();
+    await popup.waitForFunction(() => document.querySelectorAll('#demos [role=option]').length === 4);
+    const todo = popup.locator('#demos [role=option]').first();
+    ok(
+      (await todo.getAttribute('data-demo')) === '33333333-3333-3333-3333-333333333333' &&
+        (await todo.locator('.todo').innerText()) === '2 étapes à capturer',
+      `${tag} · Ajouter à une démo : la démo à compléter en tête, pastille « 2 étapes à capturer »`,
+    );
+    ok(
+      (await popup.locator('#demos [role=option] small').nth(1).innerText()) === 'Ventes · 4 étapes' &&
         (await popup.locator('#demo-q').evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 40,
       `${tag} · Ajouter à une démo : recherche de 40 px, démos avec « dossier · n étapes »`,
     );
@@ -452,6 +464,12 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     ok(
       (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Créer une facture',
       `${tag} · destination « Dans Acme · Créer une facture »`,
+    );
+    const vid = popup.locator('#modes [data-mode=video]');
+    ok(
+      (await vid.getAttribute('aria-disabled')) === 'true' &&
+        /Vidéo\s*: nouvelle démo seulement/.test((await vid.innerText()).replace(/[\u202f\u00a0]/g, ' ')),
+      `${tag} · démo existante : Vidéo visible, grisée, « Vidéo : nouvelle démo seulement »`,
     );
 
     // Un clic sur « Captures d'écran » démarre, sans autre décision ; la démo prend le titre de l'onglet
