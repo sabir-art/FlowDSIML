@@ -48,55 +48,47 @@ const ok = (c, m) => {
   await popup.fill('#password', 'x');
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
-  ok((await popup.locator('#workspace-l').innerText()) === 'Espace', 'popup : « Espace »');
+  await popup.waitForFunction(() => /Acme/.test(document.getElementById('dest-text').textContent));
+  ok((await popup.locator('#dest-text').innerText()) === 'Dans Acme · Nouvelle démo', 'popup : destination');
   ok(
-    (await popup.locator('#perm').isHidden()) && (await popup.locator('#start').isVisible()),
+    (await popup.locator('#perm').isHidden()) && (await popup.locator('#modes .mode').count()) === 4,
     'rien demandé à l’ouverture',
   );
 
-  // Option B : Format mobile visible, désactivé, « Bientôt » ; page entière en « Bientôt »
-  await popup.click('#type');
-  const mobile = popup.locator('#type + [role=listbox] [data-value=mobile]');
+  // Option B : taille « Mobile » visible, désactivée, « Bientôt » ; taille par la fenêtre
+  await ui.openPrefs(popup);
+  const mobile = popup.locator('#size [data-value=mobile]');
   ok(
-    (await mobile.getAttribute('aria-disabled')) === 'true' &&
-      (await mobile.locator('.pill').innerText()) === 'Bientôt' &&
-      (await mobile.locator('small').innerText()) ===
-        'Pas encore disponible dans cette version de l’extension.',
-    'Format mobile : visible, désactivé, « Bientôt »',
+    (await mobile.isVisible()) &&
+      (await mobile.getAttribute('aria-disabled')) === 'true' &&
+      (await mobile.getAttribute('title')) === 'Bientôt',
+    'taille « Mobile » : visible, désactivée, « Bientôt »',
   );
-  // « Bientôt » à droite du nom ; l'aide tient sur 2 lignes au plus
-  const [nameBox, soonBox, helpBox] = await Promise.all(
-    ['b', '.pill', 'small'].map((s) => mobile.locator(s).boundingBox()),
-  );
+  await mobile.click({ force: true });
   ok(
-    soonBox.x > nameBox.x + nameBox.width && helpBox.height < 40,
-    `« Bientôt » à droite du nom, aide sur 2 lignes au plus (${Math.round(helpBox.height)} px)`,
-  );
-  await popup.keyboard.press('Escape');
-  await ui.openOptions(popup);
-  const full = popup.locator('#full-row');
-  ok(
-    (await full.locator('.k').innerText()).trim() === 'Page entière' &&
-      (await full.locator('.pill').innerText()) === 'Bientôt' &&
-      (await full.isVisible()),
-    'page entière : ligne visible, « Bientôt »',
+    (await popup.locator('#size [aria-checked=true]').getAttribute('data-value')) === 'current',
+    'taille « Mobile » : ne se choisit pas',
   );
   ok(
-    (await popup.locator('#tabsize-h').innerText()).startsWith(
-      'La fenêtre est redimensionnée le temps de la capture',
-    ),
+    /La fenêtre est redimensionnée le temps de la capture/.test(await popup.locator('#size-h').innerText()),
     'taille de l’onglet : par la fenêtre',
   );
-  await ui.pick(popup, 'type', 'html');
+  await popup.click('#settings-back');
   // Comme dans le vrai popup, l'onglet actif est la page à capturer (sinon « Démarrer » est désactivé)
   const target = await ctx.newPage();
   await target.goto('http://localhost:54400/page');
   await target.bringToFront();
   await popup.evaluate(() => document.getElementById('error-retry').click());
-  await popup.waitForSelector('#start[aria-disabled=false]');
-  await popup.click('#start');
+  await popup.waitForSelector('#modes .mode[data-mode=html]:not([aria-disabled])');
+  await popup.click('#modes [data-mode=html]');
+  // Premier choix de HTML : la mention d'autorisation, puis l'autorisation de Chrome
+  await popup.click('#notice-ok');
   await popup.locator('#perm').waitFor();
-  ok(await popup.locator('#start').isHidden(), 'encart à la place de « Démarrer »');
+  ok(
+    (await popup.locator('#foot-setup').isHidden()) &&
+      (await popup.evaluate(() => document.activeElement?.id)) === 'perm-allow',
+    'encart d’autorisation, focus sur « Autoriser »',
+  );
   ok(
     (await popup.locator('#perm-t').innerText()) === 'Une autorisation de Chrome est nécessaire' &&
       /accéder aux pages que vous parcourez/.test(await popup.locator('#perm-why').innerText()),
@@ -125,8 +117,8 @@ const ok = (c, m) => {
   await popup.locator('#perm-denied:not([hidden])').waitFor();
   ok(
     (await popup.locator('#perm-denied-text').innerText()) ===
-      'La capture reste sur la page ouverte au démarrage.' && (await popup.locator('#start').isVisible()),
-    '« Pas maintenant » : la capture reste sur la page de départ, explication sous le type',
+      'La capture reste sur la page ouverte au démarrage.',
+    '« Pas maintenant » : la capture reste sur la page de départ, explication sous les modes',
   );
   await ctx.close();
   console.log(failed ? `${failed} échec(s)` : 'tout est vert');

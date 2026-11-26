@@ -40,31 +40,21 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
 
-  // L21-01 : trois cartes de type, options propres à chacun
-  const cards = (await ui.options(popup, 'type')).map((o) => o.label);
+  // L60 §1 : 4 modes ; Format mobile devient la taille « Mobile » des réglages
+  const cards = (await ui.modes(popup)).map((o) => o.name);
   ok(
-    cards.join(' | ') === 'Captures | HTML guidée | Sandbox | Vidéo | Format mobile',
-    `types de capture (${cards.join(', ')})`,
+    cards.join(' | ') === 'Captures d’écran | HTML | Vidéo | Sandbox',
+    `modes de capture (${cards.join(', ')})`,
   );
-  await ui.openOptions(popup);
-  ok(
-    (await ui.rows(popup)).join(' | ') === 'Taille de l’onglet | Suivre les nouveaux onglets',
-    'captures : ni option vidéo ni option mobile',
-  );
-  await ui.pick(popup, 'type', 'video');
-  ok(
-    (await ui.rows(popup)).join(' | ') === 'Ma voix | Webcam dans un coin | Masquer en direct',
-    'options vidéo affichées',
-  );
+  await ui.openPrefs(popup);
   ok(!(await ui.isOn(popup, 'webcam')), 'webcam désactivée par défaut');
-  // EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
-  const live = popup.getByRole('switch', { name: 'Masquer en direct' });
+  // EXT-02 §4.2 : « Flouter en direct », désactivé par défaut, choix mémorisé
+  const live = popup.getByRole('switch', { name: 'Flouter en direct' });
   ok(
     !(await live.isChecked()) &&
-      /Ces masques ne pourront plus être retirés\. Désactivé, vous décidez de chaque zone avant l’envoi\./.test(
-        await popup.textContent('#live-mask-help'),
-      ),
-    '« Masquer en direct » désactivé par défaut, avec son aide',
+      (await popup.textContent('#live-mask-h')) ===
+        'Vidéo. Les données détectées sont floutées pendant l’enregistrement.',
+    '« Flouter en direct » désactivé par défaut, avec son aide',
   );
   await live.check();
   await popup.waitForFunction(
@@ -74,26 +64,20 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await popup.waitForFunction(
     async () => (await chrome.storage.local.get('fd.liveMask'))['fd.liveMask'] === false,
   );
-  ok(true, '« Masquer en direct » : choix mémorisé');
-  // La liste des types se parcourt au clavier
-  ok((await popup.textContent('#start')).trim() === 'Démarrer', 'bouton « Démarrer »');
-  await popup.focus('#type');
-  await popup.keyboard.press('ArrowDown');
-  await popup.keyboard.press('ArrowDown');
-  await popup.keyboard.press('Enter');
-  ok(/^Format mobile/.test((await popup.innerText('#type')).trim()), 'les types se parcourent au clavier');
-  ok((await ui.rows(popup)).includes('Appareil'), 'options mobile affichées');
-  await ui.pick(popup, 'device', 'custom');
-  ok(await popup.isVisible('#custom-size'), 'taille personnalisée');
-  await ui.pick(popup, 'device', 'phone');
+  ok(true, '« Flouter en direct » : choix mémorisé');
+  // La taille se choisit au clavier (segmenté)
+  await popup.locator('#size [data-value=current]').focus();
+  await popup.keyboard.press('ArrowRight');
+  await popup.keyboard.press('ArrowRight');
+  ok(
+    (await popup.locator('#size [aria-checked=true]').innerText()) === 'Mobile' &&
+      (await popup.evaluate(() => chrome.storage.local.get('fd.tabSize')))['fd.tabSize'] === 'mobile',
+    'taille « Mobile » au clavier, mémorisée',
+  );
   await shot(popup, 'l21-01-popup-mobile', true);
-  await ui.pick(popup, 'type', 'video');
+  await popup.locator('#size [data-value=current]').click();
+  await popup.click('#settings-back');
   await shot(popup, 'l21-01-popup-video', true);
-  // L21-01 : « HTML guidée » choisie
-  await ui.pick(popup, 'type', 'html');
-  ok(/^HTML guidée/.test((await popup.innerText('#type')).trim()), '« HTML guidée » sélectionnable');
-  await shot(popup, 'l21-01-popup-html', true);
-  await ui.pick(popup, 'type', 'clicks');
 
   // Format mobile : l'onglet est émulé (390 px, tactile), la démo est créée en mobile
   const tabId = await popup.evaluate(

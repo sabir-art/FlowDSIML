@@ -14,12 +14,15 @@ import {
   Building2,
   Check,
   ChevronDown,
+  ChevronRight,
   CircleQuestionMark,
   Code,
   Crop,
   Ellipsis,
   ExternalLink,
   EyeOff,
+  Folder,
+  Globe,
   Layers,
   ListPlus,
   LogIn,
@@ -39,6 +42,7 @@ import {
   Video,
   Webcam,
   createIcons,
+  type IconNode,
 } from 'lucide';
 import { viewportFor, type DeviceKey } from '@/lib/video';
 import { tabSize, type TabSizeKey } from '@/lib/fullpage';
@@ -49,7 +53,7 @@ import {
   startsWithout,
   type PermissionNeed,
 } from '@/lib/permissions';
-import { createSelect, createSwitch, installHelps, type Option } from './ui';
+import { createSelect, createSwitch, icon, type Option } from './ui';
 
 /**
  * Popup de l'extension, variante B (EXT-02 §1.2) : titre, type de capture en liste décrite, espace,
@@ -64,11 +68,14 @@ const ICONS = {
   Building2,
   Check,
   ChevronDown,
+  ChevronRight,
   CircleQuestionMark,
   Crop,
   Ellipsis,
   ExternalLink,
   EyeOff,
+  Folder,
+  Globe,
   Layers,
   ListPlus,
   LogIn,
@@ -95,16 +102,6 @@ for (const svg of document.querySelectorAll<SVGElement>('.pph .ib svg')) {
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const show = (id: string, visible: boolean) => ($(id).hidden = !visible);
 const app = APP_URL.replace(/\/$/, '');
-
-($('title') as HTMLInputElement).placeholder = strings.demoTitlePlaceholder;
-// Aides « ? » : nom accessible « Aide : <libellé de la ligne> »
-for (const q of document.querySelectorAll<HTMLButtonElement>('button.q[data-help]'))
-  q.setAttribute(
-    'aria-label',
-    strings.helpFor.replace('{{label}}', strings[q.dataset.help as keyof typeof strings]),
-  );
-installHelps($('opts-body'));
-if (!DEBUGGER) $('tabsize-h').textContent = strings.tabSizeHelpWindow;
 
 // ===== En-tête : aide (nouvel onglet) et menu ⋯ =====
 $<HTMLAnchorElement>('help').href = `${app}/#/extension`;
@@ -138,180 +135,197 @@ document.addEventListener('pointerdown', (e) => {
   if (!menu.hidden && !(e.target as HTMLElement).closest('#more-menu, #more')) toggleMenu(false, false);
 });
 
-// ===== Type de capture (liste décrite). « HTML guidée » et « Sandbox » sont deux sorties de la capture HTML =====
-type TypeKey = 'clicks' | 'html' | 'sandbox' | 'video' | 'mobile';
+// ===== L60 §1 : modes. « Sandbox » est une sortie de la capture HTML ; « Format mobile » est un réglage =====
+type TypeKey = 'clicks' | 'html' | 'video' | 'sandbox';
+const MODES: Array<{ key: TypeKey; icon: IconNode; name: keyof typeof strings; desc: keyof typeof strings }> =
+  [
+    { key: 'clicks', icon: MousePointerClick, name: 'mClicks', desc: 'mClicksD' },
+    { key: 'html', icon: Code, name: 'mHtml', desc: 'mHtmlD' },
+    { key: 'video', icon: Video, name: 'mVideo', desc: 'mVideoD' },
+    { key: 'sandbox', icon: Box, name: 'mSandbox', desc: 'mSandboxD' },
+  ];
+const isMode = (v: unknown): v is TypeKey => MODES.some((m) => m.key === v);
 let htmlVerdict: 'ok' | 'disabled' | 'domain' = 'ok';
 let htmlHost = '';
-const typeOptions = (): Option[] => [
-  { value: 'clicks', label: strings.tClicks, desc: strings.tClicksD, icon: MousePointerClick },
-  { value: 'html', label: strings.tHtml, desc: strings.tHtmlD, icon: Code, disabled: htmlVerdict !== 'ok' },
-  {
-    value: 'sandbox',
-    label: strings.tSandbox,
-    desc: strings.tSandboxD,
-    icon: Box,
-    disabled: htmlVerdict !== 'ok',
-  },
-  { value: 'video', label: strings.tVideo, desc: strings.tVideoD, icon: Video },
-  // EXT-STORE, option B : sans l'outil de débogage, Format mobile reste visible en « Bientôt »
-  {
-    value: 'mobile',
-    label: strings.typeMobile,
-    desc: DEBUGGER ? strings.typeMobileHelp : strings.typeMobileSoonHelp,
-    icon: Smartphone,
-    disabled: !DEBUGGER,
-    pill: strings.soon,
-  },
-];
-const type = createSelect($<HTMLButtonElement>('type'), {
-  options: typeOptions(),
-  value: 'clicks',
-  described: true,
-  onChange: () => {
-    syncMode();
-    syncFill();
-    void browser.storage.local.set({ 'fd.lastMode': type.value });
-    void refreshDenied();
-  },
-});
-const typeKey = () => type.value as TypeKey;
-const mode = (): CaptureMode => (typeKey() === 'sandbox' ? 'html' : (typeKey() as CaptureMode));
+/** Dernier mode utilisé (par personne et par navigateur) : encadré, focus à l'ouverture, Entrée le lance. */
+let lastMode: TypeKey | null = null;
+/** Mode mis en avant à la place du dernier : Sandbox de l'app, ajout depuis l'éditeur. */
+let preferred: TypeKey | null = null;
+let chosen: TypeKey = 'clicks';
+let size: 'current' | '1440x900' | 'mobile' = 'current';
+const typeKey = () => chosen;
+const mode = (): CaptureMode =>
+  chosen === 'sandbox' ? 'html' : chosen === 'clicks' && size === 'mobile' ? 'mobile' : chosen;
 
-// ===== Options =====
-const tabsize = createSelect($<HTMLButtonElement>('tabsize'), {
-  options: [
-    { value: 'current', label: strings.sizeCurrentShort },
-    { value: '1280x720', label: '1 280 × 720' },
-    { value: '1440x900', label: '1 440 × 900' },
-    { value: '1920x1080', label: '1 920 × 1 080' },
-    { value: 'custom', label: strings.sizeCustomShort },
-  ],
-  value: 'current',
-  onChange: () => syncMode(),
-});
-const device = createSelect($<HTMLButtonElement>('device'), {
-  options: [
-    { value: 'phone', label: strings.devicePhone },
-    { value: 'large', label: strings.deviceLarge },
-    { value: 'tablet', label: strings.deviceTablet },
-    { value: 'custom', label: strings.deviceCustom },
-  ],
-  value: 'phone',
-  onChange: () => syncMode(),
-});
-const orient = createSelect($<HTMLButtonElement>('orient'), {
-  options: [
-    { value: 'portrait', label: strings.portrait },
-    { value: 'landscape', label: strings.landscape },
-  ],
-  value: 'portrait',
-});
-const follow = createSwitch($<HTMLButtonElement>('follow'), { onChange: () => syncSummary() });
-const mic = createSwitch($<HTMLButtonElement>('mic'), { onChange: () => syncSummary() });
-const webcam = createSwitch($<HTMLButtonElement>('webcam'), { onChange: () => syncSummary() });
-// EXT-02 §4.2 : « Masquer en direct », désactivé par défaut, choix mémorisé
-const liveMask = createSwitch($<HTMLButtonElement>('live-mask'), {
-  onChange: (on) => {
-    void browser.storage.local.set({ 'fd.liveMask': on });
-    syncSummary();
-  },
-});
-void browser.storage.local.get('fd.liveMask').then((r) => {
-  liveMask.checked = r['fd.liveMask'] === true;
-  syncSummary();
-});
-$('opts-toggle').addEventListener('click', () => {
-  const open = $('opts-toggle').getAttribute('aria-expanded') !== 'true';
-  $('opts-toggle').setAttribute('aria-expanded', String(open));
-  show('opts-body', open);
-  syncSummary();
-});
-for (const id of ['dw', 'dh', 'vw', 'vh'])
-  $<HTMLInputElement>(id).addEventListener('input', (e) => {
-    const el = e.currentTarget as HTMLInputElement;
-    el.value = el.value.replace(/\D/g, '');
-  });
-
-/** Repliée, la section dit ses réglages en une ligne (« Taille actuelle, nouveaux onglets suivis »). */
-function syncSummary() {
-  const m = mode();
-  const size = tabsize.options().find((o) => o.value === tabsize.value)?.label ?? '';
-  const parts =
-    m === 'video'
-      ? [
-          mic.checked ? strings.sumMicOn : strings.sumMicOff,
-          webcam.checked ? strings.sumCamOn : strings.sumCamOff,
-          ...(liveMask.checked ? [strings.sumMaskOn] : []),
-        ]
-      : [
-          m === 'mobile'
-            ? (device.options().find((o) => o.value === device.value)?.label ?? '')
-            : tabsize.value === 'current'
-              ? strings.sumSizeCurrent
-              : tabsize.value === 'custom'
-                ? strings.sumSizeCustom
-                : strings.sumSize.replace('{{s}}', size),
-          follow.checked ? strings.sumFollowOn : strings.sumFollowOff,
-        ];
-  const text = parts.join(', ');
-  $('opts-sum').textContent =
-    $('opts-toggle').getAttribute('aria-expanded') === 'true'
-      ? ''
-      : text.charAt(0).toUpperCase() + text.slice(1);
+/** Raison d'un mode refusé par la règle « Captures HTML » de l'espace (L49 §2.1) ; la ligne reste visible. */
+function modeOff(k: TypeKey): string | null {
+  if (k !== 'html' && k !== 'sandbox') return null;
+  if (htmlVerdict === 'disabled') return strings.offSpace;
+  if (htmlVerdict === 'domain') return strings.offDomain.replace('{{domain}}', htmlHost);
+  return null;
 }
-function syncMode() {
-  const m = mode();
-  const group = m === 'video' ? 'video' : m === 'mobile' ? 'mobile' : 'desk';
-  for (const el of document.querySelectorAll<HTMLElement>('#opts-body [data-for]')) {
-    const tags = el.dataset.for!.split(' ');
-    // Format mobile suit aussi les nouveaux onglets ; la taille d'onglet ne vaut pas pour lui
-    const on =
-      (tags.includes(group) || (m === 'mobile' && tags.includes('desk') && !tags.includes('size'))) &&
-      !(m === 'mobile' && tags.includes('size'));
-    // Une aide ne s'affiche que dépliée par son bouton
-    if (el.classList.contains('hlp')) {
-      if (!on) el.hidden = true;
-    } else el.hidden = !on;
+let focusModeOnce = true;
+function renderModes() {
+  const ul = $('modes');
+  const had = (document.activeElement as HTMLElement | null)?.closest?.<HTMLElement>('.mode')?.dataset.mode;
+  const top = preferred ?? lastMode;
+  ul.replaceChildren(
+    ...MODES.map((m) => {
+      const off = modeOff(m.key);
+      const desc = off ?? strings[m.desc];
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = m.key === top ? 'mode is-last' : 'mode';
+      b.dataset.mode = m.key;
+      b.setAttribute(
+        'aria-label',
+        strings.startMode.replace('{{mode}}', strings[m.name]).replace('{{desc}}', desc),
+      );
+      if (blocked || off) b.setAttribute('aria-disabled', 'true');
+      const tile = document.createElement('span');
+      tile.className = 'tile';
+      tile.append(icon(m.icon, 20));
+      const tx = document.createElement('span');
+      tx.className = 'tx';
+      tx.append(
+        Object.assign(document.createElement('b'), { textContent: strings[m.name] }),
+        Object.assign(document.createElement('small'), { textContent: desc }),
+      );
+      const end =
+        m.key === top
+          ? Object.assign(document.createElement('kbd'), { textContent: strings.enterKey })
+          : icon(ChevronRight, 16);
+      end.setAttribute('aria-hidden', 'true');
+      b.append(tile, tx, end);
+      const li = document.createElement('li');
+      li.append(b);
+      return li;
+    }),
+  );
+  $('modes-help').textContent = top ? strings.modesHelp : strings.modesHelpFirst;
+  const again = had ? ul.querySelector<HTMLElement>(`[data-mode="${had}"]`) : null;
+  if (again) again.focus();
+  else if (focusModeOnce && !$('setup').hidden) {
+    focusModeOnce = false;
+    (ul.querySelector<HTMLElement>('.is-last') ?? ul.querySelector<HTMLElement>('.mode'))?.focus();
   }
-  for (const q of document.querySelectorAll<HTMLButtonElement>('#opts-body button.q'))
-    if (document.getElementById(q.getAttribute('aria-controls')!)?.hidden)
-      q.setAttribute('aria-expanded', 'false');
-  show('desk-size', m !== 'video' && m !== 'mobile' && tabsize.value === 'custom');
-  show('custom-size', m === 'mobile' && device.value === 'custom');
-  show('full-row', !DEBUGGER && m === 'clicks');
-  // Raison d'une capture HTML refusée par la règle de l'espace (L49 §2.1)
-  const note =
-    htmlVerdict === 'disabled'
-      ? strings.htmlBlockedDisabled
-      : htmlVerdict === 'domain'
-        ? strings.htmlBlockedDomain.replace('{{domain}}', htmlHost)
-        : '';
-  $('type-note').textContent = note;
-  show('type-note', !!note);
-  syncSummary();
 }
-// « Actuelle · 1 512 × 862 » : taille de l'onglet courant, dans la liste
+$('modes').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>('.mode');
+  if (!b || b.getAttribute('aria-disabled') === 'true') return;
+  void startMode(b.dataset.mode as TypeKey);
+});
+// Flèches haut et bas : d'un mode à l'autre
+$('modes').addEventListener('keydown', (e) => {
+  const all = [...$('modes').querySelectorAll<HTMLElement>('.mode')];
+  const i = all.indexOf(document.activeElement as HTMLElement);
+  if (i < 0) return;
+  const to =
+    e.key === 'ArrowDown'
+      ? all[(i + 1) % all.length]
+      : e.key === 'ArrowUp'
+        ? all[(i - 1 + all.length) % all.length]
+        : e.key === 'Home'
+          ? all[0]
+          : e.key === 'End'
+            ? all[all.length - 1]
+            : null;
+  if (!to) return;
+  e.preventDefault();
+  to.focus();
+});
+
+// « Sur ExampleCRM · app.example.com » : la bonne page est visée
 void browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-  if (!tab?.width || !tab.height) return;
-  const opts = tabsize.options();
-  opts[0] = {
-    ...opts[0]!,
-    desc: `${tab.width.toLocaleString(lang)} × ${tab.height.toLocaleString(lang)}`,
-  };
-  tabsize.setOptions(opts);
+  let host = '';
+  try {
+    const u = new URL(tab?.url ?? '');
+    if (u.protocol === 'http:' || u.protocol === 'https:') host = u.host;
+  } catch {
+    /* page sans adresse */
+  }
+  if (!host) return;
+  const title = (tab?.title ?? '').trim();
+  $('page-line').querySelector('span')!.textContent = title
+    ? strings.onPage.replace('{{title}}', title).replace('{{host}}', host)
+    : strings.onPage.replace('{{title}} · ', '').replace('{{host}}', host);
+  show('page-line', true);
 });
-function viewport(): { w: number; h: number } {
-  return viewportFor(device.value as DeviceKey, orient.value === 'landscape', {
-    w: +$<HTMLInputElement>('vw').value || 390,
-    h: +$<HTMLInputElement>('vh').value || 844,
-  });
+
+// ===== Réglages de capture (tous mémorisés) =====
+const follow = createSwitch($<HTMLButtonElement>('follow'), {
+  onChange: (on) => void browser.storage.local.set({ 'fd.follow': on }),
+});
+const mic = createSwitch($<HTMLButtonElement>('mic'), {
+  onChange: (on) => void browser.storage.local.set({ 'fd.mic': on }),
+});
+const webcam = createSwitch($<HTMLButtonElement>('webcam'), {
+  onChange: (on) => void browser.storage.local.set({ 'fd.webcam': on }),
+});
+// EXT-02 §4.2 : « Flouter en direct », désactivé par défaut
+const liveMask = createSwitch($<HTMLButtonElement>('live-mask'), {
+  onChange: (on) => void browser.storage.local.set({ 'fd.liveMask': on }),
+});
+// Sans l'outil de débogage, la taille passe par la fenêtre (README §6.3)
+$('size-h').textContent = DEBUGGER
+  ? strings.sizeHelpMobile
+  : `${strings.sizeHelp} ${strings.tabSizeHelpWindow}`;
+const sizeButtons = () => [...$('size').querySelectorAll<HTMLButtonElement>('button')];
+function paintSize() {
+  for (const b of sizeButtons()) {
+    const on = b.dataset.value === size;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+    // EXT-STORE, option B : sans l'outil de débogage, Mobile reste visible en « Bientôt »
+    if (b.dataset.value === 'mobile' && !DEBUGGER) {
+      b.setAttribute('aria-disabled', 'true');
+      b.title = strings.soon;
+    }
+  }
 }
-void browser.storage.local.get('fd.lastMode').then((r) => {
-  const saved = r['fd.lastMode'] as string | undefined;
-  if (saved && type.options().some((o) => o.value === saved && !o.disabled)) type.set(saved);
-  syncMode();
+function pickSize(b: HTMLButtonElement | undefined) {
+  if (!b || b.getAttribute('aria-disabled') === 'true') return;
+  size = b.dataset.value as typeof size;
+  paintSize();
+  b.focus();
+  void browser.storage.local.set({ 'fd.tabSize': size });
+  void refreshDenied();
+}
+$('size').addEventListener('click', (e) =>
+  pickSize((e.target as HTMLElement).closest<HTMLButtonElement>('button') ?? undefined),
+);
+$('size').addEventListener('keydown', (e) => {
+  const all = sizeButtons().filter((b) => b.getAttribute('aria-disabled') !== 'true');
+  const i = all.indexOf(document.activeElement as HTMLButtonElement);
+  const d =
+    e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      ? 1
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+        ? -1
+        : 0;
+  if (!d || i < 0) return;
+  e.preventDefault();
+  pickSize(all[(i + d + all.length) % all.length]);
 });
-syncMode();
+paintSize();
+void browser.storage.local
+  .get(['fd.lastMode', 'fd.tabSize', 'fd.follow', 'fd.mic', 'fd.webcam', 'fd.liveMask'])
+  .then((r) => {
+    const saved = r['fd.lastMode'];
+    // Ancien « Format mobile » : captures d'écran en taille Mobile
+    lastMode = saved === 'mobile' ? 'clicks' : isMode(saved) ? saved : null;
+    const t = r['fd.tabSize'] ?? (saved === 'mobile' && DEBUGGER ? 'mobile' : 'current');
+    if (t === 'current' || t === '1440x900' || (t === 'mobile' && DEBUGGER)) size = t;
+    follow.checked = r['fd.follow'] === true;
+    mic.checked = r['fd.mic'] === true;
+    webcam.checked = r['fd.webcam'] === true;
+    liveMask.checked = r['fd.liveMask'] === true;
+    paintSize();
+    renderModes();
+  });
+function viewport(): { w: number; h: number } {
+  return viewportFor('phone' as DeviceKey, false, { w: 390, h: 844 });
+}
 
 // ===== Bandeau d'erreur (EXT-02 §1.3) : titre, phrase, action ; « Démarrer » désactivé, jamais masqué =====
 type Problem = { title?: string; text: string; retry?: boolean; blocking?: boolean };
@@ -322,7 +336,8 @@ function problem(p: Problem | null) {
   show('error-retry', !!p?.retry);
   $('error').hidden = !p;
   blocked = !!p?.blocking;
-  $('start').setAttribute('aria-disabled', String(blocked));
+  // Page impossible à capturer : les 4 lignes restent, désactivées
+  renderModes();
 }
 const error = (msg: string | null) => problem(msg ? { text: msg } : null);
 /** Page système, hors ligne : la capture ne peut pas démarrer d'ici. */
@@ -353,6 +368,7 @@ const workspace = createSelect($<HTMLButtonElement>('workspace'), {
   onChange: () => {
     void loadFills();
     void syncHtmlRule();
+    syncDest();
   },
 });
 async function loadWorkspaces() {
@@ -391,7 +407,7 @@ let fills: FillTarget[] = [];
 const fill = createSelect($<HTMLButtonElement>('fill'), {
   options: [{ value: '', label: strings.fillNew }],
   value: '',
-  onChange: () => syncFill(),
+  onChange: () => syncDest(),
 });
 async function loadFills() {
   const ws = workspace.value;
@@ -428,8 +444,21 @@ async function loadFills() {
   syncFill();
 }
 function syncFill() {
-  show('fill-field', fills.length > 0 && mode() === 'clicks');
-  show('title-field', !(fill.value && mode() === 'clicks'));
+  show('fill-field', fills.length > 0);
+  syncDest();
+}
+/** « Dans Acme · Nouvelle démo » : espace et démo de destination, en une ligne. */
+let addingTitle = '';
+function syncDest() {
+  const ws = workspace.options().find((o) => o.value === workspace.value)?.label ?? '';
+  const demo = addingTitle || fills.find((f) => f.demoId === fill.value)?.title || strings.fillNew;
+  const t = $('dest-text');
+  t.replaceChildren(
+    `${strings.destIn} `,
+    Object.assign(document.createElement('b'), { textContent: ws }),
+    ` · ${demo}`,
+  );
+  t.title = `${strings.destIn} ${ws} · ${demo}`;
 }
 
 /**
@@ -453,16 +482,17 @@ async function syncHtmlRule() {
     /* onglet sans adresse : seul le mode « désactivées » s'applique ici */
   }
   htmlVerdict = rule.mode === 'disabled' || htmlHost ? htmlCaptureVerdict(rule, htmlHost) : 'ok';
-  type.setOptions(typeOptions());
-  syncMode();
+  renderModes();
 }
 
 // ===== Vues : connexion, réglage de la capture, réglages de l'extension, capture en cours =====
-type View = 'login' | 'setup' | 'settings' | 'recording';
+type View = 'login' | 'setup' | 'dest' | 'settings' | 'recording';
 function view(v: View) {
-  for (const id of ['login', 'setup', 'settings', 'recording']) show(id, id === v);
+  for (const id of ['login', 'setup', 'dest', 'settings', 'recording']) show(id, id === v);
   show('foot-login', v === 'login');
-  show('foot-setup', v === 'setup');
+  // Pied commun aux vues de la capture : Réglages, « Données vérifiées »
+  show('foot-setup', v === 'setup' || v === 'dest' || v === 'settings');
+  show('open-prefs', v !== 'settings');
   show('foot-recording', v === 'recording');
   // Hors session : ni réglages ni déconnexion dans le menu
   show('open-settings', v !== 'login');
@@ -509,7 +539,7 @@ async function render() {
   }
   const { data } = await supabase.auth.getSession();
   if (!data.session) return view('login');
-  if ($('settings').hidden) view('setup');
+  if ($('settings').hidden && $('dest').hidden) view('setup');
   await loadWorkspaces();
   await Promise.all([loadFills(), syncHtmlRule()]);
   await syncAttach();
@@ -532,15 +562,20 @@ async function syncAttach() {
     ? strings.addNote.replace('{{demo}}', adding.title)
     : strings.attachNote;
   show('attach-note', !!a || !!adding);
-  show('title-field', !adding && !(fill.value && mode() === 'clicks'));
+  addingTitle = adding?.title ?? '';
+  preferred = null;
   if (adding) {
     if (workspace.options().some((o) => o.value === adding.workspaceId))
       workspace.set(adding.workspaceId, true);
-    if (mode() !== 'clicks') type.set('clicks', true);
+    // La cible de l'éditeur vaut pour les captures d'écran
+    preferred = 'clicks';
   }
-  if (!a) return;
-  if (workspace.options().some((o) => o.value === a.workspaceId)) workspace.set(a.workspaceId, true);
-  if (htmlVerdict === 'ok' && mode() !== 'html') type.set('sandbox', true);
+  if (a) {
+    if (workspace.options().some((o) => o.value === a.workspaceId)) workspace.set(a.workspaceId, true);
+    if (htmlVerdict === 'ok') preferred = 'sandbox';
+  }
+  syncDest();
+  renderModes();
 }
 
 // ===== Réglages de l'extension (EXT-02 §5) : cadre par défaut des captures, réglé par chaque personne =====
@@ -559,13 +594,27 @@ void browser.storage.local.get('fd.frame').then((r) => {
 });
 $('version').textContent = strings.versionLine.replace('{{v}}', browser.runtime.getManifest().version);
 $('settings-back').setAttribute('aria-label', strings.back);
-$('open-settings').addEventListener('click', () => {
+$('dest-back').setAttribute('aria-label', strings.back);
+$('dest-change').setAttribute('aria-label', strings.destChangeLabel);
+let prefsFrom: HTMLElement = $('open-prefs');
+const openPrefs = (from: HTMLElement) => {
+  prefsFrom = from;
   view('settings');
   $('settings-back').focus();
-});
+};
+$('open-settings').addEventListener('click', () => openPrefs($('more')));
+$('open-prefs').addEventListener('click', () => openPrefs($('open-prefs')));
 $('settings-back').addEventListener('click', () => {
   view('setup');
-  $('more').focus();
+  prefsFrom.focus();
+});
+$('dest-change').addEventListener('click', () => {
+  view('dest');
+  $('dest-back').focus();
+});
+$('dest-back').addEventListener('click', () => {
+  view('setup');
+  $('dest-change').focus();
 });
 
 $<HTMLAnchorElement>('signup-link').href = `${APP_URL.replace(/\/$/, '')}/#/signup`;
@@ -594,7 +643,8 @@ $('logout').addEventListener('click', async () => {
 
 // ===== EXT-STORE §6 : autorisations facultatives (debugger, accès aux sites), demandées au démarrage =====
 let need: PermissionNeed = { debugger: null, sites: false };
-const sizeKey = () => tabsize.value;
+// Mobile passe par le mode « mobile » (captures d'écran) ; ailleurs, la taille actuelle
+const sizeKey = () => (size === '1440x900' ? '1440x900' : 'current');
 async function currentNeed(): Promise<PermissionNeed> {
   const [hasDebugger, hasSites, later] = await Promise.all([
     browser.permissions.contains({ permissions: ['debugger'] }),
@@ -684,10 +734,20 @@ $('perm-again').addEventListener('click', () => {
     });
 });
 
-$('start').addEventListener('click', async () => {
-  const btn = $<HTMLButtonElement>('start');
-  if (btn.getAttribute('aria-disabled') === 'true' || btn.dataset.busy) return;
-  btn.dataset.busy = '1';
+// ===== Démarrage : un clic sur un mode =====
+let starting = false;
+async function startMode(k: TypeKey) {
+  if (starting) return;
+  chosen = k;
+  // Avertissement HTML (L49) : une seule fois, dans le popup, avant la première capture HTML ou Sandbox
+  if ((k === 'html' || k === 'sandbox') && !(await browser.storage.local.get(NOTICE_KEY))[NOTICE_KEY]) {
+    pendingNotice = k;
+    show('notice', true);
+    $('notice-ok').setAttribute('aria-checked', 'false');
+    $('notice-ok').focus();
+    return;
+  }
+  starting = true;
   try {
     if (!(await checkPage())) return;
     error(null);
@@ -697,8 +757,18 @@ $('start').addEventListener('click', async () => {
   } catch (err) {
     error((err as Error).message);
   } finally {
-    delete btn.dataset.busy;
+    starting = false;
   }
+}
+const NOTICE_KEY = 'fd.htmlNoticeOk';
+let pendingNotice: TypeKey | null = null;
+$('notice-ok').addEventListener('click', () => {
+  $('notice-ok').setAttribute('aria-checked', 'true');
+  if (!pendingNotice) return;
+  const k = pendingNotice;
+  pendingNotice = null;
+  show('notice', false);
+  void browser.storage.local.set({ [NOTICE_KEY]: true }).then(() => startMode(k));
 });
 
 /** Démarre la capture ; sans `debugger`, la taille d'onglet reste celle de l'onglet (README §6.3). */
@@ -712,6 +782,7 @@ async function startCapture(hasDebugger: boolean) {
     // « HTML guidée » ou « Sandbox » : la vérification présélectionne cette sortie
     await browser.storage.local.set({
       'fd.lastWorkspace': workspaceId,
+      'fd.lastMode': chosen,
       'fd.htmlKind': typeKey() === 'sandbox' ? 'sandbox' : typeKey() === 'html' ? 'guided' : null,
     });
     let streamId: string | undefined;
@@ -726,7 +797,8 @@ async function startCapture(hasDebugger: boolean) {
     await send({
       type: 'fd:start',
       workspaceId,
-      title: $<HTMLInputElement>('title').value.trim(),
+      // La démo prend le titre de l'onglet ; elle se renomme dans l'éditeur
+      title: (tab.title ?? '').trim().slice(0, 160),
       tabId: tab.id,
       mode: m,
       streamId,
@@ -738,10 +810,7 @@ async function startCapture(hasDebugger: boolean) {
       fill: m === 'clicks' ? (fills.find((f) => f.demoId === fill.value) ?? null) : null,
       size:
         (m === 'clicks' || m === 'html') && hasDebugger
-          ? tabSize(tabsize.value as TabSizeKey, {
-              w: +$<HTMLInputElement>('dw').value,
-              h: +$<HTMLInputElement>('dh').value,
-            })
+          ? tabSize(sizeKey() as TabSizeKey, { w: 0, h: 0 })
           : null,
     });
     await render();

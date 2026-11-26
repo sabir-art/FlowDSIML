@@ -32,10 +32,14 @@ const ui = require('./popup-ui.cjs');
   await popup.fill('#password', 'x');
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
+  // L60 §1 : la démo à compléter se choisit dans la destination (« Changer »)
+  await popup.click('#dest-change');
   await popup.waitForSelector('#fill-field:not([hidden])');
   const fillOpts = (await ui.options(popup, 'fill')).map((o) => o.label);
   await ui.pick(popup, 'fill', '33333333-3333-3333-3333-333333333333');
-  const titleHidden = await popup.$eval('#title-field', (e) => e.hidden);
+  await popup.click('#dest-back');
+  const destLine = await popup.locator('#dest-text').innerText();
+  const noTitle = (await popup.locator('#title').count()) === 0;
   if (process.env.SHOTS_DIR)
     await popup.screenshot({ path: `${process.env.SHOTS_DIR}/l26-04-extension-popup.png` });
   const tabId = await popup.evaluate(
@@ -86,7 +90,10 @@ const ui = require('./popup-ui.cjs');
     fillOpts.some((o) => /Compléter : Prise en main \(2 à capturer\)/.test(sp(o))),
     'popup : « Compléter : … »',
   );
-  ok(titleHidden, 'popup : pas de titre à saisir quand on complète une démo');
+  ok(
+    destLine === 'Dans Acme · Prise en main' && noTitle,
+    `popup : destination « ${destLine} », pas de titre à saisir`,
+  );
   ok(/Étape à capturer : Se connecter \(1 \/ 2\)/.test(sp(badge1)), `barre : 1 / 2 (${badge1})`);
   ok(
     /Étape à capturer : Repérer le menu \(2 \/ 2\)/.test(sp(badge2)),

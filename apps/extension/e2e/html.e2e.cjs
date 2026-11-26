@@ -45,36 +45,35 @@ const WS = '11111111-1111-1111-1111-111111111111';
     await popup.reload();
     await popup.waitForSelector('#setup:not([hidden])');
     await popup.waitForTimeout(400);
-    const types = await ui.options(popup, 'type');
+    // L60 §1 : la ligne reste visible, grisée ; sa phrase dit la raison
+    const types = await ui.modes(popup);
+    const html = types.filter((t) => t.mode === 'html' || t.mode === 'sandbox');
     return {
-      disabled: types.filter((t) => t.value === 'html' || t.value === 'sandbox').every((t) => t.disabled),
-      clicks: !types.find((t) => t.value === 'clicks').disabled,
-      help: await popup.textContent('#type-note'),
+      disabled: html.every((t) => t.disabled),
+      clicks: !types.find((t) => t.mode === 'clicks').disabled,
+      help: html[0].desc,
+      same: html[0].desc === html[1].desc,
     };
   };
   await rule({ mode: 'disabled', domains: [] });
   let hc = await htmlCard();
   ok(
-    hc.disabled && hc.help === 'Les captures HTML sont désactivées dans votre espace.',
-    'L49 : désactivées, raison',
+    hc.disabled && hc.same && hc.help === 'Désactivé par l’espace',
+    'L49 : HTML et Sandbox grisés, phrase « Désactivé par l’espace »',
   );
   await rule({ mode: 'domains', domains: ['app.example.com'] });
   hc = await htmlCard();
   ok(
-    hc.disabled && hc.help.startsWith('Non autorisée sur ce site\u202f: localhost n’est pas dans la liste'),
+    hc.disabled && hc.help === 'Non autorisé sur localhost',
     `L49 : domaine hors liste, raison (${hc.help})`,
   );
   ok(hc.clicks, 'L49 : capture d’écran toujours proposée');
   await rule({ mode: 'allowed', domains: [] });
   hc = await htmlCard();
-  ok(!hc.disabled, 'L49 : autorisées, « HTML guidée » et « Sandbox » actives');
-  await ui.pick(popup, 'type', 'html');
   ok(
-    (await popup.locator('#type').innerText()).replace(/\s+/g, ' ').trim() ===
-      'HTML guidée La page, rejouée étape par étape',
-    '« HTML guidée » choisie, avec sa description',
+    !hc.disabled && hc.help === 'La page rejouée, nette partout',
+    'L49 : autorisées, « HTML » et « Sandbox » actives',
   );
-  ok((await popup.textContent('#start')).trim() === 'Démarrer', 'bouton « Démarrer »');
   await shot(popup, 'l20-00-popup-html');
 
   const tabId = await popup.evaluate(
@@ -109,15 +108,12 @@ const WS = '11111111-1111-1111-1111-111111111111';
     };
   });
   ok(bar.label === 'Capture HTML en cours' && bar.n === '1 page', `barre de capture HTML (${bar.n})`);
+  // L60 §1 : la mention d'autorisation est dans le popup, une fois (popup.e2e) ; plus sur la page
   const notice = await page.evaluate(() => {
     const host = [...document.querySelectorAll('[data-fd-ui]')].find((e) => e.shadowRoot);
-    const n = host?.shadowRoot.querySelector('.notice');
-    return n && !n.hidden ? n.textContent.trim() : null;
+    return !!host?.shadowRoot.querySelector('.notice');
   });
-  ok(
-    notice?.startsWith('Capturez uniquement des logiciels que vous êtes autorisé à reproduire.'),
-    'L49 §6 : mention d’autorisation au lancement',
-  );
+  ok(!notice, 'L49 §6 : la mention ne recouvre plus la page');
   await page.click('a[href="/page2"]');
   await page.waitForURL(/page2/);
   ok(await waitSteps(2), 'page suivante capturée après le clic');
