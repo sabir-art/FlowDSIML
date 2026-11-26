@@ -1217,6 +1217,7 @@ export type Database = {
           demo_id: string;
           duration_s: number;
           id: string;
+          mode: string | null;
           notes_changed: number;
           owner: string;
           started_at: string;
@@ -1230,6 +1231,7 @@ export type Database = {
           demo_id: string;
           duration_s: number;
           id?: string;
+          mode?: string | null;
           notes_changed?: number;
           owner?: string;
           started_at: string;
@@ -1242,6 +1244,7 @@ export type Database = {
           demo_id?: string;
           duration_s?: number;
           id?: string;
+          mode?: string | null;
           notes_changed?: number;
           owner?: string;
           started_at?: string;
