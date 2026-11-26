@@ -4,6 +4,7 @@ import {
   DEFAULT_RULES,
   autoPick,
   fallbackOf,
+  replacementOf,
   kindOf,
   menuOf,
   requested,
@@ -39,13 +40,38 @@ Deno.test('Auto : demande courte ou analyse de toute la démo ; repli', () => {
   const rules = { ...DEFAULT_RULES, whole_demo: 'claude-opus-5-5' };
   assertEquals(autoPick(rules, menu, 'Raccourcis cette bulle'), 'claude-sonnet-5-5');
   assertEquals(autoPick(rules, menu, 'Analyse toutes les étapes'), 'claude-opus-5-5');
-  // Règle hors du menu : le premier du menu ; menu vide : aucun
+  // Règle hors du menu : le premier Recommandé (ici Sonnet) ; menu vide : aucun
   assertEquals(autoPick({ ...rules, short: 'claude-haiku-5-5' }, menu, 'court'), 'claude-sonnet-5-5');
   assertEquals(autoPick(rules, [], 'court'), null);
   assertEquals(fallbackOf(DEFAULT_RULES, menu, 'claude-sonnet-5-5'), 'claude-opus-5-5');
   assertEquals(fallbackOf(DEFAULT_RULES, menu, 'claude-opus-5-5'), 'claude-sonnet-5-5');
   assertEquals(fallbackOf({ ...DEFAULT_RULES, fallback: 'claude-opus-5-5' }, menu, 'claude-opus-5-5'), null);
 });
+
+Deno.test(
+  'règle dont le modèle n’est plus proposé : premier Recommandé du menu, jamais un Bêta avant',
+  () => {
+    // Menu : Haiku (Bêta) en tête, puis Opus (Recommandé) ; Sonnet n'est plus proposé
+    const menu = menuOf(
+      [
+        { model: 'claude-haiku-5-5', position: 1, proposed: true, tag: 'beta' },
+        { model: 'claude-opus-5-5', position: 2, proposed: true, tag: 'recommended' },
+        { model: 'claude-sonnet-5-5', position: 3, proposed: false, tag: 'recommended' },
+      ],
+      ALL,
+    );
+    assertEquals(replacementOf(menu), 'claude-opus-5-5');
+    assertEquals(autoPick(DEFAULT_RULES, menu, 'Raccourcis cette bulle'), 'claude-opus-5-5');
+    assertEquals(autoPick(DEFAULT_RULES, menu, 'Analyse toute la démo'), 'claude-opus-5-5');
+    // Aucun Recommandé : le premier du menu
+    const plain = menu.map((m) => ({ ...m, tag: 'none' as const }));
+    assertEquals(autoPick(DEFAULT_RULES, plain, 'court'), 'claude-haiku-5-5');
+    // Repli sur un modèle non proposé : le remplaçant, autre que le modèle qui vient d'échouer
+    const fb = { ...DEFAULT_RULES, fallback: 'claude-sonnet-5-5' };
+    assertEquals(fallbackOf(fb, menu, 'claude-haiku-5-5'), 'claude-opus-5-5');
+    assertEquals(fallbackOf(fb, menu, 'claude-opus-5-5'), 'claude-haiku-5-5');
+  },
+);
 
 Deno.test('modèle demandé : Auto, modèle du menu, anciens choix ; sinon refusé', () => {
   const menu = menuOf(ROWS, ALL);
@@ -129,7 +155,24 @@ Deno.test(
       x.rows.map((r) => `${r.position}:${r.model}:${r.proposed}`),
       ['1:claude-opus-5-5:true', '2:claude-haiku-5-5:true', '3:claude-sonnet-5-5:false'],
     );
-    assertEquals(x.labels.at(-1), 'Liste de l’assistant : Claude Opus, Claude Haiku');
+    assertEquals(
+      x.labels.at(-1),
+      'Liste de l’assistant · Claude Haiku : proposé ; Claude Haiku : étiquette Bêta ; ' +
+        'Claude Sonnet : retiré ; Claude Sonnet : sans étiquette',
+    );
+    // Ordre seul, puis étiquette seule : le journal les distingue
+    await set([
+      { model: 'claude-haiku-5-5', proposed: true, tag: 'beta' },
+      { model: 'claude-opus-5-5', proposed: true, tag: 'recommended' },
+      { model: 'claude-sonnet-5-5', proposed: false, tag: 'none' },
+    ]);
+    assertEquals(x.labels.at(-1), 'Liste de l’assistant · Ordre : Claude Haiku, Claude Opus');
+    await set([
+      { model: 'claude-haiku-5-5', proposed: true, tag: 'recommended' },
+      { model: 'claude-opus-5-5', proposed: true, tag: 'recommended' },
+      { model: 'claude-sonnet-5-5', proposed: false, tag: 'none' },
+    ]);
+    assertEquals(x.labels.at(-1), 'Liste de l’assistant · Claude Haiku : étiquette Recommandé');
     const last = await set([{ model: 'claude-opus-5-5', proposed: false, tag: 'none' }]);
     assertEquals([last.status, last.body.error], [409, 'LAST_MODEL']);
     assertEquals((await set([{ model: 'gpt-5', proposed: true, tag: 'none' }])).body.error, 'BAD_LIST');
