@@ -153,7 +153,8 @@ export function assistantChange(before: AssistantRow[], after: AssistantRow[]): 
   const a = order(before).filter((m) => kept.has(m));
   const b = order(after).filter((m) => kept.has(m));
   if (a.join() !== b.join()) parts.push(`Ordre : ${order(after).map(labelOf).join(', ')}`);
-  return `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`;
+  // Recette UX de l'étape 6 : l'action dit déjà « Liste de l'assistant modifiée », pas de préfixe ici
+  return parts.length ? parts.join(' ; ') : 'Aucun changement';
 }
 
 /** Liste proposée, lisible, pour le journal : « Claude Sonnet (Recommandé), Claude Haiku (Bêta) ». */

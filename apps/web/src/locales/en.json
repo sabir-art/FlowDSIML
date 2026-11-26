@@ -5970,7 +5970,13 @@
       "onlyAi": "Filtered on AI models",
       "showAll": "Show all",
       "before": "Before",
-      "after": "After"
+      "after": "After",
+      "change": {
+        "order": "Order",
+        "proposed": "Offered",
+        "notProposed": "Not offered",
+        "noTag": "No tag"
+      }
     },
     "action": {
       "console_open": "Connexion à la console",

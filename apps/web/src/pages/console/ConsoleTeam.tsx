@@ -12,6 +12,7 @@ import { formatDateTime } from '../../lib/format';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { WriteButton, actionLabel, exportCsv, rpcError, useConsoleRole } from './shared';
+import { assistantListChanges } from './auditChange';
 import type { PlatformRole } from './platform';
 import { Select } from '@flowdsiml/ui';
 
@@ -48,6 +49,12 @@ export function Team() {
   // L41 : « Historique des changements » de Modèles IA arrive filtré sur les actions IA (?objet=ai)
   const [params, setParams] = useSearchParams();
   const objet = params.get('objet');
+  const words = {
+    order: t('console.tm.change.order'),
+    proposed: t('console.tm.change.proposed'),
+    notProposed: t('console.tm.change.notProposed'),
+    noTag: t('console.tm.change.noTag'),
+  };
   const [dialog, ask] = useConfirm();
   const load = useCallback(() => {
     void supabase.rpc('console_team').then(({ data }) => setTeam((data as unknown as Owner[]) ?? []));
@@ -191,7 +198,8 @@ export function Team() {
                 'journal',
                 'export.audit',
                 ['date', 'personne', 'action', 'objet', 'avant', 'après'],
-                rows.map((e) => [e.at, e.actor, e.action, e.label, e.old ?? '', e.new ?? '']),
+                // Libellé de l'action (pas le code) ; listes complètes de l'assistant gardées
+                rows.map((e) => [e.at, e.actor, actionLabel(t, e.action), e.label, e.old ?? '', e.new ?? '']),
               )
             }
           >
@@ -213,17 +221,44 @@ export function Team() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((e) => (
-                <tr key={e.id}>
-                  <td className="fd-muted">{formatDateTime(e.at)}</td>
-                  <td>{e.actor}</td>
-                  <td>{actionLabel(t, e.action)}</td>
-                  <td>{e.label}</td>
-                  {/* Une seule valeur vide se lit « — » ; aucune valeur : cellules vides pour l'ancienne ligne */}
-                  <td className="console-audit-val">{e.old ?? (e.new ? '—' : '')}</td>
-                  <td className="console-audit-val">{e.new ?? (e.old ? '—' : '')}</td>
-                </tr>
-              ))}
+              {rows.map((e) => {
+                // Liste de l'assistant : seulement ce qui change, une ligne par changement (recette UX)
+                const ch =
+                  e.action === 'ai.assistant_list' ? assistantListChanges(e.old, e.new, words) : null;
+                return (
+                  <tr key={e.id}>
+                    <td className="fd-muted console-audit-at">{formatDateTime(e.at)}</td>
+                    <td>{e.actor}</td>
+                    <td>{actionLabel(t, e.action)}</td>
+                    {ch ? (
+                      <>
+                        <td>
+                          {ch.map((c, i) => (
+                            <div key={i}>{c.object}</div>
+                          ))}
+                        </td>
+                        <td className="console-audit-val">
+                          {ch.map((c, i) => (
+                            <div key={i}>{c.before}</div>
+                          ))}
+                        </td>
+                        <td className="console-audit-val">
+                          {ch.map((c, i) => (
+                            <div key={i}>{c.after}</div>
+                          ))}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{e.label}</td>
+                        {/* Une seule valeur vide se lit « — » ; aucune valeur : cellules vides (ancienne ligne) */}
+                        <td className="console-audit-val">{e.old ?? (e.new ? '—' : '')}</td>
+                        <td className="console-audit-val">{e.new ?? (e.old ? '—' : '')}</td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

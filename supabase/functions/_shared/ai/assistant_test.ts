@@ -160,7 +160,7 @@ Deno.test(
     );
     assertEquals(
       x.labels.at(-1),
-      'Liste de l’assistant · Claude Haiku : proposé ; Claude Haiku : étiquette Bêta ; ' +
+      'Claude Haiku : proposé ; Claude Haiku : étiquette Bêta ; ' +
         'Claude Sonnet : retiré ; Claude Sonnet : sans étiquette | ' +
         'Claude Sonnet (Recommandé), Claude Opus (Recommandé) | Claude Opus (Recommandé), Claude Haiku (Bêta)',
     );
@@ -172,7 +172,7 @@ Deno.test(
     ]);
     assertEquals(
       x.labels.at(-1),
-      'Liste de l’assistant · Ordre : Claude Haiku, Claude Opus | ' +
+      'Ordre : Claude Haiku, Claude Opus | ' +
         'Claude Opus (Recommandé), Claude Haiku (Bêta) | Claude Haiku (Bêta), Claude Opus (Recommandé)',
     );
     await set([
@@ -180,10 +180,7 @@ Deno.test(
       { model: 'claude-opus-5-5', proposed: true, tag: 'recommended' },
       { model: 'claude-sonnet-5-5', proposed: false, tag: 'none' },
     ]);
-    assertEquals(
-      x.labels.at(-1)?.split(' | ')[0],
-      'Liste de l’assistant · Claude Haiku : étiquette Recommandé',
-    );
+    assertEquals(x.labels.at(-1)?.split(' | ')[0], 'Claude Haiku : étiquette Recommandé');
     const last = await set([{ model: 'claude-opus-5-5', proposed: false, tag: 'none' }]);
     assertEquals([last.status, last.body.error], [409, 'LAST_MODEL']);
     assertEquals((await set([{ model: 'gpt-5', proposed: true, tag: 'none' }])).body.error, 'BAD_LIST');
