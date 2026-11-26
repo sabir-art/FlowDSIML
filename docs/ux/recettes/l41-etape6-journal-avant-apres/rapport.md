@@ -118,3 +118,30 @@ Cause : `apps/web/src/styles/maquette.css` l. 1372, `.mk .fd-switch input:checke
 Correction : ajouter `:not(:disabled):not([aria-disabled='true'])` à la règle `.mk`, ou y dupliquer la règle grise. Puis contrôler dans l'e2e un interrupteur de l'éditeur en rôle lecteur.
 
 Demandes concernées : L41 (date de la première proposition, journal de la liste de l'assistant, CSV, section rechargée après une clé, cause « clé manquante » d'abord, état avant un premier test) · interrupteur activé et désactivé en gris (31bc369).
+
+## Recette sur ab5c870 (26/11) : A VERT, B ROUGE léger (inchangé), D VERT
+
+**Banc** : `claude/dev-mvp` à ab5c870, qui contient 388de70 et ab5c870, en clair et en sombre.
+
+| Lettre | Verdict | Mesure |
+| --- | --- | --- |
+| **A** · L41 | **VERT** | Tout est acquis depuis bc4b452. En plus, avec 388de70, le premier test de la clé ElevenLabs (définie au déploiement, jamais testée) écrit « **Jamais testée** → Test réussi », et le test suivant « Test réussi → Test réussi ». |
+| **B** · interrupteur gris | **ROUGE léger, inchangé** | ab5c870 ne touche pas `maquette.css` : dans l'éditeur en lecture seule, « Lecture automatique » et « Sous-titres affichés » restent prune (voir la section précédente). |
+| **D** · plan du Sandbox, liens jamais ouverts | **VERT** | Voir le détail ci-dessous. |
+
+**Détail de D**, sur le plan d'une page « Mon compte » qui contient 5 liens sans page :
+- « Factures » garde « Capturer cette page ».
+- « Se déconnecter », « Supprimer mon compte », « Tarifs (PDF) » et « Ne plus recevoir la lettre » (`?action=unsubscribe`) affichent le bouclier et « Jamais ouverte par sécurité » en texte discret (gris, 13 px), sans bouton.
+- « Ouvrir la page » et le menu ⋯ (Relier / Laisser) restent, ce que le chef a accepté.
+- e2e l48g-liens : 31/31 ; axe sans violation ; test unitaire `riskyLink` : 3/3.
+- Le contrôle des liens à risque de l'e2e tourne toujours en clair, même avec `THEME=dark`, car son contexte n'utilise pas `themedContext`. Je l'ai rejoué en sombre : conforme.
+
+Capture : `ab5c870-D-liens-jamais-ouverts.png`, en clair et en sombre.
+
+Remarques non bloquantes sur D :
+1. « Ouvrir la page » sur « Se déconnecter » ouvre la vraie adresse de déconnexion : l'auteur se déconnecte de son propre site. Le geste est volontaire, mais je propose une infobulle sur ce lien pour les liens à risque : « Ouvre la page sur votre site : cela peut vous déconnecter ou agir sur votre compte. »
+2. La spec §5 (a19e542) prévoyait la raison précise (« adresse de déconnexion », « fichier »). Le texte unique « Jamais ouverte par sécurité » choisi par le chef suffit. Je mets la spec à jour.
+3. Le motif de `isRisky` peut aussi écarter des liens anodins dont le libellé contient « Supprimer » ou « Effacer » (par exemple « Effacer les filtres »). C'est sans danger, puisque ces liens restent ouvrables et peuvent être reliés.
+4. Dans l'e2e, passer le contexte de ce contrôle par `themedContext`.
+
+Demandes concernées : L41 (« Jamais testée » avant un premier test) · interrupteur gris (31bc369) · Sandbox v2, plan « Liens sans page », liens de déconnexion, de suppression, de désabonnement et fichiers jamais ouverts.
