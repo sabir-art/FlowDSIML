@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { supabase } from '../../../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -102,6 +103,19 @@ export function SandboxPlan({
   }
   const pages = editor.steps.filter((s) => s.kind === 'html');
   const sb = sandboxOf(demo.sandbox, pages);
+  // Sandbox v2 : réglage proposé dès qu'une page a son enregistrement vivant ; garde-fou de l'espace
+  const hasLive = pages.some((p) => !!p.html_live_path);
+  const [liveAllowed, setLiveAllowed] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!hasLive) return;
+    let alive = true;
+    void supabase.rpc('sandbox_live_allowed', { p_ws: demo.workspace_id }).then(({ data, error }) => {
+      if (alive) setLiveAllowed(error ? null : data === true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [hasLive, demo.workspace_id]);
   const { nodes } = useMemo(() => sandboxGraph(editor.steps, demo.sandbox), [editor.steps, demo.sandbox]);
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const title = (id: string) => byId.get(id)?.title ?? '';
@@ -477,6 +491,29 @@ export function SandboxPlan({
           </div>
           <p className="help">{t('editor.sandbox.autoLinkHelp')}</p>
         </div>
+        {hasLive && (
+          <div>
+            <div className="setting">
+              <label className="t-label" htmlFor="sb-live">
+                {t('editor.sandbox.live')}
+              </label>
+              <span className="switch">
+                <input
+                  id="sb-live"
+                  type="checkbox"
+                  checked={sb.live && liveAllowed !== false}
+                  disabled={readOnly || liveAllowed === false}
+                  aria-describedby="sb-live-h"
+                  onChange={(e) => save({ live: e.target.checked })}
+                />
+                <span />
+              </span>
+            </div>
+            <p className="help" id="sb-live-h">
+              {t(liveAllowed === false ? 'editor.sandbox.liveForbidden' : 'editor.sandbox.liveHelp')}
+            </p>
+          </div>
+        )}
         <div className="field">
           <label htmlFor="sb-unlinked">{t('editor.sandbox.unlinked')}</label>
           <Select

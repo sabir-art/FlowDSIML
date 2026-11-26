@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@flowdsiml/ui';
 import { HtmlCaptureCard } from './security/HtmlCaptureCard';
+import { SandboxLiveCard } from './security/SandboxLiveCard';
 import { ShareRulesCard } from './security/ShareRulesCard';
 import { useSaveParts } from './security/saveParts';
 import { SettingsShell } from './SettingsShell';
@@ -74,6 +75,7 @@ export function SecuritySettings() {
     >
       <Provider>
         <HtmlCaptureCard />
+        <SandboxLiveCard />
         <ShareRulesCard />
         <SsoSection />
       </Provider>

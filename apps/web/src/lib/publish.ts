@@ -29,7 +29,7 @@ interface PublishResult {
   copies: Array<{
     from: string;
     to: string;
-    bucket?: 'videos' | 'html' | 'voices';
+    bucket?: 'videos' | 'html' | 'html_live' | 'voices';
     /** Images ajoutées visibles de l'étape (chemins du bucket captures), du dessous vers le dessus. */
     images?: Array<Frame & { path: string; opacity?: number; rounded?: boolean; shadow?: boolean }>;
   }>;
@@ -283,9 +283,12 @@ export async function publishDemo(
               ? dl.data.type || 'audio/webm'
               : c.bucket === 'html'
                 ? 'text/html'
-                : burned
-                  ? 'image/webp'
-                  : dl.data.type || 'image/webp',
+                : // Sandbox v2 : enregistrement vivant d'une page
+                  c.bucket === 'html_live'
+                  ? 'application/json'
+                  : burned
+                    ? 'image/webp'
+                    : dl.data.type || 'image/webp',
         cacheControl: '31536000',
         upsert: true,
       });

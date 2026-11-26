@@ -95,6 +95,17 @@ export function buildDraftManifest(ed: DemoEditor, workspaceName = ''): Manifest
               title: String((s.html_meta as { title?: string } | null)?.title ?? ''),
               viewport: (s.html_meta as { viewport?: { w: number; h: number } } | null)?.viewport ?? null,
               links: resolveLinks(s, ed.steps),
+              // Sandbox v2 : page vivante si la démo l'est (mêmes règles que la publication, hors garde-fou)
+              live:
+                demo.kind === 'sandbox' &&
+                (demo.sandbox as { live?: boolean } | null)?.live === true &&
+                s.html_live_path &&
+                ed.imageUrls[s.html_live_path]
+                  ? {
+                      url: ed.imageUrls[s.html_live_path]!,
+                      keep: liveKeep(s.html_meta),
+                    }
+                  : null,
             }
           : null,
       // F7 : vidéo (URL signée du bucket videos) pour l'aperçu
@@ -256,6 +267,15 @@ export function resolveLinks(s: StepRow, steps: StepRow[]) {
   }
   return out;
 }
+/** Sandbox v2 : scripts gardés par l'auteur (html_meta.live.scripts[].keep). */
+export function liveKeep(meta: unknown): string[] {
+  const scripts = (meta as { live?: { scripts?: Array<{ id?: unknown; keep?: unknown }> } } | null)?.live
+    ?.scripts;
+  return Array.isArray(scripts)
+    ? scripts.filter((x) => x.keep === true && typeof x.id === 'string').map((x) => x.id as string)
+    : [];
+}
+
 export function sandboxOf(v: unknown, steps: StepRow[]) {
   const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
   const ids = new Set(steps.map((s) => s.id));
@@ -263,6 +283,8 @@ export function sandboxOf(v: unknown, steps: StepRow[]) {
   return {
     start,
     autoLink: o.autoLink !== false,
+    /** Sandbox v2 : pages rejouées avec leurs scripts (enregistrement vivant) ; inertes sinon. */
+    live: o.live === true,
     unlinked: o.unlinked === 'none' || o.unlinked === 'highlight' ? o.unlinked : ('toast' as const),
     guide: o.guide === true,
     keyPages: Array.isArray(o.keyPages)

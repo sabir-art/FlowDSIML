@@ -1002,6 +1002,28 @@ async function install(page, state = seed()) {
           });
           return json(route, 200, ws.settings.htmlCapture);
         }
+        // Sandbox v2 : garde-fou d'espace (autorisé par défaut), écrit par admin ou propriétaire, journalisé
+        case 'sandbox_live_allowed': {
+          const ws = t.workspaces.find((w) => w.id === a.p_ws);
+          return json(route, 200, ws?.settings?.sandboxLive !== false);
+        }
+        case 'set_sandbox_live': {
+          const ws = t.workspaces.find((w) => w.id === a.p_ws);
+          const me = state.user?.id ?? (t.members.find((m) => m.workspace_id === a.p_ws) || {}).user_id;
+          const role = (t.members.find((m) => m.workspace_id === a.p_ws && m.user_id === me) || {}).role;
+          if (!ws || !['admin', 'owner'].includes(role))
+            return json(route, 403, { code: '42501', message: 'FORBIDDEN' });
+          const old = ws.settings?.sandboxLive !== false;
+          ws.settings = { ...(ws.settings || {}), sandboxLive: a.p_on === true };
+          if (!t.audit_log) t.audit_log = [];
+          if (old !== (a.p_on === true))
+            t.audit_log.push({
+              workspace_id: a.p_ws,
+              action: 'settings.sandbox_live',
+              meta: { old, new: a.p_on === true },
+            });
+          return json(route, 200, a.p_on === true);
+        }
         case 'set_ai_settings': {
           const ai = aiState(state);
           ai.enabled = a.p_enabled;
@@ -2968,6 +2990,17 @@ async function install(page, state = seed()) {
         contentType: f.type,
         body: f.data,
         headers: { 'access-control-allow-origin': '*' },
+      });
+    }
+    // Sandbox v2 : enregistrements vivants (bucket html_live) tenus dans state.livePages (chemin → objet)
+    if (/^\/storage\/v1\/object\/(sign\/)?html_live\//.test(p)) {
+      const key = decodeURIComponent(p.replace(/^\/storage\/v1\/object\/(sign\/)?html_live\//, ''));
+      const rec = (state.livePages || {})[key];
+      return route.fulfill({
+        status: rec ? 200 : 404,
+        contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' },
+        body: rec ? JSON.stringify(rec) : '{}',
       });
     }
     // A8 : pages HTML (bucket html, URL signées ; L30-05 : téléchargement direct) : contenu tenu
