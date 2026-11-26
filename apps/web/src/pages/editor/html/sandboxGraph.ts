@@ -137,3 +137,22 @@ export function deadLinks(steps: StepRow[], sandbox: unknown): { dead: DeadLink[
   }
   return { dead, ignored };
 }
+
+/**
+ * Lot B (recette UX §3.2) : une ligne par destination. Le même lien porté par plusieurs pages (« Services »
+ * dans l'en-tête) ne se lit qu'une fois, avec les pages qui le portent, dans l'ordre de la démo.
+ */
+export interface DeadGroup {
+  url: string;
+  label: string;
+  items: DeadLink[];
+}
+export function deadByUrl(dead: DeadLink[]): DeadGroup[] {
+  const out = new Map<string, DeadGroup>();
+  for (const d of dead) {
+    const g = out.get(d.url);
+    if (g) g.items.push(d);
+    else out.set(d.url, { url: d.url, label: d.label, items: [d] });
+  }
+  return [...out.values()];
+}

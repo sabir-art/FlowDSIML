@@ -202,6 +202,17 @@ async function juger(b, cas, envoi) {
     ok(noms, `${nom} : plan, chaque carte porte le nom de sa page`);
     ok(depart, `${nom} : plan, la première page capturée est le départ`);
     ok(/ mène à /.test(description) || !liens.length, `${nom} : plan, les pages sont reliées`);
+    // Lot B (recette UX §3.2) : « Liens sans page », une ligne par destination, compteur des destinations
+    const dests = await p
+      .locator('.sb-deadlist:not(.sb-deadlist--left) > li .sb-deadlist__path span[title]')
+      .evaluateAll((l) => l.map((e) => e.getAttribute('title')));
+    const compteur = (await p.locator('.sb-deadpanel__n').count())
+      ? await p.locator('.sb-deadpanel__n').innerText()
+      : '(0)';
+    ok(
+      new Set(dests).size === dests.length && compteur === `(${dests.length})`,
+      `${nom} : liens sans page, une ligne par destination (${dests.length}, compteur ${compteur})`,
+    );
     plan = { cartes, noms, depart, description, absentes };
     if (SHOTS) await p.screenshot({ path: `${SHOTS}/b-${cas.id}-plan.png` });
     await p

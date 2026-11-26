@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StepRow } from '../types';
-import { deadLinks, sandboxGraph } from './sandboxGraph';
+import { deadByUrl, deadLinks, sandboxGraph } from './sandboxGraph';
 
 const page = (id: string, url: string, links: Array<[string, string]>, ops: unknown[] = []) =>
   ({
@@ -88,5 +88,20 @@ describe('deadLinks (L48-G)', () => {
     const r = deadLinks(steps, { ignoredLinks: [{ url: 'https://app.acme.example/factures', from: A }] });
     expect(r.dead.map((d) => d.from)).toEqual([B]);
     expect(r.ignored.map((d) => d.from)).toEqual([A]);
+  });
+});
+
+describe('liens sans page regroupés par destination (lot B)', () => {
+  it('une ligne par adresse, avec les pages qui portent le lien', () => {
+    const d = (from: string, url: string, label = 'Services') => ({ from, sel: 'a', url, label });
+    const g = deadByUrl([
+      d('p1', 'https://x.example/services'),
+      d('p2', 'https://x.example/services'),
+      d('p2', 'https://x.example/aide', 'Aide'),
+    ]);
+    expect(g.map((x) => [x.url, x.items.map((i) => i.from)])).toEqual([
+      ['https://x.example/services', ['p1', 'p2']],
+      ['https://x.example/aide', ['p2']],
+    ]);
   });
 });

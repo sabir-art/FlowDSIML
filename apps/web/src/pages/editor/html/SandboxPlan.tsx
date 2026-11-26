@@ -14,7 +14,7 @@ import {
 import type { Json } from '@flowdsiml/supabase-types';
 import type { DemoEditor } from '../useDemoEditor';
 import { sandboxOf } from '../draftManifest';
-import { deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
+import { deadByUrl, deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
 import { guideOnPages, guideRows, type GuideRow, type GuideStepRef } from './sandboxGuide';
 import { GuideList } from './GuideList';
 import { guideHint, upsertOp } from './htmlModel';
@@ -117,6 +117,8 @@ export function SandboxPlan({
   );
   const [showIgnored, setShowIgnored] = useState(false);
   const ghostUrls = [...new Set(dead.map((d) => d.url))];
+  // Lot B : une ligne par destination, le compteur compte les destinations
+  const groups = deadByUrl(dead);
   const deadBy = (id: string) => dead.filter((d) => d.from === id).length;
   const allCols = cols + (ghostUrls.length ? 1 : 0);
   const allRows = Math.max(rows, ghostUrls.length);
@@ -168,7 +170,7 @@ export function SandboxPlan({
         }),
       ),
     ...orphans.map((n) => t('editor.sandbox.descOrphan', { page: n.title })),
-    ...(dead.length ? [t('editor.sandbox.deadDesc', { count: dead.length })] : []),
+    ...(groups.length ? [t('editor.sandbox.deadDesc', { count: groups.length })] : []),
   ].join(' ; ');
 
   function save(patch: Record<string, unknown>) {
@@ -194,8 +196,8 @@ export function SandboxPlan({
     open(last ?? sb.start ?? pages[0]?.id ?? '');
     guideHint.close = toast(t('editor.sandbox.guideAddHint'));
   }
-  const leave = (d: DeadLink) =>
-    save({ ignoredLinks: [...ignoredOf(demo.sandbox), { url: d.url, from: d.from }] });
+  const leave = (list: DeadLink[]) =>
+    save({ ignoredLinks: [...ignoredOf(demo.sandbox), ...list.map((d) => ({ url: d.url, from: d.from }))] });
   const restore = (d: DeadLink) =>
     save({ ignoredLinks: ignoredOf(demo.sandbox).filter((x) => !(x.from === d.from && x.url === d.url)) });
   const linkTo = (d: DeadLink, page: string) => {
@@ -322,7 +324,7 @@ export function SandboxPlan({
           {(dead.length > 0 || ignored.length > 0) && (
             <section className="card sb-deadpanel" aria-labelledby="sb-dead-h">
               <h3 id="sb-dead-h">
-                {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">({dead.length})</span>
+                {t('editor.sandbox.deadTitle')} <span className="sb-deadpanel__n">({groups.length})</span>
               </h3>
               {dead.length > 0 && <p className="help">{t(`editor.sandbox.deadHelp.${sb.unlinked}`)}</p>}
               {/* L49 P1 : captures HTML désactivées par un admin : l'action est désactivée avec la raison */}
@@ -332,11 +334,17 @@ export function SandboxPlan({
                 </p>
               )}
               <ul className="sb-deadlist">
-                {dead.map((d) => (
-                  <li key={`${d.from} ${d.url}`}>
-                    <b>{d.label}</b>
+                {groups.map(({ url, label, items }) => (
+                  <li key={url}>
+                    <b>{label}</b>
                     <span className="sb-deadlist__path">
-                      {title(d.from)} → <span title={d.url}>{d.url.replace(/^https?:\/\//, '')}</span>
+                      {items.length > 1
+                        ? t('editor.sandbox.deadOnPages', {
+                            count: items.length,
+                            pages: items.map((d) => title(d.from)).join(', '),
+                          })
+                        : title(items[0]!.from)}{' '}
+                      → <span title={url}>{url.replace(/^https?:\/\//, '')}</span>
                     </span>
                     {!readOnly && (
                       <span className="sb-deadlist__actions">
@@ -347,33 +355,35 @@ export function SandboxPlan({
                           aria-disabled={htmlOff || undefined}
                           aria-describedby={htmlOff ? 'sb-dead-off' : undefined}
                           onClick={() => {
-                            if (!htmlOff) void capture(d);
+                            if (!htmlOff) void capture(items[0]!);
                           }}
                         >
                           <Camera {...ICON} />
                           {t('editor.sandbox.deadCapture')}
                         </button>
-                        <a className="link-button" href={d.url} target="_blank" rel="noopener noreferrer">
+                        <a className="link-button" href={url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />
                           {t('editor.sandbox.deadOpen')}
                         </a>
                         <span className="grow" />
                         <Menu
-                          label={t('editor.sandbox.deadMore', { link: d.label })}
+                          label={t('editor.sandbox.deadMore', { link: label })}
                           items={[
+                            // Relier ou laisser : vaut pour toutes les pages qui portent ce lien
                             ...nodes
-                              .filter((n) => n.id !== d.from)
+                              .filter((n) => !(items.length === 1 && n.id === items[0]!.from))
                               .map((n) => ({
                                 label: n.title,
                                 icon: <Link2 />,
                                 group: t('editor.sandbox.deadLink'),
-                                onSelect: () => linkTo(d, n.id),
+                                onSelect: () =>
+                                  items.filter((d) => d.from !== n.id).forEach((d) => linkTo(d, n.id)),
                               })),
                             'separator' as const,
                             {
                               label: t('editor.sandbox.deadLeave'),
                               icon: <MessageSquareOff />,
-                              onSelect: () => leave(d),
+                              onSelect: () => leave(items),
                             },
                           ]}
                         />
