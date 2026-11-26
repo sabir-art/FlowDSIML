@@ -23,6 +23,11 @@ import {
   parseVoice,
   providerRefusal,
   resolveVoices,
+  SAMPLE_TEXT,
+  accountVoices,
+  sampleLang,
+  samplePath,
+  voiceIdFor,
   type AccountVoice,
 } from './audio.ts';
 
@@ -77,30 +82,31 @@ async function reserveOr(ws: string, uid: string, feature: string, audio = 0): P
 }
 
 /**
- * Voix prédéfinies réellement disponibles sur le compte (GET /voices, cache d'une heure) : les voix
- * absentes sont masquées. En cas d'erreur du fournisseur, la liste complète est gardée sans être mise en cache.
+ * L62 §8 : voix du compte du fournisseur (GET /voices, cache d'une heure). En cas d'erreur du fournisseur
+ * (clé sans le droit de lire les voix, panne), rien n'est mis en cache : les anciens emplacements gardent
+ * leurs identifiants prévus et la génération n'est pas bloquée.
  */
-let catalog: { at: number; map: Record<string, string> } | null = null;
-/** L62 : voix proposée → identifiant d'une voix DU COMPTE (resolveVoices), cache d'une heure. */
-async function voiceMap(key: string): Promise<Record<string, string>> {
-  if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.map;
+let catalog: { at: number; account: AccountVoice[] } | null = null;
+async function accountList(key: string): Promise<AccountVoice[] | null> {
+  if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.account;
   const res = await fetch(`${ELEVEN}/voices?show_legacy=true`, { headers: { 'xi-api-key': key } }).catch(
     () => null,
   );
   if (!res?.ok) {
     console.error('ai: voices', await refusalOf(res).then((r) => r.log));
-    return { ...VOICES };
+    return null;
   }
   const out = (await res.json().catch(() => ({}))) as { voices?: AccountVoice[] };
-  const map = resolveVoices(out.voices ?? []);
-  // Combien de voix prévues existent telles quelles sur le compte, et combien ont été remplacées
-  const kept = Object.keys(map).filter((k) => map[k] === VOICES[k]).length;
-  console.log(
-    'ai: voices',
-    `account=${(out.voices ?? []).length} kept=${kept} mapped=${Object.keys(map).length - kept}`,
-  );
-  catalog = { at: Date.now(), map };
-  return map;
+  const account = Array.isArray(out.voices) ? out.voices : [];
+  console.log('ai: voices', `account=${account.length}`);
+  catalog = { at: Date.now(), account };
+  return account;
+}
+/** Voix proposées (toutes celles du compte) et correspondance des anciens emplacements. */
+async function voiceCatalog(key: string, lang: string) {
+  const account = await accountList(key);
+  if (!account) return { list: null, aliases: { ...VOICES } };
+  return { list: accountVoices(account, lang), aliases: resolveVoices(account, lang) };
 }
 
 /** Refus du fournisseur : statut et code court, jamais le message (il peut reprendre le texte envoyé). */
@@ -115,10 +121,44 @@ async function purge(key: string, url: string, what: string) {
   if (!res?.ok) console.error(`ai: purge ${what}`, res?.status ?? 'network');
 }
 
-/** Extrait d'une voix (fourni par le fournisseur) : aucun texte envoyé, aucun quota consommé. */
-async function voiceSample(key: string, voice: string) {
-  const id = (await voiceMap(key))[voice];
+const dataUrl = (bytes: Uint8Array) => {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `data:audio/mpeg;base64,${btoa(bin)}`;
+};
+
+/**
+ * L62 §8 : exemple d'une voix dans la langue de la démo. Phrase courte fixe, générée une seule fois par voix
+ * et par langue puis gardée (bucket voices, hors des dossiers des espaces), sans compter dans le quota.
+ * Repli sur l'extrait du fournisseur (souvent en anglais) seulement si la génération échoue.
+ */
+async function voiceSample(key: string, voice: string, langIn: unknown) {
+  const lang = sampleLang(langIn);
+  const { list, aliases } = await voiceCatalog(key, lang);
+  const id = voiceIdFor(voice, list, aliases);
   if (!id) return json(400, { error: 'BAD_VOICE' });
+  const path = samplePath(id, lang);
+  const cached = await admin.storage.from('voices').download(path);
+  if (!cached.error && cached.data)
+    return json(200, { result: { audio: dataUrl(new Uint8Array(await cached.data.arrayBuffer())), lang } });
+  const res = await fetch(`${ELEVEN}/text-to-speech/${id}?output_format=${TTS_FORMAT}`, {
+    method: 'POST',
+    headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
+    body: JSON.stringify({ text: SAMPLE_TEXT[lang], model_id: TTS_MODEL }),
+  }).catch(() => null);
+  if (res?.ok) {
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const hid = res.headers.get('history-item-id');
+    if (hid && /^[A-Za-z0-9]{1,64}$/.test(hid)) await purge(key, `${ELEVEN}/history/${hid}`, 'sample');
+    if (bytes.byteLength > 0 && bytes.byteLength <= 1024 * 1024) {
+      const up = await admin.storage
+        .from('voices')
+        .upload(path, bytes, { contentType: 'audio/mpeg', upsert: true });
+      if (up.error) console.error('ai: sample cache', up.error.message);
+      return json(200, { result: { audio: dataUrl(bytes), lang } });
+    }
+  } else console.error('ai: sample tts', (await refusalOf(res)).log);
+  // Repli : extrait du fournisseur
   const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
   if (!meta?.ok) {
     const r = await refusalOf(meta);
@@ -137,9 +177,7 @@ async function voiceSample(key: string, voice: string) {
   }
   const bytes = new Uint8Array(await mp3.arrayBuffer());
   if (bytes.byteLength > 1024 * 1024) return json(502, { error: 'PROVIDER' });
-  let bin = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return json(200, { result: { audio: `data:audio/mpeg;base64,${btoa(bin)}` } });
+  return json(200, { result: { audio: dataUrl(bytes), lang: null } });
 }
 
 /**
@@ -155,9 +193,13 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     const { data: cfg } = await admin.rpc('ai_config', { p_ws: ws });
     const c = cfg as { enabled?: boolean; features?: Record<string, boolean> } | null;
     if (!c?.enabled || !c.features?.voice) return json(403, { error: 'AI_DISABLED' });
-    if (body.task === 'voice_list')
-      return json(200, { result: { voices: Object.keys(await voiceMap(key)) } });
-    return voiceSample(key, String(input.voice ?? ''));
+    if (body.task === 'voice_list') {
+      // L62 §8 : toutes les voix utilisables du compte, recommandées pour la langue de la démo d'abord ;
+      // aliases : voix des anciens emplacements (claire, louise…), pour les démos qui les utilisent
+      const { list, aliases } = await voiceCatalog(key, sampleLang(body.lang));
+      return json(200, { result: { voices: list ?? [], aliases } });
+    }
+    return voiceSample(key, String(input.voice ?? ''), body.lang);
   }
   let parsed;
   try {
@@ -177,7 +219,8 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
 
   if (body.task === 'voice') {
     const v = parsed as ReturnType<typeof parseVoice>;
-    const voiceId = (await voiceMap(key))[v.voice];
+    const { list, aliases } = await voiceCatalog(key, sampleLang(body.lang));
+    const voiceId = voiceIdFor(v.voice, list, aliases);
     if (!voiceId) return json(400, { error: 'BAD_VOICE' });
     const blocked = await reserveOr(ws, uid, 'voice', v.estimate);
     if (blocked) return blocked;
