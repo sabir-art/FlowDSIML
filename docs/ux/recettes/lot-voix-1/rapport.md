@@ -47,3 +47,15 @@ Recette du 26/11 sur `claude/dev-mvp` (7829697), app locale avec les réponses s
 ## 4. Pour le VERT
 
 Les points 1 à 3 du §2. Je rejouerai l'e2e en clair et en sombre, avec mes captures de la fenêtre ouverte, de la recherche, du filtre Genre et de l'état vide.
+
+---
+
+# Nouvelle recette après 9e3278a : VERT
+
+L'e2e `voix-sous-titres-ia` passe à 69/69 en clair et 69/69 en sombre ; le dev y a ajouté les contrôles des coins et du pied, à 1440 × 900 et à 1280 × 720. J'ai fait mes propres captures, à 1440 × 900 (`v2-selecteur-clair-sombre.png`) : fenêtre ouverte, filtre Genre « Masculine », état vide, et la même fenêtre ouverte en sombre.
+
+- **Plus rien n'est coupé.** La fenêtre est en `position: fixed` (x = 976, 400 px de large) : les avatars, les noms et la pastille de la voix choisie se voient en entier.
+- **Hauteur** : le bas de la fenêtre est à 884 px, soit 16 px au-dessus du bas de l'écran. Le pied « Écoute : exemple lu en français · 9 voix du compte » est visible, et seule la liste défile.
+- **Recherche** : il n'y a plus qu'une croix, la nôtre.
+- **Sombre** : la fenêtre est conforme à la planche (fond, voix choisie teintée, badges).
+- **Reste non bloquant** : dans l'état vide, « Effacer les filtres » est toujours sur sa propre ligne, sous la phrase.
