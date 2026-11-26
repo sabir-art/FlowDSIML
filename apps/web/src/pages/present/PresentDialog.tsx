@@ -120,10 +120,13 @@ export function PresentDialog({
       closeLabel={t('common.close')}
       className="lxm"
       footerLead={
-        <button type="button" className="link-button lx-history" onClick={() => setShowHistory(true)}>
-          <History aria-hidden="true" />
-          {t('present.history', { count: history.reports.length })}
-        </button>
+        // Recette L66 : sans présentation passée, le lien n'a rien à ouvrir ; il est masqué
+        history.reports.length > 0 ? (
+          <button type="button" className="link-button lx-history" onClick={() => setShowHistory(true)}>
+            <History aria-hidden="true" />
+            {t('present.history', { count: history.reports.length })}
+          </button>
+        ) : undefined
       }
       footer={
         <>

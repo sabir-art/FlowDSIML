@@ -133,3 +133,16 @@ export function reportRows(spent: number[], titles: string[]): ReportRow[] {
     });
   return out;
 }
+
+/**
+ * L66, seuil tranché par l'UX : sans minuteur, pas de verdict ; au-delà de la durée prévue,
+ * « Dépassée » ; sous 80 % de la durée prévue, « Plus courte que prévu » (étiquette neutre) ;
+ * entre les deux (bornes comprises), « Dans les temps ».
+ */
+export function verdictOf(durationS: number, targetMin: number | null): 'over' | 'short' | 'ok' | null {
+  if (targetMin == null) return null;
+  const target = targetMin * 60;
+  if (durationS > target) return 'over';
+  if (durationS < target * 0.8) return 'short';
+  return 'ok';
+}

@@ -951,6 +951,8 @@ html[data-remote] body {
   display: grid;
   gap: var(--fd-space-2, 8px);
   min-width: 0;
+  /* Recette L66 : la marge basse d'un champ s'ajoutait à l'écart de la grille (44 px) ; 24 px seulement */
+  margin-bottom: 0;
 }
 .lxm .lx-row select,
 .lxm .lx-row .fd-select {

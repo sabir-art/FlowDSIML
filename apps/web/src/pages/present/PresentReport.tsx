@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Flag, History } from 'lucide-react';
 import { Button, Modal } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
-import { clock, spoken } from './present';
+import { clock, spoken, verdictOf } from './present';
 
 export interface PresentReportRow {
   id: string;
@@ -143,14 +143,15 @@ export function ReportDialog({
   const skipped = steps.filter((s) => s.seconds <= 0).length;
   const noted = steps.filter((s) => s.noted).map((s) => s.index + 1);
   const target = report.target_min != null ? report.target_min * 60 : null;
+  const v = verdictOf(report.duration_s, report.target_min);
   const verdict =
-    target == null
-      ? null
-      : report.duration_s > target
-        ? { cls: 'is-over', text: t('present.overBy', { time: minSec(report.duration_s - target) }) }
-        : report.duration_s < target * 0.8
-          ? { cls: 'is-short', text: t('present.shorter') }
-          : { cls: 'is-ok', text: t('present.onTime') };
+    v === 'over' && target != null
+      ? { cls: 'is-over', text: t('present.overBy', { time: minSec(report.duration_s - target) }) }
+      : v === 'short'
+        ? { cls: 'is-short', text: t('present.shorter') }
+        : v === 'ok'
+          ? { cls: 'is-ok', text: t('present.onTime') }
+          : null;
   const mode =
     report.mode === 'one' ? t('present.mode_one') : report.mode === 'two' ? t('present.mode_two') : '';
   return (
