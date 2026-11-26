@@ -278,19 +278,52 @@ function wav(sec) {
     /0:0[1-9]/.test(document.querySelector('.vo-aud--rec .vo-time')?.textContent ?? ''),
   );
   await recUi.getByRole('button', { name: 'Arrêter l’enregistrement' }).click();
-  await sec.getByText('Écoutez avant de garder').waitFor();
+  // L62 §6 : voix en place : la prise arrive dans une carte « À écouter », rien n'est remplacé
+  const fresh = sec.locator('.vo-fresh');
+  await fresh.waitFor();
   ok(
     /\.wav$/.test(s1().voice_path) &&
-      (await sec.getByRole('button', { name: 'Recommencer' }).count()) === 1 &&
-      (await sec.getByRole('button', { name: 'Garder', exact: true }).count()) === 1,
-    'après l’arrêt : « Écoutez avant de garder », « Recommencer » et « Garder » ; rien n’est encore remplacé',
+      (await fresh.locator('.vo-fresh__tag').innerText()) === 'À écouter' &&
+      (await fresh.getByRole('button', { name: 'Recommencer' }).count()) === 1 &&
+      (await fresh.getByRole('button', { name: 'Garder l’actuelle' }).count()) === 1 &&
+      (await fresh.getByRole('button', { name: 'Utiliser cette voix' }).count()) === 1,
+    'après l’arrêt : carte « À écouter », Recommencer, Garder l’actuelle, Utiliser cette voix ; rien n’est remplacé',
   );
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await sec.screenshot({ path: `${SHOTS}/l28-02-voix-ecoute${sfx}.png` });
   }
-  await sec.getByRole('button', { name: 'Garder', exact: true }).click();
-  ok(await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000), '« Garder » : nouvelle piste WebM');
+  // « Garder l’actuelle » : la prise est écartée, la voix en place ne bouge pas
+  const enPlace = s1().voice_path;
+  await fresh.getByRole('button', { name: 'Garder l’actuelle' }).click();
+  await fresh.waitFor({ state: 'detached' });
+  ok(s1().voice_path === enPlace, '« Garder l’actuelle » : la voix en place ne bouge pas');
+  // Nouvelle prise, « Utiliser cette voix » : remplacée, toast avec « Annuler », qui remet l'ancienne
+  const prise = async () => {
+    // Après « Annuler », le panneau rouvre l'onglet de la voix remise (Fichier)
+    await tabs.nth(1).click();
+    await sec.getByRole('button', { name: 'Démarrer l’enregistrement' }).click();
+    await page.waitForFunction(() =>
+      /0:0[1-9]/.test(document.querySelector('.vo-aud--rec .vo-time')?.textContent ?? ''),
+    );
+    await recUi.getByRole('button', { name: 'Arrêter l’enregistrement' }).click();
+    await fresh.waitFor();
+    await fresh.getByRole('button', { name: 'Utiliser cette voix' }).click();
+  };
+  await prise();
+  ok(
+    await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000),
+    '« Utiliser cette voix » : nouvelle piste WebM',
+  );
+  const annul = page.locator('.toast', { hasText: 'Voix remplacée par la voix enregistrée' });
+  await annul.waitFor();
+  await annul.getByRole('button', { name: 'Annuler' }).click();
+  ok(
+    await until(() => s1().voice_path === enPlace),
+    'toast « Voix remplacée… » : « Annuler » remet la voix d’avant',
+  );
+  await prise();
+  ok(await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000), 'nouvelle prise utilisée : piste WebM');
   ok(/haut à gauche/.test(s1().voice_transcript), 'transcription conservée après réenregistrement');
   await card.waitFor();
   ok(
@@ -299,6 +332,24 @@ function wav(sec) {
       (await card.locator('.vo-card__icon svg.lucide-mic').count()) === 1,
     'carte « Voix en place · Enregistrée », icône Micro, point vert sur « Enregistrée »',
   );
+  // L62 §6 : import avec une voix en place : carte « À écouter », la voix en place reste jusqu'au choix
+  {
+    const avantImport = s1().voice_path;
+    await tabs.nth(2).click();
+    await sec
+      .locator('input[type=file]')
+      .setInputFiles({ name: 'autre.wav', mimeType: 'audio/wav', buffer: wav(1) });
+    await fresh.waitFor();
+    ok(
+      s1().voice_path === avantImport &&
+        (await fresh.getByRole('button', { name: 'Utiliser cette voix' }).count()) === 1,
+      'import avec une voix en place : carte « À écouter », la voix en place ne bouge pas',
+    );
+    await fresh.getByRole('button', { name: 'Garder l’actuelle' }).click();
+    await fresh.waitFor({ state: 'detached' });
+    ok(s1().voice_path === avantImport, 'import, « Garder l’actuelle » : la voix en place reste');
+    await tabs.nth(1).click();
+  }
 
   // ===== L62 : l'Aperçu de l'éditeur fait entendre la voix de l'étape =====
   {

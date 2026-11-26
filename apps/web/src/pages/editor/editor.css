@@ -5172,3 +5172,33 @@
   padding: 0;
   border: 0;
 }
+/* L62 §6 : nouvelle voix « À écouter » (générée, réenregistrée, importée), à bordure de marque */
+.vo-fresh {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--fd-color-primary);
+  border-radius: 12px;
+}
+.vo-fresh__tag {
+  justify-self: start;
+  padding: 0 8px;
+  border-radius: var(--fd-radius-xs);
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font: 600 12px / 22px var(--fd-font-sans);
+}
+.vo-fresh .link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+}
+.vo-fresh .link-button svg {
+  width: 16px;
+  height: 16px;
+}
+/* Trois actions (Régénérer, Garder l'actuelle, Utiliser) : Régénérer sur sa propre ligne */
+.vo-two:has(> :nth-child(3)) > :first-child {
+  grid-column: 1 / -1;
+}

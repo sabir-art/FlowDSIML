@@ -1942,6 +1942,14 @@
       "checkImages": "Check the position of the added images on the steps."
     },
     "voice": {
+      "toListen": "To listen to",
+      "useThis": "Use this voice",
+      "keepCurrent": "Keep the current one",
+      "replaced": {
+        "generate": "Voice replaced by the generated voice",
+        "record": "Voice replaced by the recorded voice",
+        "import": "Voice replaced by the imported voice"
+      },
       "inPlace": "Current voice",
       "short": {
         "recorded": "Recorded",

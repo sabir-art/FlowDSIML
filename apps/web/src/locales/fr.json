@@ -1942,6 +1942,14 @@
       "checkImages": "Vérifiez la place des images ajoutées sur les étapes."
     },
     "voice": {
+      "toListen": "À écouter",
+      "useThis": "Utiliser cette voix",
+      "keepCurrent": "Garder l’actuelle",
+      "replaced": {
+        "generate": "Voix remplacée par la voix générée",
+        "record": "Voix remplacée par la voix enregistrée",
+        "import": "Voix remplacée par la voix importée"
+      },
       "inPlace": "Voix en place",
       "short": {
         "recorded": "Enregistrée",
