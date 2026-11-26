@@ -17,7 +17,6 @@ import {
   Files,
   Info,
   PanelTop,
-  Play,
   Search,
   Server,
   TextCursorInput,
@@ -63,7 +62,7 @@ const PAGE_SIZE = 20;
  */
 type ReviewGroup = HtmlReviewGroup | 'widgets';
 /** Sandbox v2 : groupe « Sandbox vivant » (scripts rejoués, Garder / Bloquer ; réponses du site). */
-type GroupKey = 'pages' | 'live' | ReviewGroup;
+type GroupKey = 'pages' | 'live' | 'responses' | ReviewGroup;
 const REVIEW_GROUPS: ReviewGroup[] = [
   'pageScripts',
   'widgets',
@@ -136,14 +135,16 @@ interface Row {
   mono: boolean;
   source: string;
   status: string;
-  tone: 'plain' | 'kept' | 'warn';
+  /** plain : neutre ; done : neutre avec une coche ; kept : choix de l'auteur (orange) ; warn : alerte */
+  tone: 'plain' | 'done' | 'kept' | 'warn';
   why: string;
   action?: { label: string; aria: string; run: () => void };
 }
 
 const GROUP_ICON: Record<GroupKey, IconNode> = {
   pages: Files,
-  live: Play,
+  live: Code,
+  responses: Server,
   pageScripts: Code,
   widgets: PanelTop,
   trackingScripts: ChartNoAxesColumn,
@@ -190,6 +191,8 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
   // Un lien externe montre son hôte complet (« legal.example.com »), les autres leur site d'origine
   const from = (it.group === 'externalLinks' && hostOf(it.href ?? '')) || it.source;
   const source = from ? (many ? `${from} · ${origin}` : from) : many ? origin : s.inPage;
+  if (it.reason === 'widgetThirdParty' && liveOn() && p.live) return liveWidgetRow(p, it, many, origin);
+  const live = liveOn() && !!p.live;
   const canKeep =
     it.group === 'pii'
       ? !!p.piiOriginals?.[it.id]
@@ -200,9 +203,11 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
       ? s.status.replaced
       : it.group === 'frames'
         ? s.status.removed
-        : it.group === 'externalLinks' || it.group === 'forms'
-          ? s.status.disabled
-          : s.status.notCopied;
+        : it.group === 'forms' && live
+          ? s.live.simulated
+          : it.group === 'externalLinks' || it.group === 'forms'
+            ? s.status.disabled
+            : s.status.notCopied;
   const why =
     it.group === 'pii'
       ? isKept
@@ -214,14 +219,17 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
           : canKeep
             ? s.reasonWhy.linkExternal
             : s.reasonWhy.linkLocked
-        : s.reasonWhy[it.reason as keyof typeof s.reasonWhy];
+        : it.group === 'forms' && live
+          ? s.live.whyForms
+          : s.reasonWhy[it.reason as keyof typeof s.reasonWhy];
   const row: Row = {
     key,
     // Suivi UX du lot B : un élément ajouté par un script n'est pas un script, il a l'icône d'un panneau
     icon: it.group === 'pii' ? UserRound : it.reason === 'widgetThirdParty' ? PanelTop : GROUP_ICON[it.group],
     name,
     mono,
-    source,
+    // Sandbox vivant : une donnée lue dans les réponses du site le dit
+    source: live && it.group === 'pii' && inResponses(p, it) ? `${s.live.inResponses} · ${source}` : source,
     status,
     tone: isKept ? 'kept' : 'plain',
     why,
@@ -285,6 +293,64 @@ const keepOf = (p: PendingHtmlPage, sc: { id: string; keep: boolean }) =>
   liveKeep.get(liveKey(p, sc.id)) ?? sc.keep;
 const liveScriptsCount = () => livePages().reduce((n, p) => n + p.live!.scripts.length, 0);
 
+const scriptName = (sc: { source: string }) =>
+  sc.source === 'page' ? s.fallback.scriptInline : sc.source.replace(/^https?:\/\//, '').slice(0, 80);
+/**
+ * Scripts d'un autre site d'une page live qui ont pu ajouter l'élément : ceux de son site, et parmi eux
+ * ceux dont le code contient son texte (« Discuter avec nous ») s'il y en a ; sinon tous ceux du site.
+ */
+function widgetScripts(p: PendingHtmlPage, it: HtmlRemovedItem) {
+  const site = (p.live?.scripts ?? []).filter(
+    (sc) => sc.category !== 'page' && (!it.source || hostOf(sc.source) === it.source),
+  );
+  const named = it.name && !it.name.endsWith('…') ? site.filter((sc) => sc.code.includes(it.name!)) : [];
+  return named.length ? named : site;
+}
+/** Un élément ajouté par un script est affiché dans le Sandbox si l'un de ses scripts est gardé. */
+const widgetOn = (p: PendingHtmlPage, it: HtmlRemovedItem) =>
+  widgetScripts(p, it).some((sc) => keepOf(p, sc));
+/** Une donnée personnelle de la copie figure-t-elle dans les réponses lues par la page ? */
+const inResponses = (p: PendingHtmlPage, it: HtmlRemovedItem) => {
+  const o = p.piiOriginals?.[it.id];
+  const vals = (o ? ('original' in o ? [o.original] : o.texts) : []).filter((v) => v.trim().length >= 3);
+  return (p.live?.responses ?? []).some((r) => vals.some((v) => r.body.includes(v.trim())));
+};
+/** Texte lisible de chaque copie (pour la détection des réponses, comme à l'envoi). */
+const readableCache = new Map<number, string>();
+const readableAll = () =>
+  active()
+    .map((x) => {
+      if (!readableCache.has(x.order)) readableCache.set(x.order, readableText(x.html));
+      return readableCache.get(x.order)!;
+    })
+    .join(' ');
+/** Données remplacées dans les réponses d'une page, hors données gardées par l'auteur. */
+function responsesReplaced(p: PendingHtmlPage): number {
+  const keptPii = (p.removed ?? [])
+    .filter((it) => it.group === 'pii' && kept.has(keyOf(p, it)))
+    .map((it) => it.id);
+  const raw = { ...p.live!, html: '', scripts: [] };
+  return redactLive(raw, pairsOf(p.piiOriginals, new Set(keptPii)), readableAll()).piiReplaced;
+}
+
+function liveWidgetRow(p: PendingHtmlPage, it: HtmlRemovedItem, many: boolean, origin: string): Row {
+  const on = widgetOn(p, it);
+  // Un seul script possible : il est nommé ; sinon, le site (on ne devine pas lequel)
+  const cands = widgetScripts(p, it);
+  const by = cands.length === 1 ? scriptName(cands[0]!) : fmt(s.live.siteScript, { site: it.source || '?' });
+  const added = fmt(s.live.addedBy, { source: by });
+  return {
+    key: keyOf(p, it),
+    icon: PanelTop,
+    name: it.name || s.fallback.widget,
+    mono: false,
+    source: many ? `${added} · ${origin}` : added,
+    status: on ? s.live.shown : s.live.absent,
+    tone: on ? 'kept' : 'plain',
+    why: fmt(s.live.whyWidget, { source: by }),
+  };
+}
+
 function liveRows(): Row[] {
   const many = pages.length > 1;
   const rows: Row[] = [];
@@ -293,57 +359,104 @@ function liveRows(): Row[] {
     for (const sc of p.live!.scripts) {
       const key = liveKey(p, sc.id);
       const on = keepOf(p, sc);
-      const name =
-        sc.source === 'page' ? s.fallback.scriptInline : sc.source.replace(/^https?:\/\//, '').slice(0, 80);
+      const name = scriptName(sc);
       rows.push({
         key,
         icon: sc.category === 'tracking' ? ChartNoAxesColumn : Code,
         name,
         mono: sc.source !== 'page',
         source: many ? `${s.live.category[sc.category]} · ${origin}` : s.live.category[sc.category],
-        status: on ? s.live.played : s.live.blocked,
-        tone: on ? 'kept' : 'plain',
+        // Orange réservé au choix de l'auteur : un script bloqué par défaut qu'il a gardé
+        status: on ? (sc.keep ? s.live.played : s.status.kept) : s.live.blocked,
+        tone: on ? (sc.keep ? 'done' : 'kept') : 'plain',
         why: s.live.why[sc.category],
         action: {
           label: on ? s.live.block : s.keep,
           aria: fmt(on ? s.live.blockOf : s.keepOf, { name }),
           run: () => {
             liveKeep.set(key, !on);
+            // Le script entraîne ses éléments ajoutés : leur groupe et le bilan suivent
+            const w = views.get('widgets');
+            if (w) renderGroup(w);
             refresh('live', key);
           },
         },
       });
     }
-    rows.push({
-      key: `live:${p.order}:responses`,
-      icon: Server,
-      name: many ? `${s.live.responses} · ${origin}` : s.live.responses,
-      mono: false,
-      source: plural(s.live.responsesN_one, s.live.responsesN_other, p.live!.responses.length),
-      status: s.live.replayed,
-      tone: 'plain',
-      why: s.live.responsesWhy,
-    });
   }
   return rows;
 }
 
+/** Réponses du site : une ligne par page qui en a lu, sans action. */
+function responseRows(): Row[] {
+  return livePages()
+    .filter((p) => p.live!.responses.length > 0)
+    .map((p) => {
+      const n = responsesReplaced(p);
+      const read = plural(s.live.responsesRead_one, s.live.responsesRead_other, p.live!.responses.length);
+      return {
+        key: `live:${p.order}:responses`,
+        icon: Server,
+        name: fmt(s.pageN, { n: pageNo(p), title: pageTitle(p) }),
+        mono: false,
+        source: `${read} · ${n ? plural(s.live.dataReplaced_one, s.live.dataReplaced_other, n) : s.live.noData}`,
+        status: s.live.replayed,
+        tone: 'plain' as const,
+        why: s.live.responsesWhy,
+      };
+    });
+}
+
+/**
+ * Sandbox vivant : les scripts retirés de la copie inerte (groupes « Scripts de la page » et « Scripts
+ * de suivi ») ne sont pas montrés pour une page rejouée ; ses scripts ont leur propre groupe.
+ */
+const shows = (p: PendingHtmlPage, it: HtmlRemovedItem) =>
+  !(
+    liveOn() &&
+    p.live &&
+    it.reason !== 'widgetThirdParty' &&
+    (it.group === 'pageScripts' || it.group === 'trackingScripts')
+  );
+const itemsOf = (p: PendingHtmlPage, g: ReviewGroup) =>
+  (p.removed ?? []).filter((it) => groupOf(it) === g && shows(p, it));
+
 function rowsOf(g: GroupKey): Row[] {
   if (g === 'pages') return active().map(pageRow);
   if (g === 'live') return liveRows();
-  return active().flatMap((p) =>
-    (p.removed ?? []).filter((it) => groupOf(it) === g).map((it) => itemRow(p, it)),
-  );
+  if (g === 'responses') return responseRows();
+  return active().flatMap((p) => itemsOf(p, g).map((it) => itemRow(p, it)));
 }
-const countOf = (g: ReviewGroup) =>
-  active().reduce((n, p) => n + (p.removed ?? []).filter((it) => groupOf(it) === g).length, 0);
+const countOf = (g: ReviewGroup) => active().reduce((n, p) => n + itemsOf(p, g).length, 0);
 const keptIn = (g: ReviewGroup) =>
-  active().reduce(
-    (n, p) => n + (p.removed ?? []).filter((it) => groupOf(it) === g && kept.has(keyOf(p, it))).length,
-    0,
-  );
+  active().reduce((n, p) => n + itemsOf(p, g).filter((it) => kept.has(keyOf(p, it))).length, 0);
+/** Nombre de lignes d'un groupe (titre et présence du groupe). */
+const sizeOf = (g: GroupKey) =>
+  g === 'pages'
+    ? active().length
+    : g === 'live'
+      ? liveScriptsCount()
+      : g === 'responses'
+        ? livePages().filter((p) => p.live!.responses.length > 0).length
+        : countOf(g);
+const titleOf = (g: GroupKey) =>
+  g === 'responses' ? s.live.responses : g === 'live' && liveOn() ? s.live.scripts : s.group[g];
+function groupWhyOf(g: GroupKey): string {
+  if (g === 'responses') return s.live.responsesWhy;
+  if (liveOn() && g === 'widgets') return s.live.whyWidgets;
+  if (liveOn() && g === 'forms') return s.live.whyForms;
+  if (liveOn() && g === 'pii') return s.live.whyPii;
+  return s.groupWhy[g as Exclude<GroupKey, 'pages' | 'responses'>];
+}
 
 function stateOf(g: GroupKey): string {
+  if (g === 'responses') return s.live.responsesState;
+  if (liveOn() && g === 'widgets') return s.live.widgetsState;
+  if (liveOn() && g === 'forms') return s.live.formsState;
+  if (liveOn() && g === 'pii') {
+    const k = keptIn(g);
+    return k ? `${s.live.piiState} · ${plural(s.keptCount_one, s.keptCount_other, k)}` : s.live.piiState;
+  }
   if (g === 'live') {
     const all = livePages().flatMap((p) => p.live!.scripts.map((sc) => keepOf(p, sc)));
     return fmt(s.live.state, { played: all.filter(Boolean).length, blocked: all.filter((x) => !x).length });
@@ -371,8 +484,8 @@ interface GroupView {
 const views = new Map<GroupKey, GroupView>();
 
 function chip(row: Row): HTMLElement {
-  const el = h('span', { class: `st2${row.tone === 'plain' ? '' : ' kp'}` });
-  if (row.tone === 'kept') el.append(icon(Check, 14));
+  const el = h('span', { class: `st2${row.tone === 'plain' || row.tone === 'done' ? '' : ' kp'}` });
+  if (row.tone === 'kept' || row.tone === 'done') el.append(icon(Check, 14));
   if (row.tone === 'warn') el.append(icon(TriangleAlert, 14));
   el.append(row.status);
   return el;
@@ -462,8 +575,8 @@ function renderRows(v: GroupView) {
 
 function renderGroup(v: GroupView) {
   const g = v.key;
-  const title = s.group[g];
-  const count = g === 'pages' ? active().length : g === 'live' ? liveScriptsCount() : countOf(g);
+  const title = titleOf(g);
+  const count = sizeOf(g);
   const listId = `list-${g}`;
   const whyId = `gwhy-${g}`;
   const toggle = h(
@@ -517,7 +630,7 @@ function renderGroup(v: GroupView) {
     ),
   ];
   if (g !== 'pages' && v.whyOpen)
-    kids.push(h('div', { class: 'why', id: whyId }, icon(Info), h('p', {}, s.groupWhy[g])));
+    kids.push(h('div', { class: 'why', id: whyId }, icon(Info), h('p', {}, groupWhyOf(g))));
   if (v.open) {
     const lst = h('div', { class: 'lst', id: listId });
     if (g !== 'pages') {
@@ -551,6 +664,8 @@ function focusKey(key: string) {
 
 // ---------- Bilan ----------
 function renderSummary() {
+  $('intro').textContent = liveOn() ? s.live.intro : s.intro;
+  if (liveOn()) return renderLiveSummary();
   // La tuile compte les scripts seuls ; les éléments ajoutés par un script sont nommés à part dans la note
   const pageOnly = countOf('pageScripts');
   const scripts = pageOnly + countOf('trackingScripts');
@@ -585,16 +700,60 @@ function renderSummary() {
   );
 }
 
+/** Sandbox vivant : pages, scripts rejoués et bloqués, choix de l'auteur ; note sur les scripts bloqués. */
+function renderLiveSummary() {
+  const all = livePages().flatMap((p) => p.live!.scripts.map((sc) => ({ sc, on: keepOf(p, sc) })));
+  const played = all.filter((x) => x.on).length;
+  // Choix de l'auteur : un script bloqué par défaut qu'il a gardé, une donnée ou un lien gardés
+  const keptN = all.filter((x) => x.on && !x.sc.keep).length + keptIn('pii') + keptIn('externalLinks');
+  const cell = (label: string, n: number) =>
+    h('div', {}, h('dt', { class: 'mu' }, label), h('dd', {}, String(n)));
+  $('sumbar').replaceChildren(
+    cell(s.sumPages, active().length),
+    cell(s.live.sumPlayed, played),
+    cell(s.live.sumBlocked, all.length - played),
+    cell(s.sumKept, keptN),
+  );
+  const blocked = all.filter((x) => !x.on && x.sc.category !== 'page');
+  const kinds = [...new Set(blocked.map((x) => s.live.kinds[x.sc.category]))].join(', ');
+  const note = $('note');
+  note.hidden = false;
+  note.replaceChildren(
+    icon(Info),
+    h(
+      'p',
+      {},
+      blocked.length
+        ? plural(s.live.note_one, s.live.note_other, blocked.length, { kinds })
+        : s.live.noteNone,
+    ),
+  );
+}
+
 /** Tout redessiner ; un groupe vide n'apparaît pas. */
 function renderAll() {
   renderSummary();
   // Sandbox v2 : « Sandbox vivant » juste après les pages, seulement pour un Sandbox
-  const order: GroupKey[] = ['pages', ...(liveOn() ? (['live'] as const) : []), ...REVIEW_GROUPS];
+  // Planche UX : en Sandbox vivant, Pages → Scripts → Réponses → Éléments ajoutés → Données → Formulaires
+  // → Liens ; les cadres retirés suivent les formulaires, et les scripts de la copie inerte n'apparaissent
+  // que pour une page sans enregistrement
+  const order: GroupKey[] = liveOn()
+    ? [
+        'pages',
+        'live',
+        'responses',
+        'widgets',
+        'pii',
+        'forms',
+        'frames',
+        'externalLinks',
+        'pageScripts',
+        'trackingScripts',
+      ]
+    : ['pages', ...REVIEW_GROUPS];
   const kids: HTMLElement[] = [];
   for (const g of order) {
-    const n =
-      g === 'pages' ? active().length : g === 'live' ? liveScriptsCount() + livePages().length : countOf(g);
-    if (!n) continue;
+    if (!sizeOf(g)) continue;
     let v = views.get(g);
     if (!v) {
       v = {
@@ -758,7 +917,12 @@ function toSend(): SendPage[] {
     .map((p) => {
       const mine = (p.removed ?? []).filter((it) => kept.has(keyOf(p, it)));
       const pii = mine.filter((it) => it.group === 'pii').map((it) => it.id);
-      const widgets = mine.filter((it) => it.reason === 'widgetThirdParty').map((it) => it.id);
+      // Sandbox vivant : un élément ajouté par un script suit ce script (affiché s'il est gardé)
+      const widgets = (
+        kind === 'sandbox' && p.live
+          ? (p.removed ?? []).filter((it) => it.reason === 'widgetThirdParty' && widgetOn(p, it))
+          : mine.filter((it) => it.reason === 'widgetThirdParty')
+      ).map((it) => it.id);
       const restoredPii = restorePii(p.html, p.piiOriginals, pii);
       const restored = restoredPii.restored;
       // Lot B : ajouts de scripts tiers retirés, sauf ceux gardés

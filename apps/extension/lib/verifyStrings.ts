@@ -47,6 +47,42 @@ const fr = {
       tracking:
         'Mesure d’audience : bloquée par défaut. Même gardée, elle ne pourrait rien envoyer depuis la démo.',
     },
+    // Planche UX « Vérifier avant l'envoi » d'un Sandbox vivant : aucun texte de la copie inerte
+    intro:
+      'Votre Sandbox rejoue les pages avec leurs scripts et les données qu’elles ont lues : menus, onglets et formulaires réagissent comme sur le site. Tout se passe dans une boîte fermée, sans aucune sortie réseau. Voici ce que TutoClick a bloqué ou protégé. Vous n’avez rien à faire, sauf si vous voulez changer un choix.',
+    sumPlayed: 'Scripts rejoués',
+    sumBlocked: 'Scripts bloqués',
+    note_one:
+      '1 script d’un autre site est bloqué : « Garder » le rejoue, toujours sans accès au réseau. Si la page envoie quelque chose au site, elle reçoit un succès fictif.',
+    note_other:
+      '{{n}} scripts d’autres sites sont bloqués ({{kinds}}) : « Garder » en rejoue un, toujours sans accès au réseau. Si la page envoie quelque chose au site, elle reçoit un succès fictif.',
+    noteNone:
+      'Aucun script n’est bloqué. Si la page envoie quelque chose au site, elle reçoit un succès fictif.',
+    kinds: { page: 'script de la page', third: 'discussion, aide', tracking: 'mesure d’audience' },
+    scripts: 'Scripts',
+    responsesState: 'Rejouées dans la démo, avec des valeurs fictives',
+    responsesRead_one: '1 réponse lue par la page',
+    responsesRead_other: '{{n}} réponses lues par la page',
+    dataReplaced_one: '1 donnée remplacée',
+    dataReplaced_other: '{{n}} données remplacées',
+    noData: 'aucune donnée personnelle',
+    widgetsState: 'Ils suivent leur script : absents tant qu’il est bloqué',
+    piiState: 'Dans les pages et les réponses du site',
+    formsState: 'Envoi simulé : succès fictif, rien ne part vers le site',
+    absent: 'Absent',
+    shown: 'Affiché',
+    simulated: 'Simulé',
+    addedBy: 'Ajouté par {{source}}',
+    siteScript: 'un script de {{site}}',
+    whyWidget:
+      'Ajouté à la page par {{source}}. Dans le Sandbox, il apparaît seulement si ce script est gardé ; il réagit alors comme sur le site, sans accès au réseau.',
+    whyWidgets:
+      'Un script d’un autre site a ajouté ces éléments à la page. Dans le Sandbox, ils apparaissent seulement si leur script est gardé ; ils réagissent alors comme sur le site, sans accès au réseau.',
+    whyForms:
+      'Les formulaires réagissent comme sur le site, mais rien ne part : la page reçoit un succès fictif, et aucune donnée saisie dans la démo n’est envoyée au site d’origine.',
+    whyPii:
+      'TutoClick a repéré ces données dans les pages et dans les réponses que la page a lues, et les a remplacées par des valeurs fictives. « Garder » rétablit le texte d’origine dans la démo.',
+    inResponses: 'Réponses du site',
   },
   group: {
     pages: 'Pages copiées',
@@ -231,6 +267,41 @@ const en: typeof fr = {
       tracking:
         'Audience tracking: blocked by default. Even if kept, it could not send anything from the demo.',
     },
+    intro:
+      'Your Sandbox replays the pages with their scripts and the data they read: menus, tabs and forms respond as on the site. Everything happens in a closed box, with no network access. Here is what TutoClick blocked or protected. You have nothing to do, unless you want to change a choice.',
+    sumPlayed: 'Scripts replayed',
+    sumBlocked: 'Scripts blocked',
+    note_one:
+      '1 script from another site is blocked: “Keep” replays it, still with no network access. If the page sends something to the site, it receives a fictional success.',
+    note_other:
+      '{{n}} scripts from other sites are blocked ({{kinds}}): “Keep” replays one, still with no network access. If the page sends something to the site, it receives a fictional success.',
+    noteNone:
+      'No script is blocked. If the page sends something to the site, it receives a fictional success.',
+    kinds: { page: 'page script', third: 'chat, help', tracking: 'audience tracking' },
+    scripts: 'Scripts',
+    responsesState: 'Replayed in the demo, with fictional values',
+    responsesRead_one: '1 response read by the page',
+    responsesRead_other: '{{n}} responses read by the page',
+    dataReplaced_one: '1 data item replaced',
+    dataReplaced_other: '{{n}} data items replaced',
+    noData: 'no personal data',
+    widgetsState: 'They follow their script: absent while it is blocked',
+    piiState: 'In the pages and the site responses',
+    formsState: 'Simulated sending: fictional success, nothing goes to the site',
+    absent: 'Absent',
+    shown: 'Shown',
+    simulated: 'Simulated',
+    addedBy: 'Added by {{source}}',
+    siteScript: 'a script from {{site}}',
+    whyWidget:
+      'Added to the page by {{source}}. In the Sandbox, it appears only if this script is kept; it then responds as on the site, with no network access.',
+    whyWidgets:
+      'A script from another site added these elements to the page. In the Sandbox, they appear only if their script is kept; they then respond as on the site, with no network access.',
+    whyForms:
+      'Forms respond as on the site, but nothing leaves: the page receives a fictional success, and no data typed in the demo is sent to the original site.',
+    whyPii:
+      'TutoClick found this data in the pages and in the responses the page read, and replaced it with fictional values. “Keep” restores the original text in the demo.',
+    inResponses: 'Site responses',
   },
   group: {
     pages: 'Pages copied',
