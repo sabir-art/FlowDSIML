@@ -57,6 +57,7 @@ export type Bar = {
   bar: HTMLElement;
   setCount(text: string): void;
   setPaused(paused: boolean): void;
+  setName(name: string): void;
   readonly paused: boolean;
 };
 
@@ -84,10 +85,11 @@ export function wireBar(
   const fin = $<HTMLButtonElement>('.fin');
   fin.append(barIcon(Check), s.finish);
   let paused = false;
+  let name = o.name;
   function setPaused(p: boolean) {
     paused = p;
     bar.classList.toggle('is-paused', p);
-    nm.textContent = p ? s.barPaused : o.name;
+    nm.textContent = p ? s.barPaused : name;
     mid.hidden = p;
     pz.hidden = !p;
     pauseBtn.replaceChildren(p ? s.resume : barIcon(Pause));
@@ -138,6 +140,10 @@ export function wireBar(
     bar,
     setCount: (t) => (pill.textContent = t),
     setPaused,
+    setName: (n) => {
+      name = n;
+      if (!paused) nm.textContent = n;
+    },
     get paused() {
       return paused;
     },

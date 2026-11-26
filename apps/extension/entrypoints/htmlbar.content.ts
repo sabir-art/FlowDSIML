@@ -6,7 +6,8 @@ import { labelText } from '@/lib/labelText';
 import { captureHtml } from '@/lib/htmlCapture';
 import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
 import type { HtmlBarRequest } from '@/lib/messages';
-import { strings } from '@/lib/i18n';
+import { barCount, strings } from '@/lib/i18n';
+import { BAR_CSS, barMarkup, togglePause, wireBar } from '@/lib/captureBar';
 
 /**
  * A8 (L20) : barre de la capture HTML. Chaque page est copiée (DOM assaini, données remplacées) au
@@ -38,30 +39,41 @@ export default defineContentScript({
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        .bar{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 14px;border-radius:999px;background:#141311;
-          color:#fff;font:500 13px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-        .dot{width:10px;height:10px;border-radius:50%;background:#2897d5}
-        .n{min-width:84px;font-variant-numeric:tabular-nums}
-        button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:999px;
-          background:#2b2926;color:#fff;font:inherit;cursor:pointer}
-        button:hover{background:#3a3734} button:focus-visible{outline:3px solid #1f7fb6;outline-offset:2px}
-        button:disabled{opacity:.6;cursor:progress}
-        .stop{background:#fff;color:#141311} .stop:hover{background:#e7e5e4}
-        .toast{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;
-          border-radius:10px;background:#141311;color:#fff;font:500 13px system-ui,sans-serif}
+        ${BAR_CSS}
+        .cap:disabled{opacity:.6;cursor:progress}
+        .toast{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;
+          border-radius:10px;background:#16181d;color:#fff;font:500 13px system-ui,sans-serif}
         .toast.err{background:#7a1f12}
         [hidden]{display:none!important}
       </style>
       <div class="toast" role="status" hidden></div>
-      <div class="bar" role="toolbar" aria-label="${s.htmlBar}">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="n" aria-live="polite"></span>
-        <button type="button" class="cap" title="${s.htmlShortcutCapture}">${s.htmlCapturePage}</button>
-        <button type="button" class="stop" title="${s.shortcutStop}">${s.finish}</button>
-      </div>`;
+      ${barMarkup({
+        label: s.htmlBar,
+        name: s.barHtml,
+        middle: `<span class="note mnote">${s.barHtmlNote}</span>
+          <button type="button" class="cap" title="${s.htmlShortcutCapture}">${s.barAddPage}</button>
+          <span class="note tgt" hidden></span>`,
+      })}`;
     document.documentElement.appendChild(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
-    const countEl = $<HTMLSpanElement>('.n');
+    const tgt = $<HTMLSpanElement>('.tgt');
+    // L60 §2 : barre commune (état, pastille « 2 pages », Pause, Terminer, déplacement)
+    const ui = wireBar(root, {
+      name: s.barHtml,
+      mover: host,
+      onPause: togglePause,
+      onStop: () => void send({ type: 'fd:html-stop' }),
+      shortcut: true,
+    });
+    void browser.storage.local.get('fd.htmlKind').then((r) => {
+      if (r['fd.htmlKind'] !== 'sandbox') return;
+      ui.setName(s.barSandbox);
+      $<HTMLSpanElement>('.mnote').textContent = s.barSandboxNote;
+    });
+    void browser.runtime
+      .sendMessage({ type: 'fd:status' })
+      .then((st: unknown) => ui.setPaused(!!(st as { paused?: boolean } | null)?.paused))
+      .catch(() => undefined);
     const capBtn = $<HTMLButtonElement>('.cap');
     const toast = $<HTMLDivElement>('.toast');
     // EXT-02 §8 : cible d'un ajout (« Démo CRM · après l'étape 3 »), à la suite du nombre de pages
@@ -69,9 +81,9 @@ export default defineContentScript({
     let pages = 0;
     const setCount = (n: number) => {
       pages = n;
-      const label =
-        n <= 1 ? s.htmlPagesOne.replace('{{n}}', String(n)) : s.htmlPages.replace('{{n}}', String(n));
-      countEl.textContent = target ? `${label} · ${target}` : label;
+      ui.setCount(barCount('pages', n));
+      tgt.textContent = target ?? '';
+      tgt.hidden = !target;
     };
     setCount(0);
     function flash(text: string, err = false) {
@@ -85,7 +97,8 @@ export default defineContentScript({
 
     let busy = false;
     async function capture() {
-      if (busy) return;
+      // En pause, aucune page n'est ajoutée (L60 §2)
+      if (busy || ui.paused) return;
       busy = true;
       capBtn.disabled = true;
       flash(s.htmlCapturing);
@@ -191,12 +204,11 @@ export default defineContentScript({
         }
       });
     }
-    $<HTMLButtonElement>('.stop').onclick = () => void send({ type: 'fd:html-stop' });
 
     // Clic sur un élément de la page : lien proposé vers la page suivante
     function onClick(e: MouseEvent) {
       const t = e.target as Element | null;
-      if (!t || t.closest('[data-fd-ui]') || e.composedPath().includes(host)) return;
+      if (!t || t.closest('[data-fd-ui]') || e.composedPath().includes(host) || ui.paused) return;
       const el =
         t.closest(
           'a,button,[role="button"],[role="link"],[role="tab"],[role="menuitem"],input[type="submit"]',

@@ -104,16 +104,66 @@ const WS = '11111111-1111-1111-1111-111111111111';
     const host = [...document.querySelectorAll('[data-fd-ui]')].find((e) => e.shadowRoot);
     return {
       label: host?.shadowRoot.querySelector('[role=toolbar]')?.getAttribute('aria-label'),
-      n: host?.shadowRoot.querySelector('.n')?.textContent,
+      n: host?.shadowRoot.querySelector('.pill')?.textContent,
+      name: host?.shadowRoot.querySelector('.nm')?.textContent,
+      note: host?.shadowRoot.querySelector('.mnote')?.textContent,
+      add: host?.shadowRoot.querySelector('.cap')?.textContent,
     };
   });
-  ok(bar.label === 'Capture HTML en cours' && bar.n === '1 page', `barre de capture HTML (${bar.n})`);
+  ok(
+    bar.label === 'Capture HTML en cours' &&
+      bar.n === '1 page' &&
+      bar.name === 'HTML' &&
+      bar.note === 'Chaque clic devient une étape' &&
+      bar.add === 'Ajouter cette page',
+    `barre HTML (L60 §2) : « HTML », pastille « ${bar.n} », « Chaque clic devient une étape », « Ajouter cette page »`,
+  );
+  // Même géométrie que les autres modes : 48 px, contrôles de 36 px sur le même centre
+  const geo = await page.evaluate(() => {
+    const b = [...document.querySelectorAll('[data-fd-ui]')]
+      .find((e) => e.shadowRoot)
+      .shadowRoot.querySelector('.bar');
+    const r = b.getBoundingClientRect();
+    const ctl = [...b.querySelectorAll(':scope > button, .mid > button')];
+    return {
+      h: Math.round(r.height),
+      hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
+      ok: ctl.every((e) => Math.abs(e.getBoundingClientRect().top + 18 - (r.top + r.height / 2)) <= 1),
+    };
+  });
+  ok(
+    geo.h === 48 && geo.hs.every((h) => h === 36) && geo.ok,
+    `barre HTML : 48 px, contrôles de 36 px centrés (${JSON.stringify(geo)})`,
+  );
   // L60 §1 : la mention d'autorisation est dans le popup, une fois (popup.e2e) ; plus sur la page
   const notice = await page.evaluate(() => {
     const host = [...document.querySelectorAll('[data-fd-ui]')].find((e) => e.shadowRoot);
     return !!host?.shadowRoot.querySelector('.notice');
   });
   ok(!notice, 'L49 §6 : la mention ne recouvre plus la page');
+  // Pause : un clic ne crée pas d'étape ; la page chargée n'est pas ajoutée
+  await page.keyboard.press('Alt+Shift+P');
+  await page.waitForFunction(
+    () =>
+      [...document.querySelectorAll('[data-fd-ui]')]
+        .find((e) => e.shadowRoot)
+        ?.shadowRoot.querySelector('.nm')?.textContent === 'En pause',
+  );
+  await page.click('a[href="/page2"]');
+  await page.waitForURL(/page2/);
+  await page.waitForTimeout(1500);
+  ok((await status()).steps === 1, 'Pause : la page ouverte par le clic n’est pas ajoutée');
+  await page.goBack();
+  await page.waitForURL(/\/page$/);
+  await page.waitForTimeout(800);
+  await page.evaluate(() =>
+    [...document.querySelectorAll('[data-fd-ui]')]
+      .find((e) => e.shadowRoot)
+      .shadowRoot.querySelector('.pause')
+      .click(),
+  );
+  await page.waitForTimeout(400);
+  ok(!(await status()).paused, 'Reprendre : la capture HTML reprend');
   await page.click('a[href="/page2"]');
   await page.waitForURL(/page2/);
   ok(await waitSteps(2), 'page suivante capturée après le clic');
