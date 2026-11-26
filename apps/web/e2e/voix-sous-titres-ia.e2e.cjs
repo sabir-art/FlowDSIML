@@ -150,8 +150,8 @@ function prepare(over = {}) {
   };
   // L62 §8 : sélecteur de voix (déclencheur, fenêtre de 400 px, liste des voix du compte)
   const voices = async () => {
-    if ((await panel.locator('.vp-pop').count()) === 0) await panel.locator('.vp-trigger').click();
-    const list = panel.getByRole('listbox');
+    if ((await page.locator('.vp-pop').count()) === 0) await panel.locator('.vp-trigger').click();
+    const list = page.getByRole('listbox');
     await list.waitFor();
     const names = await list.locator('.vp-nm').allTextContents();
     return { list, names };
@@ -189,10 +189,58 @@ function prepare(over = {}) {
     'Rien n’est envoyé à l’ouverture (liste des voix seulement)',
   );
   const v0 = await voices();
-  const pop = panel.locator('.vp-pop');
+  const pop = page.locator('.vp-pop');
+  // Recette UX : la fenêtre n'est coupée ni par le panneau ni par le bas de l'écran (portail, position
+  // fixe, hauteur bornée) ; coins haut gauche et bas droit dans la fenêtre, pied visible
+  const entiere = () =>
+    pop.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const at = (x, y) => el.contains(document.elementFromPoint(x, y));
+      // 16 px depuis le coin : hors de l'arrondi (rayon 16)
+      const foot = el.querySelector('.vp-foot').getBoundingClientRect();
+      return {
+        coins: at(r.left + 16, r.top + 16) && at(r.right - 16, r.bottom - 16),
+        pied: foot.bottom <= innerHeight && foot.top >= 0,
+        dedans: r.left >= 0 && r.bottom <= innerHeight && r.top >= 0,
+        croix: el.querySelector('input').type,
+      };
+    });
+  {
+    const e1 = await entiere();
+    ok(
+      e1.coins && e1.pied && e1.dedans,
+      `Sélecteur à 1440 × 900 : fenêtre entière, pied visible (${JSON.stringify(e1)})`,
+    );
+    ok(e1.croix === 'text', 'Recherche : champ texte, pas de croix native en plus de la nôtre');
+    await page.keyboard.press('Escape');
+    // À 1280 px, l'éditeur referme son panneau de droite : on rouvre l'outil Voix
+    const rouvrir = async () => {
+      if (await panel.locator('.vp-trigger').isVisible()) return;
+      await openTool(page, 'voice');
+      await sec.waitFor();
+      await toGenerate();
+    };
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForFunction((x) => innerWidth === x, 1280);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await rouvrir();
+    await voices();
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/l62-selecteur-1280.png` });
+    const e2 = await entiere();
+    ok(
+      e2.coins && e2.pied && e2.dedans,
+      `Sélecteur à 1280 × 720 : fenêtre entière, pied visible (${JSON.stringify(e2)})`,
+    );
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.waitForFunction((x) => innerWidth === x, 1440);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+    await rouvrir();
+    await voices();
+  }
   ok(
     (await pop.evaluate((e) => Math.round(e.getBoundingClientRect().width))) === 400 &&
-      (await page.evaluate(() => document.activeElement?.getAttribute('type'))) === 'search',
+      (await page.evaluate(() => document.activeElement?.getAttribute('role'))) === 'searchbox',
     'Sélecteur : fenêtre de 400 px, recherche avec le focus',
   );
   const secs = (await pop.locator('.vp-sec').allTextContents()).map((x) => x.replace(/\s+/g, ' ').trim());
@@ -280,7 +328,7 @@ function prepare(over = {}) {
   const pas = ['George', 'Élodie', 'Hugo', 'Camille'];
   const ecouter = async () => {
     await voices();
-    await panel.getByRole('button', { name: `Écouter ${pas.shift()}` }).click();
+    await page.getByRole('button', { name: `Écouter ${pas.shift()}` }).click();
   };
   for (const [code, text] of [
     ['PROVIDER_KEY', 'Le service de voix refuse la clé de l’espace. Prévenez un administrateur.'],
@@ -291,8 +339,8 @@ function prepare(over = {}) {
   ]) {
     state.aiProvider = code;
     await ecouter();
-    await panel.getByText(text, { exact: false }).first().waitFor();
-    const sampleSaid = await panel.getByText(text, { exact: false }).count();
+    await page.locator('.vp-pop').getByText(text, { exact: false }).first().waitFor();
+    const sampleSaid = await page.locator('.vp-pop').getByText(text, { exact: false }).count();
     await page.keyboard.press('Escape');
     await panel.getByRole('button', { name: /Générer la voix|Réessayer/ }).click();
     await page.waitForFunction(

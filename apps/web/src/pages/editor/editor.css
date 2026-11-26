@@ -4920,13 +4920,13 @@
   color: var(--fd-color-success);
   font: 600 11px / 18px var(--fd-font-sans);
 }
-/* Fenêtre de 400 px alignée sur le bord droit du champ, 4 px dessous */
-.mk .vp-pop {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+/* Fenêtre de 400 px alignée sur le bord droit du champ, 4 px dessous (ou dessus) : portail en position
+   fixe au-dessus de l'éditeur (recette UX : le panneau la coupait). Seule la liste défile. */
+.mk.vp-pop {
+  position: fixed;
   z-index: var(--fd-z-popover);
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   width: 400px;
   max-width: calc(100vw - 32px);
@@ -4946,6 +4946,10 @@
   width: 16px;
   height: 16px;
   color: var(--fd-color-text-muted);
+}
+.mk .vp-search input::-webkit-search-cancel-button {
+  display: none;
+  appearance: none;
 }
 .mk .vp-search input {
   width: 100%;
@@ -5034,6 +5038,8 @@
   height: 14px;
 }
 .mk .vp-list {
+  flex: 0 1 auto;
+  min-height: 0;
   max-height: 360px;
   overflow: auto;
   border-radius: var(--fd-radius-sm);
@@ -5084,6 +5090,11 @@
   border-color: var(--fd-color-primary);
   background: var(--fd-color-primary);
   color: var(--fd-color-on-primary);
+}
+.mk .vp-chips,
+.mk .vp-search,
+.mk .vp-foot {
+  flex: none;
 }
 .mk .vp-empty {
   display: grid;
