@@ -73,7 +73,10 @@ export function StepList({
   onEdit,
   collapsed = false,
   capture,
+  arrived = [],
 }: {
+  /** L60 §3 : étapes arrivées de l'extension, « Nouvelle » jusqu'à leur première modification. */
+  arrived?: string[];
   /** EXT-02 §8 : capturer de nouvelles étapes avec l'extension (fenêtre, repère, pastille « Nouveau »). */
   capture?: CaptureMore;
   /** Lot 3 : colonne repliée en rail de 48 px (pastilles numérotées, « Ajouter une étape » en icône). */
@@ -701,8 +704,12 @@ export function StepList({
                   <span className="meta">
                     <StepName title={s.title || t('editor.untitled')} />
                     {/* EXT-02 §8.4 : étape ajoutée par la capture, jusqu'à sa première ouverture */}
-                    {capture?.fresh.includes(s.id) && (
+                    {capture?.fresh.includes(s.id) ? (
                       <span className="fd-badge rail-new">{t('editor.captureMore.new')}</span>
+                    ) : (
+                      arrived.includes(s.id) && (
+                        <span className="fd-badge rail-arrived">{t('editor.arrival.new')}</span>
+                      )
                     )}
                     {/* L25-06 : l'étape change d'onglet */}
                     {tabChanged(editor.steps, i) && (

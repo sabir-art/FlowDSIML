@@ -2206,6 +2206,12 @@
       "dropAdd": "Drop to add an image",
       "dropReplace": "Drop to replace the capture",
       "svgHelp": "Converted to an image when placed. The original stays in the media library."
+    },
+    "arrival": {
+      "ready_one": "Demo ready: {{count}} step captured",
+      "ready_other": "Demo ready: {{count}} steps captured",
+      "preview": "Preview",
+      "new": "New"
     }
   },
   "status": {

@@ -5256,3 +5256,12 @@
 .vo-fromtext .vo-help {
   margin: 0;
 }
+
+/* L60 §3 : étape arrivée de l'extension, « Nouvelle » en vert jusqu'à sa première modification */
+.fd-badge.rail-arrived {
+  justify-self: start;
+  align-self: flex-start;
+  width: fit-content;
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}

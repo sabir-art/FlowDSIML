@@ -583,7 +583,8 @@ $('send').addEventListener('click', async () => {
         () => undefined,
         () => undefined,
       );
-    const editor = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit`;
+    // L60 §3 : « ready » : l'éditeur dit « Démo prête : n étapes capturées » et marque les étapes « Nouvelle »
+    const editor = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit${target.addTo ? '' : `?ready=${ordered.length}`}`;
     if (target.addTo) {
       // EXT-02 §8.4 : l'extension rend la main à l'onglet de l'éditeur, qui insère les étapes
       const t = (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined;

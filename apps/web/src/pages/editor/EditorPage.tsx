@@ -71,6 +71,7 @@ import { demoFrame } from './capture/FrameFields';
 import { CropCanvas, CropPanel, cropDraftFor, type CropDraft } from './capture/Crop';
 import { StepList } from './StepList';
 import { CaptureMoreBanner, useCaptureMore } from './capture/CaptureMore';
+import { useArrival } from './capture/Arrival';
 import { useStepComments } from './comments/useStepComments';
 import { CommentsDock, readDock, storeDock, type DockState } from './comments/CommentsDock';
 import { useDockFit, useScrollable } from './comments/useDockFit';
@@ -260,6 +261,8 @@ export function EditorPage() {
     setSelection({ kind: 'step' });
   }, []);
   const capture = useCaptureMore(editor, demoId, selectStep);
+  // L60 §3 : démo arrivée de l'extension : toast « Démo prête », étapes « Nouvelle »
+  const arrival = useArrival(editor, demoId, () => preview());
   // Une étape ajoutée perd sa pastille « Nouveau » à sa première ouverture
   const openedStep = editor.steps[index]?.id;
   const seenStep = capture.seen;
@@ -1207,6 +1210,7 @@ export function EditorPage() {
           <StepList
             collapsed={stepsCollapsed}
             capture={readOnly ? undefined : capture}
+            arrived={readOnly ? [] : arrival.fresh}
             editor={editor}
             current={index}
             onSelect={(i) => {
