@@ -102,7 +102,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     // personne (fuseau du navigateur enregistré avec le réglage)
     const freq = page.getByRole('radiogroup', { name: 'Fréquence des e-mails' });
     ok(
-      (await freq.getByRole('radio').allInnerTexts()).join('|') ===
+      // NUM-01 : « 9 h » insécable ; comparé espaces ramenées à des espaces ordinaires
+      (await freq.getByRole('radio').allInnerTexts()).join('|').replace(/\s+/g, ' ') ===
         'Au fil de l’eau|Un résumé par jour à 9 h' &&
         (await freq.getByRole('radio', { name: 'Au fil de l’eau' }).getAttribute('aria-checked')) === 'true',
       'fréquence : « Au fil de l’eau » (par défaut) et « Un résumé par jour à 9 h »',
@@ -120,9 +121,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
     ok(row(state).timezone === tz, `fréquence : fuseau du navigateur enregistré (${row(state).timezone})`);
     ok(
-      (await page.locator('#nt-freq-h').innerText()).startsWith(
-        'À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau.',
-      ),
+      (await page.locator('#nt-freq-h').innerText())
+        .replace(/\s+/g, ' ')
+        .startsWith('À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau.'),
       'fréquence : aide du résumé quotidien',
     );
     await shot(page, 'notifs-frequence');

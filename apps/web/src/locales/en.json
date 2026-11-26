@@ -900,7 +900,7 @@
       "linkedStepNone": "None",
       "linkedTo": "linked to step {{n}}",
       "errAnswerEmpty": "An answer is empty.",
-      "thresholdValue": "{{value}} %",
+      "thresholdValue": "{{value}} %",
       "publishBlocked": "Quiz question {{n}} is incomplete: fix it before publishing.",
       "stats": "Success per question",
       "statsEmpty": "No attempts yet.",
@@ -908,10 +908,10 @@
       "statsAttempts_other": "{{count}} attempts",
       "statsPassRate": "Pass rate",
       "statsAvg": "Average score",
-      "statsCorrect": "{{value}} % correct answers",
+      "statsCorrect": "{{value}} % correct answers",
       "true": "True",
       "false": "False",
-      "thresholdLabel": "Pass mark: {{value}} %",
+      "thresholdLabel": "Pass mark: {{value}} %",
       "subtitle_one": "\"{{module}}\" · {{count}} question",
       "subtitle_other": "\"{{module}}\" · {{count}} questions",
       "modeLabel": "Type",
@@ -1002,9 +1002,9 @@
       "logoMore": "More logo actions",
       "logoRemove": "Remove",
       "logoSending": "Uploading the logo",
-      "logoHelp": "PNG, JPEG, WebP or SVG, 2 MB at most. Or drop the file on this block.",
+      "logoHelp": "PNG, JPEG, WebP or SVG, 2 MB at most. Or drop the file on this block.",
       "logoBadType": "Format not accepted: PNG, JPEG, WebP or SVG.",
-      "logoTooBig": "File too large: 2 MB at most.",
+      "logoTooBig": "File too large: 2 MB at most.",
       "logoError": "The logo could not be uploaded. Try again."
     },
     "settings": {
@@ -1366,7 +1366,7 @@
       "pickTitle": "{{name}}: choose a step",
       "pickHelp": "The capture is copied with its blurs: editing the step later does not change the Before / After.",
       "incomplete": "Step {{n}} Before / After does not have both captures.",
-      "zoneHint": "PNG, JPEG or WebP, 10 MB at most.",
+      "zoneHint": "PNG, JPEG or WebP, 10 MB at most.",
       "zoneTitle": "Add the capture",
       "zoneFromStep": "Choose a step…",
       "zoneSending": "Uploading the image"
@@ -2015,7 +2015,7 @@
       "listen": "Listen",
       "genCount_one": "{{count}} character",
       "genCount_other": "{{count}} characters",
-      "genAbout": "about {{n}} s",
+      "genAbout": "about {{n}} s",
       "genLang": "Demo language: {{lang}}.",
       "preview": "Preview",
       "regenerate": "Regenerate",
@@ -2026,7 +2026,7 @@
       "startRec": "Start recording",
       "stop": "Stop recording",
       "recHelp": "Your microphone. 2 minutes at most.",
-      "importHelp": "MP3, M4A, WAV or WebM, 5 MB at most. Or drop the file on this block.",
+      "importHelp": "MP3, M4A, WAV or WebM, 5 MB at most. Or drop the file on this block.",
       "transcriptNote": "(required to publish)",
       "readText": "Text read",
       "readTextNote": "(also used as the transcript)",
@@ -2146,12 +2146,12 @@
       "newTitle": "Window",
       "displayHelp": "A window with an image and text, over the previous screen.",
       "image": "Image",
-      "imageHelp": "PNG, JPEG or WebP, 5 MB at most. Or drop the file on this block.",
+      "imageHelp": "PNG, JPEG or WebP, 5 MB at most. Or drop the file on this block.",
       "imageMore": "More image actions",
       "replace": "Replace…",
       "remove": "Remove",
       "sending": "Uploading the image",
-      "tooBig": "Image too large: 5 MB at most.",
+      "tooBig": "Image too large: 5 MB at most.",
       "alt": "Alternative text",
       "altHelp": "Leave empty if the image is decorative.",
       "stepOf": "Step {{n}} of {{total}}",
@@ -2204,7 +2204,7 @@
       "adding": "Adding the image…",
       "removed": "Image removed",
       "badType": "Format not accepted: PNG, JPEG, WebP or SVG.",
-      "tooBig": "File too large: 5 MB at most.",
+      "tooBig": "File too large: 5 MB at most.",
       "quota": "Storage is full: the image was not added.",
       "error": "The image could not be added.",
       "dropHint": "Drop an image on the capture to add it.",
@@ -2403,7 +2403,7 @@
       "sizeValue_one": "{{size}} · {{count}} file",
       "sizeValue_other": "{{size}} · {{count}} files",
       "limit": "Limit",
-      "limitValue": "300 MB per archive",
+      "limitValue": "300 MB per archive",
       "warning": "Anyone who has the file can see the demo, without a password.",
       "limit1": "No tracking and no lead form: nothing is sent, nothing is stored.",
       "limit2": "External links stay visible but only open online.",
@@ -2418,7 +2418,7 @@
       "fileMeta": "{{size}} · version {{n}}",
       "errTitle": "The archive could not be created.",
       "errAsset": "A file of step {{n}} cannot be read. Republish the demo, then try again.",
-      "errSize": "The archive exceeds 300 MB. Shorten the demo or remove a video.",
+      "errSize": "The archive exceeds 300 MB. Shorten the demo or remove a video.",
       "errUnpublished": "The demo is not published.",
       "errServer": "Check your connection, then try again.",
       "noRight": "Your role does not allow distributing this demo."
@@ -2845,7 +2845,7 @@
         "feed_end": "“{{demo}}” finished",
         "feed_lead": "Lead on “{{demo}}”",
         "endsToday": "Demos finished today",
-        "liveSince": "Live · updated {{n}} s ago",
+        "liveSince": "Live · updated {{n}} s ago",
         "liveNow": "Live · updated just now",
         "paused": "Paused",
         "pauseLabel": "Pause the refresh",
@@ -3423,7 +3423,7 @@
     "deleted": "Style deleted.",
     "picker": "Color picker: {{label}}",
     "logoFromMediaHelp": "A logo chosen from the media library is copied here: changing or deleting it in the media library does not change this logo.",
-    "logoFromMediaError": "This file is not suitable as a logo: PNG, JPEG, WebP or SVG, 2 MB at most."
+    "logoFromMediaError": "This file is not suitable as a logo: PNG, JPEG, WebP or SVG, 2 MB at most."
   },
   "vars": {
     "new": "New variable",
@@ -4082,7 +4082,7 @@
     "restoreConfirm": "Put the centre back",
     "restored": "The training centre is shown at this address again.",
     "logoFromMediaHelp": "A logo chosen from the media library is copied here.",
-    "logoFromMediaError": "This file is not suitable as the centre logo: PNG, SVG or WebP, 512 KB at most."
+    "logoFromMediaError": "This file is not suitable as the centre logo: PNG, SVG or WebP, 512 KB at most."
   },
   "export": {
     "menu": "Export (PDF, GIF)",
@@ -4560,7 +4560,7 @@
     "schemaPublic": "Audience",
     "schemaOne": "One screen",
     "timerOff": "No timer",
-    "timerMin": "{{n}} min",
+    "timerMin": "{{n}} min",
     "timerOther": "Other…",
     "history_one": "History ({{count}})",
     "history_other": "History ({{count}})",
@@ -4573,7 +4573,7 @@
     "historyViewOf": "View the presentation: {{when}}",
     "thisOne": "this one",
     "reportDone": "Presentation finished",
-    "planned": "Planned: {{min}} min",
+    "planned": "Planned: {{min}} min",
     "overBy": "Over by {{time}}",
     "shorter": "Shorter than planned",
     "onTime": "On time",
@@ -4593,7 +4593,7 @@
     "timerName": "{{elapsed}} elapsed of {{total}}",
     "timerNameFree": "{{elapsed}} elapsed",
     "ofTotal": "of {{total}}",
-    "twoLeft": "2 min left"
+    "twoLeft": "2 min left"
   },
   "notifications": {
     "k_invite": "{{actor}} invites you to join “{{workspace}}”",
@@ -4987,9 +4987,9 @@
     "count_other": "{{count}} files",
     "import": "Import",
     "uploading": "Importing…",
-    "types": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most",
+    "types": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most",
     "importFirst": "Import your first file",
-    "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most.",
+    "importHelp": "Logos, background images and fonts, reusable in every demo of the workspace. PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most.",
     "quota": "{{used}} of {{total}} MB",
     "usedIn_one": "Used in {{count}} demo",
     "usedIn_other": "Used in {{count}} demos",
@@ -5013,7 +5013,7 @@
     },
     "unused": "Not used",
     "dropHere": "Drop files here",
-    "pageHint": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
+    "pageHint": "PNG, JPEG, WebP, SVG or WOFF2, 5 MB at most. The category is deduced, you can change it.",
     "imported": "“{{name}}” imported into {{category}}",
     "change": "Change",
     "reason": {
@@ -5044,9 +5044,9 @@
         "font": "Import a new font"
       },
       "hint": {
-        "logo": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
-        "image": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
-        "font": "WOFF2, 5 MB at most. It will be selected automatically."
+        "logo": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
+        "image": "PNG, JPEG, WebP or SVG, 5 MB at most. It will be selected automatically.",
+        "font": "WOFF2, 5 MB at most. It will be selected automatically."
       },
       "use": {
         "logo": "Use this logo",
@@ -6352,11 +6352,11 @@
   },
   "videoImport": {
     "title": "Import a video",
-    "hint": "Drop the file here or choose it. MP4 or WebM, 50 MB and 10 min at most.",
+    "hint": "Drop the file here or choose it. MP4 or WebM, 50 MB and 10 min at most.",
     "pick": "Choose a video…",
     "pickOther": "Choose another video",
     "seeUsage": "View usage",
-    "sending": "Uploading… {{pct}}% · {{sent}} of {{total}} MB",
+    "sending": "Uploading… {{pct}}% · {{sent}} of {{total}} MB",
     "stalled": "Upload interrupted · {{pct}}%",
     "resume": "Resume",
     "progress": "Video upload",
@@ -6373,12 +6373,12 @@
       "body": "Choose an MP4 or WebM video."
     },
     "tooBig": {
-      "title": "“{{name}}” weighs {{size}} MB.",
-      "body": "The limit is 50 MB: shorten or split the video."
+      "title": "“{{name}}” weighs {{size}} MB.",
+      "body": "The limit is 50 MB: shorten or split the video."
     },
     "tooLong": {
-      "title": "“{{name}}” lasts {{min}} min.",
-      "body": "The limit is 10 min: split it into several demos."
+      "title": "“{{name}}” lasts {{min}} min.",
+      "body": "The limit is 10 min: split it into several demos."
     },
     "unreadable": {
       "title": "“{{name}}” cannot be read.",
@@ -6567,7 +6567,7 @@
     "header": "Header",
     "headerSub": "What the visitor sees on arrival.",
     "logo": "Logo",
-    "logoHelp": "The workspace logo by default. PNG or SVG, 2 MB at most.",
+    "logoHelp": "The workspace logo by default. PNG or SVG, 2 MB at most.",
     "logoSpace": "Workspace logo",
     "logoChosen": "Logo chosen from the media library",
     "logoReset": "Back to the workspace logo",
