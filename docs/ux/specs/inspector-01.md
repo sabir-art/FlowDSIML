@@ -1,5 +1,58 @@
 # INSPECTOR-01 — Langage commun des panneaux de droite de l'éditeur
 
+> **Version 2 (26/11, après la précision du client).** La structure « libellé à gauche, contrôle à droite » n'était qu'une piste. Je propose ma propre structure, partie de ce que l'utilisateur vient faire dans chaque panneau, en **deux directions** :
+> - planche `docs/ux/propositions/inspector-01/v2-planche-voix-off-2-directions.png` : avant, direction A et direction B, en clair et en sombre, avec un tableau comparatif ;
+> - planche `docs/ux/propositions/inspector-01/v2-planche-systeme-direction-b.png` : la direction B sur Étape et bulle, Thème et Recadrage.
+>
+> Les jetons du §1 (fonds remplis, contrôles de 32 px sans contour, séparateurs, typographie, contrastes) valent pour les deux directions. Les §4 et §5 plus bas décrivent la version 1, qui est la base de la direction A.
+
+## 0. Version 2 : deux directions
+
+**Ce que l'utilisateur vient faire dans Voix off** : écouter la voix de l'étape, la changer, corriger ce qu'elle dit. Tout le reste est secondaire : la langue et la voix de synthèse ne se règlent qu'une fois, et le lecteur de la démo vaut pour toute la démo, pas pour cette étape.
+
+### Direction A : sections d'inspecteur
+
+C'est une grammaire d'outil de design.
+- Les sections sont titrées (12 px demi-gras), avec leur action ou leur résumé à droite du titre.
+- Les contrôles n'ont **pas de libellé** quand leur valeur parle d'elle-même : le drapeau et « Français », l'avatar et « Antoine ».
+- La source est un mini-segmenté à icônes de 24 px dans le titre « Voix ».
+- Le lecteur de la démo est une section repliée, avec son résumé (« Bulle · auto · sous-titres »).
+
+### Direction B : l'objet d'abord (recommandée)
+
+Chaque panneau a trois couches, toujours dans le même ordre :
+
+1. **L'objet**, en haut, dans une carte de 12 px de rayon au fond rempli :
+   - Voix off : qui parle (avatar de 32 px, nom en 14 px, « Voix IA · français »), l'onde (32 px), la lecture ronde de 36 px et la durée ;
+   - Étape : la bulle telle que le visiteur la verra ;
+   - Recadrage : le cadrage sur une vignette de la capture ;
+   - Thème : les styles en tuiles.
+2. **Les actions sur l'objet, en verbes** : une barre de 3 outils de 32 px sous l'objet (Régénérer, Enregistrer, Importer).
+   - La « source » n'est plus un concept à comprendre : l'action crée une nouvelle voix, qui arrive dans la carte « Nouvelle voix » (Garder l'actuelle, Utiliser cette voix).
+   - Rien n'est remplacé d'office, et la règle « sans perte » de L62 §6 est tenue.
+3. **Le contenu et ses réglages en valeurs cliquables** :
+   - le texte se lit comme un texte, éditable sur place (fond rempli au survol et au focus seulement) ;
+   - sous lui, des **puces de valeur** de 28 px (`ValueChip` : icône ou avatar, valeur, chevron) qui ouvrent leur liste : Français, Antoine, Position auto, Suivant, Sans chapitre, Coins arrondis…
+   - les titres secondaires sont en 11 px demi-gras, en gris, en capitales espacées (« TEXTE LU », « ACCESSIBILITÉ »).
+4. **Ce qui vaut pour toute la démo** sort du panneau de l'étape : une **ligne résumé** de 44 px au pied (« Lecteur · Bulle · lecture auto · sous-titres »). Elle ouvre une surcouche de 288 px (segmenté Bulle, Orbe, Barre ; Lecture auto ; Sous-titres).
+5. **L'action destructive** (Retirer la voix, Supprimer l'étape) passe dans le menu ⋯ de l'objet ou dans le pied.
+
+**Pourquoi B** :
+- C'est la réponse directe à « n'afficher que l'essentiel, aller droit au but ». On voit et on entend la voix en entrant, on agit avec des verbes, et les réglages de la démo quittent l'étape.
+- Le rendu est plus moderne : un objet présent, du texte qui respire, des valeurs plutôt qu'un formulaire.
+- La grammaire reste commune : objet, valeurs, secondaire, pied.
+- A coûte moins cher à développer et reste un bon repli si le client préfère un rendu « outil de design ».
+
+**Composants en plus pour B** : `InspectorObject` (la carte de l'objet, avec sa barre d'outils), `ValueChip` (28 px), `InlineText` (texte éditable sur place), `SummaryRow` (ligne résumé, avec sa surcouche).
+
+**Mesures vérifiées sur la maquette B, en clair et en sombre** :
+- panneau de 320 px, en-tête de 48 px ;
+- outils de 32 px, puces de 28 px, lecture de 36 px, ligne résumé de 44 px ;
+- contrastes : 4,8:1 au moins (infos secondaires), 5,4:1 pour les titres secondaires et le texte d'aide en clair, 12:1 et plus pour les puces et les outils.
+
+---
+
+
 Retour du client du 26/11 : les panneaux de réglages font « formulaire de navigateur », avec des contours épais, du gros texte, beaucoup de blancs et trop de phrases. Il veut un inspecteur d'outil pro : simple, compact, moderne, qui va droit à l'essentiel.
 
 **Planches** (`docs/ux/propositions/inspector-01/`) :
