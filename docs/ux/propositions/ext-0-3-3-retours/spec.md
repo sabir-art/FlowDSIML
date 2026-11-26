@@ -55,7 +55,7 @@ Le client revient sur « un clic démarre ».
 - Un changement de réglage est mémorisé comme aujourd'hui.
 - ← ou Échap revient à la liste des modes, avec le focus sur le mode quitté.
 - Entrée sur la liste ouvre la vue du **dernier mode**, avec le focus sur « Démarrer » ; un second Entrée démarre.
-- L'aide sous la liste devient « Choisissez un mode : ses réglages s'affichent avant de démarrer. ».
+- L'aide sous la liste devient « Choisissez un mode pour voir ses réglages. Entrée ouvre votre dernier choix. » (remplace « Un clic démarre la capture. »).
 - Le nom accessible d'un mode devient « {mode}, {phrase} » (sans « Démarrer : »).
 - La vue Réglages du pied garde l'apparence et les réglages communs. Les réglages propres à un mode y restent aussi, pour ne rien enlever.
 
