@@ -3,7 +3,9 @@
  *  - toast « Démo prête : n étapes capturées » avec « Aperçu » (qui ouvre l'aperçu) ;
  *  - l'adresse perd « ready » (un rechargement ne rejoue pas le toast) ;
  *  - chaque étape porte l'étiquette verte « Nouvelle » jusqu'à sa première modification, y compris
- *    après un rechargement.
+ *    après un rechargement ;
+ *  - L64 §3 : étapes rédigées par l'IA pendant la capture (options.aiText) : « Généré par IA, à vérifier »
+ *    sous le titre et sous le texte de la bulle, retiré à la première saisie.
  * Faux Supabase, données fictives. Usage : node e2e/arrivee-capture.e2e.cjs (THEME=dark)
  */
 const { chromium } = require('playwright');
@@ -26,6 +28,26 @@ const ok = (c, l) => {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   const state = seed();
+  // L64 §3 : les deux étapes capturées ont été rédigées par l'IA ; une bulle sur l'étape 2
+  for (const id of ['s1', 's2']) {
+    const st = state.tables.steps.find((x) => x.id === id);
+    st.options = { ...(st.options || {}), aiText: true };
+  }
+  const h1 = state.tables.hotspots.find((h) => h.id === 'h1');
+  state.tables.hotspots.push({
+    ...h1,
+    id: 'h2',
+    step_id: 's2',
+    title: 'Filtrez',
+    body: 'Cliquez sur « Filtrer ».',
+  });
+  const aiOf = (id) => !!state.tables.steps.find((x) => x.id === id).options?.aiText;
+  // L'éditeur enregistre après un court délai : attendre l'état du faux serveur
+  const until = async (f, ms = 8000) => {
+    const end = Date.now() + ms;
+    while (Date.now() < end && !f()) await new Promise((r) => setTimeout(r, 100));
+    return f();
+  };
   await install(page, state);
   const n = state.tables.steps.filter((s) => s.demo_id === DEMO).length;
   await page.goto(`${APP}/#/demos/${DEMO}/edit?ready=${n}`);
@@ -65,7 +87,20 @@ const ok = (c, l) => {
   await page.locator('[data-step-index="0"]').click();
   await openTool(page, 'step');
   const title = page.getByLabel('Titre de l’étape').or(page.getByLabel("Titre de l'étape")).first();
+  const mention = page.locator('[data-tool-panel="step"] .st-ai-mention');
+  await mention.waitFor();
+  ok(
+    (await mention.innerText()) === 'Généré par IA, à vérifier',
+    'étape rédigée par l’IA : « Généré par IA, à vérifier » sous le titre',
+  );
+  if (SHOTS)
+    await page.screenshot({ path: `${SHOTS}/redaction-editeur${THEME === 'dark' ? '-sombre' : ''}.png` });
   await title.fill('Créer un projet (revu)');
+  await mention.waitFor({ state: 'detached' });
+  ok(
+    (await until(() => !aiOf('s1'))) && aiOf('s2'),
+    'modifier le titre retire la mention (étape 1 seulement)',
+  );
   await page.waitForFunction((n) => document.querySelectorAll('.rail-li .rail-arrived').length === n - 1, n);
   ok(
     (await page.locator('.rail-li').first().locator('.rail-arrived').count()) === 0,
@@ -80,6 +115,23 @@ const ok = (c, l) => {
       (await page.locator('.toast', { hasText: 'Démo prête' }).count()) === 0,
     'après un rechargement : « Nouvelle » gardée sur les autres étapes, pas de nouveau toast',
   );
+
+  // Bulle de l'étape 2 : mention sous le texte, retirée à la première saisie
+  await page.locator('[data-step-index="1"]').click();
+  await page.waitForSelector('.canvas-frame img');
+  await page.locator('.canvas-hotspot').first().click();
+  const hsMention = page.locator('.hs-ai-mention');
+  await hsMention.waitFor();
+  ok(
+    (await hsMention.innerText()) === 'Généré par IA, à vérifier' &&
+      (await page.locator('.ai-badge').count()) >= 1,
+    'bulle rédigée par l’IA : repère « IA » et « Généré par IA, à vérifier » sous le texte',
+  );
+  await page.locator('#hs-body [contenteditable], #hs-body').first().click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' Merci.');
+  await hsMention.waitFor({ state: 'detached' });
+  ok(await until(() => !aiOf('s2')), 'modifier le texte de la bulle retire la mention');
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await browser.close();
 })();

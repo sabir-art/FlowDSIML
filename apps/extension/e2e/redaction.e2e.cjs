@@ -7,7 +7,7 @@
  *  - pendant la capture : « Rédaction… » puis « Texte proposé : « … » » dans la carte ; un échec retire la
  *    ligne sans message ;
  *  - seuls le libellé du clic et le titre de la page partent vers l'IA (jamais d'image) ;
- *  - à l'envoi : titre et texte proposés, étape marquée aiDraft (« Généré par IA, à vérifier »).
+ *  - à l'envoi : titre et texte proposés, étape marquée aiText (repère « IA » et « Généré par IA, à vérifier » dans l’éditeur).
  * Usage : comme capture.e2e.cjs (WXT_APP_URL=http://localhost:54400), puis node e2e/redaction.e2e.cjs.
  */
 const { chromium } = require('playwright');
@@ -192,7 +192,7 @@ const journal = async () => (await fetch(`${MOCK}/__log`)).json();
   );
   await setAi({ fail: false });
 
-  // Envoi : titre et texte proposés, étape marquée « aiDraft » ; l'autre garde le libellé du clic
+  // Envoi : titre et texte proposés, étape marquée « aiText » ; l'autre garde le libellé du clic
   const app = await ctx.newPage();
   await app.goto(`${MOCK}/#/demos`);
   await page.bringToFront();
@@ -209,11 +209,11 @@ const journal = async () => (await fetch(`${MOCK}/__log`)).json();
   ok(
     steps.length === 2 &&
       steps[0].title === 'Ouvrir Nouveau projet' &&
-      steps[0].options?.aiDraft === true &&
+      steps[0].options?.aiText === true &&
       hots[0]?.body === 'Cliquez sur « Nouveau projet » pour continuer.' &&
-      !steps[1].options?.aiDraft &&
+      !steps[1].options?.aiText &&
       hots[1]?.title === 'Cliquez sur « Filtrer »',
-    `envoi : étape 1 avec le titre et le texte proposés (aiDraft), étape 2 avec le libellé du clic (${JSON.stringify(steps.map((s) => [s.title, !!s.options?.aiDraft]))})`,
+    `envoi : étape 1 avec le titre et le texte proposés (aiText), étape 2 avec le libellé du clic (${JSON.stringify(steps.map((s) => [s.title, !!s.options?.aiText]))})`,
   );
   await setAi({ enabled: true, fail: false });
   await ctx.close();
