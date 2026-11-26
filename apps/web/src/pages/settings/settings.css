@@ -1235,6 +1235,11 @@ fieldset.stg-row {
 .stg-sec__head[data-page-title]:has(.stg-sec__acts) {
   justify-content: flex-end;
 }
+/* Recette d764bb0 : en-tête masqué, la rangée qui ouvre la page perd son retrait du haut. Son texte
+   arrive à 40 px du filet (32 px sous 600 px), comme le titre de section des autres pages */
+.stg-sec__head[data-page-title]:not(:has(.stg-sec__acts)) + .stg-row {
+  padding-top: 0;
+}
 
 /* §4 : fréquence des e-mails (choix segmenté sous le tableau) */
 .nt-freq {

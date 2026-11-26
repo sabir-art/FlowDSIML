@@ -87,6 +87,19 @@ const PAGES = [
             colW: col.width,
             headBottom: hr.bottom,
             gap: next ? next.getBoundingClientRect().top - hr.bottom : null,
+            // Recette d764bb0 : premier texte affiché sous le filet, et s'il est dans une rangée de réglage
+            firstText: (() => {
+              const w = document.createTreeWalker(h.parentElement, NodeFilter.SHOW_TEXT);
+              for (let n = w.nextNode(); n; n = w.nextNode()) {
+                if (h.contains(n) || !n.data.trim()) continue;
+                const rg = document.createRange();
+                rg.selectNodeContents(n);
+                const r = rg.getClientRects()[0];
+                if (r)
+                  return { gap: Math.round(r.top - hr.bottom), row: !!n.parentElement.closest('.stg-row') };
+              }
+              return null;
+            })(),
             labels: acts.map((e) =>
               e.matches('.stg-search')
                 ? `[${e.querySelector('input')?.getAttribute('placeholder') ?? ''}]`
@@ -150,6 +163,10 @@ const PAGES = [
         const gapWant = width < 600 ? 32 : 40;
         if (m.gap === null || Math.abs(m.gap - gapWant) > 1)
           bad.push(`${where} : ${m.gap} px du filet à la première section (${gapWant} attendus)`);
+        if (m.firstText?.row && Math.abs(m.firstText.gap - gapWant) > 1)
+          bad.push(
+            `${where} : premier texte d’une rangée à ${m.firstText.gap} px du filet (${gapWant} attendus)`,
+          );
         // Variante C : fond de la bande (surface-muted) du haut de la colonne jusqu'au filet, bord à bord
         if (!m.band.ok)
           bad.push(
