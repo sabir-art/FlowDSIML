@@ -4,6 +4,7 @@
 // testée, et n'est enregistrée qu'en cas de succès ; aucune réponse ne contient de clé.
 import { PROVIDERS, publicCatalogue, type Provider } from './catalogue.ts';
 import { forgetKey, providerKey, type VaultRead } from './keys.ts';
+import { FUNCTIONS, choicesFor, cutFeatures, resolve, type Fn } from './functions.ts';
 import type { KeyTest } from './providers/anthropic.ts';
 
 export interface ProviderRow {
@@ -63,6 +64,28 @@ export interface ConsoleDeps {
   tested: (provider: Provider, r: KeyTest, uid: string) => Promise<void>;
   test: (provider: Provider, key: string) => Promise<KeyTest>;
   env?: (n: string) => string | undefined;
+  /** L41 étape 3 : modèles choisis par fonction (ai_function_models). */
+  fnModels: () => Promise<Partial<Record<Fn, string>>>;
+  setModel: (fn: Fn, model: string | null, uid: string) => Promise<{ old: string | null }>;
+  /** Fonctions de l'espace coupées (ai_cut), tenues à jour à chaque lecture. */
+  setCut: (features: string[]) => Promise<void>;
+}
+
+/** Fournisseurs qui ont une clé (coffre ou déploiement). */
+async function keysOf(d: ConsoleDeps): Promise<Set<Provider>> {
+  const out = new Set<Provider>();
+  for (const { id } of PROVIDERS)
+    if (await providerKey(id, d.vault, { env: d.env, fresh: true })) out.add(id);
+  return out;
+}
+
+/** État de chaque fonction : choix, modèle utilisé, état, modèles proposables. */
+async function functionStates(d: ConsoleDeps) {
+  const keys = await keysOf(d);
+  const chosen = await d.fnModels();
+  const rs = FUNCTIONS.map((def) => ({ def, r: resolve(def, chosen[def.fn], keys) }));
+  await d.setCut(cutFeatures(rs.map((x) => x.r)));
+  return rs.map(({ def, r }) => ({ ...r, capability: def.capability, choices: choicesFor(def, keys) }));
 }
 
 export type ConsoleReply = { status: number; body: Record<string, unknown> };
@@ -72,6 +95,8 @@ export const CONSOLE_ACTIONS = [
   'console_providers',
   'console_key_test',
   'console_key_save',
+  'console_functions',
+  'console_set_model',
 ];
 
 export async function consoleAction(body: Record<string, unknown>, d: ConsoleDeps): Promise<ConsoleReply> {
@@ -88,9 +113,21 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     }
     return { status: 200, body: { result: providerStates(await d.rows(), has) } };
   }
-  if (action !== 'console_key_test' && action !== 'console_key_save')
+  if (action === 'console_functions') return { status: 200, body: { result: await functionStates(d) } };
+  if (action !== 'console_key_test' && action !== 'console_key_save' && action !== 'console_set_model')
     return { status: 400, body: { error: 'BAD_REQUEST' } };
   if (!who.admin) return { status: 403, body: { error: 'READ_ONLY' } };
+  if (action === 'console_set_model') {
+    const def = FUNCTIONS.find((f) => f.fn === body.fn);
+    if (!def) return { status: 400, body: { error: 'BAD_FUNCTION' } };
+    const model = body.model === null || body.model === def.defaultModel ? null : body.model;
+    // Seulement un modèle du catalogue qui sait faire la fonction
+    const allowed = choicesFor(def, new Set(PROVIDERS.map((p) => p.id))).map((c) => c.id);
+    if (model !== null && (typeof model !== 'string' || !allowed.includes(model)))
+      return { status: 400, body: { error: 'BAD_MODEL' } };
+    const { old } = await d.setModel(def.fn, model, who.uid);
+    return { status: 200, body: { result: { old, functions: await functionStates(d) } } };
+  }
   const provider = body.provider;
   if (!isProvider(provider)) return { status: 400, body: { error: 'BAD_PROVIDER' } };
 

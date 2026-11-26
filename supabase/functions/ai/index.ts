@@ -11,6 +11,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { labelOf, type Provider } from '../_shared/ai/catalogue.ts';
 import { providerKey } from '../_shared/ai/keys.ts';
 import { CONSOLE_ACTIONS, consoleAction, type ProviderRow } from '../_shared/ai/console.ts';
+import { FN_OF_TASK, FUNCTIONS, cutFeatures, resolve, type Fn } from '../_shared/ai/functions.ts';
 import * as claude from '../_shared/ai/providers/anthropic.ts';
 import * as eleven from '../_shared/ai/providers/elevenlabs.ts';
 import * as openai from '../_shared/ai/providers/openai.ts';
@@ -59,6 +60,40 @@ const vaultRead = async (p: Provider) => {
   return error || typeof data !== 'string' || !data ? null : data;
 };
 const keyOf = async (p: Provider) => (await providerKey(p, vaultRead))?.key ?? null;
+
+/** L41 étape 3 : modèles choisis dans la Console (cache de 60 s, comme les clés). */
+let fnCache: { at: number; v: Partial<Record<Fn, string>> } | null = null;
+async function fnModels(fresh = false): Promise<Partial<Record<Fn, string>>> {
+  if (!fresh && fnCache && Date.now() - fnCache.at < 60_000) return fnCache.v;
+  const { data } = await admin.from('ai_function_models').select('fn, model');
+  const v = Object.fromEntries(
+    ((data ?? []) as Array<{ fn: Fn; model: string }>).map((r) => [r.fn, r.model]),
+  );
+  fnCache = { at: Date.now(), v };
+  return v;
+}
+async function keySet() {
+  const out = new Set<Provider>();
+  for (const p of ['anthropic', 'openai', 'elevenlabs'] as const) if (await keyOf(p)) out.add(p);
+  return out;
+}
+/** Fonctions coupées tenues à jour pour les espaces (ai_cut), au plus une écriture par changement. */
+let lastCut: string | null = null;
+async function syncCut(features: string[]) {
+  const k = features.join(',');
+  if (k === lastCut) return;
+  const { error } = await admin.rpc('ai_set_cut', { p_features: features });
+  if (error) console.error('ai: cut', error.code);
+  else lastCut = k;
+}
+/** Résolution du modèle de la tâche (choisi, repli ou coupure) ; met à jour les fonctions coupées. */
+async function resolveTask(task: string) {
+  const keys = await keySet();
+  const chosen = await fnModels();
+  const all = FUNCTIONS.map((def) => resolve(def, chosen[def.fn], keys));
+  await syncCut(cutFeatures(all));
+  return all.find((r) => r.fn === FN_OF_TASK[task]) ?? null;
+}
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -191,6 +226,9 @@ async function voiceSample(key: string, voice: string, langIn: unknown) {
  * lit ELEVENLABS_API_KEY. Rien n'est conservé hors des fichiers produits (voix : bucket voices).
  */
 async function audio(req: Request, body: Record<string, unknown>, ws: string, uid: string) {
+  // L41 étape 3 : fonction coupée (clé manquante) : « Indisponible pour le moment », sans quota
+  const r = await resolveTask(String(body.task));
+  if (r && (r.status === 'cut' || r.status === 'off')) return json(503, { error: 'UNAVAILABLE' });
   const key = await keyOf('elevenlabs');
   if (!key) return json(503, { error: 'PROVIDER' });
   const input = (body.input ?? {}) as Record<string, unknown>;
@@ -351,6 +389,18 @@ async function consoleOf(req: Request, body: Record<string, unknown>) {
       });
       if (error) console.error('ai: console tested', error.code);
     },
+    fnModels: () => fnModels(true),
+    setModel: async (fn, model, uid) => {
+      const { data, error } = await admin.rpc('ai_set_function_model', {
+        p_fn: fn,
+        p_model: model,
+        p_actor: uid,
+      });
+      if (error) throw new Error('SERVER');
+      fnCache = null;
+      return { old: (data as { old?: string | null } | null)?.old ?? null };
+    },
+    setCut: syncCut,
     test: (provider, key) =>
       provider === 'anthropic'
         ? claude.test(key)
@@ -408,12 +458,26 @@ Deno.serve(async (req) => {
     return json(400, { error: e instanceof AiError ? e.code : 'BAD_REQUEST' });
   }
 
+  // L41 étape 3 : fonction coupée (clé du fournisseur manquante) : rien n'est réservé ni décompté
+  const resolved = await resolveTask(parsed.task);
+  if (resolved && (resolved.status === 'cut' || resolved.status === 'off'))
+    return json(503, { error: 'UNAVAILABLE' });
+
   const blocked = await reserveOr(ws, uid, FEATURE_OF[parsed.task]);
   if (blocked) return blocked;
 
   let prompt;
   try {
     prompt = applyModel(buildPrompt(parsed), parsed);
+    // Modèle choisi dans la Console (ou repli d'un modèle retiré), sauf choix explicite dans l'assistant
+    const m = resolved?.model;
+    if (
+      m &&
+      m !== 'auto' &&
+      (resolved!.explicit || resolved!.status === 'fallback') &&
+      parsed.model === 'auto'
+    )
+      prompt = { ...prompt, model: m };
   } catch (e) {
     return json(e instanceof AiError ? e.status : 400, {
       error: e instanceof AiError ? e.code : 'BAD_REQUEST',
