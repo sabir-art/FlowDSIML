@@ -157,3 +157,34 @@ Animation : `docs/ux/propositions/l62/orbe/orbe-animation.gif` (et `.webm`). Dé
   - au clavier : focus, Entrée, K et M ;
   - en mouvement réduit, aucune volute n'est dessinée (drapeau de test exposé par le composant) ;
   - le canvas cesse d'être redessiné en pause et quand l'onglet est caché.
+
+## 8. Sélecteur de voix (24 voix et plus)
+
+Planche : `docs/ux/propositions/l62/planche-l62-selecteur-voix.png` (à 1440, clair et sombre).
+
+- **Déclencheur** : la liste « Voix » de 40 px, dans l'onglet Générée. Elle montre l'avatar de la voix choisie, son nom et son style.
+- **Fenêtre** :
+  - 400 px de large, alignée sur le bord droit du champ (elle déborde à gauche sur la zone de travail), à 4 px sous le champ ;
+  - rayon 16 et ombre de menu ;
+  - elle se ferme par Échap, par un clic dehors ou par le choix d'une voix.
+- **Recherche** :
+  - un champ de 40 px, avec le focus à l'ouverture et le texte indicatif « Rechercher : nom, accent, style » ;
+  - il cherche dans le nom, l'accent et le style, sans tenir compte des accents ni de la casse ;
+  - la croix efface la recherche.
+- **Filtres** : des puces de 28 px, chacune ouvrant un petit menu.
+  - **Langue** : par défaut, la langue de la démo.
+  - **Genre** : Toutes, Féminine, Masculine ou Neutre.
+  - Une puce active est teintée de marque.
+- **Liste** (`role="listbox"`, 360 px de haut au plus, défilante) :
+  - section **« Recommandées pour le français »** (selon la langue filtrée), avec son nombre, puis section **« Toutes les voix »** avec le nombre total (« Résultats » quand une recherche ou un filtre est actif) ;
+  - chaque voix est une ligne de 56 px : une coche (voix choisie), un avatar teinté de 32 px avec l'initiale, le **nom réel** de la voix, l'étiquette verte « Recommandée » s'il y a lieu, puis sur une 2e ligne « {genre} · {accent} · {style} » (tronquée avec « … »), et enfin le bouton **Écouter** de 32 px ;
+  - la voix choisie a un fond teinté de marque et `aria-selected="true"`.
+- **Écouter** :
+  - le bouton lit une phrase d'exemple **dans la langue de la démo**. Elle est générée une seule fois par voix et par langue, puis mise en cache, sans compter dans le quota ;
+  - pendant la lecture, le bouton devient Pause, sur fond de marque ;
+  - une seule écoute à la fois ;
+  - le bouton n'est jamais l'action de choix : cliquer sur le reste de la ligne choisit la voix ;
+  - pied de la fenêtre : « Écoute : exemple lu en français » et le nombre de voix (« 24 voix du compte », ou « 4 résultats »).
+- **Aucun résultat** : « Aucune voix pour « {recherche} » », « Essayez un autre nom ou un autre filtre », et le lien **Effacer les filtres**.
+- **Clavier** : flèches haut et bas dans la liste, Entrée choisit la voix, Espace écoute la ligne active, Échap ferme.
+- **Source** : les voix sont celles du compte du fournisseur de l'espace (L62, « voix du compte »). La recommandation vient de la langue native de la voix. On n'affiche aucun nom de fournisseur.
