@@ -424,7 +424,8 @@ const MOCK = 'http://localhost:54400';
   );
   const open = srv.getByRole('link', { name: 'Ouvrir la démo' });
   ok(
-    /22222222-2222-2222-2222-222222222222\/edit$/.test(await open.getAttribute('href')) &&
+    // L60 §3 : « ready » fait dire « Démo prête » à l'éditeur
+    /22222222-2222-2222-2222-222222222222\/edit(\?ready=\d+)?$/.test(await open.getAttribute('href')) &&
       (await v.getByRole('button', { name: 'Envoyer' }).isDisabled()),
     '« Ouvrir la démo » mène à l’éditeur ; « Envoyer » désactivé',
   );
