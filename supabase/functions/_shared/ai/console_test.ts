@@ -3,12 +3,15 @@ import { assert, assertEquals } from 'jsr:@std/assert@1';
 import { consoleAction, keyShapeOk, providerStates, type ConsoleDeps, type ProviderRow } from './console.ts';
 import { forgetKey } from './keys.ts';
 import type { KeyTest } from './providers/anthropic.ts';
+import { FUNCTIONS, cutFeatures, resolve, type Fn } from './functions.ts';
 
 const UID = '00000000-0000-0000-0000-0000000041a1';
 const KEY = 'sk-fictive-console-0001';
 
 function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
   const vault = new Map<string, string>();
+  const chosen: Partial<Record<Fn, string>> = {};
+  const cut: string[] = [];
   const rows: ProviderRow[] = [];
   const d: ConsoleDeps = {
     role: () => Promise.resolve({ uid: UID, admin: true }),
@@ -39,9 +42,21 @@ function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
           : { ok: false, ms: 210, cause: 'KEY_REFUSED', status: 401 },
       ),
     env: (n) => (n === 'ELEVENLABS_API_KEY' ? 'xi-fictive-deploiement' : undefined),
+    fnModels: () => Promise.resolve({ ...chosen }),
+    setModel: (fn, model) => {
+      const old = chosen[fn] ?? null;
+      if (model === null) delete chosen[fn];
+      else chosen[fn] = model;
+      log.push(`model ${fn} ${model}`);
+      return Promise.resolve({ old });
+    },
+    setCut: (f) => {
+      cut.splice(0, cut.length, ...f);
+      return Promise.resolve();
+    },
     ...over,
   };
-  return { d, vault, log };
+  return { d, vault, log, chosen, cut };
 }
 const noKey = (x: unknown, key: string) => assert(!JSON.stringify(x).includes(key), JSON.stringify(x));
 
@@ -166,3 +181,95 @@ Deno.test('enregistrement impossible (coffre absent) : 503 NO_VAULT, sans la cl�
   assertEquals([r.status, r.body.error], [503, 'NO_VAULT']);
   noKey(r, 'sk-bonne-fictive-0005');
 });
+
+// ===== L41 étape 3 : modèle par fonction =====
+const def = (fn: Fn) => FUNCTIONS.find((f) => f.fn === fn)!;
+const ALL = new Set(['anthropic', 'openai', 'elevenlabs'] as const);
+
+Deno.test('résolution : défaut du code, choix, retiré → repli, clé manquante → coupée', () => {
+  assertEquals(resolve(def('suggest'), null, ALL), {
+    fn: 'suggest',
+    chosen: 'claude-sonnet-5-5',
+    explicit: false,
+    status: 'active',
+    model: 'claude-sonnet-5-5',
+    provider: 'anthropic',
+  });
+  assertEquals(resolve(def('translate'), 'claude-opus-5-5', ALL).model, 'claude-opus-5-5');
+  // Modèle inconnu du catalogue (retiré d'un déploiement) : premier modèle du même fournisseur
+  const old = resolve(def('translate'), 'claude-ancien-4', ALL);
+  assertEquals([old.status, old.model], ['fallback', 'claude-haiku-5-5']);
+  const cut = resolve(def('voice'), null, new Set(['anthropic'] as const));
+  assertEquals([cut.status, cut.model, cut.provider], ['cut', null, 'elevenlabs']);
+  assertEquals(resolve(def('assistant'), null, ALL).model, 'auto');
+  assertEquals(resolve(def('assistant'), null, new Set(['elevenlabs'] as const)).status, 'cut');
+  // Un modèle sans la capacité (texte pour la voix) et aucun repli chez ce fournisseur : fonction coupée
+  assertEquals(resolve(def('voice'), 'claude-haiku-5-5', ALL).status, 'off');
+});
+
+Deno.test('fonctions coupées : fonctions de l’espace couvertes, sans doublon', () => {
+  const rs = FUNCTIONS.map((f) => resolve(f, null, new Set(['elevenlabs'] as const)));
+  assertEquals(cutFeatures(rs), [
+    'assistant',
+    'chart',
+    'dataset',
+    'generate',
+    'suggest',
+    'translate',
+    'write',
+  ]);
+});
+
+Deno.test('console_functions : états, choix proposés, fonctions coupées tenues à jour', async () => {
+  for (const p of ['anthropic', 'openai', 'elevenlabs'] as const) forgetKey(p);
+  const x = deps();
+  const r = (await consoleAction({ action: 'console_functions' }, x.d)).body.result as Array<
+    Record<string, unknown>
+  >;
+  assertEquals(
+    r.map((f) => [f.fn, f.status]),
+    [
+      ['assistant', 'cut'],
+      ['write', 'cut'],
+      ['suggest', 'cut'],
+      ['translate', 'cut'],
+      ['voice', 'active'],
+      ['captions', 'active'],
+    ],
+  );
+  assertEquals(x.cut, ['assistant', 'chart', 'dataset', 'generate', 'suggest', 'translate', 'write']);
+  const choices = (r[3]!.choices as Array<{ id: string; available: boolean }>).map(
+    (c) => `${c.id}:${c.available}`,
+  );
+  assertEquals(choices, ['claude-haiku-5-5:false', 'claude-sonnet-5-5:false', 'claude-opus-5-5:false']);
+  x.vault.set('anthropic', 'sk-bonne-fictive-0006');
+  await consoleAction({ action: 'console_functions' }, x.d);
+  assertEquals(x.cut, []);
+  noKey(r, 'xi-fictive-deploiement');
+});
+
+Deno.test(
+  'console_set_model : choix, retour au défaut, refus hors catalogue et en Lecture seule',
+  async () => {
+    const x = deps();
+    const set = (fn: string, model: unknown) =>
+      consoleAction({ action: 'console_set_model', fn, model }, x.d);
+    const a = await set('translate', 'claude-opus-5-5');
+    assertEquals([a.status, (a.body.result as Record<string, unknown>).old], [200, null]);
+    assertEquals(x.chosen.translate, 'claude-opus-5-5');
+    // Choisir le défaut revient à « défaut du code » (ligne retirée)
+    const b = await set('translate', 'claude-sonnet-5-5');
+    assertEquals(
+      [(b.body.result as Record<string, unknown>).old, x.chosen.translate],
+      ['claude-opus-5-5', undefined],
+    );
+    assertEquals((await set('voice', 'claude-haiku-5-5')).body.error, 'BAD_MODEL');
+    assertEquals((await set('autre', 'claude-haiku-5-5')).body.error, 'BAD_FUNCTION');
+    const ro = deps({ role: () => Promise.resolve({ uid: UID, admin: false }) });
+    assertEquals(
+      (await consoleAction({ action: 'console_set_model', fn: 'write', model: 'claude-sonnet-5-5' }, ro.d))
+        .status,
+      403,
+    );
+  },
+);
