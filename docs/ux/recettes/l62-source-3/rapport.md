@@ -58,3 +58,31 @@ Le bloc « Générer la voix » repris de la transcription ne s'affiche que si l
 ## Pour le VERT
 
 Le point bloquant, plus la gêne si elle est faite dans le même commit.
+
+---
+
+# Nouvelle recette après 00884e2 : VERT
+
+J'ai rejoué le §6 complet jusqu'à 00884e2, en clair et en sombre.
+
+| e2e | Clair | Sombre |
+|---|---|---|
+| voix-sous-titres-ia | 80/80 | 80/80 |
+| voix-off | 53/53 | 53/53 |
+| formation-outils | 28/28 | 28/28 |
+
+- **Voix générée en place, onglet Générée** (`v2-generee-en-place-clair-sombre.png`, 1re et 3e vues) : le panneau est conforme à la planche, vue 4.
+  - On voit la carte « Voix en place », puis **un seul** « Texte lu (sert aussi de transcription) », qui garde `{{company}}`, puis la liste Voix.
+  - Il n'y a qu'**un seul** bouton, « Régénérer la voix » (secondaire, Sparkles), avec l'aide « À faire après une modification du texte ou de la voix. ».
+- **Après « Régénérer la voix »** (2e et 4e vues) : le résultat arrive dans la carte « Nouvelle voix ».
+  - Le lien « Régénérer » est au-dessus, à gauche.
+  - « Garder l'actuelle » et « Utiliser cette voix » sont sur une ligne, à droite, à 13 px du bord.
+  - Le bouton pleine largeur disparaît tant que la carte est là.
+
+## Gêne signalée par le dev : arbitrage
+
+Sur la carte de 287 px, la ligne « Générée · Antoine · 0:04 » est coupée en « Générée · Antoine … » à côté de l'étiquette « À écouter ». **Décision** : on retire la durée de cette ligne, **dans la carte « Nouvelle voix » seulement**, puisque le lecteur juste dessous l'affiche déjà (« 0:00 / 0:04 »).
+- La ligne devient « Générée · Antoine », « Enregistrée » ou « Fichier », et tient sur une ligne.
+- La carte « Voix en place » et la ligne de 44 px gardent la durée.
+
+C'est non bloquant : ce peut être fait dans le prochain lot de la voix.
