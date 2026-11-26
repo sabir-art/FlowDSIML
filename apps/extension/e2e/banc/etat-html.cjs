@@ -347,9 +347,11 @@ async function principal() {
       r.rendu.startsWith('styles') &&
       !r.fuites.length &&
       nomsOk &&
-      (r.remplacementsAttendus === null || r.remplacements === r.remplacementsAttendus);
+      (r.remplacementsAttendus === null || r.remplacements === r.remplacementsAttendus) &&
+      // Gêne lot B : la page menu fermé mène d'office à l'état menu ouvert, par « Produits »
+      (r.cas !== 'menu' || r.liens[0] === 'Produits');
     console.error(
-      `${ok ? 'ok' : 'NOT OK'} - ${r.nom} : ${r.etatsCaptures}/${r.etatsAttendus} états, ${r.rendu}${r.fuites.length ? `, données lisibles : ${r.fuites.join(', ')}` : ''}${r.remplacementsAttendus !== null ? `, ${r.remplacements} remplacement(s) (${r.remplacementsAttendus} attendu)` : ''}${nomsOk ? '' : `, noms d’écran à revoir : ${JSON.stringify(r.noms)}`}${r.erreur ? `, ${r.erreur}` : ''}`,
+      `${ok ? 'ok' : 'NOT OK'} - ${r.nom} : ${r.etatsCaptures}/${r.etatsAttendus} états, ${r.rendu}${r.fuites.length ? `, données lisibles : ${r.fuites.join(', ')}` : ''}${r.remplacementsAttendus !== null ? `, ${r.remplacements} remplacement(s) (${r.remplacementsAttendus} attendu)` : ''}${nomsOk ? '' : `, noms d’écran à revoir : ${JSON.stringify(r.noms)}`}${r.cas === 'menu' ? `, liens ${JSON.stringify(r.liens)}` : ''}${r.erreur ? `, ${r.erreur}` : ''}`,
     );
     if (!ok) process.exitCode = 1;
   }

@@ -28,13 +28,10 @@ export function mainHeading(doc: Document): string {
 }
 
 /**
- * L60 : nom lisible d'un écran pour le plan. Le titre principal affiché, suivi de l'onglet choisi quand
- * la page en a (« Fiche produit · Tarifs ») : deux états d'une même page ne portent pas le même nom.
+ * Lot B : élément qui a ouvert le menu affiché au moment de la copie (déplié, ou survolé), avec son
+ * libellé. Sert au nom de l'écran et au lien d'office depuis la page menu fermé.
  */
-export function screenName(doc: Document): string {
-  const head = mainHeading(doc);
-  // Lot B (recette UX §3.1) : menu ouvert au moment de la copie (déplié, ou survolé) : « Catalogue ·
-  // menu Produits », pour le distinguer de la même page menu fermé
+export function openMenu(doc: Document): { el: Element; label: string } | null {
   for (const m of doc.querySelectorAll('[aria-haspopup]:not([aria-haspopup="false"])')) {
     if (m.closest(`[data-fd-ui],${PASSING}`) || !isVisible(m)) continue;
     const open =
@@ -42,8 +39,21 @@ export function screenName(doc: Document): string {
       m.matches(':hover') ||
       !!m.parentElement?.matches(':hover');
     const label = (m.textContent ?? '').replace(/\s+/g, ' ').trim();
-    if (open && label && label.length <= 40) return `${head} · menu ${label}`;
+    if (open && label && label.length <= 40) return { el: m, label };
   }
+  return null;
+}
+
+/**
+ * L60 : nom lisible d'un écran pour le plan. Le titre principal affiché, suivi de l'onglet choisi quand
+ * la page en a (« Fiche produit · Tarifs ») : deux états d'une même page ne portent pas le même nom.
+ */
+export function screenName(doc: Document): string {
+  const head = mainHeading(doc);
+  // Lot B (recette UX §3.1) : menu ouvert au moment de la copie (déplié, ou survolé) : « Catalogue ·
+  // menu Produits », pour le distinguer de la même page menu fermé
+  const menu = openMenu(doc);
+  if (menu) return `${head} · menu ${menu.label}`;
   for (const t of doc.querySelectorAll('[role="tab"][aria-selected="true"]')) {
     if (t.closest(`[data-fd-ui],${PASSING}`) || !isVisible(t)) continue;
     const tab = (t.textContent ?? '').replace(/\s+/g, ' ').trim();

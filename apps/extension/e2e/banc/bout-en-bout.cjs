@@ -203,6 +203,9 @@ async function juger(b, cas, envoi) {
     ok(noms, `${nom} : plan, chaque carte porte le nom de sa page`);
     ok(depart, `${nom} : plan, la première page capturée est le départ`);
     ok(/ mène à /.test(description) || !liens.length, `${nom} : plan, les pages sont reliées`);
+    // Gêne lot B : une page copiée menu ouvert (survol) est reliée d'office depuis la page menu fermé
+    const isoles = await p.getByText(/n’est reliée à aucune page/).count();
+    ok(isoles === 0, `${nom} : plan, aucune page isolée (${isoles} alerte)`);
     // Lot B (recette UX §3.2) : « Liens sans page », une ligne par destination, compteur des destinations
     const dests = await p
       .locator('.sb-deadlist:not(.sb-deadlist--left) > li .sb-deadlist__path span[title]')
