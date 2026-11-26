@@ -56,6 +56,10 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
         (await popup.locator('#open-settings, #logout').evaluateAll((els) => els.every((e) => e.hidden))),
       `${tag} · connexion : bouton primaire dans le pied, menu sans réglages ni déconnexion`,
     );
+    ok(
+      (await popup.locator('#foot-login').evaluate((f) => getComputedStyle(f).padding)) === '12px 16px 16px',
+      `${tag} · pied de la connexion : 12 px au-dessus, 16 px en bas`,
+    );
     await shot(popup, 'connexion');
     await popup.fill('#email', 'a@b.c');
     await popup.fill('#password', 'x');
@@ -151,28 +155,10 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
       `${tag} · ni champ titre ni « Démarrer »`,
     );
 
-    // Destination
+    // Page impossible : ni destination ni aide, le popup tient sans défiler (recette l60-lot-c)
     ok(
-      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Nouvelle démo' &&
-        (await popup.locator('#dest-text b').innerText()) === 'Acme' &&
-        (await popup.locator('#dest-change').innerText()) === 'Changer' &&
-        (await popup.locator('.dest').evaluate((e) => e.getBoundingClientRect().height)) === 44,
-      `${tag} · destination « Dans Acme · Nouvelle démo », 44 px, « Changer »`,
-    );
-    await popup.click('#dest-change');
-    ok(
-      (await popup.locator('#dest').isVisible()) &&
-        (await popup.locator('#dest-t').innerText()) === 'Destination' &&
-        (await popup.locator('#workspace-one').innerText()).trim() === 'Acme' &&
-        (await popup.evaluate(() => document.activeElement?.id)) === 'dest-back',
-      `${tag} · « Changer » : vue Destination (espace), focus sur Retour`,
-    );
-    await shot(popup, 'destination');
-    await popup.click('#dest-back');
-    ok(
-      (await popup.locator('#setup').isVisible()) &&
-        (await popup.evaluate(() => document.activeElement?.id)) === 'dest-change',
-      `${tag} · Retour : les modes, focus sur « Changer »`,
+      (await popup.locator('#dest-row').isHidden()) && (await popup.locator('#modes-help').isHidden()),
+      `${tag} · page impossible : ligne Destination et aide masquées`,
     );
 
     // Réglages de capture, mémorisés
@@ -208,6 +194,21 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
       (await popup.locator('#settings .pr-k b').allInnerTexts()).join(' | ') ===
         'Taille de l’onglet | Suivre les nouveaux onglets | Micro | Flouter en direct | Webcam dans un coin | Cadre par défaut',
       `${tag} · réglages : taille, nouveaux onglets, micro, flouter, webcam, cadre`,
+    );
+    const col = await popup.evaluate(() =>
+      ['#size', '#frame'].map((sel) => {
+        const c = document.querySelector(sel).getBoundingClientRect();
+        const row = document.querySelector(sel).closest('.pr').getBoundingClientRect();
+        const lab = document.querySelector(sel).closest('.pr').querySelector('.pr-k').getBoundingClientRect();
+        return c.top >= lab.bottom && Math.round(c.width) === Math.round(row.width - 24);
+      }),
+    );
+    ok(
+      col.every(Boolean) &&
+        (await popup.locator('#frame-h').innerText()) === 'Cadre au démarrage, modifiable dans la barre.' &&
+        (soon ||
+          (await popup.locator('#size-h').innerText()) === 'Mobile\u202f: captures d’écran seulement.'),
+      `${tag} · taille et cadre sous leur libellé, en pleine largeur, aides courtes (${JSON.stringify(col)})`,
     );
     await popup.click('#frame');
     await popup.locator('#frame + [role=listbox] [data-value=element]').click();
@@ -283,6 +284,30 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
       `${tag} · flèches haut et bas : d’un mode à l’autre`,
     );
     await shot(popup, 'modes');
+
+    // Destination
+    ok(
+      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Nouvelle démo' &&
+        (await popup.locator('#dest-text b').innerText()) === 'Acme' &&
+        (await popup.locator('#dest-change').innerText()) === 'Changer' &&
+        (await popup.locator('.dest').evaluate((e) => e.getBoundingClientRect().height)) === 44,
+      `${tag} · destination « Dans Acme · Nouvelle démo », 44 px, « Changer »`,
+    );
+    await popup.click('#dest-change');
+    ok(
+      (await popup.locator('#dest').isVisible()) &&
+        (await popup.locator('#dest-t').innerText()) === 'Destination' &&
+        (await popup.locator('#workspace-one').innerText()).trim() === 'Acme' &&
+        (await popup.evaluate(() => document.activeElement?.id)) === 'dest-back',
+      `${tag} · « Changer » : vue Destination (espace), focus sur Retour`,
+    );
+    await shot(popup, 'destination');
+    await popup.click('#dest-back');
+    ok(
+      (await popup.locator('#setup').isVisible()) &&
+        (await popup.evaluate(() => document.activeElement?.id)) === 'dest-change',
+      `${tag} · Retour : les modes, focus sur « Changer »`,
+    );
 
     // Un clic sur « Captures d'écran » démarre, sans autre décision ; la démo prend le titre de l'onglet
     await popup.locator('#modes [data-mode=clicks]').click();

@@ -79,7 +79,7 @@
               <span class="box" aria-hidden="true"></span><span data-i18n="noticeOk"></span>
             </button>
           </section>
-          <div class="dest">
+          <div class="dest" id="dest-row">
             <i data-lucide="folder"></i>
             <span id="dest-text" class="dest-t"></span>
             <button type="button" id="dest-change" class="link-button" data-i18n="destChange"></button>
@@ -126,7 +126,7 @@
             <h2 id="settings-t" data-i18n="prefsTitle"></h2>
           </div>
           <div class="rs prefs">
-            <div class="pr">
+            <div class="pr pr--col">
               <span class="pr-k"><b id="size-l" data-i18n="sizeLabel"></b><small id="size-h"></small></span>
               <div id="size" class="seg" role="radiogroup" aria-labelledby="size-l" aria-describedby="size-h">
                 <button type="button" role="radio" data-value="current" data-i18n="segCurrent"></button>
@@ -161,10 +161,10 @@
               ></span>
               <button id="webcam" aria-labelledby="webcam-l" aria-describedby="webcam-h"></button>
             </div>
-            <div class="pr">
+            <div class="pr pr--col">
               <span class="pr-k"
                 ><b id="frame-l" data-i18n="defaultFrame"></b
-                ><small id="frame-h" data-i18n="frameHelp"></small
+                ><small id="frame-h" data-i18n="frameHelpShort"></small
               ></span>
               <span class="v"
                 ><button id="frame" aria-labelledby="frame-l frame" aria-describedby="frame-h"></button
