@@ -162,19 +162,56 @@ const ok = (c, l) => {
     'popup : carte de cible à la place du formulaire, « Terminer » et « Annuler l’ajout »',
   );
   {
-    // Pied du popup : « Annuler l'ajout » part de la gouttière de 16 px, comme le reste
-    const left = await popup
-      .locator('#cancel-label')
-      .evaluate((el) => Math.round(el.getBoundingClientRect().left));
-    ok(left === 16, `popup : « Annuler l’ajout » aligné sur la gouttière de 16 px (${left})`);
-    ok(
-      await popup.evaluate(() => {
+    // Retours client 0.3.3 : pied à 2 actions de même largeur ; « Annuler » est un lien rouge sous le compteur
+    const pied = async () =>
+      popup.evaluate(() => {
         const f = document.getElementById('foot-recording');
-        const r = [...f.querySelectorAll('.btn')].map((b) => b.getBoundingClientRect());
-        return r.every((x) => x.left >= 16 && x.right <= 344) && f.scrollWidth <= f.clientWidth;
-      }),
-      'popup : les trois actions du pied tiennent dans la largeur, sans débordement',
+        const bs = [...f.querySelectorAll('button')].filter((b) => b.getBoundingClientRect().width > 0);
+        const r = bs.map((b) => b.getBoundingClientRect());
+        return {
+          n: bs.length,
+          noms: bs.map((b) => b.textContent.trim()),
+          larg: r.map((x) => Math.round(x.width)),
+          dedans: r.every((x) => x.left >= 0 && x.right <= document.body.getBoundingClientRect().right + 0.5),
+          coupe: bs.some((b) => b.scrollWidth > b.clientWidth) || f.scrollWidth > f.clientWidth,
+        };
+      });
+    const lien = await popup.evaluate(() => {
+      const c = document.getElementById('cancel');
+      const n = document.getElementById('count').getBoundingClientRect();
+      const r = c.getBoundingClientRect();
+      return {
+        sous: r.top >= n.bottom - 1 && !c.closest('footer'),
+        rouge: getComputedStyle(c).color,
+        cible: Math.round(r.height),
+        icone: !!c.querySelector('svg'),
+      };
+    });
+    const p1 = await pied();
+    ok(
+      p1.n === 2 && Math.abs(p1.larg[0] - p1.larg[1]) <= 1 && p1.dedans && !p1.coupe,
+      `popup : 2 actions de même largeur dans le pied, rien de coupé (${JSON.stringify(p1)})`,
     );
+    ok(
+      lien.sous && lien.icone && lien.cible >= 28,
+      `popup : « Annuler l’ajout » en lien sous le compteur, icône corbeille, cible de 28 px (${JSON.stringify(lien)})`,
+    );
+    // En pause : toujours 2 actions (Reprendre, Terminer), même à 320 px
+    await popup.click('#pause');
+    await popup.waitForFunction(() => /Reprendre/.test(document.getElementById('pause').textContent));
+    // Le popup fait 360 px ; on le rétrécit à 320 px pour vérifier qu'aucun libellé n'est coupé
+    await popup.evaluate(() => (document.body.style.width = '320px'));
+    const p2 = await pied();
+    ok(
+      p2.n === 2 && /Reprendre/.test(p2.noms[0]) && /Terminer/.test(p2.noms[1]) && p2.dedans && !p2.coupe,
+      `popup en pause, 320 px : « Reprendre » et « Terminer », rien de coupé (${JSON.stringify(p2)})`,
+    );
+    await popup.evaluate(() => (document.body.style.width = ''));
+    await popup.click('#pause');
+    // Le lien ouvre la confirmation actuelle, inchangée
+    await popup.click('#cancel');
+    ok(await popup.locator('#cancel-ask').isVisible(), 'popup : « Annuler l’ajout » ouvre la confirmation');
+    await popup.click('#cancel-no');
     ok(
       (await popup.locator('#count').innerText()).trim() === '0 étape capturée',
       `popup : « 0 étape capturée », au singulier (${(await popup.locator('#count').innerText()).trim()})`,
