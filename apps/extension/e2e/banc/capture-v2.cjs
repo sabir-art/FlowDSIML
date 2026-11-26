@@ -59,7 +59,9 @@ async function envoyer(s) {
     .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps') && l.body)
     .map((l) => JSON.parse(l.body));
   const demo = log.find((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/demos'));
-  return { capture: r, groupe, lives, steps, demo: demo ? JSON.parse(demo.body) : null };
+  // Copies inertes envoyées (une par page, dans l'ordre des étapes)
+  const pages = log.filter((l) => l.u.startsWith('/functions/v1/html-ingest') && l.html).map((l) => l.html);
+  return { capture: r, groupe, lives, steps, pages, demo: demo ? JSON.parse(demo.body) : null };
 }
 
 async function principal() {
@@ -179,7 +181,9 @@ async function principal() {
   }
 }
 
-principal().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+module.exports = { envoyer };
+if (require.main === module)
+  principal().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
