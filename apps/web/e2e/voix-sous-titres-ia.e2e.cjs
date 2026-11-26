@@ -421,9 +421,10 @@ function prepare(over = {}) {
   ok(await until(() => /a1\.mp3$/.test(s1().voice_path || '')), 'Voix de synthèse appliquée');
   ok(
     s1().voice_duration_ms === 4200 &&
-      s1().voice_transcript === 'Bienvenue chez votre entreprise. Ouvrez la fiche du jeune.' &&
+      s1().voice_transcript === 'Bienvenue chez {{company}}. Ouvrez la fiche du jeune.' &&
       s1().options?.aiVoice === true,
-    'Transcription = texte lu, repère IA',
+    // Recette l62-source-3 : la transcription garde les variables (sous-titres du visiteur)
+    'Transcription = texte lu, avec ses variables, repère IA',
   );
   const demo = () => state.tables.demos.find((d) => d.id === DEMO);
   ok(await until(() => demo().settings?.aiVoice === 'voixFrM0000001'), 'Voix mémorisée pour la démo');
@@ -481,26 +482,85 @@ function prepare(over = {}) {
       1,
     'Onglet Générée : « La voix en place n’est pas touchée tant que vous n’avez pas choisi. »',
   );
-  // Une voix générée en place : « Régénérer depuis ce texte »
+  // Recette l62-source-3 : voix générée en place, onglet Générée : un seul « Texte lu » (la transcription,
+  // variables gardées), la liste Voix, un seul bouton « Régénérer la voix »
+  const recorded = JSON.parse(
+    JSON.stringify({
+      voice_path: s1().voice_path,
+      voice_duration_ms: s1().voice_duration_ms,
+      voice_transcript: s1().voice_transcript,
+      options: s1().options ?? {},
+    }),
+  );
   await fromText.click();
   await panel.locator('.vo-fresh').getByRole('button', { name: 'Utiliser cette voix' }).click();
   ok(
-    await until(() => /a1\.mp3$/.test(s1().voice_path || '')),
-    'Voix générée depuis la transcription en place',
+    await until(
+      () =>
+        /a1\.mp3$/.test(s1().voice_path || '') &&
+        s1().voice_transcript === 'Bienvenue chez {{company}}. Ouvrez la fiche du jeune.',
+    ),
+    'Voix générée depuis la transcription en place, transcription gardée avec {{company}}',
   );
-  const regen = sec.getByRole('button', { name: 'Régénérer depuis ce texte' });
-  await regen.waitFor();
+  await shot('l62-source-3-generee-en-place');
+  const readFields = sec.getByLabel(/^Texte lu/);
+  const genButtons = sec.getByRole('button', { name: /Générer la voix|Régénérer/ });
+  const regen = sec.getByRole('button', { name: 'Régénérer la voix' });
   ok(
-    (await regen.evaluate(
-      (b) => document.getElementById(b.getAttribute('aria-describedby'))?.textContent,
-    )) === 'À faire après une modification de la transcription.',
-    'Voix générée en place : « Régénérer depuis ce texte », aide « À faire après une modification de la transcription. »',
+    (await readFields.count()) === 1 &&
+      (await sec.locator('textarea').count()) === 1 &&
+      /\(sert aussi de transcription\)/.test(await sec.locator('label[for^="vo-gt-"]').innerText()) &&
+      (await readFields.inputValue()).includes('{{company}}'),
+    'Voix générée en place, onglet Générée : un seul champ « Texte lu (sert aussi de transcription) », avec {{company}}',
   );
-  await page
-    .locator('.toast', { hasText: 'Voix remplacée par la voix générée' })
-    .getByRole('button', { name: 'Annuler' })
-    .click();
-  await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice);
+  ok(
+    (await genButtons.count()) === 1 &&
+      (await regen.count()) === 1 &&
+      (await regen.evaluate((b) => b.matches('.btn-secondary') && !!b.querySelector('svg'))) &&
+      (await regen.evaluate(
+        (b) => document.getElementById(b.getAttribute('aria-describedby'))?.textContent,
+      )) === 'À faire après une modification du texte ou de la voix.',
+    'Un seul bouton de génération : « Régénérer la voix » (secondaire, icône), aide « À faire après une modification du texte ou de la voix. »',
+  );
+  // Le champ unique est la transcription de l'étape
+  await readFields.fill('Bienvenue chez {{company}}. Ouvrez la fiche.');
+  ok(
+    await until(() => s1().voice_transcript === 'Bienvenue chez {{company}}. Ouvrez la fiche.'),
+    'Modifier le texte lu modifie la transcription de l’étape',
+  );
+  await regen.click();
+  const card = panel.locator('.vo-fresh');
+  await card.waitFor();
+  const regenCall = state.aiCalls.filter((c) => c.task === 'voice').at(-1);
+  ok(
+    regenCall.input.text === 'Bienvenue chez votre entreprise. Ouvrez la fiche.' &&
+      /a1\.mp3$/.test(s1().voice_path || ''),
+    'Régénérer : texte lu avec les valeurs par défaut, résultat dans la carte « Nouvelle voix », voix en place intacte',
+  );
+  // Gêne l62-source-3 : lien au-dessus à gauche, « Garder l’actuelle » et « Utiliser cette voix » côte à côte
+  const lay = await card.evaluate((c) => {
+    const r = (el) => el.getBoundingClientRect();
+    const box = r(c);
+    const redo = r(c.querySelector('.vo-fresh__redo'));
+    const [keep, use] = [...c.querySelectorAll('.vo-fresh__main .btn')].map(r);
+    const line = c.querySelector('.vo-fresh__head .muted');
+    return {
+      redoAbove: redo.bottom <= keep.top && redo.left - box.left < 20,
+      sameRow: Math.abs(keep.top - use.top) < 1 && keep.right <= use.left,
+      right: Math.round(box.right - use.right),
+      oneLine: line.getClientRects().length === 1 && r(line).height < 24,
+      width: Math.round(box.width),
+    };
+  });
+  ok(
+    lay.redoAbove && lay.sameRow && lay.right >= 12 && lay.oneLine,
+    `Carte « Nouvelle voix » : lien au-dessus à gauche, « Garder l’actuelle » et « Utiliser cette voix » sur une ligne à droite, ligne « Générée · … » sur une ligne (${JSON.stringify(lay)})`,
+  );
+  await shot('l62-source-3-regenerer');
+  await card.getByRole('button', { name: 'Garder l’actuelle' }).click();
+  // Retour à l'enregistrement pour la suite (page neuve)
+  Object.assign(s1(), recorded);
+  await open(state);
 
   // ===== L30-11 : transcription de la voix enregistrée =====
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
