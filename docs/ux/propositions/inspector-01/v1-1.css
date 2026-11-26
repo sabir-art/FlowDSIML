@@ -1,0 +1,66 @@
+/* INSPECTOR-01 v1.1 : la v1 telle quelle, plus les seules corrections dictées par les lois de l'UX */
+[data-theme='light'] { --fd-insp-action-line: #8a94a2; }
+[data-theme='dark']  { --fd-insp-action-line: #5e6978; }
+
+/* Proximité : 4 px entre deux lignes d'un groupe, 8 px du titre au contenu, 12 px du groupe à son action,
+   25 px entre sections (12 + filet + 12) */
+.v11 .st { margin-bottom: 4px; }
+.v11 .act { margin-top: 8px; }           /* 4 px de l'écart de section + 8 = 12 px */
+
+/* Similarité : une action n'est jamais remplie comme un champ */
+.btn.line { background: transparent; color: var(--fd-color-text); box-shadow: inset 0 0 0 1px var(--fd-insp-action-line); }
+.btn.line:hover { background: var(--fd-insp-fill); }
+
+/* Fitts : 28 px au moins pour les boutons icône */
+.v11 .ib { width: 28px; height: 28px; }
+.v11 .st .ib { width: 28px; height: 28px; margin: -2px -6px -2px 0; }
+
+/* Portée : ce qui vaut pour toute la démo le dit */
+.scope { font-size: 11px; font-weight: 600; color: var(--fd-insp-meta); display: inline-flex; align-items: center; gap: 4px; }
+
+/* Listes (hotspots, zones) au gabarit des lignes v1 */
+.li { min-height: 36px; border-radius: var(--fd-radius-control-sm); background: var(--fd-insp-fill); display: flex; align-items: center; gap: 8px; padding: 0 4px 0 8px; font-size: 13px; }
+.li .num { width: 20px; height: 20px; border-radius: 50%; background: #d60b52; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.li .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.li .m { color: var(--fd-insp-meta); font-size: 12px; }
+.li.sel { box-shadow: inset 0 0 0 1.5px var(--fd-color-border-selected); background: var(--fd-color-surface-selected); }
+.li.sel .m { color: var(--fd-insp-label); }
+
+/* Curseurs en ligne « libellé | curseur | valeur » */
+.slide { flex: 1; display: flex; align-items: center; gap: 10px; height: 32px; }
+.slide .tr { flex: 1; height: 4px; border-radius: 2px; background: var(--fd-insp-fill-hover); position: relative; }
+.slide .tr i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--fd-color-primary); }
+.slide .tr b { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px var(--fd-color-primary), 0 1px 2px rgba(0,0,0,.2); }
+.slide .val { width: 44px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Connexité : la condition et sa destination reliées par une flèche */
+.rule { border-radius: var(--fd-radius-surface); background: var(--fd-insp-bg); box-shadow: inset 0 0 0 1px var(--fd-insp-sep); padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+.rule .rt { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 650; height: 24px; }
+.rule .rt .grow { flex: 1; }
+.flow { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--fd-insp-meta); height: 20px; padding-left: 4px; }
+.err { font-size: 12px; color: var(--fd-color-danger); display: flex; align-items: center; gap: 6px; }
+
+/* Aperçu (Étape, Recadrage, Zoom, Projecteur) */
+.cropbox .zf { position: absolute; border: 1.5px solid #fff; border-radius: 3px; box-shadow: 0 0 0 999px rgba(8,8,8,.38); }
+.cropbox .halo { position: absolute; width: 76px; height: 76px; border-radius: 50%; box-shadow: 0 0 0 999px rgba(8,8,8,.5); }
+.ctaprev { display: flex; justify-content: center; padding: 16px; border-radius: var(--fd-radius-surface); background: var(--fd-color-canvas-editor); }
+.ctaprev span { background: #a3195b; color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 650; display: inline-flex; gap: 6px; align-items: center; }
+
+/* Assistant */
+.msg { border-radius: 12px; padding: 8px 10px; font-size: 13px; line-height: 1.45; max-width: 86%; }
+.msg.me { align-self: flex-end; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); }
+.msg.ai { background: var(--fd-insp-fill); }
+.compose { display: flex; gap: 6px; align-items: center; }
+.compose .ctl { flex: 1; }
+.sendb { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; background: var(--fd-color-primary-soft); color: var(--fd-color-primary-soft-text); flex: none; }
+.ctab { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--fd-insp-label); height: 24px; padding: 0 8px; border-radius: 6px; background: var(--fd-insp-fill); }
+
+/* Sections repliées (Réglages de la démo) : titre + résumé + chevron, ligne entière cliquable */
+.fold { min-height: 32px; display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
+.fold b { font-weight: 650; color: var(--fd-color-text); }
+.fold .s { flex: 1; color: var(--fd-insp-meta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--fd-insp-label); height: 24px; }
+.backrow { display: flex; align-items: center; gap: 2px; font-size: 14px; font-weight: 650; flex: 1; }
+.backrow .ib { margin-left: -8px; }
+.row .lab.wide { width: auto; flex: 1; font-size: 12px; }
+.btn.line.sm { height: 28px; }

@@ -1,93 +1,87 @@
 # INSPECTOR-01 — Langage commun des panneaux de droite de l'éditeur
 
-> **Version 3 (26/11, retour du client : appliquer les lois de l'UX).** Le client valide l'esprit de la direction B. En v2, « Régénérer la voix » avait le même fond gris et le même écart de 4 px que les champs Français et Antoine : il se lisait comme un troisième champ. La v3 corrige ce défaut. Elle fixe une règle par loi (§V3.1), des jetons de hiérarchie (§V3.2) et l'application à **tous** les panneaux (§V3.3), puis donne une grille d'auto-contrôle (§V3.4). Les planches sont dans `docs/ux/propositions/inspector-01/` :
-> - `v3-planche-voix-off-corrigee.png` : le défaut v1 annoté, la v3 (voix en place, nouvelle voix), l'échelle d'écarts et les familles de contrôles, en clair et en sombre ;
-> - `v3-planche-contenu.png` : Étape, Bouton d'action, Points d'intérêt, Hotspot sélectionné, Suite du parcours ;
-> - `v3-planche-ecran.png` : Flou, Zoom, Projecteur, Recadrage, Image ;
-> - `v3-planche-apparence-demo.png` : Design, Assistant, Réglages de la démo ;
-> - `v3-grille-auto-controle.png` : la grille panneau × loi, avec les mesures.
+> **Version 1.1 (26/11, décision du client) : c'est la version à retenir.**
 >
-> Sur chaque planche, l'avant est une capture de l'app actuelle et l'après est la maquette v3, en clair et en sombre. **La v3 remplace les §4 et §5** ; les jetons du §1 restent valables, et le §V3.2 les complète.
+> Le client garde la **v1** (d0ce330) comme base : couleurs, formes, style des contrôles, Source « IA · Micro · Fichier », Thème, Format et Zone du Recadrage.
+>
+> Il reprend de la v2 seulement les **aperçus en tête des panneaux Étape et Recadrage**, et ne demande de corriger que ce qui enfreint les lois de l'UX.
+>
+> Les directions A et B (v2, §0) et la refonte v3 (7e1dc24) ne sont **pas retenues**. Leurs planches restent dans le dossier pour l'historique, mais ne servent plus de référence.
+>
+> Planches v1.1 dans `docs/ux/propositions/inspector-01/`, en clair et en sombre :
+> - `v1-1-planche-voix-off.png` : le défaut de la v1, annoté, à côté de la v1.1 (voix en place, nouvelle voix) ;
+> - `v1-1-planche-contenu.png` : Étape, Bouton d'action, Points d'intérêt, Hotspot sélectionné, Suite du parcours ;
+> - `v1-1-planche-ecran.png` : Flou, Zoom, Projecteur, Recadrage, Image ;
+> - `v1-1-planche-apparence-demo.png` : Design, Assistant, Réglages de la démo ;
+> - `v1-1-grille-auto-controle.png` : la grille panneau × loi, avec les mesures.
+>
+> Sur chaque planche, l'avant est une capture de l'app actuelle. Les §1 à §5 (v1) restent la référence ; la section V1.1 ci-dessous les complète.
 
-## V3. Lois appliquées
+## V1.1. Lois appliquées (corrections à la marge de la v1)
 
-Source : lawsofux.com/fr. Pour chaque loi, la règle concrète dans nos panneaux. Une règle se vérifie sur la maquette ou dans le code, jamais « à l'œil ».
+Source : lawsofux.com/fr. La v1 est gardée telle quelle ; chaque loi ne change que ce qui l'enfreignait.
 
-### V3.1 Une règle par loi
+### V1.1.1 Une règle par loi
 
-| Loi | Ce qu'elle dit | Règle dans nos panneaux |
+| Loi | Règle dans nos panneaux | Ce que la v1.1 corrige |
 | --- | --- | --- |
-| **Proximité** | Les éléments proches sont perçus comme liés. | L'écart dit le lien, sur une échelle stricte : **4 px** entre deux contrôles d'un même groupe, **8 px** du titre de groupe à son contenu, **12 px** d'un groupe à l'action qui en dépend, **20 px** entre deux groupes, **33 px** entre deux sections (16 + filet de 1 px + 16). Une action n'est jamais à 4 px d'un champ dont elle ne fait pas partie. |
-| **Similarité** | Ce qui se ressemble est perçu comme de même nature. | Trois familles, qui ne se mélangent jamais. **Champ** : fond rempli, sans contour. **Action** : jamais remplie de gris ; secondaire = contour de 1 px sur fond transparent, primaire = fond de marque, tertiaire = lien de marque. **Valeur cliquable** (puce) : rempli, avec chevron. Un bouton qui ressemble à un champ est un défaut. |
-| **Région commune** | Des éléments dans une même zone délimitée forment un groupe. | Les réglages qui n'ont de sens qu'ensemble sont posés sur une **région** (fond `--region`, filet `--region-line`, 8 px de marge interne, titre en 11 px dans la région). Exemples : « Synthèse » (Français et Antoine), chaque règle de Suite du parcours, la proposition de l'Assistant, la « Nouvelle voix ». L'action qui agit sur la région reste **hors** de la région, 12 px dessous, sauf les choix de la région elle-même (Garder ou Utiliser). |
-| **Connexité** | Des éléments reliés visuellement sont perçus comme liés. | Le lien entre deux objets se dessine. Suite du parcours : « Si … est … » → flèche → « Alors aller à ». Points d'intérêt : la pastille numérotée du panneau est celle du canevas, à la même couleur. Zoom, Projecteur, Recadrage : le cadre, le halo ou le cadrage est montré sur la vignette de la capture, au-dessus des réglages. |
-| **Prägnanz** | L'œil lit la forme la plus simple possible. | Un panneau = une colonne, des blocs rectangulaires alignés sur 16 px de marge, un seul rayon par niveau (8 px pour les contrôles, 12 px pour les surfaces). Pas de cadre dans un cadre dans un cadre : 2 niveaux d'imbrication au plus. Aucun paragraphe visible : les aides sont derrière « ? ». |
-| **Hick** | Le temps de décision croît avec le nombre de choix. | 5 options au plus dans un segmenté ; au-delà, une liste. Les choix rares ou valables pour toute la démo sont repliés en **lignes résumé**. Les tuiles visuelles (styles du Design) font exception, car on les reconnaît sans les lire. |
-| **Fitts** | Le temps pour atteindre une cible dépend de sa taille et de sa distance. | Cible de **28 px au moins**, 32 px pour les champs et les actions. L'interrupteur (36 × 20) est toujours sur une ligne entière cliquable de 32 px. Les icônes seules (corbeille, ⋯) font 28 px. L'action principale est près de ce qu'elle modifie, pas au pied du panneau. |
-| **Miller** | On garde environ 7 éléments en mémoire de travail. | 7 blocs au plus par panneau ouvert, en comptant l'objet et les lignes résumé. Les listes de plus de 7 éléments (zones, règles, variables) défilent dans leur groupe, avec un compteur dans le titre (« 1 / 8 »). |
-| **Jakob** | Les utilisateurs attendent ce qu'ils connaissent ailleurs. | Inspecteur à droite, de 320 px, titre en haut, croix pour fermer. Saisie de l'assistant au pied, comme une messagerie. Retour (‹) en tête quand on entre dans un sous-objet (Hotspot 1). Action destructive au pied, en rouge, jamais à côté de l'action primaire. |
-| **Tesler** | La complexité irréductible doit être absorbée par le système, pas par l'utilisateur. | L'utilisateur agit par verbes, pas par concepts. Voix off : plus de « source » à choisir ; Régénérer, Enregistrer et Importer créent une nouvelle voix, sans rien écraser. Hotspot : la voix n'est plus recopiée ici, une ligne mène au panneau Voix off. Recadrage : « Appliquer à » propose « Cette étape » ou « Toutes (2) », sans calcul à faire. |
-| **Position sérielle** | On retient mieux le premier et le dernier élément. | En tête, **l'objet** (ce qu'on vient voir ou modifier). Au pied, ce qui conclut ou ce qui vaut pour toute la démo : action destructive, ligne résumé « Lecteur », saisie de l'Assistant, Annuler / Recadrer. Au milieu, les réglages. |
-| **Von Restorff** | L'élément qui se distingue est le mieux retenu. | **Une action primaire au plus par panneau** (fond de marque). La couleur de marque est réservée à l'action primaire, à la sélection et aux liens. L'erreur se signale par une ligne rouge sous le champ fautif, pas par un bandeau. |
-| **Doherty** | Sous 400 ms de réponse, on reste dans le flux. | Tout réglage local s'applique tout de suite sur le canevas. Ce qui prend plus de 400 ms montre un état **dès le clic** : synthèse vocale (« Génération… » et onde en squelette), réponse de l'Assistant (message de l'utilisateur affiché aussitôt, indicateur de saisie), envoi d'image (vignette locale tout de suite). |
-| **Esthétique-utilisabilité** | Une interface soignée est perçue comme plus facile. | Typographie de la charte sur 3 tailles (14 / 13 / 11 px), icônes Lucide de 14 à 16 px et de trait 2, alignement sur la grille de 4 px. Contraste du texte ≥ 4,5:1 en clair et en sombre (mesure : 4,63 au plus bas). |
-| **Pareto** | 20 % des fonctions servent 80 % du temps. | Ce qui sert le plus est ouvert et en haut (le texte de la bulle, la voix, le niveau de zoom) ; le reste est replié en lignes résumé (Réglages de la démo : Lecture, Variables, Jeu de données, Collaboration, Notes de la démo). |
+| **Proximité** | L'écart dit le lien : **4 px** entre deux lignes d'un groupe, **8 px** du titre de section au contenu, **12 px** d'un groupe à l'action qui en dépend, **25 px** entre deux sections (12 + filet + 12). | Titre → contenu passe de 6 à 8 px ; l'action passe de 4 à 12 px sous son groupe (« Régénérer la voix », « Ajouter un hotspot », « Ajouter une règle », « Centrer sur le hotspot », « Remplacer la capture »…). |
+| **Similarité** | Un champ est gris rempli, sans contour (v1). Une action ne l'est **jamais** : secondaire = contour de 1 px sur fond transparent (`.btn.line`), primaire = fond de marque, destructive = texte rouge au pied. | « Régénérer la voix », « Garder l'actuelle », « Annuler » et « Ignorer » perdent leur fond gris et prennent un contour. Tous les réglages oui / non sont des interrupteurs (la case « Animation de pulsation » du Hotspot en devient un). |
+| **Région commune** | Ce qui forme un tout est posé sur une même surface : carte de la voix, carte « Nouvelle voix », chaque règle de Suite du parcours, la proposition de l'Assistant. | Les règles de Suite du parcours ont chacune leur surface encadrée. |
+| **Connexité** | Le lien entre deux objets se dessine : flèche « Alors aller à » entre condition et destination ; pastille numérotée identique au canevas ; cadre de zoom, halo et cadrage montrés sur la vignette de la capture. | Aperçus en tête de Recadrage (repris de la v2), de Zoom et de Projecteur. |
+| **Prägnanz** | Une colonne, des lignes « libellé \| contrôle » de 36 px, un seul rayon par niveau ; pas de paragraphe visible, les aides sont derrière « ? ». | Les paragraphes de Zoom, Projecteur et Hotspot passent derrière « ? ». |
+| **Hick** | 5 options au plus dans un segmenté ; au-delà, une liste. Les réglages rares sont repliés. | Réglages de la démo : 5 sections repliées avec leur résumé (Lecture, Variables, Jeu de données, Collaboration, Notes de la démo). |
+| **Fitts** | Cible de 28 px au moins ; un interrupteur est sur une ligne entière cliquable de 32 px. | Les boutons icône passent de 24 à 28 px (⋯ de la carte de voix, Régénérer de la carte « Nouvelle voix », « + » du Style). Les libellés d'interrupteur prennent toute la ligne (avant : « Zoom sur une zone » sur 2 lignes). |
+| **Miller** | 7 blocs au plus par panneau ouvert ; au-delà, on replie. | Réglages de la démo : de 1 720 px à 2 sections ouvertes et 5 repliées. |
+| **Jakob** | Inspecteur de 320 px à droite, titre et croix en haut, retour ‹ pour un sous-objet, action destructive au pied, saisie de l'Assistant au pied. Le nom du panneau est celui du rail. | Le panneau « Thème » de la v1 reprend le nom du rail, « Design ». Le Hotspot sélectionné a son retour ‹ dans l'en-tête. |
+| **Tesler** | Le système absorbe la complexité : sources sans perte (la carte « Nouvelle voix » ne remplace rien d'office), « Appliquer à » sans calcul. | Ce qui vaut pour toute la démo le dit : la section Lecteur de Voix off porte « Toute la démo ». |
+| **Position sérielle** | En tête l'objet (aperçu de la bulle, carte de la voix, vignette) ; au pied ce qui conclut (supprimer, Annuler / Recadrer, saisie). | Aperçu de la bulle en tête d'Étape et du Hotspot (repris de la v2). |
+| **Von Restorff** | Une action primaire au plus par panneau. | « Envoyer » de l'Assistant passe en couleur douce, pour laisser « Appliquer » seule primaire. |
+| **Doherty** | Un réglage local s'applique tout de suite sur le canevas ; au-delà de 400 ms, un état s'affiche dès le clic. | À tenir en code : synthèse de la voix, réponse de l'Assistant, envoi d'une image. |
+| **Esthétique-utilisabilité** | Jetons, typographie et icônes de la v1 ; contraste du texte ≥ 4,5:1. | Mesuré : 4,83:1 au plus bas en clair, 4,88:1 en sombre. |
+| **Pareto** | Ce qui sert le plus est ouvert et en haut ; le reste est replié ou plus bas. | Étape : la bulle et ses réglages en haut ; Test A/B et notes plus bas (le panneau défile). |
 
-### V3.2 Jetons et composants de la v3
+### V1.1.2 Jetons et classes ajoutés à la v1
 
-À ajouter aux jetons du §1 :
+Les jetons du §1 ne changent pas. Les ajouts sont dans `docs/ux/propositions/inspector-01/v1-1.css` :
+- `--fd-insp-action-line` : #8a94a2 en clair, #5e6978 en sombre. C'est le contour de l'action secondaire, à 3:1 au moins sur le fond.
+- `.btn.line` : action secondaire à contour. **Il n'existe plus d'action grise remplie** : `.btn.alt` est retiré des actions.
+- Écart titre → contenu de 8 px (`.st` : 4 px de marge plus les 4 px de la section). Action à 12 px sous son groupe (`.act` : 8 px plus 4).
+- Boutons icône de 28 px. Ligne d'interrupteur au libellé pleine largeur.
+- Classes utilitaires :
+  - `.scope` : portée « Toute la démo », « Privées », compteur ;
+  - `.li` : ligne de liste de 36 px ;
+  - `.rule` + `.flow` : règle et flèche ;
+  - `.slide` : curseur avec sa valeur ;
+  - `.fold` : section repliée avec son résumé ;
+  - `.cropbox` avec `.zf` (cadre de zoom) et `.halo`.
 
-| Jeton | Valeur | Rôle |
+### V1.1.3 Tous les panneaux
+
+| Panneau | Ce qui vient de la v1 | Ajouté ou corrigé |
 | --- | --- | --- |
-| `--fd-insp-in-gap` | 4 px | entre deux contrôles d'un même groupe |
-| `--fd-insp-title-gap` | 8 px | titre de groupe → contenu |
-| `--fd-insp-act-gap` | 12 px | groupe → action qui en dépend |
-| `--fd-insp-grp-gap` | 20 px | entre deux groupes d'une section |
-| `--fd-insp-sec-pad` | 16 px | haut et bas d'une section (avec le filet : 33 px entre sections) |
-| `--fd-insp-action-line` | #8a94a2 (clair) / #5e6978 (sombre) | contour du bouton secondaire (≥ 3:1 sur le fond) |
-| `--fd-insp-region` | #f6f8fa / #1b2027 | fond d'une région commune |
-| `--fd-insp-region-line` | #e2e8ef / #2a313b | filet d'une région commune |
+| Étape | Lignes Position (5 icônes), Bouton ; Nom, Animation, Chapitre, Lead, Page ; Texte alt. | Aperçu de la bulle en tête, modifiable sur place ; « Créer une variante B » à contour ; « Notes de l'étape » (Privées). |
+| Bouton d'action | Lignes Libellé, Lien | Interrupteur sur sa ligne et aperçu du bouton. |
+| Points d'intérêt | — | Liste de lignes de 36 px, avec la pastille du canevas ; « Ajouter un hotspot » à contour, 12 px dessous. |
+| Hotspot sélectionné | Segmenté Guidage ; X / Y / L / H en 2 × 2, comme la Zone du Recadrage | Retour ‹ ; aperçu de la bulle ; Pulsation en interrupteur. |
+| Voix off | **Inchangée** : Source IA · Micro · Fichier et point vert, carte « Voix en place », Texte lu, Langue, Voix, Lecteur | Régénérer à contour et 12 px sous Voix ; « Garder l'actuelle » à contour ; ⋯ à 28 px ; « Toute la démo » sur Lecteur. |
+| Suite du parcours | Listes déroulantes v1 | Règle sur sa surface, flèche, erreur sous le champ ; « Ajouter une règle » à contour. |
+| Flou | Segmenté Flou / Pixels / Masque | Liste des zones, réglages de la zone choisie. |
+| Zoom | Segmentés Niveau et Transition ; H / V | Interrupteur pleine ligne ; cadre sur la vignette ; « Centrer sur le hotspot » à contour. |
+| Projecteur | — | Halo sur la vignette ; Taille et Assombrir en curseurs ; aides derrière « ? ». |
+| Recadrage | **Inchangé** : Format, Zone L / H / X / Y avec lien, Appliquer à, pied Réinitialiser / Annuler / Recadrer | Aperçu du cadrage en tête ; Annuler à contour. |
+| Image | — | Vignette ; « Remplacer la capture » et « Ajouter une image » à contour. |
+| Design | **Inchangé** (Thème de la v1) : Style en tuiles, Couleurs « pastille + code + 100 % », Coins, Cadre, Police | Nom du rail ; « + » à 28 px. |
+| Assistant | — | Proposition en carte (Ignorer à contour, Appliquer en primaire) ; Envoyer en couleur douce. |
+| Réglages de la démo | Lignes et segmentés v1 | 2 sections ouvertes, 5 repliées avec leur résumé. |
 
-Composants :
-- `InspectorGroup` : titre en 11 px (capitales espacées, gris méta), puis contenu à 4 px ;
-- `InspectorUnit` : un groupe suivi de son action à 12 px ;
-- `InspectorRegion` : une surface de région commune, avec un titre facultatif ;
-- `ActionButton` : variantes `primary` (fond de marque), `secondary` (contour, fond transparent) et `link` ; il n'existe **pas** de variante grise remplie ;
-- `SummaryRow` : ligne résumé de 32 px au moins (icône, nom, valeur en gris, chevron), qui ouvre une surcouche ou déplie le groupe ;
-- `ObjectPreview` : la vignette de la capture avec le cadre, le halo ou le cadrage dessinés dessus.
+### V1.1.4 Grille d'auto-contrôle
 
-### V3.3 Tous les panneaux
-
-| Panneau | Objet en tête | Groupes | Actions |
-| --- | --- | --- | --- |
-| Étape | vignette, nom éditable, page | Organisation (Chapitre, Lead en puces), Animation d'arrivée, Texte alternatif, Test A/B, Notes de l'étape | « Créer une variante B » (secondaire, sous Test A/B) ; Supprimer l'étape au pied |
-| Bouton d'action | aperçu du bouton, interrupteur dessous | Bouton (libellé, lien) | — |
-| Points d'intérêt | — | liste numérotée « Sur cette étape », sélection en région de marque | « Ajouter un hotspot » (secondaire, 12 px sous la liste) |
-| Hotspot sélectionné | ‹ Hotspot 1, aperçu de la bulle éditable | Guidage, Position (X, Y, L, H) | ligne résumé Voix off ; Supprimer le hotspot au pied |
-| Voix off | la voix : avatar, nom, lecture, onde, durée | Texte lu ; région Synthèse (Français, Antoine) | Régénérer (secondaire, 12 px sous la région) ou carte Nouvelle voix (Garder l'actuelle, Utiliser cette voix) ; liens Enregistrer et Importer ; ligne résumé Lecteur au pied |
-| Suite du parcours | — | Règles (une région par règle : Si → Alors aller à), Sinon | « Ajouter une règle » (secondaire) |
-| Flou | — | liste des zones, réglages de la zone choisie (Flou, Pixels, Masque ; intensité) | Annuler / Appliquer le flou restent ceux de la fenêtre (voir l'écart en §V3.4) |
-| Zoom | cadre de zoom sur la vignette, interrupteur | Niveau, Centre, Mouvement | « Centrer sur le hotspot » (secondaire) |
-| Projecteur | halo sur la vignette, interrupteur | Halo (taille, assombrissement) ; Fixe si moins d'animations | — |
-| Recadrage | cadrage sur la vignette | Format, Zone (L, H, X, Y), Appliquer à | pied : Réinitialiser (lien), Annuler (secondaire), Recadrer (primaire) |
-| Image | la capture en vignette | Capture de l'étape, Par-dessus la capture | « Remplacer la capture », « Ajouter une image » (secondaires) |
-| Design | styles en tuiles | Couleurs (pastilles nommées), Forme, adresse et police (puces) | « Enregistrer le style actuel » (lien) |
-| Assistant | contexte en jetons (Étape 1, Modèle auto) | fil de messages ; proposition en région | Ignorer (secondaire), Appliquer (primaire) ; saisie au pied |
-| Réglages de la démo | — | Langue et étiquettes, Format des écrans ; lignes résumé Lecture, Variables, Jeu de données, Collaboration, Notes de la démo | « Appliquer à toutes les étapes » (secondaire) |
-
-Libellés : « Notes du présentateur » existait à deux niveaux. Il devient « Notes de l'étape » dans Étape et « Notes de la démo » dans Réglages. Aucun nom de fournisseur dans l'interface : le jeton de l'Assistant dit « Modèle auto ».
-
-### V3.4 Grille d'auto-contrôle
-
-Contrôle panneau par panneau, sur les maquettes v3 rendues, en clair et en sombre. Les écarts entre éléments, le nombre d'actions primaires, les actions remplies, la plus petite cible et le plus petit contraste sont **mesurés** par script (planche `v3-grille-auto-controle.png`, colonne de droite).
-
-Mesures communes aux 14 panneaux :
-- écarts observés dans {4, 8, 12, 20} px seulement ;
-- 1 action primaire au plus ;
-- 0 action remplie de gris ;
-- 0 champ à contour ;
-- plus petite cible : 28 px, ou 20 px pour un interrupteur sur une ligne cliquable de 32 px ;
-- plus petit contraste de texte : 4,83:1 en clair et 4,63:1 en sombre.
+Contrôle de chaque panneau v1.1, rendu en clair et en sombre. Le script mesure 4 points (planche `v1-1-grille-auto-controle.png`) :
+- écarts observés : uniquement 4, 8 et 12 px dans une section, et 25 px entre sections ;
+- 1 action primaire au plus, et 0 action grise remplie ;
+- plus petite cible : 28 px ;
+- plus petit contraste de texte : 4,83:1 en clair, 4,88:1 en sombre.
 
 | Panneau | Proximité | Similarité | Région commune | Connexité | Prägnanz | Hick | Fitts | Miller | Jakob | Tesler | Position sérielle | Von Restorff | Doherty | Esthétique-utilisabilité | Pareto |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -95,7 +89,7 @@ Mesures communes aux 14 panneaux :
 | Bouton d’action | OK | OK | OK | — | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Points d’intérêt | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Hotspot sélectionné | OK | OK | OK | OK | OK | Écart | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| Voix off | OK | OK | OK | — | OK | OK | OK | OK | OK | OK | OK | OK | À tenir | OK | OK |
+| Voix off | OK | OK | OK | — | OK | OK | OK | OK | OK | Écart | OK | OK | À tenir | OK | OK |
 | Suite du parcours | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Flou | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | Écart | OK | OK | OK | OK |
 | Zoom | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -106,24 +100,29 @@ Mesures communes aux 14 panneaux :
 | Assistant | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | À tenir | OK | OK |
 | Réglages de la démo | OK | OK | OK | — | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 
-Légende : OK = loi respectée ; — = sans objet ; À tenir = règle posée dans la maquette, à vérifier dans le code ; Écart = écart connu.
+Légende :
+- OK : loi respectée ;
+- — : sans objet pour ce panneau ;
+- À tenir : à vérifier dans le code ;
+- Écart : écart connu, motivé ci-dessous.
 
 Écarts et points à tenir :
-- **Hotspot sélectionné · Hick (écart)** : « Libre · Bientôt » ajoute une option qu'on ne peut pas choisir. Je la garde pour la règle « Bientôt » : elle reste grisée et non cliquable.
-- **Flou · Position sérielle (écart)** : Annuler et Appliquer le flou sont en tête de la fenêtre, alors que le Recadrage les met au pied. Je propose de les mettre au pied de la fenêtre ; c'est au chef de décider.
-- **Voix off · Doherty (à tenir)** : « Génération… » et onde en squelette dès le clic.
-- **Assistant · Doherty (à tenir)** : le message s'affiche aussitôt, puis l'indicateur de saisie en moins de 400 ms.
-- **Image · Doherty (à tenir)** : la vignette locale s'affiche tout de suite, et le téléversement se fait en fond.
+- **Hotspot sélectionné · Hick (écart)** : « Libre · Bientôt » ajoute une option qu'on ne peut pas choisir. Je la garde pour la règle « Bientôt » : grisée, non cliquable.
+- **Voix off · Tesler (écart)** : le Lecteur vaut pour toute la démo mais reste dans Voix off, comme dans la v1 retenue par le client. La section porte « Toute la démo ».
+- **Flou · Position sérielle (écart)** : Annuler et Appliquer le flou restent en tête de la fenêtre, alors que le Recadrage les met au pied. Je propose de les passer au pied ; c'est au chef de décider.
+- **Voix off, Assistant, Image · Doherty (à tenir)** : un état dès le clic au-delà de 400 ms.
 
-e2e à ajouter, sur chaque panneau ouvert en clair et en sombre :
-1. aucun bouton d'action n'a de fond gris rempli ;
+e2e à ajouter, sur chaque panneau ouvert, en clair et en sombre :
+1. aucun bouton d'action n'a le fond des champs (`--fd-insp-fill`) ;
 2. 1 action primaire au plus ;
-3. les écarts entre frères d'un groupe valent 4 px, et 12 px entre un groupe et son action ;
-4. toute cible fait 28 px au moins, interrupteurs exceptés (sur une ligne de 32 px) ;
+3. 12 px entre un groupe et son action, 8 px entre un titre de section et son contenu ;
+4. toute cible fait 28 px au moins, interrupteurs exceptés (ligne de 32 px) ;
 5. contraste du texte ≥ 4,5:1.
 
 
-> **Version 2 (26/11, après la précision du client).** La structure « libellé à gauche, contrôle à droite » n'était qu'une piste. Je propose ma propre structure, partie de ce que l'utilisateur vient faire dans chaque panneau, en **deux directions** :
+> **Version 3 (7e1dc24), non retenue** : refonte complète des panneaux selon les lois de l'UX. Le client l'écarte : il voulait des corrections à la marge de la v1. Ses planches `v3-*` restent pour l'historique.
+
+> **Version 2 (26/11), non retenue par le client (directions A et B).** La structure « libellé à gauche, contrôle à droite » n'était qu'une piste. Je propose ma propre structure, partie de ce que l'utilisateur vient faire dans chaque panneau, en **deux directions** :
 > - planche `docs/ux/propositions/inspector-01/v2-planche-voix-off-2-directions.png` : avant, direction A et direction B, en clair et en sombre, avec un tableau comparatif ;
 > - planche `docs/ux/propositions/inspector-01/v2-planche-systeme-direction-b.png` : la direction B sur Étape et bulle, Thème et Recadrage.
 >
