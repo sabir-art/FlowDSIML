@@ -3942,8 +3942,12 @@
   width: 16px;
   height: 16px;
 }
-/* Le titre laisse la place aux deux actions */
-.mk .rail-li .step {
+/* Le titre laisse la place aux deux actions, seulement quand elles s'affichent (lot B : sinon le nom
+   d'une étape n'avait que 55 px, « Catalogue » passait sur deux lignes et « menu Produits » était rogné) */
+.mk .rail-li:hover .step,
+.mk .rail-li:has(:focus-visible) .step,
+.mk .rail-li .step[aria-current='step'],
+.mk .rail-li:has(.menu-trigger[aria-expanded='true']) .step {
   padding-right: 68px;
 }
 /* Au survol et au focus clavier, la poignée (GripVertical, 16 px) remplace le numéro, à sa place */
@@ -4809,7 +4813,7 @@
   min-width: 0;
 }
 .mk .step .meta b {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .mk .step .rail-screen {
   overflow: hidden;
