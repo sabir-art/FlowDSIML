@@ -3469,8 +3469,7 @@
     },
     "password": "Password",
     "showPw": "Show password",
-    "generate": "Generate",
-    "pwHelp": "8 characters minimum. Changing it requires visitors to enter the new one.",
+    "pwHelp": "At least 8 characters. Share it separately from the link.",
     "pwChanged": "Set {{when}}.",
     "pwChangedCap": "Password changed {{when}}",
     "pwKeep": "Set: type a new one to change it",
@@ -3492,7 +3491,6 @@
     "expHelp": "Paris time. You can extend or remove the expiry at any time: the link becomes active again immediately.",
     "expSaved": "Expiry date saved",
     "expRemoved": "Expiry removed: the link is active",
-    "rulesInfo": "These rules apply to the link, the embed and personalised links. They take effect immediately, without republishing.",
     "summary": "Demo access",
     "expiresOn": "Expires on {{date}}",
     "expiredOn": "Expired on {{date}}",
@@ -3558,7 +3556,12 @@
       "help": "Any address from these domains gets a link to confirm it. Public email providers are not accepted.",
       "lastOne": "Keep at least one domain, or choose another access mode.",
       "required": "Add at least one domain to turn on email domain access."
-    }
+    },
+    "copyPw": "Copy the password",
+    "pwCopied": "Password copied",
+    "pwSuggestions": "Suggested password",
+    "pwStrong": "Strong password · {{n}} characters",
+    "pwSuggested": "Suggested"
   },
   "tags": {
     "title": "Tags",
