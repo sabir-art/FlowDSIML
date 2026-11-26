@@ -261,6 +261,23 @@ export const LIVE_SHIM = `(function () {
   report();
 })();`;
 
+/**
+ * Réponses rejouées dans une page : les siennes d'abord, puis celles des autres pages capturées de la démo
+ * (une application à page unique capturée avant un clic ne connaît pas encore la liste que ce clic charge ;
+ * la page suivante l'a relevée). Une même adresse n'apparaît qu'une fois.
+ */
+export function mergeResponses(page: LivePage, all: readonly LivePage[]): LiveResponse[] {
+  const seen = new Set<string>();
+  const out: LiveResponse[] = [];
+  for (const r of [page.responses, ...all.filter((p) => p !== page).map((p) => p.responses)].flat()) {
+    const k = `${(r.method ?? 'GET').toUpperCase()} ${r.url}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(r);
+  }
+  return out;
+}
+
 /** Empreinte sha256 d'un texte, au format CSP. */
 async function sha(text: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
