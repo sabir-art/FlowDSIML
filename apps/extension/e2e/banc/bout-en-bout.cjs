@@ -50,12 +50,16 @@ async function envoyer(cas) {
   const steps = log
     .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps') && l.body)
     .map((l) => JSON.parse(l.body));
-  return { capture: r, demo: demo ? JSON.parse(demo.body) : null, pages, steps };
+  // Recette du lot B : bulles posées par l'envoi (démo guidée)
+  const hotspots = log
+    .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/hotspots') && l.body)
+    .map((l) => JSON.parse(l.body));
+  return { capture: r, demo: demo ? JSON.parse(demo.body) : null, pages, steps, hotspots };
 }
 
 /** Ouvre l'envoi dans l'app et juge l'éditeur, le plan et l'aperçu. */
 async function juger(b, cas, envoi) {
-  const { demo, pages, steps } = envoi;
+  const { demo, pages, steps, hotspots } = envoi;
   const nom = cas.nom;
   ok(
     !envoi.capture.erreur,
@@ -67,6 +71,7 @@ async function juger(b, cas, envoi) {
 
   const state = seed();
   const base = state.tables.steps.find((s) => s.demo_id === DEMO);
+  const baseHot = state.tables.hotspots.find((h) => h.demo_id === DEMO);
   const ws = state.tables.workspaces[0].id;
   const d = state.tables.demos.find((x) => x.id === DEMO);
   d.title = demo.title;
@@ -91,6 +96,18 @@ async function juger(b, cas, envoi) {
       html_meta: s.html_meta,
     });
   });
+  // Bulles envoyées, rattachées à la démo ouverte (champs absents : ceux du modèle du faux Supabase)
+  hotspots.forEach((h, k) =>
+    state.tables.hotspots.push({ ...baseHot, body: '', ...h, id: h.id ?? `hb-${k}`, demo_id: DEMO }),
+  );
+  // Démo guidée : chaque clic capturé entre deux pages devient une bulle sur l'élément cliqué
+  const guidee = demo.kind !== 'sandbox' && steps.length > 1;
+  const bulle = guidee ? hotspots.find((h) => h.step_id === steps[0].id) : null;
+  if (guidee)
+    ok(
+      !!bulle && !!bulle.sel && /^Cliquez sur « .+ »$/.test(bulle.title),
+      `${nom} : le clic capturé devient une bulle sur l'élément cliqué (${bulle ? `« ${bulle.title} », ${bulle.sel}` : 'aucune'})`,
+    );
 
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, locale: 'fr-FR' });
   const p = await ctx.newPage();
@@ -195,14 +212,33 @@ async function juger(b, cas, envoi) {
     );
   ok(lu, `${nom} : aperçu, le lecteur affiche la première page (« ${premier} »)`);
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/b-${cas.id}-apercu.png` });
-  // Aperçu : on passe à la page suivante comme un visiteur. En Sandbox, par le clic capturé (le
-  // lien de la page) ; en démo guidée, par la flèche « suivant » du lecteur.
+  // Démo guidée : la bulle s'affiche dans l'aperçu, avec son libellé, sur l'élément entouré
+  if (bulle) {
+    const apercu = p.frameLocator('iframe.preview-frame');
+    const vue = await apercu
+      .locator('.p-tip-title', { hasText: bulle.title })
+      .first()
+      .waitFor({ timeout: 15000 })
+      .then(
+        () => true,
+        () => false,
+      );
+    const anneau = (await apercu.locator('.p-gd-ring').count()) > 0;
+    ok(vue && anneau, `${nom} : aperçu, la bulle « ${bulle.title} » entoure l'élément cliqué`);
+    ok(
+      (await apercu.locator('.p-html-nozone').count()) === 0,
+      `${nom} : aperçu, pas d'avertissement « Aucune zone cliquable » (la bulle fait avancer)`,
+    );
+  }
+  // Aperçu : on passe à la page suivante comme un visiteur, par le clic capturé : le lien de la page
+  // en Sandbox, l'élément de la bulle en démo guidée.
   let suite = null;
   if (steps.length > 1) {
     const lien = demo.kind === 'sandbox' ? (steps[0].html_ops ?? []).find((o) => o.op === 'link') : null;
     const cible = lien ? steps.find((s) => s.id === lien.value) : steps[1];
     const attendu = reperes[steps.indexOf(cible)];
     if (lien) await lecteur.locator(lien.sel).first().click();
+    else if (bulle) await lecteur.locator(bulle.sel).first().click();
     else await p.frameLocator('iframe.preview-frame').getByRole('button', { name: SUIVANT }).click();
     suite = await lecteur
       .getByText(attendu, { exact: false })
@@ -212,7 +248,22 @@ async function juger(b, cas, envoi) {
         () => true,
         () => false,
       );
-    ok(suite, `${nom} : aperçu, ${lien ? 'le clic capturé mène à' : 'la flèche mène à'} « ${cible.title} »`);
+    // Même titre d'écran avant et après le clic (« Tableau de bord ») : on vérifie aussi que l'étape a
+    // changé, la bulle de la première étape n'est plus affichée
+    if (bulle && suite)
+      suite = await p
+        .frameLocator('iframe.preview-frame')
+        .locator('.p-tip-title', { hasText: bulle.title })
+        .first()
+        .waitFor({ state: 'detached', timeout: 15000 })
+        .then(
+          () => true,
+          () => false,
+        );
+    ok(
+      suite,
+      `${nom} : aperçu, ${lien || bulle ? 'le clic capturé mène à' : 'la flèche mène à'} « ${cible.title} »`,
+    );
     if (SHOTS) await p.screenshot({ path: `${SHOTS}/b-${cas.id}-apercu-suite.png` });
   }
   ok(erreurs.length === 0, `${nom} : aucune erreur dans l'app${erreurs.length ? ` (${erreurs[0]})` : ''}`);

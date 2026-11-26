@@ -3,11 +3,14 @@ import type { HtmlOp } from '@flowdsiml/core';
 import { supabase } from './supabase';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
 import type { PendingHtmlPage } from './htmlStore';
+import { defaultHotspotTitle } from './geometry';
 
 /**
  * A8 : envoi des pages HTML. Chaque page passe par la fonction html-ingest, qui l'assainit une
  * seconde fois côté serveur et la range dans le bucket html (aucune écriture directe du client).
- * Le clic capturé entre deux pages devient une opération « lien » vers l'étape suivante.
+ * Sandbox : le clic capturé entre deux pages devient une opération « lien » vers l'étape suivante.
+ * Démo guidée (recette du lot B) : il devient une bulle posée sur l'élément cliqué (sélecteur, place de
+ * secours), « Cliquez sur « libellé » » ; dans le lecteur, un clic sur l'élément mène à l'étape suivante.
  */
 export type HtmlDemoKind = 'guided' | 'sandbox';
 
@@ -102,7 +105,7 @@ export async function sendHtml(
     );
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
-    if (p.clickSel && next)
+    if (p.clickSel && next && target.kind === 'sandbox')
       ops.push({ id: `l${i + 1}`, sel: p.clickSel, op: 'link', value: next, scope: 'step' });
     // Liens externes gardés : réactivés par une opération « extlink » (le lecteur affiche d'abord
     // « Vous quittez la démo »). Une adresse que le serveur a signalée reste désactivée.
@@ -139,6 +142,17 @@ export async function sendHtml(
       } as unknown as Json,
     });
     if (ins.error) throw ins.error;
+    if (p.clickSel && target.kind === 'guided') {
+      const hot = await supabase.from('hotspots').insert({
+        step_id: stepIds[i]!,
+        demo_id: demoId,
+        workspace_id: target.workspaceId,
+        sel: p.clickSel.slice(0, 500),
+        ...(p.clickRect ?? { x: 0.5, y: 0.5, w: 0.02, h: 0.02 }),
+        title: defaultHotspotTitle(p.clickLabel ?? ''),
+      });
+      if (hot.error) throw hot.error;
+    }
     onProgress(i + 1);
   }
   return { demoId, dropped, stepIds };

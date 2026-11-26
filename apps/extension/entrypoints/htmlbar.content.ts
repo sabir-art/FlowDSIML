@@ -1,7 +1,7 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { stableSelector } from '@flowdsiml/core';
-import { elementLabel } from '@/lib/geometry';
+import { elementLabel, hotspotRect } from '@/lib/geometry';
 import { labelText } from '@/lib/labelText';
 import { captureHtml } from '@/lib/htmlCapture';
 import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
@@ -221,6 +221,11 @@ export default defineContentScript({
         sel: stableSelector(el),
         label,
         transient: !!seen && !seen.has(el),
+        rect: (() => {
+          const r = el.getBoundingClientRect();
+          const box = { left: r.left, top: r.top, width: r.width, height: r.height };
+          return hotspotRect({ x: e.clientX, y: e.clientY }, box, { width: innerWidth, height: innerHeight });
+        })(),
       });
       watchClick(el);
     }
