@@ -705,7 +705,13 @@ async function onHtmlBar(
     if (s.paused) return { steps: s.steps };
     const order = s.steps + 1;
     // L60 §2 : la carte « Étape n capturée » rappelle le clic qui a mené à cette page
-    const label = order > 1 ? ((await htmlStore.last())?.clickLabel ?? '') : '';
+    const prev = order > 1 ? await htmlStore.last() : undefined;
+    // Gêne lot B : copie faite menu ouvert (survol) juste après la même page menu fermé, sans clic
+    // entre les deux : la page précédente est reliée d'office à cet état par l'élément qui l'ouvre
+    const menu = m.capture.menu;
+    if (prev && menu && !prev.clickSel && sameAddress(prev.url, m.capture.url))
+      await htmlStore.put({ ...prev, clickSel: menu.sel, clickLabel: menu.label, clickRect: menu.rect });
+    const label = prev ? (menu && !prev.clickSel ? menu.label : (prev.clickLabel ?? '')) : '';
     await htmlStore.put({ ...m.capture, order });
     return { ...(await setState({ steps: order, htmlAwait: false })), label };
   }
@@ -721,6 +727,17 @@ async function onHtmlBar(
   }
   if (m.type === 'fd:html-stop') return stop();
   return null;
+}
+
+/** Même page, hors ancre (la copie menu ouvert garde l'adresse de la page). */
+function sameAddress(a: string, b: string): boolean {
+  try {
+    const x = new URL(a);
+    const y = new URL(b);
+    return x.origin === y.origin && x.pathname === y.pathname && x.search === y.search;
+  } catch {
+    return false;
+  }
 }
 
 /** Attend qu'un onglet ait fini de charger (30 s au plus). */

@@ -1,4 +1,5 @@
-import { screenName } from './screenChange';
+import { openMenu, screenName } from './screenChange';
+import { hotspotRect, type RelRect } from './geometry';
 import {
   type HtmlRemovedItem,
   type HtmlSecurityCounts,
@@ -47,6 +48,11 @@ export interface HtmlCapture {
    * navigateur pour « Garder » ; jamais affiché, jamais envoyé avec la page.
    */
   piiOriginals?: Record<string, PiiOriginal>;
+  /**
+   * Gêne lot B : menu ouvert pendant la copie, et l'élément qui l'a ouvert (survolé ou déplié). La page
+   * précédente, même page menu fermé, est reliée d'office à cet état par cet élément.
+   */
+  menu?: { sel: string; label: string; rect: RelRect };
 }
 
 /** Récupère une ressource (image → data: WebP, police → data:, CSS → texte) par le service. */
@@ -279,6 +285,7 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     tooBig: bytes > HTML_MAX_BYTES,
     title: document.title.slice(0, 200),
     heading: screenName(document).slice(0, 200),
+    menu: menuOf(),
     url: location.href.slice(0, 2000),
     viewport: { w: innerWidth, h: innerHeight },
     links,
@@ -287,5 +294,19 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     security,
     removed,
     piiOriginals,
+  };
+}
+
+/** Gêne lot B : élément qui a ouvert le menu affiché, s'il y en a un. */
+function menuOf(): HtmlCapture['menu'] {
+  const m = openMenu(document);
+  if (!m) return undefined;
+  const r = m.el.getBoundingClientRect();
+  const box = { left: r.left, top: r.top, width: r.width, height: r.height };
+  const center = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  return {
+    sel: stableSelector(m.el),
+    label: m.label,
+    rect: hotspotRect(center, box, { width: innerWidth, height: innerHeight }),
   };
 }
