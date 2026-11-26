@@ -145,8 +145,8 @@ function prepare(over = {}) {
   const s1 = () => state.tables.steps.find((s) => s.demo_id === DEMO && s.position === 0);
   // EXT-02 §6.4 : «\u202fGénérer\u202f» dans le panneau, sans fenêtre à part
   const toGenerate = async () => {
-    await sec.getByRole('button', { name: 'Remplacer…' }).click();
-    await sec.getByRole('tab', { name: 'Générer' }).click();
+    // L62 §6 : la source est toujours visible, plus de « Remplacer… »
+    await sec.getByRole('tab', { name: /^Générée/ }).click();
   };
   // L62 §8 : sélecteur de voix (déclencheur, fenêtre de 400 px, liste des voix du compte)
   const voices = async () => {
@@ -572,7 +572,6 @@ function prepare(over = {}) {
   );
   ok(!(state.aiCalls || []).some((c) => c.task === 'voice'), 'Quota atteint : rien n’est envoyé');
   await shot('l30-13-quota-voix');
-  await sec.getByRole('button', { name: 'Garder la voix actuelle' }).click();
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
   ok(
     /^Quota de sous-titres automatiques atteint pour ce mois \(300\ss\)\./.test(
@@ -583,8 +582,7 @@ function prepare(over = {}) {
 
   state = prepare({ features: { ...FEATURES, voice: false, captions: false } });
   await open(state);
-  await sec.getByRole('button', { name: 'Remplacer…' }).click();
-  const entry = sec.getByRole('tab', { name: 'Générer' });
+  const entry = sec.getByRole('tab', { name: /^Générée/ });
   ok(
     (await entry.getAttribute('aria-disabled')) === 'true',
     'Voix désactivée : onglet «\u202fGénérer\u202f» grisé',

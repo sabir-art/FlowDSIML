@@ -59,16 +59,16 @@ const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers
       return !!(v && body && body.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING);
     });
     ok(order, 'n° 10 : placée après le texte de la bulle');
-    // EXT-02 §6.4 : voix en place = carte (durée, écoute, « Remplacer… »), « Supprimer » dans le menu ⋯
+    // L62 §6 : voix en place = carte (durée, écoute), source toujours visible, « Supprimer » dans le menu ⋯
     const card = voice.locator('.vo-card');
     const more = card.getByRole('button', { name: 'Plus d’actions sur la voix' });
     ok(
       (await card.count()) === 1 &&
         /\d+:\d{2}/.test(await card.locator('.vo-card__txt').innerText()) &&
         (await card.getByRole('button', { name: /^Écouter/ }).count()) === 1 &&
-        (await card.getByRole('button', { name: 'Remplacer…' }).count()) === 1 &&
+        (await voice.getByRole('tablist', { name: 'Source de la voix' }).count()) === 1 &&
         (await more.count()) === 1,
-      'Lead UX §6.4 : carte de la voix (durée, Écouter, Remplacer…, menu ⋯)',
+      'L62 §6 : carte de la voix (durée, Écouter, menu ⋯), source de la voix toujours visible',
     );
     await more.click();
     ok(
