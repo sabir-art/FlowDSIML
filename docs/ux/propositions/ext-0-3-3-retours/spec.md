@@ -22,9 +22,10 @@ Cause : `.sel-list` est en `position: absolute`, avec `left` et `right` à 16 px
    - dessous si la hauteur de la liste, plus 4 px, tient sous le champ ;
    - sinon dessus si elle y tient ;
    - sinon, du côté le plus grand, avec un défilement interne (240 px au plus) et la liste toujours collée au champ.
-3. La liste suit son champ : si la vue défile, elle se recalcule, ou elle se ferme.
-4. Le popup ne grandit plus pour montrer une liste. Le `minHeight` ajouté au `body` est la cause du décalage : on le retire.
-5. Mise en œuvre suggérée : `position: fixed`, avec `top` ou `bottom` calculés depuis `getBoundingClientRect()` du bouton à l'ouverture, au redimensionnement et au défilement. Pas de valeur de `left` / `right` fixe.
+3. **Menu d'actions** (⋯) : 4 px sous son bouton, aligné sur le bord du bouton le plus proche du bord du popup (à droite pour le ⋯ de l'en-tête), avec sa largeur de menu. Il ne sort jamais du popup (arbitrage du 26/11).
+4. La liste suit son champ : si la vue défile, elle se recalcule, ou elle se ferme.
+5. Le popup ne grandit plus pour montrer une liste. Le `minHeight` ajouté au `body` est la cause du décalage : on le retire.
+6. Mise en œuvre suggérée : `position: fixed`, avec `top` ou `bottom` calculés depuis `getBoundingClientRect()` du bouton à l'ouverture, au redimensionnement et au défilement. Pas de valeur de `left` / `right` fixe.
 
 **e2e d'ancrage** (nouveau, `liste-ancrage.e2e.cjs`), en clair et en sombre :
 1. Pour chaque `[aria-haspopup=listbox]` et `[aria-haspopup=menu]` du popup (Cadre par défaut, Espace, menu ⋯), et pour chaque liste de la barre de capture et des écrans de vérification :
