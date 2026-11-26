@@ -40,6 +40,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
     return false;
   };
 
+  const from = (await (await fetch('http://localhost:54400/__log')).json()).length;
   // Onglet de l'app déjà ouvert : c'est lui qui recevra l'éditeur
   const app = await ctx.newPage();
   await app.goto('http://localhost:54400/#/demos');
@@ -61,6 +62,8 @@ const WS = '11111111-1111-1111-1111-111111111111';
         type: 'fd:start',
         workspaceId: a.WS,
         title: 'Projets',
+        // L64 §2 : nouvelle démo dans le dossier « Ventes »
+        folderId: 'f-ventes',
         tabId: a.tabId,
         mode: 'clicks',
       }),
@@ -118,5 +121,49 @@ const WS = '11111111-1111-1111-1111-111111111111';
   );
   const st = await status();
   ok(!st.recording && st.steps === 0, 'capture terminée');
+  const log = async () => (await (await fetch('http://localhost:54400/__log')).json()).slice(from);
+  const created = (await log()).filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/demos'));
+  ok(
+    created.length === 1 && JSON.parse(created[0].body).folder_id === 'f-ventes',
+    `L64 §2 : la nouvelle démo est créée dans le dossier choisi (${created[0]?.body?.slice(0, 120)})`,
+  );
+
+  // L64 §2 : Ajouter à une démo existante : pas de nouvelle démo, étapes à la fin, éditeur sans « ready »
+  const from2 = (await log()).length + from;
+  await page.bringToFront();
+  await popup.evaluate(
+    (a) =>
+      chrome.runtime.sendMessage({
+        type: 'fd:start',
+        workspaceId: a.WS,
+        title: 'Projets',
+        tabId: a.tabId,
+        mode: 'clicks',
+        appendDemo: { id: '55555555-5555-4555-8555-555555555555', title: 'Créer une facture' },
+      }),
+    { tabId, WS },
+  );
+  await page.locator('[data-fd-ui]').first().waitFor({ state: 'attached' });
+  await page.waitForTimeout(600);
+  await page.click('#nouveau');
+  ok(await until(async () => (await status()).steps === 1), 'ajout : étape capturée');
+  await page.waitForTimeout(500);
+  await app.goto('http://localhost:54400/#/demos');
+  await page.bringToFront();
+  await page.evaluate(() => document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.fin').click());
+  ok(
+    await until(() => /#\/demos\/55555555-5555-4555-8555-555555555555\/edit$/.test(app.url())),
+    `ajout : l’éditeur de la démo choisie s’ouvre, sans « Démo prête » (${app.url()})`,
+  );
+  const log2 = (await (await fetch('http://localhost:54400/__log')).json()).slice(from2);
+  const steps2 = log2
+    .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/steps'))
+    .map((l) => JSON.parse(l.body));
+  ok(
+    !log2.some((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/demos')) &&
+      steps2.length === 1 &&
+      steps2[0].demo_id === '55555555-5555-4555-8555-555555555555',
+    `ajout : aucune démo créée, l’étape va dans la démo choisie (${steps2.length})`,
+  );
   await ctx.close();
 })();

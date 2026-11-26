@@ -54,6 +54,9 @@ export type PopupRequest =
       followTabs?: boolean;
       /** L26-04 : capture guidée d'une démo créée depuis un modèle (étapes « À capturer »). */
       fill?: FillTarget | null;
+      /** L64 §2 : dossier de la nouvelle démo, ou démo existante où ajouter les étapes à la fin. */
+      folderId?: string | null;
+      appendDemo?: { id: string; title: string } | null;
     }
   | { type: 'fd:stop' }
   | { type: 'fd:pause' }
@@ -163,4 +166,7 @@ export interface RecordingStatus {
   restoreWindow?: { id: number; width: number; height: number; state: string } | null;
   /** L26-04 : capture guidée (démo à compléter). */
   fill?: FillTarget | null;
+  /** L64 §2 : destination choisie dans le popup. */
+  folderId?: string | null;
+  appendDemo?: { id: string; title: string } | null;
 }

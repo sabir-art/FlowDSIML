@@ -96,6 +96,9 @@ let target: {
   fill?: FillTarget | null;
   /** EXT-02 §8 : ajout à la démo ouverte dans l'éditeur, après l'étape choisie. */
   addTo?: { demoId: string; title: string; after: { n: number; title: string } | null } | null;
+  /** L64 §2 : dossier de la nouvelle démo, ou démo existante (étapes ajoutées à la fin). */
+  folderId?: string | null;
+  appendTo?: string | null;
 } | null = null;
 /** Libellé du bouton principal : « Flouter et envoyer n captures », ou « Ajouter n étapes » (§8.4). */
 const sendLabel = (n: number) =>
@@ -571,7 +574,7 @@ $('send').addEventListener('click', async () => {
     const created: string[] = [];
     const demoId = await sendCaptures(
       ordered,
-      { ...target, appendTo: target.addTo?.demoId ?? null },
+      { ...target, appendTo: target.addTo?.demoId ?? target.appendTo ?? null },
       (done) => {
         $('send-text').textContent = tr('sending', { done, total: ordered.length });
         toBar({ type: 'fd:send-progress', done, total: ordered.length });
@@ -588,7 +591,7 @@ $('send').addEventListener('click', async () => {
         () => undefined,
       );
     // L60 §3 : « ready » : l'éditeur dit « Démo prête : n étapes capturées » et marque les étapes « Nouvelle »
-    const editor = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit${target.addTo ? '' : `?ready=${ordered.length}`}`;
+    const editor = `${APP_URL.replace(/\/$/, '')}/#/demos/${demoId}/edit${target.addTo || target.appendTo ? '' : `?ready=${ordered.length}`}`;
     if (target.addTo) {
       // EXT-02 §8.4 : l'extension rend la main à l'onglet de l'éditeur, qui insère les étapes
       const t = (await browser.storage.local.get(ADD_KEY))[ADD_KEY] as AddTarget | undefined;

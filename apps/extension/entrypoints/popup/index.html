@@ -118,15 +118,49 @@
             <button type="button" id="dest-back" class="ib"><i data-lucide="arrow-left"></i></button>
             <h2 id="dest-t" data-i18n="destTitle"></h2>
           </div>
-          <div id="workspace-field">
-            <span class="fl" id="workspace-l" data-i18n="workspace"></span>
-            <button id="workspace" aria-labelledby="workspace-l workspace"></button>
-            <p id="workspace-one" class="one" hidden><i data-lucide="building-2"></i><span></span></p>
+          <!-- L64 §2 : Nouvelle démo (dossier) ou Ajouter à une démo (à la fin) ; choix mémorisés -->
+          <div
+            id="dest-kind"
+            class="seg seg--full"
+            role="radiogroup"
+            aria-label=""
+            data-i18n-label="destKindLabel"
+          >
+            <button type="button" role="radio" data-value="new" data-i18n="fillNew"></button>
+            <button type="button" role="radio" data-value="append" data-i18n="destAppend"></button>
+          </div>
+          <div id="folder-field">
+            <span class="fl" id="folders-l" data-i18n="folderLabel"></span>
+            <ul
+              id="folders"
+              class="tree"
+              role="tree"
+              aria-labelledby="folders-l"
+              aria-describedby="folders-h"
+            ></ul>
+            <p class="muted small help" id="folders-h" data-i18n="folderHelp"></p>
+          </div>
+          <div id="append-field" hidden>
+            <input class="inp" id="demo-q" type="text" autocomplete="off" aria-controls="demos" />
+            <ul id="demos" class="dlist" role="listbox" aria-describedby="demos-h"></ul>
+            <p class="muted small help" id="demos-h" data-i18n="appendHelp"></p>
           </div>
           <div id="fill-field" hidden>
             <span class="fl" id="fill-l" data-i18n="fillLabel"></span>
             <button id="fill" aria-labelledby="fill-l fill" aria-describedby="fill-h"></button>
             <p class="muted small help" id="fill-h" data-i18n="fillHelp"></p>
+          </div>
+          <div id="workspace-field" hidden>
+            <span class="fl" id="workspace-l" data-i18n="workspace"></span>
+            <button id="workspace" aria-labelledby="workspace-l workspace"></button>
+          </div>
+          <!-- Ligne Espace : « Changer » ouvre la liste du menu ⋯ -->
+          <div class="dest-ws">
+            <span class="wt" id="dest-ws-tile" aria-hidden="true"></span>
+            <span class="dest-ws-t"
+              ><small data-i18n="workspace"></small><span id="workspace-one"><span></span></span
+            ></span>
+            <button type="button" id="dest-ws-change" class="link-button" data-i18n="destChange"></button>
           </div>
         </section>
         <!-- L60 §1 : réglages de capture, tous mémorisés -->

@@ -414,6 +414,7 @@ const workspace = createSelect($<HTMLButtonElement>('workspace'), {
   onChange: () => {
     void loadFills();
     void syncHtmlRule();
+    void loadDest();
     syncDest();
   },
 });
@@ -460,10 +461,7 @@ async function loadWorkspaces() {
   const saved = (await browser.storage.local.get('fd.lastWorkspace'))['fd.lastWorkspace'] as
     string | undefined;
   if (saved) workspace.set(saved);
-  show('workspace', opts.length > 1);
-  show('workspace-one', opts.length === 1);
   $('workspace-one').querySelector('span')!.textContent = opts[0]?.label ?? '';
-  show('workspace-field', opts.length > 0);
   renderSpaces();
 }
 
@@ -570,14 +568,24 @@ async function loadFills() {
   syncFill();
 }
 function syncFill() {
-  show('fill-field', fills.length > 0);
+  show('fill-field', fills.length > 0 && destKind === 'new');
   syncDest();
 }
 /** « Dans Acme · Nouvelle démo » : espace et démo de destination, en une ligne. */
 let addingTitle = '';
 function syncDest() {
   const ws = workspace.options().find((o) => o.value === workspace.value)?.label ?? '';
-  const demo = addingTitle || fills.find((f) => f.demoId === fill.value)?.title || strings.fillNew;
+  // « Dans Acme · Ventes · Nouvelle démo », ou la démo où ajouter les étapes
+  const demo =
+    addingTitle ||
+    (destKind === 'append' && appendDemo
+      ? appendDemo.title
+      : [
+          folderId ? folderName(folderId) : '',
+          fills.find((f) => f.demoId === fill.value)?.title || strings.fillNew,
+        ]
+          .filter(Boolean)
+          .join(' · '));
   const t = $('dest-text');
   t.replaceChildren(
     `${strings.destIn} `,
@@ -585,7 +593,189 @@ function syncDest() {
     ` · ${demo}`,
   );
   t.title = `${strings.destIn} ${ws} · ${demo}`;
+  $('dest-ws-tile').textContent = ws.trim().charAt(0).toUpperCase();
 }
+
+// ===== L64 §2 : vue Destination (dossier d'une nouvelle démo, ou démo où ajouter à la fin) =====
+type FolderRow = { id: string; name: string; parent_id: string | null };
+type DemoRow = { id: string; title: string; folder_id: string | null; steps: number };
+let destKind: 'new' | 'append' = 'new';
+let folderId: string | null = null;
+let appendDemo: { id: string; title: string } | null = null;
+let folders: FolderRow[] = [];
+let demosList: DemoRow[] = [];
+const foldText = (t: string) => t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+const folderName = (id: string | null) => folders.find((f) => f.id === id)?.name ?? '';
+$('dest-kind').setAttribute('aria-label', strings.destKindLabel);
+$<HTMLInputElement>('demo-q').placeholder = strings.demoSearch;
+$('demo-q').setAttribute('aria-label', strings.demoSearch);
+$('demos').setAttribute('aria-label', strings.demoSearch);
+
+async function loadDest() {
+  const ws = workspace.value;
+  if (!ws) return;
+  const [f, d, saved] = await Promise.all([
+    supabase.from('folders').select('id, name, parent_id').eq('workspace_id', ws).order('name'),
+    supabase
+      .from('demos')
+      .select('id, title, folder_id, steps(count)')
+      .eq('workspace_id', ws)
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false })
+      .limit(200),
+    browser.storage.local.get(['fd.destKind', `fd.folder.${ws}`, `fd.appendDemo.${ws}`]),
+  ]);
+  folders = (f.data ?? []) as FolderRow[];
+  demosList = (
+    (d.data ?? []) as unknown as Array<{
+      id: string;
+      title: string | null;
+      folder_id: string | null;
+      steps: Array<{ count: number }> | null;
+    }>
+  ).map((r) => ({ id: r.id, title: r.title || '', folder_id: r.folder_id, steps: r.steps?.[0]?.count ?? 0 }));
+  destKind = saved['fd.destKind'] === 'append' ? 'append' : 'new';
+  const sf = saved[`fd.folder.${ws}`] as string | undefined;
+  folderId = sf && folders.some((x) => x.id === sf) ? sf : null;
+  const sa = saved[`fd.appendDemo.${ws}`] as { id: string; title: string } | undefined;
+  appendDemo = sa && demosList.some((x) => x.id === sa.id) ? sa : null;
+  renderDest();
+}
+
+function renderDest(focus?: string) {
+  for (const b of $('dest-kind').querySelectorAll<HTMLButtonElement>('button')) {
+    const on = b.dataset.value === destKind;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  }
+  show('folder-field', destKind === 'new');
+  show('append-field', destKind === 'append');
+  syncFill();
+  // Arbre des dossiers : « Toutes les démos », puis les dossiers et sous-dossiers (décalés de 24 px)
+  const items: HTMLElement[] = [];
+  const node = (id: string | null, name: string, count: number, level: number) => {
+    const li = document.createElement('li');
+    li.setAttribute('role', 'treeitem');
+    li.setAttribute('aria-level', String(level));
+    li.setAttribute('aria-selected', String(id === folderId));
+    li.tabIndex = id === folderId ? 0 : -1;
+    li.dataset.folder = id ?? '';
+    li.style.paddingLeft = `${10 + (level - 1) * 24}px`;
+    li.append(
+      icon(Folder, 16),
+      Object.assign(document.createElement('span'), { className: 'nm', textContent: name }),
+      Object.assign(document.createElement('span'), { className: 'ct', textContent: String(count) }),
+    );
+    items.push(li);
+  };
+  node(null, strings.folderAll, demosList.length, 1);
+  const walk = (parent: string | null, level: number) => {
+    for (const f of folders.filter((x) => x.parent_id === parent)) {
+      node(f.id, f.name, demosList.filter((x) => x.folder_id === f.id).length, level);
+      walk(f.id, level + 1);
+    }
+  };
+  walk(null, 2);
+  $('folders').replaceChildren(...items);
+  // Démos modifiables, filtrées par la recherche (sans tenir compte des accents)
+  const q = foldText($<HTMLInputElement>('demo-q').value.trim());
+  const shown = demosList.filter((x) => !q || foldText(x.title).includes(q));
+  $('demos').replaceChildren(
+    ...(shown.length
+      ? shown.map((x) => {
+          const li = document.createElement('li');
+          li.setAttribute('role', 'option');
+          const on = x.id === appendDemo?.id;
+          li.setAttribute('aria-selected', String(on));
+          li.tabIndex = on || (!appendDemo && x === shown[0]) ? 0 : -1;
+          li.dataset.demo = x.id;
+          const two = document.createElement('span');
+          two.className = 'two';
+          two.append(
+            Object.assign(document.createElement('span'), { textContent: x.title }),
+            Object.assign(document.createElement('small'), {
+              textContent: (x.steps === 1 ? strings.demoMeta_one : strings.demoMeta_other)
+                .replace('{{folder}}', folderName(x.folder_id) || strings.folderAll)
+                .replace('{{n}}', String(x.steps)),
+            }),
+          );
+          li.append(two);
+          if (on) li.append(icon(Check, 16));
+          return li;
+        })
+      : [Object.assign(document.createElement('li'), { className: 'none', textContent: strings.demoNone })]),
+  );
+  syncDest();
+  if (focus) document.querySelector<HTMLElement>(focus)?.focus();
+}
+const saveDest = () => {
+  const ws = workspace.value;
+  void browser.storage.local.set({
+    'fd.destKind': destKind,
+    [`fd.folder.${ws}`]: folderId,
+    [`fd.appendDemo.${ws}`]: appendDemo,
+  });
+};
+$('dest-kind').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+  if (!b) return;
+  destKind = b.dataset.value === 'append' ? 'append' : 'new';
+  saveDest();
+  renderDest(`#dest-kind [data-value="${destKind}"]`);
+});
+$('dest-kind').addEventListener('keydown', (e) => {
+  if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  e.preventDefault();
+  destKind = destKind === 'new' ? 'append' : 'new';
+  saveDest();
+  renderDest(`#dest-kind [data-value="${destKind}"]`);
+});
+const pickFolder = (li: HTMLElement) => {
+  folderId = li.dataset.folder || null;
+  saveDest();
+  renderDest(`#folders [data-folder="${li.dataset.folder}"]`);
+};
+$('folders').addEventListener('click', (e) => {
+  const li = (e.target as HTMLElement).closest<HTMLElement>('[role=treeitem]');
+  if (li) pickFolder(li);
+});
+const pickDemo = (li: HTMLElement) => {
+  const d = demosList.find((x) => x.id === li.dataset.demo);
+  if (!d) return;
+  appendDemo = { id: d.id, title: d.title };
+  saveDest();
+  renderDest(`#demos [data-demo="${d.id}"]`);
+};
+$('demos').addEventListener('click', (e) => {
+  const li = (e.target as HTMLElement).closest<HTMLElement>('[role=option]');
+  if (li) pickDemo(li);
+});
+// Clavier : flèches haut et bas d'une ligne à l'autre, Entrée ou Espace choisit
+for (const [id, sel, pick] of [
+  ['folders', '[role=treeitem]', pickFolder],
+  ['demos', '[role=option]', pickDemo],
+] as const)
+  $(id).addEventListener('keydown', (e) => {
+    const all = [...$(id).querySelectorAll<HTMLElement>(sel)];
+    const i = all.indexOf(document.activeElement as HTMLElement);
+    if (i < 0) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      return pick(all[i]!);
+    }
+    const to = e.key === 'ArrowDown' ? all[i + 1] : e.key === 'ArrowUp' ? all[i - 1] : null;
+    if (!to) return;
+    e.preventDefault();
+    all[i]!.tabIndex = -1;
+    to.tabIndex = 0;
+    to.focus();
+  });
+$('demo-q').addEventListener('input', () => renderDest());
+// « Changer » de la ligne Espace : la liste des espaces du menu ⋯
+$('dest-ws-change').addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleMenu(true);
+});
 
 /**
  * L49 §2.1 : réglage « Captures HTML » de l'espace. Hors réglage, « HTML guidée » et « Sandbox » restent
@@ -668,7 +858,7 @@ async function render() {
   if (!data.session) return view('login');
   if ($('settings').hidden && $('dest').hidden) view('setup');
   await loadWorkspaces();
-  await Promise.all([loadFills(), syncHtmlRule()]);
+  await Promise.all([loadFills(), syncHtmlRule(), loadDest()]);
   await syncAttach();
   await checkPage();
 }
@@ -947,7 +1137,11 @@ async function startCapture(hasDebugger: boolean) {
       liveMask: m === 'video' && liveMask.checked,
       viewport: m === 'mobile' ? viewport() : undefined,
       followTabs: m !== 'video' && follow.checked,
-      fill: m === 'clicks' ? (fills.find((f) => f.demoId === fill.value) ?? null) : null,
+      fill:
+        m === 'clicks' && destKind === 'new' ? (fills.find((f) => f.demoId === fill.value) ?? null) : null,
+      // L64 §2 : dossier de la nouvelle démo, ou démo existante (étapes à la fin)
+      folderId: destKind === 'new' ? folderId : null,
+      appendDemo: destKind === 'append' ? appendDemo : null,
       size:
         (m === 'clicks' || m === 'html') && hasDebugger
           ? tabSize(sizeKey() as TabSizeKey, { w: 0, h: 0 })

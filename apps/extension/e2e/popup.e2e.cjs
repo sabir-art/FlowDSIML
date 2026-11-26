@@ -394,6 +394,65 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
         (await popup.evaluate(() => document.activeElement?.id)) === 'dest-change',
       `${tag} · Retour : les modes, focus sur « Changer »`,
     );
+    // L64 §2 : Destination : Nouvelle démo (arbre des dossiers) ou Ajouter à une démo (recherche, liste)
+    await popup.click('#dest-change');
+    await popup.waitForFunction(() => document.querySelectorAll('#folders [role=treeitem]').length === 4);
+    const tree = await popup.locator('#folders [role=treeitem]').evaluateAll((els) =>
+      els.map((e) => ({
+        t: e.querySelector('.nm').textContent,
+        n: e.querySelector('.ct').textContent,
+        lvl: e.getAttribute('aria-level'),
+        pad: getComputedStyle(e).paddingLeft,
+        h: Math.round(e.getBoundingClientRect().height),
+        on: e.getAttribute('aria-selected') === 'true',
+      })),
+    );
+    ok(
+      (await popup.locator('#dest-kind [aria-checked=true]').innerText()) === 'Nouvelle démo' &&
+        JSON.stringify(tree.map((x) => [x.t, x.n, x.lvl, x.on])) ===
+          JSON.stringify([
+            ['Toutes les démos', '3', '1', true],
+            ['Ventes', '1', '2', false],
+            ['Nouveaux clients', '1', '3', false],
+            ['Support', '1', '2', false],
+          ]) &&
+        tree.every((x) => x.h === 36) &&
+        parseInt(tree[2].pad) - parseInt(tree[1].pad) === 24 &&
+        (await popup.locator('#folders-h').innerText()) ===
+          'Le dossier est mémorisé pour les prochaines captures.',
+      `${tag} · destination : Nouvelle démo, arbre des dossiers (36 px, sous-dossier décalé de 24 px), « Toutes les démos » par défaut`,
+    );
+    await popup.locator('#folders [data-folder="f-ventes"]').click();
+    await popup.click('#dest-back');
+    ok(
+      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Ventes · Nouvelle démo',
+      `${tag} · destination « Dans Acme · Ventes · Nouvelle démo »`,
+    );
+    await popup.reload();
+    await popup.waitForFunction(() => /Ventes/.test(document.getElementById('dest-text').textContent));
+    ok(true, `${tag} · le dossier choisi est mémorisé après une nouvelle ouverture`);
+    await popup.click('#dest-change');
+    await popup.locator('#dest-kind [data-value=append]').click();
+    await popup.waitForFunction(() => document.querySelectorAll('#demos [role=option]').length === 3);
+    ok(
+      (await popup.locator('#demos [role=option] small').first().innerText()) === 'Ventes · 4 étapes' &&
+        (await popup.locator('#demo-q').evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 40,
+      `${tag} · Ajouter à une démo : recherche de 40 px, démos avec « dossier · n étapes »`,
+    );
+    await popup.fill('#demo-q', 'facture');
+    ok((await popup.locator('#demos [role=option]').count()) === 1, `${tag} · la recherche filtre les démos`);
+    await popup.locator('#demos [role=option]').first().click();
+    ok(
+      (await popup.locator('#demos [aria-selected=true]').count()) === 1 &&
+        /Les nouvelles étapes s’ajoutent à la fin/.test(await popup.locator('#demos-h').innerText()),
+      `${tag} · démo choisie cochée, aide « ajout à la fin »`,
+    );
+    await shot(popup, 'destination-ajout');
+    await popup.click('#dest-back');
+    ok(
+      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Créer une facture',
+      `${tag} · destination « Dans Acme · Créer une facture »`,
+    );
 
     // Un clic sur « Captures d'écran » démarre, sans autre décision ; la démo prend le titre de l'onglet
     await popup.locator('#modes [data-mode=clicks]').click();
@@ -409,6 +468,10 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     await page.waitForTimeout(500);
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/popup-capture-demarree-${tag}.png` });
     const st = await status();
+    ok(
+      st.appendDemo?.id === '55555555-5555-4555-8555-555555555555' && !st.folderId,
+      `${tag} · la capture part vers la démo choisie (étapes ajoutées à la fin)`,
+    );
     ok(
       st.title === 'Page test' && (await pref('fd.lastMode')) === 'clicks',
       `${tag} · titre de l’onglet (« ${st.title} »), mode mémorisé`,

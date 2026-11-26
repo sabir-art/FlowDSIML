@@ -75,6 +75,39 @@ http
           list.map((w) => ({ role: w.role, workspaces: { id: w.id, name: w.name } })),
         );
       }
+      // L64 §2 : dossiers de l'espace et démos modifiables (vue Destination du popup), fictifs
+      if (req.method === 'GET' && req.url.startsWith('/rest/v1/folders'))
+        return send(200, [
+          { id: 'f-ventes', name: 'Ventes', parent_id: null },
+          { id: 'f-nouveaux', name: 'Nouveaux clients', parent_id: 'f-ventes' },
+          { id: 'f-support', name: 'Support', parent_id: null },
+        ]);
+      if (
+        req.method === 'GET' &&
+        req.url.startsWith('/rest/v1/demos') &&
+        req.url.includes('folder_id') &&
+        !/[?&]id=eq\./.test(req.url)
+      )
+        return send(200, [
+          {
+            id: '44444444-4444-4444-8444-444444444444',
+            title: 'Prise en main du CRM',
+            folder_id: 'f-ventes',
+            steps: [{ count: 4 }],
+          },
+          {
+            id: '55555555-5555-4555-8555-555555555555',
+            title: 'Créer une facture',
+            folder_id: 'f-support',
+            steps: [{ count: 7 }],
+          },
+          {
+            id: '66666666-6666-4666-8666-666666666666',
+            title: 'Relancer un client',
+            folder_id: 'f-nouveaux',
+            steps: [{ count: 2 }],
+          },
+        ]);
       // EXT-02 §8 : ajout d'étapes à une démo existante (titre de la démo, étapes dans l'ordre)
       if (req.method === 'GET' && req.url.startsWith('/rest/v1/demos') && req.url.includes('workspace_id'))
         return send(

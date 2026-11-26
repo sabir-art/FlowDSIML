@@ -24,6 +24,8 @@ export async function sendCaptures(
     fill?: FillTarget | null;
     /** EXT-02 §8 : ajout à une démo existante (les étapes vont à la fin ; l'éditeur les place). */
     appendTo?: string | null;
+    /** L64 §2 : dossier de la nouvelle démo (null : Toutes les démos). */
+    folderId?: string | null;
   },
   onProgress: (done: number) => void,
   /** Identifiants des étapes créées, dans l'ordre (rempli par l'envoi). */
@@ -75,6 +77,7 @@ export async function sendCaptures(
         workspace_id: target.workspaceId,
         title: target.title.slice(0, 160),
         created_by: auth.user.id,
+        folder_id: target.folderId ?? null,
         // F7 : démo mobile (cadre téléphone dans le lecteur)
         device: target.device ?? 'desktop',
         viewport: (target.viewport ?? null) as Json,

@@ -454,6 +454,9 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
     lastError: null,
     // L26-04 : capture guidée (captures à chaque clic seulement)
     fill: mode === 'clicks' ? (req.fill ?? null) : null,
+    // L64 §2 : destination (dossier d'une nouvelle démo, ou démo existante : étapes à la fin)
+    folderId: req.appendDemo || req.fill ? null : (req.folderId ?? null),
+    appendDemo: req.fill ? null : (req.appendDemo ?? null),
     viewport: mode === 'mobile' ? (req.viewport ?? null) : null,
     // A8 : la page de départ est capturée dès l'injection de la barre
     htmlAwait: mode === 'html',
@@ -855,14 +858,17 @@ async function stop(): Promise<RecordingStatus> {
       const attach = (await browser.storage.local.get('fd.attach'))['fd.attach'] as PendingAttach | undefined;
       const appendTo = state.addTo
         ? state.addTo.demoId
-        : attach && attach.workspaceId === state.workspaceId && Date.now() - attach.at < ATTACH_TTL_MS
-          ? attach.demoId
-          : undefined;
+        : state.appendDemo
+          ? state.appendDemo.id
+          : attach && attach.workspaceId === state.workspaceId && Date.now() - attach.at < ATTACH_TTL_MS
+            ? attach.demoId
+            : undefined;
       await browser.storage.local.set({
         'fd.htmlReview': {
           workspaceId: state.workspaceId,
           title: state.title || 'Nouvelle démo',
           appendTo,
+          folderId: state.folderId ?? null,
           // EXT-02 §8 : ajout à la démo ouverte dans l'éditeur (étapes HTML)
           addTo: state.addTo ?? null,
         },
@@ -899,6 +905,9 @@ async function stop(): Promise<RecordingStatus> {
         device: state.mode === 'mobile' ? 'mobile' : 'desktop',
         viewport: state.mode === 'mobile' ? (state.viewport ?? null) : null,
         fill: state.fill ?? null,
+        // L64 §2 : dossier de la nouvelle démo, ou démo existante (étapes à la fin)
+        folderId: state.folderId ?? null,
+        appendTo: state.addTo ? null : (state.appendDemo?.id ?? null),
         // EXT-02 §8 : ajout à la démo ouverte dans l'éditeur
         addTo: state.addTo ?? null,
       },
