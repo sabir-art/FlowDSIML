@@ -1,6 +1,7 @@
 import type { StepRow } from '../types';
 import { normUrl, resolveLinks, sandboxOf } from '../draftManifest';
 import { asOps } from './htmlModel';
+import { isRisky } from '@flowdsiml/core';
 
 export interface SbNode {
   id: string;
@@ -165,6 +166,11 @@ export interface Coverage {
   missing: number;
   /** Destinations laissées volontairement par l'auteur (« Laisser le message »), hors du total. */
   left: number;
+  /**
+   * Spec des pages liées §5 (UX a19e542) : destinations refusées par sécurité (isRisky : déconnexion,
+   * suppression, désabonnement, fichier), jamais capturées, hors du total et rendues à part.
+   */
+  refused: number;
 }
 
 /**
@@ -175,9 +181,18 @@ export interface Coverage {
  */
 export function coverage(steps: StepRow[], sandbox: unknown): Coverage {
   const { dead, ignored } = deadLinks(steps, sandbox);
-  const missing = new Set(dead.map((d) => d.url));
-  const left = new Set(ignored.map((d) => d.url).filter((u) => !missing.has(u)));
-  return { captured: steps.filter((s) => s.kind === 'html').length, missing: missing.size, left: left.size };
+  // Refusées : une destination à risque ne compte jamais, laissée ou non
+  const refused = new Set(
+    [...dead, ...ignored].filter((d) => isRisky(d.url, d.label === d.url ? '' : d.label)).map((d) => d.url),
+  );
+  const missing = new Set(dead.map((d) => d.url).filter((u) => !refused.has(u)));
+  const left = new Set(ignored.map((d) => d.url).filter((u) => !missing.has(u) && !refused.has(u)));
+  return {
+    captured: steps.filter((s) => s.kind === 'html').length,
+    missing: missing.size,
+    left: left.size,
+    refused: refused.size,
+  };
 }
 
 /** Total de la couverture : pages capturées et destinations qui restent à traiter (hors liens laissés). */

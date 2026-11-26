@@ -277,9 +277,12 @@ ouvert dans la vraie app.
 | Pièges | 0 visite (déconnexion, suppression, PDF) ; ni ancre, ni autre site, ni e-mail dans une passe |
 | Envoi | 7 pages, une étape et un enregistrement vivant chacune ; liens relevés : rien à capturer, 3 pièges |
 | a) Plan de l'éditeur | les 7 pages ; « Liens sans page » : les 3 pièges seulement |
-| Couverture | les 3 pièges laissés par l'auteur : 7 pages sur 7 liens · 3 laissés, 100 % |
+| Couverture | dès l'envoi : 7 pages sur 7 liens · 3 refusés, 100 % ; les pièges laissés restent refusés |
 
 Lancé par la CI (job E2E extension). Reste pour 4b/4c : l'interface (liste « Pages liées », bouton
-« Capturer les pages liées »), en attente de la validation du client. Remarque : le plan propose
-« Capturer cette page » aussi sur « Se déconnecter » et « Supprimer mon compte », que la série ne
-capture jamais (`isRisky`) ; à trancher avec la planche 4b/4c.
+« Capturer les pages liées »), en attente de la validation du client.
+
+Décisions du chef, appliquées depuis : `isRisky` est partagée par `@flowdsiml/core` ; le plan n'offre plus
+« Capturer cette page » sur un lien refusé (« Jamais ouverte par sécurité », « Ouvrir la page » gardé) ;
+`coverage()` met ces liens à part (`refused`), hors du total, comme les liens laissés (spec des pages
+liées §5).

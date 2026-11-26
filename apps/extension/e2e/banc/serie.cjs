@@ -195,6 +195,12 @@ const chemin = (u) => new URL(u).pathname;
       (await panel.locator('.sb-deadlist__safe', { hasText: 'Jamais ouverte par sécurité' }).count()) === 3,
     'plan : les 3 pièges « Jamais ouverte par sécurité », sans « Capturer cette page »',
   );
+  // Spec des pages liées §5 : les pièges refusés ne comptent pas, la couverture est déjà complète
+  const c0 = coverage(steps, d.sandbox);
+  ok(
+    c0.captured === 7 && c0.missing === 0 && c0.refused === 3 && coverageRatio(c0) === 100,
+    `couverture à 100 % dès l’envoi : ${c0.captured} pages sur ${c0.captured + c0.missing} liens · ${c0.refused} refusés`,
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/serie-plan.png`, fullPage: true });
   // L'auteur laisse les trois pièges (« Laisser le message »)
   for (const l of ['Se déconnecter', 'Guide (PDF)', 'Supprimer mon compte']) {
@@ -209,9 +215,10 @@ const chemin = (u) => new URL(u).pathname;
     (await panel.locator('.sb-deadlist > li').count()) === 0 &&
       c.captured === 7 &&
       c.missing === 0 &&
-      c.left === 3 &&
+      c.left === 0 &&
+      c.refused === 3 &&
       coverageRatio(c) === 100,
-    `couverture à 100 % : ${c.captured} pages sur ${c.captured + c.missing} liens · ${c.left} laissés`,
+    `pièges laissés par l’auteur : toujours refusés, hors du total (${c.captured} pages sur ${c.captured + c.missing} liens · ${c.refused} refusés)`,
   );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/serie-plan-laisses.png`, fullPage: true });
   ok(erreurs.length === 0, `aucune erreur de l’app (${erreurs.join(' | ').slice(0, 300)})`);
