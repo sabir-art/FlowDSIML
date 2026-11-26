@@ -285,10 +285,10 @@ function fakeExtension(version) {
   await banner.waitFor();
   ok(
     (await banner.getAttribute('role')) === 'status' &&
-      /En direct depuis l’extension · 0 étape reçue · Captures d’écran\. Les étapes arriveront après l’étape 1 · Écran 1\./.test(
+      /^Capture en cours dans l’extension · 0 étape · elles arriveront à la fin\. ?Revenir/.test(
         (await banner.innerText()).replace(/\s+/g, ' '),
       ),
-    'bandeau role=status : « En direct depuis l’extension · 0 étape reçue · Captures d’écran », puis l’endroit d’arrivée',
+    'bandeau role=status : « Capture en cours dans l’extension · 0 étape · elles arriveront à la fin. »',
   );
   const marker = page.locator('.cm-marker');
   ok(
@@ -309,19 +309,30 @@ function fakeExtension(version) {
   await page.locator('.rail-list .step').nth(1).focus();
   await page.keyboard.press('Alt+ArrowUp');
   await page.waitForFunction(() =>
-    /Les étapes arriveront après l’étape 2 · Écran 1\./.test(
-      document.querySelector('.cm-banner')?.textContent ?? '',
-    ),
+    /après l’étape 2/.test(document.querySelector('.cm-marker .sr-only')?.textContent ?? ''),
   );
-  ok(true, 'étape d’insertion déplacée : le bandeau suit (« après l’étape 2 · Écran 1 »)');
-  // L60 §3 : en direct, le nombre d'étapes reçues et l'étape suivante en réception
+  ok(true, 'étape d’insertion déplacée : le repère suit (« après l’étape 2 »)');
+  // Recette UX lot E : pendant la capture, le nombre d'étapes, sans « réception » (elles arrivent à l'envoi)
   await page.evaluate(() => (window.__ext.status = { state: 'recording', steps: 3, stepIds: [] }));
   await page.waitForFunction(() =>
-    /3 étapes reçues/.test(document.querySelector('.cm-banner')?.textContent ?? ''),
+    /· 3 étapes · elles arriveront à la fin/.test(document.querySelector('.cm-banner')?.textContent ?? ''),
   );
   ok(
-    /^Étape 6 · réception…$/.test((await page.locator('.cm-marker > span[aria-hidden]').innerText()).trim()),
-    'en direct : « 3 étapes reçues », repère « Étape 6 · réception… » (après l’étape 2)',
+    /^Les nouvelles étapes arriveront ici$/.test(
+      (await page.locator('.cm-marker > span[aria-hidden]').innerText()).trim(),
+    ),
+    'pendant la capture : « 3 étapes · elles arriveront à la fin », repère « Les nouvelles étapes arriveront ici »',
+  );
+  // À l'envoi (vérification dans l'extension) : « Réception… », repère « Étape 3 · réception… »
+  await page.evaluate(() => (window.__ext.status = { state: 'review', steps: 0, stepIds: [] }));
+  await page.waitForFunction(() =>
+    /^Réception… · 3 étapes\.$/.test(
+      (document.querySelector('.cm-banner p')?.textContent ?? '').replace(/\s+/g, ' ').trim(),
+    ),
+  );
+  ok(
+    /^Étape 3 · réception…$/.test((await page.locator('.cm-marker > span[aria-hidden]').innerText()).trim()),
+    'à l’envoi : « Réception… · 3 étapes. », repère « Étape 3 · réception… » (après l’étape 2)',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/ajout-en-direct${sfx}.png` });
 
@@ -398,9 +409,10 @@ function fakeExtension(version) {
     );
   }
   ok(
-    /Les étapes arriveront au début de la démo\./.test(await banner.innerText()) &&
-      (await page.locator('.rail-list > :first-child').getAttribute('class')).includes('cm-marker'),
-    '« Au début » : bandeau et repère en tête de liste',
+    /elles arriveront à la fin\./.test(await banner.innerText()) &&
+      (await page.locator('.rail-list > :first-child').getAttribute('class')).includes('cm-marker') &&
+      /au début/.test(await page.locator('.cm-marker .sr-only').innerText()),
+    '« Au début » : bandeau, et repère en tête de liste (« au début »)',
   );
   await page.evaluate(() => (window.__sent = []));
   await banner.getByRole('button', { name: 'Annuler l’ajout' }).click();

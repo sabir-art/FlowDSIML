@@ -512,7 +512,7 @@ export function StepList({
       )}
       <ol className="rail-list" aria-label={t('editor.railLabel')} ref={listRef}>
         {capture?.pending && capture.pending.afterId === null && (
-          <CaptureMoreMarker n={0} received={capture.received} />
+          <CaptureMoreMarker n={0} receiving={capture.receiving} />
         )}
         {editor.steps.map((s, i) => {
           // F7 : vignette d'une étape vidéo = image de sa première pause, sinon icône de lecture
@@ -761,7 +761,7 @@ export function StepList({
                 </span>
               </li>
               {capture?.pending?.afterId === s.id && (
-                <CaptureMoreMarker n={i + 1} received={capture.received} />
+                <CaptureMoreMarker n={i + 1} receiving={capture.receiving} />
               )}
             </Fragment>
           );

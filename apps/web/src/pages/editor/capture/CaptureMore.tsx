@@ -58,6 +58,11 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
   const [fresh, setFresh] = useState<string[]>([]);
   /** L60 §3 : étapes déjà capturées dans l'autre onglet (« En direct depuis l'extension · 3 étapes reçues »). */
   const [received, setReceived] = useState(0);
+  /**
+   * Recette UX lot E : les étapes arrivent à l'envoi, pas au fil des clics. Capture finie dans
+   * l'extension (vérification, envoi) : « Réception… », et le repère « Étape n · réception… ».
+   */
+  const [receiving, setReceiving] = useState(false);
   const live = useRef(editor);
   live.current = editor;
   const remember = useCallback(
@@ -94,8 +99,13 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
         const st = await addStatus(demoId);
         if (stopped || !st) return;
         if (st.state === 'none') return remember(null);
-        if (st.state !== 'sent') return setReceived(st.steps);
+        if (st.state !== 'sent') {
+          setReceiving(st.state === 'review');
+          // Pendant l'envoi, l'extension ne compte plus les étapes : on garde le dernier nombre lu
+          return setReceived((n) => (st.state === 'review' ? Math.max(n, st.steps) : st.steps));
+        }
         setReceived(0);
+        setReceiving(false);
         const added = (await live.current.adoptSteps(st.stepIds, pending.afterId)) ?? [];
         await clearAddCapture(demoId);
         remember(null);
@@ -158,6 +168,7 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
     fresh,
     seen,
     received: pending ? received : 0,
+    receiving: !!pending && receiving,
   };
 }
 
@@ -165,20 +176,18 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
 export function CaptureMoreBanner({ capture }: { capture: CaptureMore }) {
   const { t } = useTranslation();
   if (!capture.pending) return null;
-  const after = capture.afterLabel(capture.pending.afterId);
   return (
     <div className="cm-banner" role="status">
       <Radio aria-hidden="true" />
       <p>
-        {/* L60 §3 : en direct depuis l'extension, nombre d'étapes reçues et type de capture */}
-        <b>{t('editor.captureMore.live')}</b>
+        {/*
+          Recette UX lot E : les étapes arrivent à l'envoi. Pendant la capture : « Capture en cours dans
+          l'extension · 3 étapes · elles arriveront à la fin. » ; à l'envoi : « Réception… »
+        */}
+        <b>{t(capture.receiving ? 'editor.captureMore.receivingAll' : 'editor.captureMore.live')}</b>
         {' · '}
         {t('editor.captureMore.received', { count: capture.received })}
-        {' · '}
-        {t('editor.captureMore.liveMode')}.{' '}
-        {after
-          ? t('editor.captureMore.willArriveAfter', { n: after.n, title: after.title })
-          : t('editor.captureMore.willArriveStart')}
+        {capture.receiving ? '.' : ` · ${t('editor.captureMore.arriveEnd')}`}
       </p>
       <button type="button" className="fd-btn fd-btn--sm" onClick={capture.focus}>
         {t('editor.captureMore.back')}
@@ -195,16 +204,14 @@ export function CaptureMoreBanner({ capture }: { capture: CaptureMore }) {
 }
 
 /** Repère pointillé dans la liste des étapes : « Les nouvelles étapes arriveront ici ». */
-export function CaptureMoreMarker({ n, received = 0 }: { n: number; received?: number }) {
+export function CaptureMoreMarker({ n, receiving = false }: { n: number; receiving?: boolean }) {
   const { t } = useTranslation();
   return (
     <li className="cm-marker" data-gap-exempt="">
       <CornerDownRight aria-hidden="true" />
-      {/* L60 §3 : pendant la capture, l'étape suivante en réception (« Étape 4 · réception… ») */}
+      {/* Recette UX lot E : « Étape 4 · réception… » à l'envoi seulement (première étape insérée) */}
       <span aria-hidden="true">
-        {received > 0
-          ? t('editor.captureMore.receiving', { n: n + received + 1 })
-          : t('editor.captureMore.here')}
+        {receiving ? t('editor.captureMore.receiving', { n: n + 1 }) : t('editor.captureMore.here')}
       </span>
       <span className="sr-only">
         {n > 0 ? t('editor.captureMore.hereAfter', { n }) : t('editor.captureMore.hereStart')}
