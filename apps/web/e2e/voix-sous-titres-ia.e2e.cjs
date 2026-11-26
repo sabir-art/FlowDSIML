@@ -357,7 +357,7 @@ function prepare(over = {}) {
   }
   state.aiProvider = null;
   await panel.getByRole('button', { name: /Générer la voix|Réessayer/ }).click();
-  await panel.getByRole('button', { name: 'Utiliser' }).waitFor();
+  await panel.getByRole('button', { name: 'Utiliser cette voix' }).waitFor();
   const call = state.aiCalls.at(-1);
   ok(
     call.task === 'voice' &&
@@ -367,18 +367,22 @@ function prepare(over = {}) {
     'Demande : texte avec les valeurs par défaut et voix choisie',
   );
   ok(
-    (await panel.getByText('Aperçu', { exact: true }).count()) === 1 &&
+    // L62 §6 : une voix est en place : la voix générée arrive dans la carte « À écouter »
+    (await panel.locator('.vo-fresh .vo-fresh__tag').innerText()) === 'À écouter' &&
       (await panel.getByRole('button', { name: 'Écouter', exact: true }).count()) === 1 &&
       (await panel
         .getByRole('button', { name: 'Écouter', exact: true })
         .evaluate((b) => getComputedStyle(b).borderRadius)) === '50%',
-    'Aperçu à écouter, bouton Écouter rond (RADIUS-01)',
+    'Carte « À écouter », bouton Écouter rond (RADIUS-01)',
   );
   ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
   ok((await panel.locator('audio[controls]').count()) === 0, 'Pas de lecteur natif');
   const two = await panel.locator('.vo-two button').allTextContents();
-  ok(two.join('|') === 'Régénérer|Utiliser', '«\u202fRégénérer\u202f» et «\u202fUtiliser\u202f» côte à côte');
-  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant «\u202fUtiliser\u202f»');
+  ok(
+    two.join('|') === 'Régénérer|Garder l’actuelle|Utiliser cette voix',
+    '«\u202fRégénérer\u202f», puis «\u202fGarder l’actuelle\u202f» et «\u202fUtiliser cette voix\u202f»',
+  );
+  ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant «\u202fUtiliser cette voix\u202f»');
   await shot('l30-10-voix-apercu');
   // Accessibilité et espacements du panneau «\u202fGénérer\u202f» (aperçu affiché)
   const axe = await new AxeBuilder({ page })
@@ -407,14 +411,12 @@ function prepare(over = {}) {
     tight.length === 0,
     `Panneau «\u202fGénérer\u202f» : 8 px au moins entre les blocs (${tight.join(' ; ')})`,
   );
-  await panel.getByRole('button', { name: 'Utiliser' }).click();
-  const confirm = page.getByRole('dialog', {
-    name: 'Remplacer votre enregistrement par la voix de synthèse ?',
-  });
-  await confirm.waitFor();
-  ok(true, 'Confirmation avant de remplacer la voix enregistrée');
-  await shot('l30-10-voix-remplacer');
-  await confirm.getByRole('button', { name: 'Remplacer' }).click();
+  // L62 §6 : plus de fenêtre de confirmation : le toast « Voix remplacée… » porte « Annuler »
+  await panel.getByRole('button', { name: 'Utiliser cette voix' }).click();
+  ok(
+    (await page.getByRole('dialog', { name: /Remplacer votre enregistrement/ }).count()) === 0,
+    'Pas de fenêtre de confirmation : « Annuler » dans le toast suffit',
+  );
   ok(await until(() => /a1\.mp3$/.test(s1().voice_path || '')), 'Voix de synthèse appliquée');
   ok(
     s1().voice_duration_ms === 4200 &&
@@ -424,7 +426,7 @@ function prepare(over = {}) {
   );
   const demo = () => state.tables.demos.find((d) => d.id === DEMO);
   ok(await until(() => demo().settings?.aiVoice === 'voixFrM0000001'), 'Voix mémorisée pour la démo');
-  await page.getByText('Voix appliquée.').waitFor();
+  await page.locator('.toast', { hasText: 'Voix remplacée par la voix générée' }).waitFor();
   ok(
     (await page.locator('.rail-li .rail-ai[aria-label="Voix off générée par l’IA"]').count()) === 1,
     'Liste des étapes : icône voix avec repère «\u202fIA\u202f»',
@@ -433,7 +435,7 @@ function prepare(over = {}) {
   await page.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
   ok(
     await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice),
-    '«\u202fAnnuler\u202f» rétablit l’enregistrement',
+    '«\u202fAnnuler\u202f» rétablit l’enregistrement (chemin et options, sans repère IA)',
   );
 
   // ===== L30-11 : transcription de la voix enregistrée =====

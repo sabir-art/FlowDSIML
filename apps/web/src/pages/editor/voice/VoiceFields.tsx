@@ -71,6 +71,16 @@ export function VoiceFields({
   const [sending, setSending] = useState(false);
   const [announce, setAnnounce] = useState('');
   const [source, setSource] = useState<Source | null>(null);
+  /**
+   * L62 §6 : nouvelle voix importée alors qu'une voix est en place. Elle est envoyée, puis attend le
+   * choix : « Utiliser cette voix » ou « Garder l'actuelle » (son fichier est alors retiré).
+   */
+  const [fresh, setFresh] = useState<{
+    path: string;
+    durationMs: number;
+    from: 'import';
+    url: string;
+  } | null>(null);
   /** Enregistrement terminé, à écouter avant de le garder */
   const [take, setTake] = useState<{ blob: Blob; ms: number; url: string } | null>(null);
   /** Onde de l'enregistrement en cours (niveaux du micro) */
@@ -84,6 +94,13 @@ export function VoiceFields({
   const [heard, setHeard] = useState<{ text: string; language: string } | null>(null);
   useEffect(() => {
     setHeard(null);
+    setFresh((f) => {
+      if (f) {
+        URL.revokeObjectURL(f.url);
+        void supabase.storage.from('voices').remove([f.path]);
+      }
+      return null;
+    });
     setSource(null);
     setTake((k) => {
       if (k) URL.revokeObjectURL(k.url);
@@ -153,7 +170,65 @@ export function VoiceFields({
     }
   }
 
-  async function store(blob: Blob, durationMs: number, from: 'record' | 'import') {
+  /**
+   * L62 §6 : met une voix en place. S'il y en avait une, le toast « Voix remplacée par la voix … » porte
+   * « Annuler », qui remet l'ancienne (chemin, durée, transcription, options) ; l'ancien fichier n'est
+   * retiré qu'une fois l'annulation impossible.
+   */
+  function applyVoice(v: {
+    path: string;
+    durationMs: number;
+    from: 'record' | 'import' | 'generate';
+    transcript?: string;
+    voiceName?: string;
+  }) {
+    const cur = live.current.steps.find((x) => x.id === step.id) ?? step;
+    const curOpts = (cur.options ?? {}) as Record<string, unknown>;
+    const before = {
+      voice_path: cur.voice_path,
+      voice_duration_ms: cur.voice_duration_ms,
+      voice_transcript: cur.voice_transcript,
+      // Toujours un objet : une valeur absente serait ignorée par la mise à jour, et « Annuler » garderait
+      // les options de la nouvelle voix (repère IA)
+      options: (cur.options ?? {}) as StepRow['options'],
+    };
+    live.current.updateStep(step.id, {
+      voice_path: v.path,
+      voice_duration_ms: Math.max(1, Math.round(v.durationMs)),
+      voice_transcript:
+        v.transcript ??
+        (cur.voice_transcript?.trim() ? cur.voice_transcript : bubbleText(cur, editor.hotspots)),
+      // Nouvelle voix : elle suit le réglage « Lecture automatique » de la démo
+      voice_autoplay: demoVoice.autoplay !== false,
+      options:
+        v.from === 'generate'
+          ? { ...curOpts, aiVoice: true, aiVoiceName: v.voiceName, voiceSource: undefined }
+          : // Voix enregistrée ou importée : plus de repère « IA »
+            { ...curOpts, aiVoice: undefined, aiVoiceName: undefined, voiceSource: v.from },
+    });
+    setSource(null);
+    if (!before.voice_path) return;
+    let undone = false;
+    toast(t(`editor.voice.replaced.${v.from}`), {
+      label: t('ai.undo'),
+      durationMs: 8000,
+      onClick: () => {
+        undone = true;
+        live.current.updateStep(step.id, before);
+        void supabase.storage.from('voices').remove([v.path]);
+      },
+    });
+    const old = before.voice_path;
+    window.setTimeout(() => {
+      if (!undone) void supabase.storage.from('voices').remove([old]);
+    }, 9000);
+  }
+
+  /**
+   * Envoie un enregistrement ou un fichier. now : la voix est mise en place tout de suite (pas de voix en
+   * place, ou choix déjà fait) ; sinon un fichier importé attend « Utiliser cette voix ».
+   */
+  async function store(blob: Blob, durationMs: number, from: 'record' | 'import', now = !step.voice_path) {
     const ext = voiceExt(blob.type);
     if (!ext) return setErr(t('editor.voice.badType'));
     if (blob.size > VOICE_MAX_BYTES) return setErr(t('editor.voice.tooBig'));
@@ -164,30 +239,26 @@ export function VoiceFields({
       const path = `${step.workspace_id}/${step.demo_id}/${crypto.randomUUID()}.${ext}`;
       const up = await supabase.storage.from('voices').upload(path, blob, { contentType: blob.type });
       if (up.error) throw up.error;
-      const old = step.voice_path;
-      editor.updateStep(step.id, {
-        voice_path: path,
-        voice_duration_ms: Math.max(1, Math.round(durationMs)),
-        voice_transcript: step.voice_transcript?.trim()
-          ? step.voice_transcript
-          : bubbleText(step, editor.hotspots),
-        // Voix enregistrée ou importée : plus de repère « IA »
-        // Nouvelle voix : elle suit le réglage « Lecture automatique » de la démo
-        voice_autoplay: demoVoice.autoplay !== false,
-        options: {
-          ...((step.options ?? {}) as Record<string, unknown>),
-          aiVoice: undefined,
-          voiceSource: from,
-        },
-      });
-      if (old) void supabase.storage.from('voices').remove([old]);
-      setSource(null);
+      if (now || from === 'record') applyVoice({ path, durationMs, from });
+      else setFresh({ path, durationMs, from: 'import', url: URL.createObjectURL(blob) });
     } catch {
       setErr(t('editor.voice.uploadError'));
     } finally {
       setBusy(false);
     }
   }
+  const useFresh = () => {
+    if (!fresh) return;
+    applyVoice(fresh);
+    URL.revokeObjectURL(fresh.url);
+    setFresh(null);
+  };
+  const keepCurrent = () => {
+    if (!fresh) return;
+    void supabase.storage.from('voices').remove([fresh.path]);
+    URL.revokeObjectURL(fresh.url);
+    setFresh(null);
+  };
 
   async function start() {
     setErr(null);
@@ -302,42 +373,19 @@ export function VoiceFields({
         initialText={step.voice_transcript?.trim() || bubbleText(step, editor.hotspots)}
         variables={editor.variables.map((v) => ({ key: v.key, default_value: v.default_value ?? '' }))}
         savedVoice={settings.aiVoice}
-        hasRecording={!!step.voice_path && !generated}
+        hasVoice={!!step.voice_path}
         onRememberVoice={(v) =>
           v !== settings.aiVoice && editor.updateDemo({ settings: { ...settings, aiVoice: v } })
         }
-        onApply={(r) => {
-          const before = {
-            voice_path: step.voice_path,
-            voice_duration_ms: step.voice_duration_ms,
-            voice_transcript: step.voice_transcript,
-            options: { ...opts, aiVoice: opts.aiVoice || undefined } as StepRow['options'],
-          };
-          editor.updateStep(step.id, {
-            voice_path: r.path,
-            voice_duration_ms: Math.max(1, Math.round(r.durationMs)),
-            voice_transcript: r.transcript,
-            voice_autoplay: demoVoice.autoplay !== false,
-            // L62 §6 : nom de la voix, pour la carte « Voix en place » (« Générée · Antoine · 0:11 »)
-            options: { ...opts, aiVoice: true, aiVoiceName: r.voiceName, voiceSource: undefined },
-          });
-          setSource(null);
-          // L'ancien fichier n'est retiré qu'une fois l'annulation impossible
-          let undone = false;
-          toast(t('ai.voice.applied'), {
-            label: t('ai.undo'),
-            durationMs: 8000,
-            onClick: () => {
-              undone = true;
-              live.current.updateStep(step.id, before);
-              void supabase.storage.from('voices').remove([r.path]);
-            },
-          });
-          if (before.voice_path)
-            window.setTimeout(() => {
-              if (!undone) void supabase.storage.from('voices').remove([before.voice_path!]);
-            }, 9000);
-        }}
+        onApply={(r) =>
+          applyVoice({
+            path: r.path,
+            durationMs: r.durationMs,
+            from: 'generate',
+            transcript: r.transcript,
+            voiceName: r.voiceName,
+          })
+        }
       />
     ) : null;
   const has = !!step.voice_path;
@@ -520,10 +568,11 @@ export function VoiceFields({
             {tab === 'generate' && aiVoice}
             {tab === 'record' &&
               (take ? (
-                <>
-                  <div>
-                    <span className="vo-label" id="vo-take">
-                      {t('editor.voice.listenFirst')}
+                has ? (
+                  // L62 §6 : nouvelle voix enregistrée, voix en place gardée jusqu'au choix
+                  <div className="vo-fresh" role="group" aria-labelledby="vo-take">
+                    <span className="vo-fresh__tag" id="vo-take">
+                      {t('editor.voice.toListen')}
                     </span>
                     <AudioLine
                       src={take.url}
@@ -531,11 +580,30 @@ export function VoiceFields({
                       label={t('editor.voice.listen')}
                       pauseLabel={t('editor.voice.pause')}
                     />
-                  </div>
-                  <div className="vo-two">
+                    <div className="vo-two">
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={busy}
+                        onClick={discardTake}
+                      >
+                        {t('editor.voice.keepCurrent')}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={busy}
+                        onClick={() => {
+                          const k = take;
+                          void store(k.blob, k.ms, 'record', true).then(discardTake);
+                        }}
+                      >
+                        {t('editor.voice.useThis')}
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      className="btn btn-secondary btn-sm"
+                      className="link-button"
                       disabled={busy}
                       onClick={() => {
                         discardTake();
@@ -545,19 +613,47 @@ export function VoiceFields({
                       <RotateCcw aria-hidden="true" />
                       {t('editor.voice.again')}
                     </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      disabled={busy}
-                      onClick={() => {
-                        const k = take;
-                        void store(k.blob, k.ms, 'record').then(discardTake);
-                      }}
-                    >
-                      {t('editor.voice.keep')}
-                    </button>
                   </div>
-                </>
+                ) : (
+                  <>
+                    <div>
+                      <span className="vo-label" id="vo-take">
+                        {t('editor.voice.listenFirst')}
+                      </span>
+                      <AudioLine
+                        src={take.url}
+                        durationMs={take.ms}
+                        label={t('editor.voice.listen')}
+                        pauseLabel={t('editor.voice.pause')}
+                      />
+                    </div>
+                    <div className="vo-two">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={busy}
+                        onClick={() => {
+                          discardTake();
+                          void start();
+                        }}
+                      >
+                        <RotateCcw aria-hidden="true" />
+                        {t('editor.voice.again')}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={busy}
+                        onClick={() => {
+                          const k = take;
+                          void store(k.blob, k.ms, 'record').then(discardTake);
+                        }}
+                      >
+                        {t('editor.voice.keep')}
+                      </button>
+                    </div>
+                  </>
+                )
               ) : (
                 <>
                   <div
@@ -603,7 +699,29 @@ export function VoiceFields({
                   <p className="help">{t('editor.voice.recHelp')}</p>
                 </>
               ))}
-            {tab === 'import' && (
+            {tab === 'import' && fresh && (
+              // L62 §6 : fichier importé, voix en place gardée jusqu'au choix
+              <div className="vo-fresh" role="group" aria-labelledby="vo-fresh-t">
+                <span className="vo-fresh__tag" id="vo-fresh-t">
+                  {t('editor.voice.toListen')}
+                </span>
+                <AudioLine
+                  src={fresh.url}
+                  durationMs={fresh.durationMs}
+                  label={t('editor.voice.listen')}
+                  pauseLabel={t('editor.voice.pause')}
+                />
+                <div className="vo-two">
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={keepCurrent}>
+                    {t('editor.voice.keepCurrent')}
+                  </button>
+                  <button type="button" className="btn btn-primary btn-sm" onClick={useFresh}>
+                    {t('editor.voice.useThis')}
+                  </button>
+                </div>
+              </div>
+            )}
+            {tab === 'import' && !fresh && (
               <div className="vo-import">
                 <button
                   type="button"

@@ -4,7 +4,6 @@ import { RefreshCw } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { AiRequestError, aiBlock, audioLeft, callAi, useAiStatus } from '../../../lib/ai';
 import {
-  ConfirmModal,
   TTS_MAX_CHARS,
   VOICE_CHOICES,
   estimateSeconds,
@@ -26,7 +25,7 @@ export function VoiceGenerate({
   initialText,
   variables,
   savedVoice,
-  hasRecording,
+  hasVoice,
   onRememberVoice,
   onApply,
 }: {
@@ -38,8 +37,8 @@ export function VoiceGenerate({
   variables: Array<{ key: string; default_value: string }>;
   /** Voix mémorisée pour la démo (demo.settings). */
   savedVoice?: string;
-  /** Une voix enregistrée existe : confirmation avant de la remplacer. */
-  hasRecording: boolean;
+  /** L62 §6 : une voix est en place ; la nouvelle attend « Utiliser cette voix » ou « Garder l'actuelle ». */
+  hasVoice: boolean;
   onRememberVoice: (v: string) => void;
   onApply: (r: { path: string; durationMs: number; transcript: string; voiceName?: string }) => void;
 }) {
@@ -55,7 +54,6 @@ export function VoiceGenerate({
   const [res, setRes] = useState<{ path: string; durationMs: number; url: string; spoken: string } | null>(
     null,
   );
-  const [confirming, setConfirming] = useState(false);
   // Repli (liste du compte illisible) : les anciennes voix proposées, sous leur nom d'interface
   const fallback: VoiceInfo[] = VOICE_CHOICES.map((v, i) => ({
     id: v,
@@ -208,8 +206,12 @@ export function VoiceGenerate({
         </p>
       </div>
       {phase === 'ready' && res && (
-        <div>
-          <span className="vo-label">{t('editor.voice.preview')}</span>
+        <div className={hasVoice ? 'vo-fresh' : undefined}>
+          {hasVoice ? (
+            <span className="vo-fresh__tag">{t('editor.voice.toListen')}</span>
+          ) : (
+            <span className="vo-label">{t('editor.voice.preview')}</span>
+          )}
           <AudioLine
             src={res.url}
             durationMs={res.durationMs}
@@ -248,12 +250,23 @@ export function VoiceGenerate({
             <RefreshCw aria-hidden="true" />
             {t('editor.voice.regenerate')}
           </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={() => (hasRecording ? setConfirming(true) : apply())}
-          >
-            {t('editor.voice.use')}
+          {hasVoice && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                // Garder l'actuelle : la voix générée est retirée, la voix en place ne bouge pas
+                void supabase.storage.from('voices').remove([res.path]);
+                pending.current = null;
+                setRes(null);
+                setPhase('idle');
+              }}
+            >
+              {t('editor.voice.keepCurrent')}
+            </button>
+          )}
+          <button type="button" className="btn btn-primary btn-sm" onClick={apply}>
+            {hasVoice ? t('editor.voice.useThis') : t('editor.voice.use')}
           </button>
         </div>
       ) : busy ? (
@@ -273,18 +286,6 @@ export function VoiceGenerate({
         >
           {phase === 'error' ? t('ai.retry') : t('ai.voice.go')}
         </button>
-      )}
-      {confirming && (
-        <ConfirmModal
-          title={t('ai.voice.replaceTitle')}
-          body={t('ai.voice.replaceBody')}
-          confirm={t('ai.voice.replace')}
-          onCancel={() => setConfirming(false)}
-          onConfirm={() => {
-            setConfirming(false);
-            apply();
-          }}
-        />
       )}
     </>
   );
