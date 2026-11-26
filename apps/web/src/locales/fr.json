@@ -6067,7 +6067,7 @@
       "noModel": "Aucun modèle disponible",
       "active": "Actif",
       "off": "Fonction coupée",
-      "retiredFallback": "Modèle retiré : repli sur {{model}}",
+      "retiredFallback": "Modèle retiré : repli sur {{model}}",
       "cutMissing": "Clé {{name}} manquante : coupée",
       "speed": {
         "1": "Rapide",
