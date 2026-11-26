@@ -177,8 +177,8 @@ Planche : `docs/ux/propositions/l62/planche-l62-selecteur-voix.png` (à 1440, cl
   - Une puce active est teintée de marque.
 - **Liste** (`role="listbox"`, 360 px de haut au plus, défilante) :
   - section **« Recommandées pour le français »** (selon la langue filtrée), avec son nombre, puis section **« Toutes les voix »** avec le nombre total (« Résultats » quand une recherche ou un filtre est actif) ;
-  - chaque voix est une ligne de 56 px : une coche (voix choisie), un avatar teinté de 32 px avec l'initiale, le **nom réel** de la voix, l'étiquette verte « Recommandée » s'il y a lieu, puis sur une 2e ligne « {genre} · {accent} · {style} » (tronquée avec « … »), et enfin le bouton **Écouter** de 32 px, **rond** (famille Rond de RADIUS-01) ;
-  - la voix choisie a un fond teinté de marque et `aria-selected="true"`.
+  - chaque voix est une ligne de 56 px, **sans colonne de coche** (CHOIX-01) : un avatar teinté de 32 px avec l'initiale, aligné sur la marge de la liste, le **nom réel** de la voix, l'étiquette verte « Recommandée » s'il y a lieu, puis sur une 2e ligne « {genre} · {accent} · {style} » (tronquée avec « … »), et enfin le bouton **Écouter** de 32 px, **rond** (famille Rond de RADIUS-01) ;
+  - la voix choisie a un fond teinté de marque, une **pastille cochée de 16 px en bas à droite de l'avatar** (couleur principale, contour de 2 px de la couleur du fond de la ligne), et `aria-selected="true"`.
 - **Écouter** :
   - le bouton lit une phrase d'exemple **dans la langue de la démo**. Elle est générée une seule fois par voix et par langue, puis mise en cache, sans compter dans le quota ;
   - pendant la lecture, le bouton devient Pause, sur fond de marque ;
