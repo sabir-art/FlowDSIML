@@ -405,6 +405,7 @@
     "removeInviteTitle": "Retirer l’invitation ?",
     "removeInviteBody": "Le lien envoyé à {{email}} ne fonctionnera plus. Vous pourrez inviter cette adresse de nouveau.",
     "removeInviteConfirm": "Retirer l’invitation",
+    "inviteRemoved": "Invitation retirée.",
     "noMatch": "Aucun membre ne correspond à cette recherche.",
     "roleHelp": {
       "viewer": "Consulte les démos et les analytics.",
