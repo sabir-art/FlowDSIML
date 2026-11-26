@@ -109,6 +109,9 @@ const WS = '11111111-1111-1111-1111-111111111111';
       h: Math.round(r.height),
       bottom: Math.round(innerHeight - r.bottom),
       bg: getComputedStyle(b).backgroundColor,
+      // L64 §4 : couleurs en variables ; capsule jamais plus large que 720 px
+      vars: getComputedStyle(b).getPropertyValue('--fdb-bg').trim(),
+      maxW: getComputedStyle(b).maxWidth,
       hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
       centers: ctl.map((e) =>
         Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2),
@@ -120,6 +123,8 @@ const WS = '11111111-1111-1111-1111-111111111111';
     geo.h === 48 &&
       geo.bottom === 20 &&
       geo.bg === 'rgb(22, 24, 29)' &&
+      geo.vars === '#16181d' &&
+      /720px/.test(geo.maxW) &&
       geo.hs.every((h) => h === 36) &&
       geo.centers.every((c) => Math.abs(c - geo.mid) <= 1),
     `barre : 48 px, à 20 px du bas, fond #16181d, contrôles de 36 px sur le même centre (${JSON.stringify(geo)})`,
