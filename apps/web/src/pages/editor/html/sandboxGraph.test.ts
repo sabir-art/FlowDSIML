@@ -123,21 +123,39 @@ describe('couverture du site (Sandbox v2, étape 4a)', () => {
     ]),
   ];
   it('pages capturées face aux destinations du même site, chacune comptée une fois', () => {
-    expect(coverage(steps, {})).toEqual({ captured: 2, missing: 3, left: 0 });
+    expect(coverage(steps, {})).toEqual({ captured: 2, missing: 3, left: 0, refused: 0 });
     expect(coverageRatio(coverage(steps, {}))).toBe(40);
   });
   it('liens laissés par l’auteur : à part, hors du total (décision du chef)', () => {
     const sb = { ignoredLinks: [{ from: A, url: `${site}/aide` }] };
     const c = coverage(steps, sb);
-    expect(c).toEqual({ captured: 2, missing: 2, left: 1 });
+    expect(c).toEqual({ captured: 2, missing: 2, left: 1, refused: 0 });
     expect(coverageTotal(c)).toBe(4);
     expect(coverageRatio(c)).toBe(50);
   });
   it('une destination laissée sur une page mais manquante sur une autre reste manquante', () => {
     const sb = { ignoredLinks: [{ from: B, url: `${site}/agenda` }] };
-    expect(coverage(steps, sb)).toEqual({ captured: 2, missing: 3, left: 0 });
+    expect(coverage(steps, sb)).toEqual({ captured: 2, missing: 3, left: 0, refused: 0 });
   });
   it('sans lien ni page : 100 %', () => {
     expect(coverageRatio(coverage([], {}))).toBe(100);
+  });
+  it('liens refusés par sécurité (déconnexion, suppression, fichier) : à part, hors du total (§5)', () => {
+    const risky = [
+      page(A, `${site}/`, [
+        ['nav a:nth-of-type(1)', `${site}/clients`],
+        ['nav a:nth-of-type(2)', `${site}/deconnexion`],
+        ['nav a:nth-of-type(3)', `${site}/compte/supprimer`],
+        ['main a', `${site}/guide.pdf`],
+      ]),
+      page(B, `${site}/clients`, [['nav a:nth-of-type(2)', `${site}/deconnexion`]]),
+    ];
+    const c = coverage(risky, {});
+    expect(c).toEqual({ captured: 2, missing: 0, left: 0, refused: 3 });
+    expect(coverageTotal(c)).toBe(2);
+    expect(coverageRatio(c)).toBe(100);
+    // Un lien refusé que l'auteur a aussi laissé reste compté comme refusé, une seule fois
+    const sb = { ignoredLinks: [{ from: A, url: `${site}/guide.pdf` }] };
+    expect(coverage(risky, sb)).toEqual({ captured: 2, missing: 0, left: 0, refused: 3 });
   });
 });
