@@ -6,9 +6,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks'
 import type { Rect, SandboxSettings, Step } from '@flowdsiml/manifest';
 import {
   FRAME_SANDBOX,
+  buildLiveSrcdoc,
   buildSrcdoc,
+  mergeResponses,
+  pageKey,
   parseFromFrame,
   type FrameOp,
+  type LivePage,
   type ToFrame,
 } from '@flowdsiml/player-core';
 import { fmt, type Dict } from './i18n';
@@ -26,6 +30,23 @@ const EXTLINK_RE = /^https:\/\/[^\s"'<>]+$/;
  * EXT-02 §3 : la bascule « Zones cliquables » (touche H) entoure en bleu les éléments reliés ; un clic à
  * côté les illumine un instant et affiche « Aucun lien à cet endroit » avec leur nombre.
  */
+/**
+ * Sandbox v2 : enregistrements vivants déjà lus (une fois par adresse signée, pour toute la visite). Un
+ * enregistrement illisible est retiré du cache : la page reste inerte.
+ */
+const liveCache = new Map<string, Promise<LivePage>>();
+function loadLive(url: string): Promise<LivePage> {
+  let p = liveCache.get(url);
+  if (!p) {
+    p = fetch(url).then((r) =>
+      r.ok ? (r.json() as Promise<LivePage>) : Promise.reject(new Error(String(r.status))),
+    );
+    liveCache.set(url, p);
+    p.catch(() => liveCache.delete(url));
+  }
+  return p;
+}
+
 /** Choix « Zones cliquables » gardé dans le navigateur (par personne). */
 const ZONES_KEY = 'tc.player.zones';
 const readZones = () => {
@@ -47,6 +68,7 @@ export function HtmlStep({
   overlay,
   onAddZone,
   chrome,
+  livePages = [],
 }: {
   step: Step;
   t: Dict;
@@ -75,6 +97,11 @@ export function HtmlStep({
    * page courante (absent : sans cadre).
    */
   chrome?: { style: 'light' | 'dark' | 'minimal'; dots: boolean; address: string | null };
+  /**
+   * Sandbox v2 : pages vivantes de la démo (étape et adresse de son enregistrement). Sert aux réponses
+   * rejouées (celles de toute la démo) et à la navigation par adresse.
+   */
+  livePages?: Array<{ id: string; url: string }>;
 }) {
   const h = step.html!;
   const ht = t.html;
@@ -82,6 +109,11 @@ export function HtmlStep({
   const box = useRef<HTMLDivElement>(null);
   const [doc, setDoc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  /** Sandbox v2 : adresse d'une page capturée → étape ; une navigation vers la page elle-même la recharge. */
+  const navMap = useRef(new Map<string, string>());
+  const [reload, setReload] = useState(0);
+  const live = sandbox ? h.live : null;
+  const liveKey = livePages.map((p) => `${p.id}:${p.url}`).join('|');
   const [toast, setToast] = useState<string | null>(null);
   /** EXT-02 §3 : nombre de zones cliquables de la page (null : pas encore compté), bascule, message. */
   const [zones, setZones] = useState<number | null>(null);
@@ -121,15 +153,41 @@ export function HtmlStep({
     setFailed(false);
     setZones(null);
     setMiss(false);
-    fetch(h.url)
-      .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
-      .then(buildSrcdoc)
+    const inert = () =>
+      fetch(h.url)
+        .then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+        .then(buildSrcdoc);
+    // Sandbox v2 : page rejouée avec ses scripts gardés et les réponses de toute la démo ; sinon inerte
+    const vivante = async () => {
+      const list = (
+        await Promise.all(
+          livePages.map((p) =>
+            loadLive(p.url)
+              .then((page) => ({ id: p.id, page }))
+              .catch(() => null),
+          ),
+        )
+      ).filter((x): x is { id: string; page: LivePage } => !!x);
+      const own = list.find((x) => x.id === step.id);
+      if (!live || !own) throw new Error('LIVE_MISSING');
+      navMap.current = new Map(list.map((x) => [pageKey(x.page.url), x.id]));
+      return buildLiveSrcdoc({
+        ...own.page,
+        scripts: own.page.scripts.map((sc) => ({ ...sc, keep: live.keep.includes(sc.id) })),
+        responses: mergeResponses(
+          own.page,
+          list.map((x) => x.page),
+        ),
+      });
+    };
+    (live ? vivante().catch(inert) : inert())
       .then((d) => alive && setDoc(d))
       .catch(() => alive && setFailed(true));
     return () => {
       alive = false;
     };
-  }, [h.url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [h.url, live?.url, live?.keep.join(','), liveKey]);
 
   // Mise à l'échelle : la page garde sa largeur capturée et tient dans la scène, en largeur comme en
   // hauteur (comme les captures image) ; sinon elle débordait sur la barre du haut et les contrôles
@@ -219,7 +277,18 @@ export function HtmlStep({
       } else if (m.t === 'target') setSpot({ rect: m.rect, found: m.found });
       else if (m.t === 'hit') onHit?.();
       else if (m.t === 'go') onGo(m.step);
-      else if (m.t === 'zones') setZones(m.n);
+      else if (m.t === 'nav') {
+        // Sandbox v2 : page capturée de même adresse ; elle-même : rechargée (stockage neuf)
+        const id = navMap.current.get(pageKey(m.url));
+        if (id === step.id) setReload((n) => n + 1);
+        else if (id) onGo(id);
+        else if (sandbox?.unlinked !== 'none') {
+          setToast(null);
+          setMiss(true);
+          window.clearTimeout(missTimer.current);
+          missTimer.current = window.setTimeout(() => setMiss(false), 5000);
+        }
+      } else if (m.t === 'zones') setZones(m.n);
       else if (m.t === 'zones-key') toggleZones();
       else if (m.t === 'unlinked' && m.ext) {
         setMiss(false);
@@ -239,7 +308,7 @@ export function HtmlStep({
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [ops, sandbox, h.links, onGo, ht, onHit, toggleZones]);
+  }, [ops, sandbox, h.links, onGo, ht, onHit, toggleZones, step.id]);
 
   // EXT-02 §3.1 : cadres des zones, aux couleurs du thème du lecteur
   useEffect(() => {
@@ -298,7 +367,7 @@ export function HtmlStep({
         {doc ? (
           <iframe
             ref={frame}
-            key={step.id}
+            key={`${step.id}:${reload}`}
             srcdoc={doc}
             sandbox={FRAME_SANDBOX}
             referrerpolicy="no-referrer"
