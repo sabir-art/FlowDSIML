@@ -309,9 +309,9 @@ function wav(sec) {
       g.dedans &&
         Math.abs(g.retrait - 12) <= 1 &&
         g.titre === 'Nouvelle voix' &&
-        /^Enregistrée · 0:0\d$/.test(g.ligne) &&
+        g.ligne === 'Enregistrée' &&
         g.icone,
-      `carte « Nouvelle voix » : icône Micro, « Enregistrée · 0:0x », actions dans la carte à 12 px du bord (${JSON.stringify(g)})`,
+      `carte « Nouvelle voix » : icône Micro, « Enregistrée » (sans durée), actions dans la carte à 12 px du bord (${JSON.stringify(g)})`,
     );
   }
   if (SHOTS) {

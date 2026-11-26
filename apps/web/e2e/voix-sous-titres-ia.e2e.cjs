@@ -467,7 +467,7 @@ function prepare(over = {}) {
   ok(
     (await sec.getByRole('tab', { name: /^Générée/ }).getAttribute('aria-selected')) === 'true' &&
       /Nouvelle voix/.test(await panel.locator('.vo-fresh').innerText()) &&
-      /Générée · Antoine · 0:04/.test(await panel.locator('.vo-fresh').innerText()) &&
+      (await panel.locator('.vo-fresh .vo-card__txt .muted').innerText()).trim() === 'Générée · Antoine' &&
       /b1\.webm$/.test(s1().voice_path),
     'Résultat dans la carte « Nouvelle voix » (onglet Générée), enregistrement toujours en place',
   );
