@@ -60,6 +60,10 @@ function fadeMenuOut(el: HTMLElement | null) {
   );
   anim.onfinish = done;
   anim.oncancel = done;
+  // L66 : l'entrée a ouvert une fenêtre (Présenter…) : la copie ne reste pas visible par-dessus
+  requestAnimationFrame(() => {
+    if (document.querySelector('dialog:modal, [aria-modal="true"]')) anim.cancel();
+  });
 }
 
 export interface MenuItem {
