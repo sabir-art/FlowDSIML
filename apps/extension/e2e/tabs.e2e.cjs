@@ -40,46 +40,39 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
 
-  // ===== Popup (L25-01) =====
-  const cards = (await ui.options(popup, 'type')).map((o) => o.label);
-  ok(/HTML/.test(cards[1]), 'la capture HTML est le 2e type');
-  await ui.openOptions(popup);
+  // ===== Popup (L25-01, L60 §1 : réglages de capture) =====
+  const cards = (await ui.modes(popup)).map((o) => o.name);
+  ok(cards[1] === 'HTML', 'la capture HTML est le 2e mode');
+  await ui.openPrefs(popup);
   ok(!(await ui.isOn(popup, 'follow')), '« Suivre les nouveaux onglets » désactivé par défaut');
   ok(
     (await popup.locator('.ppf .ok').innerText()).trim() === 'Données vérifiées',
     'vérification des données toujours active (pied du popup)',
   );
   ok(
-    /L’onglet prend cette taille pendant la capture/.test(await popup.textContent('#tabsize-h')),
+    /^Toutes les étapes gardent la même taille\./.test(await popup.textContent('#size-h')),
     'aide de la taille de l’onglet',
   );
-  await ui.pick(popup, 'type', 'video');
-  ok(!(await popup.isVisible('#follow')), 'vidéo : options multi-onglets masquées');
-  await ui.pick(popup, 'type', 'mobile');
   ok(
-    (await popup.isVisible('#follow')) && !(await popup.isVisible('#tabsize')),
-    'mobile : taille de l’onglet masquée, suivi des onglets proposé',
+    (await popup.textContent('#follow-h')) === 'Captures et HTML.' &&
+      /^Vidéo\./.test(await popup.textContent('#mic-h')),
+    'chaque réglage dit le mode auquel il s’applique',
   );
-  await ui.pick(popup, 'type', 'clicks');
-  await ui.setSwitch(popup, 'follow', true);
-  // « Actuelle » porte la taille de l'onglet courant dans la liste
-  ok(/^\d/.test((await ui.options(popup, 'tabsize'))[0].desc), 'taille actuelle de l’onglet');
   for (const theme of ['light', 'dark']) {
     await popup.emulateMedia({ colorScheme: theme });
     const sfx = theme === 'dark' ? '-sombre' : '';
     await ui.setSwitch(popup, 'follow', true);
-    await ui.pick(popup, 'tabsize', 'current');
+    await popup.locator('#size [data-value=current]').click();
     if (SHOTS) await popup.screenshot({ path: `${SHOTS}/l25-01-suivi${sfx}.png`, fullPage: true });
-    // Vue « Taille personnalisée » : suivi des onglets à sa valeur par défaut (désactivé)
     await ui.setSwitch(popup, 'follow', false);
-    await ui.pick(popup, 'tabsize', 'custom');
-    await popup.fill('#dw', '1600');
-    await popup.fill('#dh', '900');
-    await popup.locator('#dh').blur();
+    await popup.locator('#size [data-value="1440x900"]').click();
     if (SHOTS) await popup.screenshot({ path: `${SHOTS}/l25-01-taille${sfx}.png`, fullPage: true });
   }
-  ok(await popup.isVisible('#desk-size'), 'taille personnalisée : largeur et hauteur');
-  ok(/800 à 2 560/.test(await popup.textContent('#desk-range')), 'bornes de la taille');
+  ok(
+    (await popup.evaluate(() => chrome.storage.local.get('fd.tabSize')))['fd.tabSize'] === '1440x900',
+    'taille 1440 mémorisée',
+  );
+  await popup.locator('#size [data-value=current]').click();
   await popup.emulateMedia({ colorScheme: 'light' });
 
   // ===== Capture : taille imposée, onglet suivi, onglet ouvert à la main ignoré =====

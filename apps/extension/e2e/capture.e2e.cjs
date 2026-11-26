@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
   await popup.fill('#password', 'x');
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
-  await popup.waitForSelector('#workspace-field:not([hidden])');
+  await popup.waitForSelector('#modes .mode');
   const wsOpts = [(await popup.locator('#workspace-one').innerText()).trim()];
   // Démarrage via message (le popup ouvert dans un onglet n'a pas l'onglet test comme onglet actif)
   const tabId = await popup.evaluate(

@@ -33,4 +33,21 @@ async function openOptions(popup) {
 const rows = async (popup) =>
   (await popup.locator('#opts-body .rw:not([hidden]) .k').allInnerTexts()).map((t) => t.trim());
 
-module.exports = { options, pick, isOn, setSwitch, openOptions, rows };
+/** L60 §1 : modes du popup (nom, phrase, nom accessible, désactivé, dernier choix). */
+const modes = (popup) =>
+  popup.locator('#modes .mode').evaluateAll((els) =>
+    els.map((el) => ({
+      mode: el.dataset.mode,
+      name: el.querySelector('b')?.textContent ?? '',
+      desc: el.querySelector('small')?.textContent ?? '',
+      label: el.getAttribute('aria-label') ?? '',
+      disabled: el.getAttribute('aria-disabled') === 'true',
+      last: el.classList.contains('is-last'),
+    })),
+  );
+/** Ouvre la vue Réglages de capture. */
+async function openPrefs(popup) {
+  if (await popup.locator('#settings').isHidden()) await popup.click('#open-prefs');
+}
+
+module.exports = { options, pick, isOn, setSwitch, openOptions, rows, modes, openPrefs };
