@@ -149,7 +149,15 @@ async function juger(b, cas, envoi) {
     menus.push(
       (await sm.count()) > 0 && (await sm.first().evaluate((e) => getComputedStyle(e).display !== 'none')),
     );
-    const nomOk = visible.includes(s.title);
+    // Lot B : nom complet en infobulle ; un nom « Écran · Partie » s'affiche sur deux lignes, la partie
+    // (ce qui distingue l'étape) toujours lisible, sans coupe nette
+    const tip = await rail.nth(i).locator('.rail-name').getAttribute('data-tip');
+    const partie = s.title.split(' · ').pop();
+    const coupe = await rail
+      .nth(i)
+      .locator('.rail-name b')
+      .evaluate((b) => b.scrollWidth > b.clientWidth + 1);
+    const nomOk = tip === s.title && visible.includes(partie) && !coupe;
     const rendu = texte.trim().length > 0 && (!repere || texte.includes(repere));
     ok(nomOk, `${nom} : étape ${i + 1} nommée « ${s.title} » dans la liste`);
     ok(rendu, `${nom} : étape ${i + 1}, page rendue dans l'éditeur${repere ? ` (« ${repere} »)` : ''}`);

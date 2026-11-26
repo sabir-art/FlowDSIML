@@ -3,7 +3,7 @@ import { branchOf } from './branch';
 import { condRules, missingDest } from './rules';
 import type { ChoiceAction } from '@flowdsiml/manifest';
 import { stepTab, tabChanged } from './capture/tabs';
-import { asCrop, cropImageStyle, outOfFrame } from '@flowdsiml/player-core';
+import { asCrop, cropImageStyle, outOfFrame, thumbSrcdoc } from '@flowdsiml/player-core';
 import { asVideo } from './video/videoModel';
 import type { PresencePayload } from './presence/presence';
 import { RailWho } from './presence/PresenceUI';
@@ -44,7 +44,7 @@ import {
 } from 'lucide-react';
 import { Menu, type MenuItem } from '../../components/Menu';
 import { asSettings, asStepOptions, type StepRow } from './types';
-import { Fragment, useRef, useState, type KeyboardEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../components/Toast';
@@ -674,7 +674,12 @@ export function StepList({
                     ) : s.kind === 'video' ? (
                       <Play aria-hidden="true" className="th-missing" />
                     ) : s.kind === 'html' ? (
-                      <Code aria-hidden="true" className="th-missing" />
+                      <HtmlThumb
+                        label={s.title || t('editor.untitled')}
+                        url={s.html_path ? editor.imageUrls[s.html_path] : undefined}
+                        width={(s.html_meta as { viewport?: { w?: number } } | null)?.viewport?.w ?? 1280}
+                        height={(s.html_meta as { viewport?: { h?: number } } | null)?.viewport?.h ?? 800}
+                      />
                     ) : s.kind === 'text' ? (
                       <span className="th-card fd-player-scope">{s.title || t('editor.untitled')}</span>
                     ) : s.to_capture ? (
@@ -694,7 +699,7 @@ export function StepList({
                     )}
                   </span>
                   <span className="meta">
-                    <b>{s.title || t('editor.untitled')}</b>
+                    <StepName title={s.title || t('editor.untitled')} />
                     {/* EXT-02 §8.4 : étape ajoutée par la capture, jusqu'à sa première ouverture */}
                     {capture?.fresh.includes(s.id) && (
                       <span className="fd-badge rail-new">{t('editor.captureMore.new')}</span>
@@ -864,5 +869,88 @@ function StepBadges({
         </span>
       ))}
     </>
+  );
+}
+
+/** Pages HTML déjà lues, par adresse signée : une vignette ne relit pas la page à chaque rendu. */
+const thumbDocs = new Map<string, Promise<string>>();
+
+/**
+ * Lot B (recette UX §3.3) : vignette d'une étape HTML, rendu réduit de la page copiée (sans script,
+ * sandbox vide, hors de l'ordre de tabulation) ; le type « HTML » passe en pastille dans le coin.
+ */
+function HtmlThumb({
+  label,
+  url,
+  width,
+  height,
+}: {
+  label: string;
+  url: string | undefined;
+  width: number;
+  height: number;
+}) {
+  const [doc, setDoc] = useState<string | null>(null);
+  const box = useRef<HTMLSpanElement>(null);
+  const [scale, setScale] = useState(0);
+  useEffect(() => {
+    if (!url) return;
+    let alive = true;
+    let p = thumbDocs.get(url);
+    if (!p) {
+      p = fetch(url).then((r) => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))));
+      thumbDocs.set(url, p);
+      p.catch(() => thumbDocs.delete(url));
+    }
+    p.then((html) => alive && setDoc(thumbSrcdoc(html))).catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [url]);
+  useEffect(() => {
+    const el = box.current?.parentElement;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setScale(el.clientWidth / width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [width, doc]);
+  return (
+    <>
+      {doc ? (
+        <span className="th-html" ref={box} aria-hidden="true">
+          <iframe
+            srcDoc={doc}
+            sandbox=""
+            tabIndex={-1}
+            title={label}
+            loading="lazy"
+            style={{ width, height, transform: `scale(${scale})` }}
+          />
+        </span>
+      ) : (
+        <span ref={box} hidden />
+      )}
+      <Code aria-hidden="true" className={doc ? 'th-kind' : 'th-missing'} />
+    </>
+  );
+}
+
+/**
+ * Lot B (recette UX §3.3) : nom d'une étape sur deux lignes au plus, nom complet en infobulle. Un nom
+ * « Écran · Partie » montre l'écran (petit, gris) puis la partie, qui distingue les étapes entre elles.
+ */
+function StepName({ title }: { title: string }) {
+  const cut = title.indexOf(' · ');
+  return (
+    <span className="rail-name" data-tip={title} data-tip-side="right">
+      {cut > 0 ? (
+        <>
+          <span className="rail-screen">{title.slice(0, cut)}</span>
+          <b className="rail-part">{title.slice(cut + 3)}</b>
+        </>
+      ) : (
+        <b>{title}</b>
+      )}
+    </span>
   );
 }

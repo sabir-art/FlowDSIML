@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { FRAME_RUNTIME, FRAME_SANDBOX, buildSrcdoc, frameCsp, parseFromFrame } from './htmlFrame';
+import {
+  FRAME_RUNTIME,
+  FRAME_SANDBOX,
+  buildSrcdoc,
+  frameCsp,
+  parseFromFrame,
+  thumbSrcdoc,
+} from './htmlFrame';
 
 describe('htmlFrame', () => {
   it('le script de la page est du JavaScript valide', () => {
@@ -125,5 +132,17 @@ describe('htmlFrame', () => {
     expect(ok && ok.t === 'select' && ok.el?.chart).toEqual(chart);
     const bad = parseFromFrame({ fd: 1, t: 'select', el: { ...base, chart: { ...chart, type: 'pie' } } });
     expect(bad && bad.t === 'select' && bad.el?.chart).toBeNull();
+  });
+});
+
+describe('vignette d’une page HTML (lot B)', () => {
+  it('aucun script, CSP sans script en tête', () => {
+    const doc = thumbSrcdoc(
+      '<html><head><meta http-equiv="refresh" content="0"></head><body><script>alert(1)</script><h1>Page</h1></body></html>',
+    );
+    expect(doc).not.toMatch(/<script/i);
+    expect(doc).not.toContain('refresh');
+    expect(doc).toContain("script-src 'none'");
+    expect(doc.indexOf('Content-Security-Policy')).toBeLessThan(doc.indexOf('<h1>'));
   });
 });
