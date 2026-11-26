@@ -1,4 +1,4 @@
-import { openMenu, screenName } from './screenChange';
+import { isVisible, openMenu, screenName } from './screenChange';
 import { hotspotRect, type RelRect } from './geometry';
 import {
   type HtmlRemovedItem,
@@ -14,6 +14,7 @@ import {
   stableSelector,
 } from '@flowdsiml/core';
 import { PII_ATTR, type PiiOriginal } from './htmlKeep';
+import { hideWidget, thirdPartyScriptSites, thirdPartyWidgets } from './htmlWidgets';
 import { scanNodes } from './scan';
 
 /**
@@ -208,6 +209,9 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
     if (copy) linkOf.set(copy, { sel, href: a.href });
   }
 
+  // Lot B : ajouts de scripts d'un autre site (discussion, cookies, aide), masqués et listés pour « Garder »
+  const widgetItems = await markWidgets(map);
+
   // Interface de l'extension retirée
   for (const el of [...clone.querySelectorAll('[data-fd-ui]')]) el.remove();
 
@@ -275,6 +279,7 @@ export async function captureHtml(fetchAsset: FetchAsset): Promise<HtmlCapture> 
   const removed = [
     ...collectRemoved(clone, location.href, (el) => linkOf.get(el)),
     ...piiList.map((p, i) => piiItem(i, p.masked, p.type)),
+    ...widgetItems,
   ];
   const security = { ...sanitizeDom(clone, location.href), piiReplaced };
   const html = `<!doctype html>\n${clone.outerHTML}`;
@@ -309,4 +314,64 @@ function menuOf(): HtmlCapture['menu'] {
     label: m.label,
     rect: hotspotRect(center, box, { width: innerWidth, height: innerHeight }),
   };
+}
+
+/** Source de la page telle que le serveur l'a envoyée (cache du navigateur d'abord), 2 s au plus. */
+async function pageSource(): Promise<string | null> {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 2000);
+  try {
+    const r = await fetch(location.href, {
+      cache: 'force-cache',
+      credentials: 'include',
+      signal: ctl.signal,
+    });
+    return r.ok && /html/.test(r.headers.get('content-type') ?? '') ? await r.text() : null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Lot B : éléments ajoutés par un script d'un autre site, masqués et marqués dans la copie. Sans source
+ * lisible, rien n'est retiré (prudence). Le nom affiché est lu dans la copie, déjà neutralisée.
+ */
+async function markWidgets(map: Map<Node, Node>): Promise<HtmlRemovedItem[]> {
+  const sites = thirdPartyScriptSites(document, location.href);
+  if (!sites.length) return [];
+  const source = await pageSource();
+  if (!source) return [];
+  const found = thirdPartyWidgets(
+    document,
+    location.href,
+    source,
+    { width: innerWidth, height: innerHeight },
+    (el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        position: getComputedStyle(el).position,
+        box: { width: r.width, height: r.height },
+        visible: isVisible(el),
+      };
+    },
+  );
+  const out: HtmlRemovedItem[] = [];
+  for (const el of found) {
+    const copy = map.get(el) as Element | undefined;
+    if (!copy) continue;
+    const id = `w${out.length + 1}`;
+    hideWidget(copy, id);
+    const name = (copy.getAttribute('aria-label') ?? copy.textContent ?? '').replace(/\s+/g, ' ').trim();
+    out.push({
+      id,
+      group: 'pageScripts',
+      reason: 'widgetThirdParty',
+      keepable: true,
+      name: name.length > 60 ? `${name.slice(0, 59)}…` : name,
+      source: sites.length === 1 ? sites[0]! : '',
+    });
+  }
+  return out;
 }

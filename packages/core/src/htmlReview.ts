@@ -31,6 +31,8 @@ export type HtmlReviewReason =
   | 'scriptSameSite'
   | 'scriptThirdParty'
   | 'scriptTracking'
+  /** Lot B : élément ajouté à la page par un script d'un autre site (lanceur de discussion, bandeau). */
+  | 'widgetThirdParty'
   | 'frameVideo'
   | 'frameMap'
   | 'frameThirdParty'
