@@ -2060,10 +2060,23 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 8px 0 0 30px;
   padding: 16px;
-  background: var(--fd-color-surface-sunken);
+}
+/* Retours client : l'option ouverte est une seule carte (en-tête puis réglages, séparés par un filet),
+   aucun retrait : les réglages occupent toute la largeur de la carte */
+.mk .l11-item.is-open {
+  border: 1px solid var(--fd-color-primary);
   border-radius: var(--fd-radius-md);
+  background: var(--fd-color-primary-soft);
+  overflow: hidden;
+}
+.mk .l11-item.is-open > .opt-card.l11-opt {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.mk .l11-item.is-open > .l11-cfg {
+  border-top: 1px solid var(--fd-color-border);
 }
 /* L39 : invités et domaines autorisés */
 .mk .l11-inv-head {
@@ -2204,9 +2217,6 @@
   color: var(--fd-color-primary);
 }
 @media (max-width: 640px) {
-  .mk .l11-cfg {
-    margin-left: 0;
-  }
   .mk .l11-exp-grid {
     grid-template-columns: 1fr;
   }
