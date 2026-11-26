@@ -1122,7 +1122,7 @@
       "received_one": "{{count}} étape",
       "received_other": "{{count}} étapes",
       "receiving": "Étape {{n}} · réception…",
-      "arriveEnd": "elles arriveront à la fin.",
+      "arriveEnd": "elles arriveront à la fin de la capture.",
       "receivingAll": "Réception…"
     },
     "rail": {

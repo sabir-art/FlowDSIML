@@ -285,10 +285,10 @@ function fakeExtension(version) {
   await banner.waitFor();
   ok(
     (await banner.getAttribute('role')) === 'status' &&
-      /^Capture en cours dans l’extension · 0 étape · elles arriveront à la fin\. ?Revenir/.test(
+      /^Capture en cours dans l’extension · 0 étape · elles arriveront à la fin de la capture\. ?Revenir/.test(
         (await banner.innerText()).replace(/\s+/g, ' '),
       ),
-    'bandeau role=status : « Capture en cours dans l’extension · 0 étape · elles arriveront à la fin. »',
+    'bandeau role=status : « Capture en cours dans l’extension · 0 étape · elles arriveront à la fin de la capture. »',
   );
   const marker = page.locator('.cm-marker');
   ok(
@@ -315,13 +315,15 @@ function fakeExtension(version) {
   // Recette UX lot E : pendant la capture, le nombre d'étapes, sans « réception » (elles arrivent à l'envoi)
   await page.evaluate(() => (window.__ext.status = { state: 'recording', steps: 3, stepIds: [] }));
   await page.waitForFunction(() =>
-    /· 3 étapes · elles arriveront à la fin/.test(document.querySelector('.cm-banner')?.textContent ?? ''),
+    /· 3 étapes · elles arriveront à la fin de la capture/.test(
+      document.querySelector('.cm-banner')?.textContent ?? '',
+    ),
   );
   ok(
     /^Les nouvelles étapes arriveront ici$/.test(
       (await page.locator('.cm-marker > span[aria-hidden]').innerText()).trim(),
     ),
-    'pendant la capture : « 3 étapes · elles arriveront à la fin », repère « Les nouvelles étapes arriveront ici »',
+    'pendant la capture : « 3 étapes · elles arriveront à la fin de la capture », repère « Les nouvelles étapes arriveront ici »',
   );
   // À l'envoi (vérification dans l'extension) : « Réception… », repère « Étape 3 · réception… »
   await page.evaluate(() => (window.__ext.status = { state: 'review', steps: 0, stepIds: [] }));
@@ -409,7 +411,7 @@ function fakeExtension(version) {
     );
   }
   ok(
-    /elles arriveront à la fin\./.test(await banner.innerText()) &&
+    /elles arriveront à la fin de la capture\./.test(await banner.innerText()) &&
       (await page.locator('.rail-list > :first-child').getAttribute('class')).includes('cm-marker') &&
       /au début/.test(await page.locator('.cm-marker .sr-only').innerText()),
     '« Au début » : bandeau, et repère en tête de liste (« au début »)',
