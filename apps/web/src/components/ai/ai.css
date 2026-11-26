@@ -565,7 +565,8 @@
   align-items: center;
   gap: 4px;
   height: 32px;
-  padding: 0 8px 0 10px;
+  /* Chevron à 12 px du bord (étape « Chevrons à 12 px » de la CI) */
+  padding: 0 12px;
   border: 0;
   border-radius: var(--fd-radius-sm, 8px);
   background: none;
@@ -584,7 +585,8 @@
 }
 .aim-pill:focus-visible {
   outline: none;
-  box-shadow: var(--fd-shadow-focus);
+  /* FIELD-01 : un seul indicateur, trait intérieur prune (la pilule n'a pas de bordure) */
+  box-shadow: inset 0 0 0 2px var(--fd-color-focus);
 }
 .aim-menu {
   position: fixed;

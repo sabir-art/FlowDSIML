@@ -739,6 +739,10 @@
   margin: 0;
   gap: var(--fd-space-2, 8px);
 }
+/* L45 (E15) : aide → « Enregistrer l'adresse » à 12 px, le champ portant ici 8 px d'écart */
+.mk .shl-sec .sh-addr-actions {
+  margin-top: calc(var(--fd-gap-action) - var(--fd-space-2, 8px));
+}
 .mk .shl-label {
   font: 500 14px var(--fd-font-sans);
   color: var(--fd-color-text);
