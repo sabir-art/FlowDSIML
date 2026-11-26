@@ -1,13 +1,22 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { stableSelector } from '@flowdsiml/core';
-import { elementLabel, hotspotRect } from '@/lib/geometry';
+import { defaultHotspotTitle, elementLabel, hotspotRect } from '@/lib/geometry';
 import { labelText } from '@/lib/labelText';
 import { captureHtml } from '@/lib/htmlCapture';
 import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
 import type { HtmlBarRequest } from '@/lib/messages';
-import { barCount, strings } from '@/lib/i18n';
-import { BAR_CSS, barMarkup, togglePause, wireBar } from '@/lib/captureBar';
+import { barCount, lang, strings } from '@/lib/i18n';
+import {
+  BAR_CSS,
+  CARD_CSS,
+  barMarkup,
+  cardMarkup,
+  ring,
+  togglePause,
+  wireBar,
+  wireCard,
+} from '@/lib/captureBar';
 
 /**
  * A8 (L20) : barre de la capture HTML. Chaque page est copiée (DOM assaini, données remplacées) au
@@ -40,6 +49,8 @@ export default defineContentScript({
     root.innerHTML = `
       <style>
         ${BAR_CSS}
+        ${CARD_CSS}
+        .card{position:absolute;bottom:56px;left:50%;transform:translateX(-50%)}
         .cap:disabled{opacity:.6;cursor:progress}
         .toast{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;
           border-radius:10px;background:#16181d;color:#fff;font:500 13px system-ui,sans-serif}
@@ -47,6 +58,7 @@ export default defineContentScript({
         [hidden]{display:none!important}
       </style>
       <div class="toast" role="status" hidden></div>
+      ${cardMarkup()}
       ${barMarkup({
         label: s.htmlBar,
         name: s.barHtml,
@@ -69,6 +81,14 @@ export default defineContentScript({
       if (r['fd.htmlKind'] !== 'sandbox') return;
       ui.setName(s.barSandbox);
       $<HTMLSpanElement>('.mnote').textContent = s.barSandboxNote;
+    });
+    // L60 §2 : carte « Étape n capturée » ; « Annuler » retire la dernière page
+    const card = wireCard(root, {
+      onUndo: (c) =>
+        browser.runtime
+          .sendMessage({ type: 'fd:undo-step', n: c.n })
+          .then((st: unknown) => setCount((st as { steps?: number } | null)?.steps ?? pages))
+          .catch(() => undefined),
     });
     void browser.runtime
       .sendMessage({ type: 'fd:status' })
@@ -105,10 +125,11 @@ export default defineContentScript({
       try {
         const c = await captureHtml(async (url, kind) => send<string>({ type: 'fd:fetch-asset', url, kind }));
         if (c.tooBig) return flash(s.htmlTooBig, true);
-        const st = await send<{ steps: number }>({ type: 'fd:html-page', capture: c });
+        const st = await send<{ steps: number; label?: string }>({ type: 'fd:html-page', capture: c });
         setCount(st?.steps ?? 0);
         remember();
-        flash(s.htmlCaptured);
+        toast.hidden = true;
+        if (st?.steps) card.show({ n: st.steps, label: st.label ? defaultHotspotTitle(st.label, lang) : '' });
       } catch {
         flash(s.htmlFailed, true);
       } finally {
@@ -231,6 +252,7 @@ export default defineContentScript({
           return hotspotRect({ x: e.clientX, y: e.clientY }, box, { width: innerWidth, height: innerHeight });
         })(),
       });
+      ring(e.clientX, e.clientY);
       watchClick(el);
     }
     document.addEventListener('click', onClick, true);

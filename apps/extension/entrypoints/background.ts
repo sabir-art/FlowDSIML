@@ -271,7 +271,20 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   return p;
 }
 
-async function handleClick(msg: ClickPayload, windowId: number, tabId: number | undefined) {
+/** L60 §2 : miniature de la carte « Étape n capturée » (144 × 90, 2× la taille affichée). */
+async function thumbOf(bitmap: ImageBitmap): Promise<string> {
+  const c = new OffscreenCanvas(144, 90);
+  const g = c.getContext('2d')!;
+  const k = Math.max(144 / bitmap.width, 90 / bitmap.height);
+  g.drawImage(bitmap, 0, 0, bitmap.width * k, bitmap.height * k);
+  return toDataUrl(await c.convertToBlob({ type: 'image/jpeg', quality: 0.7 }));
+}
+
+async function handleClick(
+  msg: ClickPayload,
+  windowId: number,
+  tabId: number | undefined,
+): Promise<{ n: number; id: string; thumb: string } | undefined> {
   const state = await getState();
   if (!state.recording || state.paused || !state.workspaceId) return;
   // L25-01 : seuls l'onglet de départ et les onglets qu'il a ouverts sont capturés
@@ -282,14 +295,16 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
     const image = await (await fetch(shot.view)).blob();
     const bitmap = await createImageBitmap(image);
     const { width, height } = bitmap;
+    const thumb = await thumbOf(bitmap).catch(() => '');
     bitmap.close();
     // Fenêtre réellement capturée : une barre a pu s'ouvrir entre le clic et la capture
     const viewport = capturedViewport(msg.viewport, msg.dpr, { width, height });
     let full: Awaited<ReturnType<typeof fullCapture>> = undefined;
     if (shot.full && msg.page) full = await fullCapture(shot.full, msg);
     const order = (await getState()).steps;
+    const id = crypto.randomUUID();
     await pending.put({
-      id: crypto.randomUUID(),
+      id,
       order,
       image,
       width,
@@ -320,6 +335,7 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
       zone: msg.frame?.zone ?? null,
     });
     await setState({ steps: order + 1, lastError: null });
+    return { n: order + 1, id, thumb };
   } catch (e) {
     await setState({
       lastError: e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e),
@@ -651,8 +667,10 @@ async function onHtmlBar(
   if (m.type === 'fd:html-page') {
     if (s.paused) return { steps: s.steps };
     const order = s.steps + 1;
+    // L60 §2 : la carte « Étape n capturée » rappelle le clic qui a mené à cette page
+    const label = order > 1 ? ((await htmlStore.last())?.clickLabel ?? '') : '';
     await htmlStore.put({ ...m.capture, order });
-    return setState({ steps: order, htmlAwait: false });
+    return { ...(await setState({ steps: order, htmlAwait: false })), label };
   }
   if (m.type === 'fd:html-click') {
     if (s.paused) return null;
@@ -940,9 +958,20 @@ export default defineBackground(() => {
     if (m.type === 'fd:click') {
       // On répond après la capture : le badge REC reste masqué jusque-là (il n'apparaît pas à l'image)
       if (sender.tab?.windowId !== undefined)
-        return handleClick(m as ClickPayload, sender.tab.windowId, sender.tab.id).then(() => true);
+        return handleClick(m as ClickPayload, sender.tab.windowId, sender.tab.id).then((r) => r ?? true);
       return undefined;
     }
+    if (m.type === 'fd:undo-step')
+      // L60 §2 : « Annuler » de la carte « Étape n capturée » : l'étape est retirée
+      return getState().then(async (s) => {
+        const { id, n } = m as { id?: string; n?: number };
+        // Seule la dernière étape se retire : la numérotation reste continue
+        if (!s.recording || s.steps < 1 || n !== s.steps) return s;
+        if (s.mode === 'html') await htmlStore.remove(s.steps);
+        else if (id) await pending.remove(id);
+        else return s;
+        return setState({ steps: s.steps - 1 });
+      });
     if (m.type === 'fd:tab-info')
       // L25-01 : numéro de l'onglet suivi, pour la puce « Onglet 2 · Aide » de la barre
       return getState().then((s) => {

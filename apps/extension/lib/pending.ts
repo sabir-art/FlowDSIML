@@ -84,5 +84,7 @@ export const pending = {
   all: async () =>
     (await tx<PendingCapture[]>('readonly', (s) => s.getAll())).sort((a, b) => a.order - b.order),
   clear: () => tx('readwrite', (s) => s.clear()),
+  /** L60 §2 : « Annuler » de la carte « Étape n capturée ». */
+  remove: (id: string) => tx('readwrite', (s) => s.delete(id)),
   count: () => tx<number>('readonly', (s) => s.count()),
 };

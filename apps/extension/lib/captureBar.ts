@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import { Check, Pause, createElement, type IconNode } from 'lucide';
+import { Check, Code, Pause, Undo2, createElement, type IconNode } from 'lucide';
 import { strings as s } from './i18n';
 
 /**
@@ -155,4 +155,108 @@ export async function togglePause(): Promise<boolean> {
   await browser.runtime.sendMessage({ type: 'fd:pause' });
   const st = (await browser.runtime.sendMessage({ type: 'fd:status' })) as { paused?: boolean } | null;
   return !!st?.paused;
+}
+
+/**
+ * L60 §2 : retour à chaque capture. Carte sombre 8 px au-dessus de la barre pendant 2 s : miniature
+ * (72 × 45), « Étape 3 capturée », libellé du clic, « Annuler » (retire l'étape). Annoncée poliment.
+ */
+export const CARD_CSS = `
+  .card{box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px;border-radius:12px;
+    background:#16181d;color:#fff;font:500 13px/1.3 system-ui,sans-serif;max-width:min(440px,calc(100vw - 32px));
+    box-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.2);white-space:nowrap}
+  .card .th{width:72px;height:45px;flex:none;display:grid;place-items:center;border-radius:6px;object-fit:cover;
+    background:#2b2f38;color:#b8bcc6}
+  .card .tx{min-width:0;display:grid;gap:2px}
+  .card b{font-weight:600}
+  .card small{font-size:12px;color:#b8bcc6;overflow:hidden;text-overflow:ellipsis}
+  .card button{box-sizing:border-box;height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;
+    margin-left:auto;border:0;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;font:inherit;cursor:pointer}
+  .card button:hover{background:rgba(255,255,255,.18)}
+  .card button:focus-visible{outline:3px solid #6cb8e6;outline-offset:2px}
+`;
+
+export function cardMarkup(): string {
+  return `
+    <div class="card" role="status" hidden>
+      <span class="th" aria-hidden="true"></span>
+      <span class="tx"><b></b><small></small></span>
+      <button type="button" class="undo"></button>
+    </div>`;
+}
+
+export type StepCard = { n: number; label: string; thumb?: string; id?: string };
+
+export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise<unknown> }) {
+  const card = root.querySelector<HTMLElement>('.card')!;
+  const title = card.querySelector('b')!;
+  const sub = card.querySelector('small')!;
+  const undo = card.querySelector<HTMLButtonElement>('.undo')!;
+  undo.append(barIcon(Undo2), s.cardUndo);
+  let cur: StepCard | null = null;
+  let timer = 0;
+  let hold = false;
+  const hide = () => {
+    clearTimeout(timer);
+    card.hidden = true;
+    cur = null;
+  };
+  const arm = () => {
+    clearTimeout(timer);
+    if (!hold) timer = window.setTimeout(hide, 2000);
+  };
+  // Survol ou focus : la carte reste le temps de viser « Annuler »
+  card.addEventListener('pointerenter', () => ((hold = true), clearTimeout(timer)));
+  card.addEventListener('pointerleave', () => ((hold = false), arm()));
+  card.addEventListener('focusin', () => ((hold = true), clearTimeout(timer)));
+  card.addEventListener('focusout', () => ((hold = false), arm()));
+  undo.addEventListener('click', () => {
+    if (!cur) return;
+    const c = cur;
+    hide();
+    void o.onUndo(c);
+  });
+  return {
+    show(c: StepCard) {
+      cur = c;
+      // Miniature de la capture ; une page HTML n'a pas d'image : icône Code
+      let next: HTMLElement;
+      if (c.thumb) {
+        const img = document.createElement('img');
+        img.alt = '';
+        img.src = c.thumb;
+        next = img;
+      } else {
+        next = document.createElement('span');
+        next.append(barIcon(Code, 20));
+      }
+      next.className = 'th';
+      next.setAttribute('aria-hidden', 'true');
+      card.querySelector('.th')!.replaceWith(next);
+      title.textContent = s.cardCaptured.replace('{{n}}', String(c.n));
+      sub.textContent = c.label;
+      sub.hidden = !c.label;
+      card.hidden = false;
+      arm();
+    },
+    hide,
+  };
+}
+
+/** Anneau rouge sur le point cliqué pendant 400 ms (rien en mouvement réduit). Hors des captures. */
+export function ring(x: number, y: number): void {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const el = document.createElement('div');
+  el.setAttribute('data-fd-ui', '');
+  el.setAttribute('data-fd-ring', '');
+  el.style.cssText =
+    `position:fixed;left:${x - 18}px;top:${y - 18}px;width:36px;height:36px;box-sizing:border-box;` +
+    'border:3px solid #e5484d;border-radius:50%;pointer-events:none;z-index:2147483647;' +
+    'transition:transform .4s ease-out,opacity .4s ease-out';
+  document.documentElement.append(el);
+  requestAnimationFrame(() => {
+    el.style.transform = 'scale(1.6)';
+    el.style.opacity = '0';
+  });
+  setTimeout(() => el.remove(), 450);
 }
