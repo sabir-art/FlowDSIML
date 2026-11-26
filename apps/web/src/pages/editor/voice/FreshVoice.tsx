@@ -3,7 +3,6 @@ import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mic, Sparkles, Upload } from 'lucide-react';
 import { AudioLine } from './AudioLine';
-import { formatClock } from './voice';
 
 /**
  * L62 §6 : nouvelle voix à écouter alors qu'une voix est en place. Une seule forme pour les trois sources
@@ -33,11 +32,8 @@ export function FreshVoice({
 }) {
   const { t } = useTranslation();
   const id = useId();
-  const line = [
-    t(`editor.voice.short.${source}`),
-    source === 'generated' ? voiceName : '',
-    formatClock(durationMs),
-  ]
+  // Recette l62-source-3 : pas de durée ici, le lecteur l'affiche déjà (« Générée · Antoine »)
+  const line = [t(`editor.voice.short.${source}`), source === 'generated' ? voiceName : '']
     .filter(Boolean)
     .join(' · ');
   return (
