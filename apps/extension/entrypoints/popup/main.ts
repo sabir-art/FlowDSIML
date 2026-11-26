@@ -39,6 +39,7 @@ import {
   SlidersHorizontal,
   Smartphone,
   Sparkles,
+  Trash2,
   TriangleAlert,
   Video,
   Webcam,
@@ -93,6 +94,7 @@ const ICONS = {
   SlidersHorizontal,
   Smartphone,
   Sparkles,
+  Trash2,
   TriangleAlert,
   Webcam,
 };

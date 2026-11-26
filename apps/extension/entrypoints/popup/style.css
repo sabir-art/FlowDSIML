@@ -160,20 +160,35 @@ a {
   background: var(--fd-color-danger);
   color: #fff;
 }
-.btn-ghost-danger {
-  /* Texte seul, calé sur la gouttière de 16 px : les trois actions tiennent dans 360 px */
-  margin-right: auto;
-  padding: 0;
-  border-width: 0;
-  background: none;
-  color: var(--fd-color-danger);
-}
-.btn-ghost-danger:hover {
-  background: none;
-  text-decoration: underline;
-}
-#foot-recording .btn:not(.btn-ghost-danger) {
+/* Retours client 0.3.3 : 2 actions de même largeur (160 px à 360 px), aucun libellé coupé */
+#foot-recording .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: center;
   padding: 0 12px;
+}
+/* « Annuler la capture » : lien rouge, icône corbeille 13 px, cible de 28 px, sous le compteur */
+.cancel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fd-color-danger);
+  cursor: pointer;
+}
+.cancel-link svg {
+  width: 13px;
+  height: 13px;
+}
+.cancel-link:hover {
+  text-decoration: underline;
 }
 .link-button {
   padding: 0;
