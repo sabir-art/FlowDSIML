@@ -3243,7 +3243,8 @@ function aiConsole(state, body, route, json) {
   const env = state.aiEnvKeys ?? [];
   const labels = { anthropic: 'Anthropic', openai: 'OpenAI', elevenlabs: 'ElevenLabs' };
   // Journal : liste à part, fusionnée par console_audit_list (sans toucher aux données de la Console)
-  const log = (action, label) =>
+  // L41 étape 6 : objet, ancienne et nouvelle valeur (comme console_audit_list)
+  const log = (action, label, old = null, next = null) =>
     (state.aiAudit ??= []).unshift({
       id: Date.now() + Math.random(),
       at: new Date().toISOString(),
@@ -3252,7 +3253,11 @@ function aiConsole(state, body, route, json) {
       action,
       objectType: 'ai',
       label,
+      old,
+      new: next,
     });
+  const testState = (r) =>
+    !r?.last_test_at ? 'Jamais testée' : r.last_test_ok ? 'Test réussi' : `Échec : ${r.last_test_error}`;
   if (body.action === 'console_catalog') return json(route, 200, { result: { providers: [], models: [] } });
   // L41 étape 3 : modèle par fonction (même résolution que _shared/ai/functions.ts, catalogue réduit)
   const CAT = [
@@ -3409,9 +3414,17 @@ function aiConsole(state, body, route, json) {
       proposed: r.proposed,
       tag: r.tag,
     }));
+    const listText = (xs) =>
+      [...xs]
+        .sort((x, y) => x.position - y.position)
+        .filter((r) => r.proposed)
+        .map((r) => `${lab(r.model)}${{ none: '', recommended: ' (Recommandé)', beta: ' (Bêta)' }[r.tag]}`)
+        .join(', ');
     log(
       'ai.assistant_list',
       `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`,
+      listText(before),
+      listText(after),
     );
     return json(route, 200, { result: asstState() });
   }
@@ -3420,7 +3433,7 @@ function aiConsole(state, body, route, json) {
     if (!RULE[body.rule]) return json(route, 400, { error: 'BAD_RULE' });
     const old = rules[body.rule];
     rules[body.rule] = body.model;
-    log('ai.auto_rule', `Auto · ${RULE[body.rule]} · ${nameOf(old)} → ${nameOf(body.model)}`);
+    log('ai.auto_rule', `Auto · ${RULE[body.rule]}`, nameOf(old), nameOf(body.model));
     return json(route, 200, { result: { old, ...asstState() } });
   }
   if (body.action === 'console_set_model') {
@@ -3446,7 +3459,7 @@ function aiConsole(state, body, route, json) {
       const l = m === 'auto' ? 'Auto' : (CAT.find((c) => c.id === m)?.label ?? 'Ancien modèle (retiré)');
       return id === null ? `${l} (défaut)` : l;
     };
-    log('ai.model_changed', `${FN_LABEL[d.fn]} · ${name(old)} → ${name(model)}`);
+    log('ai.model_changed', FN_LABEL[d.fn], name(old), name(model));
     return json(route, 200, { result: { old, functions: functions() } });
   }
   if (body.action === 'console_providers') {
@@ -3477,6 +3490,7 @@ function aiConsole(state, body, route, json) {
       keys[provider] ?? (env.includes(provider) ? (state.aiEnvKeyValue ?? 'cle-de-deploiement-bonne') : null);
     if (!k) return json(route, 409, { error: 'MISSING' });
     const r = testOf(k);
+    const was = testState(rows[provider]);
     rows[provider] = {
       ...(rows[provider] ?? {}),
       last_test_at: new Date().toISOString(),
@@ -3484,7 +3498,7 @@ function aiConsole(state, body, route, json) {
       last_test_error: r.ok ? null : r.cause,
       last_test_ms: r.ms,
     };
-    log('ai.key_tested', `${provider} · ${r.ok ? 'ok' : r.cause}`);
+    log('ai.key_tested', labels[provider], was, testState(rows[provider]));
     return json(route, 200, { result: r });
   }
   if (body.action === 'console_key_save') {
@@ -3503,7 +3517,12 @@ function aiConsole(state, body, route, json) {
       last_test_error: null,
       last_test_ms: r.ms,
     };
-    log(replaced ? 'ai.key_replaced' : 'ai.key_added', provider);
+    log(
+      replaced ? 'ai.key_replaced' : 'ai.key_added',
+      labels[provider],
+      replaced ? 'Clé enregistrée' : 'Aucune clé',
+      replaced ? 'Clé remplacée, test réussi' : 'Clé enregistrée, test réussi',
+    );
     return json(route, 200, { result: { ok: true, ms: r.ms, replaced } });
   }
   return json(route, 400, { error: 'BAD_REQUEST' });
