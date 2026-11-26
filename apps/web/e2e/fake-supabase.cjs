@@ -659,6 +659,15 @@ async function install(page, state = seed()) {
       (state.aiCalls ||= []).push(body);
       const ai = aiState(state);
       if (!ai.enabled) return json(route, 403, { error: 'AI_DISABLED' });
+      // L41 étape 3 : fonction coupée par TutoClick (state.aiCut) : 503 UNAVAILABLE, rien n'est décompté
+      const featureOf = {
+        write_all: 'write',
+        step_draft: 'write',
+        voice_sample: 'voice',
+        voice_list: 'voice',
+      };
+      if ((state.aiCut ?? []).includes(featureOf[body.task] ?? body.task))
+        return json(route, 503, { error: 'UNAVAILABLE' });
       if (ai.workspaceQuotaReached)
         return json(route, 429, { error: 'AI_QUOTA_WORKSPACE', renewsOn: ai.renewsOn });
       // L30b : extrait de voix (sans quota) ; quota audio séparé pour voix et sous-titres
