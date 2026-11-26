@@ -14,8 +14,8 @@ insert into public.platform_admins (user_id, role) values
 
 select ok(not has_table_privilege('authenticated', 'public.ai_assistant_models', 'select'), 'client : ai_assistant_models illisible');
 select ok(not has_table_privilege('authenticated', 'public.ai_auto_rules', 'select'), 'client : ai_auto_rules illisible');
-select ok(not has_function_privilege('authenticated', 'public.ai_assistant_set(jsonb, uuid, text)', 'execute'), 'client : ai_assistant_set refusée');
-select ok(has_function_privilege('service_role', 'public.ai_auto_rule_set(text, text, uuid, text)', 'execute'), 'rôle de service : ai_auto_rule_set permise');
+select ok(not has_function_privilege('authenticated', 'public.ai_assistant_set(jsonb, uuid, text, text, text)', 'execute'), 'client : ai_assistant_set refusée');
+select ok(has_function_privilege('service_role', 'public.ai_auto_rule_set(text, text, uuid, text, text, text)', 'execute'), 'rôle de service : ai_auto_rule_set permise');
 
 -- Valeurs de départ : le comportement actuel
 select is((select array_agg(model || ':' || proposed || ':' || tag order by position)::text from public.ai_assistant_models),
@@ -29,12 +29,14 @@ select public.ai_assistant_set('[
   {"model":"claude-opus-5-5","position":1,"proposed":true,"tag":"recommended"},
   {"model":"claude-sonnet-5-5","position":2,"proposed":true,"tag":"none"},
   {"model":"claude-haiku-5-5","position":3,"proposed":true,"tag":"beta"}
-]'::jsonb, '00000000-0000-0000-0000-0000000041c1', 'Liste de l''assistant : Claude Opus, Claude Sonnet, Claude Haiku');
+]'::jsonb, '00000000-0000-0000-0000-0000000041c1', 'Liste de l''assistant · Ordre : Claude Opus, Claude Sonnet, Claude Haiku');
 select is((select array_agg(model order by position)::text from public.ai_assistant_models where proposed),
   '{claude-opus-5-5,claude-sonnet-5-5,claude-haiku-5-5}', 'ordre et cases enregistrés');
 select is((select tag from public.ai_assistant_models where model = 'claude-haiku-5-5'), 'beta', 'étiquette enregistrée');
-select is((select object_label from public.console_audit where action = 'ai.assistant_list' order by id desc limit 1),
-  'Liste de l''assistant : Claude Opus, Claude Sonnet, Claude Haiku', 'journal lisible');
+select is((select object_label || ' | ' || old_value || ' | ' || new_value from public.console_audit
+            where action = 'ai.assistant_list' order by id desc limit 1),
+  'Liste de l''assistant · Ordre : Claude Opus, Claude Sonnet, Claude Haiku | claude-sonnet-5-5, claude-opus-5-5 | claude-opus-5-5, claude-sonnet-5-5, claude-haiku-5-5',
+  'journal lisible, liste avant et après (identifiants sans libellés de l''Edge Function)');
 select throws_ok($$ select public.ai_assistant_set('[{"model":"claude-opus-5-5","position":1,"proposed":false,"tag":"none"}]'::jsonb,
   '00000000-0000-0000-0000-0000000041c1') $$, 'P0001', 'LAST_MODEL', 'décocher le dernier modèle : refusé');
 select throws_ok($$ select public.ai_assistant_set('[{"model":"claude-opus-5-5","position":1,"proposed":true,"tag":"none"}]'::jsonb,
@@ -42,7 +44,7 @@ select throws_ok($$ select public.ai_assistant_set('[{"model":"claude-opus-5-5",
 
 -- Règles d'Auto
 select is((public.ai_auto_rule_set('whole_demo', 'claude-opus-5-5', '00000000-0000-0000-0000-0000000041c1',
-  'Auto · analyse de toute la démo · Claude Sonnet → Claude Opus'))->>'old', 'claude-sonnet-5-5', 'règle changée, ancienne valeur rendue');
+  'Auto · analyse de toute la démo', 'Claude Sonnet', 'Claude Opus'))->>'old', 'claude-sonnet-5-5', 'règle changée, ancienne valeur rendue');
 select throws_ok($$ select public.ai_auto_rule_set('autre', 'claude-opus-5-5', '00000000-0000-0000-0000-0000000041c1') $$,
   'P0001', 'BAD_RULE', 'règle inconnue refusée');
 
