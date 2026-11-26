@@ -181,6 +181,8 @@ async function capturer(cas, apres, opts = {}) {
   await popup.click('button[form=login]');
   await popup.waitForSelector('#setup:not([hidden])');
   const tabId = await popup.evaluate(async (u) => (await chrome.tabs.query({ url: u + '/*' }))[0].id, BANC);
+  // Sandbox v2 : type choisi dans la popup (« Sandbox » enregistre aussi la page vivante)
+  await popup.evaluate((k) => chrome.storage.local.set({ 'fd.htmlKind': k }), opts.kind ?? 'guided');
   await popup.evaluate(
     (a) =>
       chrome.runtime.sendMessage({

@@ -2,6 +2,8 @@
 const http = require('http');
 const log = [];
 let htmlCapture = { mode: 'allowed', domains: [] };
+// Sandbox v2 : garde-fou d'espace (autorisé par défaut), modifiable par le test
+let sandboxLive = true;
 // L64 §1 : espaces de la personne (menu ⋯), modifiables par le test ; null : le seul espace Acme
 let members = null;
 // L64 §3 : assistance IA de l'espace (réglage) et échec simulé du fournisseur, modifiables par le test
@@ -49,6 +51,10 @@ http
       if (req.url === '/__html-capture') {
         htmlCapture = JSON.parse(buf.toString() || '{}');
         return send(200, htmlCapture);
+      }
+      if (req.url === '/__sandbox-live') {
+        sandboxLive = JSON.parse(buf.toString() || 'true') !== false;
+        return send(200, { sandboxLive });
       }
       if (req.url === '/__ai') {
         ai = { enabled: true, fail: false, ...JSON.parse(buf.toString() || '{}') };
@@ -372,6 +378,29 @@ http
       }
       if (req.url.startsWith('/functions/v1/html-ingest')) {
         const b = JSON.parse(buf.toString() || '{}');
+        // Sandbox v2 : seconde requête, enregistrement vivant d'une page déjà déposée (gardé tel quel au journal)
+        if (b.live) {
+          log[log.length - 1].body = JSON.stringify({
+            workspaceId: b.workspaceId,
+            demoId: b.demoId,
+            path: b.path,
+          });
+          log[log.length - 1].live = b.live;
+          if (!sandboxLive) return send(403, { error: 'SANDBOX_LIVE_DISABLED' });
+          return send(200, {
+            livePath: String(b.path).replace(/\.html$/, '.json'),
+            live: {
+              scripts: b.live.scripts.map((x) => ({
+                id: x.id,
+                source: x.source,
+                category: x.category,
+                keep: x.keep,
+                bytes: x.code.length,
+              })),
+              responses: b.live.responses.length,
+            },
+          });
+        }
         log[log.length - 1].body = JSON.stringify({
           workspaceId: b.workspaceId,
           demoId: b.demoId,

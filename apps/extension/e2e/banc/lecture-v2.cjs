@@ -410,6 +410,7 @@ function markdown(total, rapport, criteres) {
   return `${l.join('\n')}\n`;
 }
 
+module.exports = { lire, CAPTURES };
 if (require.main === module)
   principal().catch((e) => {
     console.error(e);
