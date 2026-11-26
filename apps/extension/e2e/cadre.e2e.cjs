@@ -335,10 +335,12 @@ const WS = '11111111-1111-1111-1111-111111111111';
     `envoi : options.crop sur les étapes cadrées, pas sur la page entière (${crops.map((c) => (c ? 'cadre' : 'page')).join(', ')})`,
   );
   const c2 = crops[1];
-  ok(
-    c2 && Math.round(c2.w * 1440) === 480 && Math.round(c2.h * 900) === 300,
-    `envoi : cadre « Élément » de 480 × 300 (${c2 && Math.round(c2.w * 1440)} × ${c2 && Math.round(c2.h * 900)})`,
-  );
+  // Le cadre se juge sur l'image capturée, en pixels CSS : une barre du navigateur (bandeau de débogage)
+  // peut la rendre moins haute que la fenêtre du départ (recette du petit lot UX)
+  const k = sent[1] ? 1440 / sent[1].image_width : 1;
+  const cw = c2 && Math.round(c2.w * sent[1].image_width * k);
+  const ch = c2 && Math.round(c2.h * sent[1].image_height * k);
+  ok(c2 && cw === 480 && ch === 300, `envoi : cadre « Élément » de 480 × 300 (${cw} × ${ch})`);
   ok(
     sent.every((s) => s.image_width >= 1440),
     'envoi : l’image reste entière (recadrage non destructif)',

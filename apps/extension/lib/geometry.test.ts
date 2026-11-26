@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { defaultHotspotTitle, elementLabel, hotspotRect, toRelRect } from './geometry';
+import { capturedViewport, defaultHotspotTitle, elementLabel, hotspotRect, toRelRect } from './geometry';
 
 const vp = { width: 1000, height: 500 };
 
@@ -34,5 +34,26 @@ describe('geometry', () => {
     expect(elementLabel({ ariaLabel: 'Fermer', text: 'x' })).toBe('Fermer');
     expect(defaultHotspotTitle('Créer')).toBe('Cliquez sur « Créer »');
     expect(defaultHotspotTitle('', 'en')).toBe('Click here');
+  });
+});
+
+describe('fenêtre réellement capturée (recette du petit lot UX)', () => {
+  it('une barre ouverte après le clic : la hauteur de l’image fait foi', () => {
+    expect(capturedViewport({ width: 1280, height: 800 }, 1, { width: 1280, height: 657 })).toEqual({
+      width: 1280,
+      height: 657,
+    });
+    expect(capturedViewport({ width: 1280, height: 800 }, 2, { width: 2560, height: 1314 })).toEqual({
+      width: 1280,
+      height: 657,
+    });
+    // La zone du nom, mesurée à 427 px au clic, retombe à 0,65 de l'image, comme sur la capture suivante
+    const vp = capturedViewport({ width: 1280, height: 800 }, 1, { width: 1280, height: 657 });
+    expect(Math.round((427 / vp.height) * 1000) / 1000).toBe(0.65);
+  });
+  it('même taille, ou largeur différente (émulation) : la fenêtre du clic est gardée', () => {
+    const vp = { width: 1280, height: 800 };
+    expect(capturedViewport(vp, 1, { width: 1280, height: 800 })).toBe(vp);
+    expect(capturedViewport(vp, 1, { width: 390, height: 844 })).toBe(vp);
   });
 });
