@@ -2043,6 +2043,19 @@ async function install(page, state = seed()) {
         // les tests envoyés (par /functions/v1/webhooks-dispatch { slack_test }) ; aucun appel réseau.
         case 'slack_webhook_connected':
           return json(route, 200, !!state.slack?.url);
+        // Planche 4 : état (adresse masquée, jamais la partie secrète) et interrupteur des alertes
+        case 'slack_webhook_info': {
+          if (!state.slack?.url) return json(route, 200, { connected: false });
+          const team = state.slack.url.slice('https://hooks.slack.com/services/'.length).split('/')[0];
+          return json(route, 200, {
+            connected: true,
+            alerts: state.slack.alerts !== false,
+            masked: `hooks.slack.com/services/${team.slice(0, 4)}…/••••`,
+          });
+        }
+        case 'slack_webhook_alerts':
+          if (state.slack) state.slack.alerts = a.p_on;
+          return json(route, 200, null);
         case 'slack_webhook_set': {
           if (!/^https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9_/-]{8,200}$/.test(a.p_url || ''))
             return json(route, 400, { code: '22023', message: 'SLACK_URL' });
