@@ -476,6 +476,23 @@ jobs:
         run: |
           cd apps/web && node e2e/acces-email.e2e.cjs | tee /tmp/e2e-acces.log
           ! grep -q '^NOT OK' /tmp/e2e-acces.log
+      # L41 : Console « Modèles IA », menu de l'assistant, modèles gardés par l'espace (fausses clés,
+      # aucun appel au fournisseur)
+      - name: Console Modèles IA L41 (clés, modèle par fonction, liste de l'assistant, règles d'Auto)
+        if: always()
+        run: |
+          cd apps/web && node e2e/console-modeles.e2e.cjs | tee /tmp/e2e-console-modeles.log
+          ! grep -q '^NOT OK' /tmp/e2e-console-modeles.log
+      - name: Menu de l'assistant L41 (pilule Auto, Recommandé, Autres modèles, modèle demandé)
+        if: always()
+        run: |
+          cd apps/web && node e2e/assistant-modele.e2e.cjs | tee /tmp/e2e-assistant-modele.log
+          ! grep -q '^NOT OK' /tmp/e2e-assistant-modele.log
+      - name: Modèles gardés par l'espace L41 (Paramètres › Assistance IA, retrait seulement)
+        if: always()
+        run: |
+          cd apps/web && node e2e/assistance-ia-modeles.e2e.cjs | tee /tmp/e2e-assistance-ia-modeles.log
+          ! grep -q '^NOT OK' /tmp/e2e-assistance-ia-modeles.log
 
   # Extension : capture HTML d'une appli à page unique (routeur côté client). L'extension est construite
   # pour les tests (faux Supabase local, accès aux sites accordé : Playwright ne répond pas aux fenêtres
