@@ -99,26 +99,40 @@ const WS = '11111111-1111-1111-1111-111111111111';
     'barre : pilule centrée en bas',
   );
   // L60 §2 : capsule de 48 px, contrôles de 36 px sur le même centre ; Pause, puis un clic : pas d'étape
-  const geo = await page.evaluate(() => {
-    const b = document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.bar');
-    const r = b.getBoundingClientRect();
-    const ctl = [...b.querySelectorAll(':scope > button, .mid > button, .mid > .seg')].filter(
-      (e) => e.getClientRects().length,
+  // L64 §4 : apparence Sombre pour les mesures de la barre sombre ; Clair vérifiée ensuite
+  const look = async (v) => {
+    await popup.evaluate((v) => chrome.storage.local.set({ 'fd.appearance': v }), v);
+    await page.waitForFunction(
+      (v) => document.querySelector('[data-fd-ui]').shadowRoot.host.getAttribute('data-theme') === v,
+      v,
     );
-    return {
-      h: Math.round(r.height),
-      bottom: Math.round(innerHeight - r.bottom),
-      bg: getComputedStyle(b).backgroundColor,
-      // L64 §4 : couleurs en variables ; capsule jamais plus large que 720 px
-      vars: getComputedStyle(b).getPropertyValue('--fdb-bg').trim(),
-      maxW: getComputedStyle(b).maxWidth,
-      hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
-      centers: ctl.map((e) =>
-        Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2),
-      ),
-      mid: Math.round(r.top + r.height / 2),
-    };
-  });
+  };
+  await look('dark');
+  const measure = () =>
+    page.evaluate(() => {
+      const b = document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.bar');
+      const r = b.getBoundingClientRect();
+      const ctl = [...b.querySelectorAll(':scope > button, .mid > button, .mid > .seg')].filter(
+        (e) => e.getClientRects().length,
+      );
+      return {
+        h: Math.round(r.height),
+        bottom: Math.round(innerHeight - r.bottom),
+        bg: getComputedStyle(b).backgroundColor,
+        // L64 §4 : couleurs en variables ; capsule jamais plus large que 720 px
+        vars: getComputedStyle(b).getPropertyValue('--fdb-bg').trim(),
+        maxW: getComputedStyle(b).maxWidth,
+        hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
+        centers: ctl.map((e) =>
+          Math.round(e.getBoundingClientRect().top + e.getBoundingClientRect().height / 2),
+        ),
+        mid: Math.round(r.top + r.height / 2),
+        fin: getComputedStyle(b.querySelector('.fin')).backgroundColor,
+        segOn: getComputedStyle(b.querySelector('.seg [aria-checked=true]')).backgroundColor,
+        shadow: getComputedStyle(b).boxShadow,
+      };
+    });
+  const geo = await measure();
   ok(
     geo.h === 48 &&
       geo.bottom === 20 &&
@@ -129,6 +143,21 @@ const WS = '11111111-1111-1111-1111-111111111111';
       geo.centers.every((c) => Math.abs(c - geo.mid) <= 1),
     `barre : 48 px, à 20 px du bas, fond #16181d, contrôles de 36 px sur le même centre (${JSON.stringify(geo)})`,
   );
+  // Barre claire : fond blanc, contour de 1 px, segment actif sombre, Terminer de marque, même géométrie
+  await look('light');
+  const lg = await measure();
+  ok(
+    lg.bg === 'rgb(255, 255, 255)' &&
+      lg.segOn === 'rgb(29, 36, 51)' &&
+      lg.fin === 'rgb(163, 25, 91)' &&
+      /0px 0px 0px 1px/.test(lg.shadow) &&
+      lg.h === geo.h &&
+      JSON.stringify(lg.hs) === JSON.stringify(geo.hs) &&
+      JSON.stringify(lg.centers) === JSON.stringify(geo.centers),
+    `L64 §4 : barre claire (fond blanc, contour, segment actif #1d2433, Terminer de marque), même géométrie (${JSON.stringify({ bg: lg.bg, segOn: lg.segOn, fin: lg.fin })})`,
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/barre-claire.png` });
+  await look('dark');
   await bar.getByRole('button', { name: 'Pause' }).click();
   await page.waitForFunction(
     () => document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.nm').textContent === 'En pause',

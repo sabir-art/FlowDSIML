@@ -54,6 +54,7 @@ import {
   type PermissionNeed,
 } from '@/lib/permissions';
 import { createSelect, createSwitch, icon, type Option } from './ui';
+import { APPEARANCE_KEY, asAppearance, followAppearance, paintPage, type Appearance } from '@/lib/appearance';
 
 /**
  * Popup de l'extension, variante B (EXT-02 §1.2) : titre, type de capture en liste décrite, espace,
@@ -308,6 +309,45 @@ $('size').addEventListener('keydown', (e) => {
   pickSize(all[(i + d + all.length) % all.length]);
 });
 paintSize();
+// L64 §4 : apparence (Système, Clair, Sombre), appliquée tout de suite au popup
+let look: Appearance = 'system';
+const lookButtons = () => [...$('look').querySelectorAll<HTMLButtonElement>('button')];
+function paintLook() {
+  for (const b of lookButtons()) {
+    const on = b.dataset.value === look;
+    b.setAttribute('aria-checked', String(on));
+    b.tabIndex = on ? 0 : -1;
+  }
+}
+function pickLook(b: HTMLButtonElement | undefined) {
+  if (!b) return;
+  look = asAppearance(b.dataset.value);
+  paintLook();
+  b.focus();
+  paintPage(look);
+  void browser.storage.local.set({ [APPEARANCE_KEY]: look });
+}
+$('look').addEventListener('click', (e) =>
+  pickLook((e.target as HTMLElement).closest<HTMLButtonElement>('button') ?? undefined),
+);
+$('look').addEventListener('keydown', (e) => {
+  const all = lookButtons();
+  const i = all.indexOf(document.activeElement as HTMLButtonElement);
+  const d =
+    e.key === 'ArrowRight' || e.key === 'ArrowDown'
+      ? 1
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+        ? -1
+        : 0;
+  if (!d || i < 0) return;
+  e.preventDefault();
+  pickLook(all[(i + d + all.length) % all.length]);
+});
+paintLook();
+followAppearance((a) => {
+  look = a;
+  paintLook();
+});
 void browser.storage.local
   .get(['fd.lastMode', 'fd.tabSize', 'fd.follow', 'fd.mic', 'fd.webcam', 'fd.liveMask'])
   .then((r) => {

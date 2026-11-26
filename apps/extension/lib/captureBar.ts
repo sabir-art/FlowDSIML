@@ -17,6 +17,15 @@ export const BAR_VARS = `
     --fdb-pill:rgba(255,255,255,.14);--fdb-ctl:rgba(255,255,255,.08);--fdb-ctl-hover:rgba(255,255,255,.16);
     --fdb-seg-on-bg:#fff;--fdb-seg-on-fg:#16181d;--fdb-fin-bg:#fff;--fdb-fin-fg:#16181d;--fdb-fin-hover:#e7e5e4;
     --fdb-thumb:#2b2f38;--fdb-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.2)}
+  /* L64 §4 : barre claire (fond blanc, contour de 1 px à 8 %, segment actif sombre, Terminer de marque) */
+  :host([data-theme=light]){--fdb-bg:#fff;--fdb-fg:#1d2433;--fdb-muted:#5b6475;--fdb-line:rgba(16,24,40,.12);
+    --fdb-pill:rgba(16,24,40,.06);--fdb-ctl:rgba(16,24,40,.05);--fdb-ctl-hover:rgba(16,24,40,.1);
+    --fdb-seg-on-bg:#1d2433;--fdb-seg-on-fg:#fff;--fdb-fin-bg:#a3195b;--fdb-fin-fg:#fff;--fdb-fin-hover:#85164b;
+    --fdb-thumb:#eef0f4;--fdb-shadow:0 0 0 1px rgba(16,24,40,.08),0 12px 32px rgba(16,24,40,.16),0 2px 6px rgba(16,24,40,.08)}
+  @media (prefers-color-scheme: light){:host([data-theme=system]){--fdb-bg:#fff;--fdb-fg:#1d2433;--fdb-muted:#5b6475;--fdb-line:rgba(16,24,40,.12);
+    --fdb-pill:rgba(16,24,40,.06);--fdb-ctl:rgba(16,24,40,.05);--fdb-ctl-hover:rgba(16,24,40,.1);
+    --fdb-seg-on-bg:#1d2433;--fdb-seg-on-fg:#fff;--fdb-fin-bg:#a3195b;--fdb-fin-fg:#fff;--fdb-fin-hover:#85164b;
+    --fdb-thumb:#eef0f4;--fdb-shadow:0 0 0 1px rgba(16,24,40,.08),0 12px 32px rgba(16,24,40,.16),0 2px 6px rgba(16,24,40,.08)}}
 `;
 
 export const BAR_CSS = `
