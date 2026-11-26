@@ -280,6 +280,22 @@ const fr = {
     'Non autorisée sur ce site\u202f: {{domain}} n’est pas dans la liste des domaines de votre espace. Utilisez la capture d’écran, ou demandez à un admin.',
   htmlBlockedDisabled: 'Les captures HTML sont désactivées dans votre espace.',
   // L60 §1 : popup « Que voulez-vous capturer ? »
+  // L60 §2 : barre de capture commune aux 4 modes
+  barClicks: 'Captures',
+  barHtml: 'HTML',
+  barSandbox: 'Sandbox',
+  barVideo: 'Vidéo',
+  barSteps_one: '{{n}} étape',
+  barSteps_other: '{{n}} étapes',
+  barPages_one: '{{n}} page',
+  barPages_other: '{{n}} pages',
+  barPaused: 'En pause',
+  barPausedNote: 'Vos clics ne sont pas capturés',
+  barHtmlNote: 'Chaque clic devient une étape',
+  barSandboxNote: 'Chaque page visitée est ajoutée',
+  barAddPage: 'Ajouter cette page',
+  barClicksSeen_one: '{{n}} clic repéré',
+  barClicksSeen_other: '{{n}} clics repérés',
   whatCapture: 'Que voulez-vous capturer ?',
   onPage: 'Sur {{title}} · {{host}}',
   mClicks: 'Captures d’écran',
@@ -610,6 +626,21 @@ const en: typeof fr = {
   htmlBlockedDomain:
     'Not allowed on this site: {{domain}} is not in your workspace’s list of domains. Use the screenshot capture, or ask an admin.',
   htmlBlockedDisabled: 'HTML captures are disabled in your workspace.',
+  barClicks: 'Screenshots',
+  barHtml: 'HTML',
+  barSandbox: 'Sandbox',
+  barVideo: 'Video',
+  barSteps_one: '{{n}} step',
+  barSteps_other: '{{n}} steps',
+  barPages_one: '{{n}} page',
+  barPages_other: '{{n}} pages',
+  barPaused: 'Paused',
+  barPausedNote: 'Your clicks are not captured',
+  barHtmlNote: 'Each click becomes a step',
+  barSandboxNote: 'Each page you visit is added',
+  barAddPage: 'Add this page',
+  barClicksSeen_one: '{{n}} click spotted',
+  barClicksSeen_other: '{{n}} clicks spotted',
   whatCapture: 'What do you want to capture?',
   onPage: 'On {{title}} · {{host}}',
   mClicks: 'Screenshots',
@@ -697,4 +728,11 @@ export function guideChip(g: { title: string; n: number; total: number }): strin
     .replace('{{title}}', g.title.slice(0, 60))
     .replace('{{n}}', String(g.n))
     .replace('{{total}}', String(g.total));
+}
+
+/** L60 §2 : pastille de la barre (« 3 étapes », « 1 page », « 2 clics repérés »). */
+export function barCount(kind: 'steps' | 'pages' | 'clicks', n: number): string {
+  const key = kind === 'steps' ? 'barSteps' : kind === 'pages' ? 'barPages' : 'barClicksSeen';
+  const one = n === 1 || (n === 0 && lang === 'fr');
+  return strings[`${key}_${one ? 'one' : 'other'}` as keyof typeof strings].replace('{{n}}', String(n));
 }
