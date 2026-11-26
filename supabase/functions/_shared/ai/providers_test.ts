@@ -1,7 +1,7 @@
 // L41 étape 1 : catalogue, clés et adaptateurs (fetch simulé, aucun appel réel). Données fictives.
 import { assert, assertEquals } from 'jsr:@std/assert@1';
 import { CATALOGUE, isRetired, labelOf, modelsFor, publicCatalogue } from './catalogue.ts';
-import { providerKey, scrub } from './keys.ts';
+import { forgetKey, providerKey, scrub } from './keys.ts';
 import * as claude from './providers/anthropic.ts';
 import * as eleven from './providers/elevenlabs.ts';
 
@@ -37,10 +37,30 @@ Deno.test('catalogue public : ni adresse ni clé', () => {
   assert(!/https?:|key|sk-/i.test(txt), txt);
 });
 
-Deno.test('clés : variables de déploiement en repli ; scrub', () => {
+Deno.test('clés : coffre d’abord, déploiement en repli, cache de 60 s ; scrub', async () => {
   const env = (n: string) => (n === 'ANTHROPIC_API_KEY' ? KEY : undefined);
-  assertEquals(providerKey('anthropic', env), { key: KEY, source: 'env' });
-  assertEquals(providerKey('openai', env), null);
+  let stored: string | null = null;
+  let reads = 0;
+  const vault = (_p: string) => {
+    reads++;
+    return Promise.resolve(stored);
+  };
+  assertEquals(await providerKey('anthropic', vault, { env, now: 0 }), { key: KEY, source: 'env' });
+  assertEquals(await providerKey('openai', vault, { env, now: 0 }), null);
+  stored = 'sk-fictive-coffre-0001';
+  // Dans les 60 s : la valeur en cache sert encore
+  assertEquals((await providerKey('anthropic', vault, { env, now: 30_000 }))?.source, 'env');
+  assertEquals(await providerKey('anthropic', vault, { env, now: 61_000 }), { key: stored, source: 'vault' });
+  forgetKey('anthropic');
+  const before = reads;
+  await providerKey('anthropic', vault, { env, now: 61_500 });
+  assertEquals(reads, before + 1);
+  // Coffre en erreur : repli sur le déploiement
+  forgetKey('anthropic');
+  assertEquals(
+    (await providerKey('anthropic', () => Promise.reject(new Error('x')), { env, now: 0 }))?.source,
+    'env',
+  );
   assertEquals(scrub(`refus pour ${KEY}`, KEY), 'refus pour [clé]');
 });
 

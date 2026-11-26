@@ -8,10 +8,12 @@
 //  * Aucun prompt ni réponse stocké ni journalisé : seuls des codes d'erreur sont écrits dans les logs.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { labelOf } from '../_shared/ai/catalogue.ts';
+import { labelOf, type Provider } from '../_shared/ai/catalogue.ts';
 import { providerKey } from '../_shared/ai/keys.ts';
+import { CONSOLE_ACTIONS, consoleAction, type ProviderRow } from '../_shared/ai/console.ts';
 import * as claude from '../_shared/ai/providers/anthropic.ts';
 import * as eleven from '../_shared/ai/providers/elevenlabs.ts';
+import * as openai from '../_shared/ai/providers/openai.ts';
 import {
   AiError,
   DEADLINE_MS,
@@ -50,6 +52,13 @@ const MAX_BODY = 200_000;
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false },
 });
+
+/** L41 étape 2 : clé du coffre (rôle de service), puis variable de déploiement. */
+const vaultRead = async (p: Provider) => {
+  const { data, error } = await admin.rpc('ai_key_read', { p_provider: p });
+  return error || typeof data !== 'string' || !data ? null : data;
+};
+const keyOf = async (p: Provider) => (await providerKey(p, vaultRead))?.key ?? null;
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -182,7 +191,7 @@ async function voiceSample(key: string, voice: string, langIn: unknown) {
  * lit ELEVENLABS_API_KEY. Rien n'est conservé hors des fichiers produits (voix : bucket voices).
  */
 async function audio(req: Request, body: Record<string, unknown>, ws: string, uid: string) {
-  const key = providerKey('elevenlabs')?.key;
+  const key = await keyOf('elevenlabs');
   if (!key) return json(503, { error: 'PROVIDER' });
   const input = (body.input ?? {}) as Record<string, unknown>;
   if (body.task === 'voice_sample' || body.task === 'voice_list') {
@@ -300,6 +309,58 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   });
 }
 
+/** L41 étape 2 : actions de la Console (fournisseurs, clés), réservées aux comptes de la plateforme. */
+async function consoleOf(req: Request, body: Record<string, unknown>) {
+  const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
+  const reply = await consoleAction(body, {
+    role: async () => {
+      if (!token) return null;
+      const { data } = await admin.auth.getUser(token);
+      const uid = data.user?.id;
+      if (!uid) return null;
+      const { data: row } = await admin
+        .from('platform_admins')
+        .select('role')
+        .eq('user_id', uid)
+        .maybeSingle();
+      return row ? { uid, admin: row.role === 'admin' } : null;
+    },
+    vault: vaultRead,
+    rows: async () => {
+      const { data } = await admin.from('ai_providers').select('*');
+      return (data ?? []) as ProviderRow[];
+    },
+    save: async (provider, key, uid, ms) => {
+      const { data, error } = await admin.rpc('ai_key_save', {
+        p_provider: provider,
+        p_key: key,
+        p_actor: uid,
+        p_ms: ms,
+      });
+      // Jamais le message d'erreur complet (il pourrait citer la requête)
+      if (error) throw new Error(/NO_VAULT/.test(error.message) ? 'NO_VAULT' : 'SERVER');
+      return { replaced: !!(data as { replaced?: boolean } | null)?.replaced };
+    },
+    tested: async (provider, r, uid) => {
+      const { error } = await admin.rpc('ai_key_tested', {
+        p_provider: provider,
+        p_ok: r.ok,
+        p_cause: r.ok ? null : r.cause,
+        p_ms: r.ms,
+        p_actor: uid,
+      });
+      if (error) console.error('ai: console tested', error.code);
+    },
+    test: (provider, key) =>
+      provider === 'anthropic'
+        ? claude.test(key)
+        : provider === 'openai'
+          ? openai.test(key)
+          : eleven.test(key),
+  });
+  return json(reply.status, reply.body);
+}
+
 async function editorOf(req: Request, ws: string): Promise<string | null> {
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
   if (!token || !UUID.test(ws)) return null;
@@ -327,6 +388,7 @@ Deno.serve(async (req) => {
   } catch {
     return json(400, { error: 'BAD_REQUEST' });
   }
+  if (CONSOLE_ACTIONS.includes(String(body.action))) return consoleOf(req, body);
   const ws = String(body.ws ?? '');
   const uid = await editorOf(req, ws);
   if (!uid) return json(403, { error: 'FORBIDDEN' });
@@ -359,7 +421,7 @@ Deno.serve(async (req) => {
   }
   let result;
   try {
-    result = await claude.text(providerKey('anthropic')?.key ?? '', prompt, {
+    result = await claude.text((await keyOf('anthropic')) ?? '', prompt, {
       deadline: DEADLINE_MS[parsed.task],
     });
   } catch (e) {
