@@ -390,11 +390,12 @@ async function consoleOf(req: Request, body: Record<string, unknown>) {
       if (error) console.error('ai: console tested', error.code);
     },
     fnModels: () => fnModels(true),
-    setModel: async (fn, model, uid) => {
+    setModel: async (fn, model, uid, label) => {
       const { data, error } = await admin.rpc('ai_set_function_model', {
         p_fn: fn,
         p_model: model,
         p_actor: uid,
+        p_label: label,
       });
       if (error) throw new Error('SERVER');
       fnCache = null;

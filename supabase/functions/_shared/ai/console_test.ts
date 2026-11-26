@@ -12,6 +12,7 @@ function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
   const vault = new Map<string, string>();
   const chosen: Partial<Record<Fn, string>> = {};
   const cut: string[] = [];
+  const labels: string[] = [];
   const rows: ProviderRow[] = [];
   const d: ConsoleDeps = {
     role: () => Promise.resolve({ uid: UID, admin: true }),
@@ -43,7 +44,8 @@ function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
       ),
     env: (n) => (n === 'ELEVENLABS_API_KEY' ? 'xi-fictive-deploiement' : undefined),
     fnModels: () => Promise.resolve({ ...chosen }),
-    setModel: (fn, model) => {
+    setModel: (fn, model, _uid, label) => {
+      labels.push(label);
       const old = chosen[fn] ?? null;
       if (model === null) delete chosen[fn];
       else chosen[fn] = model;
@@ -56,7 +58,7 @@ function deps(over: Partial<ConsoleDeps> = {}, log: string[] = []) {
     },
     ...over,
   };
-  return { d, vault, log, chosen, cut };
+  return { d, vault, log, chosen, cut, labels };
 }
 const noKey = (x: unknown, key: string) => assert(!JSON.stringify(x).includes(key), JSON.stringify(x));
 
@@ -197,14 +199,18 @@ Deno.test('résolution : défaut du code, choix, retiré → repli, clé manquan
   });
   assertEquals(resolve(def('translate'), 'claude-opus-5-5', ALL).model, 'claude-opus-5-5');
   // Modèle inconnu du catalogue (retiré d'un déploiement) : premier modèle du même fournisseur
+  // Décision du chef : repli sur le défaut de la fonction (Sonnet pour la traduction)
   const old = resolve(def('translate'), 'claude-ancien-4', ALL);
-  assertEquals([old.status, old.model], ['fallback', 'claude-haiku-5-5']);
+  assertEquals([old.status, old.model], ['fallback', 'claude-sonnet-5-5']);
   const cut = resolve(def('voice'), null, new Set(['anthropic'] as const));
   assertEquals([cut.status, cut.model, cut.provider], ['cut', null, 'elevenlabs']);
   assertEquals(resolve(def('assistant'), null, ALL).model, 'auto');
   assertEquals(resolve(def('assistant'), null, new Set(['elevenlabs'] as const)).status, 'cut');
-  // Un modèle sans la capacité (texte pour la voix) et aucun repli chez ce fournisseur : fonction coupée
-  assertEquals(resolve(def('voice'), 'claude-haiku-5-5', ALL).status, 'off');
+  // Un modèle sans la capacité (texte pour la voix) : repli sur le défaut de la fonction
+  const v = resolve(def('voice'), 'claude-haiku-5-5', ALL);
+  assertEquals([v.status, v.model], ['fallback', 'eleven_multilingual_v2']);
+  // Défaut indisponible (clé ElevenLabs absente) et aucun modèle de voix chez Anthropic : fonction coupée
+  assertEquals(resolve(def('voice'), 'claude-haiku-5-5', new Set(['anthropic'] as const)).status, 'off');
 });
 
 Deno.test('fonctions coupées : fonctions de l’espace couvertes, sans doublon', () => {
@@ -263,6 +269,10 @@ Deno.test(
       [(b.body.result as Record<string, unknown>).old, x.chosen.translate],
       ['claude-opus-5-5', undefined],
     );
+    assertEquals(x.labels, [
+      'Traduction · Claude Sonnet (défaut) → Claude Opus',
+      'Traduction · Claude Opus → Claude Sonnet (défaut)',
+    ]);
     assertEquals((await set('voice', 'claude-haiku-5-5')).body.error, 'BAD_MODEL');
     assertEquals((await set('autre', 'claude-haiku-5-5')).body.error, 'BAD_FUNCTION');
     const ro = deps({ role: () => Promise.resolve({ uid: UID, admin: false }) });

@@ -3,7 +3,7 @@
 -- plateforme seulement ; journal ai.model_changed ; ai_status rend « unavailable » sans nom de fournisseur.
 begin;
 set search_path = public, extensions;
-select plan(14);
+select plan(15);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000041b1', 'proprio-ia3@example.com'),
@@ -22,9 +22,9 @@ end $$;
 -- ===== Droits =====
 select ok(not has_table_privilege('authenticated', 'public.ai_function_models', 'select'), 'client : ai_function_models illisible');
 select ok(not has_table_privilege('authenticated', 'public.ai_cut', 'select'), 'client : ai_cut illisible');
-select ok(not has_function_privilege('authenticated', 'public.ai_set_function_model(text, text, uuid)', 'execute'), 'client : ai_set_function_model refusée');
+select ok(not has_function_privilege('authenticated', 'public.ai_set_function_model(text, text, uuid, text)', 'execute'), 'client : ai_set_function_model refusée');
 select ok(not has_function_privilege('authenticated', 'public.ai_set_cut(text[])', 'execute'), 'client : ai_set_cut refusée');
-select ok(has_function_privilege('service_role', 'public.ai_set_function_model(text, text, uuid)', 'execute'), 'rôle de service : ai_set_function_model permise');
+select ok(has_function_privilege('service_role', 'public.ai_set_function_model(text, text, uuid, text)', 'execute'), 'rôle de service : ai_set_function_model permise');
 
 -- ===== Modèle par fonction =====
 select is((public.ai_set_function_model('translate', 'claude-opus-5-5', '00000000-0000-0000-0000-0000000041b1'))->>'old',
@@ -35,6 +35,10 @@ select is((public.ai_set_function_model('translate', null, '00000000-0000-0000-0
 select is((select count(*)::int from public.ai_function_models where fn = 'translate'), 0, 'retour au défaut : ligne retirée');
 select is((select object_label from public.console_audit where action = 'ai.model_changed' order by id desc limit 1),
   'translate · claude-opus-5-5 → défaut', 'journal : ancien et nouveau modèle');
+select public.ai_set_function_model('translate', 'claude-opus-5-5', '00000000-0000-0000-0000-0000000041b1',
+  'Traduction · Claude Sonnet (défaut) → Claude Opus');
+select is((select object_label from public.console_audit where action = 'ai.model_changed' order by id desc limit 1),
+  'Traduction · Claude Sonnet (défaut) → Claude Opus', 'journal : libellé lisible fourni par l''Edge Function');
 select throws_ok($$ select public.ai_set_function_model('write', 'claude-haiku-5-5', '00000000-0000-0000-0000-0000000041b2') $$,
   '42501', null, 'Lecture seule : changement refusé');
 select throws_ok($$ select public.ai_set_function_model('autre', 'claude-haiku-5-5', '00000000-0000-0000-0000-0000000041b1') $$,

@@ -16,6 +16,26 @@ export interface FnDef {
   provider: Provider;
 }
 
+/** Nom des fonctions dans le journal de la Console (en français, comme le reste du journal). */
+export const FN_LABEL: Record<Fn, string> = {
+  assistant: 'Assistant IA de l’éditeur',
+  write: 'Rédaction automatique',
+  suggest: 'Vérification de cohérence',
+  translate: 'Traduction',
+  voice: 'Voix',
+  captions: 'Transcription',
+};
+
+/** Libellé lisible d'un changement : « Traduction · Claude Sonnet (défaut) → Claude Opus ». */
+export function changeLabel(def: FnDef, from: string | null, to: string | null): string {
+  const name = (id: string | null) => {
+    const m = id ?? def.defaultModel;
+    const label = m === 'auto' ? 'Auto' : (modelById(m)?.label ?? 'Ancien modèle (retiré)');
+    return id === null ? `${label} (défaut)` : label;
+  };
+  return `${FN_LABEL[def.fn]} · ${name(from)} → ${name(to)}`;
+}
+
 export const FUNCTIONS: FnDef[] = [
   {
     fn: 'assistant',
@@ -111,7 +131,16 @@ export function resolve(
   if (!keys.has(provider)) return { ...base, status: 'cut', model: null, provider };
   if (entry && entry.capabilities.includes(def.capability) && !isRetired(entry, today))
     return { ...base, status: 'active', model: entry.id, provider };
-  // Retiré (catalogue) ou inconnu : premier modèle disponible du même fournisseur qui a la capacité
+  // Retiré (catalogue) ou inconnu. Décision du chef : repli sur le modèle par défaut de la fonction ;
+  // s'il est lui-même indisponible, sur le premier modèle disponible du même fournisseur.
+  const dflt = modelById(def.defaultModel);
+  if (
+    dflt &&
+    keys.has(dflt.provider) &&
+    dflt.capabilities.includes(def.capability) &&
+    !isRetired(dflt, today)
+  )
+    return { ...base, status: 'fallback', model: dflt.id, provider: dflt.provider };
   const fb = modelsFor(provider, def.capability, today)[0];
   return fb
     ? { ...base, status: 'fallback', model: fb.id, provider }

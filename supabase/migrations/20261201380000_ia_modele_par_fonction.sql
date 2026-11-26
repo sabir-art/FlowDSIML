@@ -23,8 +23,10 @@ alter table public.ai_cut enable row level security;
 revoke all on table public.ai_cut from public, anon, authenticated;
 grant select on table public.ai_cut to service_role;
 
--- Choix d'un modèle (Edge Function, au nom d'un admin de la plateforme) ; null : retour au défaut
-create or replace function public.ai_set_function_model(p_fn text, p_model text, p_actor uuid)
+-- Choix d'un modèle (Edge Function, au nom d'un admin de la plateforme) ; null : retour au défaut.
+-- p_label : libellé lisible du journal (« Traduction · Claude Sonnet (défaut) → Claude Opus »), écrit
+-- par l'Edge Function à partir du catalogue ; sans lui, les identifiants.
+create or replace function public.ai_set_function_model(p_fn text, p_model text, p_actor uuid, p_label text default null)
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_old text;
 begin
@@ -46,7 +48,8 @@ begin
   end if;
   insert into public.console_audit (actor_id, action, object_type, object_id, object_label)
   values (p_actor, 'ai.model_changed', 'ai', p_fn,
-          left(p_fn || ' · ' || coalesce(v_old, 'défaut') || ' → ' || coalesce(p_model, 'défaut'), 200));
+          left(coalesce(nullif(p_label, ''),
+                        p_fn || ' · ' || coalesce(v_old, 'défaut') || ' → ' || coalesce(p_model, 'défaut')), 200));
   return jsonb_build_object('old', v_old);
 end $$;
 
@@ -62,9 +65,9 @@ begin
   on conflict (feature) do nothing;
 end $$;
 
-revoke all on function public.ai_set_function_model(text, text, uuid) from public, anon, authenticated;
+revoke all on function public.ai_set_function_model(text, text, uuid, text) from public, anon, authenticated;
 revoke all on function public.ai_set_cut(text[]) from public, anon, authenticated;
-grant execute on function public.ai_set_function_model(text, text, uuid) to service_role;
+grant execute on function public.ai_set_function_model(text, text, uuid, text) to service_role;
 grant execute on function public.ai_set_cut(text[]) to service_role;
 
 -- ai_status : inchangé, plus « unavailable »
