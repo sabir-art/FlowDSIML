@@ -145,6 +145,11 @@ const manifests = {
   const p = await open(SAND, { width: 1440, height: 900 }, '?company=Globex');
   await p.waitForSelector('.p-html-frame iframe');
   const iframe = p.locator('.p-html-frame iframe');
+  // Gêne lot B : manifeste sans cadre (theme: {}) : « Barre d'adresse » par défaut en Sandbox
+  ok(
+    (await p.locator('.p-win--sb .p-chrome .p-addr').count()) === 1,
+    'Sandbox sans cadre réglé : cadre avec barre d’adresse par défaut',
+  );
   ok((await iframe.getAttribute('sandbox')) === 'allow-scripts', 'iframe sandbox="allow-scripts" seulement');
   const srcdoc = (await iframe.getAttribute('srcdoc')) ?? '';
   ok(
@@ -285,6 +290,11 @@ const manifests = {
 
   // ===== Démo guidée =====
   const g = await open(GUID, { width: 1024, height: 800 });
+  await g.waitForSelector('.p-html-frame iframe');
+  ok(
+    (await g.locator('.p-addr').count()) === 1,
+    'démo guidée HTML sans cadre réglé : barre d’adresse par défaut',
+  );
   await g.waitForSelector('.p-html-frame iframe');
   await g.frameLocator('.p-html-frame iframe').locator('h1').waitFor();
   // Démo guidée : la page se lit comme une capture, sans la rangée du Sandbox sous la page
