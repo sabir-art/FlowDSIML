@@ -131,7 +131,7 @@ export function NewDemoDialog({
   const blockText = useBlockText();
   // Règle 4 : désactivée (espace, fonction, rôle) ; quota atteint : la carte reste active (message dans l'aperçu)
   const aiOff = aiBlock(ai, 'generate');
-  const aiDisabled = aiOff === 'disabled' || aiOff === 'role';
+  const aiDisabled = aiOff === 'disabled' || aiOff === 'role' || aiOff === 'unavailable';
   /** Assistance IA coupée et réglable par ce membre : « Ouvrir le réglage » à droite de la ligne. */
   const aiLink = aiDisabled && aiOff === 'disabled' && !!ai?.canManage;
 

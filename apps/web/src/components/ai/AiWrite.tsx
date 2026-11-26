@@ -52,18 +52,20 @@ export function useBlockText() {
   return (b: AiBlock, s: AiStatus | null) =>
     b === 'disabled'
       ? t('ai.disabled')
-      : b === 'role'
-        ? t('ai.role')
-        : b === 'quota'
-          ? [
-              t('ai.quota'),
-              s?.renewsOn ? t('ai.quotaRenews', { date: fmtDate(s.renewsOn, i18n.language) }) : '',
-            ]
-              .filter(Boolean)
-              .join(' ')
-          : b === 'userQuota'
-            ? t('ai.userQuota')
-            : '';
+      : b === 'unavailable'
+        ? t('ai.unavailable')
+        : b === 'role'
+          ? t('ai.role')
+          : b === 'quota'
+            ? [
+                t('ai.quota'),
+                s?.renewsOn ? t('ai.quotaRenews', { date: fmtDate(s.renewsOn, i18n.language) }) : '',
+              ]
+                .filter(Boolean)
+                .join(' ')
+            : b === 'userQuota'
+              ? t('ai.userQuota')
+              : '';
 }
 
 /** Entrée désactivée (aria-disabled, focalisable) avec explication ; lien vers le réglage pour un admin. */
@@ -155,7 +157,8 @@ export function AiWrite({
   }, [fieldKey]);
 
   const b = aiBlock(status, 'write');
-  if (b === 'disabled' || b === 'role') return <DisabledEntry status={status} label={t('ai.write.menu')} />;
+  if (b === 'disabled' || b === 'role' || b === 'unavailable')
+    return <DisabledEntry status={status} label={t('ai.write.menu')} />;
 
   const run = async (action: WriteAction, tone?: Tone, variant = 0) => {
     setLast({ action, tone, variant });

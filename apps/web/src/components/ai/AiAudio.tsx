@@ -219,7 +219,7 @@ export function AiCaptions({
   useEffect(() => () => ctrl.current?.abort(), []);
 
   const b = aiBlock(status, 'captions');
-  if (b === 'disabled' || b === 'role')
+  if (b === 'disabled' || b === 'role' || b === 'unavailable')
     return <DisabledEntry status={status} label={label} feature="captions" tip={at.disabled('captions')} />;
 
   const seconds = Math.max(1, Math.ceil(durationMs / 1000));

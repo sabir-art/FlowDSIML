@@ -244,6 +244,101 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await c2.close();
   }
 
+  // ===== Étape 3 : modèle par fonction =====
+  {
+    const s3 = seed();
+    s3.platformRole = 'admin';
+    s3.aiEnvKeys = ['elevenlabs'];
+    s3.aiKeys = { anthropic: 'sk-fictive-bonne-000444' };
+    s3.ai = { ...(s3.ai ?? {}), enabled: true };
+    const { ctx: c3, p: p3 } = await open(s3);
+    await p3.goto(`${APP}/#/console/modeles`);
+    await p3.getByRole('heading', { name: 'Modèle par fonction' }).waitFor();
+    const FN = {
+      'Assistant IA de l’éditeur': 'assistant',
+      'Rédaction automatique': 'write',
+      Traduction: 'translate',
+      Voix: 'voice',
+    };
+    const fnRow = (name) =>
+      p3.locator('.console-ai-fns .console-ai-row').filter({ has: p3.locator(`#ai-fn-${FN[name]}`) });
+    const states = await p3.locator('.console-ai-fns .console-ai-fstate').allInnerTexts();
+    ok(
+      states.length === 6 &&
+        states.every((x) => x.trim() === 'Actif') &&
+        (await p3.locator('.console-ai-attention').count()) === 0,
+      `6 fonctions, toutes « Actif », pas de bandeau (${states.map((x) => x.trim()).join(', ')})`,
+    );
+    ok(
+      (await fnRow('Assistant IA de l’éditeur').locator('.fd-sel').innerText()).includes('Auto · voir') &&
+        (await fnRow('Rédaction automatique').locator('.fd-sel').innerText()).includes('Claude Haiku') &&
+        (await fnRow('Voix').locator('.fd-sel').innerText()).includes('ElevenLabs · voix multilingue'),
+      'défauts : Auto pour l’assistant, Claude Haiku pour la rédaction, ElevenLabs pour la voix',
+    );
+    // Changement : Traduction → Claude Opus, toast avec Annuler
+    await fnRow('Traduction').locator('.fd-sel').click();
+    await p3.getByRole('option', { name: /Claude Opus/ }).click();
+    await p3.getByText('Traduction : Claude Opus').waitFor();
+    ok(s3.aiFnModels.translate === 'claude-opus-5-5', 'Traduction : Claude Opus enregistré');
+    await p3.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
+    await p3.waitForTimeout(500);
+    ok(
+      !s3.aiFnModels.translate &&
+        (await fnRow('Traduction').locator('.fd-sel').innerText()).includes('Claude Sonnet'),
+      'Annuler : retour au modèle précédent (défaut, Claude Sonnet)',
+    );
+    if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-fonctions${sfx}.png`, fullPage: true });
+    await axe(p3, 'modèle par fonction');
+
+    // Modèle retiré : repli et bandeau
+    s3.aiFnModels.translate = 'claude-ancien-4';
+    await p3.reload();
+    await p3.getByRole('heading', { name: 'Modèle par fonction' }).waitFor();
+    await p3.locator('.console-ai-attention').waitFor();
+    ok(
+      (await p3.locator('.console-ai-attention').innerText())
+        .replace(/\s+/g, ' ')
+        .includes('1 fonction demande votre attention : Traduction (modèle retiré).') &&
+        (await fnRow('Traduction').locator('.console-ai-pick.is-retired').count()) === 1 &&
+        (await fnRow('Traduction').innerText()).includes('Modèle retiré : repli sur Claude Haiku') &&
+        (await fnRow('Traduction').locator('.fd-sel').innerText()).includes('Ancien modèle (retiré)'),
+      'modèle retiré : bandeau, bordure orange, « repli sur Claude Haiku »',
+    );
+    if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-retire${sfx}.png`, fullPage: true });
+    await axe(p3, 'modèle retiré');
+
+    // Clé manquante : fonctions coupées, l'espace voit « Indisponible pour le moment »
+    delete s3.aiFnModels.translate;
+    s3.aiKeys = {};
+    await p3.reload();
+    await p3.getByRole('heading', { name: 'Modèle par fonction' }).waitFor();
+    await p3.locator('.console-ai-attention').waitFor();
+    ok(
+      (await fnRow('Traduction').innerText()).includes('Clé Anthropic manquante : coupée') &&
+        (await fnRow('Voix').innerText()).includes('Actif') &&
+        /4 fonctions demandent votre attention : Assistant IA de l’éditeur \(clé Anthropic manquante\), Rédaction automatique \(clé Anthropic manquante\), Vérification de cohérence \(clé Anthropic manquante\) et Traduction \(clé Anthropic manquante\)\./.test(
+          (await p3.locator('.console-ai-attention').innerText()).replace(/\s+/g, ' '),
+        ) &&
+        ['assistant', 'translate', 'write'].every((f) => s3.aiCut.includes(f)) &&
+        !s3.aiCut.includes('voice'),
+      `clé Anthropic manquante : 4 fonctions coupées (${s3.aiCut.join(', ')}), la voix reste active`,
+    );
+    if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-coupee${sfx}.png`, fullPage: true });
+    await p3.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
+    await p3.waitForSelector('.canvas-frame img');
+    await p3.locator('.canvas-hotspot').first().click();
+    await p3.waitForSelector('#hs-body');
+    await p3.locator('.ai-entry').first().waitFor();
+    const tip = (await p3.locator('.ai-tip').first().textContent()) || '';
+    ok(
+      (await p3.locator('.ai-entry').first().getAttribute('aria-disabled')) === 'true' &&
+        tip.includes('Indisponible pour le moment') &&
+        (await p3.getByRole('link', { name: 'Ouvrir le réglage' }).count()) === 0,
+      `espace : entrée IA désactivée, « ${tip.trim()} », sans lien vers le réglage`,
+    );
+    await c3.close();
+  }
+
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

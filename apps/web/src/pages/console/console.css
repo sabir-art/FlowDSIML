@@ -753,9 +753,57 @@
   width: 18px;
   height: 18px;
 }
+.console-ai-attention {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+  font-size: 13px;
+}
+.console-ai-attention svg,
+.console-ai-warn svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-warning);
+}
+/* L41 · Modèle par fonction (spec UX §3) : fonction, liste de 40 px, état */
+.console-ai-fns {
+  grid-template-columns: 0 minmax(0, 1fr) 280px minmax(0, 280px) 0;
+}
+.console-ai-fns label {
+  cursor: default;
+}
+.console-ai-pick .fd-sel {
+  width: 100%;
+}
+.console-ai-pick.is-retired .fd-sel {
+  border-color: var(--fd-color-warning);
+}
+.console-ai-pick.is-cut {
+  opacity: 0.6;
+}
+.console-ai-warn {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-text);
+}
 @media (max-width: 720px) {
   .console-ai-list {
     grid-template-columns: 0 40px minmax(0, 1fr) 0;
+  }
+  .console-ai-fns {
+    grid-template-columns: 0 minmax(0, 1fr) 0;
+  }
+  .console-ai-fns .console-ai-pick,
+  .console-ai-fns .console-ai-fstate {
+    grid-column: 2;
   }
   .console-ai-state,
   .console-ai-acts {

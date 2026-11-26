@@ -5219,6 +5219,7 @@
     "openScorm": "Ouvrir Diffuser"
   },
   "ai": {
+    "unavailable": "Indisponible pour le moment. Réessayez plus tard.",
     "name": "Assistance IA",
     "feature": {
       "write": "Rédiger les textes",
@@ -5986,7 +5987,8 @@
       "export_audit": "Export du journal",
       "ai_key_added": "Clé IA ajoutée",
       "ai_key_replaced": "Clé IA remplacée",
-      "ai_key_tested": "Clé IA testée"
+      "ai_key_tested": "Clé IA testée",
+      "ai_model_changed": "Modèle IA changé"
     },
     "ai": {
       "title": "Modèles IA",
@@ -6039,6 +6041,49 @@
         "NETWORK": "Le fournisseur est injoignable",
         "MISSING": "Aucune clé enregistrée",
         "PROVIDER": "Le fournisseur a renvoyé une erreur"
+      },
+      "functions": "Modèle par fonction",
+      "functionsHelp": "Le modèle utilisé par défaut, pour tous les espaces. Un changement s’applique aux demandes suivantes.",
+      "fn": {
+        "assistant": "Assistant IA de l’éditeur",
+        "write": "Rédaction automatique",
+        "suggest": "Vérification de cohérence",
+        "translate": "Traduction",
+        "voice": "Voix",
+        "captions": "Transcription"
+      },
+      "fnHelp": {
+        "assistant": "Réponses et propositions dans l’éditeur",
+        "write": "Textes des étapes pendant la capture (extension)",
+        "suggest": "Titres, textes et pauses de toute la démo",
+        "translate": "Démo traduite dans une autre langue",
+        "voice": "Voix off générée",
+        "captions": "Texte d’une voix enregistrée ou importée"
+      },
+      "autoSee": "Auto · voir « Assistant IA » plus bas",
+      "retiredModel": "Ancien modèle (retiré)",
+      "noModel": "Aucun modèle disponible",
+      "active": "Actif",
+      "off": "Fonction coupée",
+      "retiredFallback": "Modèle retiré : repli sur {{model}}",
+      "cutMissing": "Clé {{name}} manquante : coupée",
+      "speed": {
+        "1": "Rapide",
+        "2": "Équilibré",
+        "3": "Plus lent"
+      },
+      "cost": {
+        "1": "coût faible",
+        "2": "coût moyen",
+        "3": "coût élevé"
+      },
+      "modelSet": "{{fn}} : {{model}}",
+      "modelError": "Le modèle n’a pas pu être changé. Réessayez.",
+      "attention_one": "1 fonction demande votre attention : {{list}}.",
+      "attention_other": "{{count}} fonctions demandent votre attention : {{list}}.",
+      "why": {
+        "retired": "modèle retiré",
+        "missing": "clé {{name}} manquante"
       }
     }
   },

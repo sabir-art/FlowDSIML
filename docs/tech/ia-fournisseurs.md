@@ -203,6 +203,13 @@ nouvelle valeur.
    onglet Console « Modèles IA », section Fournisseurs (e2e `console-modeles`, 20/20 en clair et en sombre).
 3. **Modèle par fonction** : `ai_function_models`, résolution, repli et coupure, bandeau ;
    « Indisponible pour le moment » côté espace.
+   **Livrée** : migration `20261201380000_ia_modele_par_fonction.sql` (`ai_function_models`, `ai_cut`,
+   `ai_set_function_model`, `ai_set_cut`, `ai_status.unavailable` ; pgTAP 14/14) ; résolution pure
+   `_shared/ai/functions.ts` (sans choix : défaut du code, aucun changement de comportement ; retiré ou
+   inconnu : repli sur le premier modèle du même fournisseur ; clé manquante : coupée, 503 `UNAVAILABLE`
+   avant toute réservation) ; Console « Modèle par fonction » et bandeau d'attention ; côté espace,
+   « Indisponible pour le moment » (`AiBlock` « unavailable »). La transcription OpenAI n'est pas encore
+   proposée : le catalogue n'a pas de modèle OpenAI (adaptateur de transcription à faire, §12.1).
 4. **Assistant** : `ai_assistant_models`, `ai_auto_rules`, aperçu du menu ; `ai_models_for` branché
    sur `ModelPicker` ; contrôle côté serveur.
 5. **Espace** : section « Modèles proposés dans l'assistant », retrait seulement.
