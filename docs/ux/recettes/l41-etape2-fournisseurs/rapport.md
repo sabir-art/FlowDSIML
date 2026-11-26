@@ -31,3 +31,30 @@ J'ai ajouté mes propres captures (succès, Tester, clé de déploiement, lectur
 2. **Fenêtre** : l'erreur arrive **sous l'aide**, à 50 px du champ. Je propose de la placer juste sous le champ, avant l'aide, pour la proximité ; l'aide reste dessous.
 
 Demandes concernées : L41 · Console › Modèles IA › Fournisseurs (état vide, états des clés, fenêtre d'ajout de clé, test, lecture seule, onglet, aucune clé affichée).
+
+## Contre-recette sur b07d779 (26/11) : 3 points VERT
+
+**Banc** :
+- `claude/dev-mvp` à b07d779 (après 24882d8) ;
+- app locale lancée comme en CI, faux backend, clés fictives (`sk-fictive-…`) ;
+- Chromium, en français et en anglais (langue du profil), en clair et en sombre, à 1440 et 390 px, soit 8 combinaisons mesurées ;
+- e2e `console-modeles` : 22/22 en clair comme en sombre.
+
+| Point | Verdict | Mesure |
+| --- | --- | --- |
+| 1 · « 320 ms » sur une seule ligne (toasts Tester et Tester et enregistrer, ajout et remplacement) | **VERT** | Espace insécable entre 320 et ms dans les 3 toasts, en français et en anglais. « 320 ms » occupe un seul rectangle de texte, donc une seule ligne, dans les 24 cas, toast de 420 px comme de 358 px. À 390 px, le toast passe sur deux lignes, mais « (320 ms) » reste entier. |
+| 2 · État vide : un seul bouton primaire | **VERT** | Un seul `fd-btn--primary` dans la page : « Ajouter une clé » / « Add a key ». Les 3 « Ajouter la clé » des lignes sont en contour (fond de surface : blanc en clair, #15191f en sombre). Dès qu'une clé est connectée, les lignes encore sans clé repassent en primaire : c'est conforme, il n'y a plus d'état vide. |
+| 3 · Erreur juste sous le champ, avant l'aide | **VERT** | Ordre `#ai-key` > `#ai-key-e` > `#ai-key-h`, 8 px du champ à l'erreur, 6 px de l'erreur à l'aide, même bord gauche que le champ. Le champ porte `aria-invalid="true"` et `aria-describedby="ai-key-h ai-key-e"`. |
+
+Captures :
+- `b07d779-1-vide-un-seul-primaire.png` (français en clair, anglais en sombre) ;
+- `b07d779-2-erreur-sous-le-champ.png` (français en clair et en sombre à 1440, anglais à 390) ;
+- `b07d779-3-toasts-320-ms.png` (ajout et Tester, en français et en anglais, à 390).
+
+### Remarque hors périmètre, non bloquante : l'en-tête de la page à 390 px
+
+À 390 px, « Historique des changements » reste à droite du titre. La colonne du titre est écrasée à **95 px** : « Modèles / IA » tient sur deux lignes, et le sous-titre fait 7 lignes, sur 137 px de haut. Les autres onglets de la Console n'ont pas cet en-tête visible : le défaut est propre à cette page (`.console-ai-head`).
+
+Demande : sous 600 px, placer le bouton sous le texte, aligné à gauche, avec 12 px d'écart. Capture : `b07d779-remarque-en-tete-390.png`.
+
+Demandes concernées : L41 étape 2 · durée « 320 ms » insécable dans les toasts (NUM-01) · un seul bouton primaire dans l'état vide · erreur de la fenêtre juste sous le champ.
