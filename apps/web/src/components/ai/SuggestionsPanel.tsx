@@ -59,6 +59,17 @@ export function demoTexts(
   return out;
 }
 
+/** Début d'un texte cité dans un signalement : première ligne, 24 caractères au plus. */
+export const excerpt = (text: string, max = 24) => {
+  const line =
+    text
+      .split(/[\r\n]+/)
+      .find((l) => l.trim())
+      ?.replace(/\s+/g, ' ')
+      .trim() ?? '';
+  return line.length > max ? `${line.slice(0, max).trimEnd()}…` : line;
+};
+
 /** Bulle au-delà de laquelle la lecture devient difficile (contrôle local). */
 export const BUBBLE_MAX = 280;
 
@@ -88,7 +99,11 @@ export function localChecks(
           key: f.id,
           n: i + 1,
           type: 'clarity',
-          message: t('ai.suggest.technical'),
+          // Recette 277f878 §1 : citer le champ et le début du texte, sinon deux signalements se confondent
+          message: t('ai.suggest.technical', {
+            field: t(`ai.suggest.technicalField.${f.id.split(':')[0]}`),
+            excerpt: excerpt(f.text),
+          }),
           proposal: '',
           local: true,
           stepId: s.id,

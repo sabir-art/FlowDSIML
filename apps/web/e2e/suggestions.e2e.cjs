@@ -67,6 +67,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       { id: 'inconnu', type: 'clarity', message: 'Ignorée', proposal: 'x' },
     ].filter((s) => input.items.some((i) => i.id === s.id)),
   });
+  // Recette 277f878 §1 : deux titres techniques laissés par la capture, signalés chacun avec son champ
+  state.tables.steps.find((x) => x.id === 's3').title = 'div:has(> #search-input) > button.btn-primary';
+  state.tables.hotspots.find((h) => h.id === 'h1').title = 'Generate speechText to SpeechOpen';
   await install(page, state);
   const hs = (id) => state.tables.hotspots.find((h) => h.id === id);
   const st = (id) => state.tables.steps.find((s) => s.id === id);
@@ -85,6 +88,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok((await checks.first().textContent()) === 'Vérification', 'Libellé « Vérification », sans mention IA');
   ok((await panel.getByText('Généré par IA, à vérifier').count()) === 0, 'Pas de mention IA avant l’analyse');
   ok(!(state.aiCalls || []).length, 'Rien n’est envoyé à l’ouverture');
+  {
+    const txt = await panel.innerText();
+    ok(
+      txt.includes('Titre de la bulle : «\u202fGenerate speechText to S…\u202f»') &&
+        txt.includes('Titre de l’étape : «\u202fdiv:has(> #search-input)…\u202f»'),
+      'Titres techniques : chaque signalement cite son champ et le début du texte',
+    );
+  }
   await shot('l30-04-verifications');
   await panel.getByRole('button', { name: 'Analyser la démo' }).click();
   await panel.getByRole('button', { name: 'Analyser à nouveau' }).waitFor();

@@ -5265,7 +5265,12 @@
       "check": "Check",
       "open": "Open the step",
       "altMissing": "The screenshot has no alternative text.",
-      "technical": "Technical title left by the capture (selector or glued text). Rewrite it, or run the analysis for a suggestion.",
+      "technical": "{{field}}: “{{excerpt}}”. Technical title left by the capture (selector or glued text): rewrite it, or run the analysis for a suggestion.",
+      "technicalField": {
+        "s": "Step title",
+        "h": "Bubble title",
+        "p": "Pause title"
+      },
       "tooLong": "{{n}}-character bubble: above {{max}}, it is hard to read.",
       "type": {
         "clarity": "Clarity",
