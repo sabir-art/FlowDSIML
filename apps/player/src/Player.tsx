@@ -829,7 +829,8 @@ export function Player({
       ? ''
       : [
           newTab ? t.newTab.replace('{{title}}', activeTitle) : '',
-          `${t.stepWord} ${index + 1} ${t.of} ${m.steps.length}`,
+          // NUM-01 : « Étape 1 sur 3 », « sur » et le nombre insécables
+          `${t.stepWord} ${index + 1} ${t.of}\u00a0${m.steps.length}`,
           richTextToPlain(sub(h0?.title || step.title || '')),
           richTextToPlain(sub(h0?.body || step.body || '')),
         ]

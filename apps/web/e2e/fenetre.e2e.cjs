@@ -260,7 +260,10 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
         (await img.locator('img').evaluate((el) => getComputedStyle(el).objectFit)) === 'cover',
       `${tag} image en « cover » avec son texte alternatif`,
     );
-    ok((await dlg.locator('.p-dwin__count').textContent()) === 'Étape 2 sur 4', `${tag} « Étape 2 sur 4 »`);
+    ok(
+      (await dlg.locator('.p-dwin__count').textContent()).replace(/\s/g, ' ') === 'Étape 2 sur 4',
+      `${tag} « Étape 2 sur 4 »`,
+    );
     ok(
       (await dlg.locator('h2').evaluate((el) => getComputedStyle(el).fontSize)) === '22px',
       `${tag} titre de 22 px`,
