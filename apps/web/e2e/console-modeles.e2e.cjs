@@ -191,6 +191,22 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       ![GOOD, GOOD2].some((k) => journal.includes(k)),
     'journal : ajoutée, remplacée, testée, sans la clé',
   );
+  // L41 étape 6 : colonnes Avant et Après ; pour une clé, un état, jamais la clé
+  const heads = (await p.locator('table').nth(1).locator('thead th').allInnerTexts()).map((x) => x.trim());
+  const cells = await p
+    .locator('table')
+    .nth(1)
+    .locator('tbody tr')
+    .evaluateAll((trs) => trs.map((tr) => [...tr.cells].map((c) => c.textContent.trim())));
+  const added = cells.find((r) => r[2] === 'Clé IA ajoutée');
+  const replaced = cells.find((r) => r[2] === 'Clé IA remplacée');
+  ok(
+    heads.join('|') === 'Date|Personne|Action|Objet|Avant|Après' &&
+      added?.slice(3).join(' | ') === 'Anthropic | Aucune clé | Clé enregistrée, test réussi' &&
+      replaced?.slice(3).join(' | ') === 'Anthropic | Clé enregistrée | Clé remplacée, test réussi' &&
+      cells.some((r) => r[2] === 'Clé IA testée' && r[4] && r[5]),
+    `journal : objet, avant, après (${JSON.stringify([added?.slice(3), replaced?.slice(3)])})`,
+  );
   await ctx.close();
 
   // ===== 390 px : en-tête en colonne, bouton sous le texte à 12 px (recette UX) =====
@@ -329,9 +345,22 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     const jr = (await p3.locator('table').nth(1).locator('tbody tr').allInnerTexts()).map((x) =>
       x.replace(/\s+/g, ' '),
     );
+    // L41 étape 6 : objet | avant | après dans leurs colonnes
+    const jc = await p3
+      .locator('table')
+      .nth(1)
+      .locator('tbody tr')
+      .evaluateAll((trs) =>
+        trs.map((tr) =>
+          [...tr.cells]
+            .slice(3)
+            .map((c) => c.textContent.trim())
+            .join(' | '),
+        ),
+      );
     ok(
-      jr.some((x) => x.includes('Traduction · Claude Sonnet (défaut) → Claude Opus')) &&
-        jr.some((x) => x.includes('Traduction · Claude Opus → Claude Sonnet (défaut)')) &&
+      jc.includes('Traduction | Claude Sonnet (défaut) | Claude Opus') &&
+        jc.includes('Traduction | Claude Opus | Claude Sonnet (défaut)') &&
         !jr.some((x) => /claude-|translate|suggest/.test(x)) &&
         jr.every((x) => /Clé IA|Modèle IA/.test(x)),
       `journal filtré sur Modèles IA, lisible (${jr.length} lignes, ex. « ${jr.find((x) => x.includes('Traduction')) ?? ''} »)`,
@@ -537,9 +566,22 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     const jr = (await p5.locator('table').nth(1).locator('tbody tr').allInnerTexts())
       .join(' | ')
       .replace(/\s+/g, ' ');
+    const jc5 = await p5
+      .locator('table')
+      .nth(1)
+      .locator('tbody tr')
+      .evaluateAll((trs) => trs.map((tr) => [...tr.cells].slice(3).map((c) => c.textContent.trim())));
+    const order = jc5.find((r) => r[0].startsWith('Liste de l’assistant · Ordre'));
+    if (SHOTS) await p5.screenshot({ path: `${SHOTS}/console-journal-ia${sfx}.png`, fullPage: true });
     ok(
-      jr.includes('Auto · analyse de toute la démo · Claude Sonnet → Claude Opus') &&
-        jr.includes('Liste de l’assistant · Claude Haiku : proposé') &&
+      jc5.some((r) => r.join(' | ') === 'Auto · analyse de toute la démo | Claude Sonnet | Claude Opus') &&
+        // Dernier « Monter » : Haiku passe devant Sonnet
+        order?.[1] === 'Claude Sonnet (Recommandé), Claude Haiku (Recommandé), Claude Opus (Recommandé)' &&
+        order?.[2] === 'Claude Haiku (Recommandé), Claude Sonnet (Recommandé), Claude Opus (Recommandé)',
+      `journal : règle d’Auto et liste de l’assistant avec avant et après (${JSON.stringify(order)})`,
+    );
+    ok(
+      jr.includes('Liste de l’assistant · Claude Haiku : proposé') &&
         jr.includes('Liste de l’assistant · Claude Haiku : étiquette Recommandé') &&
         jr.includes('Liste de l’assistant · Ordre : Claude Haiku, Claude Sonnet, Claude Opus') &&
         jr.includes('Liste de l’assistant · Claude Sonnet : retiré') &&

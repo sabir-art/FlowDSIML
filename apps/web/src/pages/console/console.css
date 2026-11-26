@@ -946,3 +946,9 @@
     display: none;
   }
 }
+
+/* L41 étape 6 : ancienne et nouvelle valeur du journal, coupées au mot si longues */
+.console-audit-val {
+  max-width: 280px;
+  overflow-wrap: anywhere;
+}

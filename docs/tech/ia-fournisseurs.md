@@ -243,6 +243,16 @@ nouvelle valeur.
    lecture, « Réservé aux propriétaires » ; autres rôles : rien) ; la note du propriétaire revient dans
    « Autres modèles ». e2e `assistance-ia-modeles`.
 6. **Journal** : anciennes et nouvelles valeurs, filtre « Modèles IA ».
+   **Livrée** : migration `20261201410000_journal_valeurs.sql` (colonnes `old_value` et `new_value` de 200
+   caractères au plus ; `private.console_log` à six paramètres ; `console_audit_list` rend `old` et `new` ;
+   pgTAP 9/9). Clés : un état (« Aucune clé », « Clé enregistrée », « Test réussi », « Échec : … »),
+   jamais la clé, avec le nom du fournisseur comme objet. Modèle par fonction, liste de l'assistant et
+   règles d'Auto : l'objet (« Traduction », « Auto · analyse de toute la démo ») et les valeurs lisibles
+   fournies par l'Edge Function (`p_old`, `p_new`) ; sans elles, les identifiants. Ces trois fonctions
+   reçoivent deux paramètres de plus : elles sont supprimées et recréées dans la nouvelle migration (les
+   précédentes ne changent pas) ; l'Edge Function `ai` doit être déployée après la migration. Journal de la
+   Console : colonnes « Avant » et « Après », aussi dans l'export. Le filtre « Modèles IA » existait déjà
+   (étape 3).
 
 Chaque étape est livrable seule. Jusqu'à l'étape 4, l'assistant gardait Sonnet et Opus.
 

@@ -5078,14 +5078,20 @@
     "emailing": {
       "title": "Emailing tools",
       "body": "Add leads to a list or trigger an email sequence.",
-      "items": ["Lists and sequences", "Form consent respected"],
+      "items": [
+        "Lists and sequences",
+        "Form consent respected"
+      ],
       "action": "Connect",
       "why": "Requires vendor accounts and keys. Meanwhile: webhooks."
     },
     "enrich": {
       "title": "Visitor enrichment",
       "body": "Identify the organisation of an anonymous visitor.",
-      "items": ["Company from the network", "Size, industry"],
+      "items": [
+        "Company from the network",
+        "Size, industry"
+      ],
       "action": "Enable",
       "why": "Not planned without a legal review: personal data processed by a third party (GDPR)."
     },
@@ -5968,7 +5974,9 @@
       "object": "Objet",
       "retention": "Le journal est conservé 12 mois ; il ne peut être ni modifié ni effacé.",
       "onlyAi": "Filtered on AI models",
-      "showAll": "Show all"
+      "showAll": "Show all",
+      "before": "Before",
+      "after": "After"
     },
     "action": {
       "console_open": "Connexion à la console",

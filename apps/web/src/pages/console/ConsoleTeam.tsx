@@ -31,6 +31,9 @@ interface Entry {
   action: string;
   objectType: string;
   label: string;
+  /** L41 étape 6 : ancienne et nouvelle valeur (nulles pour les anciennes lignes). */
+  old?: string | null;
+  new?: string | null;
 }
 
 export function Team() {
@@ -187,8 +190,8 @@ export function Team() {
               exportCsv(
                 'journal',
                 'export.audit',
-                ['date', 'personne', 'action', 'objet'],
-                rows.map((e) => [e.at, e.actor, e.action, e.label]),
+                ['date', 'personne', 'action', 'objet', 'avant', 'après'],
+                rows.map((e) => [e.at, e.actor, e.action, e.label, e.old ?? '', e.new ?? '']),
               )
             }
           >
@@ -205,6 +208,8 @@ export function Team() {
                 <th scope="col">{t('console.tm.person')}</th>
                 <th scope="col">{t('console.tm.action')}</th>
                 <th scope="col">{t('console.tm.object')}</th>
+                <th scope="col">{t('console.tm.before')}</th>
+                <th scope="col">{t('console.tm.after')}</th>
               </tr>
             </thead>
             <tbody>
@@ -214,6 +219,9 @@ export function Team() {
                   <td>{e.actor}</td>
                   <td>{actionLabel(t, e.action)}</td>
                   <td>{e.label}</td>
+                  {/* Une seule valeur vide se lit « — » ; aucune valeur : cellules vides pour l'ancienne ligne */}
+                  <td className="console-audit-val">{e.old ?? (e.new ? '—' : '')}</td>
+                  <td className="console-audit-val">{e.new ?? (e.old ? '—' : '')}</td>
                 </tr>
               ))}
             </tbody>
