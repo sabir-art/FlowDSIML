@@ -1618,6 +1618,8 @@
         "none": "These links lead to pages you have not captured. On click, nothing happens for the visitor.",
         "highlight": "These links lead to pages you have not captured. On click, the visitor sees the clickable areas highlighted."
       },
+      "deadOnPages_one": "On {{count}} page: {{pages}}",
+      "deadOnPages_other": "On {{count}} pages: {{pages}}",
       "deadCapture": "Capture this page",
       "deadLink": "Link to a page",
       "deadLeave": "Keep the message",

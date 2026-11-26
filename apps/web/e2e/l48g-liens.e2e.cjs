@@ -88,8 +88,8 @@ const pages = [
 
   // ===== Plan =====
   ok(
-    /3 liens mènent à des pages non capturées/.test((await map.getAttribute('aria-label')) ?? ''),
-    'plan décrit : « 3 liens mènent à des pages non capturées »',
+    /2 liens mènent à des pages non capturées/.test((await map.getAttribute('aria-label')) ?? ''),
+    'plan décrit : « 2 liens mènent à des pages non capturées » (une par destination, lot B)',
   );
   const node = (t) => p.locator('.sbnode', { hasText: t });
   ok(
@@ -109,7 +109,14 @@ const pages = [
   // ===== Panneau =====
   const panel = p.locator('.sb-deadpanel');
   const items = panel.locator('.sb-deadlist:not(.sb-deadlist--left) > li');
-  ok((await items.count()) === 3, 'panneau : 3 liens');
+  // Lot B (recette UX §3.2) : une ligne par destination ; « Factures » est sur deux pages
+  ok((await items.count()) === 2, 'panneau : 2 destinations');
+  ok(
+    (await items.filter({ hasText: 'Factures' }).innerText()).includes(
+      'Sur 2 pages : Tableau de bord, Liste des usagers',
+    ),
+    'panneau : « Sur 2 pages : Tableau de bord, Liste des usagers »',
+  );
   {
     const n = panel.locator('.sb-deadpanel__n');
     const shape = await n.evaluate((el) => {
@@ -117,7 +124,7 @@ const pages = [
       return { r: c.borderRadius, sh: c.boxShadow };
     });
     ok(
-      (await n.innerText()) === '(3)' && shape.sh === 'none' && ['0px', ''].includes(shape.r),
+      (await n.innerText()) === '(2)' && shape.sh === 'none' && ['0px', ''].includes(shape.r),
       'écart 3 : compteur en texte simple dans l’en-tête, sans cercle',
     );
   }
@@ -203,41 +210,57 @@ const pages = [
   );
   await p.getByRole('menuitem', { name: 'Agenda' }).click();
   await p.waitForFunction(
-    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 2,
+    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 1,
   );
   ok(true, 'Relier à une page : le lien sort de la liste');
-  // Laisser le message : « Factures » depuis le tableau de bord
+  // Laisser le message : « Factures », pour les deux pages qui portent le lien
   await items
-    .filter({ hasText: 'Tableau de bord' })
+    .filter({ hasText: 'Factures' })
     .getByRole('button', { name: /^Autres actions pour/ })
     .click();
   await p.getByRole('menuitem', { name: 'Laisser le message' }).click();
   await p.waitForFunction(
-    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 1,
+    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 0,
   );
   ok(
     (await node('Tableau de bord').locator('.sb-dead').count()) === 0,
     'Laisser le message : le nœud n’a plus de lien sans page',
   );
-  const toggle = panel.getByRole('button', { name: 'Afficher le lien laissé (1)' });
+  const toggle = panel.getByRole('button', { name: 'Afficher les liens laissés (2)' });
   await toggle.click();
   ok((await toggle.getAttribute('aria-expanded')) === 'true', 'liens laissés affichés');
   await p.waitForTimeout(1500);
   const saved = state.tables.demos.find((d) => d.id === DEMO);
   ok(
-    JSON.stringify(saved.sandbox?.ignoredLinks) === JSON.stringify([{ url: `${U}/factures`, from: ID(1) }]),
-    'ignoredLinks enregistré (adresse et page d’origine)',
+    JSON.stringify(saved.sandbox?.ignoredLinks) ===
+      JSON.stringify([
+        { url: `${U}/factures`, from: ID(1) },
+        { url: `${U}/factures`, from: ID(2) },
+      ]),
+    'ignoredLinks enregistré pour les deux pages (adresse et page d’origine)',
   );
   const linked = state.tables.steps.find((s) => s.id === ID(2)).html_ops;
   ok(
     linked.some((o) => o.op === 'link' && o.sel === '#aide' && o.value === ID(3)),
     'op « link » créée sur la page d’origine',
   );
-  await panel.locator('.sb-deadlist--left').getByRole('button', { name: 'Rétablir' }).click();
+  await panel.locator('.sb-deadlist--left').getByRole('button', { name: 'Rétablir' }).first().click();
   await p.waitForFunction(
-    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 2,
+    () => document.querySelectorAll('.sb-deadlist:not(.sb-deadlist--left) > li').length === 1,
   );
-  ok(true, 'Rétablir : le lien revient dans la liste');
+  await panel.getByRole('button', { name: 'Afficher le lien laissé (1)' }).waitFor();
+  if (
+    (await panel
+      .getByRole('button', { name: 'Afficher le lien laissé (1)' })
+      .getAttribute('aria-expanded')) !== 'true'
+  )
+    await panel.getByRole('button', { name: 'Afficher le lien laissé (1)' }).click();
+  await panel.locator('.sb-deadlist--left').getByRole('button', { name: 'Rétablir' }).click();
+  await p.waitForFunction(() => !document.querySelector('.sb-deadlist--left'));
+  ok(
+    (await items.count()) === 1 && (await items.first().innerText()).includes('Sur 2 pages'),
+    'Rétablir : le lien revient dans la liste, une seule ligne pour ses deux pages',
+  );
 
   // ===== Liste de contrôle avant publication =====
   await p

@@ -1618,6 +1618,8 @@
         "none": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, rien ne se passe pour le visiteur.",
         "highlight": "Ces liens mènent à des pages que vous n’avez pas capturées. Au clic, le visiteur voit les zones cliquables mises en évidence."
       },
+      "deadOnPages_one": "Sur {{count}} page : {{pages}}",
+      "deadOnPages_other": "Sur {{count}} pages : {{pages}}",
       "deadCapture": "Capturer cette page",
       "deadLink": "Relier à une page",
       "deadLeave": "Laisser le message",
