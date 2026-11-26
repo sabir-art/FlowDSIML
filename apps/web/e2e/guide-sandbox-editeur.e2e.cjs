@@ -143,10 +143,16 @@ const U = 'https://logiciel.acme.example';
   const panel = p.locator('.sp-panel', { hasText: 'Bulle du guide · étape 1' });
   await panel.waitFor();
   ok(true, 'recette 7 : bulle 1 posée sur un élément, son panneau s’ouvre');
+  // Le toast sort avec une animation : on attend sa disparition (au plus 2 s)
   ok(
-    (await p
+    await p
       .getByText('Sélectionnez un élément de la page, puis «\u202fBulle du guide\u202f»', { exact: false })
-      .count()) === 0,
+      .first()
+      .waitFor({ state: 'detached', timeout: 2000 })
+      .then(
+        () => true,
+        () => false,
+      ),
     'toast de consigne fermé dès que la bulle est ajoutée',
   );
   {
