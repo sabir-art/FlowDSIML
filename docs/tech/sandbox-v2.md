@@ -1,7 +1,9 @@
 # Sandbox v2 : note d'architecture (L60)
 
 Statut : validée par le chef (décisions au §8). Étape 1 livrée : banc et mesure de la v1
-(`docs/tech/recettes/sandbox-v2-etape1/mesure-v1.md`). Étapes 2 à 6 : à développer.
+(`docs/tech/recettes/sandbox-v2-etape1/mesure-v1.md`). Étape 2 livrée : lecture v2, 89,3 %
+d'interaction sur des pages préparées à la main
+(`docs/tech/recettes/sandbox-v2-etape2/lecture-v2.md`). Étapes 3 à 6 : à développer.
 
 ## 1. Ce que veut le client
 
