@@ -53,7 +53,20 @@ const s = vs;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const lang = document.documentElement.lang || 'fr';
 const PAGE_SIZE = 20;
-type GroupKey = 'pages' | HtmlReviewGroup;
+/**
+ * Groupes de l'écran. Décision du chef (suivi UX du lot B) : les éléments ajoutés par un script d'un
+ * autre site forment un groupe à part, sous « Scripts de la page », pour que les chiffres concordent avec
+ * la tuile. Dans les données, ils restent du groupe pageScripts (raison widgetThirdParty).
+ */
+type ReviewGroup = HtmlReviewGroup | 'widgets';
+type GroupKey = 'pages' | ReviewGroup;
+const REVIEW_GROUPS: ReviewGroup[] = [
+  'pageScripts',
+  'widgets',
+  ...HTML_REVIEW_GROUPS.filter((g) => g !== 'pageScripts'),
+];
+const groupOf = (it: HtmlRemovedItem): ReviewGroup =>
+  it.reason === 'widgetThirdParty' ? 'widgets' : it.group;
 
 function icon(node: IconNode, size = 16): SVGElement {
   const el = lucide(node);
@@ -127,6 +140,7 @@ interface Row {
 const GROUP_ICON: Record<GroupKey, IconNode> = {
   pages: Files,
   pageScripts: Code,
+  widgets: PanelTop,
   trackingScripts: ChartNoAxesColumn,
   frames: PanelTop,
   forms: TextCursorInput,
@@ -213,7 +227,7 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
       aria: fmt(s.removeOf, { name }),
       run: () => {
         kept.delete(key);
-        refresh(it.group, key);
+        refresh(groupOf(it), key);
       },
     };
   else if (canKeep)
@@ -223,7 +237,7 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
       run: () => {
         const keep = () => {
           kept.add(key);
-          refresh(it.group, key);
+          refresh(groupOf(it), key);
         };
         if (it.group !== 'externalLinks') return keep();
         void ask(
@@ -259,14 +273,14 @@ function pageRow(p: PendingHtmlPage): Row {
 function rowsOf(g: GroupKey): Row[] {
   if (g === 'pages') return active().map(pageRow);
   return active().flatMap((p) =>
-    (p.removed ?? []).filter((it) => it.group === g).map((it) => itemRow(p, it)),
+    (p.removed ?? []).filter((it) => groupOf(it) === g).map((it) => itemRow(p, it)),
   );
 }
-const countOf = (g: HtmlReviewGroup) =>
-  active().reduce((n, p) => n + (p.removed ?? []).filter((it) => it.group === g).length, 0);
-const keptIn = (g: HtmlReviewGroup) =>
+const countOf = (g: ReviewGroup) =>
+  active().reduce((n, p) => n + (p.removed ?? []).filter((it) => groupOf(it) === g).length, 0);
+const keptIn = (g: ReviewGroup) =>
   active().reduce(
-    (n, p) => n + (p.removed ?? []).filter((it) => it.group === g && kept.has(keyOf(p, it))).length,
+    (n, p) => n + (p.removed ?? []).filter((it) => groupOf(it) === g && kept.has(keyOf(p, it))).length,
     0,
   );
 
@@ -473,24 +487,14 @@ function focusKey(key: string) {
 }
 
 // ---------- Bilan ----------
-/** Éléments ajoutés à la page par un script d'un autre site, retirés de la copie (non gardés). */
-const widgetsOut = () =>
-  active().reduce(
-    (n, p) =>
-      n +
-      (p.removed ?? []).filter((it) => it.reason === 'widgetThirdParty' && !kept.has(keyOf(p, it))).length,
-    0,
-  );
-const widgetsAll = () =>
-  active().reduce((n, p) => n + (p.removed ?? []).filter((it) => it.reason === 'widgetThirdParty').length, 0);
-
 function renderSummary() {
   // La tuile compte les scripts seuls ; les éléments ajoutés par un script sont nommés à part dans la note
-  const pageOnly = countOf('pageScripts') - widgetsAll();
+  const pageOnly = countOf('pageScripts');
   const scripts = pageOnly + countOf('trackingScripts');
-  const elements = widgetsOut();
+  // Éléments retirés de la copie (un élément gardé y reste)
+  const elements = countOf('widgets') - keptIn('widgets');
   const prot = countOf('frames') + countOf('forms') + countOf('pii') + countOf('externalLinks');
-  const keptN = HTML_REVIEW_GROUPS.reduce((n, g) => n + keptIn(g), 0);
+  const keptN = REVIEW_GROUPS.reduce((n, g) => n + keptIn(g), 0);
   const cell = (label: string, n: number) =>
     h('div', {}, h('dt', { class: 'mu' }, label), h('dd', {}, String(n)));
   $('sumbar').replaceChildren(
@@ -521,7 +525,7 @@ function renderSummary() {
 /** Tout redessiner ; un groupe vide n'apparaît pas. */
 function renderAll() {
   renderSummary();
-  const order: GroupKey[] = ['pages', ...HTML_REVIEW_GROUPS];
+  const order: GroupKey[] = ['pages', ...REVIEW_GROUPS];
   const kids: HTMLElement[] = [];
   for (const g of order) {
     const n = g === 'pages' ? active().length : countOf(g);
