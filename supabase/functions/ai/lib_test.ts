@@ -1,6 +1,9 @@
 import { assert, assertEquals, assertThrows } from 'jsr:@std/assert@1';
 import {
   AiError,
+  applyModel,
+  MODEL_LABEL,
+  OPUS,
   buildPrompt,
   DEADLINE_MS,
   checkOutput,
@@ -307,4 +310,24 @@ Deno.test('step_draft : libellé, page et texte bornés et masqués, réponse ti
     { title: 'Créer une opportunité', text: 'Cliquez sur « Nouvelle opportunité ».' },
   );
   assertThrows(() => checkOutput('step_draft', { title: '', text: 'x' }, {}));
+});
+
+Deno.test('planche 3 : modèle de l’assistant (auto, Sonnet, Opus), autorisé seulement', () => {
+  const base = { task: 'assistant', lang: 'fr', input: { messages: [{ role: 'user', text: 'Plus court' }] } };
+  const auto = parseRequest(base);
+  assertEquals(auto.model, 'auto');
+  assertEquals(applyModel(buildPrompt(auto), auto).model, SONNET);
+  const opus = parseRequest({ ...base, model: 'opus' });
+  assertEquals(applyModel(buildPrompt(opus), opus).model, OPUS);
+  assertEquals(MODEL_LABEL[OPUS], 'Claude Opus');
+  assertThrows(() => parseRequest({ ...base, model: 'gpt' }), AiError, 'BAD_MODEL');
+  assertThrows(() => applyModel(buildPrompt(opus), opus, ['sonnet']), AiError, 'MODEL_NOT_ALLOWED');
+  // Les autres tâches gardent leur modèle, quoi qu'on demande
+  const w = parseRequest({
+    task: 'write_all',
+    lang: 'fr',
+    input: { items: [{ id: 'a', text: 'x' }] },
+    model: 'opus',
+  });
+  assertEquals(w.model, 'auto');
 });
