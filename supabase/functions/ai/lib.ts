@@ -33,7 +33,7 @@ export const OPUS = 'claude-opus-5-5';
  * Modèles n'existe pas (L41), les modèles autorisés sont Sonnet et Opus.
  */
 export const MODEL_CHOICES = { sonnet: SONNET, opus: OPUS } as const;
-export type ModelChoice = 'auto' | keyof typeof MODEL_CHOICES;
+export type ModelChoice = 'auto' | keyof typeof MODEL_CHOICES | (string & {});
 export const ALLOWED_MODELS: Array<keyof typeof MODEL_CHOICES> = ['sonnet', 'opus'];
 /** Nom affiché du modèle réellement utilisé (« Généré par IA (Auto · Claude Sonnet), à vérifier »). */
 export const MODEL_LABEL: Record<string, string> = {
@@ -177,7 +177,10 @@ export function parseRequest(body: Record<string, unknown>): Request {
   const l = lang(body.lang);
   // Seul l'assistant laisse choisir le modèle ; les autres tâches gardent le leur
   const model = (task === 'assistant' ? (body.model ?? 'auto') : 'auto') as ModelChoice;
-  if (model !== 'auto' && !(model in MODEL_CHOICES)) throw new AiError('BAD_MODEL');
+  // L41 étape 4 : un identifiant du catalogue (« claude-opus-5-5 »), contrôlé ensuite contre le menu de
+  // l'assistant (403 MODEL) ; les anciens choix « sonnet » et « opus » restent acceptés
+  if (model !== 'auto' && !(model in MODEL_CHOICES) && !/^[a-z]+(-[a-z0-9.]+)+$/.test(model))
+    throw new AiError('BAD_MODEL');
   const input = (body.input ?? {}) as Record<string, unknown>;
   let redacted = 0;
   const r = (s: string) => {
@@ -639,5 +642,5 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
 export function applyModel(prompt: Prompt, req: Request, allowed: string[] = ALLOWED_MODELS): Prompt {
   if (req.model === 'auto') return prompt;
   if (!allowed.includes(req.model)) throw new AiError('MODEL_NOT_ALLOWED', 403);
-  return { ...prompt, model: MODEL_CHOICES[req.model] };
+  return { ...prompt, model: MODEL_CHOICES[req.model as keyof typeof MODEL_CHOICES] ?? req.model };
 }

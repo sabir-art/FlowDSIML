@@ -2,9 +2,10 @@
 // Console sur les fournisseurs, servies par l'Edge Function `ai`. Rôles vérifiés par la base
 // (is_platform_owner pour lire, is_platform_admin pour écrire). Une clé collée part une seule fois, est
 // testée, et n'est enregistrée qu'en cas de succès ; aucune réponse ne contient de clé.
-import { PROVIDERS, publicCatalogue, type Provider } from './catalogue.ts';
+import { CATALOGUE, PROVIDERS, isRetired, labelOf, publicCatalogue, type Provider } from './catalogue.ts';
 import { forgetKey, providerKey, type VaultRead } from './keys.ts';
 import { FUNCTIONS, changeLabel, choicesFor, cutFeatures, resolve, type Fn } from './functions.ts';
+import { DEFAULT_RULES, menuOf, type AssistantRow, type AutoRule, type AutoRules } from './assistant.ts';
 import type { KeyTest } from './providers/anthropic.ts';
 
 export interface ProviderRow {
@@ -70,7 +71,46 @@ export interface ConsoleDeps {
   setModel: (fn: Fn, model: string | null, uid: string, label: string) => Promise<{ old: string | null }>;
   /** Fonctions de l'espace coupées (ai_cut), tenues à jour à chaque lecture. */
   setCut: (features: string[]) => Promise<void>;
+  /** L41 étape 4 : liste de l'assistant et règles d'Auto. */
+  assistantRows?: () => Promise<AssistantRow[]>;
+  autoRules?: () => Promise<Partial<AutoRules>>;
+  setAssistant?: (rows: AssistantRow[], uid: string, label: string) => Promise<void>;
+  setRule?: (rule: AutoRule, model: string, uid: string, label: string) => Promise<{ old: string | null }>;
 }
+
+/** Modèles de texte du catalogue, non retirés : ceux que la liste de l'assistant peut contenir. */
+const textModels = () => CATALOGUE.filter((m) => m.capabilities.includes('text') && !isRetired(m));
+
+/** Liste de l'assistant pour la Console : tous les modèles de texte, dans l'ordre enregistré. */
+async function assistantState(d: ConsoleDeps) {
+  const keys = await keysOf(d);
+  const rows = (await d.assistantRows?.()) ?? [];
+  const rules = { ...DEFAULT_RULES, ...((await d.autoRules?.()) ?? {}) };
+  // Un modèle du catalogue absent de la table arrive en fin de liste, non proposé
+  const known = new Set(rows.map((r) => r.model));
+  const max = Math.max(0, ...rows.map((r) => r.position));
+  const all = [
+    ...rows.filter((r) => textModels().some((m) => m.id === r.model)),
+    ...textModels()
+      .filter((m) => !known.has(m.id))
+      .map((m, i) => ({ model: m.id, position: max + 1 + i, proposed: false, tag: 'none' as const })),
+  ].sort((a, b) => a.position - b.position);
+  return {
+    models: all.map((r) => {
+      const m = textModels().find((x) => x.id === r.model)!;
+      return { ...r, label: m.label, provider: m.provider, available: keys.has(m.provider) };
+    }),
+    rules,
+    menu: menuOf(all, keys),
+  };
+}
+
+const RULE_LABEL: Record<AutoRule, string> = {
+  short: 'demandes courtes',
+  whole_demo: 'analyse de toute la démo',
+  fallback: 'modèle indisponible',
+};
+const ruleModel = (m: string) => (m === 'next' ? 'le suivant de la liste' : labelOf(m) || m);
 
 /** Fournisseurs qui ont une clé (coffre ou déploiement). */
 async function keysOf(d: ConsoleDeps): Promise<Set<Provider>> {
@@ -98,6 +138,9 @@ export const CONSOLE_ACTIONS = [
   'console_key_save',
   'console_functions',
   'console_set_model',
+  'console_assistant',
+  'console_assistant_set',
+  'console_auto_rule_set',
 ];
 
 export async function consoleAction(body: Record<string, unknown>, d: ConsoleDeps): Promise<ConsoleReply> {
@@ -115,9 +158,59 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     return { status: 200, body: { result: providerStates(await d.rows(), has) } };
   }
   if (action === 'console_functions') return { status: 200, body: { result: await functionStates(d) } };
-  if (action !== 'console_key_test' && action !== 'console_key_save' && action !== 'console_set_model')
-    return { status: 400, body: { error: 'BAD_REQUEST' } };
+  if (action === 'console_assistant') return { status: 200, body: { result: await assistantState(d) } };
+  const writes = [
+    'console_key_test',
+    'console_key_save',
+    'console_set_model',
+    'console_assistant_set',
+    'console_auto_rule_set',
+  ];
+  if (!writes.includes(String(action))) return { status: 400, body: { error: 'BAD_REQUEST' } };
   if (!who.admin) return { status: 403, body: { error: 'READ_ONLY' } };
+  if (action === 'console_assistant_set') {
+    const list = body.models;
+    const ids = new Set(textModels().map((m) => m.id));
+    if (
+      !Array.isArray(list) ||
+      !list.length ||
+      list.length > 50 ||
+      !list.every(
+        (r) =>
+          r &&
+          typeof r === 'object' &&
+          ids.has((r as AssistantRow).model) &&
+          typeof (r as AssistantRow).proposed === 'boolean' &&
+          ['none', 'recommended', 'beta'].includes((r as AssistantRow).tag),
+      )
+    )
+      return { status: 400, body: { error: 'BAD_LIST' } };
+    const rows = (list as AssistantRow[]).map((r, i) => ({
+      model: r.model,
+      position: i + 1,
+      proposed: r.proposed,
+      tag: r.tag,
+    }));
+    // « Gardez au moins un modèle. »
+    if (!rows.some((r) => r.proposed)) return { status: 409, body: { error: 'LAST_MODEL' } };
+    const label = `Liste de l’assistant : ${rows
+      .filter((r) => r.proposed)
+      .map((r) => labelOf(r.model))
+      .join(', ')}`;
+    await d.setAssistant?.(rows, who.uid, label);
+    return { status: 200, body: { result: await assistantState(d) } };
+  }
+  if (action === 'console_auto_rule_set') {
+    const rule = body.rule as AutoRule;
+    if (!(rule in RULE_LABEL)) return { status: 400, body: { error: 'BAD_RULE' } };
+    const model = String(body.model ?? '');
+    const okModel = textModels().some((m) => m.id === model) || (rule === 'fallback' && model === 'next');
+    if (!okModel) return { status: 400, body: { error: 'BAD_MODEL' } };
+    const before = { ...DEFAULT_RULES, ...((await d.autoRules?.()) ?? {}) }[rule];
+    const label = `Auto · ${RULE_LABEL[rule]} · ${ruleModel(before)} → ${ruleModel(model)}`;
+    const { old } = (await d.setRule?.(rule, model, who.uid, label)) ?? { old: null };
+    return { status: 200, body: { result: { old: old ?? before, ...(await assistantState(d)) } } };
+  }
   if (action === 'console_set_model') {
     const def = FUNCTIONS.find((f) => f.fn === body.fn);
     if (!def) return { status: 400, body: { error: 'BAD_FUNCTION' } };
