@@ -117,7 +117,17 @@ export type FromFrame =
   /** A8 guide : clic du visiteur dans la zone visée. */
   | { fd: 1; t: 'hit' }
   /** A8 guide, éditeur : le sélecteur d'une bulle désigne-t-il un seul élément de la page ? */
-  | { fd: 1; t: 'probe'; ok: boolean };
+  | { fd: 1; t: 'probe'; ok: boolean }
+  /**
+   * Sandbox v2 (liveFrame) : navigation demandée par la page (lien, location, envoi de formulaire) ; le
+   * lecteur affiche la page capturée de même adresse. L'adresse vient de la page : elle ne sert qu'à
+   * choisir une étape, jamais à ouvrir quoi que ce soit.
+   */
+  | { fd: 1; t: 'nav'; url: string }
+  /** Sandbox v2 : changement de route d'une application à page unique (history virtuel). */
+  | { fd: 1; t: 'route'; url: string }
+  /** Sandbox v2 : réponses rejouées, non rejouées, écritures fictives (mesure de fidélité). */
+  | { fd: 1; t: 'live'; replayed: number; unreplayed: number; writes: number };
 
 const STEP_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const num = (v: unknown) => typeof v === 'number' && Number.isFinite(v);
@@ -154,6 +164,21 @@ export function parseFromFrame(data: unknown): FromFrame | null {
         : null;
     case 'go':
       return typeof m.step === 'string' && STEP_RE.test(m.step) ? { fd: 1, t: 'go', step: m.step } : null;
+    case 'nav':
+    case 'route':
+      return str(m.url, 2000) && /^https?:\/\//.test(m.url as string)
+        ? { fd: 1, t: m.t, url: m.url as string }
+        : null;
+    case 'live':
+      return num(m.replayed) && num(m.unreplayed) && num(m.writes)
+        ? {
+            fd: 1,
+            t: 'live',
+            replayed: m.replayed as number,
+            unreplayed: m.unreplayed as number,
+            writes: m.writes as number,
+          }
+        : null;
     case 'unlinked':
       return m.ext === true
         ? { fd: 1, t: 'unlinked', ext: true }

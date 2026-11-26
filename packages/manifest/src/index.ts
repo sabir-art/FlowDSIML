@@ -560,6 +560,15 @@ export const htmlStepSchema = z.object({
     .max(300)
     .default([])
     .catch([]),
+  /**
+   * Sandbox v2 : enregistrement rejouable (document, scripts, réponses) et identifiants des scripts gardés
+   * par l'auteur. Absent : page inerte (défaut).
+   */
+  live: z
+    .object({ url: z.string(), keep: z.array(z.string().max(8)).max(200).default([]) })
+    .nullable()
+    .default(null)
+    .catch(null),
 });
 export type HtmlStep = z.infer<typeof htmlStepSchema>;
 

@@ -472,6 +472,11 @@ export function Player({
 
   // ===== A8 : Sandbox (navigation libre entre pages HTML reliées) =====
   const sandbox = m.kind === 'sandbox' ? m.sandbox : null;
+  // Sandbox v2 : pages vivantes de la démo (étape et enregistrement publié)
+  const livePages = useMemo(
+    () => (sandbox ? m.steps.flatMap((x) => (x.html?.live ? [{ id: x.id, url: x.html.live.url }] : [])) : []),
+    [m.steps, sandbox],
+  );
   /** Pages clés : choisies dans l'éditeur, sinon toutes les pages reliées. */
   const keyPages = useMemo(
     () =>
@@ -1121,6 +1126,7 @@ export function Player({
                 sub={sub}
                 sandbox={sandbox}
                 onGo={goStep}
+                livePages={livePages}
                 chrome={
                   // Lot B : le Sandbox prend le même cadre, avec l'adresse de la page courante
                   sandbox && !mobile && htmlFrame.style !== 'none'

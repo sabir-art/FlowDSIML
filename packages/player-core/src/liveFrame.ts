@@ -278,6 +278,21 @@ export function mergeResponses(page: LivePage, all: readonly LivePage[]): LiveRe
   return out;
 }
 
+/**
+ * Clé d'adresse pour choisir la page capturée d'une navigation : chemin sans barre finale, paramètres
+ * triés, sans fragment (même idée que html_link_key côté base).
+ */
+export function pageKey(url: string): string {
+  try {
+    const u = new URL(url);
+    const ps = [...u.searchParams.entries()].sort(([a, x], [b, y]) => (a + '=' + x < b + '=' + y ? -1 : 1));
+    const q = ps.length ? '?' + ps.map(([k, v]) => `${k}=${v}`).join('&') : '';
+    return `${u.host}${u.pathname.replace(/\/+$/, '') || '/'}${q}`;
+  } catch {
+    return '';
+  }
+}
+
 /** Empreinte sha256 d'un texte, au format CSP. */
 async function sha(text: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
