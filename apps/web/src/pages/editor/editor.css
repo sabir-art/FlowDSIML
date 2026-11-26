@@ -5201,11 +5201,12 @@
   font: 600 12px / 22px var(--fd-font-sans);
 }
 /* Actions dans la carte : le lien pour refaire à gauche, Garder l'actuelle et Utiliser à droite */
+/* Recette l62-source-3 : lien pour refaire au-dessus, à gauche ; « Garder l'actuelle » et « Utiliser cette
+   voix » côte à côte, à droite, sur une ligne */
 .vo-fresh__acts {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
 }
 .vo-fresh > * {
@@ -5213,11 +5214,19 @@
 }
 .vo-fresh__main {
   display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+  align-self: stretch;
   min-width: 0;
-  margin-left: auto;
+}
+.vo-fresh__main .btn {
+  white-space: nowrap;
+}
+/* « Générée · Antoine · 0:04 » sur une ligne, avec « … » si besoin */
+.vo-fresh__head .vo-card__txt .muted {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .vo-fresh__main .btn {
   min-width: 0;

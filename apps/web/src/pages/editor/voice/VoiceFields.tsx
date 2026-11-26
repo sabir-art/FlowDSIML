@@ -378,6 +378,17 @@ export function VoiceFields({
         savedVoice={settings.aiVoice}
         hasVoice={!!step.voice_path}
         fromTranscript={!!step.voice_transcript?.trim()}
+        bound={
+          // L62 §6 (recette l62-source-3) : voix générée en place : un seul « Texte lu », qui est la
+          // transcription de l'étape (variables gardées), et un seul bouton « Régénérer la voix »
+          generated
+            ? {
+                text: step.voice_transcript ?? '',
+                invalid: !step.voice_transcript?.trim(),
+                onChange: (v) => editor.updateStep(step.id, { voice_transcript: v }),
+              }
+            : undefined
+        }
         auto={auto ?? undefined}
         onRememberVoice={(v) =>
           v !== settings.aiVoice && editor.updateDemo({ settings: { ...settings, aiVoice: v } })
@@ -732,7 +743,7 @@ export function VoiceFields({
         </p>
       )}
 
-      {has && (
+      {has && !(generated && tab === 'generate' && aiVoice) && (
         <div className="field">
           <label htmlFor={`voice-tr-${step.id}`}>
             {generated ? t('editor.voice.readText') : t('editor.voice.transcript')}{' '}
@@ -754,7 +765,7 @@ export function VoiceFields({
           <span className="help" id={`voice-tr-h-${step.id}`}>
             {t('editor.voice.transcriptHelp')}
           </span>
-          {ws && !readOnly && !genOff && quickVoice && (
+          {ws && !readOnly && !genOff && !generated && quickVoice && (
             <div className="vo-fromtext">
               <button
                 type="button"
@@ -764,15 +775,13 @@ export function VoiceFields({
                 onClick={fromText}
               >
                 <Sparkles aria-hidden="true" />
-                {generated ? t('editor.voice.regenFromText') : t('editor.voice.genFromText')}
+                {t('editor.voice.genFromText')}
               </button>
               <p className="vo-help" id={`vo-ft-h-${step.id}`}>
-                {generated
-                  ? t('editor.voice.regenFromTextHelp')
-                  : t('editor.voice.genFromTextHelp', {
-                      voice: quickVoice.name,
-                      lang: langLabel(lang, i18n.language),
-                    })}
+                {t('editor.voice.genFromTextHelp', {
+                  voice: quickVoice.name,
+                  lang: langLabel(lang, i18n.language),
+                })}
               </p>
             </div>
           )}

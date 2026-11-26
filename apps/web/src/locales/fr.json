@@ -2029,10 +2029,10 @@
       "soundNote": "Les navigateurs bloquent le son avant le premier clic du visiteur : la voix démarre à son premier clic, les sous-titres s’affichent dès l’arrivée.",
       "genFromText": "Générer la voix depuis ce texte",
       "genFromTextHelp": "Avec {{voice}} ({{lang}}). Votre enregistrement reste en place jusqu’à ce que vous choisissiez la nouvelle voix.",
-      "regenFromText": "Régénérer depuis ce texte",
-      "regenFromTextHelp": "À faire après une modification de la transcription.",
       "fromTranscript": "(repris de la transcription)",
-      "keepsVoice": "La voix en place n’est pas touchée tant que vous n’avez pas choisi."
+      "keepsVoice": "La voix en place n’est pas touchée tant que vous n’avez pas choisi.",
+      "regenVoice": "Régénérer la voix",
+      "regenVoiceHelp": "À faire après une modification du texte ou de la voix."
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",

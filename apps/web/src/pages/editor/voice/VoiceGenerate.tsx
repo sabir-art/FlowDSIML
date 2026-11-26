@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Sparkles } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { AiRequestError, aiBlock, audioLeft, callAi, useAiStatus } from '../../../lib/ai';
 import { TTS_MAX_CHARS, estimateSeconds, useAudioText, withDefaults } from '../../../components/ai/AiAudio';
@@ -23,6 +23,7 @@ export function VoiceGenerate({
   savedVoice,
   hasVoice,
   fromTranscript,
+  bound,
   auto,
   onRememberVoice,
   onApply,
@@ -40,6 +41,11 @@ export function VoiceGenerate({
   /** Le texte lu est repris de la transcription de l'étape (sinon du texte de la bulle). */
   fromTranscript?: boolean;
   /**
+   * Recette l62-source-3 : voix générée en place. Le texte lu EST la transcription de l'étape (un seul
+   * champ, variables gardées) et le seul bouton est « Régénérer la voix ».
+   */
+  bound?: { text: string; invalid: boolean; onChange: (v: string) => void };
+  /**
    * L62 §6 (commit 3) : « Générer la voix depuis ce texte », sous la transcription. Chaque nouveau `n`
    * lance la génération avec ce texte et cette voix, sans autre clic.
    */
@@ -56,9 +62,8 @@ export function VoiceGenerate({
   const [voice, setVoice] = useState<string>(auto?.voice || savedVoice || 'claire');
   const [phase, setPhase] = useState<'idle' | 'busy' | 'ready' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [res, setRes] = useState<{ path: string; durationMs: number; url: string; spoken: string } | null>(
-    null,
-  );
+  // raw : texte avec ses variables ({{company}}), gardé tel quel comme transcription (sous-titres du visiteur)
+  const [res, setRes] = useState<{ path: string; durationMs: number; url: string; raw: string } | null>(null);
   const { voices, aliases, ready } = useVoiceList(ws, lang);
   useEffect(() => {
     if (ready) setVoice((cur) => pickVoice(voices, aliases, cur)?.id ?? cur);
@@ -74,18 +79,20 @@ export function VoiceGenerate({
     [],
   );
 
-  const spoken = withDefaults(text, variables);
+  const txt = bound ? bound.text : text;
+  const spoken = withDefaults(txt, variables);
   const est = estimateSeconds(spoken);
   const left = audioLeft(status, 'voice');
   const tooMuch = left != null && left > 0 && est > left;
-  const firstVar = variables.find((v) => text.includes(`{{${v.key}`));
+  const firstVar = variables.find((v) => txt.includes(`{{${v.key}`));
   // Quota atteint : message et date de remise à zéro dès l'ouverture, sans envoi
   const quota = aiBlock(status, 'voice') === 'quota' ? at.block('voice', status) : '';
   const busy = phase === 'busy';
   const langName = langLabel(lang, i18n.language);
 
   const run = async (req?: { text: string; voice: string }) => {
-    const said = req ? withDefaults(req.text, variables) : spoken;
+    const raw = req?.text ?? txt;
+    const said = withDefaults(raw, variables);
     const who = req?.voice ?? voice;
     const blocked = at.block('voice', status);
     if (blocked) {
@@ -110,7 +117,7 @@ export function VoiceGenerate({
       );
       pending.current = r.path;
       const { data } = await supabase.storage.from('voices').createSignedUrl(r.path, 3600);
-      setRes({ ...r, url: data?.signedUrl ?? '', spoken: said });
+      setRes({ ...r, url: data?.signedUrl ?? '', raw });
       setPhase('ready');
     } catch (e) {
       if (e instanceof AiRequestError && e.code === 'ABORTED') return setPhase('idle');
@@ -137,7 +144,7 @@ export function VoiceGenerate({
     onApply({
       path: res.path,
       durationMs: res.durationMs,
-      transcript: res.spoken,
+      transcript: res.raw,
       voiceName: voices.find((v) => v.id === voice)?.name,
     });
     setRes(null);
@@ -153,7 +160,9 @@ export function VoiceGenerate({
         <label className="vo-label" htmlFor={`vo-gt-${stepId}`}>
           {t('editor.voice.readText')}{' '}
           <span className="vo-opt">
-            {hasVoice && fromTranscript ? t('editor.voice.fromTranscript') : t('editor.voice.readTextNote')}
+            {hasVoice && fromTranscript && !bound
+              ? t('editor.voice.fromTranscript')
+              : t('editor.voice.readTextNote')}
           </span>
         </label>
         <textarea
@@ -161,13 +170,14 @@ export function VoiceGenerate({
           className="textarea input-sm"
           rows={3}
           maxLength={TTS_MAX_CHARS}
-          value={text}
+          value={txt}
           disabled={busy}
           aria-describedby={`vo-gt-h-${stepId}`}
-          onChange={(e) => setText(e.target.value)}
+          aria-invalid={bound?.invalid || undefined}
+          onChange={(e) => (bound ? bound.onChange(e.target.value) : setText(e.target.value))}
         />
         <p className="vo-help" id={`vo-gt-h-${stepId}`}>
-          {t('editor.voice.genCount', { count: text.length })}
+          {t('editor.voice.genCount', { count: txt.length })}
           {spoken.trim() ? ` · ${t('editor.voice.genAbout', { n: est })}` : ''}
           {firstVar && (
             <>
@@ -179,6 +189,11 @@ export function VoiceGenerate({
             </>
           )}
         </p>
+        {bound?.invalid && (
+          <p className="field-error" role="alert">
+            {t('editor.voice.transcriptMissing')}
+          </p>
+        )}
       </div>
       <div>
         <span className="vo-label" id={`vo-gv-${stepId}`}>
@@ -249,7 +264,7 @@ export function VoiceGenerate({
           {quota || message}
         </p>
       )}
-      {hasVoice && phase !== 'ready' && <p className="vo-help">{t('editor.voice.keepsVoice')}</p>}
+      {hasVoice && !bound && phase !== 'ready' && <p className="vo-help">{t('editor.voice.keepsVoice')}</p>}
       {phase !== 'ready' && !busy && !quota && <p className="vo-notice">{t('ai.voice.notice')}</p>}
       {phase === 'ready' && res && hasVoice ? null : phase === 'ready' && res ? (
         <div className="vo-two">
@@ -274,6 +289,22 @@ export function VoiceGenerate({
         >
           {t('ai.stop')}
         </button>
+      ) : bound && phase !== 'error' ? (
+        <div className="vo-fromtext">
+          <button
+            type="button"
+            className="btn btn-secondary vo-wide"
+            disabled={!spoken.trim() || tooMuch || !!quota}
+            aria-describedby={`vo-rg-h-${stepId}`}
+            onClick={() => void run()}
+          >
+            <Sparkles aria-hidden="true" />
+            {t('editor.voice.regenVoice')}
+          </button>
+          <p className="vo-help" id={`vo-rg-h-${stepId}`}>
+            {t('editor.voice.regenVoiceHelp')}
+          </p>
+        </div>
       ) : (
         <button
           type="button"
