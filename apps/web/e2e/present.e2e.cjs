@@ -58,7 +58,10 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
     await dlg.getByRole('radio', { name: /Deux fenêtres/ }).isChecked(),
     'L22-02 : Deux fenêtres par défaut',
   );
-  ok((await dlg.getByLabel('Durée cible en minutes').inputValue()) === '15', 'L22-02 : minuteur à 15 min');
+  ok(
+    (await dlg.getByRole('combobox', { name: 'Minuteur' }).getAttribute('data-value')) === '15',
+    'L22-02 / L66 : minuteur à 15 min (liste)',
+  );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/l22-02-lancer${sfx}.png` });
 
   // Fenêtre bloquée : message et Réessayer
@@ -100,7 +103,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   ok(/Étape 1 sur\s3/.test(await page.locator('.pr-count').textContent()), 'L22-03 : Étape 1 sur 3');
   const timer = page.getByRole('timer');
   ok(
-    /Temps écoulé : 0\smin \d\d sur\s15\smin 00/.test(await timer.getAttribute('aria-label')),
+    /^0\smin \d\d écoulées sur 15\smin 00$/.test(await timer.getAttribute('aria-label')),
     'L22-03 : minuteur étiqueté',
   );
   ok((await timer.getAttribute('aria-live')) === null, 'L22-03 : minuteur jamais annoncé automatiquement');
@@ -160,7 +163,7 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
 
   // Terminer : bilan de fin (L26-12) avec la durée, puis retour à l'éditeur ; l'écran public se ferme
   await page.keyboard.press('Escape');
-  const rep = page.getByRole('dialog', { name: /Présentation terminée · 0\smin \d\d/ });
+  const rep = page.getByRole('dialog', { name: 'Présentation terminée' });
   await rep.waitFor();
   ok(true, 'L22-03 / L26-12 : bilan de fin avec durée');
   await rep.getByRole('button', { name: 'Retour à l’éditeur' }).click();

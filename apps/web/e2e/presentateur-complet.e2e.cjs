@@ -168,24 +168,33 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     .getByRole('group', { name: /Terminer la présentation/ })
     .getByRole('button', { name: 'Terminer' })
     .click();
-  const rep = page.getByRole('dialog', { name: /Présentation terminée · \d+\smin \d\d/ });
+  const rep = page.getByRole('dialog', { name: 'Présentation terminée' });
   await rep.waitFor({ timeout: 5000 });
   ok(true, 'téléphone «\u202fTerminer\u202f» : bilan de fin');
   await phone.getByText(/La présentation est terminée/).waitFor({ timeout: 5000 });
   ok(true, 'téléphone : fin annoncée');
-  const rows = rep.getByRole('table').getByRole('row');
-  ok((await rows.count()) === 4, 'bilan : tableau (en-tête et 3 étapes)');
-  ok(/Durée cible : 15\smin/.test(sp(await rep.innerText())), 'bilan : durée cible');
-  ok(/gardé que pour vous, 30 jours/.test(sp(await rep.innerText())), 'bilan : conservation 30 jours');
+  // L66 §3 : trois chiffres, temps par étape, historique gardé 90 jours
+  ok((await rep.locator('.rp-steps tbody tr').count()) === 3, 'bilan : temps par étape (3 étapes)');
+  ok(/Prévu : 15\smin/.test(sp(await rep.innerText())), 'bilan : durée prévue');
   ok(
-    /Notes modifiées pendant la présentation : 1 étape/.test(sp(await rep.innerText())),
-    'bilan : 1 étape modifiée',
+    /Gardé 90 jours, visible par vous seul\./.test(sp(await rep.innerText())),
+    'bilan : conservation 90 jours',
   );
-  ok((await rep.locator('.rp-row.is-long').count()) === 1, 'bilan : étape la plus longue');
+  ok(
+    /^Notes modifiées 1 Étape \d, enregistrée$/.test(
+      (await rep.locator('.rp-card').nth(2).innerText()).replace(/\s+/g, ' ').trim(),
+    ),
+    `bilan : 1 étape modifiée, laquelle (${(await rep.locator('.rp-card').nth(2).innerText()).replace(/\s+/g, ' ').trim()})`,
+  );
+  ok((await rep.locator('.rp-steps tr.is-long').count()) === 1, 'bilan : étape la plus longue');
   await page.waitForTimeout(400);
   const saved = state.tables.present_reports?.[0];
   ok(
-    saved && saved.notes_changed === 1 && saved.steps.length === 3 && saved.target_min === 15,
+    saved &&
+      saved.notes_changed === 1 &&
+      saved.steps.length === 3 &&
+      saved.steps.filter((x) => x.noted).length === 1 &&
+      saved.target_min === 15,
     'bilan enregistré',
   );
   ok(
@@ -193,7 +202,10 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
     'aucune vue comptée',
   );
   const bg = (n) =>
-    rep.getByRole('button', { name: n, exact: true }).evaluate((e) => getComputedStyle(e).backgroundColor);
+    rep
+      .locator('.fd-modal__foot')
+      .getByRole('button', { name: n, exact: true })
+      .evaluate((e) => getComputedStyle(e).backgroundColor);
   ok(
     (await bg('Retour à l’éditeur')) !== (await bg('Fermer')),
     'bilan : «\u202fRetour à l’éditeur\u202f» en bouton principal',
