@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { demoTexts, localChecks } from './SuggestionsPanel';
+import { demoTexts, excerpt, localChecks } from './SuggestionsPanel';
 
 type Arg = Parameters<typeof demoTexts>[0];
 const step = (id: string, patch: Record<string, unknown>) =>
@@ -51,5 +51,23 @@ describe('textes lus par l’assistant (L63)', () => {
     const found = localChecks(editor, (k) => k).filter((s) => s.id.startsWith('tech:'));
     expect(found.map((s) => s.key)).toEqual(['s:i1:title', 'h:h2:title']);
     expect(found.every((s) => s.type === 'clarity' && s.local && s.stepId === 'i1')).toBe(true);
+  });
+
+  it('ont deux signalements distincts : champ et début du texte', () => {
+    const t = (k: string, o?: object) =>
+      k === 'ai.suggest.technical' ? JSON.stringify(o) : k.replace('ai.suggest.technicalField.', '');
+    const msgs = localChecks(editor, t)
+      .filter((s) => s.id.startsWith('tech:'))
+      .map((s) => JSON.parse(s.message) as { field: string; excerpt: string });
+    expect(msgs.map((m) => m.field)).toEqual(['s', 'h']);
+    expect(new Set(msgs.map((m) => m.excerpt)).size).toBe(2);
+  });
+});
+
+describe('signalement d’un titre technique (recette 277f878 §1)', () => {
+  it('cite le champ et le début du texte', () => {
+    expect(excerpt('Generate speechText to SpeechOpen')).toBe('Generate speechText to S…');
+    expect(excerpt('Court')).toBe('Court');
+    expect(excerpt('\n  Première ligne\nseconde')).toBe('Première ligne');
   });
 });
