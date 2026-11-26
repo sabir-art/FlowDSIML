@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_PRESENT, clock, fromSearch, noteLines, reportRows, spoken, toSearch } from './present';
+import {
+  DEFAULT_PRESENT,
+  clock,
+  fromSearch,
+  noteLines,
+  reportRows,
+  spoken,
+  toSearch,
+  verdictOf,
+} from './present';
 
 describe('L22 : mode présentateur', () => {
   it('options aller-retour dans l’adresse, bornées', () => {
@@ -43,4 +52,14 @@ describe('L22 : mode présentateur', () => {
     ]);
     expect(reportRows([5, 9], ['a', 'b']).map((x) => x.longest)).toEqual([false, true]);
   });
+});
+
+describe('verdictOf (L66, seuil tranché)', () => {
+  it('sans minuteur : pas de verdict', () => expect(verdictOf(600, null)).toBeNull());
+  it('sous 80 % : plus courte', () => expect(verdictOf(719, 15)).toBe('short'));
+  it('80 % pile et 100 % pile : dans les temps', () => {
+    expect(verdictOf(720, 15)).toBe('ok');
+    expect(verdictOf(900, 15)).toBe('ok');
+  });
+  it('au-delà : dépassée', () => expect(verdictOf(901, 15)).toBe('over'));
 });

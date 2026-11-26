@@ -125,6 +125,26 @@ async function openEditor(b, state) {
       (await dlg.locator('.lx-opts').evaluate((e) => getComputedStyle(e).borderRadius)) === '12px',
     'options : encadré de lignes (rayon 12), libellé, aide et interrupteur',
   );
+  // Recette des planches (ROUGE planche 2), non-régression : l'infobulle d'une fenêtre MODAL-01 (hors couche
+  // supérieure) reste vue par-dessus ; le cas <dialog> modal est contrôlé dans partager-lien
+  await dlg.getByRole('button', { name: 'Fermer' }).first().hover();
+  await page.locator('.fd-tooltip').waitFor();
+  const tipOk = await page.evaluate(() => {
+    const t = document.querySelector('.fd-tooltip');
+    const r = t.getBoundingClientRect();
+    const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!e && t.contains(e) && t.textContent === 'Fermer';
+  });
+  ok(tipOk, 'infobulle « Fermer » visible par-dessus la fenêtre (elementFromPoint)');
+  await page.mouse.move(2, 2);
+  // Recette L66 : 24 px entre la ligne Commencer à / Minuteur et l'encadré des options (44 auparavant)
+  const rowGap = await dlg.evaluate((d) =>
+    Math.round(
+      d.querySelector('.lx-opts').getBoundingClientRect().top -
+        d.querySelector('.lx-row').getBoundingClientRect().bottom,
+    ),
+  );
+  ok(rowGap === 24, `24 px entre Commencer à / Minuteur et les options (${rowGap} px)`);
   const hist = dlg.getByRole('button', { name: 'Historique (1)' });
   ok(
     (await hist.count()) === 1 &&
@@ -264,6 +284,23 @@ async function openEditor(b, state) {
     );
     await p2.unrouteAll({ behavior: 'ignoreErrors' });
     await c2.close();
+  }
+  // Recette L66 : sans présentation passée, pas de lien « Historique (0) »
+  {
+    const st = seed();
+    st.tables.present_reports = [];
+    const o = await openEditor(b, st);
+    await fromMore(o.page, 'Présenter');
+    const d0 = o.page.getByRole('dialog', { name: 'Présenter « Démo CRM »' });
+    await d0.waitFor();
+    await o.page.waitForTimeout(400);
+    const foot0 = (await d0.locator('.fd-modal__foot button').allInnerTexts()).map((x) => x.trim()).join('|');
+    ok(
+      foot0 === 'Annuler|Lancer la présentation' && (await d0.getByText(/Historique/).count()) === 0,
+      `sans historique : lien « Historique » masqué (${foot0})`,
+    );
+    await o.page.unrouteAll({ behavior: 'ignoreErrors' });
+    await o.ctx.close();
   }
   await b.close();
 })();
