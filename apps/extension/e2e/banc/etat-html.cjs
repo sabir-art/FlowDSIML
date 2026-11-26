@@ -117,9 +117,20 @@ const CAS = [
     attendus: [
       ['Commandes lisibles (bouton et lien)', 'Modifier la fiche'],
       ['Lien lisible', 'Voir l’historique'],
+      ['Libellés de rôle lisibles', 'Interlocutrice'],
+      ['Libellé « Client » lisible, nom remplacé', 'Client :'],
+      ['Statut lisible dans le tableau', 'Active'],
     ],
     // Ce qui ne doit PAS rester lisible dans la copie
-    interdits: ['Camille Durand', 'camille.durand@acme.example'],
+    interdits: [
+      'Camille Durand',
+      'camille.durand@acme.example',
+      'Léa Martin',
+      'Hugo Bernard',
+      'Inès Petit',
+      'Moreau',
+      'Julie Roux',
+    ],
   },
   {
     id: 'piege',
@@ -135,6 +146,9 @@ const CAS = [
       ['Ville seule lisible', 'Ville : Lyon'],
       ['Avis signé', 'Camille D.'],
       ['Lignes du tableau', 'Offre essentielle'],
+      ['Rôle tenu par un service', 'Responsable : Service RH'],
+      ['Colonne « Client » sans nom', 'Brouillon'],
+      ['Champ « Type de client »', 'Entreprise'],
     ],
     remplacements: 0,
   },

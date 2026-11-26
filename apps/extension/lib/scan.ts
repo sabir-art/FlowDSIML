@@ -67,8 +67,11 @@ function isLabelLike(el: Element, text: string): boolean {
   return text.split(' ').length <= 4;
 }
 
-/** Libellé de contexte d'un texte affiché : en-tête de colonne, terme <dt>, libellé voisin. */
-function contextLabel(el: Element): string {
+/**
+ * Libellé de contexte d'un texte affiché : en-tête de colonne, terme <dt>, libellé voisin. column est vrai
+ * pour l'en-tête d'une colonne de vrai tableau : seul cas où un nom d'un seul mot est admis (« Durand »).
+ */
+function contextLabel(el: Element): { text: string; column?: boolean } {
   const cell = el.closest('td,[role="cell"],[role="gridcell"]');
   if (cell) {
     const row = cell.parentElement;
@@ -76,13 +79,13 @@ function contextLabel(el: Element): string {
     const idx = row ? Array.prototype.indexOf.call(row.children, cell) : -1;
     const head = table?.querySelector('thead tr, [role="row"]');
     const th = idx >= 0 && head && head !== row ? head.children[idx] : null;
-    if (th) return clean(th.textContent);
+    if (th) return { text: clean(th.textContent), column: true };
   }
   const dd = el.closest('dd');
   if (dd) {
     let p = dd.previousElementSibling;
     while (p && p.tagName !== 'DT') p = p.previousElementSibling;
-    if (p) return clean(p.textContent);
+    if (p) return { text: clean(p.textContent) };
   }
   // Libellé court juste avant (« Nom » puis la valeur dans l'élément suivant)
   let host: Element | null = el;
@@ -90,10 +93,10 @@ function contextLabel(el: Element): string {
     const prev = host.previousElementSibling;
     const t = clean(prev?.textContent);
     // Un libellé, pas une donnée : court, sans chiffre ni @
-    if (prev && t && t.length <= 30 && !/[\d@]/.test(t) && isLabelLike(prev, t)) return t;
+    if (prev && t && t.length <= 30 && !/[\d@]/.test(t) && isLabelLike(prev, t)) return { text: t };
     host = host.parentElement;
   }
-  return '';
+  return { text: '' };
 }
 
 function rangeRects(node: Text, start: number, end: number): DOMRect[] {
@@ -155,7 +158,11 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
     }
     if (!value) continue; // champ vide : rien à cacher
     const label = fieldLabel(el);
-    const type = byAc ?? labelType(label) ?? matchText(value)[0]?.type ?? null;
+    // Un libellé de rôle (« Client », « Responsable ») n'annonce un nom que si la valeur en a la forme
+    const byLabel = labelType(label);
+    const roleOnly = byLabel === 'name' && labelType(label, { roles: false }) !== 'name';
+    const fromLabel = roleOnly && !plausibleValue('name', value) ? null : byLabel;
+    const type = byAc ?? fromLabel ?? matchText(value)[0]?.type ?? null;
     if (type) emit({ type, el, value, by: 'field', label: clean(label).slice(0, 80) || undefined });
   }
 
@@ -180,12 +187,17 @@ function walk(root: ParentNode, visibleOnly: boolean, emit: (h: Hit) => void): v
     n++;
     // Le texte d'une commande (bouton, lien, onglet) n'est pas la valeur du libellé voisin ; les motifs
     // (adresse e-mail, téléphone…) y restent cherchés
-    const ctx = parent.closest(COMMAND) ? '' : contextLabel(parent);
+    const { text: ctx, column } = parent.closest(COMMAND) ? { text: '' } : contextLabel(parent);
     const ctxType = labelType(ctx);
     const trimmed = text.trim();
     // La valeur doit avoir la forme de la donnée annoncée : « Statut » après « Nom » est un autre
     // en-tête, « Lyon » après « Ville » une ville seule (lisible)
-    if (ctxType && trimmed.length <= 120 && !labelType(trimmed) && plausibleValue(ctxType, trimmed)) {
+    if (
+      ctxType &&
+      trimmed.length <= 120 &&
+      !labelType(trimmed) &&
+      plausibleValue(ctxType, trimmed, { single: column })
+    ) {
       const start = text.indexOf(trimmed);
       emit({
         type: ctxType,

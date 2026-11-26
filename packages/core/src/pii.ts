@@ -55,6 +55,12 @@ const notAName = (m: RegExpExecArray) => {
 };
 const BIRTH_CONTEXT = /(naissance|né\(e\)|née?\s+le|birth|date of birth|dob)/i;
 
+/**
+ * L60 (petit lot UX) : libellés qui désignent une personne par son rôle. Ils ne suffisent jamais seuls :
+ * la valeur doit avoir la forme d'un nom (« Client : Camille Durand », pas « Responsable : Service RH »).
+ */
+const ROLE = /(\bclients?\b|\bcontacts?\b|interlocut(?:eur|rice)s?|\bresponsables?\b)/i;
+
 /** Libellé de champ → type (nom de champ, aria-label, placeholder, en-tête de colonne, `autocomplete`…). */
 const LABELS: Array<[RegExp, PiiType]> = [
   [/(s[ée]curit[ée] sociale|\bnir\b|\bssn\b|n°\s*ss\b|\bsecu)/i, 'nir'],
@@ -65,13 +71,15 @@ const LABELS: Array<[RegExp, PiiType]> = [
   [/(adresse|address|street|\bvoie\b|code postal|postal|\bzip\b|\bville\b|\bcity\b)/i, 'address'],
   [/(identifiant|\blogin\b|username|user ?id|matricule|n° dossier|num[ée]ro de dossier)/i, 'identifier'],
   [/(\bnom\b|pr[ée]nom|\bname\b|given-name|family-name|usager|b[ée]n[ée]ficiaire|jeune accompagn)/i, 'name'],
+  [ROLE, 'name'],
 ];
 
-export function labelType(label: string | null | undefined): PiiType | null {
+/** roles: false ignore les libellés de rôle (« Client ») : seuls comptent les libellés explicites. */
+export function labelType(label: string | null | undefined, opts: { roles?: boolean } = {}): PiiType | null {
   if (!label) return null;
   const l = label.trim();
   if (!l || l.length > 80) return null;
-  for (const [re, type] of LABELS) if (re.test(l)) return type;
+  for (const [re, type] of LABELS) if ((opts.roles !== false || re !== ROLE) && re.test(l)) return type;
   return null;
 }
 
@@ -141,13 +149,16 @@ const PARTICLE = /^(de|du|des|la|le|d|van|von|der|den|di|da|el|al|ben)$/i;
  *  - address : une adresse porte un numéro (voie ou code postal). Une ville seule reste lisible
  *    (décision produit du 25/11) : elle n'est pas une donnée personnelle à elle seule.
  */
-export function plausibleValue(type: PiiType, value: string): boolean {
+export function plausibleValue(type: PiiType, value: string, opts: { single?: boolean } = {}): boolean {
   const v = value.replace(/\s+/g, ' ').trim();
   if (type === 'address') return /\d/.test(v);
   if (type !== 'name') return true;
   if (/[\d@:/]/.test(v)) return false;
   const words = v.split(' ');
+  if (words.length === 1 && opts.single) return singleName(words[0]!);
   if (words.length < 2 || words.length > 5) return false;
+  // « Service RH », « Mode API » : un mot d'interface suivi d'un sigle n'est pas un nom
+  if (UI_WORDS.has(words[0]!.toLowerCase()) || words.slice(1).every((w) => ACRONYMS.has(w))) return false;
   let proper = 0;
   for (const w of words) {
     if (PARTICLE.test(w.replace(/[’']$/, ''))) continue;
@@ -155,6 +166,22 @@ export function plausibleValue(type: PiiType, value: string): boolean {
     proper++;
   }
   return proper >= 2;
+}
+
+/** Mots seuls d'une colonne de tableau qui ne sont pas des noms : états, totaux, réponses. */
+const NOT_SINGLE_NAMES = new Set(
+  'actions action actif active inactif inactive brouillon archivé archivée publié publiée total aucun aucune oui non tous toutes autre autres inconnu inconnue nouveau nouvelle'.split(
+    ' ',
+  ),
+);
+/**
+ * Nom d'un seul mot, admis seulement dans une colonne de nom d'un vrai tableau (« Durand » sous « Nom ») :
+ * une majuscule initiale, pas de sigle, pas de mot d'interface ni de libellé.
+ */
+function singleName(w: string): boolean {
+  if (!/^\p{Lu}[\p{L}’'-]+$/u.test(w) || ACRONYMS.has(w)) return false;
+  const l = w.toLowerCase();
+  return !UI_WORDS.has(l) && !NOT_SINGLE_NAMES.has(l) && !labelType(w) && !/\p{Ll}\p{Lu}/u.test(w);
 }
 
 /** Extrait masqué pour l'écran de vérification : jamais la valeur en clair. */
