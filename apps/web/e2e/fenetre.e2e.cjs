@@ -69,7 +69,8 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
     'canevas : sans image, fenêtre de 480 px au plus',
   );
   ok(
-    /Étape 2 sur \d+/.test(await canvas.textContent()) &&
+    // NUM-01 : « sur N » insécable
+    /Étape 2 sur\s\d+/.test(await canvas.textContent()) &&
       /Échap pour fermer/.test(await canvas.textContent()) &&
       /Précédent/.test(await canvas.textContent()) &&
       /Suivant/.test(await canvas.textContent()),
@@ -91,7 +92,9 @@ const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
   const block = page.locator('.win-img');
   ok(
     (await block.getByRole('button', { name: 'Importer…' }).count()) === 1 &&
-      /PNG, JPEG ou WebP, 5 Mo au plus\. Ou déposez le fichier sur ce bloc\./.test(await block.textContent()),
+      /PNG, JPEG ou WebP, 5\sMo au plus\. Ou déposez le fichier sur ce bloc\./.test(
+        await block.textContent(),
+      ),
     'panneau : image en zone étroite (« Importer… » et aide)',
   );
   await axe(page, '.win-img', 'panneau sans image');

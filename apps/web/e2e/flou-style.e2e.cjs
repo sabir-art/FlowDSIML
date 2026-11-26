@@ -163,7 +163,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   ok(await until(() => last().tint === 'plum'), '« Prune » enregistrée');
   ok(/rgba\(163, 25, 91, 0\.3\d*\)/.test(await css(2, 'backgroundColor')), 'aperçu : teinte à 30 %');
   ok(
-    (await panel.locator('#mk-tint-h').textContent()) ===
+    // NUM-01 : « 30 % » insécable, comparé espaces ramenées à des espaces ordinaires
+    (await panel.locator('#mk-tint-h').textContent()).replace(/\s/g, ' ') ===
       'Teinte à 30 % par-dessus le flou. Le texte masqué n’est jamais lisible, quelle que soit la teinte.',
     'aide de la teinte',
   );
