@@ -62,3 +62,22 @@ L'écran est conforme à la planche 0a0c403, sur les sites « tiers » et « spa
 - analytics.js est rangé dans « Script d'un autre site » sur localhost : c'est propre au banc.
 
 Demandes concernées : extension 0.3.3 · listes déroulantes collées à leur champ (EXT-LIST-01) · Ajouter à une démo : retour automatique après le choix · pied du popup en pause · Sandbox v2 · écran « Vérifier avant l'envoi » en mode vivant.
+
+## C. « Zones cliquables » masqué sur une page vivante : VERT
+
+Branche dev-mvp à c034e25 (efea526). `player-sandbox-vivant` passe à 13/13, en clair comme en sombre :
+- sur une page vivante, pas de bouton « Zones cliquables », ni dans le lecteur ni dans l'aperçu ;
+- sur la copie inerte de secours, le bouton revient ;
+- `html-player` passe à 34/34 : la copie inerte n'a pas régressé et garde son bouton.
+
+Capture : `C-D-lecteur-editeur.png` (en bas, le lecteur vivant sans le bouton).
+
+## D. « Clic sur un élément non relié » grisé en Sandbox vivant : VERT
+
+`sandbox-vivant-reglages` passe à 10/10, en clair comme en sombre :
+- sans Sandbox vivant, le réglage est actif ;
+- avec le Sandbox vivant, il est grisé et porte l'aide « Sans effet sur une page vivante : elle réagit elle-même. », reliée par `aria-describedby`.
+
+J'ai **ajouté moi-même le contrôle du dernier cas**, que l'e2e ne couvrait pas. Quand l'espace interdit le Sandbox vivant, le réglage **redevient actif, sans l'aide**, en clair comme en sombre (`D-interdit-par-espace.png`). Je recommande d'ajouter ce contrôle à l'e2e.
+
+Demandes concernées (C, D) : Sandbox v2 · lecteur et aperçu d'une page vivante sans « Zones cliquables » · réglage « Clic sur un élément non relié » en Sandbox vivant.
