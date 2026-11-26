@@ -106,7 +106,8 @@ async function openEditor(b, state) {
     `Commencer à et Minuteur : sur une ligne, 40 px, même largeur (${Math.round(start.width)} / ${Math.round(tb.width)})`,
   );
   await timer.click();
-  const opts = (await page.getByRole('option').allInnerTexts()).map((x) => x.trim());
+  // NUM-01 : « 5 min » avec une espace insécable ; comparé espaces ramenées à des espaces ordinaires
+  const opts = (await page.getByRole('option').allInnerTexts()).map((x) => x.trim().replace(/\s+/g, ' '));
   ok(
     opts.join('|') === 'Sans minuteur|5 min|10 min|15 min|20 min|30 min|45 min|60 min|Autre…',
     `minuteur : ${opts.join(', ')}`,
@@ -197,8 +198,9 @@ async function openEditor(b, state) {
   await page.clock.fastForward('13:00');
   await page.waitForFunction(() => document.querySelector('.pr-timer')?.classList.contains('is-late'));
   ok(
-    (await page.locator('.pr-pill').innerText()) === 'Plus que 2 min' &&
-      (await page.locator('.pr-timer [aria-live="polite"]').innerText()) === 'Plus que 2 min' &&
+    (await page.locator('.pr-pill').innerText()).replace(/\s+/g, ' ') === 'Plus que 2 min' &&
+      (await page.locator('.pr-timer [aria-live="polite"]').innerText()).replace(/\s+/g, ' ') ===
+        'Plus que 2 min' &&
       /^13 min 0\d écoulées sur 15 min 00$/.test(await tm.getAttribute('aria-label')),
     `à 13:00 sur 15:00 : « Plus que 2 min » (annoncé poliment), nom « ${await tm.getAttribute('aria-label')} »`,
   );

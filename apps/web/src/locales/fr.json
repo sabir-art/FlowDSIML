@@ -1002,9 +1002,9 @@
       "logoMore": "Plus d’actions sur le logo",
       "logoRemove": "Retirer",
       "logoSending": "Envoi du logo",
-      "logoHelp": "PNG, JPEG, WebP ou SVG, 2 Mo au plus. Ou déposez le fichier sur ce bloc.",
+      "logoHelp": "PNG, JPEG, WebP ou SVG, 2 Mo au plus. Ou déposez le fichier sur ce bloc.",
       "logoBadType": "Format non accepté : PNG, JPEG, WebP ou SVG.",
-      "logoTooBig": "Fichier trop lourd : 2 Mo au plus.",
+      "logoTooBig": "Fichier trop lourd : 2 Mo au plus.",
       "logoError": "Le logo n’a pas pu être envoyé. Réessayez."
     },
     "settings": {
@@ -1199,7 +1199,7 @@
       "tint_plum": "Prune",
       "tint_blue": "Bleu",
       "tint_white": "Blanc",
-      "tintHelp": "Teinte à 30 % par-dessus le flou. Le texte masqué n’est jamais lisible, quelle que soit la teinte."
+      "tintHelp": "Teinte à 30 % par-dessus le flou. Le texte masqué n’est jamais lisible, quelle que soit la teinte."
     },
     "blurTag": "Flou",
     "applyStyle": {
@@ -1366,7 +1366,7 @@
       "pickTitle": "{{name}} : choisir une étape",
       "pickHelp": "La capture est copiée avec ses flous : modifier ensuite l’étape ne change pas l’Avant / Après.",
       "incomplete": "L’étape {{n}} Avant / Après n’a pas ses deux captures.",
-      "zoneHint": "PNG, JPEG ou WebP, 10 Mo au plus.",
+      "zoneHint": "PNG, JPEG ou WebP, 10 Mo au plus.",
       "zoneTitle": "Ajouter la capture",
       "zoneFromStep": "Choisir une étape…",
       "zoneSending": "Envoi de l’image"
@@ -2015,7 +2015,7 @@
       "listen": "Écouter",
       "genCount_one": "{{count}} caractère",
       "genCount_other": "{{count}} caractères",
-      "genAbout": "environ {{n}} s",
+      "genAbout": "environ {{n}} s",
       "genLang": "Langue de la démo : {{lang}}.",
       "preview": "Aperçu",
       "regenerate": "Régénérer",
@@ -2026,7 +2026,7 @@
       "startRec": "Démarrer l’enregistrement",
       "stop": "Arrêter l’enregistrement",
       "recHelp": "Votre micro. 2 minutes au plus.",
-      "importHelp": "MP3, M4A, WAV ou WebM, 5 Mo au plus. Ou déposez le fichier sur ce bloc.",
+      "importHelp": "MP3, M4A, WAV ou WebM, 5 Mo au plus. Ou déposez le fichier sur ce bloc.",
       "transcriptNote": "(obligatoire pour publier)",
       "readText": "Texte lu",
       "readTextNote": "(sert aussi de transcription)",
@@ -2146,12 +2146,12 @@
       "newTitle": "Fenêtre",
       "displayHelp": "Une fenêtre avec une image et un texte, par-dessus l’écran précédent.",
       "image": "Image",
-      "imageHelp": "PNG, JPEG ou WebP, 5 Mo au plus. Ou déposez le fichier sur ce bloc.",
+      "imageHelp": "PNG, JPEG ou WebP, 5 Mo au plus. Ou déposez le fichier sur ce bloc.",
       "imageMore": "Plus d’actions sur l’image",
       "replace": "Remplacer…",
       "remove": "Retirer",
       "sending": "Envoi de l’image",
-      "tooBig": "Image trop lourde : 5 Mo au plus.",
+      "tooBig": "Image trop lourde : 5 Mo au plus.",
       "alt": "Texte alternatif",
       "altHelp": "Laissez vide si l’image est décorative.",
       "stepOf": "Étape {{n}} sur {{total}}",
@@ -2190,7 +2190,7 @@
       "deleteImage": "Supprimer l’image",
       "keep": "Conserver les proportions",
       "opacity": "Opacité",
-      "percent": "{{n}} %",
+      "percent": "{{n}} %",
       "corners": "Coins",
       "square": "Droits",
       "rounded": "Arrondis",
@@ -2204,13 +2204,13 @@
       "adding": "Ajout de l’image…",
       "removed": "Image retirée",
       "badType": "Format non accepté : PNG, JPEG, WebP ou SVG.",
-      "tooBig": "Fichier trop lourd : 5 Mo au plus.",
+      "tooBig": "Fichier trop lourd : 5 Mo au plus.",
       "quota": "L’espace de stockage est plein : l’image n’a pas été ajoutée.",
       "error": "L’image n’a pas pu être ajoutée.",
       "dropHint": "Déposez une image sur la capture pour l’ajouter.",
       "selectedHint": "Image sélectionnée : {{name}}.",
       "layerLabel": "Image ajoutée : {{name}}",
-      "a11ySized": "Taille : {{w}} % × {{h}} %",
+      "a11ySized": "Taille : {{w}} % × {{h}} %",
       "destCapture": "Capture de l’étape « {{title}} »",
       "destLayer": "Image ajoutée sur l’étape « {{title}} »",
       "dropAdd": "Déposer pour ajouter une image",
@@ -2403,7 +2403,7 @@
       "sizeValue_one": "{{size}} · {{count}} fichier",
       "sizeValue_other": "{{size}} · {{count}} fichiers",
       "limit": "Limite",
-      "limitValue": "300 Mo par archive",
+      "limitValue": "300 Mo par archive",
       "warning": "Toute personne qui a le fichier voit la démo, sans mot de passe.",
       "limit1": "Ni suivi ni formulaire de lead : rien n’est envoyé, rien n’est gardé.",
       "limit2": "Les liens externes restent visibles mais ne s’ouvrent qu’en ligne.",
@@ -2418,7 +2418,7 @@
       "fileMeta": "{{size}} · version {{n}}",
       "errTitle": "L’archive n’a pas abouti.",
       "errAsset": "Un fichier de l’étape {{n}} est illisible. Republiez la démo, puis réessayez.",
-      "errSize": "L’archive dépasse 300 Mo. Raccourcissez la démo ou retirez une vidéo.",
+      "errSize": "L’archive dépasse 300 Mo. Raccourcissez la démo ou retirez une vidéo.",
       "errUnpublished": "La démo n’est pas publiée.",
       "errServer": "Vérifiez votre connexion, puis réessayez.",
       "noRight": "Votre rôle ne permet pas de diffuser cette démo."
@@ -2845,7 +2845,7 @@
         "feed_end": "Fin de « {{demo}} »",
         "feed_lead": "Lead sur « {{demo}} »",
         "endsToday": "Fins de démo aujourd’hui",
-        "liveSince": "En direct · actualisé il y a {{n}} s",
+        "liveSince": "En direct · actualisé il y a {{n}} s",
         "liveNow": "En direct · actualisé à l’instant",
         "paused": "En pause",
         "pauseLabel": "Mettre en pause l’actualisation",
@@ -3423,7 +3423,7 @@
     "deleted": "Style supprimé.",
     "picker": "Nuancier : {{label}}",
     "logoFromMediaHelp": "Un logo choisi dans la médiathèque est copié ici : le modifier ou le supprimer dans la médiathèque ne change pas ce logo.",
-    "logoFromMediaError": "Ce fichier ne convient pas comme logo : PNG, JPEG, WebP ou SVG, 2 Mo au plus."
+    "logoFromMediaError": "Ce fichier ne convient pas comme logo : PNG, JPEG, WebP ou SVG, 2 Mo au plus."
   },
   "vars": {
     "new": "Nouvelle variable",
@@ -4082,7 +4082,7 @@
     "restoreConfirm": "Remettre le centre",
     "restored": "Le centre de formation est de nouveau affiché à cette adresse.",
     "logoFromMediaHelp": "Un logo choisi dans la médiathèque est copié ici.",
-    "logoFromMediaError": "Ce fichier ne convient pas comme logo du centre : PNG, SVG ou WebP, 512 Ko au plus."
+    "logoFromMediaError": "Ce fichier ne convient pas comme logo du centre : PNG, SVG ou WebP, 512 Ko au plus."
   },
   "export": {
     "menu": "Exporter (PDF, GIF)",
@@ -4560,7 +4560,7 @@
     "schemaPublic": "Public",
     "schemaOne": "Un seul écran",
     "timerOff": "Sans minuteur",
-    "timerMin": "{{n}} min",
+    "timerMin": "{{n}} min",
     "timerOther": "Autre…",
     "history_one": "Historique ({{count}})",
     "history_other": "Historique ({{count}})",
@@ -4573,7 +4573,7 @@
     "historyViewOf": "Voir la présentation : {{when}}",
     "thisOne": "celle-ci",
     "reportDone": "Présentation terminée",
-    "planned": "Prévu : {{min}} min",
+    "planned": "Prévu : {{min}} min",
     "overBy": "Dépassée de {{time}}",
     "shorter": "Plus courte que prévu",
     "onTime": "Dans les temps",
@@ -4593,7 +4593,7 @@
     "timerName": "{{elapsed}} écoulées sur {{total}}",
     "timerNameFree": "{{elapsed}} écoulées",
     "ofTotal": "sur {{total}}",
-    "twoLeft": "Plus que 2 min"
+    "twoLeft": "Plus que 2 min"
   },
   "notifications": {
     "k_invite": "{{actor}} vous invite à rejoindre « {{workspace}} »",
@@ -4987,9 +4987,9 @@
     "count_other": "{{count}} fichiers",
     "import": "Importer",
     "uploading": "Import en cours…",
-    "types": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus",
+    "types": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus",
     "importFirst": "Importer votre premier fichier",
-    "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos de l’espace. PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus.",
+    "importHelp": "Logos, images de fond et polices, réutilisables dans toutes les démos de l’espace. PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus.",
     "quota": "{{used}} sur {{total}} Mo",
     "usedIn_one": "Utilisé dans {{count}} démo",
     "usedIn_other": "Utilisé dans {{count}} démos",
@@ -5013,7 +5013,7 @@
     },
     "unused": "Non utilisé",
     "dropHere": "Glissez des fichiers ici",
-    "pageHint": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
+    "pageHint": "PNG, JPEG, WebP, SVG ou WOFF2, 5 Mo au plus. La catégorie est déduite, vous pouvez la changer.",
     "imported": "« {{name}} » importé dans {{category}}",
     "change": "Changer",
     "reason": {
@@ -5044,9 +5044,9 @@
         "font": "Importer une nouvelle police"
       },
       "hint": {
-        "logo": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Il sera choisi d’office.",
-        "image": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Elle sera choisie d’office.",
-        "font": "WOFF2, 5 Mo au plus. Elle sera choisie d’office."
+        "logo": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Il sera choisi d’office.",
+        "image": "PNG, JPEG, WebP ou SVG, 5 Mo au plus. Elle sera choisie d’office.",
+        "font": "WOFF2, 5 Mo au plus. Elle sera choisie d’office."
       },
       "use": {
         "logo": "Utiliser ce logo",
@@ -6356,8 +6356,8 @@
     "pick": "Choisir une vidéo…",
     "pickOther": "Choisir une autre vidéo",
     "seeUsage": "Voir l’utilisation",
-    "sending": "Envoi… {{pct}} % · {{sent}} sur {{total}} Mo",
-    "stalled": "Envoi interrompu · {{pct}} %",
+    "sending": "Envoi… {{pct}} % · {{sent}} sur {{total}} Mo",
+    "stalled": "Envoi interrompu · {{pct}} %",
     "resume": "Reprendre",
     "progress": "Envoi de la vidéo",
     "or": "ou",
@@ -6373,12 +6373,12 @@
       "body": "Choisissez une vidéo MP4 ou WebM."
     },
     "tooBig": {
-      "title": "« {{name}} » pèse {{size}} Mo.",
-      "body": "La limite est de 50 Mo : raccourcissez ou découpez la vidéo."
+      "title": "« {{name}} » pèse {{size}} Mo.",
+      "body": "La limite est de 50 Mo : raccourcissez ou découpez la vidéo."
     },
     "tooLong": {
-      "title": "« {{name}} » dure {{min}} min.",
-      "body": "La limite est de 10 min : découpez-la en plusieurs démos."
+      "title": "« {{name}} » dure {{min}} min.",
+      "body": "La limite est de 10 min : découpez-la en plusieurs démos."
     },
     "unreadable": {
       "title": "« {{name}} » ne peut pas être lu.",
@@ -6441,9 +6441,9 @@
     "mentionsEmail": "Recevoir aussi les mentions par e-mail",
     "frequency": "Fréquence des e-mails",
     "frequency_hourly": "Au fil de l’eau",
-    "frequency_daily": "Un résumé par jour à 9 h",
+    "frequency_daily": "Un résumé par jour à 9 h",
     "frequencyHelp_hourly": "Au plus un e-mail par heure.",
-    "frequencyHelp_daily": "À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau."
+    "frequencyHelp_daily": "À 9 h, à votre heure ; pas d’e-mail s’il n’y a rien de nouveau."
   },
   "accessKeys": {
     "title": "Clés d’accès",
@@ -6567,7 +6567,7 @@
     "header": "En-tête",
     "headerSub": "Ce que le visiteur voit en arrivant.",
     "logo": "Logo",
-    "logoHelp": "Celui de l’espace par défaut. PNG ou SVG, 2 Mo au plus.",
+    "logoHelp": "Celui de l’espace par défaut. PNG ou SVG, 2 Mo au plus.",
     "logoSpace": "Logo de l’espace",
     "logoChosen": "Logo choisi dans la médiathèque",
     "logoReset": "Revenir au logo de l’espace",
