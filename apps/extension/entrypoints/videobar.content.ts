@@ -6,7 +6,9 @@ import { maskExcerpt } from '@flowdsiml/core';
 import { scanNodes } from '@/lib/scan';
 import type { RecordingStatus, VideoBarRequest } from '@/lib/messages';
 import { MAX_MS, WARN_MS, elapsed, timer } from '@/lib/video';
-import { lang, strings } from '@/lib/i18n';
+import { barCount, lang, strings } from '@/lib/i18n';
+import { BAR_CSS, barIcon, barMarkup, wireBar } from '@/lib/captureBar';
+import { Mic, MicOff } from 'lucide';
 
 /**
  * F7 (L21-02) : barre d'enregistrement vidéo dans l'onglet (shadow DOM, toujours au-dessus,
@@ -212,50 +214,56 @@ export default defineContentScript({
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>
-        .bar{display:flex;align-items:center;gap:6px;padding:6px 8px 6px 14px;border-radius:999px;background:#141311;
-          color:#fff;font:500 13px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.3);cursor:grab;user-select:none}
-        .dot{width:10px;height:10px;border-radius:50%;background:#e5484d;animation:p 1.4s ease-in-out infinite}
-        .bar.paused .dot{background:#a8a29e;animation:none}
-        @keyframes p{50%{opacity:.35}} @media (prefers-reduced-motion:reduce){.dot{animation:none}}
-        .t{font-variant-numeric:tabular-nums;min-width:96px}
-        button{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border:0;border-radius:999px;
-          background:#2b2926;color:#fff;font:inherit;cursor:pointer}
-        button:hover{background:#3a3734} button:focus-visible{outline:3px solid #1f7fb6;outline-offset:2px}
-        .stop{background:#fff;color:#141311} .stop:hover{background:#e7e5e4}
-        .toast,.alert{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;
-          border-radius:10px;background:#141311;color:#fff;font:500 13px system-ui,sans-serif}
+        ${BAR_CSS}
+        .bar:not(.is-paused) .dot{animation:p 1.4s ease-in-out infinite}
+        @keyframes p{50%{opacity:.35}} @media (prefers-reduced-motion:reduce){.bar .dot{animation:none}}
+        .bar .mic[aria-pressed=false]{color:#f5a524}
+        .toast,.alert{position:absolute;bottom:56px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:8px 14px;
+          border-radius:10px;background:#16181d;color:#fff;font:500 13px system-ui,sans-serif}
         .alert{background:#7a1f12}
         [hidden]{display:none!important}
       </style>
       <div class="toast" role="status" hidden></div>
       <div class="alert" role="alert" hidden></div>
-      <div class="bar" role="toolbar" aria-label="${s.recBar}">
-        <span class="dot" aria-hidden="true"></span>
-        <span class="t" role="timer" aria-live="off"></span>
-        <button type="button" class="pause" title="${s.shortcutPause}"></button>
-        <button type="button" class="mark" title="${s.shortcutMark}">${s.markStep}</button>
-        <button type="button" class="stop" title="${s.shortcutStop}">${s.finish}</button>
-      </div>`;
+      ${barMarkup({
+        label: s.recBar,
+        name: s.barVideo,
+        middle: `<span class="note clk"></span>
+          <button type="button" class="mic" aria-pressed="true" hidden></button>`,
+      })}`;
     document.documentElement.appendChild(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
-    const bar = $<HTMLDivElement>('.bar');
-    const timeEl = $<HTMLSpanElement>('.t');
-    const pauseBtn = $<HTMLButtonElement>('.pause');
-    timeEl.textContent = `${timer(0)} / ${timer(MAX_MS)}`;
+    // L60 §2 : barre commune ; la pastille est le chronomètre (« 00:42 »), les clics deviennent des pauses
+    const ui = wireBar(root, {
+      name: s.barVideo,
+      mover: host,
+      onPause: () =>
+        send({ type: 'fd:video-pause' }).then(async () => {
+          await tick();
+          return ui.paused;
+        }),
+      onStop: () => finish(),
+    });
+    const timeEl = $<HTMLSpanElement>('.pill');
+    timeEl.setAttribute('role', 'timer');
+    timeEl.setAttribute('aria-live', 'off');
+    ui.setCount(timer(0));
     timeEl.setAttribute('aria-label', s.timerLabel.replace('{{t}}', timer(0)));
-    pauseBtn.textContent = s.pause;
+    const clk = $<HTMLSpanElement>('.clk');
+    clk.textContent = barCount('clicks', 0);
+    const micBtn = $<HTMLButtonElement>('.mic');
+    const paintMic = (on: boolean) => {
+      micBtn.setAttribute('aria-pressed', String(on));
+      micBtn.replaceChildren(barIcon(on ? Mic : MicOff), s.micLabel);
+    };
+    paintMic(true);
+    micBtn.onclick = () => void send({ type: 'fd:video-mic' }).then(tick);
     const toast = $<HTMLDivElement>('.toast');
     const alertEl = $<HTMLDivElement>('.alert');
     let warned = false;
     let stopped = false;
     let micShown = false;
 
-    pauseBtn.onclick = () => void send({ type: 'fd:video-pause' }).then(tick);
-    $<HTMLButtonElement>('.mark').onclick = () => {
-      void send({ type: 'fd:video-mark', label: '', manual: true, zones: shown });
-      flash(s.marked);
-    };
-    $<HTMLButtonElement>('.stop').onclick = () => finish();
     function finish() {
       if (stopped) return;
       stopped = true;
@@ -278,11 +286,14 @@ export default defineContentScript({
         { startedAt: st.startedAt ?? Date.now(), pausedAt: st.pausedAt ?? null, pausedMs: st.pausedMs ?? 0 },
         Date.now(),
       );
-      const paused = !!st.pausedAt;
-      timeEl.textContent = `${timer(ms)} / ${timer(MAX_MS)}`;
+      // Le compte à rebours n'est pas une pause de la personne
+      const paused = !!st.pausedAt && !st.countdown;
+      ui.setCount(timer(ms));
       timeEl.setAttribute('aria-label', s.timerLabel.replace('{{t}}', timer(ms)));
-      bar.classList.toggle('paused', paused);
-      pauseBtn.textContent = paused ? s.resume : s.pause;
+      if (ui.paused !== paused) ui.setPaused(paused);
+      clk.textContent = barCount('clicks', st.steps);
+      micBtn.hidden = !st.micOn;
+      if (st.micOn) paintMic(!st.micMuted);
       if (st.micDenied && !micShown) {
         micShown = true;
         alertEl.textContent = s.micDenied;
@@ -298,22 +309,65 @@ export default defineContentScript({
     void tick();
     const tickTimer = setInterval(() => void tick(), 500);
 
-    // Déplacement de la barre à la souris
-    let drag: { x: number; y: number; left: number; top: number } | null = null;
-    bar.addEventListener('pointerdown', (e) => {
-      if ((e.target as Element).closest('button')) return;
-      const r = host.getBoundingClientRect();
-      drag = { x: e.clientX, y: e.clientY, left: r.left, top: r.top };
-      bar.setPointerCapture(e.pointerId);
-    });
-    bar.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      host.style.transform = 'none';
-      host.style.bottom = 'auto';
-      host.style.left = `${Math.max(0, drag.left + e.clientX - drag.x)}px`;
-      host.style.top = `${Math.max(0, drag.top + e.clientY - drag.y)}px`;
-    });
-    bar.addEventListener('pointerup', () => (drag = null));
+    // ===== L60 §2 : compte à rebours de 3 s, fond assombri à 55 %, Échap pour annuler =====
+    void browser.runtime
+      .sendMessage({ type: 'fd:status' })
+      .then((st: unknown) => {
+        if ((st as RecordingStatus | null)?.countdown) countdown();
+      })
+      .catch(() => undefined);
+    function countdown() {
+      const cdHost = document.createElement('div');
+      cdHost.setAttribute('data-fd-ui', '');
+      cdHost.setAttribute('data-fd-countdown', '');
+      cdHost.style.cssText = 'position:fixed;inset:0;z-index:2147483647';
+      const cr = cdHost.attachShadow({ mode: 'open' });
+      cr.innerHTML = `
+        <style>
+          .cd{position:fixed;inset:0;display:grid;place-content:center;justify-items:center;gap:16px;
+            background:rgba(0,0,0,.55);color:#fff;font:500 16px system-ui,sans-serif;text-align:center}
+          .n{font:700 120px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums}
+          @media (prefers-reduced-motion:no-preference){.n.go{animation:z .9s ease-out}}
+          @keyframes z{from{transform:scale(1.35);opacity:0}to{transform:scale(1);opacity:1}}
+        </style>
+        <div class="cd" role="dialog" aria-modal="true" aria-label="${s.countdownText}">
+          <b class="n" aria-hidden="true"></b>
+          <p>${s.countdownText}</p>
+          <span role="status" class="sr" style="position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></span>
+        </div>`;
+      document.documentElement.appendChild(cdHost);
+      const num = cr.querySelector<HTMLElement>('.n')!;
+      const said = cr.querySelector<HTMLElement>('[role=status]')!;
+      let n = 3;
+      let timerId = 0;
+      const show = () => {
+        num.textContent = String(n);
+        num.classList.remove('go');
+        void num.offsetWidth;
+        num.classList.add('go');
+        said.textContent = s.countdownLabel.replace('{{n}}', String(n));
+      };
+      const end = () => {
+        clearInterval(timerId);
+        document.removeEventListener('keydown', onKey, true);
+        cdHost.remove();
+      };
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        e.stopPropagation();
+        end();
+        void browser.runtime.sendMessage({ type: 'fd:cancel' }).catch(() => undefined);
+      };
+      document.addEventListener('keydown', onKey, true);
+      show();
+      timerId = window.setInterval(() => {
+        n -= 1;
+        if (n > 0) return show();
+        end();
+        void send({ type: 'fd:video-go' }).then(tick);
+      }, 1000);
+    }
 
     // Clics horodatés : pauses-étapes proposées au montage
     let last = 0;
@@ -341,6 +395,7 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener((msg: unknown) => {
       if ((msg as { type?: string })?.type === 'fd:recorder-stop') {
         clearInterval(tickTimer);
+        document.querySelector('[data-fd-countdown]')?.remove();
         clearInterval(scanTimer);
         clearInterval(flushTimer);
         cancelAnimationFrame(sampling);

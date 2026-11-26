@@ -39,7 +39,9 @@ type Msg =
       metas: Array<{ id: string; type: string; excerpt: string; by: string; label?: string }>;
       samples: Array<{ id: string; t: number; rects: MaskRect[] }>;
     }
-  | { type: 'fd:rec-cancel' };
+  | { type: 'fd:rec-cancel' }
+  /** L60 §2 : bouton Micro de la barre (piste coupée, l'enregistrement continue). */
+  | { type: 'fd:rec-mic'; on: boolean };
 
 let recorder: MediaRecorder | null = null;
 let chunks: Blob[] = [];
@@ -51,6 +53,8 @@ let masks = new Map<string, VideoMask>();
 let frames: Blob[] = [];
 let hasVoice = false;
 let micDenied = false;
+/** Pistes du micro de l'enregistrement en cours (coupées par la barre). */
+let micTracks: MediaStreamTrack[] = [];
 let mime = 'video/webm';
 let meta: Start['meta'] | null = null;
 
@@ -153,7 +157,8 @@ async function start(m: Start) {
       /* webcam refusée : vidéo de l'onglet seule */
     }
   }
-  const out = new MediaStream([...video.getVideoTracks(), ...(mic?.getAudioTracks() ?? [])]);
+  micTracks = mic?.getAudioTracks() ?? [];
+  const out = new MediaStream([...video.getVideoTracks(), ...micTracks]);
   mime = pickMime((t) => MediaRecorder.isTypeSupported(t));
   recorder = new MediaRecorder(out, {
     mimeType: mime,
@@ -195,6 +200,10 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   const m = msg as Msg;
   if (m.type === 'fd:rec-start') return start(m).catch((e: Error) => ({ error: e.message }));
   if (m.type === 'fd:rec-pause') return void recorder?.pause();
+  if (m.type === 'fd:rec-mic') {
+    for (const t of micTracks) t.enabled = m.on;
+    return true;
+  }
   if (m.type === 'fd:rec-resume') return void recorder?.resume();
   if (m.type === 'fd:rec-mark')
     return frame().then((b) => {

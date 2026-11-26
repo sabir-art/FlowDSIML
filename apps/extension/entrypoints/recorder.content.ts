@@ -483,6 +483,8 @@ export default defineContentScript({
 
     document.addEventListener('pointerdown', onPointerDown, true);
     browser.runtime.onMessage.addListener((msg: unknown) => {
+      if ((msg as { type?: string })?.type === 'fd:paused')
+        ui.setPaused(!!(msg as { paused?: boolean }).paused);
       if ((msg as { type?: string })?.type === 'fd:recorder-stop') {
         document.removeEventListener('pointerdown', onPointerDown, true);
         document.removeEventListener('pointermove', onPointerMove, true);

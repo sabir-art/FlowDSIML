@@ -281,6 +281,8 @@ const fr = {
   htmlBlockedDisabled: 'Les captures HTML sont désactivées dans votre espace.',
   // L60 §1 : popup « Que voulez-vous capturer ? »
   // L60 §2 : barre de capture commune aux 4 modes
+  countdownText: 'L’enregistrement commence. Échap pour annuler',
+  countdownLabel: 'L’enregistrement commence dans {{n}}',
   barClicks: 'Captures',
   barHtml: 'HTML',
   barSandbox: 'Sandbox',
@@ -626,6 +628,8 @@ const en: typeof fr = {
   htmlBlockedDomain:
     'Not allowed on this site: {{domain}} is not in your workspace’s list of domains. Use the screenshot capture, or ask an admin.',
   htmlBlockedDisabled: 'HTML captures are disabled in your workspace.',
+  countdownText: 'Recording starts. Esc to cancel',
+  countdownLabel: 'Recording starts in {{n}}',
   barClicks: 'Screenshots',
   barHtml: 'HTML',
   barSandbox: 'Sandbox',

@@ -87,6 +87,10 @@ export type VideoBarRequest =
       zones?: Array<{ x: number; y: number; w: number; h: number }>;
     }
   | { type: 'fd:video-stop' }
+  /** L60 §2 : bouton Micro de la barre. */
+  | { type: 'fd:video-mic' }
+  /** L60 §2 : fin du compte à rebours, l'enregistrement commence. */
+  | { type: 'fd:video-go' }
   | { type: 'fd:video-blurs'; count: number }
   /** EXT-02 §4 : données repérées (extrait masqué, origine) et leurs positions relevées dans la page. */
   | {
@@ -138,6 +142,11 @@ export interface RecordingStatus {
   pausedAt?: number | null;
   pausedMs?: number;
   micDenied?: boolean;
+  /** L60 §2 : micro demandé et obtenu (bouton Micro de la barre), coupé ou non. */
+  micOn?: boolean;
+  micMuted?: boolean;
+  /** L60 §2 : compte à rebours de 3 s en cours (enregistrement en pause). */
+  countdown?: boolean;
   blurredZones?: number;
   /** EXT-02 §4.2 : « Masquer en direct » choisi au démarrage. */
   liveMask?: boolean;

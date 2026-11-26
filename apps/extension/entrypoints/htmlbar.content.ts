@@ -238,6 +238,7 @@ export default defineContentScript({
     const onMsg = (msg: unknown) => {
       const type = (msg as { type?: string })?.type;
       if (type === 'fd:html-capture') void capture();
+      if (type === 'fd:paused') ui.setPaused(!!(msg as { paused?: boolean }).paused);
       if (type === 'fd:recorder-stop') {
         document.removeEventListener('click', onClick, true);
         clearInterval(watch);

@@ -67,6 +67,38 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
     `l’enregistrement démarre sur le faux flux (${started.slice(0, 120)})`,
   );
   await page.locator('[data-fd-ui]').first().waitFor({ state: 'attached' });
+  // L60 §2 : compte à rebours de 3 s, fond assombri à 55 %, Échap pour annuler ; puis l'enregistrement
+  const cd = await until(
+    () =>
+      page.evaluate(() => {
+        const h = document.querySelector('[data-fd-countdown]');
+        const d = h?.shadowRoot?.querySelector('.cd');
+        return !!d && /^[123]$/.test(d.querySelector('.n').textContent);
+      }),
+    3000,
+  );
+  const cdInfo = await page.evaluate(() => {
+    const d = document.querySelector('[data-fd-countdown]')?.shadowRoot?.querySelector('.cd');
+    return d ? { text: d.querySelector('p').textContent, bg: getComputedStyle(d).backgroundColor } : null;
+  });
+  ok(
+    cd &&
+      cdInfo?.text === 'L’enregistrement commence. Échap pour annuler' &&
+      cdInfo.bg === 'rgba(0, 0, 0, 0.55)',
+    `compte à rebours : chiffre, « L’enregistrement commence. Échap pour annuler », fond à 55 % (${JSON.stringify(cdInfo)})`,
+  );
+  if (process.env.SHOTS_DIR)
+    await page.screenshot({ path: `${process.env.SHOTS_DIR}/video-compte-a-rebours.png` });
+  ok(
+    await until(
+      async () =>
+        !(await page.evaluate(() => !!document.querySelector('[data-fd-countdown]'))) &&
+        !(await status())?.countdown &&
+        !(await status())?.pausedAt,
+      5000,
+    ),
+    'compte à rebours terminé en 3 s : l’enregistrement commence',
+  );
   // Trois gestes d'utilisateur : chacun pose un repère avec un libellé lisible
   // (le service compte les repères : chaque geste attend que le précédent soit compté, comme une
   // personne qui regarde l'écran avant de cliquer de nouveau)
@@ -91,6 +123,33 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
   await clic(page.getByRole('button', { name: 'Ajouter une note' }));
   await page.getByText('Note ajoutée').waitFor();
   await reperes(3);
+  // L60 §2 : barre vidéo commune (« Vidéo », chronomètre, « 3 clics repérés », 48 px, contrôles de 36 px)
+  const vbar = await page.evaluate(() => {
+    const host = [...document.querySelectorAll('[data-fd-ui]')].find((e) =>
+      e.shadowRoot?.querySelector('.bar'),
+    );
+    const b = host.shadowRoot.querySelector('.bar');
+    const r = b.getBoundingClientRect();
+    const ctl = [...b.querySelectorAll(':scope > button, .mid > button')].filter(
+      (e) => e.getClientRects().length,
+    );
+    return {
+      name: b.querySelector('.nm').textContent,
+      pill: b.querySelector('.pill').textContent,
+      clicks: b.querySelector('.clk').textContent,
+      h: Math.round(r.height),
+      hs: ctl.map((e) => Math.round(e.getBoundingClientRect().height)),
+    };
+  });
+  ok(
+    vbar.name === 'Vidéo' &&
+      /^\d\d:\d\d$/.test(vbar.pill) &&
+      vbar.clicks === '3 clics repérés' &&
+      vbar.h === 48 &&
+      vbar.hs.every((h) => h === 36),
+    `barre vidéo : ${JSON.stringify(vbar)}`,
+  );
+  if (process.env.SHOTS_DIR) await page.screenshot({ path: `${process.env.SHOTS_DIR}/video-barre.png` });
   // L'enregistrement a une durée réelle : on attend que l'état du service l'affiche
   await until(async () => ((await status())?.elapsedMs ?? (await status())?.seconds ?? 2) >= 2, 4000);
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/video-review.html'), { timeout: 30000 });
