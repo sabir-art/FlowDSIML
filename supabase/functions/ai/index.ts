@@ -12,6 +12,15 @@ import { labelOf, type Provider } from '../_shared/ai/catalogue.ts';
 import { providerKey } from '../_shared/ai/keys.ts';
 import { CONSOLE_ACTIONS, consoleAction, type ProviderRow } from '../_shared/ai/console.ts';
 import { FN_OF_TASK, FUNCTIONS, cutFeatures, resolve, type Fn } from '../_shared/ai/functions.ts';
+import {
+  DEFAULT_RULES,
+  autoPick,
+  fallbackOf,
+  menuOf,
+  requested,
+  type AssistantRow,
+  type AutoRules,
+} from '../_shared/ai/assistant.ts';
 import * as claude from '../_shared/ai/providers/anthropic.ts';
 import * as eleven from '../_shared/ai/providers/elevenlabs.ts';
 import * as openai from '../_shared/ai/providers/openai.ts';
@@ -77,6 +86,31 @@ async function keySet() {
   for (const p of ['anthropic', 'openai', 'elevenlabs'] as const) if (await keyOf(p)) out.add(p);
   return out;
 }
+/** L41 étape 4 : liste de l'assistant et règles d'Auto (cache de 60 s). */
+let asstCache: { at: number; rows: AssistantRow[]; rules: AutoRules } | null = null;
+async function assistantConfig(fresh = false) {
+  if (!fresh && asstCache && Date.now() - asstCache.at < 60_000) return asstCache;
+  const [{ data: rows }, { data: rules }] = await Promise.all([
+    admin.from('ai_assistant_models').select('model, position, proposed, tag'),
+    admin.from('ai_auto_rules').select('rule, model'),
+  ]);
+  asstCache = {
+    at: Date.now(),
+    rows: (rows ?? []) as AssistantRow[],
+    rules: {
+      ...DEFAULT_RULES,
+      ...Object.fromEntries(
+        ((rules ?? []) as Array<{ rule: string; model: string }>).map((r) => [r.rule, r.model]),
+      ),
+    } as AutoRules,
+  };
+  return asstCache;
+}
+async function assistantMenu() {
+  const c = await assistantConfig();
+  return { menu: menuOf(c.rows, await keySet()), rules: c.rules };
+}
+
 /** Fonctions coupées tenues à jour pour les espaces (ai_cut), au plus une écriture par changement. */
 let lastCut: string | null = null;
 async function syncCut(features: string[]) {
@@ -402,6 +436,24 @@ async function consoleOf(req: Request, body: Record<string, unknown>) {
       return { old: (data as { old?: string | null } | null)?.old ?? null };
     },
     setCut: syncCut,
+    assistantRows: async () => (await assistantConfig(true)).rows,
+    autoRules: async () => (await assistantConfig(true)).rules,
+    setAssistant: async (rows, uid, label) => {
+      const { error } = await admin.rpc('ai_assistant_set', { p_models: rows, p_actor: uid, p_label: label });
+      if (error) throw new Error(/LAST_MODEL/.test(error.message) ? 'LAST_MODEL' : 'SERVER');
+      asstCache = null;
+    },
+    setRule: async (rule, model, uid, label) => {
+      const { data, error } = await admin.rpc('ai_auto_rule_set', {
+        p_rule: rule,
+        p_model: model,
+        p_actor: uid,
+        p_label: label,
+      });
+      if (error) throw new Error('SERVER');
+      asstCache = null;
+      return { old: (data as { old?: string | null } | null)?.old ?? null };
+    },
     test: (provider, key) =>
       provider === 'anthropic'
         ? claude.test(key)
@@ -444,6 +496,10 @@ Deno.serve(async (req) => {
   const uid = await editorOf(req, ws);
   if (!uid) return json(403, { error: 'FORBIDDEN' });
 
+  // L41 étape 4 : menu de l'assistant (modèles proposés par la Console, utilisables), sans quota
+  if (body.action === 'assistant_models')
+    return json(200, { result: { models: (await assistantMenu()).menu } });
+
   if (
     body.task === 'voice' ||
     body.task === 'captions' ||
@@ -464,19 +520,34 @@ Deno.serve(async (req) => {
   if (resolved && (resolved.status === 'cut' || resolved.status === 'off'))
     return json(503, { error: 'UNAVAILABLE' });
 
+  // L41 étape 4 : assistant. Modèle demandé contrôlé contre le menu (403 MODEL), Auto selon les règles
+  let assistantModel: string | null = null;
+  let asst: Awaited<ReturnType<typeof assistantMenu>> | null = null;
+  if (parsed.task === 'assistant') {
+    asst = await assistantMenu();
+    const want = requested(String(parsed.model), asst.menu);
+    if (!want) return json(403, { error: 'MODEL' });
+    const msgs = (parsed.payload.messages ?? []) as Array<{ text: string }>;
+    assistantModel = want.auto ? autoPick(asst.rules, asst.menu, msgs.at(-1)?.text ?? '') : want.model;
+    if (!assistantModel) return json(503, { error: 'UNAVAILABLE' });
+  }
+
   const blocked = await reserveOr(ws, uid, FEATURE_OF[parsed.task]);
   if (blocked) return blocked;
 
   let prompt;
   try {
-    prompt = applyModel(buildPrompt(parsed), parsed);
+    prompt = assistantModel
+      ? { ...buildPrompt(parsed), model: assistantModel }
+      : applyModel(buildPrompt(parsed), parsed);
     // Modèle choisi dans la Console (ou repli d'un modèle retiré), sauf choix explicite dans l'assistant
     const m = resolved?.model;
     if (
       m &&
       m !== 'auto' &&
       (resolved!.explicit || resolved!.status === 'fallback') &&
-      parsed.model === 'auto'
+      parsed.model === 'auto' &&
+      !assistantModel
     )
       prompt = { ...prompt, model: m };
   } catch (e) {
@@ -486,9 +557,22 @@ Deno.serve(async (req) => {
   }
   let result;
   try {
-    result = await claude.text((await keyOf('anthropic')) ?? '', prompt, {
-      deadline: DEADLINE_MS[parsed.task],
-    });
+    try {
+      result = await claude.text((await keyOf('anthropic')) ?? '', prompt, {
+        deadline: DEADLINE_MS[parsed.task],
+      });
+    } catch (first) {
+      // L41 étape 4 : Auto, modèle indisponible ou surchargé : un essai sur le repli (règle de la Console)
+      const fb =
+        asst && parsed.model === 'auto' && claude.failure(first).error === 'PROVIDER'
+          ? fallbackOf(asst.rules, asst.menu, prompt.model)
+          : null;
+      if (!fb) throw first;
+      prompt = { ...prompt, model: fb };
+      result = await claude.text((await keyOf('anthropic')) ?? '', prompt, {
+        deadline: DEADLINE_MS[parsed.task],
+      });
+    }
   } catch (e) {
     // Aucune réponse (ou pas dans le délai de la tâche) : la demande est rendue, aucun crédit décompté.
     // Seul le statut est journalisé.
