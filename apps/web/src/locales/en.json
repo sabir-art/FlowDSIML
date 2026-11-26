@@ -1118,11 +1118,12 @@
       "addedStart_one": "{{count}} step added at the start",
       "addedStart_other": "{{count}} steps added at the start",
       "new": "New",
-      "live": "Live from the extension",
-      "received_one": "{{count}} step received",
-      "received_other": "{{count}} steps received",
-      "liveMode": "Screenshots",
-      "receiving": "Step {{n}} · receiving…"
+      "live": "Capture in progress in the extension",
+      "received_one": "{{count}} step",
+      "received_other": "{{count}} steps",
+      "receiving": "Step {{n}} · receiving…",
+      "arriveEnd": "they will arrive at the end.",
+      "receivingAll": "Receiving…"
     },
     "rail": {
       "label": "Step tools",
