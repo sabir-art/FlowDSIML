@@ -94,6 +94,10 @@ body {
   cursor: pointer;
   flex: none;
 }
+/* RADIUS-01, famille Rond (décision du client du 26/11) : lecture/pause de la voix off dans la barre */
+.p-icon-btn.p-voice-toggle {
+  border-radius: 50%;
+}
 .p-icon-btn:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--p-text) 35%, transparent);
 }

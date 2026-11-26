@@ -360,11 +360,16 @@ function wav(sec) {
     const r = e.getBoundingClientRect();
     const b = e.querySelector('.p-voice-play').getBoundingClientRect();
     const body = e.parentElement.querySelector('.p-rich').getBoundingClientRect();
-    return { h: Math.round(r.height), play: Math.round(b.width), under: r.top >= body.bottom };
+    return {
+      h: Math.round(r.height),
+      play: Math.round(b.width),
+      under: r.top >= body.bottom,
+      rond: getComputedStyle(e.querySelector('.p-voice-play')).borderRadius,
+    };
   });
   ok(
-    geo.h === 36 && geo.play === 28 && geo.under,
-    `ligne de 36 px sous le texte, bouton de 28 px (${JSON.stringify(geo)})`,
+    geo.h === 36 && geo.play === 28 && geo.under && geo.rond === '50%',
+    `ligne de 36 px sous le texte, bouton de 28 px, rond (RADIUS-01) (${JSON.stringify(geo)})`,
   );
   ok(
     (await pl.getByRole('button', { name: 'Activer le son' }).count()) === 0 &&
@@ -439,6 +444,10 @@ function wav(sec) {
   {
     const pause = pl.locator('.p-controls').getByRole('button', { name: 'Mettre la voix en pause' });
     await pause.waitFor();
+    ok(
+      (await pause.evaluate((b) => getComputedStyle(b).borderRadius)) === '50%',
+      'barre du lecteur : bouton lecture/pause de la voix rond (RADIUS-01)',
+    );
     await pause.click();
     await pl.waitForFunction(() => document.querySelector('audio').paused);
     const resume = pl.locator('.p-controls').getByRole('button', { name: 'Écouter la voix off' });
