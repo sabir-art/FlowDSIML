@@ -137,3 +137,20 @@ Captures :
 **Note pour le chef** : 3056891 modifie la migration `20261201380000_ia_modele_par_fonction.sql` au lieu d'en ajouter une nouvelle. C'est sans risque seulement si cette migration n'a encore été appliquée nulle part.
 
 Demandes concernées : L41 étape 3 · focus après un choix · journal lisible et Historique filtré · infobulle de l'entrée indisponible · Assistant coupé · repli sur le défaut de la fonction · bandeau groupé par cause.
+
+## Vérification sur 52fb330 (26/11) : Assistance IA coupée pendant l'édition, VERT
+
+**Banc** : `claude/dev-mvp` à 52fb330, à 1440 × 900 en clair et en sombre (plus 1440 × 1300 en clair). Je coupe la fonction côté serveur pendant que l'éditeur est ouvert : réponse `503 UNAVAILABLE`, et état IA mis à jour.
+
+| Contrôle | Résultat |
+| --- | --- |
+| Annonce aria-live | « Indisponible pour le moment. Réessayez plus tard. » écrit dans la zone `role=status` et dans la zone `role=alert` **364 ms** après la demande. Mesuré avec un observateur des mutations. |
+| Focus | Il revient sur l'entrée désactivée « Assistance IA » (`aria-disabled="true"`), **au clavier comme à la souris**, dans les 6 cas. Il ne retombe plus sur `body`. |
+| Description | `aria-describedby` donne « Indisponible pour le moment. Réessayez plus tard. » : elle est relue avec le focus. |
+| Infobulle | Au clavier, elle s'affiche au premier plan (au-dessus de l'entrée, à 900 px de haut). À la souris, le focus n'est pas « visible » : l'infobulle reste cachée jusqu'au survol, comme partout ailleurs dans l'app. |
+
+Capture : `52fb330-coupee-pendant-edition.png` (clavier, clair et sombre, à 900 px).
+
+Remarque non bloquante : un lecteur d'écran peut entendre la phrase jusqu'à trois fois (status, alert, puis description au focus). Une seule zone suffirait (`role=status`), puisque le focus relit déjà la description.
+
+Demandes concernées : L41 étape 3 · Assistance IA d'une bulle coupée pendant l'édition (annonce, focus, description, infobulle).
