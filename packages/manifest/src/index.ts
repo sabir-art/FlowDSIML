@@ -298,6 +298,12 @@ export const stepOptionsSchema = z
     showIcon: z.boolean().default(true).catch(true),
     /** Libellé du bouton principal (vide = « Suivant »). */
     buttonLabel: z.string().max(40).default('').catch(''),
+    /**
+     * Lot B (recette UX §3.4) : adresse affichée dans le cadre du navigateur pour cette page (domaine et
+     * chemin, lecture seule pour le visiteur). Préremplie à la capture, modifiable dans l'éditeur pour
+     * masquer une adresse interne ; absente, l'adresse de la démo (cadre) s'affiche.
+     */
+    address: z.string().max(120).optional().catch(undefined),
     /** L12-05 : libellé de « Précédent » dans la bulle (vide = thème) et affichage du bouton. */
     prevLabel: z.string().max(24).default('').catch(''),
     showPrev: z.boolean().default(false).catch(false),

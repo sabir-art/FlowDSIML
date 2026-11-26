@@ -1502,6 +1502,8 @@
       "vttFormat": "Fichier de sous-titres .vtt (WebVTT)."
     },
     "html": {
+      "address": "Adresse affichée",
+      "addressHelp": "Dans le cadre du navigateur, pour le visiteur. Modifiez-la pour masquer une adresse interne ; vide, l’adresse de la démo s’affiche.",
       "kind": "Étape HTML",
       "missing": "Page HTML manquante",
       "frame": "Page capturée : {{title}}",

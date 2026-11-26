@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { looksGlued, looksLikeSelector, looksTechnical, readableLabel } from './labels';
+import { displayAddress, looksGlued, looksLikeSelector, looksTechnical, readableLabel } from './labels';
 
 describe('libellés lisibles (L63)', () => {
   it('reconnaît un sélecteur ou du code', () => {
@@ -41,5 +41,23 @@ describe('libellés lisibles (L63)', () => {
     expect(readableLabel(['div.x > span', null, ''])).toBe('');
     expect(readableLabel(['a'.repeat(80)])).toHaveLength(58);
     expect(readableLabel(['a'.repeat(80)]).endsWith('…')).toBe(true);
+  });
+});
+
+describe('adresse affichée (lot B)', () => {
+  it('domaine et chemin, sans protocole, paramètres ni ancre', () => {
+    expect(displayAddress('https://crm.acme.example/opportunites?id=42#x')).toBe(
+      'crm.acme.example/opportunites',
+    );
+    expect(displayAddress('http://localhost:54410/formulaire')).toBe('localhost:54410/formulaire');
+    expect(displayAddress('https://acme.example/')).toBe('acme.example');
+    expect(displayAddress('https://acme.example/a/b/')).toBe('acme.example/a/b');
+  });
+  it('vide pour une adresse illisible ou hors web', () => {
+    expect(displayAddress('pas une adresse')).toBe('');
+    expect(displayAddress('file:///etc/passwd')).toBe('');
+  });
+  it('120 caractères au plus', () => {
+    expect(displayAddress(`https://a.example/${'x'.repeat(300)}`).length).toBe(120);
   });
 });

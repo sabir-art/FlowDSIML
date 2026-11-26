@@ -49,3 +49,19 @@ export function readableLabel(candidates: Array<string | null | undefined>, max 
   }
   return '';
 }
+
+/**
+ * Lot B (recette UX §3.4) : adresse affichée dans le cadre du navigateur, réduite au domaine et au
+ * chemin (« crm.acme.example/opportunites ») : ni protocole, ni paramètres, ni ancre, 120 caractères au
+ * plus. Chaîne vide pour une adresse illisible.
+ */
+export function displayAddress(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '';
+    const path = u.pathname === '/' ? '' : u.pathname.replace(/\/$/, '');
+    return `${u.host}${path}`.slice(0, 120);
+  } catch {
+    return '';
+  }
+}

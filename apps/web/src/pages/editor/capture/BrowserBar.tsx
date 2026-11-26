@@ -30,7 +30,10 @@ export function BrowserBar({
       : [];
   const active = stepTabs ? captured.active : 1;
   const captureUrl = step?.page_url?.replace(/^https?:\/\//, '') ?? '';
-  const url = frame.address || captureUrl;
+  // Lot B (recette UX §3.4) : adresse de la page (préremplie à la capture, modifiable), sinon celle de la démo
+  const stepAddress = ((step?.options as { address?: unknown } | null)?.address as string | undefined) ?? '';
+  const shown = stepAddress || frame.address;
+  const url = shown || captureUrl;
   const dots = frame.windowButtons && frame.style !== 'minimal' && (
     <>
       <i />
@@ -38,9 +41,7 @@ export function BrowserBar({
       <i />
     </>
   );
-  const address = frame.addressBar && (
-    <span className={`url${frame.address ? '' : ' is-capture'}`}>{url}</span>
-  );
+  const address = frame.addressBar && <span className={`url${shown ? '' : ' is-capture'}`}>{url}</span>;
   const withTabs = tabs.length > 0 && frame.style !== 'minimal';
   return (
     <div className={`browser browser--${frame.style}${withTabs ? ' has-tabs' : ''}`} aria-hidden="true">

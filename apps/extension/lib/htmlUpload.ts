@@ -1,5 +1,5 @@
 import type { Json } from '@flowdsiml/supabase-types';
-import type { HtmlOp } from '@flowdsiml/core';
+import { displayAddress, type HtmlOp } from '@flowdsiml/core';
 import { supabase } from './supabase';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
 import type { PendingHtmlPage } from './htmlStore';
@@ -134,6 +134,8 @@ export async function sendHtml(
       kind: 'html',
       title: names[i]!.slice(0, 200),
       page_url: p.url.slice(0, 2000),
+      // Lot B (recette UX §3.4) : adresse du cadre préremplie (domaine et chemin), modifiable dans l'éditeur
+      options: { address: displayAddress(p.url) } as NonNullable<Json>,
       html_path: path,
       html_ops: ops as unknown as Json,
       html_meta: {

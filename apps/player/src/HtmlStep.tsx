@@ -46,6 +46,7 @@ export function HtmlStep({
   onHit,
   overlay,
   onAddZone,
+  chrome,
 }: {
   step: Step;
   t: Dict;
@@ -69,6 +70,11 @@ export function HtmlStep({
    * cliquable. Absent dans le lecteur public (l'encart n'y apparaît jamais).
    */
   onAddZone?: () => void;
+  /**
+   * Lot B (recette UX §3.4) : Sandbox, cadre du navigateur au-dessus de la page, avec l'adresse de la
+   * page courante (absent : sans cadre).
+   */
+  chrome?: { style: 'light' | 'dark' | 'minimal'; dots: boolean; address: string | null };
 }) {
   const h = step.html!;
   const ht = t.html;
@@ -129,7 +135,8 @@ export function HtmlStep({
   // hauteur (comme les captures image) ; sinon elle débordait sur la barre du haut et les contrôles
   useEffect(() => {
     const el = box.current;
-    const step = el?.parentElement;
+    // Lot B : en Sandbox, la page peut être dans un cadre de navigateur ; la mesure se fait sur l'étape
+    const step = el?.closest<HTMLElement>('.p-html-step') ?? el?.parentElement;
     if (!el || !step) return;
     if (guided) {
       // La scène a déjà sa taille (proportions de la page capturée) : la page la remplit
@@ -371,7 +378,25 @@ export function HtmlStep({
   if (guided) return page;
   return (
     <div class="p-html-step">
-      {page}
+      {chrome ? (
+        <div class={`p-win p-win--${chrome.style} p-win--sb`}>
+          <div class="p-chrome" aria-hidden="true">
+            <div class="p-tabs p-tabs--addr">
+              {chrome.dots && chrome.style !== 'minimal' && (
+                <span class="p-tabs-dots">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              )}
+              {chrome.address !== null && <span class="p-addr">{chrome.address}</span>}
+            </div>
+          </div>
+          {page}
+        </div>
+      ) : (
+        page
+      )}
       <div class="p-html-bar">
         {/* Sandbox : le repère des pages clés tient la place du titre de l'étape */}
         {status ? (

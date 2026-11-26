@@ -100,6 +100,7 @@ async function juger(b, cas, envoi) {
       html_path: chemin,
       html_ops: s.html_ops,
       html_meta: s.html_meta,
+      options: { ...base.options, ...s.options },
     });
   });
   // Bulles envoyées, rattachées à la démo ouverte (champs absents : ceux du modèle du faux Supabase)
@@ -221,6 +222,22 @@ async function juger(b, cas, envoi) {
       .click();
   }
 
+  // Lot B (recette UX §3.4) : le cadre du navigateur affiche le domaine et le chemin de la page
+  const adresse = (i) => {
+    const u = new URL(steps[i].page_url);
+    return `${u.host}${u.pathname === '/' ? '' : u.pathname.replace(/\/$/, '')}`;
+  };
+  // Panneau de l'étape : « Adresse affichée » préremplie ; sur le formulaire, on la remplace par une
+  // adresse neutre (masquer une adresse interne) et l'aperçu doit afficher celle-ci
+  await rail.first().click();
+  const champ = p.locator('#st-address');
+  ok(
+    (await champ.inputValue()) === adresse(0),
+    `${nom} : panneau, « Adresse affichée » préremplie (« ${await champ.inputValue()} »)`,
+  );
+  const masque = cas.id === 'formulaire' ? 'crm.acme.example/demandes' : null;
+  if (masque) await champ.fill(masque);
+  const montree = (i) => (i === 0 && masque ? masque : adresse(i));
   // Aperçu : le lecteur ouvre la première page
   await rail.first().hover();
   await p.getByRole('button', { name: 'Lire depuis l’étape 1' }).click();
@@ -236,6 +253,19 @@ async function juger(b, cas, envoi) {
       () => false,
     );
   ok(lu, `${nom} : aperçu, le lecteur affiche la première page (« ${premier} »)`);
+  const barre = p.frameLocator('iframe.preview-frame').locator('.p-addr').first();
+  const lueAdresse = async (i) =>
+    barre
+      .filter({ hasText: montree(i) })
+      .waitFor({ timeout: 10000 })
+      .then(
+        () => true,
+        () => false,
+      );
+  ok(
+    steps[0].options?.address === adresse(0) && (await lueAdresse(0)),
+    `${nom} : aperçu, adresse « ${montree(0)} » dans le cadre${demo.kind === 'sandbox' ? ' du Sandbox' : ''}${masque ? ' (modifiée dans l’éditeur)' : ''}`,
+  );
   if (SHOTS) await p.screenshot({ path: `${SHOTS}/b-${cas.id}-apercu.png` });
   // Démo guidée : la bulle s'affiche dans l'aperçu, avec son libellé, sur l'élément entouré
   if (bulle) {
@@ -289,6 +319,12 @@ async function juger(b, cas, envoi) {
       suite,
       `${nom} : aperçu, ${lien || bulle ? 'le clic capturé mène à' : 'la flèche mène à'} « ${cible.title} »`,
     );
+    // Sandbox : l'adresse suit la page courante
+    if (lien && adresse(steps.indexOf(cible)) !== adresse(0))
+      ok(
+        await lueAdresse(steps.indexOf(cible)),
+        `${nom} : aperçu, l'adresse change avec la page (« ${montree(steps.indexOf(cible))} »)`,
+      );
     if (SHOTS) await p.screenshot({ path: `${SHOTS}/b-${cas.id}-apercu-suite.png` });
   }
   ok(erreurs.length === 0, `${nom} : aucune erreur dans l'app${erreurs.length ? ` (${erreurs[0]})` : ''}`);
