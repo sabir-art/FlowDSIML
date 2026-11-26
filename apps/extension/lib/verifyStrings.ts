@@ -19,6 +19,13 @@ const fr = {
     '1 script n’est pas copié ({{page}} de la page, {{track}} de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics.',
   note_other:
     '{{n}} scripts ne sont pas copiés ({{page}} de la page, {{track}} de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics.',
+  // Suivi UX du lot B : les éléments ajoutés par un script sont nommés à part, pas comptés comme scripts
+  noteMix:
+    '{{scripts}} et {{elements}} ne sont pas copiés ({{page}} de la page, {{track}} de suivi) : la démo n’en a pas besoin, la navigation est rejouée à partir de vos clics.',
+  noteScripts_one: '1 script',
+  noteScripts_other: '{{n}} scripts',
+  noteElements_one: '1 élément ajouté par un script',
+  noteElements_other: '{{n}} éléments ajoutés par un script',
   group: {
     pages: 'Pages copiées',
     pageScripts: 'Scripts de la page',
@@ -170,6 +177,12 @@ const en: typeof fr = {
     '1 script is not copied ({{page}} from the page, {{track}} tracking): the demo does not need it, navigation is replayed from your clicks.',
   note_other:
     '{{n}} scripts are not copied ({{page}} from the page, {{track}} tracking): the demo does not need them, navigation is replayed from your clicks.',
+  noteMix:
+    '{{scripts}} and {{elements}} are not copied ({{page}} from the page, {{track}} tracking): the demo does not need them, navigation is replayed from your clicks.',
+  noteScripts_one: '1 script',
+  noteScripts_other: '{{n}} scripts',
+  noteElements_one: '1 element added by a script',
+  noteElements_other: '{{n}} elements added by a script',
   group: {
     pages: 'Pages copied',
     pageScripts: 'Page scripts',

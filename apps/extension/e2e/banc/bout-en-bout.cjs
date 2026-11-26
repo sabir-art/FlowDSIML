@@ -44,12 +44,25 @@ async function envoyer(cas) {
     // Gêne lot B : le bouton ajouté par le script de discussion d'un autre site est listé dans les
     // scripts de la page, avec « Garder » ; on le garde sur la première page seulement
     if (cas.id === 'tiers') {
+      // Suivi UX du lot B : la tuile compte les scripts seuls, la note nomme les éléments à part
+      const bilan = async () => ({
+        tuile: (await review.locator('#sumbar > div').nth(1).innerText()).replace(/\s+/g, ' ').trim(),
+        note: (await review.locator('#note').innerText()).trim(),
+      });
+      const avant = await bilan();
       const grp = review.getByRole('region', { name: 'Scripts de la page', exact: true });
       await grp.getByRole('button', { name: 'Voir : Scripts de la page' }).click();
       const rows = grp.locator('li.el2').filter({ hasText: 'Discuter avec nous' });
       tiers = { lignes: await rows.count(), statut: (await rows.first().locator('.st2').innerText()).trim() };
+      // Icône d'un panneau (PanelTop : un cadre et sa barre du haut), pas celle d'un script
+      tiers.panneau = await rows
+        .first()
+        .locator('.gi svg')
+        .evaluate((svg) => !!svg.querySelector('rect') && !!svg.querySelector('path[d="M3 9h18"]'));
       await rows.first().getByRole('button', { name: 'Garder : Discuter avec nous' }).click();
       tiers.garde = (await rows.first().locator('.st2').innerText()).trim();
+      tiers.avant = avant;
+      tiers.apres = await bilan();
     }
     await review.click('#send');
     // L'écran rend la main à l'app : l'adresse de l'éditeur de la démo créée
@@ -84,6 +97,17 @@ async function juger(b, cas, envoi) {
     ok(
       t?.lignes === pages.length && t.statut === 'Non copié' && t.garde === 'Gardé',
       `${nom} : « Discuter avec nous » listé dans les scripts de la page, avec « Garder » (${JSON.stringify(t)})`,
+    );
+    const elems = new RegExp(
+      `^\\d+ scripts? et ${pages.length} éléments ajoutés par un script ne sont pas copiés`,
+    );
+    ok(
+      t?.panneau === true &&
+        /^Scripts non copiés \d+$/.test(t.avant.tuile) &&
+        t.avant.tuile === t.apres.tuile &&
+        elems.test(t.avant.note) &&
+        / et 1 élément ajouté par un script ne sont pas copiés/.test(t.apres.note),
+      `${nom} : tuile « Scripts non copiés » sans les éléments, note « n scripts et m éléments ajoutés par un script », icône de panneau (${JSON.stringify({ avant: t?.avant, apres: t?.apres })})`,
     );
     const avec = pages.map((x) => /id="chat-tiers"/.test(x.html));
     ok(
