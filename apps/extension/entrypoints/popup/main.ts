@@ -38,6 +38,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Smartphone,
+  Sparkles,
   TriangleAlert,
   Video,
   Webcam,
@@ -91,6 +92,7 @@ const ICONS = {
   ShieldCheck,
   SlidersHorizontal,
   Smartphone,
+  Sparkles,
   TriangleAlert,
   Webcam,
 };
@@ -313,6 +315,33 @@ $('size').addEventListener('keydown', (e) => {
   pickSize(all[(i + d + all.length) % all.length]);
 });
 paintSize();
+// L64 §3 : rédaction automatique, désactivée (visible) si l'espace n'autorise pas l'IA
+let aiAllowed = true;
+const autoDraft = createSwitch($<HTMLButtonElement>('auto-draft'), {
+  onChange: (on) => {
+    if (!aiAllowed) return (autoDraft.checked = false);
+    void browser.storage.local.set({ 'fd.autoDraft': on });
+  },
+});
+function paintAutoDraft() {
+  $('auto-draft-h').textContent = aiAllowed ? strings.autoDraftHelp : strings.autoDraftOff;
+  if (aiAllowed) $('auto-draft').removeAttribute('aria-disabled');
+  else {
+    $('auto-draft').setAttribute('aria-disabled', 'true');
+    autoDraft.checked = false;
+  }
+}
+async function syncAi() {
+  const ws = workspace.value;
+  if (!ws) return;
+  const { data } = await supabase.rpc('ai_status', { p_ws: ws });
+  const st = data as { enabled?: boolean; features?: Record<string, boolean> } | null;
+  aiAllowed = !!st?.enabled && st.features?.write !== false;
+  const saved = (await browser.storage.local.get('fd.autoDraft'))['fd.autoDraft'] === true;
+  paintAutoDraft();
+  if (aiAllowed) autoDraft.checked = saved;
+}
+paintAutoDraft();
 // L64 §4 : apparence (Système, Clair, Sombre), appliquée tout de suite au popup
 let look: Appearance = 'system';
 const lookButtons = () => [...$('look').querySelectorAll<HTMLButtonElement>('button')];
@@ -415,6 +444,7 @@ const workspace = createSelect($<HTMLButtonElement>('workspace'), {
     void loadFills();
     void syncHtmlRule();
     void loadDest();
+    void syncAi();
     syncDest();
   },
 });
@@ -858,7 +888,7 @@ async function render() {
   if (!data.session) return view('login');
   if ($('settings').hidden && $('dest').hidden) view('setup');
   await loadWorkspaces();
-  await Promise.all([loadFills(), syncHtmlRule(), loadDest()]);
+  await Promise.all([loadFills(), syncHtmlRule(), loadDest(), syncAi()]);
   await syncAttach();
   await checkPage();
 }
@@ -1142,6 +1172,7 @@ async function startCapture(hasDebugger: boolean) {
       // L64 §2 : dossier de la nouvelle démo, ou démo existante (étapes à la fin)
       folderId: destKind === 'new' ? folderId : null,
       appendDemo: destKind === 'append' ? appendDemo : null,
+      autoDraft: aiAllowed && autoDraft.checked && (m === 'clicks' || m === 'mobile'),
       size:
         (m === 'clicks' || m === 'html') && hasDebugger
           ? tabSize(sizeKey() as TabSizeKey, { w: 0, h: 0 })

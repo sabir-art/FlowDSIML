@@ -4,6 +4,8 @@ const log = [];
 let htmlCapture = { mode: 'allowed', domains: [] };
 // L64 §1 : espaces de la personne (menu ⋯), modifiables par le test ; null : le seul espace Acme
 let members = null;
+// L64 §3 : assistance IA de l'espace (réglage) et échec simulé du fournisseur, modifiables par le test
+let ai = { enabled: true, fail: false };
 let tusOffset = 0;
 // EXT-02 §2.4 : adresses que le faux serveur signale (liens gardés qu'il refuse)
 let blocked = [];
@@ -47,6 +49,31 @@ http
       if (req.url === '/__html-capture') {
         htmlCapture = JSON.parse(buf.toString() || '{}');
         return send(200, htmlCapture);
+      }
+      if (req.url === '/__ai') {
+        ai = { enabled: true, fail: false, ...JSON.parse(buf.toString() || '{}') };
+        return send(200, ai);
+      }
+      if (req.url.startsWith('/rest/v1/rpc/ai_status'))
+        return send(200, { enabled: ai.enabled, features: { write: ai.enabled } });
+      // L64 §3 : rédaction automatique d'une étape (faux fournisseur, aucune donnée réelle)
+      if (req.url.startsWith('/functions/v1/ai')) {
+        const b = JSON.parse(buf.toString() || '{}');
+        if (b.task !== 'step_draft') return send(400, { error: 'BAD_TASK' });
+        if (!ai.enabled) return send(403, { error: 'AI_DISABLED' });
+        if (ai.fail) return send(502, { error: 'PROVIDER' });
+        const label = String(b.input?.label ?? '');
+        return setTimeout(
+          () =>
+            send(200, {
+              result: {
+                title: label ? `Ouvrir ${label}` : 'Étape',
+                text: `Cliquez sur « ${label} » pour continuer.`,
+              },
+              redacted: 0,
+            }),
+          ai.delay || 0,
+        );
       }
       if (req.url === '/__members') {
         members = JSON.parse(buf.toString() || 'null');

@@ -333,6 +333,15 @@ const fr = {
   demoNone: 'Aucune démo ne correspond.',
   appendHelp:
     'Les nouvelles étapes s’ajoutent à la fin. Pour insérer après une étape précise, partez de l’éditeur («\u00a0Capturer de nouvelles étapes\u00a0»).',
+  // L64 §3 : rédaction automatique (aucun nom de fournisseur ni de modèle)
+  autoDraft: 'Rédaction automatique',
+  autoDraftHelp:
+    'L’IA de TutoClick rédige le titre et le texte de chaque étape pendant la capture. Vous relisez dans l’éditeur.',
+  autoDraftNote:
+    'La rédaction automatique utilise le quota IA de l’espace (1 crédit par étape). Désactivée si l’espace n’autorise pas l’IA.',
+  autoDraftOff: 'Désactivé par l’espace',
+  cardDrafting: 'Rédaction…',
+  cardProposed: 'Texte proposé\u202f: «\u00a0{{text}}\u00a0»',
   whatCapture: 'Que voulez-vous capturer ?',
   onPage: 'Sur {{title}} · {{host}}',
   mClicks: 'Captures d’écran',
@@ -712,6 +721,14 @@ const en: typeof fr = {
   demoNone: 'No demo matches.',
   appendHelp:
     'New steps are added at the end. To insert them after a given step, start from the editor (“Capture new steps”).',
+  autoDraft: 'Automatic writing',
+  autoDraftHelp:
+    'TutoClick’s AI writes the title and text of each step while you capture. You review them in the editor.',
+  autoDraftNote:
+    'Automatic writing uses the workspace’s AI quota (1 credit per step). Turned off if the workspace does not allow AI.',
+  autoDraftOff: 'Turned off by the workspace',
+  cardDrafting: 'Writing…',
+  cardProposed: 'Proposed text: “{{text}}”',
   whatCapture: 'What do you want to capture?',
   onPage: 'On {{title}} · {{host}}',
   mClicks: 'Screenshots',

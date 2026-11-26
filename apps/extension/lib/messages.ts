@@ -57,6 +57,8 @@ export type PopupRequest =
       /** L64 §2 : dossier de la nouvelle démo, ou démo existante où ajouter les étapes à la fin. */
       folderId?: string | null;
       appendDemo?: { id: string; title: string } | null;
+      /** L64 §3 : rédaction automatique de chaque étape (captures d'écran). */
+      autoDraft?: boolean;
     }
   | { type: 'fd:stop' }
   | { type: 'fd:pause' }
@@ -169,4 +171,5 @@ export interface RecordingStatus {
   /** L64 §2 : destination choisie dans le popup. */
   folderId?: string | null;
   appendDemo?: { id: string; title: string } | null;
+  autoDraft?: boolean;
 }

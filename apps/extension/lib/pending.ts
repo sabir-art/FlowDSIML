@@ -28,6 +28,8 @@ export interface PendingCapture {
   url: string;
   title: string;
   label: string;
+  /** L64 §3 : titre et texte proposés par la rédaction automatique (à relire dans l'éditeur). */
+  ai?: { title: string; text: string };
   selector: string;
   tag: string;
   element: PxRect | null;

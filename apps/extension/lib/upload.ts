@@ -123,6 +123,8 @@ export async function sendCaptures(
       };
     }
     const options: Record<string, unknown> = {};
+    // L64 §3 : texte rédigé par l'IA pendant la capture : « Généré par IA, à vérifier » dans l'éditeur
+    if (c.ai) options.aiDraft = true;
     if (c.tab) options.tab = c.tab;
     if (fullPage) options.fullPage = fullPage;
     // EXT-02 §5 : cadre gardé, en recadrage non destructif (l'image envoyée reste entière)
@@ -189,7 +191,7 @@ export async function sendCaptures(
       image_path: path,
       image_width: width,
       image_height: height,
-      title: c.title.slice(0, 200),
+      title: (c.ai?.title ?? c.title).slice(0, 200),
       page_url: c.url.slice(0, 2000),
       page_title: c.title.slice(0, 300),
       // Flous incrustés dans l'image : pas de calque à rejouer dans le player
@@ -204,7 +206,8 @@ export async function sendCaptures(
       demo_id: demoId,
       workspace_id: target.workspaceId,
       ...rect,
-      title: defaultHotspotTitle(c.label),
+      title: c.ai?.title ?? defaultHotspotTitle(c.label),
+      ...(c.ai ? { body: c.ai.text } : {}),
     });
     if (hot.error) throw hot.error;
     onProgress(position + 1);

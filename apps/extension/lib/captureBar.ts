@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import { Check, Code, Pause, Undo2, createElement, type IconNode } from 'lucide';
+import { Check, Code, Pause, Sparkles, Undo2, createElement, type IconNode } from 'lucide';
 import { strings as s } from './i18n';
 
 /**
@@ -238,18 +238,26 @@ export const CARD_CSS = `
     cursor:pointer}
   .card button:hover{background:var(--fdb-ctl-hover)}
   .card button:focus-visible{outline:3px solid #6cb8e6;outline-offset:2px}
+  /* L64 §3 : « Texte proposé : « … » », précédé de Sparkles ; « Rédaction… » bat en attendant */
+  .card .ai{display:flex;align-items:flex-start;gap:6px;min-width:0;font-size:12px;color:var(--fdb-fg)}
+  .card .ai svg{flex:none;margin-top:1px}
+  .card .ai span{white-space:normal;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;
+    -webkit-line-clamp:2}
+  .card .ai.wait span{animation:fdb-beat 1.2s ease-in-out infinite}
+  @keyframes fdb-beat{50%{opacity:.4}}
+  @media (prefers-reduced-motion:reduce){.card .ai.wait span{animation:none}}
 `;
 
 export function cardMarkup(): string {
   return `
     <div class="card" role="status" hidden>
       <span class="th" aria-hidden="true"></span>
-      <span class="tx"><b></b><small></small></span>
+      <span class="tx"><b></b><small></small><span class="ai" hidden></span></span>
       <button type="button" class="undo"></button>
     </div>`;
 }
 
-export type StepCard = { n: number; label: string; thumb?: string; id?: string };
+export type StepCard = { n: number; label: string; thumb?: string; id?: string; drafting?: boolean };
 
 export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise<unknown> }) {
   const card = root.querySelector<HTMLElement>('.card')!;
@@ -258,6 +266,19 @@ export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise
   const undo = card.querySelector<HTMLButtonElement>('.undo')!;
   undo.append(barIcon(Undo2), s.cardUndo);
   let cur: StepCard | null = null;
+  const ai = card.querySelector<HTMLElement>('.ai')!;
+  /** '' : en attente ; null : rien ; sinon le texte proposé. */
+  const paintDraft = (text: string | null) => {
+    ai.hidden = text === null;
+    ai.classList.toggle('wait', text === '');
+    if (text === null) return ai.replaceChildren();
+    ai.replaceChildren(
+      barIcon(Sparkles, 14),
+      Object.assign(document.createElement('span'), {
+        textContent: text === '' ? s.cardDrafting : s.cardProposed.replace('{{text}}', text),
+      }),
+    );
+  };
   let timer = 0;
   let hold = false;
   const hide = () => {
@@ -300,8 +321,15 @@ export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise
       title.textContent = s.cardCaptured.replace('{{n}}', String(c.n));
       sub.textContent = c.label;
       sub.hidden = !c.label;
+      paintDraft(c.drafting ? '' : null);
       card.hidden = false;
       arm();
+    },
+    /** L64 §3 : texte proposé pour l'étape n (null : échec, la ligne disparaît sans message). */
+    draft(n: number, text: string | null) {
+      if (cur?.n !== n) return;
+      paintDraft(text);
+      if (text) arm();
     },
     hide,
   };

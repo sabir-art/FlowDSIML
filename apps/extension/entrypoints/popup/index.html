@@ -169,6 +169,14 @@
             <button type="button" id="settings-back" class="ib"><i data-lucide="arrow-left"></i></button>
             <h2 id="settings-t" data-i18n="prefsTitle"></h2>
           </div>
+          <!-- L64 §3 : rédaction automatique, en tête, dans un encadré teinté de marque -->
+          <div class="ai-box">
+            <i data-lucide="sparkles"></i>
+            <span class="pr-k"
+              ><b id="auto-draft-l" data-i18n="autoDraft"></b><small id="auto-draft-h"></small
+            ></span>
+            <button id="auto-draft" aria-labelledby="auto-draft-l" aria-describedby="auto-draft-h"></button>
+          </div>
           <div class="rs prefs">
             <!-- L64 §4 : apparence du popup, de la barre et des écrans de vérification -->
             <div class="pr pr--col">
@@ -226,6 +234,7 @@
               ></span>
             </div>
           </div>
+          <p class="muted small" data-i18n="autoDraftNote"></p>
           <p class="muted small" data-i18n="prefsSaved"></p>
           <p class="muted small" id="version"></p>
         </section>
