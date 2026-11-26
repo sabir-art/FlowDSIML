@@ -288,7 +288,8 @@ export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise
   };
   const arm = () => {
     clearTimeout(timer);
-    if (!hold) timer = window.setTimeout(hide, 2000);
+    // « Rédaction… » : la carte attend le texte proposé (ou l'échec, 5 s au plus) avant ses 2 s
+    if (!hold && !ai.classList.contains('wait')) timer = window.setTimeout(hide, 2000);
   };
   // Survol ou focus : la carte reste le temps de viser « Annuler »
   card.addEventListener('pointerenter', () => ((hold = true), clearTimeout(timer)));
@@ -329,7 +330,7 @@ export function wireCard(root: ShadowRoot, o: { onUndo: (c: StepCard) => Promise
     draft(n: number, text: string | null) {
       if (cur?.n !== n) return;
       paintDraft(text);
-      if (text) arm();
+      arm();
     },
     hide,
   };

@@ -1,5 +1,15 @@
 import { assert, assertEquals, assertThrows } from 'jsr:@std/assert@1';
-import { AiError, buildPrompt, checkOutput, HAIKU, looksReal, parseRequest, redact, SONNET } from './lib.ts';
+import {
+  AiError,
+  buildPrompt,
+  DEADLINE_MS,
+  checkOutput,
+  HAIKU,
+  looksReal,
+  parseRequest,
+  redact,
+  SONNET,
+} from './lib.ts';
 
 Deno.test('redact : e-mail, téléphone, NIR, nom masqués ; variables gardées', () => {
   const r = redact(
@@ -261,6 +271,14 @@ Deno.test('generate depuis une capture HTML : page masquée, éléments numérot
     'TOO_LONG_PAGE_TEXT',
   );
 });
+
+Deno.test(
+  'step_draft : délai de 4 s (au-delà, demande rendue au quota) ; les autres tâches sans délai',
+  () => {
+    assertEquals(DEADLINE_MS.step_draft, 4000);
+    assertEquals(DEADLINE_MS.write, undefined);
+  },
+);
 
 Deno.test('step_draft : libellé, page et texte bornés et masqués, réponse titre + texte', () => {
   const req = parseRequest({

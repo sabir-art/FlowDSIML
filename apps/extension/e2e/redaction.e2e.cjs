@@ -190,6 +190,29 @@ const journal = async () => (await fetch(`${MOCK}/__log`)).json();
     after.ai && !/erreur|échec/i.test(after.text),
     'échec : la ligne du texte proposé disparaît, sans message',
   );
+  // Recette UX lot E : sans réponse en 4 s, la ligne disparaît ; l'étape garde le libellé du clic, sans repère IA
+  await setAi({ enabled: true, delay: 6000 });
+  await page.waitForTimeout(500);
+  const t0 = Date.now();
+  await page.click('#nouveau');
+  ok(await until(async () => (await status()).steps === 3), 'troisième étape capturée');
+  // La carte reste avec « Rédaction… » au-delà de ses 2 s, tant que la réponse est attendue
+  await page.waitForTimeout(2500);
+  const wait = await page.evaluate(() => {
+    const c = document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.card');
+    return !c.hidden && c.querySelector('.ai').textContent === 'Rédaction…';
+  });
+  const gone = await until(
+    () =>
+      page.evaluate(
+        () => document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.card .ai').hidden,
+      ),
+    8000,
+  );
+  ok(
+    gone && Date.now() - t0 < 7000 && wait,
+    `sans réponse en 4 s : « Rédaction… » reste affiché, puis la ligne disparaît sans message (${Date.now() - t0} ms)`,
+  );
   await setAi({ fail: false });
 
   // Envoi : titre et texte proposés, étape marquée « aiText » ; l'autre garde le libellé du clic
@@ -207,13 +230,15 @@ const journal = async () => (await fetch(`${MOCK}/__log`)).json();
     .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/hotspots'))
     .map((l) => JSON.parse(l.body));
   ok(
-    steps.length === 2 &&
+    steps.length === 3 &&
       steps[0].title === 'Ouvrir Nouveau projet' &&
       steps[0].options?.aiText === true &&
       hots[0]?.body === 'Cliquez sur « Nouveau projet » pour continuer.' &&
       !steps[1].options?.aiText &&
-      hots[1]?.title === 'Cliquez sur « Filtrer »',
-    `envoi : étape 1 avec le titre et le texte proposés (aiText), étape 2 avec le libellé du clic (${JSON.stringify(steps.map((s) => [s.title, !!s.options?.aiText]))})`,
+      hots[1]?.title === 'Cliquez sur « Filtrer »' &&
+      !steps[2]?.options?.aiText &&
+      hots[2]?.title === 'Cliquez sur « Nouveau projet »',
+    `envoi : étape 1 avec le titre et le texte proposés (aiText), étapes 2 (échec) et 3 (délai) avec le libellé du clic, sans repère (${JSON.stringify(steps.map((s) => [s.title, !!s.options?.aiText]))})`,
   );
   await setAi({ enabled: true, fail: false });
   await ctx.close();
