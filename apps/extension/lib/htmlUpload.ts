@@ -54,7 +54,14 @@ async function ingest(
 
 export async function sendHtml(
   pages: SendPage[],
-  target: { workspaceId: string; title: string; kind: HtmlDemoKind; appendTo?: string },
+  target: {
+    workspaceId: string;
+    title: string;
+    kind: HtmlDemoKind;
+    appendTo?: string;
+    /** L64 §2 : dossier de la nouvelle démo. */
+    folderId?: string | null;
+  },
   onProgress: (done: number) => void,
 ): Promise<{ demoId: string; dropped: DroppedLink[]; stepIds: string[] }> {
   const { data: s } = await supabase.auth.getSession();
@@ -87,6 +94,7 @@ export async function sendHtml(
       .from('demos')
       .insert({
         workspace_id: target.workspaceId,
+        folder_id: target.folderId ?? null,
         title: target.title.slice(0, 160),
         created_by: user.id,
         kind: target.kind,

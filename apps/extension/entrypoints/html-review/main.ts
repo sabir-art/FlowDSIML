@@ -686,6 +686,7 @@ async function main() {
         workspaceId: string;
         title: string;
         appendTo?: string;
+        folderId?: string | null;
         addTo?: { demoId: string; title: string; after: { n: number; title: string } | null } | null;
       }
     | undefined;
@@ -785,6 +786,7 @@ async function main() {
           title: title.value.trim(),
           kind: target.appendTo ? 'sandbox' : kind,
           appendTo: target.appendTo,
+          folderId: target.folderId ?? null,
         },
         (done) => {
           $('progress').textContent = fmt(s.sending, { done, total: batch.length });
