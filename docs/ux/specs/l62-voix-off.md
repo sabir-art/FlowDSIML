@@ -17,10 +17,10 @@ En haut, un segmenté **Générer · Enregistrer · Importer**. Le conteneur fai
 3. **Voix** :
    - une liste de 40 px, avec à gauche un **avatar** de 24 px : un rond teinté portant l'initiale de la voix, dans la palette BADGE-01. Pas de photo de vraie personne ;
    - à côté, le nom (« Antoine ») et un descripteur gris (« grave, calme ») ;
-   - dans la liste ouverte, chaque voix a son avatar, son nom, son descripteur sur une 2e ligne, et un mini-bouton ▶ (28 px, rayon 8) pour un échantillon fixe, qui ne consomme pas de quota ;
+   - dans la liste ouverte, chaque voix a son avatar, son nom, son descripteur sur une 2e ligne, et un mini-bouton ▶ rond (28 px) pour un échantillon fixe, qui ne consomme pas de quota ;
    - les voix proposées dépendent de la langue choisie.
 4. **Aperçu** :
-   - à gauche, un bouton carré de 40 px (▶ / ❚❚, rayon 10), **de la même hauteur que les champs**. C'est la correction du ▶ plus haut que la liste ;
+   - à gauche, un bouton **rond** de 40 px (▶ / ❚❚, famille Rond de RADIUS-01, décision du 26/11), **de la même hauteur que les champs**. C'est la correction du ▶ plus haut que la liste ;
    - à droite, une piste de 40 px sur `surface-sunken` : une **onde** dont la partie déjà lue prend la couleur de marque, puis le temps « 0:02 / 0:05 » en chiffres tabulaires ;
    - l'aperçu lit **le texte saisi** avec la voix choisie, sans rien enregistrer. Il compte dans le quota, ce que dit l'aide : « Lit le texte saisi avec la voix choisie, sans enregistrer. Compte dans le quota du mois. » ;
    - il est relancé après chaque modification du texte, de la langue ou de la voix ;
@@ -39,7 +39,7 @@ En haut, un segmenté **Générer · Enregistrer · Importer**. Le conteneur fai
 
 - Le lecteur (« bulle audio ») est **visible dans l'aperçu de l'étape**, à la position choisie, à 16 px des bords du cadre :
   - 44 px de haut, rayon 12, surface, ombre de menu ;
-  - de gauche à droite : poignée de déplacement (Grip), bouton ▶ (32 px, rayon 8, couleur de marque), onde, durée, bouton « Couper le son ».
+  - de gauche à droite : poignée de déplacement (Grip), bouton ▶ rond (32 px, couleur de marque), onde, durée, bouton « Couper le son ».
 - **Placement** :
   - quand l'outil Voix off est ouvert, un contour pointillé de marque entoure le lecteur, avec la mention « Lecteur audio · glissez pour le placer » ;
   - le glisser passe la position en « Libre » et enregistre `x`/`y` en pourcentage du cadre. Le lecteur reste toujours entier dans le cadre ;
@@ -50,7 +50,7 @@ En haut, un segmenté **Générer · Enregistrer · Importer**. Le conteneur fai
 ## 3. Côté visiteur (lecteur public)
 
 - Le lecteur audio a la même forme, sans poignée.
-  - **Pause / Lecture** (32 px, couleur de marque du thème client, `--p-btn-radius`).
+  - **Pause / Lecture** : bouton rond de 32 px, en couleur de marque du thème client (famille Rond, quel que soit `--p-btn-radius`).
   - Onde et temps.
   - **Couper le son / Rétablir le son** (`aria-pressed`). Ce choix est mémorisé pour toute la visite.
 - Sous-titres activés : bandeau centré en bas du cadre, au-dessus du lecteur, fond noir à 78 %, texte blanc de 15 px (13 px à 390), deux lignes au plus.
@@ -60,7 +60,7 @@ En haut, un segmenté **Générer · Enregistrer · Importer**. Le conteneur fai
 
 ## 4. Contrôles de même hauteur
 
-Tous les contrôles du panneau font 40 px : listes, bouton d'aperçu, bouton principal et segmentés (conteneur). Les mini-boutons de la liste des voix font 28 px. Les rayons suivent RADIUS-01. Le test e2e vérifie que le bouton ▶ et la liste « Voix » ont la même hauteur et le même rayon.
+Tous les contrôles du panneau font 40 px : listes, bouton d'aperçu, bouton principal et segmentés (conteneur). Les mini-boutons de la liste des voix font 28 px. Les rayons suivent RADIUS-01 ; les boutons de lecture audio sont ronds. Le test e2e vérifie que le bouton ▶ et la liste « Voix » ont la même hauteur, et que le bouton ▶ est rond.
 
 ## 5. e2e
 
@@ -177,7 +177,7 @@ Planche : `docs/ux/propositions/l62/planche-l62-selecteur-voix.png` (à 1440, cl
   - Une puce active est teintée de marque.
 - **Liste** (`role="listbox"`, 360 px de haut au plus, défilante) :
   - section **« Recommandées pour le français »** (selon la langue filtrée), avec son nombre, puis section **« Toutes les voix »** avec le nombre total (« Résultats » quand une recherche ou un filtre est actif) ;
-  - chaque voix est une ligne de 56 px : une coche (voix choisie), un avatar teinté de 32 px avec l'initiale, le **nom réel** de la voix, l'étiquette verte « Recommandée » s'il y a lieu, puis sur une 2e ligne « {genre} · {accent} · {style} » (tronquée avec « … »), et enfin le bouton **Écouter** de 32 px ;
+  - chaque voix est une ligne de 56 px : une coche (voix choisie), un avatar teinté de 32 px avec l'initiale, le **nom réel** de la voix, l'étiquette verte « Recommandée » s'il y a lieu, puis sur une 2e ligne « {genre} · {accent} · {style} » (tronquée avec « … »), et enfin le bouton **Écouter** de 32 px, **rond** (famille Rond de RADIUS-01) ;
   - la voix choisie a un fond teinté de marque et `aria-selected="true"`.
 - **Écouter** :
   - le bouton lit une phrase d'exemple **dans la langue de la démo**. Elle est générée une seule fois par voix et par langue, puis mise en cache, sans compter dans le quota ;

@@ -16,7 +16,7 @@ Planche avant / après (Équipe, fenêtre « Inviter des membres », éditeur ; 
 | Détail | `--fd-radius-detail` | 4 px | `kbd` (« Ctrl K »), code en ligne, barre d'adresse fictive du cadre navigateur |
 | Surface | `--fd-radius-surface` | 12 px | Cartes, tableaux encadrés, menus, popovers, infobulles riches, toasts, encadrés (zone de danger, bandeaux), vignettes |
 | Surface superposée | `--fd-radius-overlay` | 16 px | Fenêtres modales, tiroirs et feuilles (seulement leurs coins libres : `16px 16px 0 0` pour une feuille du bas), panneau d'aide |
-| Rond | `--fd-radius-round` | 50 % ou `--fd-radius-full` | Avatars, interrupteurs (piste et pastille), points d'état, pastilles numérotées des hotspots, curseurs de glissière, barres de progression (piste et remplissage), boutons ronds du lecteur public |
+| Rond | `--fd-radius-round` | 50 % ou `--fd-radius-full` | Avatars, interrupteurs (piste et pastille), points d'état, pastilles numérotées des hotspots, curseurs de glissière, barres de progression (piste et remplissage), boutons ronds du lecteur public, **boutons de lecture audio** : Écouter, lecture/pause des lecteurs audio (bulle, barre, aperçu de voix off) et écoute des voix (décision du client du 26/11) |
 
 Règles :
 - **Même hauteur, même rayon.** Deux contrôles côte à côte ont toujours le même rayon. Un contrôle qui change de taille change de famille, jamais de règle.
@@ -37,7 +37,7 @@ Règles :
 ## 3. Garde CI (comme MOTION-01 §6)
 
 Un contrôle statique dans `mouvement-regles.e2e.cjs`, ou un fichier frère `rayons-regles.e2e.cjs`, échoue sur deux cas :
-1. Un `border-radius` avec une valeur littérale (px, rem, %), hors des fichiers de jetons et hors des exceptions listées avec leur raison. Exceptions admises : `0`, `inherit`, `50%` uniquement sur un sélecteur de la famille Rond (avatar, interrupteur, point, pastille numérotée).
+1. Un `border-radius` avec une valeur littérale (px, rem, %), hors des fichiers de jetons et hors des exceptions listées avec leur raison. Exceptions admises : `0`, `inherit`, `50%` uniquement sur un sélecteur de la famille Rond (avatar, interrupteur, point, pastille numérotée, bouton de lecture audio).
 2. Un sélecteur de contrôle (`.fd-btn`, `.fd-input`, `.fd-sel`, `.segmented`, `.fd-tabs`, `.stg-search`, `.stg-group`, `[class*='-btn']`…) dont le rayon n'est pas `var(--fd-radius-control)` ou `var(--fd-radius-control-sm)`, ou `--p-btn-radius` dans le lecteur.
 
 Il faut aussi une vérification dynamique sur 6 pages (Équipe, Général, Démos, éditeur, Analytics, lecteur) : deux contrôles de même hauteur ±2 px, alignés sur la même ligne, ont le même rayon calculé.
