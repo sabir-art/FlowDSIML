@@ -2599,6 +2599,10 @@ export type Database = {
       // L30 : Assistance IA
       ai_status: { Args: { p_ws: string }; Returns: Json };
       ai_enabled: { Args: { p_ws: string }; Returns: boolean };
+      set_ai_models: {
+        Args: { p_ws: string; p_models: string[] };
+        Returns: Json;
+      };
       set_ai_settings: {
         Args: {
           p_ws: string;
