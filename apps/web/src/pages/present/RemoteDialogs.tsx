@@ -1,11 +1,10 @@
 /**
- * L26-10 : appairage du téléphone (QR code, adresse courte, code à 8 chiffres) ; L26-12 : bilan de fin.
+ * L26-10 : appairage du téléphone (QR code, adresse courte, code à 8 chiffres). Le bilan de fin est dans PresentReport (L66).
  */
 import { useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleCheck, Flag, RefreshCw, Smartphone, X } from 'lucide-react';
+import { CircleCheck, RefreshCw, Smartphone, X } from 'lucide-react';
 import { encode } from 'uqr';
-import { clock, spoken, type ReportRow } from './present';
 import { codeDisplay, codeSpoken, remoteShortUrl } from './remote';
 
 /** QR code en SVG (modules noirs sur fond blanc, marge de 2 modules), nommé pour les lecteurs d'écran. */
@@ -99,84 +98,6 @@ export function RemoteDialog({
       <footer>
         <button type="button" className="fd-btn" onClick={() => ref.current?.close()}>
           {t('present.close')}
-        </button>
-      </footer>
-    </dialog>
-  );
-}
-
-export function ReportDialog({
-  seconds,
-  targetMin,
-  rows,
-  notesChanged,
-  onClose,
-  onEditor,
-}: {
-  seconds: number;
-  targetMin: number | null;
-  rows: ReportRow[];
-  notesChanged: number;
-  onClose: () => void;
-  onEditor: () => void;
-}) {
-  const { t } = useTranslation();
-  const id = useId();
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (d && !d.open) d.showModal();
-  }, []);
-  const max = Math.max(1, ...rows.map((r) => r.seconds));
-  return (
-    <dialog ref={ref} className="dialog lx rp" aria-labelledby={`${id}-t`} onClose={onClose}>
-      <header>
-        <span className="fd-icon-chip">
-          <Flag aria-hidden="true" />
-        </span>
-        <h2 id={`${id}-t`}>{t('present.reportTitle', { time: spoken(seconds) })}</h2>
-      </header>
-      <p className="rp-intro">
-        {targetMin != null && <>{t('present.reportTarget', { min: targetMin })} </>}
-        {t('present.reportIntro')}
-      </p>
-      <div className="rp-table" role="table" aria-label={t('present.reportTable')}>
-        <div role="rowgroup" className="sr-only">
-          <div role="row">
-            <span role="columnheader">{t('present.step')}</span>
-            <span role="columnheader">{t('present.duration')}</span>
-          </div>
-        </div>
-        <div role="rowgroup">
-          {rows.map((r) => (
-            <div role="row" key={`${r.first}-${r.last}`} className={`rp-row${r.longest ? ' is-long' : ''}`}>
-              <span role="cell" className="rp-name">
-                <span className="rp-n">{r.count > 1 ? `${r.first + 1}–${r.last + 1}` : r.first + 1}</span>
-                <span>
-                  {r.count > 1
-                    ? t('present.reportGroup', { count: r.count })
-                    : r.label || t('editor.untitled')}
-                  {r.longest && <> · {t('present.reportLongest')}</>}
-                </span>
-              </span>
-              <span role="cell" className="rp-dur">
-                <span className="rp-bar" aria-hidden="true">
-                  <i style={{ width: `${Math.round((r.seconds / max) * 100)}%` }} />
-                </span>
-                <span className="rp-time">{clock(r.seconds).replace(/^0(\d):/, '$1:')}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <p className="fd-help">{t('present.reportPrivacy')}</p>
-      <p className="fd-help">{t('present.reportNotes', { count: notesChanged })}</p>
-      <footer>
-        <button type="button" className="fd-btn" onClick={onClose}>
-          {t('present.reportClose')}
-        </button>
-        <button type="button" className="fd-btn fd-btn--primary" onClick={onEditor} autoFocus>
-          {t('present.reportEditor')}
         </button>
       </footer>
     </dialog>

@@ -15,19 +15,10 @@ import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { Loading } from '../../components/guards';
 import { supabase } from '../../lib/supabase';
 import { PlayerFrame } from './PlayerFrame';
-import {
-  channelName,
-  clock,
-  fromSearch,
-  noteLines,
-  reportRows,
-  screenUrl,
-  spoken,
-  type PresentMessage,
-  type ReportRow,
-} from './present';
+import { channelName, clock, fromSearch, noteLines, screenUrl, spoken, type PresentMessage } from './present';
 import { openRemote, remoteUrl, type RemoteLink, type RemoteMessage } from './remote';
-import { RemoteDialog, ReportDialog } from './RemoteDialogs';
+import { RemoteDialog } from './RemoteDialogs';
+import { ReportDialog, usePresentHistory, type PresentReportRow } from './PresentReport';
 import './present.css';
 
 interface RemoteState {
@@ -68,7 +59,10 @@ export function PresenterPage() {
   const spent = useRef<number[]>([]);
   const lastSwitch = useRef({ index: 0, at: Date.now() });
   const sessionStart = useRef(Date.now());
-  const [report, setReport] = useState<{ seconds: number; rows: ReportRow[]; notes: number } | null>(null);
+  // L66 §3 : bilan de cette présentation, l'historique, et un bilan passé rouvert par « Voir »
+  const [report, setReport] = useState<PresentReportRow | null>(null);
+  const [viewed, setViewed] = useState<PresentReportRow | null>(null);
+  const history = usePresentHistory(demoId ?? '');
   // L26-10 : télécommande
   const [remote, setRemote] = useState<RemoteState | null>(null);
   const [remoteOpen, setRemoteOpen] = useState(false);
@@ -153,8 +147,6 @@ export function PresenterPage() {
   }, []);
   const elapsed = Math.floor((now - started) / 1000);
   const target = opts.minutes * 60;
-  const over = opts.timer && elapsed > target;
-  const ratio = opts.timer ? Math.min(1, elapsed / target) : 0;
   const screenOpen = opts.mode === 'two' && now - screenAlive < 3000;
 
   // ===== L26-10 : télécommande =====
@@ -327,22 +319,45 @@ export function PresenterPage() {
     const titles = editor.steps.map((s) => s.title);
     const duration = Math.round((Date.now() - sessionStart.current) / 1000);
     const notes = changedSteps.current.size;
-    setReport({ seconds: duration, rows: reportRows(secs, titles), notes });
+    const changed = new Set(
+      editor.steps.map((st, i) => (changedSteps.current.has(st.id) ? i : -1)).filter((i) => i >= 0),
+    );
+    const row: PresentReportRow = {
+      id: `local-${sessionStart.current}`,
+      started_at: new Date(sessionStart.current).toISOString(),
+      duration_s: Math.min(86400, duration),
+      target_min: opts.timer ? opts.minutes : null,
+      mode: opts.mode,
+      notes_changed: Math.min(500, notes),
+      steps: secs.map((sec, i) => ({
+        index: i,
+        title: (titles[i] ?? '').slice(0, 200),
+        seconds: sec,
+        ...(changed.has(i) ? { noted: true } : {}),
+      })),
+    };
+    setReport(row);
     setEditing(false);
-    // L26-12 : bilan gardé 30 jours pour la seule personne qui a présenté (rien dans Analytics)
+    // L66 : bilan gardé 90 jours pour la seule personne qui a présenté (rien dans Analytics)
     if (editor.demo)
       void supabase
         .from('present_reports')
         .insert({
           workspace_id: editor.demo.workspace_id,
           demo_id: demoId,
-          started_at: new Date(sessionStart.current).toISOString(),
-          duration_s: Math.min(86400, duration),
-          target_min: opts.timer ? opts.minutes : null,
-          steps: secs.map((s, i) => ({ index: i, title: (titles[i] ?? '').slice(0, 200), seconds: s })),
-          notes_changed: Math.min(500, notes),
+          started_at: row.started_at,
+          duration_s: row.duration_s,
+          target_min: row.target_min,
+          mode: row.mode,
+          steps: row.steps,
+          notes_changed: row.notes_changed,
         })
-        .then(() => undefined);
+        .select('id')
+        .single()
+        .then(async ({ data }) => {
+          if (data?.id) setReport((r) => (r ? { ...r, id: data.id as string } : r));
+          await history.reload();
+        });
   };
   const keys = useRef({ go, finish, index, startRemote, editing });
   keys.current = { go, finish, index, startRemote, editing };
@@ -403,9 +418,6 @@ export function PresenterPage() {
   const rawNotes = notesTab === 'demo' ? (editor.demo?.presenter_notes ?? '') : (step?.presenter_notes ?? '');
   const notes = noteLines(rawNotes);
   const nextImg = nextStep?.image_path ? editor.imageUrls[nextStep.image_path] : null;
-  const timeLabel = opts.timer
-    ? t('present.timerLabel', { elapsed: spoken(elapsed), target: spoken(target) })
-    : t('present.timerLabelFree', { elapsed: spoken(elapsed) });
   const saving = editor.saveState === 'saving';
 
   return (
@@ -500,17 +512,13 @@ export function PresenterPage() {
             className="pr-frame"
           />
         </div>
-        {opts.timer && (
-          <div className={`tbar${over || ratio > 0.8 ? ' is-late' : ''}`} aria-hidden="true">
-            <span>
-              <i style={{ width: `${Math.round(ratio * 100)}%` }} />
-            </span>
-          </div>
-        )}
         <div className="bar" role="toolbar" aria-label={t('present.controls')}>
-          <span className={`t${over ? ' over' : ''}`} role="timer" aria-label={timeLabel}>
-            {clock(over ? elapsed - target : elapsed)}
-            {opts.timer && (over ? <small>{t('present.over')}</small> : <small>/ {clock(target)}</small>)}
+          <PresentTimer elapsed={elapsed} target={opts.timer ? target : null} />
+          <span className="pr-sep" aria-hidden="true" />
+          <span className="pr-dots" aria-hidden="true">
+            {Array.from({ length: total }, (_, i) => (
+              <i key={i} className={i < index ? 'is-done' : i === index ? 'is-cur' : undefined} />
+            ))}
           </span>
           <span className="pr-count">{t('present.stepOf', { n: index + 1, total })}</span>
           <span className="pr-actions">
@@ -673,16 +681,77 @@ export function PresenterPage() {
           onClose={() => setRemoteOpen(false)}
         />
       )}
-      {report && (
+      {report && !viewed && (
         <ReportDialog
-          seconds={report.seconds}
-          targetMin={opts.timer ? opts.minutes : null}
-          rows={report.rows}
-          notesChanged={report.notes}
+          report={report}
+          // La présentation en cours en tête, même avant son enregistrement
+          history={[report, ...history.reports.filter((r) => r.id !== report.id)]}
+          onView={(r) => r.id !== report.id && setViewed(r)}
           onClose={() => navigate('/')}
           onEditor={() => navigate(`/demos/${demoId}/edit`)}
         />
       )}
+      {report && viewed && (
+        <ReportDialog
+          report={viewed}
+          history={[report, ...history.reports.filter((r) => r.id !== report.id)]}
+          onView={(r) => setViewed(r.id === report.id ? null : r)}
+          onClose={() => setViewed(null)}
+        />
+      )}
     </main>
+  );
+}
+
+/**
+ * L66 §2 : minuteur de la barre. Anneau de 36 px (trait de 4 px) rempli avec le temps écoulé ; temps
+ * écoulé en 22 px, « sur 15:00 » dessous. Les 2 dernières minutes en orange avec « Plus que 2 min »
+ * (annoncé une fois, poliment) ; au-delà, anneau plein en rouge et « +m:ss ». Sans minuteur : le temps
+ * écoulé seul. role="timer", jamais annoncé à chaque seconde.
+ */
+function PresentTimer({ elapsed, target }: { elapsed: number; target: number | null }) {
+  const { t } = useTranslation();
+  const over = target != null && elapsed > target;
+  const late = target != null && !over && target - elapsed <= 120;
+  const ratio = target ? Math.min(1, elapsed / target) : 0;
+  const R = 16;
+  const C = 2 * Math.PI * R;
+  const name =
+    target != null
+      ? t('present.timerName', { elapsed: spoken(elapsed), total: spoken(target) })
+      : t('present.timerNameFree', { elapsed: spoken(elapsed) });
+  return (
+    <span className={`pr-timer${over ? ' is-over' : late ? ' is-late' : ''}`}>
+      <span role="timer" aria-label={name} className="pr-timer__main">
+        {target != null && (
+          <svg className="pr-ring" viewBox="0 0 36 36" width={36} height={36} aria-hidden="true">
+            <circle cx={18} cy={18} r={R} className="pr-ring__bg" />
+            <circle
+              cx={18}
+              cy={18}
+              r={R}
+              className="pr-ring__fg"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - (over ? 1 : ratio))}
+              transform="rotate(-90 18 18)"
+            />
+          </svg>
+        )}
+        <span className="pr-timer__tx" aria-hidden="true">
+          <b>{clock(elapsed)}</b>
+          {target != null && <small>{t('present.ofTotal', { total: clock(target) })}</small>}
+        </span>
+      </span>
+      {late && <span className="pr-pill">{t('present.twoLeft')}</span>}
+      {over && (
+        <span className="pr-pill is-over" aria-hidden="true">
+          +{clock(elapsed - target!).replace(/^0(\d):/, '$1:')}
+        </span>
+      )}
+      {/* Annonce polie, une seule fois, à l'entrée dans les 2 dernières minutes */}
+      <span className="sr-only" aria-live="polite">
+        {late ? t('present.twoLeft') : ''}
+      </span>
+    </span>
   );
 }

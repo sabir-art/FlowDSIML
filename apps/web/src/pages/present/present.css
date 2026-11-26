@@ -185,26 +185,6 @@
   height: 100%;
   border: 0;
 }
-.presenter .tbar {
-  display: flex;
-  height: 6px;
-}
-.presenter .tbar span {
-  flex: 1;
-  height: 6px;
-  border-radius: 3px;
-  background: #262c35;
-  overflow: hidden;
-}
-.presenter .tbar span i {
-  display: block;
-  height: 100%;
-  background: #aed054;
-  border-radius: 3px;
-}
-.presenter .tbar.is-late span i {
-  background: #f8bb61;
-}
 .presenter .bar {
   display: flex;
   flex-wrap: wrap;
@@ -214,23 +194,6 @@
   border-radius: 28px;
   background: #15191f;
   font: 600 14px var(--fd-font-sans);
-}
-.presenter .bar .t {
-  font-variant-numeric: tabular-nums;
-  font-size: 18px;
-  font-weight: 800;
-}
-.presenter .bar .t small {
-  font-size: 13px;
-  font-weight: 600;
-  color: #b7c0ca;
-  margin-left: 4px;
-}
-.presenter .bar .t.over {
-  color: #f8bb61;
-}
-.presenter .bar .t.over::before {
-  content: '+ ';
 }
 .pr-count {
   color: #b7c0ca;
@@ -528,63 +491,6 @@
   .rm .rm-body {
     flex-direction: column;
   }
-}
-
-/* ===== L26-12 : bilan ===== */
-.rp .rp-intro {
-  margin: 0 0 12px;
-}
-.rp .rp-table {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.rp .rp-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 40%);
-  gap: 12px;
-  align-items: center;
-}
-.rp .rp-name {
-  display: flex;
-  gap: 10px;
-  min-width: 0;
-}
-.rp .rp-n {
-  flex: none;
-  min-width: 28px;
-  color: var(--fd-color-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-.rp .rp-dur {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.rp .rp-bar {
-  flex: 1;
-  height: 8px;
-  border-radius: 99px;
-  background: var(--fd-color-surface-sunken);
-  overflow: hidden;
-}
-.rp .rp-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 99px;
-  background: var(--fd-color-primary);
-}
-.rp .rp-row.is-long {
-  font-weight: 700;
-}
-/* Étape la plus longue : #B85B00 (4,6:1 sur blanc) */
-.rp .rp-row.is-long .rp-bar i {
-  background: #b85b00;
-}
-.rp .rp-time {
-  min-width: 44px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
 }
 
 /* ===== L26-11 : téléphone (#0B0D10) ===== */
@@ -921,4 +827,417 @@ html[data-remote] body {
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
+}
+
+/* ===== L66 §1 : fenêtre « Présenter » (MODAL-01, md) ===== */
+.lxm .lx-body {
+  display: grid;
+  gap: var(--fd-space-6, 24px);
+}
+.lxm .lx-sec {
+  display: grid;
+  gap: var(--fd-space-2, 8px);
+}
+.lxm .lx-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.lxm .lx-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 8px 8px 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.lxm .lx-card.is-on {
+  border-color: var(--fd-color-primary);
+  box-shadow: 0 0 0 1px var(--fd-color-primary);
+}
+.lxm .lx-card:has(input:focus-visible) {
+  box-shadow: var(--fd-shadow-focus);
+}
+.lxm .lx-art {
+  display: grid;
+  place-items: center;
+  height: 112px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+}
+.lxm .lx-schema {
+  width: 100%;
+  height: 100%;
+}
+.lxm .lx-sc {
+  fill: var(--fd-color-surface);
+  stroke: var(--fd-color-border);
+}
+.lxm .lx-demo {
+  fill: #e3e9f0;
+}
+.lxm .lx-bar {
+  fill: #1d2433;
+}
+.lxm .lx-hot {
+  fill: var(--fd-color-primary);
+}
+.lxm .lx-notes rect {
+  fill: color-mix(in srgb, var(--fd-color-primary) 12%, transparent);
+  stroke: var(--fd-color-primary);
+}
+.lxm .lx-notes.is-dashed rect {
+  stroke-dasharray: 3 2;
+}
+.lxm .lx-notes line {
+  stroke: var(--fd-color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.lxm .lx-arrow {
+  fill: none;
+  stroke: var(--fd-color-text-muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.lxm .lx-cap {
+  font: 500 9px var(--fd-font-sans);
+  fill: var(--fd-color-text-muted);
+  text-anchor: middle;
+}
+.lxm .lx-key {
+  font: 700 10px var(--fd-font-sans);
+  fill: var(--fd-color-primary);
+  text-anchor: middle;
+}
+.lxm .lx-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+.lxm .lx-choice input {
+  margin: 0;
+  accent-color: var(--fd-color-primary);
+}
+.lxm .lx-choice b {
+  font: 600 14px var(--fd-font-sans);
+}
+.lxm .lx-card small {
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--fd-color-text-muted);
+}
+.lxm .lx-proj,
+.lxm .lx-blocked {
+  margin: 0;
+}
+.lxm .lx-blocked {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+/* Commencer à et Minuteur : deux listes de 40 px de même largeur */
+.lxm .lx-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.lxm .lx-row .fd-field {
+  display: grid;
+  gap: var(--fd-space-2, 8px);
+  min-width: 0;
+}
+.lxm .lx-row select,
+.lxm .lx-row .fd-select {
+  height: 40px;
+  width: 100%;
+}
+.lxm .lx-custom {
+  height: 40px;
+}
+/* Options : encadré de lignes (rayon 12, filets), libellé, aide et interrupteur à droite */
+.lxm .lx-opts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.lxm .lx-opts > li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.lxm .lx-opts > li + li {
+  border-top: 1px solid var(--fd-color-border);
+}
+.lxm .lx-opt-tx {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  font: 500 14px var(--fd-font-sans);
+}
+.lxm .lx-opt-tx small {
+  font: 400 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.lx-history {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--fd-color-primary);
+}
+.lx-history svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== L66 §2 : minuteur de la barre (anneau, temps, pastilles) ===== */
+.pr-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.pr-timer__main {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.pr-ring__bg {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 4;
+}
+.pr-ring__fg {
+  fill: none;
+  stroke: #f5a3c7;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.pr-timer__tx {
+  display: grid;
+  line-height: 1.1;
+}
+.pr-timer__tx b {
+  font: 600 22px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+.pr-timer__tx small {
+  font: 500 12px var(--fd-font-sans);
+  color: #b7c0ca;
+  font-variant-numeric: tabular-nums;
+}
+.pr-timer.is-late .pr-ring__fg {
+  stroke: #f8bb61;
+}
+.pr-timer.is-late .pr-timer__tx b {
+  color: #f8bb61;
+}
+.pr-timer.is-over .pr-ring__fg {
+  stroke: #ff6b6b;
+}
+.pr-timer.is-over .pr-timer__tx b {
+  color: #ff6b6b;
+}
+.pr-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(248 187 97 / 0.18);
+  color: #f8bb61;
+  font: 600 12px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pr-pill.is-over {
+  background: rgb(255 107 107 / 0.18);
+  color: #ff6b6b;
+}
+.pr-sep {
+  width: 1px;
+  height: 24px;
+  background: rgb(255 255 255 / 0.16);
+}
+.pr-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+.pr-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.28);
+}
+.pr-dots i.is-done {
+  background: #f5a3c7;
+}
+.pr-dots i.is-cur {
+  background: #fff;
+}
+
+/* ===== L66 §3 : bilan et historique (MODAL-01, lg) ===== */
+.rp .rp-body {
+  display: grid;
+  gap: var(--fd-space-6, 24px);
+}
+.rp .rp-body p {
+  margin: 0;
+}
+.rp .rp-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.rp .rp-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.rp .rp-k {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.rp .rp-v {
+  font: 600 20px var(--fd-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.rp .rp-sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.rp .rp-verdict {
+  height: 20px;
+}
+.rp .rp-verdict.is-ok {
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}
+.rp .rp-verdict.is-over {
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-warning);
+}
+.rp .rp-sec {
+  display: grid;
+  gap: var(--fd-space-2, 8px);
+}
+.rp .rp-sec h3 {
+  margin: 0;
+  font: 600 14px var(--fd-font-sans);
+}
+.rp .rp-steps,
+.rp .rp-hist {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.rp .rp-steps tbody tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 45%;
+  gap: 16px;
+  align-items: center;
+}
+.rp .rp-steps th[scope='row'] {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  font-weight: 400;
+  text-align: left;
+}
+.rp .rp-steps td {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rp .rp-n {
+  min-width: 20px;
+  color: var(--fd-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.rp .rp-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--fd-color-surface-sunken);
+  overflow: hidden;
+}
+.rp .rp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--fd-color-primary);
+}
+/* Étape la plus longue : orange (#B85B00, 4,6:1 sur blanc) */
+.rp .is-long .rp-bar i,
+.rp .rp-dot.is-long {
+  background: #b85b00;
+}
+.rp .rp-time {
+  min-width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rp .rp-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.rp .rp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--fd-color-primary);
+}
+.rp .rp-dot + * {
+  margin-right: 8px;
+}
+.rp .rp-hist {
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+.rp .rp-hist th,
+.rp .rp-hist td {
+  padding: 8px 12px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.rp .rp-hist th {
+  font: 500 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  background: var(--fd-color-surface-sunken);
+}
+.rp .rp-hist td:last-child,
+.rp .rp-hist th:last-child {
+  text-align: right;
+}
+.rp .rp-hist tbody tr + tr td {
+  border-top: 1px solid var(--fd-color-border);
+}
+.rp .rp-hist tr.is-current td {
+  background: var(--fd-color-primary-soft);
+  font-weight: 600;
+}
+.presenter .bar .pr-ring {
+  flex: none;
+  width: 36px;
+  height: 36px;
 }
