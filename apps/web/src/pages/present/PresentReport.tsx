@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Flag, History } from 'lucide-react';
 import { Button, Modal } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
-import { clock, spoken, verdictOf } from './present';
+import { clock, minSec, verdictOf } from './present';
 
 export interface PresentReportRow {
   id: string;
@@ -38,8 +38,6 @@ export function usePresentHistory(demoId: string) {
   return { reports, reload };
 }
 
-/** « 12 min 40 » ; « 45 s » sous la minute. */
-const minSec = (s: number) => (s < 60 ? `${Math.max(0, Math.round(s))} s` : spoken(s));
 /** « 6:10 » (sans zéro de tête). */
 const mss = (s: number) => clock(s).replace(/^0(\d):/, '$1:');
 

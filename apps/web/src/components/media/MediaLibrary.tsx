@@ -20,8 +20,8 @@ export const mediaUrl = (path: string) => supabase.storage.from('media').getPubl
 export const sizeLabel = (n: number, locale: string) => {
   const fr = locale.startsWith('fr');
   return n < 1024 * 1024
-    ? `${Math.max(n > 0 ? 1 : 0, Math.round(n / 1024)).toLocaleString(locale)}${fr ? ' Ko' : ' KB'}`
-    : `${(n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: 1 })}${fr ? ' Mo' : ' MB'}`;
+    ? `${Math.max(n > 0 ? 1 : 0, Math.round(n / 1024)).toLocaleString(locale)}${fr ? ' Ko' : '\u202fKB'}`
+    : `${(n / 1024 / 1024).toLocaleString(locale, { maximumFractionDigits: 1 })}${fr ? ' Mo' : '\u202fMB'}`;
 };
 
 const FILTERS: MediaFilter[] = ['all', 'logo', 'image', 'font'];

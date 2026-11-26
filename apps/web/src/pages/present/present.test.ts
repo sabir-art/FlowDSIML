@@ -3,6 +3,7 @@ import {
   DEFAULT_PRESENT,
   clock,
   fromSearch,
+  minSec,
   noteLines,
   reportRows,
   spoken,
@@ -25,7 +26,7 @@ describe('L22 : mode présentateur', () => {
   it('minuteur et durée', () => {
     expect(clock(402)).toBe('06:42');
     expect(clock(3723)).toBe('1:02:03');
-    expect(spoken(845)).toBe('14 min 05');
+    expect(spoken(845)).toBe('14\u00a0min\u00a005');
   });
   it('notes en puces', () => {
     expect(noteLines('Insister\n\n  Question fréquente  \n')).toEqual(['Insister', 'Question fréquente']);
@@ -62,4 +63,13 @@ describe('verdictOf (L66, seuil tranché)', () => {
     expect(verdictOf(900, 15)).toBe('ok');
   });
   it('au-delà : dépassée', () => expect(verdictOf(901, 15)).toBe('over'));
+});
+
+describe('NUM-01 : durées du présentateur insécables', () => {
+  it('« 14 min 05 » et « 45 s » ne se coupent jamais', () => {
+    expect(spoken(845)).toBe('14 min 05');
+    expect(minSec(45)).toBe('45 s');
+    expect(minSec(760)).toBe('12 min 40');
+    expect(/ /.test(spoken(3599) + minSec(9))).toBe(false);
+  });
 });

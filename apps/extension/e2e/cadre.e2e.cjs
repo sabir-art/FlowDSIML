@@ -261,7 +261,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
   await zone.waitFor();
   ok(
     (await page.getByText('Tracez la zone à garder').isVisible()) &&
-      /^Zone à garder, \d+ × \d+ px\./.test(await zone.getAttribute('aria-label')) &&
+      /^Zone à garder, \d+ × \d+\spx\./.test(await zone.getAttribute('aria-label')) &&
       (await page.evaluate(
         () => document.querySelector('[data-fd-ui]').shadowRoot.activeElement?.className,
       )) === 'zone',
