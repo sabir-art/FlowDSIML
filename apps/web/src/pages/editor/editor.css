@@ -3904,10 +3904,9 @@
    focus clavier et sur l'étape choisie ---- */
 .mk .rail-acts {
   position: absolute;
-  top: 50%;
   right: 8px;
+  bottom: 6px;
   display: flex;
-  translate: 0 -50%;
   opacity: 0;
 }
 .mk .rail-li:hover .rail-acts,
@@ -3942,13 +3941,10 @@
   width: 16px;
   height: 16px;
 }
-/* Le titre laisse la place aux deux actions, seulement quand elles s'affichent (lot B : sinon le nom
-   d'une étape n'avait que 55 px, « Catalogue » passait sur deux lignes et « menu Produits » était rogné) */
-.mk .rail-li:hover .step,
-.mk .rail-li:has(:focus-visible) .step,
-.mk .rail-li .step[aria-current='step'],
-.mk .rail-li:has(.menu-trigger[aria-expanded='true']) .step {
-  padding-right: 68px;
+/* Lot B : les deux actions se posent sur la ligne des icônes, en bas à droite ; le nom garde toute la
+   largeur (il n'avait que 55 px : « Catalogue » passait sur deux lignes, « menu Produits » était rogné) */
+.mk .rail-li .step .icons {
+  padding-right: 64px;
 }
 /* Au survol et au focus clavier, la poignée (GripVertical, 16 px) remplace le numéro, à sa place */
 .mk .step .grip {
@@ -4814,6 +4810,10 @@
 }
 .mk .step .meta b {
   overflow-wrap: break-word;
+}
+/* Lot B : « Adresse affichée » sous « Capturé sur … » */
+.mk .sp-url + .field {
+  margin-top: 16px;
 }
 .mk .step .rail-screen {
   overflow: hidden;
