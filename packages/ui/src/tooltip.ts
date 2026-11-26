@@ -131,6 +131,17 @@ export interface TooltipOptions {
 let seq = 0;
 
 /** Installe les infobulles sur un document ; renvoie la fonction de désinstallation. */
+/** Fenêtre modale ou popover ouvert (couche supérieure) qui contient l'élément, sinon null. */
+function topLayerOf(el: HTMLElement): HTMLElement | null {
+  const dlg = el.closest<HTMLElement>('dialog[open]');
+  if (dlg) return dlg;
+  try {
+    return el.closest<HTMLElement>(':popover-open');
+  } catch {
+    return null;
+  }
+}
+
 export function installTooltips({ doc = document, container }: TooltipOptions = {}): () => void {
   const win = doc.defaultView ?? window;
   const mac = /Mac|iPhone|iPad/.test(win.navigator.platform || win.navigator.userAgent);
@@ -178,6 +189,15 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
     bubble.dataset.side = p.side;
     bubble.style.left = `${Math.round(p.left)}px`;
     bubble.style.top = `${Math.round(p.top)}px`;
+    // Montée dans une fenêtre dont la boîte sert de repère (transformation, animation) : on corrige
+    // l'écart mesuré pour rester sur l'ancre
+    const got = bubble.getBoundingClientRect();
+    const dx = got.left - Math.round(p.left);
+    const dy = got.top - Math.round(p.top);
+    if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+      bubble.style.left = `${Math.round(p.left - dx)}px`;
+      bubble.style.top = `${Math.round(p.top - dy)}px`;
+    }
     bubble.style.setProperty('--fd-tip-arrow', `${Math.round(p.arrow)}px`);
   }
 
@@ -224,7 +244,10 @@ export function installTooltips({ doc = document, container }: TooltipOptions = 
     }
     b.addEventListener('pointerenter', () => win.clearTimeout(closeTimer));
     b.addEventListener('pointerleave', () => scheduleClose());
-    (container ?? doc.body).append(b);
+    // Recette des planches (Partager › Lien) : une fenêtre modale est dans la couche supérieure du
+    // navigateur ; une infobulle ajoutée à body passerait dessous, invisible. Elle monte donc dans la
+    // fenêtre (ou le popover) ouverte qui contient l'ancre.
+    (container ?? topLayerOf(el) ?? doc.body).append(b);
     bubble = b;
     anchor = el;
     position();

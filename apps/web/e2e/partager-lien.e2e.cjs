@@ -19,6 +19,19 @@ const APP = process.env.APP_URL || 'http://localhost:5173';
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
+/**
+ * Recette des planches (planche 2 ROUGE) : l'infobulle doit être VUE, pas seulement présente dans le DOM.
+ * L'élément au centre de l'infobulle est l'infobulle elle-même (une fenêtre modale la recouvrait).
+ */
+const tipSeen = (page) =>
+  page.evaluate(() => {
+    const t = document.querySelector('.fd-tooltip');
+    if (!t) return false;
+    const r = t.getBoundingClientRect();
+    const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!e && t.contains(e);
+  });
+
 const ok = (c, l) => {
   console.log(`${c ? 'ok' : 'NOT OK'} - ${l}`);
   if (!c) process.exitCode = 1;
@@ -112,8 +125,8 @@ const r = (b) => ({
     await btns.nth(0).hover();
     await page.locator('.fd-tooltip').waitFor();
     ok(
-      (await page.locator('.fd-tooltip').innerText()) === 'Envoyer par e-mail',
-      `${tag} · infobulle au survol`,
+      (await page.locator('.fd-tooltip').innerText()) === 'Envoyer par e-mail' && (await tipSeen(page)),
+      `${tag} · infobulle au survol, visible par-dessus la fenêtre`,
     );
     if (SHOTS) await page.screenshot({ path: `${SHOTS}/partager-lien-infobulle-${tag}${sfx}.png` });
     await page.mouse.move(2, 2);
@@ -122,7 +135,7 @@ const r = (b) => ({
     await page.waitForFunction(
       () => document.querySelector('.fd-tooltip')?.textContent === 'Envoyer par message',
     );
-    ok(true, `${tag} · infobulle au focus (« Envoyer par message »)`);
+    ok(await tipSeen(page), `${tag} · infobulle au focus (« Envoyer par message »), visible`);
     // QR code en PNG
     const dl = page.waitForEvent('download');
     await btns.nth(2).click();
@@ -183,8 +196,9 @@ const r = (b) => ({
     ok(
       off.every((x) => x === 'true') &&
         (await page.locator('.fd-tooltip').innerText()) ===
-          'Accès sur invitation : invitez les personnes depuis Accès.',
-      `${tag} · « Sur invitation » : envoi grisé (aria-disabled), raison dans l’infobulle`,
+          'Accès sur invitation : invitez les personnes depuis Accès.' &&
+        (await tipSeen(page)),
+      `${tag} · « Sur invitation » : envoi grisé (aria-disabled), raison visible dans l’infobulle`,
     );
     ok(errors.length === 0, `${tag} · aucune erreur JS (${errors.join(' | ')})`);
     await ctx.close();
@@ -202,8 +216,9 @@ const r = (b) => ({
     await page.locator('.fd-tooltip').waitFor();
     ok(
       (await btns.first().getAttribute('aria-disabled')) === 'true' &&
-        (await page.locator('.fd-tooltip').innerText()) === 'Publiez la démo pour envoyer son lien.',
-      'non publiée : envoi grisé, « Publiez la démo pour envoyer son lien. »',
+        (await page.locator('.fd-tooltip').innerText()) === 'Publiez la démo pour envoyer son lien.' &&
+        (await tipSeen(page)),
+      'non publiée : envoi grisé, « Publiez la démo pour envoyer son lien. » visible',
     );
     await ctx.close();
   }
