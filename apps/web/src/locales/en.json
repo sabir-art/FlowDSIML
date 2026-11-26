@@ -1502,6 +1502,8 @@
       "vttFormat": "Subtitle file in .vtt format (WebVTT)."
     },
     "html": {
+      "address": "Displayed address",
+      "addressHelp": "Shown in the browser frame to visitors. Edit it to hide an internal address; empty, the demo’s address is shown.",
       "kind": "HTML step",
       "missing": "HTML page missing",
       "frame": "Captured page: {{title}}",

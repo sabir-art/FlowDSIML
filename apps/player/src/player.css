@@ -2673,6 +2673,16 @@ h1.p-title {
   width: min(100cqw, 100cqh * var(--ratio, 1.6));
   box-shadow: var(--p-shadow);
 }
+/* Lot B (recette UX §3.4) : Sandbox, même cadre de navigateur au-dessus de la page, qui garde sa taille */
+.p-win.p-win--sb {
+  width: fit-content;
+  max-width: 100%;
+  align-self: center;
+}
+.p-win--sb > .p-html-frame {
+  border-radius: 0;
+  box-shadow: none;
+}
 .p-win > .p-stage.p-html-frame {
   width: 100%;
   border-radius: 0;

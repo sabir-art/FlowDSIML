@@ -1107,6 +1107,7 @@ export function Player({
             <HtmlWindow
               on={!sandbox}
               frame={mobile ? { ...DEFAULT_FRAME, style: 'none' } : theme.frame}
+              address={step.options.address}
               title={m.title}
               ratio={(step.html.viewport?.w ?? 1280) / (step.html.viewport?.h ?? 800)}
             >
@@ -1117,6 +1118,18 @@ export function Player({
                 sub={sub}
                 sandbox={sandbox}
                 onGo={goStep}
+                chrome={
+                  // Lot B : le Sandbox prend le même cadre, avec l'adresse de la page courante
+                  sandbox && !mobile && theme.frame && theme.frame.style !== 'none'
+                    ? {
+                        style: theme.frame.style,
+                        dots: theme.frame.windowButtons,
+                        address: theme.frame.addressBar
+                          ? (step.options.address ?? theme.frame.address)
+                          : null,
+                      }
+                    : undefined
+                }
                 target={
                   point
                     ? {
@@ -2203,19 +2216,28 @@ function Beacon({ h, label, onClick }: { h: Hotspot; label: string; onClick: () 
 function HtmlWindow({
   on,
   frame,
+  address,
   title,
   ratio,
   children,
 }: {
   on: boolean;
   frame?: Frame;
+  /** Lot B : adresse de la page (options.address), à la place de celle de la démo. */
+  address?: string;
   title: string;
   ratio: number;
   children: ComponentChildren;
 }) {
   if (!on) return <>{children}</>;
   return (
-    <TabWindow tabs={{ tabs: [], active: 0 }} changed={false} frame={frame} title={title} ratio={ratio}>
+    <TabWindow
+      tabs={{ tabs: [], active: 0 }}
+      changed={false}
+      frame={frame && address ? { ...frame, address } : frame}
+      title={title}
+      ratio={ratio}
+    >
       {children}
     </TabWindow>
   );

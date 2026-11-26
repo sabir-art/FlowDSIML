@@ -1,3 +1,4 @@
+import { displayAddress } from '@flowdsiml/core';
 import { VoiceFields } from '../voice/VoiceFields';
 import { useConfirm } from '../../../components/ConfirmDialog';
 import { Lock, Presentation, Target, Trash2 } from 'lucide-react';
@@ -100,6 +101,28 @@ export function StepPanel({
               <p className="help sp-url">
                 {t('editor.capturedOn')} {step.page_url}
               </p>
+            )}
+            {/* Lot B (recette UX §3.4) : adresse du cadre du navigateur, préremplie à la capture, à
+                modifier pour masquer une adresse interne */}
+            {step.kind === 'html' && (
+              <div className="field">
+                <label className="t-label" htmlFor="st-address">
+                  {t('editor.html.address')}
+                </label>
+                <input
+                  id="st-address"
+                  className="input"
+                  value={opts.address ?? ''}
+                  maxLength={120}
+                  placeholder={displayAddress(step.page_url ?? '') || 'app.example.com'}
+                  disabled={readOnly}
+                  aria-describedby="st-address-h"
+                  onChange={(e) => setOpts({ address: e.target.value })}
+                />
+                <span className="help" id="st-address-h">
+                  {t('editor.html.addressHelp')}
+                </span>
+              </div>
             )}
           </div>
 
