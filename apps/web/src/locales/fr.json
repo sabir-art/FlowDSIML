@@ -2689,11 +2689,7 @@
     "copyLink": "Copier le lien",
     "openLink": "Ouvrir la démo dans un nouvel onglet",
     "byEmail": "Envoyer par e-mail",
-    "copyMessage": "Copier un message prêt à envoyer",
     "messageText": "Bonjour, voici la démo « {{title}} » : {{url}}",
-    "qrCode": "Afficher le QR code",
-    "qrLabel": "QR code du lien de « {{title}} »",
-    "qrHelp": "À scanner avec l’appareil photo d’un téléphone.",
     "urlParamsShort": "Paramètres d’URL",
     "embedFrame": "Encadré dans la page",
     "embedButton": "Bouton qui ouvre la démo",
@@ -2722,7 +2718,14 @@
     "exportWhat_pdf": "Un guide pas à pas, à imprimer ou à joindre.",
     "exportWhat_gif": "Une animation courte, pour un e-mail ou une messagerie.",
     "exportWhat_mp4": "Une vidéo de la démo, avec sous-titres si besoin.",
-    "clickToStartHint": "Une couverture et un bouton « Lancer la démo » avant le chargement"
+    "clickToStartHint": "Une couverture et un bouton « Lancer la démo » avant le chargement",
+    "demoLink": "Lien de la démo",
+    "byMessage": "Envoyer par message",
+    "qrDownload": "Télécharger le QR code (PNG)",
+    "publishToSend": "Publiez la démo pour envoyer son lien.",
+    "inviteNoSend": "Accès sur invitation : invitez les personnes depuis Accès.",
+    "changeAccess": "Changer l’accès",
+    "qrFile": "qr-code-demo"
   },
   "analytics": {
     "title": "Analytics",

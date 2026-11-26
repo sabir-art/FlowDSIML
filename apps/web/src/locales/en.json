@@ -2689,11 +2689,7 @@
     "copyLink": "Copy the link",
     "openLink": "Open the demo in a new tab",
     "byEmail": "Send by email",
-    "copyMessage": "Copy a ready-to-send message",
     "messageText": "Hello, here is the demo “{{title}}”: {{url}}",
-    "qrCode": "Show the QR code",
-    "qrLabel": "QR code of the link to “{{title}}”",
-    "qrHelp": "Scan it with a phone camera.",
     "urlParamsShort": "URL parameters",
     "embedFrame": "Framed in the page",
     "embedButton": "Button that opens the demo",
@@ -2722,7 +2718,14 @@
     "exportWhat_pdf": "A step-by-step guide, to print or attach.",
     "exportWhat_gif": "A short animation, for an email or a chat.",
     "exportWhat_mp4": "A video of the demo, with subtitles if needed.",
-    "clickToStartHint": "A cover and a “Launch the demo” button before loading"
+    "clickToStartHint": "A cover and a “Launch the demo” button before loading",
+    "demoLink": "Demo link",
+    "byMessage": "Send by message",
+    "qrDownload": "Download the QR code (PNG)",
+    "publishToSend": "Publish the demo to send its link.",
+    "inviteNoSend": "Invitation only: invite people from Access.",
+    "changeAccess": "Change access",
+    "qrFile": "demo-qr-code"
   },
   "analytics": {
     "title": "Analytics",
