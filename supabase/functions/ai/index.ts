@@ -1,19 +1,21 @@
-// Edge Function `ai` (L30 Assistance IA) : seule à lire ANTHROPIC_API_KEY, jamais exposée au client.
+// Edge Function `ai` (L30 Assistance IA) : seule à lire les clés des fournisseurs, jamais exposées au client.
+// L41 : appels aux fournisseurs derrière les adaptateurs de _shared/ai (catalogue, clés, fournisseurs).
 //  * POST { ws, task, lang, input } : utilisateur éditeur ou plus (JWT vérifié par la plateforme,
 //    config.toml verify_jwt = true, puis ici auth.getUser) ; user_id tiré du JWT, jamais du corps.
 //  * Réservation d'une demande en base AVANT l'appel (ai_reserve : espace activé, fonction cochée,
 //    quota mensuel de l'espace, limite du jour par utilisateur), puis jetons comptés (ai_commit).
 //  * Texte seulement, données personnelles masquées (lib.ts redact) avant l'envoi.
 //  * Aucun prompt ni réponse stocké ni journalisé : seuls des codes d'erreur sont écrits dans les logs.
-import Anthropic from 'npm:@anthropic-ai/sdk@1.11.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { labelOf } from '../_shared/ai/catalogue.ts';
+import { providerKey } from '../_shared/ai/keys.ts';
+import * as claude from '../_shared/ai/providers/anthropic.ts';
+import * as eleven from '../_shared/ai/providers/elevenlabs.ts';
 import {
   AiError,
   DEADLINE_MS,
   FEATURE_OF,
-  HAIKU,
-  MODEL_LABEL,
   applyModel,
   buildPrompt,
   checkOutput,
@@ -48,11 +50,6 @@ const MAX_BODY = 200_000;
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false },
 });
-const anthropic = new Anthropic({
-  apiKey: Deno.env.get('ANTHROPIC_API_KEY') ?? '',
-  timeout: 90_000,
-  maxRetries: 1,
-});
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
@@ -65,7 +62,7 @@ const renewsOn = () => {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
 };
 
-const ELEVEN = 'https://api.elevenlabs.io/v1';
+const ELEVEN = eleven.ELEVEN;
 
 /** Client au nom de l'utilisateur (RLS : dossiers restreints compris), pour vérifier l'accès à l'étape. */
 const asUser = (req: Request) =>
@@ -99,9 +96,7 @@ async function reserveOr(ws: string, uid: string, feature: string, audio = 0): P
 let catalog: { at: number; account: AccountVoice[] } | null = null;
 async function accountList(key: string): Promise<AccountVoice[] | null> {
   if (catalog && Date.now() - catalog.at < 3_600_000) return catalog.account;
-  const res = await fetch(`${ELEVEN}/voices?show_legacy=true`, { headers: { 'xi-api-key': key } }).catch(
-    () => null,
-  );
+  const res = await eleven.voices(key);
   if (!res?.ok) {
     console.error('ai: voices', await refusalOf(res).then((r) => r.log));
     return null;
@@ -125,11 +120,7 @@ async function refusalOf(res: Response | null | undefined) {
   return providerRefusal(res.status, await res.json().catch(() => null));
 }
 
-/** Suppression immédiate côté fournisseur après génération (historique TTS, transcription STT). */
-async function purge(key: string, url: string, what: string) {
-  const res = await fetch(url, { method: 'DELETE', headers: { 'xi-api-key': key } }).catch(() => null);
-  if (!res?.ok) console.error(`ai: purge ${what}`, res?.status ?? 'network');
-}
+const purge = (key: string, url: string, what: string) => eleven.purge(key, url, what);
 
 const dataUrl = (bytes: Uint8Array) => {
   let bin = '';
@@ -151,11 +142,7 @@ async function voiceSample(key: string, voice: string, langIn: unknown) {
   const cached = await admin.storage.from('voices').download(path);
   if (!cached.error && cached.data)
     return json(200, { result: { audio: dataUrl(new Uint8Array(await cached.data.arrayBuffer())), lang } });
-  const res = await fetch(`${ELEVEN}/text-to-speech/${id}?output_format=${TTS_FORMAT}`, {
-    method: 'POST',
-    headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
-    body: JSON.stringify({ text: SAMPLE_TEXT[lang], model_id: TTS_MODEL }),
-  }).catch(() => null);
+  const res = await eleven.tts(key, id, TTS_FORMAT, { text: SAMPLE_TEXT[lang], model_id: TTS_MODEL });
   if (res?.ok) {
     const bytes = new Uint8Array(await res.arrayBuffer());
     const hid = res.headers.get('history-item-id');
@@ -169,7 +156,7 @@ async function voiceSample(key: string, voice: string, langIn: unknown) {
     }
   } else console.error('ai: sample tts', (await refusalOf(res)).log);
   // Repli : extrait du fournisseur
-  const meta = await fetch(`${ELEVEN}/voices/${id}`, { headers: { 'xi-api-key': key } }).catch(() => null);
+  const meta = await eleven.voice(key, id);
   if (!meta?.ok) {
     const r = await refusalOf(meta);
     console.error('ai: sample', r.log);
@@ -195,7 +182,7 @@ async function voiceSample(key: string, voice: string, langIn: unknown) {
  * lit ELEVENLABS_API_KEY. Rien n'est conservé hors des fichiers produits (voix : bucket voices).
  */
 async function audio(req: Request, body: Record<string, unknown>, ws: string, uid: string) {
-  const key = Deno.env.get('ELEVENLABS_API_KEY');
+  const key = providerKey('elevenlabs')?.key;
   if (!key) return json(503, { error: 'PROVIDER' });
   const input = (body.input ?? {}) as Record<string, unknown>;
   if (body.task === 'voice_sample' || body.task === 'voice_list') {
@@ -234,11 +221,11 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
     if (!voiceId) return json(400, { error: 'BAD_VOICE' });
     const blocked = await reserveOr(ws, uid, 'voice', v.estimate);
     if (blocked) return blocked;
-    const res = await fetch(`${ELEVEN}/text-to-speech/${voiceId}?output_format=${TTS_FORMAT}`, {
-      method: 'POST',
-      headers: { 'xi-api-key': key, 'content-type': 'application/json', accept: 'audio/mpeg' },
-      body: JSON.stringify({ text: v.text, model_id: TTS_MODEL, voice_settings: { speed: v.speed } }),
-    }).catch(() => null);
+    const res = await eleven.tts(key, voiceId, TTS_FORMAT, {
+      text: v.text,
+      model_id: TTS_MODEL,
+      voice_settings: { speed: v.speed },
+    });
     if (!res || !res.ok) {
       await refund();
       const r = await refusalOf(res);
@@ -287,11 +274,7 @@ async function audio(req: Request, body: Record<string, unknown>, ws: string, ui
   form.append('file', file.data, path.split('/').pop() ?? 'audio');
   const lang = typeof body.lang === 'string' ? body.lang.slice(0, 2).toLowerCase() : '';
   if (/^[a-z]{2}$/.test(lang)) form.append('language_code', lang);
-  const res = await fetch(`${ELEVEN}/speech-to-text`, {
-    method: 'POST',
-    headers: { 'xi-api-key': key },
-    body: form,
-  }).catch(() => null);
+  const res = await eleven.stt(key, form);
   if (!res || !res.ok) {
     await refund();
     const r = await refusalOf(res);
@@ -330,56 +313,6 @@ async function editorOf(req: Request, ws: string): Promise<string | null> {
     .eq('user_id', uid)
     .maybeSingle();
   return m && (RANK[m.role as string] ?? 0) >= RANK.editor! ? uid : null;
-}
-
-/** Appel au modèle. Sonnet et Opus : repli côté serveur sur refus (« default ») ; Haiku n'en a pas. */
-async function callModel(prompt: ReturnType<typeof buildPrompt>, deadline?: number) {
-  // Délai de la tâche : un seul essai, abandonné au-delà (l'appelant rend alors la demande au quota)
-  const opts = deadline ? { timeout: deadline, maxRetries: 0 } : undefined;
-  const output_config = {
-    effort: prompt.model === HAIKU ? ('low' as const) : ('medium' as const),
-    ...(prompt.schema ? { format: { type: 'json_schema' as const, schema: prompt.schema } } : {}),
-  };
-  const res =
-    prompt.model !== HAIKU
-      ? await anthropic.beta.messages.create(
-          {
-            model: prompt.model,
-            max_tokens: prompt.maxTokens,
-            system: prompt.system,
-            messages: prompt.messages,
-            output_config,
-            betas: ['server-side-fallback-2026-07-01'],
-            fallbacks: 'default',
-          },
-          opts,
-        )
-      : await anthropic.messages.create(
-          {
-            model: prompt.model,
-            max_tokens: prompt.maxTokens,
-            system: prompt.system,
-            messages: prompt.messages,
-            output_config,
-          },
-          opts,
-        );
-  const usage = {
-    input: Number(res.usage?.input_tokens ?? 0),
-    output: Number(res.usage?.output_tokens ?? 0),
-  };
-  if (res.stop_reason === 'refusal') return { usage, error: 'REFUSED' as const };
-  if (res.stop_reason === 'max_tokens') return { usage, error: 'TOO_LONG' as const };
-  const text = (res.content as Array<{ type: string; text?: string }>)
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text ?? '')
-    .join('');
-  if (!prompt.schema) return { usage, out: { text } };
-  try {
-    return { usage, out: JSON.parse(text) };
-  } catch {
-    return { usage, error: 'BAD_OUTPUT' as const };
-  }
 }
 
 Deno.serve(async (req) => {
@@ -426,18 +359,16 @@ Deno.serve(async (req) => {
   }
   let result;
   try {
-    result = await callModel(prompt, DEADLINE_MS[parsed.task]);
+    result = await claude.text(providerKey('anthropic')?.key ?? '', prompt, {
+      deadline: DEADLINE_MS[parsed.task],
+    });
   } catch (e) {
     // Aucune réponse (ou pas dans le délai de la tâche) : la demande est rendue, aucun crédit décompté.
     // Seul le statut est journalisé.
     await admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_refund: true });
-    if (e instanceof Anthropic.APIConnectionTimeoutError) {
-      console.error('ai: provider timeout');
-      return json(504, { error: 'TIMEOUT' });
-    }
-    const status = e instanceof Anthropic.APIError ? (e.status ?? 0) : 0;
-    console.error('ai: provider', status || (e instanceof Error ? e.name : 'unknown'));
-    return json(status === 429 || status === 529 ? 503 : 502, { error: 'PROVIDER' });
+    const f = claude.failure(e);
+    console.error(f.error === 'TIMEOUT' ? 'ai: provider timeout' : 'ai: provider', f.log);
+    return json(f.http, { error: f.error });
   }
   await admin.rpc('ai_commit', {
     p_ws: ws,
@@ -451,7 +382,7 @@ Deno.serve(async (req) => {
       result: checkOutput(parsed.task, result.out, parsed.payload),
       redacted: parsed.redacted,
       // Planche 3 : modèle réellement utilisé (pied « Généré par IA (Auto · Claude Sonnet), à vérifier »)
-      model: MODEL_LABEL[prompt.model] ?? '',
+      model: labelOf(prompt.model),
     });
   } catch (e) {
     return json(502, { error: e instanceof AiError ? e.code : 'BAD_OUTPUT' });

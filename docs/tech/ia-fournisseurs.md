@@ -191,6 +191,10 @@ nouvelle valeur.
 
 1. **Adaptateurs et catalogue** : le code actuel est déplacé derrière l'interface, sans changement
    de comportement, et le repli sur les variables d'environnement est gardé. Tests Deno.
+   **Livrée** : `_shared/ai/catalogue.ts`, `keys.ts` (variables de déploiement), adaptateurs
+   `providers/anthropic.ts` et `providers/elevenlabs.ts` avec `test(key)` ; `ai/index.ts` les appelle.
+   Tests `_shared/ai/providers_test.ts` (fetch simulé, la clé n'apparaît dans aucun résultat), lancés
+   par la CI avec `--allow-env` : le SDK Anthropic lit l'environnement à sa création.
 2. **Clés** : Vault, `ai_providers`, Tester et enregistrer, Tester ; onglet Console « Modèles IA »,
    section Fournisseurs. pgTAP, e2e « clé jamais visible », « échec : rien n'est enregistré ».
 3. **Modèle par fonction** : `ai_function_models`, résolution, repli et coupure, bandeau ;
