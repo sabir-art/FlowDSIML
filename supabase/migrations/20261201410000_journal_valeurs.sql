@@ -4,7 +4,7 @@
 --    lignes et les actions sans valeur) ; console_audit_list les rend.
 --  * private.console_log : variante à six paramètres ; celle à quatre reste.
 --  * Modèles IA : les fonctions d'écriture écrivent les deux valeurs. Clés : un état (« Aucune clé »,
---    « Clé enregistrée », « Test réussi », « Échec : UNAUTHORIZED », « — » avant un premier test), jamais la clé. Modèles, liste de
+--    « Clé enregistrée », « Test réussi », « Échec : UNAUTHORIZED », « Jamais testée » avant un premier test), jamais la clé. Modèles, liste de
 --    l'assistant et règles d'Auto : libellés lisibles fournis par l'Edge Function (catalogue), sinon les
 --    identifiants. Le libellé de l'objet devient le nom de ce qui change (« Traduction », « Anthropic »).
 --  Les migrations précédentes ne changent pas : les fonctions sont remplacées ici.
@@ -44,10 +44,10 @@ returns text language sql immutable set search_path = '' as $$
 $$;
 revoke all on function private.ai_provider_label(text) from public, anon, authenticated;
 
--- État du dernier test d'une clé, tel qu'il s'écrit dans le journal ; jamais testée : « — »
+-- État du dernier test d'une clé, tel qu'il s'écrit dans le journal
 create or replace function private.ai_test_state(p_at timestamptz, p_ok boolean, p_cause text)
 returns text language sql immutable set search_path = '' as $$
-  select case when p_at is null then '—' when p_ok then 'Test réussi'
+  select case when p_at is null then 'Jamais testée' when p_ok then 'Test réussi'
               else 'Échec : ' || coalesce(p_cause, 'PROVIDER') end;
 $$;
 revoke all on function private.ai_test_state(timestamptz, boolean, text) from public, anon, authenticated;
@@ -108,7 +108,7 @@ begin
     last_test_error = excluded.last_test_error, last_test_ms = excluded.last_test_ms;
   insert into public.console_audit (actor_id, action, object_type, object_id, object_label, old_value, new_value)
   values (p_actor, 'ai.key_tested', 'ai', p_provider, private.ai_provider_label(p_provider),
-          coalesce(v_old, '—'), private.ai_test_state(now(), p_ok, p_cause));
+          coalesce(v_old, 'Jamais testée'), private.ai_test_state(now(), p_ok, p_cause));
 end $$;
 
 -- Modèle par fonction : p_old et p_new (libellés lisibles) s'ajoutent ; sans eux, les identifiants

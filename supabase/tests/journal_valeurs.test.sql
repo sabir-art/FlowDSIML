@@ -22,7 +22,7 @@ select throws_ok($$ insert into public.console_audit (action, old_value) values 
 select public.ai_key_tested('openai', false, 'UNAUTHORIZED', 120, '00000000-0000-0000-0000-0000000041e1');
 select is((select object_label || ' | ' || old_value || ' | ' || new_value from public.console_audit
             where action = 'ai.key_tested' order by id desc limit 1),
-  'OpenAI | — | Échec : UNAUTHORIZED', 'premier test : « — » → échec nommé');
+  'OpenAI | Jamais testée | Échec : UNAUTHORIZED', 'premier test : jamais testée → échec nommé (décision du chef)');
 select public.ai_key_tested('openai', true, null, 90, '00000000-0000-0000-0000-0000000041e1');
 select is((select old_value || ' → ' || new_value from public.console_audit
             where action = 'ai.key_tested' order by id desc limit 1),
