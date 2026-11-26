@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
 import type { PendingHtmlPage } from './htmlStore';
 import { defaultHotspotTitle } from './geometry';
+import { distinctNames } from './stepNames';
 
 /**
  * A8 : envoi des pages HTML. Chaque page passe par la fonction html-ingest, qui l'assainit une
@@ -61,6 +62,11 @@ export async function sendHtml(
   if (!user || !s.session) throw new Error('Non connecté');
   const ordered = [...pages].sort((a, b) => a.order - b.order).filter((p) => !p.tooBig);
   const stepIds = ordered.map(() => crypto.randomUUID());
+  // L60 : le nom de l'écran copié (son titre, son onglet), pas le libellé du clic qui le quitte ; jamais
+  // deux étapes du même nom (lot B)
+  const names = distinctNames(
+    ordered.map((p, i) => ({ name: p.heading || p.title || `Page ${i + 1}`, clickLabel: p.clickLabel })),
+  );
   const dropped: DroppedLink[] = [];
   let demoId: string;
   let first = 0;
@@ -126,8 +132,7 @@ export async function sendHtml(
       workspace_id: target.workspaceId,
       position: first + i,
       kind: 'html',
-      // L60 : le nom de l'écran copié (son titre, son onglet), pas le libellé du clic qui le quitte
-      title: (p.heading || p.title || `Page ${i + 1}`).slice(0, 200),
+      title: names[i]!.slice(0, 200),
       page_url: p.url.slice(0, 2000),
       html_path: path,
       html_ops: ops as unknown as Json,
