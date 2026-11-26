@@ -121,6 +121,15 @@ const menuItems = () =>
 function toggleMenu(open: boolean, focus = true) {
   menu.hidden = !open;
   $('more').setAttribute('aria-expanded', String(open));
+  // Retours client 0.3.3 : menu collé à son bouton (4 px dessous), aligné sur son bord droit
+  if (open) {
+    const r = $('more').getBoundingClientRect();
+    Object.assign(menu.style, {
+      position: 'fixed',
+      top: `${r.bottom + 4}px`,
+      right: `${innerWidth - r.right}px`,
+    });
+  }
   if (open) menuItems()[0]?.focus();
   else if (focus) $('more').focus();
 }
