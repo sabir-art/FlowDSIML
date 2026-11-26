@@ -405,6 +405,7 @@
     "removeInviteTitle": "Remove the invitation?",
     "removeInviteBody": "The link sent to {{email}} will stop working. You can invite this address again.",
     "removeInviteConfirm": "Remove invitation",
+    "inviteRemoved": "Invitation removed.",
     "noMatch": "No member matches this search.",
     "roleHelp": {
       "viewer": "Views demos and analytics.",

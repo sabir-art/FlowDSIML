@@ -416,7 +416,7 @@ export function Members() {
                             await run(async () => {
                               check(await supabase.from('invitations').delete().eq('id', i.id));
                               await load();
-                            });
+                            }, t('members.inviteRemoved'));
                           })(),
                       },
                     ]}

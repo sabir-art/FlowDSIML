@@ -509,6 +509,9 @@ const SHOTS = process.env.SHOTS_DIR;
       .click();
     await page.getByRole('button', { name: `Actions pour ${inv.email}` }).waitFor({ state: 'detached' });
     ok(state.tables.invitations.length === before - 1, 'confirmation : invitation retirée');
+    const toast = page.locator('.toasts[role="status"] .toast', { hasText: 'Invitation retirée.' });
+    await toast.waitFor();
+    ok(await toast.isVisible(), 'retrait : confirmé par un toast « Invitation retirée. »');
   }
 
   // Connecté en Lecteur (recette UX du 25/11) : ni « Inviter », ni invitations, ni menu sur les autres
