@@ -56,7 +56,7 @@ const ok = (c, l) => {
   };
   const status = (page) => send(page, { type: 'fd:add-status', v: 1, demoId: DEMO });
 
-  ok(manifest.version === '0.3.3', `manifeste : version ${manifest.version}`);
+  ok(manifest.version === '0.3.4', `manifeste : version ${manifest.version}`);
   ok(
     JSON.stringify(manifest.externally_connectable) ===
       JSON.stringify({ matches: ['http://localhost:54400/*'] }),
@@ -74,7 +74,7 @@ const ok = (c, l) => {
   await editor.goto('http://localhost:54400/page');
   const ping = await send(editor, { type: 'fd:ping', v: 1 });
   ok(
-    ping && ping.ok === true && ping.version === '0.3.3',
+    ping && ping.ok === true && ping.version === '0.3.4',
     `ping : version de l’extension (${JSON.stringify(ping)})`,
   );
   ok(
