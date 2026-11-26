@@ -187,7 +187,7 @@ const manifests = {
   await p.getByRole('button', { name: 'Sous-titres' }).click();
   ok((await p.locator('.p-video__cc').count()) === 0, 'sous-titres masqués');
   ok(
-    (await slider.getAttribute('aria-valuetext')).includes(`sur 0:10`),
+    (await slider.getAttribute('aria-valuetext')).replace(/\s/g, ' ').includes(`sur 0:10`),
     'curseur : valeur en minutes et secondes',
   );
   await p.getByRole('button', { name: 'Activer le son' }).first().click();
