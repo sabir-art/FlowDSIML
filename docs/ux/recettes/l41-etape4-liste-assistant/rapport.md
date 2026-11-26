@@ -85,3 +85,34 @@ Captures : `4-editeur-menu-clair-sombre.png` et `5-editeur-autres-modeles-vide-e
 2. **La phrase « Le propriétaire choisit les modèles dans Paramètres › Assistance IA. » est fausse aujourd'hui.** Cette page n'a pas de section de modèles : seulement « Assistance IA » et « Voix et sous-titres ». La section « Modèles proposés dans l'assistant » (spec §5) n'est pas encore livrée. Attendu : retirer la phrase jusqu'à la livraison du §5, ou bien livrer le §5.
 
 Demandes concernées : L41 étape 4 · Console › Modèles IA › Assistant IA (liste ordonnée, Proposer, étiquettes, règles d'Auto, aperçu, dernier modèle, lecture seule) · ModelPicker de l'éditeur (menu du serveur, groupes, fin d'OpenAI « Bientôt ») · décision 3 (règle dont le modèle n'est plus proposé).
+
+## Contre-recette sur bb8dd58 (26/11) : 3 points VERT, non bloquants VERT
+
+**Banc** :
+- `claude/dev-mvp` à bb8dd58, qui contient ba1e186 et 69999b1 ;
+- faux backend, clés factices ;
+- Chromium à 1440 × 900 et 390 px, en clair et en sombre.
+
+**Tests** :
+- e2e `console-modeles` 56/56 et `assistant-modele` 15/15, en clair comme en sombre ;
+- Deno 45/45 ;
+- mes sondes de la recette, rejouées.
+
+| Point | Verdict | Mesure |
+| --- | --- | --- |
+| 1 · « Autres modèles › » masqué quand le sous-menu est vide | **VERT** | Configuration par défaut : le menu contient Auto, Recommandé (Sonnet, Opus), et plus d'entrée « Autres modèles ». Avec Haiku Bêta proposé, l'entrée revient et ne contient que Haiku (Bêta). |
+| 2 · Phrase du propriétaire retirée | **VERT** | Plus affichée dans le sous-menu. La clé `ai.model.ownerNote` reste dans les fichiers de langue mais n'est plus utilisée : à supprimer au passage. |
+| 3 · Règle dont le modèle n'est plus proposé | **VERT** | Bordure orange (#855104 en clair, #f8bb61 en sombre). Sous la liste, « Non proposé : Auto utilise Claude Opus », relié par `aria-describedby`. Bandeau : « 2 règles d'Auto visent un modèle qui n'est plus proposé : demandes courtes et analyse de toute la démo. » Liste de 272 px, sans troncature (« Claude Sonnet (non proposé) » en entier). Serveur : Haiku Bêta en tête et Sonnet décoché donnent `autoPick` = **Opus**, le premier Recommandé. Quand seul un Bêta est proposé, Auto le prend : c'est le seul choix possible. |
+
+Captures : `bb8dd58-regle-non-proposee-bandeau.png`, `bb8dd58-editeur-menu-defaut-et-regle.png`.
+
+**Points non bloquants**
+
+| Point | Verdict | Mesure |
+| --- | --- | --- |
+| Journal | **VERT** | Chaque changement a sa ligne : « Liste de l'assistant · Claude Haiku : proposé », « · Claude Haiku : étiquette Bêta », « · Claude Sonnet : retiré », « · Ordre : Claude Sonnet, Claude Opus ». |
+| Un seul toast pour un même message (`Toast.tsx`, changement global) | **VERT** | 3 changements d'étiquette d'affilée donnent 1 seul « Liste de l'assistant enregistrée ». Les toasts avec action (Annuler) s'empilent encore, ce qui est voulu. Rien de cassé ailleurs : console 56, acces-mot-de-passe 28, acces-email 33, assistance-ia 41, assistant 18, distribute 93, editor 41, glossary 21, integrations 41 et generer 27, tous verts. |
+| 8 px entre les règles à 390 px | **VERT** | 8 px mesurés entre deux règles. J'avais demandé 12 px, mais avec le message « Non proposé » placé sous la liste, chaque règle se lit comme un groupe. J'accepte 8 px. Capture : `bb8dd58-regles-390.png`. |
+| ba1e186 · `AiWrite` n'annonce qu'une fois | **VERT** | Plus de `role=alert` : seule la zone `role=status` reçoit « Indisponible pour le moment ». Pendant le focus automatique, l'entrée n'a pas de description, ce qui évite la double lecture. Après Maj+Tab puis Tab, la description revient : « Indisponible pour le moment. Réessayez plus tard. ». Au clavier, l'infobulle reste visible au premier plan. |
+
+Demandes concernées : L41 étape 4 · ModelPicker (« Autres modèles » vide masqué, phrase du propriétaire retirée) · règle d'Auto dont le modèle n'est plus proposé (alerte, bandeau, premier Recommandé) · journal détaillé · toast unique · espacement des règles à 390 px · annonce unique dans AiWrite.
