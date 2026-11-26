@@ -60,3 +60,22 @@ Le test `num01.test.ts` ne lit que `fr.json` et `en.json`, et ne vise pas « sur
   - et à un contrôle des gabarits `` `${…} unité` `` dans `src` et `packages` (même motif que le §22.5 de COMP-01).
 
 Demandes concernées : NUM-01 partout (textes FR et EN, présentateur, Médiathèque, analytics, notifications, voix off).
+
+## Contre-recette sur 312150a (26/11) : VERT
+
+**Banc** :
+- `claude/dev-mvp` à 312150a (avec 39e91c4) ;
+- app et lecteur lancés comme en CI, faux backend ;
+- test `num01.test.ts` : 6/6.
+
+**Mesures** :
+- **Textes** : en FR, 11 espaces rendues insécables, rien d'autre ne change. Dans le lecteur, 20 textes passent à `sur {{x}}`. Il ne reste plus aucune espace ordinaire entre un nombre (ou `{{x}}`) et son unité, ni après « sur » suivi d'un nombre, dans fr.json, en.json et le lecteur. Aucun mot n'est touché. « repli sur {{model}} » a aussi reçu l'insécable : c'est sans effet visible et accepté. `console.ov.onArticles` est maintenant traduit en anglais.
+- **Code** :
+  - `spoken()` donne « 16 min 21 » et `minSec()` donne « 45 s », tous deux avec des insécables ;
+  - `unit()` est ajouté dans `lib/format.ts` et sert à l'axe des taux, à « w × h px » et au zoom de l'éditeur ;
+  - la recherche des gabarits `` `${…} unité` `` dans `src`, `packages` et le lecteur ne trouve plus rien, sauf `learners/progress.ts` l. 374. C'est une cellule de l'export CSV (`csvTable`), qui n'est pas affichée, et elle porte la marque `num01-donnee`. Exception acceptée par le chef.
+- **À l'écran** : j'ai relevé en direct chaque texte visible pendant 11 e2e, tous verts (presenter-l66, media-page, analytics, analytics-avance, notifications, parametres-notifications, voix-off, player-ux, quiz-player, player-resume, guide-sandbox). La Médiathèque, les notifications et l'analytics sont aussi relevées à 390 px. Le relevé ne trouve **plus aucune espace ordinaire dans un texte affiché** : les durées du bilan et le minuteur « sur 15:00 » sont conformes (`312150a-presentateur.png`).
+
+**Remarque non bloquante** : l'annonce aux lecteurs d'écran du lecteur (`Player.tsx` l. 832, `` `${t.stepWord} ${index + 1} ${t.of} …` ``) garde une espace ordinaire dans « Étape 1 sur 3 ». La zone n'est pas affichée et la ligne ne s'y coupe pas, donc sans effet. À aligner un jour par cohérence.
+
+Demandes concernées : NUM-01 partout (« sur N », textes du lecteur, valeurs du code, présentateur, test étendu).
