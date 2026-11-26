@@ -21,7 +21,6 @@ import {
   Lock,
   Mail,
   MessageSquareText,
-  Pencil,
   Plus,
   Power,
   QrCode,
@@ -48,6 +47,7 @@ import { Menu, type MenuItem } from '../../components/Menu';
 import { asSettings } from '../editor/types';
 import { AccessPanel, useDemoAccess } from './AccessPanel';
 import { useShareRules } from '../../lib/shareRules';
+import { downloadQrPng } from '../../lib/qrPng';
 import { PublicPagePanel } from './PublicPagePanel';
 import {
   PersonalPageFields,
@@ -70,7 +70,6 @@ import '../../styles/maquette-ajouts.css';
 import '../../styles/maquette-peau.css';
 import { Status, Select } from '@flowdsiml/ui';
 import { CopyField } from '../../components/CopyField';
-import { Qr } from '../present/RemoteDialogs';
 import { Fold } from './Fold';
 import { CopyAction } from './CopyAction';
 import { RadioCards } from './RadioCards';
@@ -158,7 +157,6 @@ export function SharePanel({
   const [importing, setImporting] = useState(false);
   /** L38-7 : formations de l'espace et leurs modules (bloc « Formation »). */
   const tab: Tab = TAB_OF[mode];
-  const [qr, setQr] = useState(false);
   const [msgCopied, copyMsg] = useCopied();
   // Adresse d'une page personnalisée copiée depuis le menu ⋯ : confirmée sous la liste, sans toast
   const [pageCopied, copyPage] = useCopied();
@@ -327,6 +325,22 @@ export function SharePanel({
     .slice(0, 2)
     .map((k, i) => [i ? '&' : '?', `${k}=`, variables.find((v) => v.key === k)?.default_value || k] as const);
 
+  // Planche 2 : envoi impossible (démo non publiée, ou accès « Sur invitation ») : boutons grisés, raison
+  // dans l'infobulle
+  const canSend = published && access.access.mode !== 'invite';
+  const sendOff = !published ? t('share.publishToSend') : t('share.inviteNoSend');
+  /** « Envoyer par message » : partage du système s'il existe, sinon message prêt à envoyer copié. */
+  const sendMessage = async () => {
+    const text = t('share.messageText', { title: demo.title, url: publicUrl });
+    if (typeof navigator.share === 'function') {
+      try {
+        return await navigator.share({ title: demo.title, text });
+      } catch (e) {
+        if ((e as Error).name === 'AbortError') return;
+      }
+    }
+    await copyMsg(text);
+  };
   const AccessIcon =
     access.access.mode === 'password'
       ? KeyRound
@@ -421,7 +435,7 @@ export function SharePanel({
             {t(`share.modeName.${mode}`)}
           </h3>
           {/* L'accès vaut pour tous les moyens de partage : il est rappelé en tête de chaque mode */}
-          {mode !== 'acces' && (
+          {mode !== 'acces' && mode !== 'lien' && (
             <span className="shd-access">
               <AccessIcon aria-hidden="true" />
               <span className="shd-access__txt">{t(`access.mode.${access.access.mode}`)}</span>
@@ -479,131 +493,156 @@ export function SharePanel({
                     <span>{t('share.publicLinksOff')}</span>
                   </div>
                 )}
-                {/* §1.3 : mode Lien sobre. Le lien se copie et s'ouvre par deux boutons icône ; trois autres
-                    façons de le transmettre ; les réglages rares sont repliés. La pastille d'accès suffit :
-                    aucun encadré d'explication. */}
-                <div className="shl-link">
-                  <CopyField
-                    id="sh-pub"
-                    label={t('share.publicLink')}
-                    value={publicUrl}
-                    copyLabel={t('share.copyLink')}
-                    copiedText={t('common.copied')}
-                    disabled={!published}
-                  />
-                  {published ? (
-                    <a
-                      className="fd-btn fd-btn--icon"
-                      href={publicUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={t('share.openLink')}
-                      title={t('share.openLink')}
-                    >
-                      <ExternalLink size={16} aria-hidden="true" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      className="fd-btn fd-btn--icon"
-                      aria-disabled="true"
-                      aria-label={t('share.openLink')}
-                      title={t('share.publishFirst')}
-                    >
-                      <ExternalLink size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-                <div className="shl-acts" role="group" aria-label={t('share.elsewhere')}>
-                  {published ? (
-                    <a
-                      className="fd-btn fd-btn--icon"
-                      href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
-                      aria-label={t('share.byEmail')}
-                      title={t('share.byEmail')}
-                    >
-                      <Mail size={16} aria-hidden="true" />
-                    </a>
-                  ) : (
-                    <button
-                      type="button"
-                      className="fd-btn fd-btn--icon"
-                      aria-disabled="true"
-                      aria-label={t('share.byEmail')}
-                      title={t('share.publishFirst')}
-                    >
-                      <Mail size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="fd-btn fd-btn--icon"
-                    aria-label={t('share.copyMessage')}
-                    title={published ? t('share.copyMessage') : t('share.publishFirst')}
-                    aria-disabled={published ? undefined : 'true'}
-                    onClick={() =>
-                      published && void copyMsg(t('share.messageText', { title: demo.title, url: publicUrl }))
-                    }
-                  >
-                    {msgCopied ? (
-                      <Check size={16} aria-hidden="true" />
-                    ) : (
-                      <MessageSquareText size={16} aria-hidden="true" />
+                {/*
+                  Retours client, planche 2 : bandeau d'accès, Lien de la démo, envoi en trois boutons icône
+                  (infobulles), Adresse personnalisée, Paramètres d'URL. Libellé → contrôle → aide à 8 px,
+                  24 px entre les sections.
+                */}
+                <div className="shl-secs">
+                  <div className="shl-access">
+                    <span className="shl-access__tile">
+                      <AccessIcon aria-hidden="true" />
+                    </span>
+                    <span className="shl-access__tx">
+                      <b>{t(`access.mode.${access.access.mode}`)}</b>
+                      <small>{t(`access.modeHelp.${access.access.mode}`)}</small>
+                      {editable && (
+                        <button
+                          type="button"
+                          className="link-button shl-access__link"
+                          onClick={() => onView('acces')}
+                        >
+                          {t('share.changeAccess')}
+                        </button>
+                      )}
+                    </span>
+                    {editable && (
+                      <button
+                        type="button"
+                        className="fd-btn fd-btn--sm shl-access__btn"
+                        onClick={() => onView('acces')}
+                      >
+                        {t('share.changeAccess')}
+                      </button>
                     )}
-                  </button>
-                  <button
-                    type="button"
-                    className="fd-btn fd-btn--icon"
-                    aria-label={t('share.qrCode')}
-                    title={published ? t('share.qrCode') : t('share.publishFirst')}
-                    aria-expanded={published ? qr : undefined}
-                    aria-disabled={published ? undefined : 'true'}
-                    onClick={() => published && setQr((v) => !v)}
-                  >
-                    <QrCode size={16} aria-hidden="true" />
-                  </button>
-                  {/* Confirmation sur place (pas de toast) : toujours présente, annoncée poliment */}
-                  <span className="shl-ok" role="status">
-                    {msgCopied ? t('common.copied') : ''}
-                  </span>
-                </div>
-                {qr && published && (
-                  <div className="shl-qr">
-                    <Qr text={publicUrl} label={t('share.qrLabel', { title: demo.title })} size={144} />
-                    <p className="help">{t('share.qrHelp')}</p>
                   </div>
-                )}
-                <div className="shd-folds">
+                  <div className="shl-sec">
+                    <span className="shl-label" aria-hidden="true">
+                      {t('share.demoLink')}
+                    </span>
+                    <div className="shl-link">
+                      <CopyField
+                        id="sh-pub"
+                        label={t('share.demoLink')}
+                        value={publicUrl}
+                        copyLabel={t('share.copyLink')}
+                        copiedText={t('common.copied')}
+                        disabled={!published}
+                      />
+                      {published ? (
+                        <a
+                          className="fd-btn fd-btn--icon"
+                          href={publicUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={t('share.openLink')}
+                        >
+                          <ExternalLink size={16} aria-hidden="true" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--icon"
+                          aria-disabled="true"
+                          aria-label={t('share.openLink')}
+                          data-tip={t('share.publishToSend')}
+                        >
+                          <ExternalLink size={16} aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="shl-acts" role="group" aria-label={t('share.elsewhere')}>
+                      {canSend ? (
+                        <a
+                          className="fd-btn fd-btn--icon"
+                          href={`mailto:?subject=${encodeURIComponent(demo.title)}&body=${encodeURIComponent(publicUrl)}`}
+                          aria-label={t('share.byEmail')}
+                        >
+                          <Mail size={16} aria-hidden="true" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--icon"
+                          aria-disabled="true"
+                          aria-label={t('share.byEmail')}
+                          data-tip={sendOff}
+                        >
+                          <Mail size={16} aria-hidden="true" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="fd-btn fd-btn--icon"
+                        aria-label={t('share.byMessage')}
+                        data-tip={canSend ? undefined : sendOff}
+                        aria-disabled={canSend ? undefined : 'true'}
+                        onClick={() => canSend && void sendMessage()}
+                      >
+                        {msgCopied ? (
+                          <Check size={16} aria-hidden="true" />
+                        ) : (
+                          <MessageSquareText size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        className="fd-btn fd-btn--icon"
+                        aria-label={t('share.qrDownload')}
+                        data-tip={canSend ? undefined : sendOff}
+                        aria-disabled={canSend ? undefined : 'true'}
+                        onClick={() => canSend && void downloadQrPng(publicUrl, `${t('share.qrFile')}.png`)}
+                      >
+                        <QrCode size={16} aria-hidden="true" />
+                      </button>
+                      {/* Confirmation sur place (pas de toast) : toujours présente, annoncée poliment */}
+                      <span className="shl-ok" role="status">
+                        {msgCopied ? t('common.copied') : ''}
+                      </span>
+                    </div>
+                  </div>
                   {/* L28-01 : adresse personnalisée (#/l/<partie lisible>-<suffixe>) */}
-                  <Fold icon={<Pencil aria-hidden="true" />} title={t('share.customAddress')}>
+                  <div className="shl-sec">
                     <AddressField
                       demoId={demo.id}
                       editable={editable}
                       address={address}
                       onSaved={setAddress}
                     />
-                  </Fold>
-                  <Fold icon={<Braces aria-hidden="true" />} title={t('share.urlParamsShort')}>
-                    <h4 className="sr-only" id="sh-params-h">
-                      {t('share.urlParams')}
-                    </h4>
-                    {/* §18.7 : l'adresse revient à la ligne (pas de zone défilante) */}
-                    <div className="code" role="region" aria-labelledby="sh-params-h">
-                      {publicUrl}
-                      {paramExample.map(([sep, k, v]) => (
-                        <span key={k}>
-                          <span className="k">
-                            {sep}
-                            {k}
+                  </div>
+                  <div className="shd-folds">
+                    <Fold icon={<Braces aria-hidden="true" />} title={t('share.urlParamsShort')}>
+                      <h4 className="sr-only" id="sh-params-h">
+                        {t('share.urlParams')}
+                      </h4>
+                      {/* §18.7 : l'adresse revient à la ligne (pas de zone défilante) */}
+                      <div className="code" role="region" aria-labelledby="sh-params-h">
+                        {publicUrl}
+                        {paramExample.map(([sep, k, v]) => (
+                          <span key={k}>
+                            <span className="k">
+                              {sep}
+                              {k}
+                            </span>
+                            <span className="s">{encodeURIComponent(v)}</span>
                           </span>
-                          <span className="s">{encodeURIComponent(v)}</span>
-                        </span>
-                      ))}
-                    </div>
-                    <p className="help sh-help">
-                      {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
-                    </p>
-                  </Fold>
+                        ))}
+                      </div>
+                      <p className="help sh-help">
+                        {paramExample.length ? t('share.urlParamsHelp') : t('share.urlParamsNone')}
+                      </p>
+                    </Fold>
+                  </div>
                 </div>
               </section>
             )}

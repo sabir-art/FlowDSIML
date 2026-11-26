@@ -236,11 +236,13 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         (await d.locator('.shd-nav__item[aria-current="page"]').textContent()).trim() === 'Lien',
         'mode courant : aria-current',
       );
-    const pill = d.locator('.shd-access');
+    // Planche 2 : sur Lien, l'accès est un bandeau dans le volet (« Changer l'accès »), pas une pastille
+    const pill = d.locator('.shl-access');
     ok(
-      (await pill.locator('.shd-access__txt').textContent()) === 'Toute personne avec le lien' &&
-        (await pill.getByRole('button', { name: 'Modifier' }).count()) === 1,
-      `Lien : pastille d’accès « Toute personne avec le lien » + « Modifier » (${JSON.stringify(await pill.innerText())})`,
+      (await pill.locator('b').textContent()) === 'Toute personne avec le lien' &&
+        (await pill.getByRole('button', { name: 'Changer l’accès' }).count()) === 1 &&
+        (await d.locator('.shd-access').count()) === 0,
+      `Lien : bandeau d’accès « Toute personne avec le lien » + « Changer l’accès » (${JSON.stringify(await pill.innerText())})`,
     );
     ok((await d.locator('.shd-banner').count()) === 0, 'démo publiée : pas de bandeau');
     ok(
@@ -255,10 +257,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await lien.getByRole('button', { name: 'Copier le lien', exact: true }).click();
     await lien.locator('.fd-copy__ok', { hasText: 'Copié' }).waitFor();
     if (MOBILE) {
-      const pill = await d.locator('.shd-access').boundingBox();
+      const pill = await d.locator('.shl-access').boundingBox();
       ok(
         pill.x >= 16 && pill.x + pill.width <= WIDTH - 16,
-        `390 : la pastille d’accès garde 16 px de marge (${Math.round(pill.x)} → ${Math.round(pill.x + pill.width)})`,
+        `390 : le bandeau d’accès garde 16 px de marge (${Math.round(pill.x)} → ${Math.round(pill.x + pill.width)})`,
       );
     }
     ok(
@@ -279,7 +281,11 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
         ).startsWith('mailto:?subject='),
       'Lien : trois boutons icône (e-mail, message, QR code)',
     );
-    await acts.getByRole('button', { name: 'Copier un message prêt à envoyer' }).click();
+    await page.evaluate(() => {
+      // Sans partage du système, « Envoyer par message » copie le message prêt à envoyer
+      navigator.share = undefined;
+    });
+    await acts.getByRole('button', { name: 'Envoyer par message' }).click();
     const msg = await page.evaluate(() => navigator.clipboard.readText());
     ok(msg.includes(link) && msg.startsWith('Bonjour'), `Lien : message prêt à envoyer copié (${msg})`);
     // Retour UX : la copie se confirme sur place (« Copié », région polie), jamais par un toast
@@ -292,32 +298,23 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       (await d.getByRole('link', { name: 'modifications non publiées' }).count()) === 0,
       'fenêtre sobre : pas de lien « modifications non publiées »',
     );
-    const qrBtn = acts.getByRole('button', { name: 'Afficher le QR code' });
-    ok((await qrBtn.getAttribute('aria-expanded')) === 'false', 'Lien : QR code masqué par défaut');
-    await qrBtn.click();
-    await lien.locator('.shl-qr svg').waitFor();
-    ok(
-      (await qrBtn.getAttribute('aria-expanded')) === 'true' &&
-        /QR code du lien/.test((await lien.locator('.shl-qr svg').getAttribute('aria-label')) || ''),
-      'Lien : QR code affiché, nommé',
-    );
-    await shot(page, 'partager-lien-qr');
-    await qrBtn.click();
+    // Planche 2 : le QR code se télécharge en PNG (partager-lien.e2e) ; l'adresse personnalisée est une
+    // section ouverte, seuls les paramètres d'URL restent repliés
     const folds = lien.locator('.shd-fold__head');
     ok(
-      (await folds.count()) === 2 &&
-        (await folds.allTextContents()).join('|') === 'Adresse personnalisée|Paramètres d’URL' &&
-        (await folds.evaluateAll((l) => l.every((b) => b.getAttribute('aria-expanded') === 'false'))) &&
-        (await lien.locator('#sh-slug').count()) === 0,
-      'Lien : deux lignes repliées « Adresse personnalisée », « Paramètres d’URL »',
+      (await folds.count()) === 1 &&
+        (await folds.allTextContents()).join('|') === 'Paramètres d’URL' &&
+        (await folds.first().getAttribute('aria-expanded')) === 'false' &&
+        (await lien.locator('#sh-slug').count()) === 1,
+      'Lien : « Adresse personnalisée » ouverte, « Paramètres d’URL » replié',
     );
-    await folds.nth(1).click();
+    await folds.nth(0).click();
     ok(
       (await lien.getByRole('region', { name: /paramètres/i }).count()) === 1 &&
-        (await folds.nth(1).getAttribute('aria-expanded')) === 'true',
+        (await folds.nth(0).getAttribute('aria-expanded')) === 'true',
       'Lien : « Paramètres d’URL » se déplie',
     );
-    await folds.nth(1).click();
+    await folds.nth(0).click();
     ok((await lien.locator('.fd-note, .sh-note').count()) === 0, 'Lien : aucun encadré d’explication');
     ok(await noScroll(page), 'Lien : pas de défilement horizontal');
     await shot(page, 'partager-lien');
@@ -600,7 +597,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     await dlg(page).waitFor();
     // La fenêtre charge la démo avant d'afficher ses modes
     await d.locator('.shd-nav').waitFor();
-    await mode(page, 'Lien');
+    await mode(page, 'Intégrer');
 
     // Accès : pas de pastille ; un mot de passe enregistré met la pastille à jour partout
     await d.locator('.shd-access').getByRole('button', { name: 'Modifier' }).click();
@@ -623,9 +620,9 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     ok(state.tables.demo_access[0]?.mode === 'password', 'Accès : mot de passe enregistré');
     await mode(page, 'Lien');
     await page.waitForFunction(
-      () => document.querySelector('.shd-access__txt')?.textContent === 'Avec un mot de passe',
+      () => document.querySelector('.shl-access b')?.textContent === 'Avec un mot de passe',
     );
-    ok(true, 'pastille d’accès mise à jour : « Avec un mot de passe »');
+    ok(true, 'bandeau d’accès mis à jour : « Avec un mot de passe »');
     await mode(page, 'Intégrer');
     ok(
       (await d.locator('.shd-access__txt').textContent()) === 'Avec un mot de passe',
@@ -783,7 +780,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
           (b) =>
             b.tagName === 'BUTTON' &&
             b.getAttribute('aria-disabled') === 'true' &&
-            (b.title || b.dataset.tipTitle) === 'Publiez la démo d’abord' &&
+            b.dataset.tip === 'Publiez la démo pour envoyer son lien.' &&
             Number(getComputedStyle(b).opacity) < 1,
         ),
       );
@@ -791,7 +788,7 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
       off.length === 3 && off.every(Boolean),
       'non publiée : e-mail, message et QR code désactivés, grisés, avec la raison',
     );
-    ok((await d.locator('.shd-access').count()) === 1, 'non publiée : l’accès se règle déjà');
+    ok((await d.locator('.shl-access').count()) === 1, 'non publiée : l’accès se règle déjà');
     await shot(page, 'partager-nonpubliee');
     await axe(page, 'Non publiée');
     await d.locator('.shd-banner').getByRole('button', { name: 'Publier' }).click();

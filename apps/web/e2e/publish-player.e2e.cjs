@@ -228,8 +228,8 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   );
   // §1 : l'accès de la démo est rappelé en tête de chaque mode (pastille d'accès)
   await app.locator('.shd-nav').getByRole('button', { name: 'Lien', exact: true }).click();
-  ok(/Avec un mot de passe/.test(await app.textContent('.shd-access')), 'L11 : pastille d’accès de la démo');
-  await app.locator('.shd-access').getByRole('button', { name: 'Modifier' }).click();
+  ok(/Avec un mot de passe/.test(await app.textContent('.shl-access')), 'L11 : bandeau d’accès de la démo');
+  await app.locator('.shl-access__btn').click();
 
   const g = await ctx.newPage();
   await install(g, state);

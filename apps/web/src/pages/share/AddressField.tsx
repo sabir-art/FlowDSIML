@@ -69,7 +69,10 @@ export function AddressField({
     <div className="field">
       <label htmlFor="sh-slug">{t('share.customAddress')}</label>
       <div className="input-group sh-addr">
-        <span className="input t-mono muted sh-prefix">{prefix}</span>
+        {/* Planche 2 : préfixe coupé par la gauche (la fin utile reste lisible), 55 % au plus */}
+        <span className="input t-mono muted sh-prefix" title={prefix}>
+          <bdi>{prefix}</bdi>
+        </span>
         <input
           id="sh-slug"
           className="input t-mono sh-slug"
