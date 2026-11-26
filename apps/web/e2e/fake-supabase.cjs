@@ -3267,7 +3267,7 @@ function aiConsole(state, body, route, json) {
       new: next,
     });
   const testState = (r) =>
-    !r?.last_test_at ? 'Jamais testée' : r.last_test_ok ? 'Test réussi' : `Échec : ${r.last_test_error}`;
+    !r?.last_test_at ? '—' : r.last_test_ok ? 'Test réussi' : `Échec : ${r.last_test_error}`;
   if (body.action === 'console_catalog') return json(route, 200, { result: { providers: [], models: [] } });
   // L41 étape 3 : modèle par fonction (même résolution que _shared/ai/functions.ts, catalogue réduit)
   const CAT = [
@@ -3432,7 +3432,7 @@ function aiConsole(state, body, route, json) {
         .join(', ');
     log(
       'ai.assistant_list',
-      `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`,
+      parts.length ? parts.join(' ; ') : 'Aucun changement',
       listText(before),
       listText(after),
     );

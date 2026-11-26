@@ -952,3 +952,8 @@
   max-width: 280px;
   overflow-wrap: anywhere;
 }
+/* Recette UX de l'étape 6 : date du journal sur une ligne */
+.console-audit-at {
+  min-width: 148px;
+  white-space: nowrap;
+}

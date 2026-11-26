@@ -9,6 +9,7 @@
  *  - Lecture seule : tout visible, actions désactivées.
  *  - axe sans violation sérieuse. Usage : [THEME=dark] [SHOTS_DIR=…] node e2e/console-modeles.e2e.cjs
  */
+const fs = require('fs');
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 const { install, seed } = require('./fake-supabase.cjs');
@@ -566,28 +567,67 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     const jr = (await p5.locator('table').nth(1).locator('tbody tr').allInnerTexts())
       .join(' | ')
       .replace(/\s+/g, ' ');
+    // Recette UX de l'étape 6 : la liste de l'assistant ne montre que ce qui change, une ligne par
+    // changement (objet | avant | après) ; l'objet n'a plus le préfixe « Liste de l'assistant · »
     const jc5 = await p5
       .locator('table')
       .nth(1)
       .locator('tbody tr')
-      .evaluateAll((trs) => trs.map((tr) => [...tr.cells].slice(3).map((c) => c.textContent.trim())));
-    const order = jc5.find((r) => r[0].startsWith('Liste de l’assistant · Ordre'));
+      .evaluateAll((trs) =>
+        trs.map((tr) => {
+          const cell = (c) => {
+            const ds = [...c.querySelectorAll(':scope > div')];
+            return ds.length ? ds.map((d) => d.textContent.trim()) : [c.textContent.trim()];
+          };
+          const [o, a, n] = [...tr.cells].slice(3).map(cell);
+          return {
+            action: tr.cells[2].textContent.trim(),
+            lines: o.map((x, k) => `${x} | ${a[k]} | ${n[k]}`),
+          };
+        }),
+      );
+    const lst = jc5.filter((r) => r.action === 'Liste de l’assistant modifiée').flatMap((r) => r.lines);
     if (SHOTS) await p5.screenshot({ path: `${SHOTS}/console-journal-ia${sfx}.png`, fullPage: true });
     ok(
-      jc5.some((r) => r.join(' | ') === 'Auto · analyse de toute la démo | Claude Sonnet | Claude Opus') &&
-        // Dernier « Monter » : Haiku passe devant Sonnet
-        order?.[1] === 'Claude Sonnet (Recommandé), Claude Haiku (Recommandé), Claude Opus (Recommandé)' &&
-        order?.[2] === 'Claude Haiku (Recommandé), Claude Sonnet (Recommandé), Claude Opus (Recommandé)',
-      `journal : règle d’Auto et liste de l’assistant avec avant et après (${JSON.stringify(order)})`,
+      jc5.some((r) => r.lines[0] === 'Auto · analyse de toute la démo | Claude Sonnet | Claude Opus'),
+      'journal : règle d’Auto, modèle avant et après',
     );
+    const attendu = [
+      'Claude Haiku | Non proposé | Proposé',
+      'Claude Haiku | Sans étiquette | Recommandé',
+      'Ordre | Sonnet · Opus · Haiku | Sonnet · Haiku · Opus',
+      'Ordre | Sonnet · Haiku · Opus | Haiku · Sonnet · Opus',
+      'Claude Haiku | Proposé | Non proposé',
+      'Claude Sonnet | Proposé | Non proposé',
+    ];
     ok(
-      jr.includes('Liste de l’assistant · Claude Haiku : proposé') &&
-        jr.includes('Liste de l’assistant · Claude Haiku : étiquette Recommandé') &&
-        jr.includes('Liste de l’assistant · Ordre : Claude Haiku, Claude Sonnet, Claude Opus') &&
-        jr.includes('Liste de l’assistant · Claude Sonnet : retiré') &&
-        !/claude-/.test(jr),
-      'journal lisible : proposé, étiquette et ordre distingués ; règle d’Auto',
+      attendu.every((x) => lst.includes(x)) &&
+        !lst.some((x) => /Liste de l’assistant ·|\(Recommandé\)|claude-/.test(x)),
+      `journal, liste de l’assistant : seulement ce qui change (${lst.join(' ; ')})`,
     );
+    // Export : listes complètes et libellé de l'action
+    const [dl] = await Promise.all([
+      p5.waitForEvent('download'),
+      p5.getByRole('button', { name: 'Exporter' }).click(),
+    ]);
+    const csv = fs.readFileSync(await dl.path(), 'utf8');
+    ok(
+      csv.includes('Liste de l’assistant modifiée') &&
+        !/(^|[;,])ai\.assistant_list([;,]|$)/m.test(csv) &&
+        csv.includes('Claude Haiku (Recommandé), Claude Sonnet (Recommandé), Claude Opus (Recommandé)'),
+      'export CSV : libellé de l’action et listes complètes',
+    );
+    const at = await p5
+      .locator('table')
+      .nth(1)
+      .locator('tbody tr td.console-audit-at')
+      .first()
+      .evaluate((td) => ({
+        w: Math.round(td.getBoundingClientRect().width),
+        h: Math.round(td.getBoundingClientRect().height),
+        lh: parseFloat(getComputedStyle(td).lineHeight) || 20,
+      }));
+    ok(at.w >= 148 && at.h < at.lh * 2 + 24, `date du journal sur une ligne (${JSON.stringify(at)})`);
     // Éditeur : le menu de l'assistant suit la liste de la Console (Opus seul, recommandé)
     await p5.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
     await p5.waitForSelector('.canvas-frame img');
@@ -607,6 +647,50 @@ const GOOD2 = 'sk-fictive-bonne-000333';
       'éditeur : pas d’« Autres modèles » quand le sous-menu serait vide, pas de note du propriétaire',
     );
     await c5.close();
+  }
+  // Recette UX de l'étape 6 : sans clé, puis clé Anthropic ajoutée sur la même page
+  {
+    const s7 = seed();
+    s7.platformRole = 'admin';
+    s7.aiKeys = {};
+    s7.aiEnvKeys = [];
+    const { ctx: c7, p: p7 } = await open(s7);
+    await p7.goto(`${APP}/#/console/modeles`);
+    await p7.getByRole('heading', { name: 'Assistant IA : modèles proposés' }).waitFor();
+    await p7.waitForTimeout(400);
+    const avant = {
+      banniere: (await p7.locator('.console-ai-attention').count())
+        ? (await p7.locator('.console-ai-attention').innerText()).replace(/\s+/g, ' ')
+        : '',
+      off: await p7.locator('#ai-as-p-claude-sonnet-5-5').isDisabled(),
+      aide: (await p7.locator('.console-ai-asrow').first().innerText()).replace(/\s+/g, ' '),
+      avert: await p7.locator('.console-ai-rule__warn').count(),
+    };
+    ok(
+      !/règle/.test(avant.banniere) &&
+        avant.avert === 0 &&
+        avant.off &&
+        /Ajoutez la clé Anthropic/.test(avant.aide),
+      `sans clé : la cause « clé manquante » passe avant, aucune règle « non proposée » (bandeau : « ${avant.banniere.trim()} »)`,
+    );
+    await p7.getByRole('button', { name: 'Ajouter la clé Anthropic' }).first().click();
+    const dk = p7.getByRole('dialog', { name: 'Ajouter la clé Anthropic' });
+    await dk.getByLabel('Clé d’API').fill(GOOD);
+    await dk.getByRole('button', { name: 'Tester et enregistrer' }).click();
+    await dk.waitFor({ state: 'detached' });
+    await p7
+      .locator('#ai-as-p-claude-sonnet-5-5:not([disabled])')
+      .waitFor({ timeout: 5000 })
+      .catch(() => {});
+    const apres = {
+      off: await p7.locator('#ai-as-p-claude-sonnet-5-5').isDisabled(),
+      aide: (await p7.locator('.console-ai-asrow').first().innerText()).replace(/\s+/g, ' '),
+    };
+    ok(
+      !apres.off && !/Ajoutez la clé/.test(apres.aide),
+      `clé Anthropic ajoutée sur la même page : la section de l’assistant suit sans rechargement (« ${apres.aide.trim()} »)`,
+    );
+    await c7.close();
   }
   // Lecture seule : liste et règles désactivées
   {

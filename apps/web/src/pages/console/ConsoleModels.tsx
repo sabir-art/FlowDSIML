@@ -82,7 +82,10 @@ export function Models() {
   const [fns, setFns] = useState<FnState[] | null>(null);
   // Règles d'Auto dont le modèle n'est plus proposé (signalées par la section de l'assistant)
   const [ruleWarn, setRuleWarn] = useState<string[]>([]);
+  // Recette UX de l'étape 6 : la section de l'assistant dépend aussi des clés, rechargée avec elles
+  const [version, setVersion] = useState(0);
   const load = useCallback(() => {
+    setVersion((v) => v + 1);
     void consoleAi<ProviderState[]>('console_providers').then((r) => {
       if (r.ok) setList(r.result);
       else setFailed(true);
@@ -209,7 +212,7 @@ export function Models() {
         </ul>
       </section>
       {fns && <FunctionModels fns={fns} onChanged={setFns} />}
-      {fns && <AssistantModels onWarn={setRuleWarn} />}
+      {fns && <AssistantModels onWarn={setRuleWarn} version={version} />}
       {keyFor && (
         <KeyDialog
           p={keyFor}
@@ -546,7 +549,7 @@ interface AsstState {
  * Spec UX §4 : modèles proposés dans l'assistant (ordre, case Proposer, étiquette), règles d'« Auto »
  * et aperçu du menu tel que les utilisateurs le voient, mis à jour en direct. Au moins un modèle coché.
  */
-function AssistantModels({ onWarn }: { onWarn: (rules: string[]) => void }) {
+function AssistantModels({ onWarn, version }: { onWarn: (rules: string[]) => void; version: number }) {
   const { t } = useTranslation();
   const toast = useToast();
   const ro = useConsoleRole() !== 'admin';
@@ -555,15 +558,16 @@ function AssistantModels({ onWarn }: { onWarn: (rules: string[]) => void }) {
   const [lastHelp, setLastHelp] = useState<string | null>(null);
   useEffect(() => {
     void consoleAi<AsstState>('console_assistant').then((r) => r.ok && setSt(r.result));
-  }, []);
-  // Bandeau d'attention de la page : règles d'Auto dont le modèle n'est plus proposé
+  }, [version]);
+  // Bandeau d'attention de la page : règles d'Auto dont le modèle n'est plus proposé. Clé manquante :
+  // cette cause passe avant (le modèle n'est pas « non proposé », son fournisseur n'a pas de clé)
   const staleKey = st
     ? (['short', 'whole_demo', 'fallback'] as const)
-        .filter(
-          (r) =>
-            st.rules[r] !== 'next' &&
-            !st.models.some((m) => m.model === st.rules[r] && m.proposed && m.available),
-        )
+        .filter((r) => {
+          if (st.rules[r] === 'next') return false;
+          const m = st.models.find((x) => x.model === st.rules[r]);
+          return m ? m.available && !m.proposed : true;
+        })
         .join(',')
     : '';
   useEffect(() => onWarn(staleKey ? staleKey.split(',') : []), [staleKey, onWarn]);
