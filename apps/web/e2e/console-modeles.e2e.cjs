@@ -412,6 +412,34 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await c3.close();
   }
 
+  // ===== Fonction coupée pendant que l'éditeur est ouvert (503 UNAVAILABLE) =====
+  {
+    const s4 = seed();
+    s4.ai = { enabled: true };
+    const { ctx: c4, p: p4 } = await open(s4);
+    await p4.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
+    await p4.waitForSelector('.canvas-frame img');
+    await p4.locator('.canvas-hotspot').first().click();
+    await p4.waitForSelector('#hs-body');
+    const menu = p4.getByRole('button', { name: 'Assistance IA' }).first();
+    await menu.waitFor();
+    // TutoClick coupe la rédaction après l'ouverture de l'éditeur
+    s4.aiCut = ['write'];
+    await menu.click();
+    await p4.getByRole('menuitem', { name: 'Raccourcir' }).click();
+    await p4.waitForFunction(() => document.activeElement?.classList.contains('ai-entry'));
+    const focused = await p4.evaluate(() => {
+      const a = document.activeElement;
+      const d = document.getElementById(a?.getAttribute('aria-describedby') ?? '');
+      return { disabled: a?.getAttribute('aria-disabled'), desc: d?.textContent ?? '' };
+    });
+    ok(
+      focused.disabled === 'true' && focused.desc.includes('Indisponible pour le moment'),
+      `coupée pendant l’édition : 503 UNAVAILABLE, le focus va à l’entrée désactivée, « ${focused.desc.trim()} »`,
+    );
+    await c4.close();
+  }
+
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await b.close();
 })();

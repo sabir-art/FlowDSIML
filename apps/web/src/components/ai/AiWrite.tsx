@@ -74,14 +74,24 @@ export function DisabledEntry({
   label,
   feature = 'write',
   tip,
+  autoFocus = false,
 }: {
   status: AiStatus | null;
   label: string;
   feature?: AiFeature;
   /** Infobulle propre à la fonction quand elle est désactivée (voix, sous-titres). */
   tip?: string;
+  /**
+   * Recette UX (L41 étape 3) : l'entrée vient d'être coupée pendant une demande ; elle reprend le focus,
+   * et sa description (« Indisponible pour le moment ») est annoncée.
+   */
+  autoFocus?: boolean;
 }) {
   const id = useId();
+  const btn = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (autoFocus) btn.current?.focus();
+  }, [autoFocus]);
   const blockText = useBlockText();
   const { t } = useTranslation();
   const b = aiBlock(status, feature);
@@ -97,6 +107,7 @@ export function DisabledEntry({
   return (
     <span className="ai-disabled-wrap" onMouseEnter={place}>
       <button
+        ref={btn}
         type="button"
         className="btn btn-ghost btn-xs ai-entry"
         aria-disabled="true"
@@ -159,6 +170,8 @@ export function AiWrite({
   const [announce, setAnnounce] = useState('');
   const ctrl = useRef<AbortController | null>(null);
   const before = useRef(text);
+  // Coupée par TutoClick pendant une demande : l'entrée désactivée reprendra le focus
+  const justCut = useRef(false);
   useEffect(() => () => ctrl.current?.abort(), []);
   // Le champ change (autre hotspot) : l'aperçu en cours est abandonné
   useEffect(() => {
@@ -168,7 +181,13 @@ export function AiWrite({
 
   const b = aiBlock(status, 'write');
   if (b === 'disabled' || b === 'role' || b === 'unavailable')
-    return <DisabledEntry status={status} label={t('ai.write.menu')} />;
+    return (
+      <DisabledEntry
+        status={status}
+        label={t('ai.write.menu')}
+        autoFocus={b === 'unavailable' && justCut.current}
+      />
+    );
 
   const run = async (action: WriteAction, tone?: Tone, variant = 0) => {
     setLast({ action, tone, variant });
@@ -201,6 +220,11 @@ export function AiWrite({
         return setView({ kind: 'blocked', message: blockText('userQuota', status) });
       if (e instanceof AiRequestError && e.code === 'AI_DISABLED')
         return setView({ kind: 'blocked', message: t('ai.disabled') });
+      if (e instanceof AiRequestError && e.code === 'UNAVAILABLE') {
+        justCut.current = true;
+        setAnnounce(t('ai.unavailable'));
+        return setView({ kind: 'blocked', message: t('ai.unavailable') });
+      }
       setView({ kind: 'error' });
     }
   };
