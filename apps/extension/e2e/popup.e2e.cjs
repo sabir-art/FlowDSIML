@@ -192,8 +192,8 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     );
     ok(
       (await popup.locator('#settings .pr-k b').allInnerTexts()).join(' | ') ===
-        'Apparence | Taille de l’onglet | Suivre les nouveaux onglets | Micro | Flouter en direct | Webcam dans un coin | Cadre par défaut',
-      `${tag} · réglages : apparence, taille, nouveaux onglets, micro, flouter, webcam, cadre`,
+        'Rédaction automatique | Apparence | Taille de l’onglet | Suivre les nouveaux onglets | Micro | Flouter en direct | Webcam dans un coin | Cadre par défaut',
+      `${tag} · réglages : rédaction automatique, apparence, taille, nouveaux onglets, micro, flouter, webcam, cadre`,
     );
     const col = await popup.evaluate(() =>
       ['#size', '#frame'].map((sel) => {

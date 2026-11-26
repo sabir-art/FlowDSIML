@@ -280,11 +280,42 @@ async function thumbOf(bitmap: ImageBitmap): Promise<string> {
   return toDataUrl(await c.convertToBlob({ type: 'image/jpeg', quality: 0.7 }));
 }
 
+/**
+ * L64 §3 : titre et texte proposés pour une étape. Seuls le libellé du clic et le titre de la page sont
+ * envoyés (jamais la capture, jamais une donnée floutée). Échec ou délai dépassé : rien n'est proposé,
+ * l'étape garde le libellé du clic.
+ */
+async function draftStep(id: string, n: number, tabId: number, msg: ClickPayload, ws: string) {
+  const tell = (text: string | null) =>
+    browser.tabs.sendMessage(tabId, { type: 'fd:draft', n, text }).catch(() => undefined);
+  try {
+    const lang = (navigator.language || 'fr').slice(0, 2).toLowerCase() === 'en' ? 'en' : 'fr';
+    const call = supabase.functions.invoke('ai', {
+      body: {
+        ws,
+        task: 'step_draft',
+        lang,
+        input: { label: msg.label.slice(0, 200), page: msg.title.slice(0, 200) },
+      },
+    });
+    const late = new Promise<never>((_, no) => setTimeout(() => no(new Error('late')), 4000));
+    const r = (await Promise.race([call, late])) as { data?: { result?: { title?: string; text?: string } } };
+    const out = r.data?.result;
+    if (!out?.title || !out.text) throw new Error('empty');
+    const c = (await pending.all()).find((x) => x.id === id);
+    if (!c) return void tell(null);
+    await pending.put({ ...c, ai: { title: out.title.slice(0, 80), text: out.text.slice(0, 280) } });
+    await tell(out.text);
+  } catch {
+    await tell(null);
+  }
+}
+
 async function handleClick(
   msg: ClickPayload,
   windowId: number,
   tabId: number | undefined,
-): Promise<{ n: number; id: string; thumb: string } | undefined> {
+): Promise<{ n: number; id: string; thumb: string; drafting: boolean } | undefined> {
   const state = await getState();
   if (!state.recording || state.paused || !state.workspaceId) return;
   // L25-01 : seuls l'onglet de départ et les onglets qu'il a ouverts sont capturés
@@ -335,7 +366,9 @@ async function handleClick(
       zone: msg.frame?.zone ?? null,
     });
     await setState({ steps: order + 1, lastError: null });
-    return { n: order + 1, id, thumb };
+    // L64 §3 : rédaction automatique, après la capture (la carte de la page affiche « Rédaction… »)
+    if (state.autoDraft) void draftStep(id, order + 1, tab.id, msg, state.workspaceId);
+    return { n: order + 1, id, thumb, drafting: !!state.autoDraft };
   } catch (e) {
     await setState({
       lastError: e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e),
@@ -457,6 +490,7 @@ async function start(req: Extract<PopupRequest, { type: 'fd:start' }>): Promise<
     // L64 §2 : destination (dossier d'une nouvelle démo, ou démo existante : étapes à la fin)
     folderId: req.appendDemo || req.fill ? null : (req.folderId ?? null),
     appendDemo: req.fill ? null : (req.appendDemo ?? null),
+    autoDraft: (mode === 'clicks' || mode === 'mobile') && !!req.autoDraft,
     viewport: mode === 'mobile' ? (req.viewport ?? null) : null,
     // A8 : la page de départ est capturée dès l'injection de la barre
     htmlAwait: mode === 'html',

@@ -493,7 +493,7 @@ export default defineContentScript({
       void painted
         .then(() => browser.runtime.sendMessage(payload))
         .then((r: unknown) => {
-          const got = r as { n?: number; id?: string; thumb?: string } | null;
+          const got = r as { n?: number; id?: string; thumb?: string; drafting?: boolean } | null;
           if (!got?.n) return;
           // Hors de l'image : l'anneau et la carte arrivent une fois la capture prise
           ring(ev.clientX, ev.clientY);
@@ -502,6 +502,7 @@ export default defineContentScript({
             id: got.id,
             thumb: got.thumb,
             label: payload.label ? defaultHotspotTitle(payload.label, lang) : '',
+            drafting: got.drafting,
           });
           ui.setCount(barCount('steps', got.n));
         })
@@ -517,6 +518,10 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener((msg: unknown) => {
       if ((msg as { type?: string })?.type === 'fd:paused')
         ui.setPaused(!!(msg as { paused?: boolean }).paused);
+      if ((msg as { type?: string })?.type === 'fd:draft') {
+        const d = msg as { n?: number; text?: string | null };
+        if (typeof d.n === 'number') card.draft(d.n, d.text ?? null);
+      }
       if ((msg as { type?: string })?.type === 'fd:send-progress') {
         const p = msg as { done?: number; total?: number };
         card.hide();

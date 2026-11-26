@@ -1116,3 +1116,23 @@ a {
   font-size: 12px;
   color: var(--fd-color-text-muted);
 }
+
+/* L64 §3 : encadré « Rédaction automatique » */
+.ai-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--fd-color-primary-soft);
+}
+.ai-box > svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--fd-color-primary);
+}
+.sw[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
