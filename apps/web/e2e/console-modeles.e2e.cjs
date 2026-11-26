@@ -412,6 +412,116 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await c3.close();
   }
 
+  // ===== Étape 4 : modèles proposés dans l'assistant =====
+  {
+    const s5 = seed();
+    s5.platformRole = 'admin';
+    s5.aiKeys = { anthropic: 'sk-fictive-bonne-000555' };
+    s5.ai = { enabled: true };
+    const { ctx: c5, p: p5 } = await open(s5);
+    await p5.goto(`${APP}/#/console/modeles`);
+    await p5.getByRole('heading', { name: 'Assistant IA : modèles proposés' }).waitFor();
+    // Texte de l'aperçu, sans les tuiles (initiales du fournisseur)
+    const preview = async () =>
+      (await p5.locator('.console-ai-preview__menu').locator('.aim-head, .aim-tx').allInnerTexts())
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    ok(
+      (await preview()) ===
+        'Auto Équilibre la vitesse, l’effort et le coût Recommandé Claude Sonnet Claude Opus Autres modèles',
+      `départ : Sonnet et Opus recommandés dans l’aperçu (${await preview()})`,
+    );
+    // Haiku proposé, étiquette « Recommandé », monté en tête : l'aperçu suit
+    await p5.locator('#ai-as-p-claude-haiku-5-5').check();
+    await p5.getByText('Liste de l’assistant enregistrée').first().waitFor();
+    await p5.locator('#ai-as-tag-claude-haiku-5-5').click();
+    await p5.getByRole('option', { name: 'Recommandé' }).click();
+    await p5.waitForTimeout(300);
+    await p5.getByRole('button', { name: 'Monter : Claude Haiku' }).click();
+    await p5.waitForTimeout(300);
+    await p5.getByRole('button', { name: 'Monter : Claude Haiku' }).click();
+    await p5.waitForTimeout(400);
+    ok(
+      (await preview()).includes('Recommandé Claude Haiku Claude Sonnet Claude Opus') &&
+        s5.aiAssistant.map((r) => r.model).join(',') ===
+          'claude-haiku-5-5,claude-sonnet-5-5,claude-opus-5-5' &&
+        (await p5.evaluate(() => document.activeElement?.id)) === 'ai-as-up-claude-haiku-5-5',
+      'ordre et étiquettes reflétés dans l’aperçu ; le focus reste sur « Monter »',
+    );
+    // Décocher tout : le dernier est refusé
+    for (const m of ['claude-haiku-5-5', 'claude-sonnet-5-5']) {
+      await p5.locator(`#ai-as-p-${m}`).uncheck();
+      await p5.waitForTimeout(300);
+    }
+    // Refusé : la case reste cochée (clic simple, pas uncheck(), qui exige un changement d'état)
+    await p5.locator('#ai-as-p-claude-opus-5-5').click();
+    await p5.waitForTimeout(300);
+    ok(
+      (await p5.locator('#ai-as-keep').innerText()) === 'Gardez au moins un modèle.' &&
+        s5.aiAssistant
+          .filter((r) => r.proposed)
+          .map((r) => r.model)
+          .join(',') === 'claude-opus-5-5',
+      'décocher le dernier modèle : refusé, « Gardez au moins un modèle. »',
+    );
+    // Règle d'Auto, journalisée lisiblement
+    await p5.locator('#ai-rule-whole_demo').click();
+    await p5.getByRole('option', { name: 'Claude Opus' }).click();
+    await p5.getByText('Règle d’Auto enregistrée').first().waitFor();
+    ok(s5.aiAutoRules.whole_demo === 'claude-opus-5-5', 'règle « Analyse de toute la démo » → Claude Opus');
+    ok(
+      (await p5.locator('#ai-rule-short').innerText()).includes('Claude Sonnet (non proposé)'),
+      'règle dont le modèle n’est plus proposé : la valeur reste visible, « (non proposé) »',
+    );
+    if (SHOTS) await p5.screenshot({ path: `${SHOTS}/console-modeles-assistant${sfx}.png`, fullPage: true });
+    await axe(p5, 'liste de l’assistant');
+    await p5.getByRole('link', { name: 'Historique des changements' }).click();
+    await p5.getByText('Filtré sur Modèles IA').waitFor();
+    const jr = (await p5.locator('table').nth(1).locator('tbody tr').allInnerTexts())
+      .join(' | ')
+      .replace(/\s+/g, ' ');
+    ok(
+      jr.includes('Auto · analyse de toute la démo · Claude Sonnet → Claude Opus') &&
+        jr.includes('Liste de l’assistant : Claude Haiku, Claude Sonnet, Claude Opus') &&
+        !/claude-/.test(jr),
+      'journal lisible : liste et règle d’Auto',
+    );
+    // Éditeur : le menu de l'assistant suit la liste de la Console (Opus seul, recommandé)
+    await p5.goto(`${APP}/#/demos/0b5c1f0e-0000-4000-8000-000000000001/edit`);
+    await p5.waitForSelector('.canvas-frame img');
+    await p5.getByRole('button', { name: 'Assistant' }).click();
+    await p5.locator('.ai-assistant').waitFor();
+    await p5.locator('.aim-pill').click();
+    const items = (await p5.locator('.aim-menu [role=menuitemradio] .aim-tx b').allInnerTexts()).map((x) =>
+      x.trim(),
+    );
+    ok(
+      items.join(',') === 'Auto,Claude Opus',
+      `éditeur : menu Auto, Claude Opus seulement (${items.join(', ')})`,
+    );
+    await c5.close();
+  }
+  // Lecture seule : liste et règles désactivées
+  {
+    const s6 = seed();
+    s6.platformRole = 'read_only';
+    s6.aiEnvKeys = ['anthropic'];
+    const { ctx: c6, p: p6 } = await open(s6);
+    await p6.goto(`${APP}/#/console/modeles`);
+    await p6.getByRole('heading', { name: 'Assistant IA : modèles proposés' }).waitFor();
+    ok(
+      (await p6
+        .locator('.console-ai-aslist input[type=checkbox]')
+        .evaluateAll((xs) => xs.every((x) => x.disabled))) &&
+        (await p6
+          .locator('.console-ai-moves button')
+          .evaluateAll((xs) => xs.every((x) => x.getAttribute('aria-disabled') === 'true'))),
+      'Lecture seule : cases et Monter / Descendre désactivés',
+    );
+    await c6.close();
+  }
+
   // ===== Fonction coupée pendant que l'éditeur est ouvert (503 UNAVAILABLE) =====
   {
     const s4 = seed();

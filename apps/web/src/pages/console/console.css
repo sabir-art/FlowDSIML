@@ -820,3 +820,114 @@
   gap: 8px;
   font-size: 13px;
 }
+
+/* L41 · Assistant IA : modèles proposés (spec UX §4) : liste et règles d'Auto, aperçu de 300 px */
+.console-ai-as {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  margin-top: 16px;
+}
+.console-ai-aslist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.console-ai-asrow {
+  display: grid;
+  grid-template-columns: 20px 20px minmax(0, 1fr) 160px auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px;
+}
+.console-ai-asrow + .console-ai-asrow {
+  border-top: 1px solid var(--fd-color-border);
+}
+.console-ai-asrow.is-off .console-ai-name {
+  color: var(--fd-color-text-muted);
+}
+.console-ai-asrow.is-drag {
+  background: var(--fd-color-surface-sunken);
+}
+.console-ai-handle {
+  display: grid;
+  place-items: center;
+  color: var(--fd-color-text-muted);
+  cursor: grab;
+}
+.console-ai-handle svg {
+  width: 16px;
+  height: 16px;
+}
+.console-ai-asrow input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--fd-color-primary);
+}
+.console-ai-moves {
+  display: inline-flex;
+  gap: 2px;
+}
+.console-ai-auto {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 8px;
+}
+.console-ai-auto h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.console-ai-auto h4 svg {
+  width: 16px;
+  height: 16px;
+}
+.console-ai-rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px 220px;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  font-size: 13px;
+}
+.console-ai-arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.console-ai-rule .fd-sel {
+  width: 100%;
+}
+.console-ai-preview__t {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.console-ai-preview__menu {
+  position: static;
+  width: auto;
+}
+@media (max-width: 900px) {
+  .console-ai-as {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .console-ai-asrow {
+    grid-template-columns: 20px 20px minmax(0, 1fr);
+  }
+  .console-ai-asrow .fd-sel,
+  .console-ai-moves {
+    grid-column: 3;
+  }
+  .console-ai-rule {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .console-ai-arrow {
+    display: none;
+  }
+}

@@ -5563,17 +5563,17 @@
     "model": {
       "auto": "Auto",
       "autoHelp": "Balances speed, effort and cost",
-      "sonnet": "Claude Sonnet",
-      "sonnetHelp": "Fast, for most texts",
-      "opus": "Claude Opus",
-      "opusHelp": "More precise, slower",
       "recommended": "Recommended",
       "others": "Other models",
-      "openai": "OpenAI models",
-      "openaiHelp": "Not yet offered in the workspace",
       "ownerNote": "The owner chooses the models in Settings › AI assistance.",
       "pick": "Model: {{model}}",
-      "menu": "Assistant model"
+      "menu": "Assistant model",
+      "beta": "Beta",
+      "help": {
+        "claude-sonnet-5-5": "Fast, for most texts",
+        "claude-opus-5-5": "More precise, slower",
+        "claude-haiku-5-5": "Fastest, for short texts"
+      }
     },
     "mentionModel": "AI-generated ({{model}}), please review"
   },
@@ -5990,7 +5990,9 @@
       "ai_key_added": "AI key added",
       "ai_key_replaced": "AI key replaced",
       "ai_key_tested": "AI key tested",
-      "ai_model_changed": "AI model changed"
+      "ai_model_changed": "AI model changed",
+      "ai_assistant_list": "Assistant list changed",
+      "ai_auto_rule": "Auto rule changed"
     },
     "ai": {
       "title": "AI models",
@@ -6084,7 +6086,32 @@
       "attentionCut_one": "1 feature off for lack of a {{name}} key: {{list}}.",
       "attentionCut_other": "{{count}} features off for lack of a {{name}} key: {{list}}.",
       "attentionRetired_one": "1 feature falling back, its model is retired: {{list}}.",
-      "attentionRetired_other": "{{count}} features falling back, their model is retired: {{list}}."
+      "attentionRetired_other": "{{count}} features falling back, their model is retired: {{list}}.",
+      "assistant": "AI assistant: proposed models",
+      "assistantHelp": "The list of the assistant’s “Auto” menu, in this order. A workspace admin can only remove models, never add them.",
+      "keepOne": "Keep at least one model.",
+      "listSaved": "Assistant list saved",
+      "ruleSaved": "Auto rule saved",
+      "addKeyFor": "Add the {{name}} key",
+      "tagOf": "Tag: {{name}}",
+      "tag": {
+        "none": "No tag",
+        "recommended": "Recommended",
+        "beta": "Beta"
+      },
+      "moveUp": "Move up: {{name}}",
+      "moveDown": "Move down: {{name}}",
+      "autoTitle": "What “Auto” does",
+      "rule": {
+        "short": "Short requests (one step, one text)",
+        "whole_demo": "Whole-demo analysis, translation",
+        "fallback": "Model unavailable or quota reached"
+      },
+      "nextInList": "Next in the list",
+      "autoHelp": "The model actually used is shown on each answer (“Auto · Claude Sonnet”).",
+      "preview": "Menu preview in the editor",
+      "previewHelp": "Unchecked models do not appear. A provider without a key does not appear either.",
+      "notProposed": "{{name}} (not proposed)"
     }
   },
   "news": {

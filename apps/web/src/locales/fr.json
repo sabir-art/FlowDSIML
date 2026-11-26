@@ -5563,17 +5563,17 @@
     "model": {
       "auto": "Auto",
       "autoHelp": "Équilibre la vitesse, l’effort et le coût",
-      "sonnet": "Claude Sonnet",
-      "sonnetHelp": "Rapide, pour la plupart des textes",
-      "opus": "Claude Opus",
-      "opusHelp": "Plus précis, plus lent",
       "recommended": "Recommandé",
       "others": "Autres modèles",
-      "openai": "Modèles OpenAI",
-      "openaiHelp": "Pas encore proposés dans l’espace",
       "ownerNote": "Le propriétaire choisit les modèles dans Paramètres › Assistance IA.",
       "pick": "Modèle : {{model}}",
-      "menu": "Modèle de l’assistant"
+      "menu": "Modèle de l’assistant",
+      "beta": "Bêta",
+      "help": {
+        "claude-sonnet-5-5": "Rapide, pour la plupart des textes",
+        "claude-opus-5-5": "Plus précis, plus lent",
+        "claude-haiku-5-5": "Le plus rapide, pour les textes courts"
+      }
     },
     "mentionModel": "Généré par IA ({{model}}), à vérifier"
   },
@@ -5990,7 +5990,9 @@
       "ai_key_added": "Clé IA ajoutée",
       "ai_key_replaced": "Clé IA remplacée",
       "ai_key_tested": "Clé IA testée",
-      "ai_model_changed": "Modèle IA changé"
+      "ai_model_changed": "Modèle IA changé",
+      "ai_assistant_list": "Liste de l’assistant modifiée",
+      "ai_auto_rule": "Règle d’Auto modifiée"
     },
     "ai": {
       "title": "Modèles IA",
@@ -6084,7 +6086,32 @@
       "attentionCut_one": "1 fonction coupée faute de clé {{name}} : {{list}}.",
       "attentionCut_other": "{{count}} fonctions coupées faute de clé {{name}} : {{list}}.",
       "attentionRetired_one": "1 fonction en repli, son modèle est retiré : {{list}}.",
-      "attentionRetired_other": "{{count}} fonctions en repli, leur modèle est retiré : {{list}}."
+      "attentionRetired_other": "{{count}} fonctions en repli, leur modèle est retiré : {{list}}.",
+      "assistant": "Assistant IA : modèles proposés",
+      "assistantHelp": "La liste du menu « Auto » de l’assistant, dans cet ordre. L’admin d’un espace peut seulement en retirer, jamais en ajouter.",
+      "keepOne": "Gardez au moins un modèle.",
+      "listSaved": "Liste de l’assistant enregistrée",
+      "ruleSaved": "Règle d’Auto enregistrée",
+      "addKeyFor": "Ajoutez la clé {{name}}",
+      "tagOf": "Étiquette : {{name}}",
+      "tag": {
+        "none": "Sans étiquette",
+        "recommended": "Recommandé",
+        "beta": "Bêta"
+      },
+      "moveUp": "Monter : {{name}}",
+      "moveDown": "Descendre : {{name}}",
+      "autoTitle": "Ce que fait « Auto »",
+      "rule": {
+        "short": "Demandes courtes (une étape, un texte)",
+        "whole_demo": "Analyse de toute la démo, traduction",
+        "fallback": "Modèle indisponible ou quota atteint"
+      },
+      "nextInList": "Le suivant de la liste",
+      "autoHelp": "Le modèle réellement utilisé s’affiche sur chaque réponse (« Auto · Claude Sonnet »).",
+      "preview": "Aperçu du menu dans l’éditeur",
+      "previewHelp": "Les modèles non cochés n’apparaissent pas. Un fournisseur sans clé n’apparaît pas non plus.",
+      "notProposed": "{{name}} (non proposé)"
     }
   },
   "news": {

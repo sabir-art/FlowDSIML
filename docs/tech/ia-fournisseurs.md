@@ -215,10 +215,24 @@ nouvelle valeur.
    proposée : le catalogue n'a pas de modèle OpenAI (adaptateur de transcription à faire, §12.1).
 4. **Assistant** : `ai_assistant_models`, `ai_auto_rules`, aperçu du menu ; `ai_models_for` branché
    sur `ModelPicker` ; contrôle côté serveur.
+   **Livrée** : migration `20261201390000_ia_liste_assistant.sql` (`ai_assistant_models`,
+   `ai_auto_rules`, `ai_assistant_set` avec refus `LAST_MODEL`, `ai_auto_rule_set` ; rôle de service
+   seulement ; journal `ai.assistant_list` et `ai.auto_rule` au libellé lisible ; pgTAP 13/13). Valeurs
+   de départ = comportement actuel : Sonnet et Opus proposés et recommandés, Haiku non proposé, Auto sur
+   Sonnet pour les deux règles, repli « le suivant de la liste » (la planche suggère Opus pour
+   l'analyse de toute la démo : à régler dans la Console). Fonctions pures `_shared/ai/assistant.ts`
+   (menu, choix d'Auto, repli, contrôle du modèle demandé ; 403 `MODEL` hors menu ; un échec du
+   fournisseur sous Auto est relancé une fois sur le repli). Console : liste ordonnée (glisser,
+   Monter/Descendre), case Proposer, étiquette, règles d'Auto, aperçu du menu ; une règle dont le
+   modèle n'est plus proposé reste affichée « (non proposé) » et Auto prend alors le premier du menu.
+   `ModelPicker` lit le menu ; `ALLOWED_MODELS` disparaît. **Écart** : le menu est servi par l'action
+   `assistant_models` de l'Edge Function `ai`, pas par une RPC `ai_models_for` : seule l'Edge Function
+   sait quels fournisseurs ont une clé (coffre et déploiement). Le filtre par espace (§7) viendra à
+   l'étape 5 dans cette même action.
 5. **Espace** : section « Modèles proposés dans l'assistant », retrait seulement.
 6. **Journal** : anciennes et nouvelles valeurs, filtre « Modèles IA ».
 
-Chaque étape est livrable seule. Jusqu'à l'étape 4, l'assistant garde Sonnet et Opus.
+Chaque étape est livrable seule. Jusqu'à l'étape 4, l'assistant gardait Sonnet et Opus.
 
 ## 11. Questions pour le chef
 
