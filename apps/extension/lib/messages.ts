@@ -123,7 +123,7 @@ export type HtmlBarRequest =
       rect?: RelRect;
     }
   | { type: 'fd:html-stop' }
-  | { type: 'fd:fetch-asset'; url: string; kind: 'image' | 'font' | 'css' };
+  | { type: 'fd:fetch-asset'; url: string; kind: 'image' | 'font' | 'css' | 'js' | 'data' };
 
 export interface RecordingStatus {
   recording: boolean;

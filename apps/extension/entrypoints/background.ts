@@ -16,11 +16,13 @@ import { htmlStore } from '@/lib/htmlStore';
 import { elapsed } from '@/lib/video';
 import { videoStore } from '@/lib/videoStore';
 import { APP_URL, DEBUGGER } from '@/lib/config';
+import { liveRecorder } from '@/lib/liveRecorder';
 import { asFrameMode, frameFor } from '@/lib/frame';
 import { strings } from '@/lib/i18n';
 import {
   ASSET_MAX_BYTES,
   ASSET_TIMEOUT_MS,
+  DATA_MAX_BYTES,
   assetDecision,
   assetTooLong,
   assetTypeAllowed,
@@ -80,6 +82,28 @@ async function inject(tabId: number, mode: RecordingStatus['mode'] = 'clicks') {
           (window as unknown as { __fdLiveMask?: boolean }).__fdLiveMask = v;
         },
         args: [live],
+      });
+    }
+    if (mode === 'html' && (await browser.storage.local.get('fd.htmlKind'))['fd.htmlKind'] === 'sandbox') {
+      // Sandbox v2 (étape 3) : l'enregistreur des réponses GET va dans le monde de la page, la barre l'écoute
+      // sous un nom d'évènement tiré au hasard (la page ne peut pas le deviner pour s'y faire passer)
+      const eventName = `fd-live-${crypto.randomUUID()}`;
+      await browser.scripting.executeScript({
+        target: { tabId },
+        func: (n: string) => {
+          (window as unknown as { __fdLiveEvent?: string }).__fdLiveEvent ??= n;
+        },
+        args: [eventName],
+      });
+      const [named] = await browser.scripting.executeScript({
+        target: { tabId },
+        func: () => (window as unknown as { __fdLiveEvent?: string }).__fdLiveEvent ?? '',
+      });
+      await browser.scripting.executeScript({
+        target: { tabId },
+        world: 'MAIN',
+        func: liveRecorder,
+        args: [String(named?.result ?? eventName)],
       });
     }
     await browser.scripting.executeScript({
@@ -664,7 +688,12 @@ async function fetchAsset(
     const bytes = await readBounded(res, ASSET_MAX_BYTES);
     if (!bytes) return null;
     const blob = new Blob([bytes], { type: (type ?? '').split(';')[0]!.trim() });
-    if (k === 'css') return await blob.text();
+    if (k === 'css' || k === 'js') return await blob.text();
+    // Sandbox v2 : réponse relue pour être rejouée (type et statut gardés, 1 Mo au plus)
+    if (k === 'data')
+      return bytes.length > DATA_MAX_BYTES
+        ? null
+        : JSON.stringify({ type: blob.type, status: res.status, body: await blob.text() });
     if (k === 'font') return toDataUrl(blob);
     if (/svg/.test(blob.type)) return toDataUrl(new Blob([blob], { type: 'image/svg+xml' }));
     try {

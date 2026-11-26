@@ -1,3 +1,4 @@
+import type { LiveRaw } from './liveCapture';
 import { isVisible, openMenu, screenName } from './screenChange';
 import { hotspotRect, type RelRect } from './geometry';
 import {
@@ -23,6 +24,8 @@ import { scanNodes } from './scan';
  * (« Xxxxxx Xxxxxx ») et floutées, puis assainie. Rien n'est envoyé ici.
  */
 export interface HtmlCapture {
+  /** Sandbox v2 (étape 3) : enregistrement vivant brut, données personnelles remplacées à l'envoi. */
+  live?: LiveRaw;
   html: string;
   bytes: number;
   tooBig: boolean;
@@ -317,7 +320,7 @@ function menuOf(): HtmlCapture['menu'] {
 }
 
 /** Source de la page telle que le serveur l'a envoyée (cache du navigateur d'abord), 2 s au plus. */
-async function pageSource(): Promise<string | null> {
+export async function pageSource(): Promise<string | null> {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 2000);
   try {
