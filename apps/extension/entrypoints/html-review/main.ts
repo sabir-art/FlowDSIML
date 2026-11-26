@@ -198,7 +198,8 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
         : s.reasonWhy[it.reason as keyof typeof s.reasonWhy];
   const row: Row = {
     key,
-    icon: it.group === 'pii' ? UserRound : GROUP_ICON[it.group],
+    // Suivi UX du lot B : un élément ajouté par un script n'est pas un script, il a l'icône d'un panneau
+    icon: it.group === 'pii' ? UserRound : it.reason === 'widgetThirdParty' ? PanelTop : GROUP_ICON[it.group],
     name,
     mono,
     source,
@@ -472,8 +473,22 @@ function focusKey(key: string) {
 }
 
 // ---------- Bilan ----------
+/** Éléments ajoutés à la page par un script d'un autre site, retirés de la copie (non gardés). */
+const widgetsOut = () =>
+  active().reduce(
+    (n, p) =>
+      n +
+      (p.removed ?? []).filter((it) => it.reason === 'widgetThirdParty' && !kept.has(keyOf(p, it))).length,
+    0,
+  );
+const widgetsAll = () =>
+  active().reduce((n, p) => n + (p.removed ?? []).filter((it) => it.reason === 'widgetThirdParty').length, 0);
+
 function renderSummary() {
-  const scripts = countOf('pageScripts') + countOf('trackingScripts');
+  // La tuile compte les scripts seuls ; les éléments ajoutés par un script sont nommés à part dans la note
+  const pageOnly = countOf('pageScripts') - widgetsAll();
+  const scripts = pageOnly + countOf('trackingScripts');
+  const elements = widgetsOut();
   const prot = countOf('frames') + countOf('forms') + countOf('pii') + countOf('externalLinks');
   const keptN = HTML_REVIEW_GROUPS.reduce((n, g) => n + keptIn(g), 0);
   const cell = (label: string, n: number) =>
@@ -485,16 +500,20 @@ function renderSummary() {
     cell(s.sumKept, keptN),
   );
   const note = $('note');
-  note.hidden = scripts === 0;
+  note.hidden = scripts === 0 && elements === 0;
+  const counts = { page: pageOnly, track: countOf('trackingScripts') };
   note.replaceChildren(
     icon(Info),
     h(
       'p',
       {},
-      plural(s.note_one, s.note_other, scripts, {
-        page: countOf('pageScripts'),
-        track: countOf('trackingScripts'),
-      }),
+      elements
+        ? fmt(s.noteMix, {
+            ...counts,
+            scripts: plural(s.noteScripts_one, s.noteScripts_other, scripts),
+            elements: plural(s.noteElements_one, s.noteElements_other, elements),
+          })
+        : plural(s.note_one, s.note_other, scripts, counts),
     ),
   );
 }
