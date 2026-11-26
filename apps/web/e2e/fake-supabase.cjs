@@ -659,7 +659,7 @@ async function install(page, state = seed()) {
     // L41 étape 5 : menu filtré par l'espace (state.aiWsModels, null = tous les modèles proposés)
     if (p.startsWith('/functions/v1/ai') && body.action === 'assistant_models')
       return json(route, 200, {
-        result: { models: wsMenu(state), all: assistantMenu(state), chosen: state.aiWsModels ?? null },
+        result: { models: wsMenu(state), all: assistantMenu(state), chosen: wsChosen(state) },
       });
     if (p.startsWith('/functions/v1/ai')) {
       (state.aiCalls ||= []).push(body);
@@ -3216,9 +3216,19 @@ function assistantRows(state) {
     { model: 'claude-haiku-5-5', position: 3, proposed: false, tag: 'none' },
   ]);
 }
+// Liste de l'espace ; jamais réglée : les modèles proposés avant la création de l'espace (proposedAt
+// absent = proposé de longue date), comme defaultChosen de l'Edge Function
+function wsChosen(state) {
+  if (Array.isArray(state.aiWsModels)) return state.aiWsModels;
+  const created = state.tables?.workspaces?.[0]?.created_at ?? new Date().toISOString();
+  return [...assistantRows(state)]
+    .sort((a, b) => a.position - b.position)
+    .filter((r) => r.proposed && (!r.proposedAt || r.proposedAt < created))
+    .map((r) => r.model);
+}
 function wsMenu(state) {
-  const all = assistantMenu(state);
-  return Array.isArray(state.aiWsModels) ? all.filter((m) => state.aiWsModels.includes(m.id)) : all;
+  const chosen = wsChosen(state);
+  return assistantMenu(state).filter((m) => chosen.includes(m.id));
 }
 function assistantMenu(state) {
   // Sans clé Anthropic simulée (state.aiNoAnthropic), aucun modèle n'est utilisable

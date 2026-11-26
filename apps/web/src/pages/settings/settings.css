@@ -1293,3 +1293,12 @@ fieldset.stg-row {
   font-size: 12px;
   color: var(--fd-color-text-muted);
 }
+/* « Gardez au moins un modèle coché. » : icône à 8 px du texte (recette UX de l'étape 5) */
+.ai-models .field-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-models .field-error svg {
+  flex: none;
+}

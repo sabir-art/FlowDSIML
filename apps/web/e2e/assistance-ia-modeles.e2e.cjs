@@ -116,6 +116,14 @@ const aiOn = () => ({
       JSON.stringify(s.aiWsModels) === '["claude-sonnet-5-5"]',
     'décocher le dernier modèle : refusé, « Gardez au moins un modèle coché. », rattaché à la case',
   );
+  const iconGap = await p.locator('#ai-models-keep').evaluate((el) => {
+    const svg = el.querySelector('svg').getBoundingClientRect();
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    const text = [...r.getClientRects()].filter((x) => x.left >= svg.right - 1);
+    return Math.round(Math.min(...text.map((x) => x.left)) - svg.right);
+  });
+  ok(iconGap === 8, `erreur : icône à 8 px du texte (${iconGap})`);
   await axe(p, 'erreur « au moins un modèle »');
 
   // Éditeur : le menu suit l'espace
@@ -181,6 +189,52 @@ const aiOn = () => ({
   await panel.getByText('La démo compte 3 étapes.').waitFor();
   ok(true, 'Auto répond quand l’espace n’a plus de modèle');
   await c1.close();
+
+  // ===== Espace jamais réglé : un modèle que la Console propose ensuite arrive décoché =====
+  const sn = seed();
+  sn.ai = aiOn();
+  sn.aiReply = () => ({ text: 'La démo compte 3 étapes.', changes: [] });
+  // Haiku proposé par la Console après la création de l'espace (aucune liste enregistrée)
+  sn.aiAssistant = [
+    { model: 'claude-sonnet-5-5', position: 1, proposed: true, tag: 'recommended' },
+    { model: 'claude-opus-5-5', position: 2, proposed: true, tag: 'recommended' },
+    {
+      model: 'claude-haiku-5-5',
+      position: 3,
+      proposed: true,
+      tag: 'beta',
+      proposedAt: new Date().toISOString(),
+    },
+  ];
+  const { ctx: cn, p: pn } = await open(sn);
+  await pn.goto(`${APP}/#/settings/ai`);
+  await pn.locator('#ai-wm-claude-haiku-5-5').waitFor();
+  ok(
+    sn.aiWsModels === undefined &&
+      (await rows(pn)).join(' ') === 'Auto:xd Claude Sonnet:x Claude Opus:x Claude Haiku:-',
+    `espace jamais réglé : le nouveau modèle de la Console arrive décoché (${(await rows(pn)).join(', ')})`,
+  );
+  await pn.goto(`${APP}/#/demos/${DEMO}/edit`);
+  await pn.waitForSelector('.canvas-frame img');
+  await pn.getByRole('button', { name: 'Assistant' }).click();
+  await pn.locator('.aim-pill').click();
+  const nItems = (await pn.locator('.aim-menu [role^=menuitem] .aim-tx b').allInnerTexts()).map((x) =>
+    x.trim(),
+  );
+  ok(
+    nItems.join(',') === 'Auto,Claude Sonnet,Claude Opus',
+    `éditeur d’un espace jamais réglé : pas de Haiku (${nItems.join(', ')})`,
+  );
+  // Le propriétaire le coche : il entre dans l'espace
+  await pn.keyboard.press('Escape');
+  await pn.goto(`${APP}/#/settings/ai`);
+  await pn.locator('#ai-wm-claude-haiku-5-5').check();
+  await pn.getByText('Modèles de l’assistant enregistrés').first().waitFor();
+  ok(
+    JSON.stringify(sn.aiWsModels) === '["claude-sonnet-5-5","claude-opus-5-5","claude-haiku-5-5"]',
+    `coché par le propriétaire : enregistré (${JSON.stringify(sn.aiWsModels)})`,
+  );
+  await cn.close();
 
   // ===== Admin : lecture seule =====
   const sa = seed();

@@ -241,7 +241,11 @@ nouvelle valeur.
    l'éditeur ne montre qu'Auto, qui choisit dans le menu de la Console (`autoMenuOf`). Paramètres ›
    Assistance IA : section « Modèles proposés dans l'assistant » (Auto toujours proposé ; admins en
    lecture, « Réservé aux propriétaires » ; autres rôles : rien) ; la note du propriétaire revient dans
-   « Autres modèles ». e2e `assistance-ia-modeles`.
+   « Autres modèles ». e2e `assistance-ia-modeles`. Recette UX (décision du chef) : un espace qui n'a jamais
+   réglé sa liste reçoit les modèles proposés avant sa création (`ai_assistant_models.proposed_at`, tenue
+   par un déclencheur ; les modèles déjà proposés sont datés du 1er janvier 2000, donc les espaces existants
+   gardent la liste d'aujourd'hui, sans écriture en masse). Un modèle proposé ensuite arrive décoché
+   partout (`defaultChosen`).
 6. **Journal** : anciennes et nouvelles valeurs, filtre « Modèles IA ».
    **Livrée** : migration `20261201410000_journal_valeurs.sql` (colonnes `old_value` et `new_value` de 200
    caractères au plus ; `private.console_log` à six paramètres ; `console_audit_list` rend `old` et `new` ;
