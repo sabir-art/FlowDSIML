@@ -61,7 +61,7 @@ import { useAuth } from '../../auth/AuthProvider';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { LoadError, LoadStatus, SlowLine, useMainBusy, useSkeleton } from '../../components/Skeleton';
 import { DemosSkeleton } from './DemosSkeleton';
-import { Menu, type MenuItem } from '../../components/Menu';
+import { Menu, endCheck, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { publicDemoUrl } from '../../lib/embed';
 import { createDemoFromImages } from './importImages';
@@ -1075,7 +1075,10 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                           active={ctype !== 'all'}
                           items={(['all', 'captures', 'html', 'video'] as TypeFilter[]).map((k) => ({
                             label: k === 'all' ? t('ctype.all') : t(`ctype.short.${k}`),
-                            icon: ctype === k ? <Check /> : <span />,
+                            // CHOIX-01 : coche à droite, aucune colonne vide à gauche
+                            radio: true,
+                            current: ctype === k,
+                            end: endCheck(ctype === k),
                             onSelect: () => setCtype(k),
                           }))}
                         />
@@ -1145,7 +1148,9 @@ export function DemosPage({ sandbox = false }: { sandbox?: boolean }) {
                         value={sortLabels[sort]}
                         items={(Object.keys(sortLabels) as Sort[]).map((k) => ({
                           label: sortLabels[k],
-                          icon: sort === k ? <Check /> : <span />,
+                          radio: true,
+                          current: sort === k,
+                          end: endCheck(sort === k),
                           onSelect: () => setSort(k),
                         }))}
                       />

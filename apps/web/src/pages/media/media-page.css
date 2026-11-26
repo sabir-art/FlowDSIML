@@ -68,12 +68,6 @@
   object-fit: contain;
   object-position: center;
 }
-/* Colonne d'icône vide : Logo et Image s'alignent avec Renommer et Télécharger */
-.mp-blank {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-}
 .mp-nomatch {
   display: flex;
   flex-wrap: wrap;

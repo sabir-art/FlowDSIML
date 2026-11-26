@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { motionMs } from '../lib/flip';
-import { MoreHorizontal, ChevronDown } from 'lucide-react';
+import { Check, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { computePosition, getPortal, type Placement } from '../lib/floating';
 
 /** Groupe de choix exclusifs affiché en contrôle segmenté dans le menu (menuitemradio). */
@@ -84,6 +84,13 @@ export interface MenuItem {
   /** Réglage oui / non (ex. « Afficher sur la page publique ») : `menuitemcheckbox`, coché quand `current`. */
   checkbox?: boolean;
 }
+
+/**
+ * CHOIX-01 : repère de l'élément choisi dans une liste à choix unique, une coche de 16 px en couleur
+ * principale À DROITE de la ligne (jamais de colonne vide à gauche).
+ */
+export const endCheck = (on: boolean) =>
+  on ? <Check size={16} aria-hidden="true" className="menu-check" /> : undefined;
 
 /** Au-delà de ce nombre d'éléments, le menu s'affiche en feuille du bas sous 480 px (§15.7). */
 const SHEET_MIN_ITEMS = 7;

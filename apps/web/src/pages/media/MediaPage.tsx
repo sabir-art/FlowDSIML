@@ -7,12 +7,21 @@
 import { useId, useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check, Download, FileType, Pencil, Presentation, Search, Trash2 } from 'lucide-react';
+import {
+  Download,
+  FileType,
+  Image as ImageIcon,
+  Pencil,
+  Presentation,
+  Search,
+  Stamp,
+  Trash2,
+} from 'lucide-react';
 import { Button, Modal } from '@flowdsiml/ui';
 import { foldText } from '@flowdsiml/core';
 import { AppPage } from '../../components/AppPage';
 import { FileDropzone } from '../../components/FileDropzone';
-import { Menu } from '../../components/Menu';
+import { Menu, endCheck } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { useConfirm } from '../../components/ConfirmDialog';
 import { QuotaDialog } from '../../components/QuotaDialog';
@@ -225,8 +234,9 @@ export function MediaPage() {
                             ? []
                             : (['logo', 'image'] as const).map((k) => ({
                                 label: t(`media.kind.${k}`),
-                                // Coche de 16 px devant la catégorie actuelle, colonne vide devant l'autre
-                                icon: f.kind === k ? <Check /> : <span className="mp-blank" />,
+                                // CHOIX-01 : l'icône de la catégorie en tête, coche à droite de la catégorie actuelle
+                                icon: k === 'logo' ? <Stamp /> : <ImageIcon />,
+                                end: endCheck(f.kind === k),
                                 group: t('media.category'),
                                 radio: true,
                                 current: f.kind === k,
