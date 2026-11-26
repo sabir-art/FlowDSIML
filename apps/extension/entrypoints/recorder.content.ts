@@ -58,11 +58,10 @@ export default defineContentScript({
         ${BAR_CSS}
         ${CARD_CSS}
         .seg{box-sizing:border-box;height:36px;display:flex;align-items:center;gap:2px;padding:2px;border-radius:999px;
-          background:rgba(255,255,255,.08)}
-        .bar .seg button{height:32px;background:transparent;color:#d6d3d1}
+          background:var(--fdb-ctl)}
+        .bar .seg button{height:32px;background:transparent;color:var(--fdb-muted)}
         .bar .seg button:hover{color:#fff}
-        .bar .seg [aria-checked=true]{background:#fff;color:#16181d}
-        .chips{color:#b8bcc6}
+        .bar .seg [aria-checked=true]{background:var(--fdb-seg-on-bg);color:var(--fdb-seg-on-fg)}
         button{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:0;border-radius:999px;
           background:transparent;color:#d6d3d1;font:inherit;cursor:pointer}
         button:hover{color:#fff}
@@ -112,7 +111,7 @@ export default defineContentScript({
         ${barMarkup({
           label: s.recording,
           name: s.barClicks,
-          middle: `<span class="chips" hidden></span>
+          middle: `<span class="note chip chips" hidden></span>
             <div class="seg" role="radiogroup" aria-label="${s.frameGroup}"></div>
             <button type="button" class="btn redraw" hidden>${s.redraw}</button>`,
         })}
@@ -404,21 +403,16 @@ export default defineContentScript({
             target?: string | null;
           } | null;
           ui.setCount(barCount('steps', info?.steps ?? 0));
-          const text: string[] = [];
           const said: string[] = [];
-          if (info?.target) text.push(info.target);
-          if (info && info.n >= 2) {
-            const chip = tabChip(info.n, info.title || document.title);
-            text.push(chip.label);
-            said.push(chip.announce);
-          }
-          if (info?.guide) {
-            const g = guideChip(info.guide);
-            text.push(g);
-            said.push(g);
-          }
-          chips.textContent = text.join(' · ');
-          chips.hidden = !text.length;
+          const tab = info && info.n >= 2 ? tabChip(info.n, info.title || document.title) : null;
+          if (tab) said.push(tab.announce);
+          const guide = info?.guide ? guideChip(info.guide) : '';
+          if (guide) said.push(guide);
+          // Une seule puce à la fois (recette l60-lot-d) : cible d'un ajout, sinon étape à capturer, sinon onglet
+          const one = info?.target || guide || tab?.label || '';
+          chips.textContent = one;
+          chips.title = one;
+          chips.hidden = !one;
           if (said.length) live.textContent = said.join('. ');
         })
         .catch(() => undefined);

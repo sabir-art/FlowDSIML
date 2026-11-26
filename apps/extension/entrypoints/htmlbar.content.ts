@@ -64,7 +64,7 @@ export default defineContentScript({
         name: s.barHtml,
         middle: `<span class="note mnote">${s.barHtmlNote}</span>
           <button type="button" class="cap" title="${s.htmlShortcutCapture}">${s.barAddPage}</button>
-          <span class="note tgt" hidden></span>`,
+          <span class="note chip tgt" hidden></span>`,
       })}`;
     document.documentElement.appendChild(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
@@ -103,6 +103,7 @@ export default defineContentScript({
       pages = n;
       ui.setCount(barCount('pages', n));
       tgt.textContent = target ?? '';
+      tgt.title = target ?? '';
       tgt.hidden = !target;
     };
     setCount(0);

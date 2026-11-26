@@ -9,25 +9,40 @@ import { strings as s } from './i18n';
  * En pause : point orange, « En pause », « Vos clics ne sont pas capturés », « Reprendre » à la place de
  * Pause ; raccourci Alt + Maj + P.
  */
+/**
+ * Couleurs de la barre et de la carte en variables (L64 §4) : la barre claire ne change que ces variables.
+ */
+export const BAR_VARS = `
+  :host{--fdb-bg:#16181d;--fdb-fg:#fff;--fdb-muted:#b8bcc6;--fdb-line:rgba(255,255,255,.18);
+    --fdb-pill:rgba(255,255,255,.14);--fdb-ctl:rgba(255,255,255,.08);--fdb-ctl-hover:rgba(255,255,255,.16);
+    --fdb-seg-on-bg:#fff;--fdb-seg-on-fg:#16181d;--fdb-fin-bg:#fff;--fdb-fin-fg:#16181d;--fdb-fin-hover:#e7e5e4;
+    --fdb-thumb:#2b2f38;--fdb-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.2)}
+`;
+
 export const BAR_CSS = `
-  .bar{box-sizing:border-box;height:48px;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 16px;
-    border-radius:999px;background:#16181d;color:#fff;font:500 13px/1.2 system-ui,sans-serif;
-    box-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.2);cursor:grab;user-select:none;white-space:nowrap}
+  ${BAR_VARS}
+  .bar{box-sizing:border-box;height:48px;max-width:min(720px,calc(100vw - 32px));display:flex;align-items:center;
+    gap:8px;padding:6px 6px 6px 16px;border-radius:999px;background:var(--fdb-bg);color:var(--fdb-fg);
+    font:500 13px/1.2 system-ui,sans-serif;box-shadow:var(--fdb-shadow);cursor:grab;user-select:none;white-space:nowrap}
   .bar .st,.bar .mid{display:flex;align-items:center;gap:8px}
+  .bar .st,.bar > button,.bar .sep{flex:none}
+  .bar .mid{min-width:0}
   .bar .dot{width:10px;height:10px;border-radius:50%;background:#e5484d;flex:none}
   .bar.is-paused .dot{background:#f5a524}
   .bar .nm{font-weight:600}
   .bar .pill{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;
-    background:rgba(255,255,255,.14);font-variant-numeric:tabular-nums}
-  .bar .note{color:#b8bcc6}
-  .bar .sep{width:1px;height:24px;background:rgba(255,255,255,.18);flex:none}
+    background:var(--fdb-pill);font-variant-numeric:tabular-nums}
+  .bar .note{color:var(--fdb-muted)}
+  /* Une seule puce à la fois, coupée au-delà de 200 px (recette l60-lot-d) */
+  .bar .chip{max-width:200px;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+  .bar .sep{width:1px;height:24px;background:var(--fdb-line)}
   .bar button{box-sizing:border-box;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-    padding:0 12px;border:0;border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font:inherit;cursor:pointer}
-  .bar button:hover{background:rgba(255,255,255,.16)}
+    padding:0 12px;border:0;border-radius:999px;background:var(--fdb-ctl);color:var(--fdb-fg);font:inherit;cursor:pointer}
+  .bar button:hover{background:var(--fdb-ctl-hover)}
   .bar button:focus-visible{outline:3px solid #6cb8e6;outline-offset:2px}
   .bar button.ico{width:36px;padding:0}
-  .bar .fin{background:#fff;color:#16181d}
-  .bar .fin:hover{background:#e7e5e4}
+  .bar .fin{background:var(--fdb-fin-bg);color:var(--fdb-fin-fg)}
+  .bar .fin:hover{background:var(--fdb-fin-hover)}
   .bar svg{flex:none}
 `;
 
@@ -163,16 +178,17 @@ export async function togglePause(): Promise<boolean> {
  */
 export const CARD_CSS = `
   .card{box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:8px;border-radius:12px;
-    background:#16181d;color:#fff;font:500 13px/1.3 system-ui,sans-serif;max-width:min(440px,calc(100vw - 32px));
-    box-shadow:0 12px 32px rgba(0,0,0,.28),0 2px 6px rgba(0,0,0,.2);white-space:nowrap}
+    background:var(--fdb-bg);color:var(--fdb-fg);font:500 13px/1.3 system-ui,sans-serif;
+    max-width:min(440px,calc(100vw - 32px));box-shadow:var(--fdb-shadow);white-space:nowrap}
   .card .th{width:72px;height:45px;flex:none;display:grid;place-items:center;border-radius:6px;object-fit:cover;
-    background:#2b2f38;color:#b8bcc6}
+    background:var(--fdb-thumb);color:var(--fdb-muted)}
   .card .tx{min-width:0;display:grid;gap:2px}
   .card b{font-weight:600}
-  .card small{font-size:12px;color:#b8bcc6;overflow:hidden;text-overflow:ellipsis}
+  .card small{font-size:12px;color:var(--fdb-muted);overflow:hidden;text-overflow:ellipsis}
   .card button{box-sizing:border-box;height:32px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;
-    margin-left:auto;border:0;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;font:inherit;cursor:pointer}
-  .card button:hover{background:rgba(255,255,255,.18)}
+    margin-left:auto;border:0;border-radius:999px;background:var(--fdb-ctl);color:var(--fdb-fg);font:inherit;
+    cursor:pointer}
+  .card button:hover{background:var(--fdb-ctl-hover)}
   .card button:focus-visible{outline:3px solid #6cb8e6;outline-offset:2px}
 `;
 

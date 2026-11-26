@@ -71,6 +71,10 @@ const ui = require('./popup-ui.cjs');
   await page.bringToFront();
   await page.waitForTimeout(900);
   const badge1 = await page.locator('[data-fd-ui] .chips').textContent();
+  // Une seule puce, coupée au-delà de 200 px (recette l60-lot-d)
+  const chipCss = await page
+    .locator('[data-fd-ui] .chips')
+    .evaluate((c) => [getComputedStyle(c).maxWidth, getComputedStyle(c).textOverflow].join(' '));
   if (process.env.SHOTS_DIR)
     await page.screenshot({ path: `${process.env.SHOTS_DIR}/l26-04-extension-barre.png` });
   await page.click('#go');
@@ -99,6 +103,7 @@ const ui = require('./popup-ui.cjs');
     `popup : destination « ${destLine} », pas de titre à saisir`,
   );
   ok(/Étape à capturer : Se connecter \(1 \/ 2\)/.test(sp(badge1)), `barre : 1 / 2 (${badge1})`);
+  ok(chipCss === '200px ellipsis', `puce unique, 200 px au plus, « … » (${chipCss})`);
   ok(
     /Étape à capturer : Repérer le menu \(2 \/ 2\)/.test(sp(badge2)),
     `barre : 2 / 2 après un clic (${badge2})`,
