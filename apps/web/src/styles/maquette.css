@@ -1369,6 +1369,7 @@
 }
 
 /* A2-02 : interrupteurs du composant partagé à la couleur principale, comme ceux de l'éditeur */
-.mk .fd-switch input:checked + .fd-switch__track {
+/* Activé mais désactivé : la piste grise du composant partagé (lecture seule) n'est pas recouverte */
+.mk .fd-switch input:checked:not(:disabled):not([aria-disabled='true']) + .fd-switch__track {
   background: var(--fd-color-primary);
 }
