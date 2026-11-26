@@ -156,3 +156,31 @@ export function deadByUrl(dead: DeadLink[]): DeadGroup[] {
   }
   return [...out.values()];
 }
+
+/** Sandbox v2, étape 4a : couverture du site par la démo. */
+export interface Coverage {
+  /** Pages capturées (étapes HTML). */
+  captured: number;
+  /** Destinations du même site sans page, que l'auteur n'a pas laissées. */
+  missing: number;
+  /** Destinations laissées volontairement par l'auteur (« Laisser le message »). */
+  left: number;
+}
+
+/**
+ * Couverture : pages capturées face aux destinations du même site trouvées dans leurs liens (une
+ * destination comptée une fois, quelle que soit la page qui la porte). Les liens laissés par l'auteur
+ * sont comptés à part : leur place dans le total reste un choix d'affichage.
+ */
+export function coverage(steps: StepRow[], sandbox: unknown): Coverage {
+  const { dead, ignored } = deadLinks(steps, sandbox);
+  const missing = new Set(dead.map((d) => d.url));
+  const left = new Set(ignored.map((d) => d.url).filter((u) => !missing.has(u)));
+  return { captured: steps.filter((s) => s.kind === 'html').length, missing: missing.size, left: left.size };
+}
+
+/** Part couverte, en pour cent arrondi ; `withLeft` compte les liens laissés dans le total. */
+export function coverageRatio(c: Coverage, withLeft = false): number {
+  const total = c.captured + c.missing + (withLeft ? c.left : 0);
+  return total ? Math.round((c.captured / total) * 100) : 100;
+}
