@@ -577,6 +577,15 @@ jobs:
           done
           cd apps/extension && node e2e/banc/bout-en-bout.cjs | tee /tmp/banc-bout.log
           ! grep -q '^NOT OK' /tmp/banc-bout.log
+      # Sandbox v2, étape 4d : app et lecteur déjà servis par l'étape précédente
+      - name: 'Sandbox v2 étape 4d : capture en série du site de plusieurs pages (passes, aucun piège ouvert, plan complet, couverture 100 %)'
+        if: always()
+        env:
+          NODE_PATH: ${{ github.workspace }}/apps/web/node_modules
+        run: |
+          cd apps/extension && node e2e/banc/serie.cjs | tee /tmp/banc-serie.log
+          ! grep -q '^NOT OK' /tmp/banc-serie.log
+          grep -q '^ok - couverture à 100' /tmp/banc-serie.log
       - name: Popup, variante B (EXT-02 §1.2) (types en liste décrite, options résumées, aides, erreur, clavier, aucun contrôle natif)
         if: always()
         env:
