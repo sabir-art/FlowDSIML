@@ -284,17 +284,42 @@ function data() {
   );
   await p.getByRole('button', { name: /^Type\s*:/ }).click();
   ok(
-    (await p.getByRole('menuitem').allInnerTexts()).map((x) => x.trim()).join('|') ===
+    (await p.getByRole('menuitemradio').allInnerTexts()).map((x) => x.trim()).join('|') ===
       'Tous|Captures|HTML|Vidéo',
     'filtre Type : Tous, Captures, HTML, Vidéo',
   );
-  await p.getByRole('menuitem', { name: 'Vidéo' }).click();
+  // CHOIX-01 : pas de colonne de coche ; texte aligné à gauche sur chaque ligne, coche à droite de « Tous »
+  {
+    const rows = await p.getByRole('menuitemradio').evaluateAll((l) =>
+      l.map((r) => {
+        const range = document.createRange();
+        range.selectNodeContents(r);
+        const text = [...r.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+        const tr = document.createRange();
+        if (text) tr.selectNodeContents(text);
+        return {
+          checked: r.getAttribute('aria-checked'),
+          left: text ? Math.round(tr.getBoundingClientRect().left - r.getBoundingClientRect().left) : -1,
+          end: !!r.querySelector('.menu-item__end .menu-check'),
+          vide: !!r.querySelector(':scope > span:empty, .menu-item__icon:empty'),
+        };
+      }),
+    );
+    ok(
+      rows.every((r) => r.left === rows[0].left && !r.vide) &&
+        rows[0].checked === 'true' &&
+        rows[0].end &&
+        rows.slice(1).every((r) => r.checked === 'false' && !r.end),
+      `CHOIX-01, filtre Type : textes alignés, « Tous » coché avec la coche à droite (${JSON.stringify(rows)})`,
+    );
+  }
+  await p.getByRole('menuitemradio', { name: 'Vidéo' }).click();
   ok(JSON.stringify(await titles()) === JSON.stringify(['Visite filmée']), 'filtre Type : Vidéo');
   await p.getByRole('button', { name: /^Type\s*:/ }).click();
-  await p.getByRole('menuitem', { name: 'HTML' }).click();
+  await p.getByRole('menuitemradio', { name: 'HTML' }).click();
   ok(JSON.stringify(await titles()) === JSON.stringify(['Fiche usager HTML']), 'filtre Type : HTML');
   await p.getByRole('button', { name: /^Type\s*:/ }).click();
-  await p.getByRole('menuitem', { name: 'Captures' }).click();
+  await p.getByRole('menuitemradio', { name: 'Captures' }).click();
   ok(!(await titles()).includes('Fiche usager HTML'), 'filtre Type : Captures');
   await axe(p, 'Démos (filtre Type)');
 

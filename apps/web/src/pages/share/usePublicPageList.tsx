@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
-import type { MenuItem } from '../../components/Menu';
+import { Globe } from 'lucide-react';
+import { endCheck, type MenuItem } from '../../components/Menu';
 import { useToast } from '../../components/Toast';
 import { errorMessage } from '../../lib/errors';
 import { supabase } from '../../lib/supabase';
@@ -60,8 +60,9 @@ export function usePublicPageList(wsId: string | undefined) {
     return [
       {
         label: t('share.publicPageShow'),
-        // Coche de 16 px quand la démo est affichée, colonne vide sinon
-        icon: shown ? <Check /> : <span className="menu-blank" />,
+        // CHOIX-01 : icône en tête, coche à droite quand la démo est affichée
+        icon: <Globe />,
+        end: endCheck(shown),
         checkbox: true,
         current: shown,
         disabled: !!reason,

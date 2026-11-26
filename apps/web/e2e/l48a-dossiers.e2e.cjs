@@ -170,7 +170,7 @@ const seed = () => {
     'colonne ouverte : tri en icône de 36 px (lot 2), nom complet',
   );
   await sort.click();
-  const sorts = (await page.getByRole('menuitem').allTextContents()).map((s) => s.trim());
+  const sorts = (await page.getByRole('menuitemradio').allTextContents()).map((s) => s.trim());
   ok(sorts[0] === 'Modifiées récemment' && sorts[1] === 'Date de création', 'tri « Date de création » en 2e');
   await page.keyboard.press('Escape');
   // §10 : « Installer l'extension » seulement si l'extension est publiée (VITE_EXTENSION_URL) et pas

@@ -705,8 +705,10 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
     const box = page.getByRole('menuitemcheckbox', { name: 'Afficher sur la page publique' });
     await box.waitFor();
     ok(
-      (await box.getAttribute('aria-checked')) === 'true',
-      'page publique « toutes les démos » : case cochée',
+      (await box.getAttribute('aria-checked')) === 'true' &&
+        (await box.locator('.menu-item__end .menu-check').count()) === 1 &&
+        (await box.locator('.menu-blank').count()) === 0,
+      'page publique « toutes les démos » : case cochée, coche à droite (CHOIX-01)',
     );
     await box.click();
     for (let i = 0; i < 50 && !Array.isArray(centre().public_page.demos); i++) await page.waitForTimeout(100);

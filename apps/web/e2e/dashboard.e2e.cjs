@@ -148,7 +148,7 @@ const SHOTS = process.env.SHOTS_DIR;
   await d2.getByRole('radio', { name: 'Grille' }).click();
   await d2.getByRole('button', { name: /^Tri\s*: Modifiées récemment/ }).click();
   ok(
-    (await d2.getByRole('menuitem', { name: 'Date de création' }).count()) === 1,
+    (await d2.getByRole('menuitemradio', { name: 'Date de création' }).count()) === 1,
     'DSH-04 : tri « Date de création »',
   );
   await d2.keyboard.press('Escape');

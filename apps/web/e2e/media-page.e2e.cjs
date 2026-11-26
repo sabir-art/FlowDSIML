@@ -166,13 +166,18 @@ const sp = (s) => (s || '').replace(/[  ]/g, ' ');
       const logoItem = menu.getByRole('menuitemradio', { name: 'Logo' });
       const imageItem = menu.getByRole('menuitemradio', { name: 'Image' });
       const x = async (l) => (await l.locator('.menu-item__icon').boundingBox()).x;
-      const lead = async (l) => (await l.locator('.menu-item__icon').boundingBox()).width;
+      // CHOIX-01 : icône de la catégorie en tête (alignée sur les autres entrées), coche À DROITE de la
+      // catégorie actuelle, aucune colonne vide
+      const endX = async (l) => (await l.locator('.menu-item__end').boundingBox()).x;
+      const iconX = async (l) => (await l.locator('.menu-item__icon').boundingBox()).x;
       ok(
-        (await logoItem.locator('svg.lucide-check').count()) === 1 &&
-          (await imageItem.locator('svg').count()) === 0 &&
-          Math.round(await lead(imageItem)) === 16 &&
+        (await logoItem.locator('.menu-item__end svg.lucide-check').count()) === 1 &&
+          (await imageItem.locator('.menu-item__end').count()) === 0 &&
+          (await menu.locator('.menu-blank, .mp-blank').count()) === 0 &&
+          (await endX(logoItem)) > (await iconX(logoItem)) + 40 &&
+          Math.abs((await x(logoItem)) - (await x(imageItem))) < 1 &&
           Math.abs((await x(logoItem)) - (await x(menu.getByRole('menuitem', { name: 'Renommer' })))) < 1,
-        'menu : coche devant la catégorie actuelle, colonne vide de 16 px devant l’autre, alignées',
+        'CHOIX-01 : icône de catégorie alignée sur les autres entrées, coche à droite de la catégorie actuelle',
       );
     }
     ok(
