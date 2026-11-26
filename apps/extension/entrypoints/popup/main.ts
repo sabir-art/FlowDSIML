@@ -166,6 +166,8 @@ const mode = (): CaptureMode =>
 
 /** Raison d'un mode refusé par la règle « Captures HTML » de l'espace (L49 §2.1) ; la ligne reste visible. */
 function modeOff(k: TypeKey): string | null {
+  // Recette UX lot E : la vidéo crée toujours une nouvelle démo ; le choix reste visible, grisé
+  if (k === 'video') return destKind === 'append' && appendDemo ? strings.videoNewOnly : null;
   if (k !== 'html' && k !== 'sandbox') return null;
   if (htmlVerdict === 'disabled') return strings.offSpace;
   if (htmlVerdict === 'domain') return strings.offDomain.replace('{{domain}}', htmlHost);
@@ -556,13 +558,10 @@ $('ws-items').addEventListener('click', (e) => {
   if ($('recording').hidden && $('login').hidden) view('setup');
 });
 
-// L26-04 : démos de l'espace qui ont des étapes « À capturer » (capture guidée)
+// L26-04 : démos de l'espace qui ont des étapes « À capturer » (capture guidée). Recette UX lot E : elles
+// se choisissent dans « Ajouter à une démo », en tête, avec la pastille « n étapes à capturer »
 let fills: FillTarget[] = [];
-const fill = createSelect($<HTMLButtonElement>('fill'), {
-  options: [{ value: '', label: strings.fillNew }],
-  value: '',
-  onChange: () => syncDest(),
-});
+const fillOf = (id: string | null | undefined) => (id ? fills.find((f) => f.demoId === id) : undefined);
 async function loadFills() {
   const ws = workspace.value;
   fills = [];
@@ -588,18 +587,7 @@ async function loadFills() {
     }
     fills = [...byDemo.values()];
   }
-  fill.setOptions([
-    { value: '', label: strings.fillNew },
-    ...fills.map((f) => ({
-      value: f.demoId,
-      label: strings.fillOption.replace('{{title}}', f.title).replace('{{count}}', String(f.steps.length)),
-    })),
-  ]);
-  syncFill();
-}
-function syncFill() {
-  show('fill-field', fills.length > 0 && destKind === 'new');
-  syncDest();
+  renderDest();
 }
 /** « Dans Acme · Nouvelle démo » : espace et démo de destination, en une ligne. */
 let addingTitle = '';
@@ -610,12 +598,7 @@ function syncDest() {
     addingTitle ||
     (destKind === 'append' && appendDemo
       ? appendDemo.title
-      : [
-          folderId ? folderName(folderId) : '',
-          fills.find((f) => f.demoId === fill.value)?.title || strings.fillNew,
-        ]
-          .filter(Boolean)
-          .join(' · '));
+      : [folderId ? folderName(folderId) : '', strings.fillNew].filter(Boolean).join(' · '));
   const t = $('dest-text');
   t.replaceChildren(
     `${strings.destIn} `,
@@ -668,7 +651,7 @@ async function loadDest() {
   const sf = saved[`fd.folder.${ws}`] as string | undefined;
   folderId = sf && folders.some((x) => x.id === sf) ? sf : null;
   const sa = saved[`fd.appendDemo.${ws}`] as { id: string; title: string } | undefined;
-  appendDemo = sa && demosList.some((x) => x.id === sa.id) ? sa : null;
+  appendDemo = sa && (demosList.some((x) => x.id === sa.id) || fillOf(sa.id)) ? sa : null;
   renderDest();
 }
 
@@ -680,7 +663,10 @@ function renderDest(focus?: string) {
   }
   show('folder-field', destKind === 'new');
   show('append-field', destKind === 'append');
-  syncFill();
+  // Une démo à compléter : chaque clic remplit son étape « À capturer » suivante
+  $('demos-h').textContent = fillOf(appendDemo?.id) ? strings.fillHelp : strings.appendHelp;
+  // L'ajout à une démo existante ne vaut pas pour la vidéo : la ligne Vidéo le dit (grisée)
+  renderModes();
   // Arbre des dossiers : « Toutes les démos », puis les dossiers et sous-dossiers (décalés de 24 px)
   const items: HTMLElement[] = [];
   const node = (id: string | null, name: string, count: number, level: number) => {
@@ -709,7 +695,20 @@ function renderDest(focus?: string) {
   $('folders').replaceChildren(...items);
   // Démos modifiables, filtrées par la recherche (sans tenir compte des accents)
   const q = foldText($<HTMLInputElement>('demo-q').value.trim());
-  const shown = demosList.filter((x) => !q || foldText(x.title).includes(q));
+  // Démos à compléter en tête (même absentes des 200 plus récentes), puis les autres
+  const all = [
+    ...fills.map(
+      (f) =>
+        demosList.find((x) => x.id === f.demoId) ?? {
+          id: f.demoId,
+          title: f.title,
+          folder_id: null,
+          steps: f.steps.length,
+        },
+    ),
+    ...demosList.filter((x) => !fillOf(x.id)),
+  ];
+  const shown = all.filter((x) => !q || foldText(x.title).includes(q));
   $('demos').replaceChildren(
     ...(shown.length
       ? shown.map((x) => {
@@ -730,6 +729,17 @@ function renderDest(focus?: string) {
             }),
           );
           li.append(two);
+          const todo = fillOf(x.id)?.steps.length ?? 0;
+          if (todo)
+            li.append(
+              Object.assign(document.createElement('span'), {
+                className: 'todo',
+                textContent: (todo === 1 ? strings.toCapture_one : strings.toCapture_other).replace(
+                  '{{n}}',
+                  String(todo),
+                ),
+              }),
+            );
           if (on) li.append(icon(Check, 16));
           return li;
         })
@@ -771,10 +781,11 @@ $('folders').addEventListener('click', (e) => {
 });
 const pickDemo = (li: HTMLElement) => {
   const d = demosList.find((x) => x.id === li.dataset.demo);
-  if (!d) return;
-  appendDemo = { id: d.id, title: d.title };
+  const f = fillOf(li.dataset.demo);
+  if (!d && !f) return;
+  appendDemo = d ? { id: d.id, title: d.title } : { id: f!.demoId, title: f!.title };
   saveDest();
-  renderDest(`#demos [data-demo="${d.id}"]`);
+  renderDest(`#demos [data-demo="${appendDemo.id}"]`);
 };
 $('demos').addEventListener('click', (e) => {
   const li = (e.target as HTMLElement).closest<HTMLElement>('[role=option]');
@@ -1167,8 +1178,8 @@ async function startCapture(hasDebugger: boolean) {
       liveMask: m === 'video' && liveMask.checked,
       viewport: m === 'mobile' ? viewport() : undefined,
       followTabs: m !== 'video' && follow.checked,
-      fill:
-        m === 'clicks' && destKind === 'new' ? (fills.find((f) => f.demoId === fill.value) ?? null) : null,
+      // Démo à compléter choisie dans « Ajouter à une démo » : capture guidée de ses étapes « À capturer »
+      fill: m === 'clicks' && destKind === 'append' ? (fillOf(appendDemo?.id) ?? null) : null,
       // L64 §2 : dossier de la nouvelle démo, ou démo existante (étapes à la fin)
       folderId: destKind === 'new' ? folderId : null,
       appendDemo: destKind === 'append' ? appendDemo : null,
