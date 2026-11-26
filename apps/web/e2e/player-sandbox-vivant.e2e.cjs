@@ -180,6 +180,8 @@ const ok = (c, l) => {
     'page vivante : iframe allow-scripts, CSP sans sortie, scripts par empreintes',
   );
   ok((await f.getByText('Discuter avec nous').count()) === 0, 'script bloqué par l’auteur : non exécuté');
+  // Recette UX de l'étape 3 : « Zones cliquables 0 » masqué sur une page vivante (elle réagit elle-même)
+  ok((await p.locator('.p-html-zones').count()) === 0, 'page vivante : pas de bouton « Zones cliquables »');
 
   await f.getByRole('link', { name: 'Clients' }).click();
   await f
@@ -276,6 +278,10 @@ const ok = (c, l) => {
     .then(() => true)
     .catch(() => false);
   ok(s3, 'enregistrement illisible : repli sur la copie inerte');
+  ok(
+    (await p2.locator('.p-html-zones').count()) === 1,
+    'copie inerte de secours : le bouton « Zones cliquables » revient',
+  );
   await ctx2.close();
 
   const vraies = sorties.filter((r) => !csp.has(r)).map((r) => r.url());

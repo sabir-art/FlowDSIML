@@ -488,18 +488,21 @@ export function HtmlStep({
         ) : (
           <span class="p-html-title" />
         )}
-        <button
-          type="button"
-          class={`p-html-zones${zonesOn && (zones ?? 0) > 0 ? ' is-on' : ''}`}
-          aria-pressed={zonesOn && (zones ?? 0) > 0}
-          aria-keyshortcuts="H"
-          disabled={(zones ?? 0) === 0}
-          onClick={() => toggleZones()}
-        >
-          <MousePointerClick aria-hidden="true" />
-          {ht.zones}
-          <span class="p-html-zones-n">{zones ?? 0}</span>
-        </button>
+        {/* Recette UX de l'étape 3 : une page vivante réagit elle-même, « Zones cliquables 0 » tromperait */}
+        {!isLive && (
+          <button
+            type="button"
+            class={`p-html-zones${zonesOn && (zones ?? 0) > 0 ? ' is-on' : ''}`}
+            aria-pressed={zonesOn && (zones ?? 0) > 0}
+            aria-keyshortcuts="H"
+            disabled={(zones ?? 0) === 0}
+            onClick={() => toggleZones()}
+          >
+            <MousePointerClick aria-hidden="true" />
+            {ht.zones}
+            <span class="p-html-zones-n">{zones ?? 0}</span>
+          </button>
+        )}
       </div>
     </div>
   );
