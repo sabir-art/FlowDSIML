@@ -117,6 +117,17 @@
 .fd-switch input[aria-disabled='true'] + .fd-switch__track {
   opacity: 0.5;
 }
+/* Activé mais désactivé (lecture seule) : piste grise et bouton couleur de surface, comme la case cochée et
+   désactivée (FIELD-01, recette UX de L41 étape 5) ; plus de prune pâle */
+.fd-switch input:checked:disabled + .fd-switch__track,
+.fd-switch input:checked[aria-disabled='true'] + .fd-switch__track {
+  opacity: 1;
+  background: var(--fd-color-text-muted);
+}
+.fd-switch input:checked:disabled + .fd-switch__track::after,
+.fd-switch input:checked[aria-disabled='true'] + .fd-switch__track::after {
+  background: var(--fd-color-surface);
+}
 /* aria-disabled : reste focalisable et lu (avec son aide), même apparence que disabled */
 .fd-switch:has(input:disabled),
 .fd-switch:has(input[aria-disabled='true']) {

@@ -260,6 +260,32 @@ const aiOn = () => ({
   await pe.goto(`${APP}/#/settings/ai`);
   await pe.waitForTimeout(1500);
   ok((await pe.locator('section.ai-models').count()) === 0, 'éditeur : section absente');
+  // Interrupteur activé mais désactivé (lecture seule) : piste grise, comme la case cochée désactivée
+  const sw = await pe.evaluate(() => {
+    const input = document.querySelector('.fd-switch input[role=switch]');
+    const track = input?.nextElementSibling;
+    const probe = (v) => {
+      const e = document.createElement('span');
+      e.style.color = `var(${v})`;
+      document.body.append(e);
+      const c = getComputedStyle(e).color;
+      e.remove();
+      return c;
+    };
+    return {
+      checked: input?.checked,
+      disabled: input?.disabled,
+      track: track && getComputedStyle(track).backgroundColor,
+      knob: track && getComputedStyle(track, '::after').backgroundColor,
+      opacity: track && getComputedStyle(track).opacity,
+      muted: probe('--fd-color-text-muted'),
+      surface: probe('--fd-color-surface'),
+    };
+  });
+  ok(
+    sw.checked && sw.disabled && sw.track === sw.muted && sw.knob === sw.surface && sw.opacity === '1',
+    `interrupteur activé et désactivé : piste grise, bouton couleur de surface (${JSON.stringify(sw)})`,
+  );
   await c3.close();
 
   // ===== 390 px =====
