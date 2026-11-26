@@ -1942,6 +1942,8 @@
       "checkImages": "Vérifiez la place des images ajoutées sur les étapes."
     },
     "voice": {
+      "newVoice": "Nouvelle voix",
+      "otherFile": "Choisir un autre fichier",
       "toListen": "À écouter",
       "useThis": "Utiliser cette voix",
       "keepCurrent": "Garder l’actuelle",

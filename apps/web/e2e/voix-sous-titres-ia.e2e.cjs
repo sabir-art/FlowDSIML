@@ -377,10 +377,10 @@ function prepare(over = {}) {
   );
   ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
   ok((await panel.locator('audio[controls]').count()) === 0, 'Pas de lecteur natif');
-  const two = await panel.locator('.vo-two button').allTextContents();
+  const two = await panel.locator('.vo-fresh .vo-fresh__acts button').allTextContents();
   ok(
     two.join('|') === 'Régénérer|Garder l’actuelle|Utiliser cette voix',
-    '«\u202fRégénérer\u202f», puis «\u202fGarder l’actuelle\u202f» et «\u202fUtiliser cette voix\u202f»',
+    'Carte «\u202fNouvelle voix\u202f» : «\u202fRégénérer\u202f», «\u202fGarder l’actuelle\u202f» et «\u202fUtiliser cette voix\u202f» dans la carte',
   );
   ok(/b1\.webm$/.test(s1().voice_path), 'Rien n’est appliqué avant «\u202fUtiliser cette voix\u202f»');
   await shot('l30-10-voix-apercu');
