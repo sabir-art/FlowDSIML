@@ -5,6 +5,8 @@ const path = require('path');
 const PLAYER = process.env.PLAYER_URL || 'http://localhost:5174';
 const SHOTS = process.env.SHOTS_DIR;
 const { sfx, themedContext } = require('./_theme.cjs');
+/** NUM-01 : espaces insécables ramenées à des espaces ordinaires avant de comparer. */
+const sp = (s) => (s || '').replace(/\s/g, ' ');
 const png = fs.readFileSync(path.join(__dirname, 'fixture.png'));
 const DEMO = '0b5c1f0e-0000-4000-8000-0000000000f2';
 const img = { url: 'assets/a.webp', width: 1100, height: 750 };
@@ -158,7 +160,7 @@ const manifest = {
     'énoncé = legend du fieldset',
   );
   ok(
-    (await page.locator('.p-quiz-count').textContent()) === 'Question 1 sur 3',
+    sp(await page.locator('.p-quiz-count').textContent()) === 'Question 1 sur 3',
     'progression « Question 1 sur 3 »',
   );
 
@@ -297,8 +299,8 @@ const manifest = {
     'focus sur le titre du résultat',
   );
   ok(
-    (await page.getByRole('status').first().textContent()) ===
-      '1 bonne réponse sur 3 · il vous reste 2 tentatives',
+    sp(await page.getByRole('status').first().textContent()) ===
+      sp('1 bonne réponse sur 3 · il vous reste 2 tentatives'),
     'M7 : une ligne « 1 bonne réponse sur 3 · il vous reste 2 tentatives »',
   );
   ok(

@@ -185,7 +185,7 @@ async function openEditor(b, state) {
     (await page.locator('.pr-ring').count()) === 1 &&
       (await page.locator('.presenter .tbar').count()) === 0 &&
       (await page.locator('.pr-ring').evaluate((e) => Math.round(e.getBoundingClientRect().width))) === 36 &&
-      /sur 15:00/.test(await page.locator('.pr-timer__tx small').innerText()) &&
+      /sur\s15:00/.test(await page.locator('.pr-timer__tx small').innerText()) &&
       (await page.locator('.pr-timer__tx b').evaluate((e) => getComputedStyle(e).fontSize)) === '22px',
     'minuteur : anneau de 36 px, temps en 22 px, « sur 15:00 » ; plus de ligne de progression',
   );

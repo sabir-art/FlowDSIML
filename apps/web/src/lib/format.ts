@@ -3,6 +3,12 @@ import i18n from '../i18n';
 /** Formats localisés (Intl) selon la langue courante de l'interface. */
 const locale = () => (i18n.language === 'en' ? 'en-GB' : 'fr-FR');
 
+/**
+ * NUM-01 : une valeur et son unité, séparées par une espace insécable (« 320 ms », « 1 280 px »,
+ * « 55 % ») : elles ne se coupent jamais à la ligne. Aussi pour les noms lus par les lecteurs d'écran.
+ */
+export const unit = (n: number | string, u: string) => `${n}\u00a0${u}`;
+
 export function formatDate(
   iso: string | null | undefined,
   opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' },

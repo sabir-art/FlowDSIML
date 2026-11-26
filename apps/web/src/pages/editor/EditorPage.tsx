@@ -125,6 +125,7 @@ import { asLayers, layerName } from './images/layers';
 import { ShareDialog, useShareWindow } from '../share/ShareDialog';
 import { useUnpublish } from '../share/useUnpublish';
 import { usePublicPageList } from '../share/usePublicPageList';
+import { unit } from '../../lib/format';
 
 // L32 : boîtes de dialogue chargées à l'ouverture (hors du chargement initial de la page)
 const ExportDialog = lazy(() => import('../export/ExportDialog').then((m) => ({ default: m.ExportDialog })));
@@ -1322,8 +1323,8 @@ export function EditorPage() {
               onChange={(e) => setZoom(e.target.value as Zoom)}
             >
               <option value="fit">{t('editor.zoomFit')}</option>
-              <option value="50">50 %</option>
-              <option value="100">100 %</option>
+              <option value="50">{unit(50, '%')}</option>
+              <option value="100">{unit(100, '%')}</option>
             </Select>
           </div>
           {findOpen && (

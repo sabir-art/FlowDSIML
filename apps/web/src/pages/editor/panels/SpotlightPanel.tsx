@@ -4,6 +4,7 @@ import { FREE_SPOTLIGHT } from '@flowdsiml/manifest';
 import { Slider, Switch } from '@flowdsiml/ui';
 import type { DemoEditor } from '../useDemoEditor';
 import { asSettings, freeSpotlightOf } from '../types';
+import { unit } from '../../../lib/format';
 
 /**
  * EXT-02 §6.3 : panneau « Projecteur ». Réglage de toute la démo : un halo suit le pointeur du visiteur
@@ -49,7 +50,7 @@ export function SpotlightPanel({ editor, readOnly }: { editor: DemoEditor; readO
           max={FREE_SPOTLIGHT.size.max}
           step={10}
           value={sp.size}
-          valueText={`${sp.size} px`}
+          valueText={unit(sp.size, 'px')}
           disabled={readOnly || !sp.enabled}
           onChange={(v) => set({ size: v })}
         />
@@ -64,7 +65,7 @@ export function SpotlightPanel({ editor, readOnly }: { editor: DemoEditor; readO
           max={FREE_SPOTLIGHT.dim.max}
           step={5}
           value={sp.dim}
-          valueText={`${sp.dim}\u00a0%`}
+          valueText={unit(sp.dim, '%')}
           disabled={readOnly || !sp.enabled}
           onChange={(v) => set({ dim: v })}
         />

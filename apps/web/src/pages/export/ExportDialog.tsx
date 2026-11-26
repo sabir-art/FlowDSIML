@@ -72,6 +72,7 @@ import {
 import { PdfPagePreview } from './PdfPagePreview';
 import './export.css';
 import { Select } from '@flowdsiml/ui';
+import { unit } from '../../lib/format';
 
 type Fmt = 'pdf' | 'gif' | 'mp4' | 'html';
 /** L25-12 : fichiers prêts (vidéo et sous-titres). */
@@ -440,7 +441,7 @@ export function ExportDialog({
         meta: [
           t('export.seconds', { n: gifDuration(total, o.seconds).toLocaleString(i18n.language) }),
           formatSize(bytes.byteLength, i18n.language),
-          `${w} × ${h} px`,
+          `${w} × ${unit(h, 'px')}`,
         ].join(' · '),
       });
     } catch (e) {
@@ -1426,7 +1427,9 @@ function GifPreview({
         <span>{t('export.preview')}</span>
         <span>
           {caption ??
-            (opts ? `${opts.width} × ${demo ? gifHeight(demo.steps[opts.from]!, opts.width) : 0} px` : '')}
+            (opts
+              ? `${opts.width} × ${unit(demo ? gifHeight(demo.steps[opts.from]!, opts.width) : 0, 'px')}`
+              : '')}
         </span>
       </div>
       <div className="gif-frame" aria-hidden="true">
