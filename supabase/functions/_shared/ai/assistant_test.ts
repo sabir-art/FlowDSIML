@@ -101,15 +101,15 @@ function deps(admin = true) {
     setCut: () => Promise.resolve(),
     assistantRows: () => Promise.resolve(rows),
     autoRules: () => Promise.resolve(rules),
-    setAssistant: (r, _u, label) => {
+    setAssistant: (r, _u, label, old, next) => {
       rows = r;
-      labels.push(label);
+      labels.push(`${label} | ${old} | ${next}`);
       return Promise.resolve();
     },
-    setRule: (rule, model, _u, label) => {
+    setRule: (rule, model, _u, label, was, next) => {
       const old = rules[rule];
       rules[rule] = model;
-      labels.push(label);
+      labels.push(`${label} | ${was} | ${next}`);
       return Promise.resolve({ old });
     },
   };
@@ -160,7 +160,8 @@ Deno.test(
     assertEquals(
       x.labels.at(-1),
       'Liste de l’assistant · Claude Haiku : proposé ; Claude Haiku : étiquette Bêta ; ' +
-        'Claude Sonnet : retiré ; Claude Sonnet : sans étiquette',
+        'Claude Sonnet : retiré ; Claude Sonnet : sans étiquette | ' +
+        'Claude Sonnet (Recommandé), Claude Opus (Recommandé) | Claude Opus (Recommandé), Claude Haiku (Bêta)',
     );
     // Ordre seul, puis étiquette seule : le journal les distingue
     await set([
@@ -168,13 +169,20 @@ Deno.test(
       { model: 'claude-opus-5-5', proposed: true, tag: 'recommended' },
       { model: 'claude-sonnet-5-5', proposed: false, tag: 'none' },
     ]);
-    assertEquals(x.labels.at(-1), 'Liste de l’assistant · Ordre : Claude Haiku, Claude Opus');
+    assertEquals(
+      x.labels.at(-1),
+      'Liste de l’assistant · Ordre : Claude Haiku, Claude Opus | ' +
+        'Claude Opus (Recommandé), Claude Haiku (Bêta) | Claude Haiku (Bêta), Claude Opus (Recommandé)',
+    );
     await set([
       { model: 'claude-haiku-5-5', proposed: true, tag: 'recommended' },
       { model: 'claude-opus-5-5', proposed: true, tag: 'recommended' },
       { model: 'claude-sonnet-5-5', proposed: false, tag: 'none' },
     ]);
-    assertEquals(x.labels.at(-1), 'Liste de l’assistant · Claude Haiku : étiquette Recommandé');
+    assertEquals(
+      x.labels.at(-1)?.split(' | ')[0],
+      'Liste de l’assistant · Claude Haiku : étiquette Recommandé',
+    );
     const last = await set([{ model: 'claude-opus-5-5', proposed: false, tag: 'none' }]);
     assertEquals([last.status, last.body.error], [409, 'LAST_MODEL']);
     assertEquals((await set([{ model: 'gpt-5', proposed: true, tag: 'none' }])).body.error, 'BAD_LIST');
@@ -192,7 +200,7 @@ Deno.test(
       x.d,
     );
     assertEquals([r.status, (r.body.result as Record<string, unknown>).old], [200, 'claude-sonnet-5-5']);
-    assertEquals(x.labels.at(-1), 'Auto · analyse de toute la démo · Claude Sonnet → Claude Opus');
+    assertEquals(x.labels.at(-1), 'Auto · analyse de toute la démo | Claude Sonnet | Claude Opus');
     assertEquals(
       (await consoleAction({ action: 'console_auto_rule_set', rule: 'short', model: 'next' }, x.d)).body
         .error,
@@ -203,7 +211,7 @@ Deno.test(
       x.d,
     );
     assertEquals(fb.status, 200);
-    assertEquals(x.labels.at(-1), 'Auto · modèle indisponible · le suivant de la liste → Claude Haiku');
+    assertEquals(x.labels.at(-1), 'Auto · modèle indisponible | le suivant de la liste | Claude Haiku');
   },
 );
 

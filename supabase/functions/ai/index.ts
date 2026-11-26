@@ -435,12 +435,14 @@ async function consoleOf(req: Request, body: Record<string, unknown>) {
       if (error) console.error('ai: console tested', error.code);
     },
     fnModels: () => fnModels(true),
-    setModel: async (fn, model, uid, label) => {
+    setModel: async (fn, model, uid, label, old, next) => {
       const { data, error } = await admin.rpc('ai_set_function_model', {
         p_fn: fn,
         p_model: model,
         p_actor: uid,
         p_label: label,
+        p_old: old,
+        p_new: next,
       });
       if (error) throw new Error('SERVER');
       fnCache = null;
@@ -449,17 +451,25 @@ async function consoleOf(req: Request, body: Record<string, unknown>) {
     setCut: syncCut,
     assistantRows: async () => (await assistantConfig(true)).rows,
     autoRules: async () => (await assistantConfig(true)).rules,
-    setAssistant: async (rows, uid, label) => {
-      const { error } = await admin.rpc('ai_assistant_set', { p_models: rows, p_actor: uid, p_label: label });
+    setAssistant: async (rows, uid, label, old, next) => {
+      const { error } = await admin.rpc('ai_assistant_set', {
+        p_models: rows,
+        p_actor: uid,
+        p_label: label,
+        p_old: old,
+        p_new: next,
+      });
       if (error) throw new Error(/LAST_MODEL/.test(error.message) ? 'LAST_MODEL' : 'SERVER');
       asstCache = null;
     },
-    setRule: async (rule, model, uid, label) => {
+    setRule: async (rule, model, uid, label, old, next) => {
       const { data, error } = await admin.rpc('ai_auto_rule_set', {
         p_rule: rule,
         p_model: model,
         p_actor: uid,
         p_label: label,
+        p_old: old,
+        p_new: next,
       });
       if (error) throw new Error('SERVER');
       asstCache = null;

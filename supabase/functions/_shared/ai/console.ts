@@ -4,7 +4,7 @@
 // testée, et n'est enregistrée qu'en cas de succès ; aucune réponse ne contient de clé.
 import { CATALOGUE, PROVIDERS, isRetired, labelOf, publicCatalogue, type Provider } from './catalogue.ts';
 import { forgetKey, providerKey, type VaultRead } from './keys.ts';
-import { FUNCTIONS, changeLabel, choicesFor, cutFeatures, resolve, type Fn } from './functions.ts';
+import { FN_LABEL, FUNCTIONS, choicesFor, cutFeatures, fnModelName, resolve, type Fn } from './functions.ts';
 import { DEFAULT_RULES, menuOf, type AssistantRow, type AutoRule, type AutoRules } from './assistant.ts';
 import type { KeyTest } from './providers/anthropic.ts';
 
@@ -67,15 +67,38 @@ export interface ConsoleDeps {
   env?: (n: string) => string | undefined;
   /** L41 étape 3 : modèles choisis par fonction (ai_function_models). */
   fnModels: () => Promise<Partial<Record<Fn, string>>>;
-  /** label : libellé lisible du journal (« Traduction · Claude Sonnet (défaut) → Claude Opus »). */
-  setModel: (fn: Fn, model: string | null, uid: string, label: string) => Promise<{ old: string | null }>;
+  /**
+   * Journal (L41 étape 6) : label = ce qui change (« Traduction »), old et next = valeurs lisibles avant et
+   * après (« Claude Sonnet (défaut) », « Claude Opus »).
+   */
+  setModel: (
+    fn: Fn,
+    model: string | null,
+    uid: string,
+    label: string,
+    old: string,
+    next: string,
+  ) => Promise<{ old: string | null }>;
   /** Fonctions de l'espace coupées (ai_cut), tenues à jour à chaque lecture. */
   setCut: (features: string[]) => Promise<void>;
   /** L41 étape 4 : liste de l'assistant et règles d'Auto. */
   assistantRows?: () => Promise<AssistantRow[]>;
   autoRules?: () => Promise<Partial<AutoRules>>;
-  setAssistant?: (rows: AssistantRow[], uid: string, label: string) => Promise<void>;
-  setRule?: (rule: AutoRule, model: string, uid: string, label: string) => Promise<{ old: string | null }>;
+  setAssistant?: (
+    rows: AssistantRow[],
+    uid: string,
+    label: string,
+    old: string,
+    next: string,
+  ) => Promise<void>;
+  setRule?: (
+    rule: AutoRule,
+    model: string,
+    uid: string,
+    label: string,
+    old: string,
+    next: string,
+  ) => Promise<{ old: string | null }>;
 }
 
 /** Modèles de texte du catalogue, non retirés : ceux que la liste de l'assistant peut contenir. */
@@ -131,6 +154,16 @@ export function assistantChange(before: AssistantRow[], after: AssistantRow[]): 
   const b = order(after).filter((m) => kept.has(m));
   if (a.join() !== b.join()) parts.push(`Ordre : ${order(after).map(labelOf).join(', ')}`);
   return `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`;
+}
+
+/** Liste proposée, lisible, pour le journal : « Claude Sonnet (Recommandé), Claude Haiku (Bêta) ». */
+export function assistantListText(rows: AssistantRow[]): string {
+  const tag = { none: '', recommended: ' (Recommandé)', beta: ' (Bêta)' };
+  return [...rows]
+    .sort((a, b) => a.position - b.position)
+    .filter((r) => r.proposed)
+    .map((r) => `${labelOf(r.model) || r.model}${tag[r.tag]}`)
+    .join(', ');
 }
 
 const RULE_LABEL: Record<AutoRule, string> = {
@@ -221,8 +254,14 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     }));
     // « Gardez au moins un modèle. »
     if (!rows.some((r) => r.proposed)) return { status: 409, body: { error: 'LAST_MODEL' } };
-    const label = assistantChange((await d.assistantRows?.()) ?? [], rows);
-    await d.setAssistant?.(rows, who.uid, label);
+    const before = (await d.assistantRows?.()) ?? [];
+    await d.setAssistant?.(
+      rows,
+      who.uid,
+      assistantChange(before, rows),
+      assistantListText(before),
+      assistantListText(rows),
+    );
     return { status: 200, body: { result: await assistantState(d) } };
   }
   if (action === 'console_auto_rule_set') {
@@ -232,8 +271,14 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     const okModel = textModels().some((m) => m.id === model) || (rule === 'fallback' && model === 'next');
     if (!okModel) return { status: 400, body: { error: 'BAD_MODEL' } };
     const before = { ...DEFAULT_RULES, ...((await d.autoRules?.()) ?? {}) }[rule];
-    const label = `Auto · ${RULE_LABEL[rule]} · ${ruleModel(before)} → ${ruleModel(model)}`;
-    const { old } = (await d.setRule?.(rule, model, who.uid, label)) ?? { old: null };
+    const { old } = (await d.setRule?.(
+      rule,
+      model,
+      who.uid,
+      `Auto · ${RULE_LABEL[rule]}`,
+      ruleModel(before),
+      ruleModel(model),
+    )) ?? { old: null };
     return { status: 200, body: { result: { old: old ?? before, ...(await assistantState(d)) } } };
   }
   if (action === 'console_set_model') {
@@ -245,7 +290,14 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     if (model !== null && (typeof model !== 'string' || !allowed.includes(model)))
       return { status: 400, body: { error: 'BAD_MODEL' } };
     const before = (await d.fnModels())[def.fn] ?? null;
-    const { old } = await d.setModel(def.fn, model, who.uid, changeLabel(def, before, model));
+    const { old } = await d.setModel(
+      def.fn,
+      model,
+      who.uid,
+      FN_LABEL[def.fn],
+      fnModelName(def, before),
+      fnModelName(def, model),
+    );
     return { status: 200, body: { result: { old, functions: await functionStates(d) } } };
   }
   const provider = body.provider;
