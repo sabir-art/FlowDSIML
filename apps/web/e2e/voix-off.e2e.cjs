@@ -188,6 +188,8 @@ function wav(sec) {
       (await sec.getByRole('tablist').count()) === 1 &&
       (await tabs.nth(2).getAttribute('aria-selected')) === 'true' &&
       (await tabs.nth(2).locator('.vo-dot').count()) === 1 &&
+      (await card.locator('.vo-card__icon svg.lucide-upload').count()) === 1 &&
+      (await sec.locator('.vo-src-label').isVisible()) &&
       /\(Voix en place\)/.test(await tabs.nth(2).textContent()),
     'voix en place : carte « Voix en place · Fichier · 0:02 », lecteur, segmenté visible, point vert sur « Fichier »',
   );
@@ -252,7 +254,11 @@ function wav(sec) {
     s1().voice_path === avant &&
       (await card.count()) === 0 &&
       (await mini.evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 44 &&
-      (await mini.getByRole('button', { name: 'Écouter' }).count()) === 1,
+      (await mini.getByRole('button', { name: 'Écouter' }).count()) === 1 &&
+      (await mini.locator('.vo-aud > :first-child').getAttribute('aria-label')) === 'Écouter' &&
+      (await mini.locator('.vo-mini__txt').innerText()).replace(/\s+/g, ' ') === 'Voix en place Fichier' &&
+      (await mini.locator('.vo-time').innerText()) === '0:02' &&
+      (await mini.locator('.vo-dot').count()) === 0,
     `onglet « Enregistrée » : rien n’est supprimé, la voix en place devient une ligne de 44 px (${JSON.stringify({ same: s1().voice_path === avant, card: await card.count(), h: await mini.evaluate((e) => Math.round(e.getBoundingClientRect().height)), play: await mini.getByRole('button', { name: 'Écouter' }).count() })})`,
   );
   await sec.getByRole('button', { name: 'Démarrer l’enregistrement' }).click();
@@ -289,8 +295,9 @@ function wav(sec) {
   await card.waitFor();
   ok(
     /^Enregistrée · 0:0\d$/.test((await card.locator('.vo-card__txt .muted').innerText()).trim()) &&
-      (await tabs.nth(1).locator('.vo-dot').count()) === 1,
-    'carte « Voix en place · Enregistrée », point vert sur « Enregistrée »',
+      (await tabs.nth(1).locator('.vo-dot').count()) === 1 &&
+      (await card.locator('.vo-card__icon svg.lucide-mic').count()) === 1,
+    'carte « Voix en place · Enregistrée », icône Micro, point vert sur « Enregistrée »',
   );
 
   // ===== L62 : l'Aperçu de l'éditeur fait entendre la voix de l'étape =====

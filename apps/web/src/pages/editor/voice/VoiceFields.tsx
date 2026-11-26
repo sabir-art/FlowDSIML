@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
-  AudioLines,
   Captions,
   Download,
   Ellipsis,
@@ -13,6 +12,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Sparkles,
   Square,
   Trash2,
   Upload,
@@ -397,8 +397,9 @@ export function VoiceFields({
   const fullCard = (
     <div className="vo-card">
       <div className="vo-card__head">
+        {/* L62 §6 : icône de la source (Fichier, Enregistrée, Générée) */}
         <span className="vo-card__icon" aria-hidden="true">
-          <AudioLines />
+          {kind === 'imported' ? <Upload /> : kind === 'recorded' ? <Mic /> : <Sparkles />}
         </span>
         <div className="vo-card__txt">
           <b>{t('editor.voice.inPlace')}</b>
@@ -429,18 +430,21 @@ export function VoiceFields({
       />
     </div>
   );
-  // Dans un autre onglet : une ligne de 44 px (lecture, nom, durée), au-dessus de l'outil
+  // Dans un autre onglet : une ligne de 44 px, Lecture en tête, « Voix en place » et sa source sur deux
+  // lignes, durée à droite (le point vert reste sur l'onglet)
   const miniCard = (
     <div className="vo-mini" aria-label={t('editor.voice.inPlace')} role="group">
-      <span className="vo-mini__name">
-        <span className="vo-dot" aria-hidden="true" />
-        {t('editor.voice.inPlace')}
-      </span>
       <AudioLine
         src={url}
         durationMs={step.voice_duration_ms ?? 0}
         label={t('editor.voice.listen')}
         pauseLabel={t('editor.voice.pause')}
+        middle={
+          <span className="vo-mini__txt">
+            <b>{t('editor.voice.inPlace')}</b>
+            <span>{placedLine.replace(/ · \d+:\d{2}$/, '')}</span>
+          </span>
+        }
       />
     </div>
   );
@@ -461,7 +465,10 @@ export function VoiceFields({
       {has && !choosing && fullCard}
       {choosing && (
         <>
-          <div className="fd-segmented vo-tabs" role="tablist" aria-label={t('editor.voice.source')}>
+          <span className="vo-label vo-src-label" id={`vo-src-${step.id}`}>
+            {t('editor.voice.source')}
+          </span>
+          <div className="fd-segmented vo-tabs" role="tablist" aria-labelledby={`vo-src-${step.id}`}>
             {SOURCES.map((k) => {
               const off = k === 'generate' && genOff;
               return (
@@ -474,6 +481,8 @@ export function VoiceFields({
                   aria-controls="vo-panel"
                   aria-disabled={off || undefined}
                   aria-describedby={off ? 'vo-gen-off' : undefined}
+                  // Recette UX : la raison en infobulle de l'onglet grisé, plus une ligne sous le segmenté
+                  data-tip={off ? t('editor.voice.generateOff') : undefined}
                   tabIndex={tab === k ? 0 : -1}
                   disabled={!!rec || busy}
                   onClick={() => !off && setSource(k)}
@@ -502,7 +511,7 @@ export function VoiceFields({
             })}
           </div>
           {genOff && (
-            <p className="help" id="vo-gen-off">
+            <p className="sr-only" id="vo-gen-off">
               {t('editor.voice.generateOff')}
             </p>
           )}
