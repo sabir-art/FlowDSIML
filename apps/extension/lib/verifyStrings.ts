@@ -26,8 +26,31 @@ const fr = {
   noteScripts_other: '{{n}} scripts',
   noteElements_one: '1 élément ajouté par un script',
   noteElements_other: '{{n}} éléments ajoutés par un script',
+  // Sandbox v2 (étape 3) : la page est rejouée avec ses scripts, dans une boîte sans aucune sortie
+  live: {
+    state: '{{played}} rejoués · {{blocked}} bloqués',
+    played: 'Rejoué',
+    blocked: 'Bloqué',
+    block: 'Bloquer',
+    blockOf: 'Bloquer : {{name}}',
+    replayed: 'Rejouées',
+    responses: 'Réponses du site',
+    responsesN_one: '1 réponse lue par la page, données personnelles remplacées',
+    responsesN_other: '{{n}} réponses lues par la page, données personnelles remplacées',
+    responsesWhy:
+      'Les données que la page a lues pendant la capture sont rejouées dans la démo, avec les mêmes valeurs fictives que la copie. Rien n’est envoyé au site d’origine : une écriture reçoit un succès fictif.',
+    category: { page: 'Script de la page', third: 'Script d’un autre site', tracking: 'Mesure d’audience' },
+    why: {
+      page: 'Script du site : il fait vivre la page (menus, onglets, formulaires). Dans la démo, il s’exécute dans une boîte sans accès au réseau.',
+      third:
+        'Script chargé depuis un autre site (discussion, aide). Bloqué par défaut ; « Garder » le rejoue, toujours sans accès au réseau.',
+      tracking:
+        'Mesure d’audience : bloquée par défaut. Même gardée, elle ne pourrait rien envoyer depuis la démo.',
+    },
+  },
   group: {
     pages: 'Pages copiées',
+    live: 'Sandbox vivant',
     pageScripts: 'Scripts de la page',
     widgets: 'Éléments ajoutés par un script',
     trackingScripts: 'Scripts de suivi',
@@ -88,6 +111,7 @@ const fr = {
     pii: 'Donnée',
   },
   groupWhy: {
+    live: 'Dans un Sandbox, la page est rejouée avec ses scripts et les données qu’elle a lues : les menus, onglets et formulaires réagissent comme sur le site. Tout se passe dans une boîte sans aucune sortie réseau, et rien n’est enregistré.',
     pageScripts:
       'La démo est une copie fixe de la page. La navigation est rejouée à partir de vos clics, sans exécuter le code du site. Hors du site d’origine, ces scripts ne fonctionneraient pas de toute façon.',
     widgets:
@@ -187,8 +211,30 @@ const en: typeof fr = {
   noteScripts_other: '{{n}} scripts',
   noteElements_one: '1 element added by a script',
   noteElements_other: '{{n}} elements added by a script',
+  live: {
+    state: '{{played}} replayed · {{blocked}} blocked',
+    played: 'Replayed',
+    blocked: 'Blocked',
+    block: 'Block',
+    blockOf: 'Block: {{name}}',
+    replayed: 'Replayed',
+    responses: 'Site responses',
+    responsesN_one: '1 response read by the page, personal data replaced',
+    responsesN_other: '{{n}} responses read by the page, personal data replaced',
+    responsesWhy:
+      'The data the page read during the capture is replayed in the demo, with the same fictional values as the copy. Nothing is sent to the original site: a write receives a fictional success.',
+    category: { page: 'Page script', third: 'Script from another site', tracking: 'Audience tracking' },
+    why: {
+      page: 'Script from the site: it brings the page to life (menus, tabs, forms). In the demo it runs in a box with no network access.',
+      third:
+        'Script loaded from another site (chat, help). Blocked by default; “Keep” replays it, still with no network access.',
+      tracking:
+        'Audience tracking: blocked by default. Even if kept, it could not send anything from the demo.',
+    },
+  },
   group: {
     pages: 'Pages copied',
+    live: 'Live Sandbox',
     pageScripts: 'Page scripts',
     widgets: 'Elements added by a script',
     trackingScripts: 'Tracking scripts',
@@ -249,6 +295,7 @@ const en: typeof fr = {
     pii: 'Data item',
   },
   groupWhy: {
+    live: 'In a Sandbox, the page is replayed with its scripts and the data it read: menus, tabs and forms respond as on the site. Everything happens in a box with no network access, and nothing is saved.',
     pageScripts:
       'The demo is a fixed copy of the page. Navigation is replayed from your clicks, without running the site’s code. Outside the original site, these scripts would not work anyway.',
     widgets:
