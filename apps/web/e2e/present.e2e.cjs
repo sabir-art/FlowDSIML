@@ -102,10 +102,9 @@ const NOTE = 'Note interne : rappeler le délai de traitement';
   );
   ok(/Étape 1 sur\s3/.test(await page.locator('.pr-count').textContent()), 'L22-03 : Étape 1 sur 3');
   const timer = page.getByRole('timer');
-  ok(
-    /^0\smin \d\d écoulées sur 15\smin 00$/.test(await timer.getAttribute('aria-label')),
-    'L22-03 : minuteur étiqueté',
-  );
+  const tl = (await timer.getAttribute('aria-label')) ?? '';
+  // NUM-01 : espaces insécables dans « 0 min 05 » et « sur 15 min 00 »
+  ok(/^0\smin\s\d\d écoulées sur\s15\smin\s00$/.test(tl), `L22-03 : minuteur étiqueté (${tl})`);
   ok((await timer.getAttribute('aria-live')) === null, 'L22-03 : minuteur jamais annoncé automatiquement');
 
   // Écran public synchronisé
