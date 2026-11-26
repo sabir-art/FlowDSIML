@@ -169,6 +169,10 @@ function prepare(state) {
       (await p.locator('#sb-live-h').innerText()).startsWith('Désactivé par un administrateur de l’espace'),
     'interdit par l’espace : réglage de la démo désactivé, avec la raison',
   );
+  ok(
+    (await p.locator('#sb-unlinked').isEnabled()) && (await p.locator('#sb-unlinked-h').count()) === 0,
+    'interdit par l’espace : « Clic sur un élément non relié » de nouveau actif, sans aide',
+  );
 
   // ===== Éditeur de l'espace : lecture seule =====
   const s2 = seed();
