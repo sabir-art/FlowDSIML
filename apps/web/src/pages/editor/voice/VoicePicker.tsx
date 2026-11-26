@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, Pause, Play, Search, X } from 'lucide-react';
 import { AiRequestError, callAi } from '../../../lib/ai';
@@ -83,6 +84,11 @@ export function VoicePicker({
   const search = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const pop = useRef<HTMLDivElement>(null);
+  /** Place de la fenêtre (position fixe, au-dessus de l'éditeur) : sous le champ, sinon au-dessus. */
+  const [place, setPlace] = useState<{ right: number; top?: number; bottom?: number; max: number } | null>(
+    null,
+  );
   const id = labelledBy;
 
   const langName = (l: string) => {
@@ -126,15 +132,42 @@ export function VoicePicker({
     if (!open) return;
     // Chaque ouverture repart d'une recherche vide (les filtres restent)
     setQ('');
-    search.current?.focus();
     const i = order.findIndex((v) => v.id === value);
     setActive(i >= 0 ? i : 0);
     const off = (e: MouseEvent) => {
-      if (!root.current?.contains(e.target as Node)) close(false);
+      const n = e.target as Node;
+      if (!root.current?.contains(n) && !pop.current?.contains(n)) close(false);
     };
+    // Recette UX : la fenêtre se ferme au défilement de l'éditeur (pas à celui de sa propre liste) et
+    // quand la fenêtre change de taille
+    const scrolled = (e: Event) => {
+      if (!pop.current?.contains(e.target as Node)) close(false);
+    };
+    const resized = () => close(false);
     document.addEventListener('mousedown', off);
-    return () => document.removeEventListener('mousedown', off);
+    document.addEventListener('scroll', scrolled, true);
+    window.addEventListener('resize', resized);
+    return () => {
+      document.removeEventListener('mousedown', off);
+      document.removeEventListener('scroll', scrolled, true);
+      window.removeEventListener('resize', resized);
+    };
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Alignée sur le bord droit du champ (elle déborde à gauche) ; hauteur bornée à l'espace disponible,
+  // 16 px de marge ; sous 320 px d'espace en dessous, elle s'ouvre au-dessus du champ
+  useLayoutEffect(() => {
+    if (!open || !trigger.current) return setPlace(null);
+    const r = trigger.current.getBoundingClientRect();
+    const right = Math.max(16, innerWidth - r.right);
+    const below = innerHeight - r.bottom - 4 - 16;
+    if (below >= 320) setPlace({ right, top: r.bottom + 4, max: below });
+    else setPlace({ right, bottom: innerHeight - r.top + 4, max: Math.max(160, r.top - 4 - 16) });
+  }, [open]);
+  // Focus sur la recherche une fois la fenêtre placée (masquée tant qu'elle ne l'est pas)
+  const placed = !!place;
+  useEffect(() => {
+    if (open && placed) search.current?.focus();
+  }, [open, placed]);
   useEffect(() => setActive(0), [q, fLang, fGender]);
   useEffect(() => {
     listRef.current?.querySelector(`[data-idx="${active}"]`)?.scrollIntoView?.({ block: 'nearest' });
@@ -248,7 +281,7 @@ export function VoicePicker({
   };
 
   return (
-    <div className="vp" ref={root} onKeyDown={open ? onKey : undefined}>
+    <div className="vp" ref={root}>
       <button
         ref={trigger}
         type="button"
@@ -273,154 +306,175 @@ export function VoicePicker({
         </span>
         <ChevronDown aria-hidden="true" className="vp-chev" />
       </button>
-      {open && (
-        <div className="vp-pop" role="dialog" aria-label={t('ai.voice.picker.title')}>
-          <div className="vp-search">
-            <Search aria-hidden="true" />
-            <input
-              ref={search}
-              type="search"
-              className="input"
-              value={q}
-              placeholder={t('ai.voice.picker.search')}
-              aria-label={t('ai.voice.picker.search')}
-              aria-controls={`${id}-lb`}
-              onChange={(e) => setQ(e.target.value)}
-            />
-            {q && (
-              <button
-                type="button"
-                className="vp-clear"
-                aria-label={t('ai.voice.picker.clearSearch')}
-                onClick={() => {
-                  setQ('');
-                  search.current?.focus();
-                }}
-              >
-                <X aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          <div className="vp-chips">
-            {(
-              [
-                [
-                  'lang',
-                  t('ai.voice.picker.langChip', { lang: fLang ? langName(fLang) : t('ai.voice.picker.all') }),
-                  fLang !== lang,
-                ],
-                [
-                  'gender',
-                  t('ai.voice.picker.genderChip', {
-                    gender: fGender ? genderName(fGender) : t('ai.voice.picker.all'),
-                  }),
-                  fGender !== null,
-                ],
-              ] as const
-            ).map(([k, label, on]) => (
-              <span key={k} className="vp-chip-wrap">
+      {open &&
+        createPortal(
+          <div
+            ref={pop}
+            className="mk vp-pop"
+            role="dialog"
+            aria-label={t('ai.voice.picker.title')}
+            onKeyDown={onKey}
+            style={{
+              right: place?.right ?? 0,
+              top: place?.top,
+              bottom: place?.bottom,
+              maxHeight: place?.max,
+              visibility: place ? undefined : 'hidden',
+            }}
+          >
+            <div className="vp-search">
+              <Search aria-hidden="true" />
+              <input
+                ref={search}
+                // Champ texte au rôle de recherche : aucune croix native en plus de la nôtre
+                type="text"
+                role="searchbox"
+                className="input"
+                value={q}
+                placeholder={t('ai.voice.picker.search')}
+                aria-label={t('ai.voice.picker.search')}
+                aria-controls={`${id}-lb`}
+                onChange={(e) => setQ(e.target.value)}
+              />
+              {q && (
                 <button
                   type="button"
-                  className={`vp-chip${on ? ' is-on' : ''}`}
-                  aria-haspopup="menu"
-                  aria-expanded={chip === k}
-                  onClick={() => setChip(chip === k ? null : k)}
+                  className="vp-clear"
+                  aria-label={t('ai.voice.picker.clearSearch')}
+                  onClick={() => {
+                    setQ('');
+                    search.current?.focus();
+                  }}
                 >
-                  {label}
-                  <ChevronDown aria-hidden="true" />
+                  <X aria-hidden="true" />
                 </button>
-                {chip === k && (
-                  <div className="vp-chip-menu" role="menu">
-                    {(k === 'lang'
-                      ? [null, ...langs].map((l) => ({
-                          v: l,
-                          label: l ? langName(l) : t('ai.voice.picker.all'),
-                          on: fLang === l,
-                          set: () => setFLang(l),
-                        }))
-                      : ([null, 'f', 'm', 'n'] as const).map((g) => ({
-                          v: g,
-                          label: g ? genderName(g) : t('ai.voice.picker.all'),
-                          on: fGender === g,
-                          set: () => setFGender(g),
-                        }))
-                    ).map((o) => (
-                      <button
-                        key={String(o.v)}
-                        type="button"
-                        role="menuitemradio"
-                        aria-checked={o.on}
-                        className="vp-chip-item"
-                        onClick={() => {
-                          o.set();
-                          setChip(null);
-                          search.current?.focus();
-                        }}
-                      >
-                        {o.label}
-                        {o.on && <Check aria-hidden="true" />}
-                      </button>
-                    ))}
+              )}
+            </div>
+            <div className="vp-chips">
+              {(
+                [
+                  [
+                    'lang',
+                    t('ai.voice.picker.langChip', {
+                      lang: fLang ? langName(fLang) : t('ai.voice.picker.all'),
+                    }),
+                    fLang !== lang,
+                  ],
+                  [
+                    'gender',
+                    t('ai.voice.picker.genderChip', {
+                      gender: fGender ? genderName(fGender) : t('ai.voice.picker.all'),
+                    }),
+                    fGender !== null,
+                  ],
+                ] as const
+              ).map(([k, label, on]) => (
+                <span key={k} className="vp-chip-wrap">
+                  <button
+                    type="button"
+                    className={`vp-chip${on ? ' is-on' : ''}`}
+                    aria-haspopup="menu"
+                    aria-expanded={chip === k}
+                    onClick={() => setChip(chip === k ? null : k)}
+                  >
+                    {label}
+                    <ChevronDown aria-hidden="true" />
+                  </button>
+                  {chip === k && (
+                    <div className="vp-chip-menu" role="menu">
+                      {(k === 'lang'
+                        ? [null, ...langs].map((l) => ({
+                            v: l,
+                            label: l ? langName(l) : t('ai.voice.picker.all'),
+                            on: fLang === l,
+                            set: () => setFLang(l),
+                          }))
+                        : ([null, 'f', 'm', 'n'] as const).map((g) => ({
+                            v: g,
+                            label: g ? genderName(g) : t('ai.voice.picker.all'),
+                            on: fGender === g,
+                            set: () => setFGender(g),
+                          }))
+                      ).map((o) => (
+                        <button
+                          key={String(o.v)}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={o.on}
+                          className="vp-chip-item"
+                          onClick={() => {
+                            o.set();
+                            setChip(null);
+                            search.current?.focus();
+                          }}
+                        >
+                          {o.label}
+                          {o.on && <Check aria-hidden="true" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </span>
+              ))}
+            </div>
+            {order.length ? (
+              <div
+                ref={listRef}
+                id={`${id}-lb`}
+                className="vp-list"
+                role="listbox"
+                tabIndex={0}
+                aria-label={t('ai.voice.picker.title')}
+                aria-activedescendant={order[active] ? `${id}-o-${order[active]!.id}` : undefined}
+              >
+                {!filtered && rec.length > 0 && (
+                  <div role="group" aria-labelledby={`${id}-g1`}>
+                    <div className="vp-sec" id={`${id}-g1`}>
+                      {t('ai.voice.picker.recFor', {
+                        lang: langName(lang),
+                        context: /^[aeiouyéèêh]/i.test(langName(lang)) ? 'vowel' : undefined,
+                      })}{' '}
+                      <span>{rec.length}</span>
+                    </div>
+                    {rec.map((v, i) => row(v, i))}
                   </div>
                 )}
-              </span>
-            ))}
-          </div>
-          {order.length ? (
-            <div
-              ref={listRef}
-              id={`${id}-lb`}
-              className="vp-list"
-              role="listbox"
-              tabIndex={0}
-              aria-label={t('ai.voice.picker.title')}
-              aria-activedescendant={order[active] ? `${id}-o-${order[active]!.id}` : undefined}
-            >
-              {!filtered && rec.length > 0 && (
-                <div role="group" aria-labelledby={`${id}-g1`}>
-                  <div className="vp-sec" id={`${id}-g1`}>
-                    {t('ai.voice.picker.recFor', {
-                      lang: langName(lang),
-                      context: /^[aeiouyéèêh]/i.test(langName(lang)) ? 'vowel' : undefined,
-                    })}{' '}
-                    <span>{rec.length}</span>
+                <div role="group" aria-labelledby={`${id}-g2`}>
+                  <div className="vp-sec" id={`${id}-g2`}>
+                    {filtered ? t('ai.voice.picker.results') : t('ai.voice.picker.allVoices')}{' '}
+                    <span>{shown.length}</span>
                   </div>
-                  {rec.map((v, i) => row(v, i))}
+                  {rest.map((v, i) => row(v, (filtered ? 0 : rec.length) + i))}
                 </div>
-              )}
-              <div role="group" aria-labelledby={`${id}-g2`}>
-                <div className="vp-sec" id={`${id}-g2`}>
-                  {filtered ? t('ai.voice.picker.results') : t('ai.voice.picker.allVoices')}{' '}
-                  <span>{shown.length}</span>
-                </div>
-                {rest.map((v, i) => row(v, (filtered ? 0 : rec.length) + i))}
               </div>
+            ) : (
+              <div className="vp-empty" role="status">
+                <b>{t('ai.voice.picker.noneFor', { q: q.trim() || '…' })}</b>
+                <span>
+                  {t('ai.voice.picker.noneHelp')}{' '}
+                  <button type="button" className="link-button" onClick={clearFilters}>
+                    {t('ai.voice.picker.clearFilters')}
+                  </button>
+                </span>
+              </div>
+            )}
+            {why && (
+              <p className="vp-why" role="alert">
+                {/* L62 : la cause quand le service de voix refuse, sinon le message général */}
+                {at.provider(why) || t('ai.voice.sampleError')}
+              </p>
+            )}
+            <div className="vp-foot">
+              <span>{t('ai.voice.picker.footLang', { lang: langName(lang) })}</span>
+              <span>
+                {filtered
+                  ? t('ai.voice.picker.countResults', { count: shown.length })
+                  : t('ai.voice.picker.countAll', { count: voices.length })}
+              </span>
             </div>
-          ) : (
-            <div className="vp-empty" role="status">
-              <b>{t('ai.voice.picker.noneFor', { q: q.trim() || '…' })}</b>
-              <span>{t('ai.voice.picker.noneHelp')}</span>
-              <button type="button" className="link-button" onClick={clearFilters}>
-                {t('ai.voice.picker.clearFilters')}
-              </button>
-            </div>
-          )}
-          {why && (
-            <p className="vp-why" role="alert">
-              {/* L62 : la cause quand le service de voix refuse, sinon le message général */}
-              {at.provider(why) || t('ai.voice.sampleError')}
-            </p>
-          )}
-          <div className="vp-foot">
-            <span>{t('ai.voice.picker.footLang', { lang: langName(lang) })}</span>
-            <span>
-              {filtered
-                ? t('ai.voice.picker.countResults', { count: shown.length })
-                : t('ai.voice.picker.countAll', { count: voices.length })}
-            </span>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
