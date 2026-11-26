@@ -69,6 +69,7 @@ const fr = {
   inPage: 'dans la page',
   fallback: {
     scriptInline: 'Script écrit dans la page',
+    widget: 'Élément ajouté par un script',
     script: 'Script',
     frame: 'Cadre intégré',
     frameVideo: 'Vidéo intégrée',
@@ -97,6 +98,8 @@ const fr = {
       'Script du site. La démo est une copie fixe : la navigation est rejouée à partir de vos clics, sans exécuter ce script.',
     scriptThirdParty:
       'Script chargé depuis un autre site. Hors du site d’origine, il ne fonctionnerait pas, et la démo n’en a pas besoin.',
+    widgetThirdParty:
+      'Ajouté à la page par un script d’un autre site (discussion, cookies, aide). Dans la démo, il ne réagirait pas aux clics : il est retiré. « Garder » le laisse affiché, sans effet.',
     scriptTracking:
       'Script de mesure d’audience. Dans une démo, il enverrait des données sur vos visiteurs à un tiers.',
     frameVideo:
@@ -217,6 +220,7 @@ const en: typeof fr = {
   inPage: 'in the page',
   fallback: {
     scriptInline: 'Script written in the page',
+    widget: 'Element added by a script',
     script: 'Script',
     frame: 'Embedded frame',
     frameVideo: 'Embedded video',
@@ -245,6 +249,8 @@ const en: typeof fr = {
       'Script from the site. The demo is a fixed copy: navigation is replayed from your clicks, without running this script.',
     scriptThirdParty:
       'Script loaded from another site. Outside the original site it would not work, and the demo does not need it.',
+    widgetThirdParty:
+      'Added to the page by a script from another site (chat, cookies, help). In the demo it would not respond to clicks, so it is removed. “Keep” leaves it visible, with no effect.',
     scriptTracking:
       'Audience tracking script. In a demo, it would send data about your visitors to a third party.',
     frameVideo:

@@ -34,6 +34,7 @@ import {
 import { APP_URL } from '@/lib/config';
 import { htmlStore, type PendingHtmlPage } from '@/lib/htmlStore';
 import { restorePii } from '@/lib/htmlKeep';
+import { applyWidgets } from '@/lib/htmlWidgets';
 import { sendHtml, type HtmlDemoKind, type SendPage } from '@/lib/htmlUpload';
 import { rs } from '@/lib/reviewStrings';
 import { supabase } from '@/lib/supabase';
@@ -141,6 +142,8 @@ function itemName(it: HtmlRemovedItem): { name: string; mono: boolean } {
     const type = it.piiType ? rs.types[it.piiType] : s.fallback.pii;
     return { name: it.name ? `${type} · « ${it.name} »` : type, mono: false };
   }
+  // Lot B : élément ajouté par un script tiers, nommé par son texte (« Discuter avec nous »)
+  if (it.reason === 'widgetThirdParty') return { name: it.name || s.fallback.widget, mono: false };
   if (it.group === 'pageScripts' || it.group === 'trackingScripts')
     return it.name
       ? { name: it.name, mono: true }
@@ -169,7 +172,9 @@ function itemRow(p: PendingHtmlPage, it: HtmlRemovedItem): Row {
   const from = (it.group === 'externalLinks' && hostOf(it.href ?? '')) || it.source;
   const source = from ? (many ? `${from} · ${origin}` : from) : many ? origin : s.inPage;
   const canKeep =
-    it.group === 'pii' ? !!p.piiOriginals?.[it.id] : it.group === 'externalLinks' && linkKeepable(it);
+    it.group === 'pii'
+      ? !!p.piiOriginals?.[it.id]
+      : it.reason === 'widgetThirdParty' || (it.group === 'externalLinks' && linkKeepable(it));
   const status = isKept
     ? s.status.kept
     : it.group === 'pii'
@@ -656,7 +661,11 @@ function toSend(): SendPage[] {
     .map((p) => {
       const mine = (p.removed ?? []).filter((it) => kept.has(keyOf(p, it)));
       const pii = mine.filter((it) => it.group === 'pii').map((it) => it.id);
-      const { html, restored } = restorePii(p.html, p.piiOriginals, pii);
+      const widgets = mine.filter((it) => it.reason === 'widgetThirdParty').map((it) => it.id);
+      const restoredPii = restorePii(p.html, p.piiOriginals, pii);
+      const restored = restoredPii.restored;
+      // Lot B : ajouts de scripts tiers retirés, sauf ceux gardés
+      const html = applyWidgets(restoredPii.html, widgets);
       const { piiOriginals: _local, ...page } = p;
       return {
         ...page,

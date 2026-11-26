@@ -38,8 +38,19 @@ const journal = async () => (await fetch(`${MOCK}/__log`)).json();
 async function envoyer(cas) {
   const debut = (await journal()).length;
   const sandbox = SANDBOX.has(cas.id);
+  let tiers = null;
   const r = await capturer(cas, async (review) => {
     if (sandbox) await review.click('#kind [data-kind="sandbox"]');
+    // Gêne lot B : le bouton ajouté par le script de discussion d'un autre site est listé dans les
+    // scripts de la page, avec « Garder » ; on le garde sur la première page seulement
+    if (cas.id === 'tiers') {
+      const grp = review.getByRole('region', { name: 'Scripts de la page', exact: true });
+      await grp.getByRole('button', { name: 'Voir : Scripts de la page' }).click();
+      const rows = grp.locator('li.el2').filter({ hasText: 'Discuter avec nous' });
+      tiers = { lignes: await rows.count(), statut: (await rows.first().locator('.st2').innerText()).trim() };
+      await rows.first().getByRole('button', { name: 'Garder : Discuter avec nous' }).click();
+      tiers.garde = (await rows.first().locator('.st2').innerText()).trim();
+    }
     await review.click('#send');
     // L'écran rend la main à l'app : l'adresse de l'éditeur de la démo créée
     await review.waitForURL(/#\/demos\/[^/]+\/edit/, { timeout: 60000 });
@@ -54,7 +65,7 @@ async function envoyer(cas) {
   const hotspots = log
     .filter((l) => l.m === 'POST' && l.u.startsWith('/rest/v1/hotspots') && l.body)
     .map((l) => JSON.parse(l.body));
-  return { capture: r, demo: demo ? JSON.parse(demo.body) : null, pages, steps, hotspots };
+  return { capture: r, demo: demo ? JSON.parse(demo.body) : null, pages, steps, hotspots, tiers };
 }
 
 /** Ouvre l'envoi dans l'app et juge l'éditeur, le plan et l'aperçu. */
@@ -68,6 +79,20 @@ async function juger(b, cas, envoi) {
   ok(!!demo && steps.length > 0, `${nom} : l'envoi crée la démo et ${steps.length} étape(s)`);
   if (!demo || !steps.length) return { cas: cas.id, nom, etapes: [] };
   ok(steps.length === pages.length, `${nom} : une étape par page envoyée (${pages.length})`);
+  if (cas.id === 'tiers') {
+    const t = envoi.tiers;
+    ok(
+      t?.lignes === pages.length && t.statut === 'Non copié' && t.garde === 'Gardé',
+      `${nom} : « Discuter avec nous » listé dans les scripts de la page, avec « Garder » (${JSON.stringify(t)})`,
+    );
+    const avec = pages.map((x) => /id="chat-tiers"/.test(x.html));
+    ok(
+      avec[0] &&
+        !avec.slice(1).some(Boolean) &&
+        !pages.some((x) => /data-fd-widget|display:none!important/.test(x.html)),
+      `${nom} : bouton du script tiers gardé sur la page 1, retiré des autres, sans marque (${avec.join(', ')})`,
+    );
+  }
   // Lot B (recette UX §3.1) : deux étapes ne portent jamais le même nom
   const titres = steps.map((s) => s.title);
   ok(
