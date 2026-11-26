@@ -63,15 +63,20 @@ const WS = '11111111-1111-1111-1111-111111111111';
     { tabId, WS },
   );
   await page.bringToFront();
-  /** La pastille dit « n étapes » (L60 §2) : la capture est gardée et la barre est revenue. */
-  const counted = (n) =>
-    page.waitForFunction(
+  /**
+   * La pastille dit « n étapes » (L60 §2) : la capture est gardée et la barre est revenue. Puis on laisse
+   * passer la fenêtre anti double-clic (400 ms), comme une personne avant son clic suivant.
+   */
+  const counted = async (n) => {
+    await page.waitForFunction(
       (n) =>
         new RegExp(`^${n} étapes?$`).test(
           document.querySelector('[data-fd-ui]').shadowRoot.querySelector('.pill').textContent.trim(),
         ),
       n,
     );
+    await page.waitForTimeout(450);
+  };
 
   // ===== Barre =====
   const bar = page.getByRole('toolbar', { name: 'Capture en cours' });
@@ -140,6 +145,44 @@ const WS = '11111111-1111-1111-1111-111111111111';
   );
   ok(!(await status()).paused, 'Alt + Maj + P : la capture reprend');
   await page.waitForTimeout(450);
+
+  // L60 §2 : carte « Étape 1 capturée » (miniature, libellé du clic, « Annuler ») ; Annuler retire l'étape
+  await page.click('#go');
+  ok((await steps(1)) === 1, 'un clic crée une capture');
+  const card = page.locator('[data-fd-ui] .card');
+  await card.waitFor();
+  const cinfo = await card.evaluate((c) => ({
+    t: c.querySelector('b').textContent,
+    l: c.querySelector('small').textContent,
+    img: c.querySelector('img.th')?.src.startsWith('data:image/') ?? false,
+    role: c.getAttribute('role'),
+    gap: Math.round(
+      c.parentElement.querySelector('.bar').getBoundingClientRect().top - c.getBoundingClientRect().bottom,
+    ),
+  }));
+  ok(
+    cinfo.t === 'Étape 1 capturée' &&
+      /^Cliquez sur « .+ »$/.test(cinfo.l) &&
+      cinfo.img &&
+      cinfo.role === 'status' &&
+      cinfo.gap === 8,
+    `carte « Étape 1 capturée » : miniature, « ${cinfo.l} », role=status, 8 px au-dessus de la barre`,
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/barre-carte.png` });
+  await card.getByRole('button', { name: 'Annuler' }).click();
+  ok(
+    await (async () => {
+      for (let i = 0; i < 20; i++) {
+        if ((await status()).steps === 0) return true;
+        await page.waitForTimeout(150);
+      }
+      return false;
+    })(),
+    '« Annuler » retire l’étape',
+  );
+  await counted(0);
+  await page.waitForTimeout(2200);
+  ok(await card.isHidden(), 'la carte disparaît après 2 s');
 
   // ===== 1. Page =====
   await page.click('#go');

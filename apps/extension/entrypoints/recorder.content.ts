@@ -1,13 +1,22 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
 import { Check, Crop, Monitor, SquareMousePointer, createElement, type IconNode } from 'lucide';
-import { BAR_CSS, barMarkup, togglePause, wireBar } from '@/lib/captureBar';
-import { elementLabel, type PxRect } from '@/lib/geometry';
+import {
+  BAR_CSS,
+  CARD_CSS,
+  barMarkup,
+  cardMarkup,
+  ring,
+  togglePause,
+  wireBar,
+  wireCard,
+} from '@/lib/captureBar';
+import { defaultHotspotTitle, elementLabel, type PxRect } from '@/lib/geometry';
 import { INTERACTIVE, labelText } from '@/lib/labelText';
 import { cssSelector } from '@/lib/selector';
 import type { ClickPayload } from '@/lib/messages';
 import { scanFullPage, scanPage } from '@/lib/scan';
-import { barCount, guideChip, strings, tabChip } from '@/lib/i18n';
+import { barCount, guideChip, lang, strings, tabChip } from '@/lib/i18n';
 import { asFrameMode, elementCrop, type FrameMode } from '@/lib/frame';
 
 /**
@@ -47,6 +56,7 @@ export default defineContentScript({
         .dock{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);pointer-events:auto;display:flex;
           flex-direction:column;align-items:center;gap:8px;font:500 13px system-ui,sans-serif}
         ${BAR_CSS}
+        ${CARD_CSS}
         .seg{box-sizing:border-box;height:36px;display:flex;align-items:center;gap:2px;padding:2px;border-radius:999px;
           background:rgba(255,255,255,.08)}
         .bar .seg button{height:32px;background:transparent;color:#d6d3d1}
@@ -98,6 +108,7 @@ export default defineContentScript({
             <button type="button" class="btn ok"></button>
           </div>
         </div>
+        ${cardMarkup()}
         ${barMarkup({
           label: s.recording,
           name: s.barClicks,
@@ -130,6 +141,17 @@ export default defineContentScript({
       .sendMessage({ type: 'fd:status' })
       .then((st: unknown) => ui.setPaused(!!(st as { paused?: boolean } | null)?.paused))
       .catch(() => undefined);
+    // L60 §2 : carte « Étape n capturée », « Annuler » retire l'étape
+    const card = wireCard(root, {
+      onUndo: (c) =>
+        browser.runtime
+          .sendMessage({ type: 'fd:undo-step', id: c.id, n: c.n })
+          .then(() => {
+            say(s.cardRemoved.replace('{{n}}', String(c.n)));
+            return refresh();
+          })
+          .catch(() => undefined),
+    });
     const seg = $<HTMLDivElement>('.seg');
     const redraw = $<HTMLButtonElement>('.redraw');
     const keptEl = $<HTMLDivElement>('.kept.el');
@@ -473,6 +495,19 @@ export default defineContentScript({
       const painted = new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
       void painted
         .then(() => browser.runtime.sendMessage(payload))
+        .then((r: unknown) => {
+          const got = r as { n?: number; id?: string; thumb?: string } | null;
+          if (!got?.n) return;
+          // Hors de l'image : l'anneau et la carte arrivent une fois la capture prise
+          ring(ev.clientX, ev.clientY);
+          card.show({
+            n: got.n,
+            id: got.id,
+            thumb: got.thumb,
+            label: payload.label ? defaultHotspotTitle(payload.label, lang) : '',
+          });
+          ui.setCount(barCount('steps', got.n));
+        })
         .catch(() => undefined)
         .finally(() => {
           host.style.visibility = 'visible';

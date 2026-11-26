@@ -174,6 +174,29 @@ const WS = '11111111-1111-1111-1111-111111111111';
     host.shadowRoot.querySelector('.cap').click();
   });
   ok(await waitSteps(3), '« Capturer cette page »');
+  // L60 §2 : carte « Étape 3 capturée » ; « Annuler » retire la page, puis on la reprend
+  const hcard = await page.evaluate(() => {
+    const c = [...document.querySelectorAll('[data-fd-ui]')]
+      .find((e) => e.shadowRoot)
+      .shadowRoot.querySelector('.card');
+    return c && !c.hidden ? c.querySelector('b').textContent : null;
+  });
+  ok(hcard === 'Étape 3 capturée', `carte « ${hcard} »`);
+  await page.evaluate(() =>
+    [...document.querySelectorAll('[data-fd-ui]')]
+      .find((e) => e.shadowRoot)
+      .shadowRoot.querySelector('.card .undo')
+      .click(),
+  );
+  await page.waitForTimeout(600);
+  ok((await status()).steps === 2, '« Annuler » retire la dernière page');
+  await page.evaluate(() =>
+    [...document.querySelectorAll('[data-fd-ui]')]
+      .find((e) => e.shadowRoot)
+      .shadowRoot.querySelector('.cap')
+      .click(),
+  );
+  ok(await waitSteps(3), 'page reprise après « Annuler »');
   await shot(page, 'l20-00-barre-html');
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/html-review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));

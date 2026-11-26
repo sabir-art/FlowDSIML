@@ -44,6 +44,8 @@ export const htmlStore = {
   count: () => tx<number>('readonly', (s) => s.count()),
   put: (p: PendingHtmlPage) => tx('readwrite', (s) => s.put(p)),
   clear: () => tx('readwrite', (s) => s.clear()),
+  /** L60 §2 : « Annuler » de la carte « Étape n capturée » (dernière page). */
+  remove: (order: number) => tx('readwrite', (s) => s.delete(order)),
   async last(): Promise<PendingHtmlPage | null> {
     const all = await htmlStore.all();
     return all.sort((a, b) => b.order - a.order)[0] ?? null;

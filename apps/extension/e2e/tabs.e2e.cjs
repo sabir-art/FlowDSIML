@@ -104,7 +104,7 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
   await aide.bringToFront();
   await aide.waitForTimeout(1500);
   const chip = await aide.locator('[data-fd-ui] .chips').textContent();
-  const live = await aide.locator('[data-fd-ui] [role=status]').textContent();
+  const live = await aide.locator('[data-fd-ui] .sr').textContent();
   ok(/Onglet 2 · Aide/.test(chip), `barre : « Onglet 2 · Aide » (${chip})`);
   if (SHOTS) await aide.screenshot({ path: `${SHOTS}/l25-01-barre-onglet.png` });
   ok(/Capture dans l’onglet 2 : Aide/.test(live), 'annonce de l’onglet pour les lecteurs d’écran');
