@@ -29,6 +29,7 @@ const fr = {
   group: {
     pages: 'Pages copiées',
     pageScripts: 'Scripts de la page',
+    widgets: 'Éléments ajoutés par un script',
     trackingScripts: 'Scripts de suivi',
     frames: 'Cadres intégrés',
     forms: 'Formulaires',
@@ -37,6 +38,7 @@ const fr = {
   },
   state: {
     pageScripts: 'Non copiés : la démo n’en a pas besoin',
+    widgets: 'Retirés : ils ne réagiraient pas aux clics',
     trackingScripts: 'Non copiés : ils mesurent l’audience du site',
     forms: 'Affichés, sans envoi',
     pii: 'Remplacées par des valeurs fictives',
@@ -88,6 +90,8 @@ const fr = {
   groupWhy: {
     pageScripts:
       'La démo est une copie fixe de la page. La navigation est rejouée à partir de vos clics, sans exécuter le code du site. Hors du site d’origine, ces scripts ne fonctionneraient pas de toute façon.',
+    widgets:
+      'Un script d’un autre site (discussion, cookies, aide) a ajouté ces éléments à la page. Dans la démo, ils ne réagiraient pas aux clics : ils sont retirés. « Garder » les laisse affichés, sans effet.',
     trackingScripts:
       'Ces scripts mesurent l’audience du site d’origine. Dans une démo, ils enverraient des données sur vos visiteurs à des tiers : ils ne sont jamais copiés.',
     frames:
@@ -186,6 +190,7 @@ const en: typeof fr = {
   group: {
     pages: 'Pages copied',
     pageScripts: 'Page scripts',
+    widgets: 'Elements added by a script',
     trackingScripts: 'Tracking scripts',
     frames: 'Embedded frames',
     forms: 'Forms',
@@ -194,6 +199,7 @@ const en: typeof fr = {
   },
   state: {
     pageScripts: 'Not copied: the demo does not need them',
+    widgets: 'Removed: they would not respond to clicks',
     trackingScripts: 'Not copied: they measure the site’s audience',
     forms: 'Displayed, never submitted',
     pii: 'Replaced with fictional values',
@@ -245,6 +251,8 @@ const en: typeof fr = {
   groupWhy: {
     pageScripts:
       'The demo is a fixed copy of the page. Navigation is replayed from your clicks, without running the site’s code. Outside the original site, these scripts would not work anyway.',
+    widgets:
+      'A script from another site (chat, cookies, help) added these elements to the page. In the demo they would not respond to clicks, so they are removed. “Keep” leaves them visible, with no effect.',
     trackingScripts:
       'These scripts measure the original site’s audience. In a demo, they would send data about your visitors to third parties: they are never copied.',
     frames:
