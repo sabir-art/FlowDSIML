@@ -36,6 +36,19 @@ const site4 = (titre, texte) =>
     `${entete}<nav><a href="/site">Accueil</a> <a href="/site/offres">Offres</a> <a href="/site/equipe">Équipe</a> <a href="/site/contact">Contact</a></nav></header>
      <main><h1>${titre}</h1><p class="carte">${texte}</p></main>`,
   );
+/**
+ * Sandbox v2, étape 4d : site de plusieurs pages pour la capture en série. Sept pages sur deux niveaux
+ * (l'accueil mène à Produits, Tarifs et Aide ; Produits et Aide mènent chacune plus loin), et des pièges
+ * que la série ne doit jamais ouvrir : ancre, autre site, adresse e-mail, déconnexion, suppression de
+ * compte, fichier PDF. Les pièges du même site comptent leurs visites (GET /__risques).
+ */
+const multi = (titre, texte, liens = '') =>
+  page(
+    titre,
+    `${entete}<nav><a href="/multi">Accueil</a> <a href="/multi/produits">Produits</a> <a href="/multi/tarifs">Tarifs</a> <a href="/multi/aide">Aide</a> <a href="/multi/deconnexion">Se déconnecter</a></nav></header>
+     <main id="haut"><h1>${titre}</h1><p class="carte">${texte}</p>${liens}</main>`,
+  );
+const RISQUES = { '/multi/deconnexion': 0, '/multi/compte/supprimer': 0, '/multi/guide.pdf': 0 };
 const PRODUITS = [
   { nom: 'ExempleCRM', prix: '19 € par mois' },
   { nom: 'ExempleFacture', prix: '9 € par mois' },
@@ -177,6 +190,30 @@ const PAGES = {
      document.getElementById('vider').onclick = () => { localStorage.removeItem('panier'); montrer(); };
      montrer();`,
   ),
+  // 11. Étape 4d : site de plusieurs pages, capturé en série
+  '/multi': multi(
+    'Bienvenue',
+    'ExempleCRM, la relation client simple.',
+    `<p class="carte"><a href="#haut">Haut de page</a> · <a href="https://partenaire.example/">Notre partenaire</a> ·
+     <a href="mailto:contact@exemple.example">Nous écrire</a> · <a href="/multi/guide.pdf">Guide (PDF)</a> ·
+     <a href="/multi/compte/supprimer">Supprimer mon compte</a></p>`,
+  ),
+  '/multi/produits': multi(
+    'Produits',
+    'Deux logiciels pour les petites équipes.',
+    '<p class="carte"><a href="/multi/produits/crm">ExempleCRM</a> · <a href="/multi/produits/facture">ExempleFacture</a></p>',
+  ),
+  '/multi/tarifs': multi('Tarifs', 'Essentielle 19 €, Avancée 39 €, par mois.'),
+  '/multi/aide': multi(
+    'Aide',
+    'Guides et réponses aux questions fréquentes.',
+    '<p class="carte"><a href="/multi/aide/faq">Questions fréquentes</a></p>',
+  ),
+  '/multi/produits/crm': multi('ExempleCRM', 'Contacts, relances et tableau de bord.'),
+  '/multi/produits/facture': multi('ExempleFacture', 'Devis et factures en deux clics.'),
+  '/multi/aide/faq': multi('Questions fréquentes', 'Comment importer mes contacts ?'),
+  '/multi/deconnexion': multi('Déconnecté', 'Vous êtes déconnecté.'),
+  '/multi/compte/supprimer': multi('Compte supprimé', 'Votre compte est supprimé.'),
   '/menu/logiciels': page(
     'Logiciels',
     `${entete}<a href="/menu">Catalogue</a></header><main><h1>Logiciels</h1><p class="carte">ExempleCRM, ExempleFacture.</p></main>`,
@@ -204,6 +241,14 @@ function site(req, res) {
   };
   const attendre = (ms, fn) => setTimeout(fn, ms);
   if (u.pathname === '/banc.css') return send('text/css', CSS);
+  // Étape 4d : visites des pièges du site de plusieurs pages (doivent rester à 0) et remise à zéro
+  if (u.pathname === '/__risques') {
+    const out = JSON.stringify(RISQUES);
+    if (u.searchParams.has('zero')) for (const k of Object.keys(RISQUES)) RISQUES[k] = 0;
+    return send('application/json', out);
+  }
+  if (u.pathname in RISQUES) RISQUES[u.pathname]++;
+  if (u.pathname === '/multi/guide.pdf') return send('application/pdf', '%PDF-1.4 fictif');
   if (u.pathname === '/logo.svg') return send('image/svg+xml', LOGO);
   if (u.pathname === '/api/clients')
     return attendre(250, () => send('application/json', JSON.stringify(CLIENTS)));

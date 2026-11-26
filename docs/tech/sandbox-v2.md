@@ -249,7 +249,7 @@ message ».
 | 4a. Couverture dans le plan | fonction pure `coverage` (pages capturées / destinations du même site qui restent à traiter, hors ancres et hors adresse de la page) ; ligne « 14 pages sur 15 liens · 2 laissés » dans le plan : décision du chef, les liens laissés par l'auteur ne comptent pas dans le total | à confirmer : place de la ligne |
 | 4b. Pages liées pendant la capture | liste « Pages liées » dans la barre de capture : liens du même site et routes vues, état « capturée » / « à capturer », mise à jour à chaque page | à demander |
 | 4c. Capture en série | « Capturer les pages liées » : ouverture une à une dans l'onglet courant, profondeur 1, 20 pages au plus par passe, arrêt à tout moment, puis écran de vérification ; pages en erreur ou refusées signalées | à demander |
-| 4d. Banc | site d'essai de plusieurs pages statiques capturé en série, critère a) « chaque page capturée apparaît dans le plan » et couverture à 100 % ; recette UX | — |
+| 4d. Banc | site d'essai de plusieurs pages statiques capturé en série, critère a) « chaque page capturée apparaît dans le plan » et couverture à 100 % ; recette UX | livrée sans interface (voir ci-dessous) |
 
 Règles retenues pour la capture en série :
 
@@ -258,3 +258,28 @@ Règles retenues pour la capture en série :
   (`logout`, `déconnexion`, `delete`, `supprimer`…) ;
 - GET seulement, comme un clic de l'utilisateur ;
 - rien ne part avant l'écran de vérification.
+
+### Rapport de l'étape 4d (partie sans interface)
+
+Site d'essai `/multi` du banc (`e2e/banc/serveur.cjs`) : sept pages sur deux niveaux (Bienvenue → Produits,
+Tarifs, Aide ; Produits → ExempleCRM, ExempleFacture ; Aide → Questions fréquentes) et des pièges : ancre,
+autre site, adresse e-mail, « Se déconnecter », « Supprimer mon compte », « Guide (PDF) ». Les pièges du même
+site comptent leurs visites (`GET /__risques`).
+
+`e2e/banc/serie.cjs` capture le site avec l'extension construite et chargée. L'enchaînement est celui de la
+capture en série : `linkedPages` et `nextBatch` sur les pages déjà capturées, ouverture dans l'onglet capturé,
+puis demande de capture de la page chargée (une adresse ouverte n'est pas un clic). L'envoi est relu, puis
+ouvert dans la vraie app.
+
+| Contrôle | Résultat |
+|---|---|
+| Passes de profondeur 1 | 1) Produits, Tarifs, Aide ; 2) ExempleCRM, ExempleFacture, Questions fréquentes ; puis plus rien |
+| Pièges | 0 visite (déconnexion, suppression, PDF) ; ni ancre, ni autre site, ni e-mail dans une passe |
+| Envoi | 7 pages, une étape et un enregistrement vivant chacune ; liens relevés : rien à capturer, 3 pièges |
+| a) Plan de l'éditeur | les 7 pages ; « Liens sans page » : les 3 pièges seulement |
+| Couverture | les 3 pièges laissés par l'auteur : 7 pages sur 7 liens · 3 laissés, 100 % |
+
+Lancé par la CI (job E2E extension). Reste pour 4b/4c : l'interface (liste « Pages liées », bouton
+« Capturer les pages liées »), en attente de la validation du client. Remarque : le plan propose
+« Capturer cette page » aussi sur « Se déconnecter » et « Supprimer mon compte », que la série ne
+capture jamais (`isRisky`) ; à trancher avec la planche 4b/4c.
