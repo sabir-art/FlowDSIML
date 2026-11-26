@@ -131,44 +131,35 @@ export function createSelect(
     } else list.removeAttribute('aria-activedescendant');
   }
   /**
-   * Retours client 0.3.3 : la liste s'ouvre COLLÉE à son champ, 4 px dessous (le popup grandit jusqu'à
-   * 600 px, limite de Chrome) ou dessus s'il n'y a pas la place ; elle est placée par calcul (position
-   * fixe), alignée sur le champ, quel que soit le conteneur de la ligne (Réglages, destination…).
+   * EXT-LIST-01 (retours client 0.3.3) : la liste est ancrée à SON champ, même bord gauche et même largeur,
+   * 4 px dessous si elle y tient, sinon 4 px dessus, sinon du côté le plus grand avec un défilement
+   * interne (240 px au plus) ; mesuré dans la partie visible du popup, qui ne grandit plus pour elle.
    */
   function place() {
     const r = button.getBoundingClientRect();
+    list.style.maxHeight = '';
     const natural = list.scrollHeight + 2;
-    const below = 600 - r.bottom - 4 - 8;
-    const above = r.top - 4 - 8;
-    // Dessous si elle y tient, sinon du côté qui a le plus de place ; jamais hors du popup
-    const down = natural <= below || below >= above;
-    const h = Math.max(1, Math.min(natural, down ? below : above));
-    const width = Math.min(Math.max(r.width, 220), innerWidth - 16);
-    const left = Math.min(Math.max(8, r.left), innerWidth - 8 - width);
+    const below = innerHeight - r.bottom - 4;
+    const above = r.top - 4;
+    const down = natural <= below || (natural > above && below >= above);
+    const room = down ? below : above;
+    const h = natural <= room ? natural : Math.max(1, Math.min(room, 240));
     Object.assign(list.style, {
       position: 'fixed',
       margin: '0',
-      left: `${left}px`,
+      left: `${r.left}px`,
       right: 'auto',
-      width: `${width}px`,
+      width: `${r.width}px`,
       maxHeight: `${h}px`,
       top: down ? `${r.bottom + 4}px` : `${r.top - 4 - h}px`,
     });
     list.dataset.side = down ? 'below' : 'above';
-    // Dessous : le popup grandit pour montrer la liste (hauteur d'origine rendue à la fermeture)
-    if (down) document.body.style.minHeight = `${Math.max(minBefore, Math.min(600, r.bottom + 4 + h + 8))}px`;
   }
-  let minBefore = 0;
-  let minStyle = '';
   function open() {
-    minStyle = document.body.style.minHeight;
-    minBefore = parseFloat(getComputedStyle(document.body).minHeight) || 0;
     paintList();
     list.hidden = false;
     button.setAttribute('aria-expanded', 'true');
     place();
-    // Si le popup a grandi, le champ a pu bouger : la liste le suit
-    requestAnimationFrame(() => !list.hidden && place());
     setActive(
       Math.max(
         0,
@@ -181,7 +172,6 @@ export function createSelect(
     if (list.hidden) return;
     list.hidden = true;
     button.setAttribute('aria-expanded', 'false');
-    document.body.style.minHeight = minStyle;
     if (focus) button.focus();
   }
   function choose(i: number) {
