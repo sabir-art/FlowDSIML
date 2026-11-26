@@ -85,3 +85,18 @@ Les zones de la 1re capture sont donc ramenées à une hauteur de fenêtre de **
 - ou ramener les zones à la taille réelle de l'image capturée.
 
 **Banc** : il faut contrôler, sur **chaque** capture et pas seulement la première, que chaque zone recouvre l'élément visé. Et il faut le faire sur une page assez haute pour que le décalage se voie (données sous les 300 premiers pixels).
+
+---
+
+# Nouvelle recette après 298d646 et 86e663e : VERT
+
+J'ai reconstruit l'extension sur 86e663e et rejoué mon parcours de test. La 1re capture est prise sous le bandeau de débogage : la fenêtre passe de 800 à 657 px de haut.
+
+- **Banc `etat-captures`** : 11/11. Il fait 3 captures de la même page, avec des données à plus de 300 px du haut, et juge chaque zone sur l'image.
+- **Mon parcours** : 3 captures, 5 détections chacune (`v3-captures-zones-justes.png`).
+  - **Capture 1** : les zones sont maintenant à la même place que sur la capture 2. Le nom est à 427 px, contre 351 px avant (« viewport » 1280 × 657).
+  - Sur l'image, « Camille Durand », l'adresse, le téléphone et les noms du tableau sont couverts.
+  - « Exporter », « Ville : Lyon », « Projet Alpha », les en-têtes et les rôles restent lisibles.
+- **Cadre « Élément »** : il est juste sur les 3 captures. Sur la capture 1, le point chaud de « Generate speech » est à y = 0,138 × 657 = 91 px et fait 39 px de haut, comme l'élément.
+
+Le petit lot UX passe donc au VERT.
