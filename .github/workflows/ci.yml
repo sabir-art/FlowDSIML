@@ -493,6 +493,11 @@ jobs:
         run: |
           cd apps/web && node e2e/assistance-ia-modeles.e2e.cjs | tee /tmp/e2e-assistance-ia-modeles.log
           ! grep -q '^NOT OK' /tmp/e2e-assistance-ia-modeles.log
+      - name: Interrupteur activé et désactivé en gris dans l'éditeur d'un lecteur (Voix off, pour toute la démo)
+        if: always()
+        run: |
+          cd apps/web && node e2e/interrupteur-lecture.e2e.cjs | tee /tmp/e2e-interrupteur.log
+          ! grep -q '^NOT OK' /tmp/e2e-interrupteur.log
 
   # Extension : capture HTML d'une appli à page unique (routeur côté client). L'extension est construite
   # pour les tests (faux Supabase local, accès aux sites accordé : Playwright ne répond pas aux fenêtres
