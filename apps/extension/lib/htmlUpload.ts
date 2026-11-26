@@ -15,8 +15,26 @@ import { distinctNames } from './stepNames';
  */
 export type HtmlDemoKind = 'guided' | 'sandbox';
 
+/** Enregistrement vivant prêt à l'envoi (données personnelles déjà remplacées, choix Garder / Bloquer faits). */
+export interface LiveSend {
+  url: string;
+  html: string;
+  scripts: Array<{
+    id: string;
+    code: string;
+    keep: boolean;
+    module?: boolean;
+    source: string;
+    category: string;
+  }>;
+  responses: Array<{ method: 'GET'; url: string; status: number; type: string; body: string }>;
+}
 /** Page à envoyer, avec les liens externes que la personne garde (EXT-02 §2.3). */
-export type SendPage = PendingHtmlPage & { keepLinks?: Array<{ sel: string; href: string; label: string }> };
+export type SendPage = PendingHtmlPage & {
+  keepLinks?: Array<{ sel: string; href: string; label: string }>;
+  /** Sandbox v2 : enregistrement vivant de la page. */
+  liveSend?: LiveSend;
+};
 /** Lien gardé que le serveur a refusé (adresse signalée) : dit sur l'écran de fin d'envoi (§2.4). */
 export interface DroppedLink {
   label: string;
@@ -50,6 +68,34 @@ async function ingest(
   if (!res.ok || !body.path) throw new Error(body.error ?? `HTTP ${res.status}`);
   const blocked = Array.isArray(body.security?.blocked) ? body.security.blocked.map(String) : [];
   return { path: body.path, blocked };
+}
+
+/**
+ * Sandbox v2 : enregistrement vivant d'une page déjà déposée (même nom, .json). Rend null si le serveur le
+ * refuse (espace qui l'interdit, taille) : la copie inerte reste, la page n'est simplement pas vivante.
+ */
+async function ingestLive(
+  token: string,
+  workspaceId: string,
+  demoId: string,
+  path: string,
+  live: LiveSend,
+): Promise<{ livePath: string; live: Json } | null> {
+  try {
+    const res = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/functions/v1/html-ingest`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        apikey: SUPABASE_ANON_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ workspaceId, demoId, path, live }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { livePath?: string; live?: Json };
+    return res.ok && body.livePath && body.live ? { livePath: body.livePath, live: body.live } : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function sendHtml(
@@ -100,7 +146,15 @@ export async function sendHtml(
         kind: target.kind,
         sandbox:
           target.kind === 'sandbox'
-            ? ({ start: stepIds[0], autoLink: true, unlinked: 'toast', guide: false, keyPages: [] } as Json)
+            ? ({
+                start: stepIds[0],
+                autoLink: true,
+                unlinked: 'toast',
+                guide: false,
+                keyPages: [],
+                // Sandbox v2 (décision du chef) : autorisé par défaut, dès qu'une page vivante est envoyée
+                ...(ordered.some((p) => p.liveSend) ? { live: true } : {}),
+              } as Json)
             : null,
       })
       .select('id')
@@ -117,6 +171,10 @@ export async function sendHtml(
       p.url,
       p.security,
     );
+    const live =
+      target.kind === 'sandbox' && p.liveSend
+        ? await ingestLive(s.session.access_token, target.workspaceId, demoId, path, p.liveSend)
+        : null;
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
     if (p.clickSel && next && target.kind === 'sandbox')
@@ -145,6 +203,7 @@ export async function sendHtml(
       // Lot B (recette UX §3.4) : adresse du cadre préremplie (domaine et chemin), modifiable dans l'éditeur
       options: { address: displayAddress(p.url) } as NonNullable<Json>,
       html_path: path,
+      html_live_path: live?.livePath ?? null,
       html_ops: ops as unknown as Json,
       html_meta: {
         title: p.title,
@@ -154,6 +213,7 @@ export async function sendHtml(
         links: p.links.slice(0, 300),
         blurred: p.blurred,
         canvases: p.canvases,
+        ...(live ? { live: live.live } : {}),
       } as unknown as Json,
     });
     if (ins.error) throw ins.error;

@@ -17,7 +17,9 @@ import {
   Files,
   Info,
   PanelTop,
+  Play,
   Search,
+  Server,
   TextCursorInput,
   Trash2,
   TriangleAlert,
@@ -36,6 +38,7 @@ import { htmlStore, type PendingHtmlPage } from '@/lib/htmlStore';
 import { restorePii } from '@/lib/htmlKeep';
 import { applyWidgets } from '@/lib/htmlWidgets';
 import { sendHtml, type HtmlDemoKind, type SendPage } from '@/lib/htmlUpload';
+import { pairsOf, readableText, redactLive } from '@/lib/liveCapture';
 import { rs } from '@/lib/reviewStrings';
 import { supabase } from '@/lib/supabase';
 import { fmt, plural, vs } from '@/lib/verifyStrings';
@@ -59,7 +62,8 @@ const PAGE_SIZE = 20;
  * la tuile. Dans les données, ils restent du groupe pageScripts (raison widgetThirdParty).
  */
 type ReviewGroup = HtmlReviewGroup | 'widgets';
-type GroupKey = 'pages' | ReviewGroup;
+/** Sandbox v2 : groupe « Sandbox vivant » (scripts rejoués, Garder / Bloquer ; réponses du site). */
+type GroupKey = 'pages' | 'live' | ReviewGroup;
 const REVIEW_GROUPS: ReviewGroup[] = [
   'pageScripts',
   'widgets',
@@ -139,6 +143,7 @@ interface Row {
 
 const GROUP_ICON: Record<GroupKey, IconNode> = {
   pages: Files,
+  live: Play,
   pageScripts: Code,
   widgets: PanelTop,
   trackingScripts: ChartNoAxesColumn,
@@ -270,8 +275,62 @@ function pageRow(p: PendingHtmlPage): Row {
   };
 }
 
+// ---------- Sandbox vivant ----------
+/** Choix de l'auteur par script (« live:<page>:<script> ») ; sinon le choix de la capture. */
+const liveKeep = new Map<string, boolean>();
+const liveKey = (p: PendingHtmlPage, id: string) => `live:${p.order}:${id}`;
+const livePages = () => active().filter((p) => !p.tooBig && p.live);
+const liveOn = () => kind === 'sandbox' && livePages().length > 0;
+const keepOf = (p: PendingHtmlPage, sc: { id: string; keep: boolean }) =>
+  liveKeep.get(liveKey(p, sc.id)) ?? sc.keep;
+const liveScriptsCount = () => livePages().reduce((n, p) => n + p.live!.scripts.length, 0);
+
+function liveRows(): Row[] {
+  const many = pages.length > 1;
+  const rows: Row[] = [];
+  for (const p of livePages()) {
+    const origin = fmt(s.pageN, { n: pageNo(p), title: pageTitle(p) });
+    for (const sc of p.live!.scripts) {
+      const key = liveKey(p, sc.id);
+      const on = keepOf(p, sc);
+      const name =
+        sc.source === 'page' ? s.fallback.scriptInline : sc.source.replace(/^https?:\/\//, '').slice(0, 80);
+      rows.push({
+        key,
+        icon: sc.category === 'tracking' ? ChartNoAxesColumn : Code,
+        name,
+        mono: sc.source !== 'page',
+        source: many ? `${s.live.category[sc.category]} · ${origin}` : s.live.category[sc.category],
+        status: on ? s.live.played : s.live.blocked,
+        tone: on ? 'kept' : 'plain',
+        why: s.live.why[sc.category],
+        action: {
+          label: on ? s.live.block : s.keep,
+          aria: fmt(on ? s.live.blockOf : s.keepOf, { name }),
+          run: () => {
+            liveKeep.set(key, !on);
+            refresh('live', key);
+          },
+        },
+      });
+    }
+    rows.push({
+      key: `live:${p.order}:responses`,
+      icon: Server,
+      name: many ? `${s.live.responses} · ${origin}` : s.live.responses,
+      mono: false,
+      source: plural(s.live.responsesN_one, s.live.responsesN_other, p.live!.responses.length),
+      status: s.live.replayed,
+      tone: 'plain',
+      why: s.live.responsesWhy,
+    });
+  }
+  return rows;
+}
+
 function rowsOf(g: GroupKey): Row[] {
   if (g === 'pages') return active().map(pageRow);
+  if (g === 'live') return liveRows();
   return active().flatMap((p) =>
     (p.removed ?? []).filter((it) => groupOf(it) === g).map((it) => itemRow(p, it)),
   );
@@ -285,6 +344,10 @@ const keptIn = (g: ReviewGroup) =>
   );
 
 function stateOf(g: GroupKey): string {
+  if (g === 'live') {
+    const all = livePages().flatMap((p) => p.live!.scripts.map((sc) => keepOf(p, sc)));
+    return fmt(s.live.state, { played: all.filter(Boolean).length, blocked: all.filter((x) => !x).length });
+  }
   if (g === 'pages') {
     const heavy = active().filter((p) => p.tooBig).length;
     return heavy ? plural(s.pagesHeavy_one, s.pagesHeavy_other, heavy) : s.pagesReady;
@@ -400,7 +463,7 @@ function renderRows(v: GroupView) {
 function renderGroup(v: GroupView) {
   const g = v.key;
   const title = s.group[g];
-  const count = g === 'pages' ? active().length : countOf(g);
+  const count = g === 'pages' ? active().length : g === 'live' ? liveScriptsCount() : countOf(g);
   const listId = `list-${g}`;
   const whyId = `gwhy-${g}`;
   const toggle = h(
@@ -525,10 +588,12 @@ function renderSummary() {
 /** Tout redessiner ; un groupe vide n'apparaît pas. */
 function renderAll() {
   renderSummary();
-  const order: GroupKey[] = ['pages', ...REVIEW_GROUPS];
+  // Sandbox v2 : « Sandbox vivant » juste après les pages, seulement pour un Sandbox
+  const order: GroupKey[] = ['pages', ...(liveOn() ? (['live'] as const) : []), ...REVIEW_GROUPS];
   const kids: HTMLElement[] = [];
   for (const g of order) {
-    const n = g === 'pages' ? active().length : countOf(g);
+    const n =
+      g === 'pages' ? active().length : g === 'live' ? liveScriptsCount() + livePages().length : countOf(g);
     if (!n) continue;
     let v = views.get(g);
     if (!v) {
@@ -653,6 +718,8 @@ function renderKind() {
 function pick(value: HtmlDemoKind) {
   kind = value;
   renderKind();
+  // Le groupe « Sandbox vivant » n'existe que pour un Sandbox
+  if (pages.length) renderAll();
   $('kind').querySelector<HTMLElement>('[aria-checked="true"]')?.focus();
 }
 $('kind').addEventListener('keydown', (e) => {
@@ -679,6 +746,13 @@ function titleError(show: boolean) {
 
 /** Pages à envoyer, avec ce qui est gardé : données rétablies dans la copie, liens à réactiver. */
 function toSend(): SendPage[] {
+  // Sandbox v2 : texte lisible de toutes les copies (ce que la détection a laissé visible)
+  const readable =
+    kind === 'sandbox'
+      ? active()
+          .map((x) => readableText(x.html))
+          .join(' ')
+      : '';
   return active()
     .filter((p) => !p.tooBig)
     .map((p) => {
@@ -689,9 +763,23 @@ function toSend(): SendPage[] {
       const restored = restoredPii.restored;
       // Lot B : ajouts de scripts tiers retirés, sauf ceux gardés
       const html = applyWidgets(restoredPii.html, widgets);
-      const { piiOriginals: _local, ...page } = p;
+      const { piiOriginals: _local, live: raw, ...page } = p;
+      // Sandbox v2 : mêmes valeurs neutres que la copie (sauf les données gardées), choix Garder / Bloquer
+      const liveSend =
+        kind === 'sandbox' && raw
+          ? (() => {
+              const r = redactLive(raw, pairsOf(p.piiOriginals, new Set(pii)), readable);
+              return {
+                url: r.url,
+                html: r.html,
+                scripts: r.scripts.map((sc) => ({ ...sc, keep: keepOf(p, sc) })),
+                responses: r.responses,
+              };
+            })()
+          : undefined;
       return {
         ...page,
+        liveSend,
         html,
         security: { ...p.security, piiReplaced: Math.max(0, (p.security?.piiReplaced ?? 0) - restored) },
         keepLinks: mine
