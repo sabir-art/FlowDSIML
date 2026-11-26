@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Play, RefreshCw } from 'lucide-react';
-import { Select } from '@flowdsiml/ui';
+import { RefreshCw } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { AiRequestError, aiBlock, audioLeft, callAi, useAiStatus } from '../../../lib/ai';
 import {
@@ -11,9 +10,9 @@ import {
   estimateSeconds,
   useAudioText,
   withDefaults,
-  type VoiceChoice,
 } from '../../../components/ai/AiAudio';
 import { AudioLine } from './AudioLine';
+import { VoicePicker, type VoiceInfo } from './VoicePicker';
 
 /**
  * EXT-02 §6.4, « Générer » : voix de synthèse dans le panneau de 320 px. Texte lu (il sert aussi de
@@ -41,35 +40,44 @@ export function VoiceGenerate({
   savedVoice?: string;
   /** Une voix enregistrée existe : confirmation avant de la remplacer. */
   hasRecording: boolean;
-  onRememberVoice: (v: VoiceChoice) => void;
+  onRememberVoice: (v: string) => void;
   onApply: (r: { path: string; durationMs: number; transcript: string }) => void;
 }) {
   const { t, i18n } = useTranslation();
   const at = useAudioText();
   const { status } = useAiStatus(ws);
   const [text, setText] = useState(initialText);
-  const [voice, setVoice] = useState<VoiceChoice>(
-    (VOICE_CHOICES as readonly string[]).includes(savedVoice ?? '') ? (savedVoice as VoiceChoice) : 'claire',
-  );
+  // L62 §8 : toutes les voix du compte ; une démo qui garde un ancien emplacement (« claire »…) retrouve
+  // sa voix par la correspondance renvoyée par le serveur
+  const [voice, setVoice] = useState<string>(savedVoice || 'claire');
   const [phase, setPhase] = useState<'idle' | 'busy' | 'ready' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [res, setRes] = useState<{ path: string; durationMs: number; url: string; spoken: string } | null>(
     null,
   );
   const [confirming, setConfirming] = useState(false);
-  const [sample, setSample] = useState<'loading' | 'error' | null>(null);
-  const [sampleWhy, setSampleWhy] = useState('');
-  const sampleAudio = useRef<HTMLAudioElement | null>(null);
-  // Voix prédéfinies réellement disponibles chez le fournisseur (les autres sont masquées)
-  const [available, setAvailable] = useState<readonly VoiceChoice[]>(VOICE_CHOICES);
+  // Repli (liste du compte illisible) : les anciennes voix proposées, sous leur nom d'interface
+  const fallback: VoiceInfo[] = VOICE_CHOICES.map((v, i) => ({
+    id: v,
+    name: t(`ai.voice.v.${v}.name`),
+    gender: i < 3 ? 'f' : 'm',
+    accent: '',
+    style: t(`ai.voice.v.${v}.desc`),
+    langs: [lang],
+    recommended: false,
+    own: false,
+  }));
+  const [voices, setVoices] = useState<VoiceInfo[]>(fallback);
   useEffect(() => {
     let live = true;
-    callAi<{ voices: string[] }>(ws, 'voice_list', lang, {})
+    callAi<{ voices: VoiceInfo[]; aliases: Record<string, string> }>(ws, 'voice_list', lang, {})
       .then((r) => {
-        const list = VOICE_CHOICES.filter((v) => r.voices.includes(v));
-        if (!live || !list.length) return;
-        setAvailable(list);
-        setVoice((cur) => (list.includes(cur) ? cur : list[0]!));
+        if (!live || !Array.isArray(r.voices) || !r.voices.length) return;
+        setVoices(r.voices);
+        setVoice((cur) => {
+          const id = r.aliases?.[cur] ?? cur;
+          return r.voices.some((v) => v.id === id) ? id : r.voices[0]!.id;
+        });
       })
       .catch(() => undefined);
     return () => {
@@ -82,7 +90,6 @@ export function VoiceGenerate({
   useEffect(
     () => () => {
       ctrl.current?.abort();
-      sampleAudio.current?.pause();
       if (pending.current) void supabase.storage.from('voices').remove([pending.current]);
     },
     [],
@@ -136,22 +143,6 @@ export function VoiceGenerate({
       setPhase('error');
     }
   };
-  // Exemple de la voix choisie : aucun texte de la démo n'est envoyé, aucun quota consommé
-  const playSample = async () => {
-    sampleAudio.current?.pause();
-    setSample('loading');
-    try {
-      const r = await callAi<{ audio: string }>(ws, 'voice_sample', lang, { voice });
-      const a = new Audio(r.audio);
-      sampleAudio.current = a;
-      setSample(null);
-      await a.play().catch(() => undefined);
-    } catch (e) {
-      // L62 : la cause quand le service audio refuse, sinon le message général
-      setSampleWhy(e instanceof AiRequestError ? at.provider(e.code) : '');
-      setSample('error');
-    }
-  };
   const apply = () => {
     if (!res) return;
     pending.current = null;
@@ -197,42 +188,19 @@ export function VoiceGenerate({
         <span className="vo-label" id={`vo-gv-${stepId}`}>
           {t('ai.voice.voice')}
         </span>
-        <div className="vo-voice">
-          <Select
-            aria-labelledby={`vo-gv-${stepId}`}
-            aria-describedby={`vo-gv-h-${stepId}`}
-            value={voice}
-            disabled={busy}
-            onChange={(e) => {
-              const v = e.target.value as VoiceChoice;
-              if (available.includes(v)) setVoice(v);
-            }}
-            options={available.map((v) => ({
-              value: v,
-              label: t(`ai.voice.v.${v}.name`),
-              description: t(`ai.voice.v.${v}.desc`),
-            }))}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary btn-icon vo-sample"
-            aria-label={t('ai.voice.sample')}
-            title={t('ai.voice.sample')}
-            aria-busy={sample === 'loading'}
-            disabled={busy}
-            onClick={() => void playSample()}
-          >
-            <Play aria-hidden="true" />
-          </button>
-        </div>
+        <VoicePicker
+          ws={ws}
+          lang={lang}
+          voices={voices}
+          value={voice}
+          disabled={busy}
+          labelledBy={`vo-gv-${stepId}`}
+          describedBy={`vo-gv-h-${stepId}`}
+          onChange={setVoice}
+        />
         <p className="vo-help" id={`vo-gv-h-${stepId}`}>
           {t('editor.voice.genLang', { lang: langName })}
         </p>
-        {sample === 'error' && (
-          <p className="vo-alert" role="alert">
-            {sampleWhy || t('ai.voice.sampleError')}
-          </p>
-        )}
       </div>
       {phase === 'ready' && res && (
         <div>

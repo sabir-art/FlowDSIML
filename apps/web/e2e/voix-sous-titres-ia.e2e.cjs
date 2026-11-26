@@ -148,11 +148,12 @@ function prepare(over = {}) {
     await sec.getByRole('button', { name: 'Remplacer…' }).click();
     await sec.getByRole('tab', { name: 'Générer' }).click();
   };
+  // L62 §8 : sélecteur de voix (déclencheur, fenêtre de 400 px, liste des voix du compte)
   const voices = async () => {
-    await panel.getByRole('combobox', { name: 'Voix' }).click();
-    const list = page.getByRole('listbox');
+    if ((await panel.locator('.vp-pop').count()) === 0) await panel.locator('.vp-trigger').click();
+    const list = panel.getByRole('listbox');
     await list.waitFor();
-    const names = await list.getByRole('option').allTextContents();
+    const names = await list.locator('.vp-nm').allTextContents();
     return { list, names };
   };
   await toGenerate();
@@ -188,18 +189,99 @@ function prepare(over = {}) {
     'Rien n’est envoyé à l’ouverture (liste des voix seulement)',
   );
   const v0 = await voices();
-  ok(v0.names.length === 6 && /^Claire/.test(v0.names[0]), 'Six voix, «\u202fClaire\u202f» en premier');
-  await v0.list.getByRole('option', { name: /Antoine/ }).click();
+  const pop = panel.locator('.vp-pop');
+  ok(
+    (await pop.evaluate((e) => Math.round(e.getBoundingClientRect().width))) === 400 &&
+      (await page.evaluate(() => document.activeElement?.getAttribute('type'))) === 'search',
+    'Sélecteur : fenêtre de 400 px, recherche avec le focus',
+  );
+  const secs = (await pop.locator('.vp-sec').allTextContents()).map((x) => x.replace(/\s+/g, ' ').trim());
+  ok(
+    secs[0] === 'Recommandées pour le français 4' && secs[1] === 'Toutes les voix 5' && v0.names.length === 5,
+    `Sélecteur : langue de la démo par défaut, « Recommandées pour le français » puis « Toutes les voix » (${secs.join(' | ')})`,
+  );
+  ok(
+    /^Camille/.test(v0.names[0]) && !v0.names.some((n) => /Claire/.test(n)),
+    'Sélecteur : noms réels des voix du compte, aucun emplacement fixe',
+  );
+  // Lignes de 56 px, sans colonne de coche : avatars alignés, pastille sur l'avatar de la voix choisie
+  const rows = pop.locator('[role="option"]');
+  const geo = await rows.evaluateAll((l) =>
+    l.map((r) => ({
+      h: Math.round(r.getBoundingClientRect().height),
+      left: Math.round(
+        r.querySelector('.vp-av').getBoundingClientRect().left - r.getBoundingClientRect().left,
+      ),
+      sel: r.getAttribute('aria-selected'),
+      check: !!r.querySelector('.vp-av-check'),
+      first: r.firstElementChild.className,
+    })),
+  );
+  ok(
+    geo.every((g) => g.h === 56 && g.left === geo[0].left && g.first === 'vp-av') &&
+      geo.filter((g) => g.sel === 'true').length === 1 &&
+      geo.find((g) => g.sel === 'true').check,
+    'CHOIX-01 : lignes de 56 px, avatar en tête, voix choisie marquée sur l’avatar et aria-selected',
+  );
+  await shot('l62-selecteur-voix');
+  // Recherche sans tenir compte des accents, filtre Genre, état vide
+  const search = pop.getByRole('searchbox');
+  await search.fill('elodie');
+  ok(
+    (await pop.locator('.vp-nm').allTextContents()).join() === 'Élodie' &&
+      /Résultats\s1/.test(await pop.locator('.vp-sec').first().textContent()),
+    'Recherche « elodie » : « Élodie » trouvée, section « Résultats »',
+  );
+  await search.fill('');
+  await pop.getByRole('button', { name: /^Genre/ }).click();
+  await pop.getByRole('menuitemradio', { name: 'Masculine' }).click();
+  ok(
+    (await pop.locator('.vp-nm').allTextContents()).join() === 'Antoine,Hugo,George',
+    'Filtre Genre « Masculine », langue de la démo : Antoine, Hugo et George',
+  );
+  await search.fill('zzz');
+  await pop.getByText('Aucune voix pour «\u202fzzz\u202f»').waitFor();
+  await pop.getByRole('button', { name: 'Effacer les filtres' }).click();
+  ok(
+    (await pop.locator('.vp-nm').count()) === 5,
+    'État vide : « Effacer les filtres » rend les voix de la langue de la démo',
+  );
+  // Écouter : bouton rond de 32 px, exemple dans la langue de la démo, sans quota, ne choisit pas la voix
   const used0 = state.ai.used;
-  await panel.getByRole('button', { name: 'Écouter un exemple' }).click();
+  const listen = pop.getByRole('button', { name: 'Écouter Antoine' });
+  const lb = await listen.evaluate((e) => ({
+    w: Math.round(e.getBoundingClientRect().width),
+    r: getComputedStyle(e).borderRadius,
+  }));
+  ok(lb.w === 32 && lb.r === '50%', `Écouter : bouton rond de 32 px (${lb.w} px, ${lb.r})`);
+  await listen.click();
   await until(() => (state.aiCalls || []).some((c) => c.task === 'voice_sample'));
   const sample = state.aiCalls.filter((c) => c.task === 'voice_sample').at(-1);
-  ok(sample.input.voice === 'antoine' && !('text' in sample.input), 'Exemple de la voix choisie, sans texte');
+  ok(
+    sample.input.voice === 'voixFrM0000001' && sample.lang === 'fr' && !('text' in sample.input),
+    'Exemple de la voix écoutée, en français, sans texte de la démo',
+  );
   ok(state.ai.used === used0, 'L’exemple ne consomme pas de quota');
-  const sb = await panel.getByRole('button', { name: 'Écouter un exemple' }).boundingBox();
-  ok(sb.width === 36 && sb.height === 36, 'Bouton d’exemple de 36 px à droite de «\u202fVoix\u202f»');
+  ok(
+    (await pop.locator('[aria-selected="true"] .vp-nm').textContent()) === 'Camille',
+    'Écouter n’est jamais l’action de choix',
+  );
+  // Clavier : recherche, Entrée choisit la voix active, la fenêtre se ferme
+  await search.fill('antoine');
+  await search.press('Enter');
+  await pop.waitFor({ state: 'detached' });
+  ok(
+    /Antoine/.test(await panel.locator('.vp-trigger').textContent()),
+    'Clavier : Entrée choisit la voix, la fenêtre se ferme',
+  );
   await shot('l30-10-voix-panneau');
   // L62 : le service de voix refuse. La cause est dite (clé, crédits, voix), pas « Réessayez »
+  // Une voix différente à chaque cas : un exemple déjà écouté est gardé en cache, sans nouvel appel
+  const pas = ['George', 'Élodie', 'Hugo', 'Camille'];
+  const ecouter = async () => {
+    await voices();
+    await panel.getByRole('button', { name: `Écouter ${pas.shift()}` }).click();
+  };
   for (const [code, text] of [
     ['PROVIDER_KEY', 'Le service de voix refuse la clé de l’espace. Prévenez un administrateur.'],
     ['PROVIDER_QUOTA', 'Les crédits du service de voix sont épuisés. Prévenez un administrateur.'],
@@ -208,9 +290,10 @@ function prepare(over = {}) {
     ['PROVIDER_PLAN', 'L’offre du compte du service de voix ne permet pas cette demande.'],
   ]) {
     state.aiProvider = code;
-    await panel.getByRole('button', { name: 'Écouter un exemple' }).click();
+    await ecouter();
     await panel.getByText(text, { exact: false }).first().waitFor();
     const sampleSaid = await panel.getByText(text, { exact: false }).count();
+    await page.keyboard.press('Escape');
     await panel.getByRole('button', { name: /Générer la voix|Réessayer/ }).click();
     await page.waitForFunction(
       (t) =>
@@ -230,7 +313,7 @@ function prepare(over = {}) {
   const call = state.aiCalls.at(-1);
   ok(
     call.task === 'voice' &&
-      call.input.voice === 'antoine' &&
+      call.input.voice === 'voixFrM0000001' &&
       call.input.speed === 'normal' &&
       call.input.text === 'Bienvenue chez votre entreprise. Ouvrez la fiche du jeune.',
     'Demande : texte avec les valeurs par défaut et voix choisie',
@@ -253,7 +336,7 @@ function prepare(over = {}) {
     .analyze();
   ok(
     axe.violations.length === 0,
-    `Panneau «\u202fGénérer\u202f» : aucune violation axe (${axe.violations.map((v) => v.id).join(', ')})`,
+    `Panneau «\u202fGénérer\u202f» : aucune violation axe (${axe.violations.map((v) => `${v.id} ${v.nodes.map((n) => n.target.join(' ') + ' ' + n.failureSummary).join('; ')}`).join(', ')})`,
   );
   const tight = await page.evaluate(() => {
     const out = [];
@@ -289,7 +372,7 @@ function prepare(over = {}) {
     'Transcription = texte lu, repère IA',
   );
   const demo = () => state.tables.demos.find((d) => d.id === DEMO);
-  ok(await until(() => demo().settings?.aiVoice === 'antoine'), 'Voix mémorisée pour la démo');
+  ok(await until(() => demo().settings?.aiVoice === 'voixFrM0000001'), 'Voix mémorisée pour la démo');
   await page.getByText('Voix appliquée.').waitFor();
   ok(
     (await page.locator('.rail-li .rail-ai[aria-label="Voix off générée par l’IA"]').count()) === 1,
@@ -402,16 +485,17 @@ function prepare(over = {}) {
 
   // ===== L30-13 : quotas et fonction désactivée =====
   state = prepare({ ttsUsed: 298 });
-  state.aiVoices = ['claire', 'louise', 'sarah', 'antoine', 'daniel'];
+  // Liste du compte illisible (droit manquant) : repli silencieux sur les voix proposées
+  state.aiVoiceList = [];
   await open(state);
   await toGenerate();
   ok(
     await until(async () => {
       const v = await voices();
       await page.keyboard.press('Escape');
-      return v.names.length === 5 && !v.names.some((n) => /Adam/.test(n));
+      return v.names.length === 6 && /^Claire/.test(v.names[0]);
     }),
-    'Voix absente chez le fournisseur : masquée',
+    'Liste des voix du compte illisible : repli sur les voix proposées, sans blocage',
   );
   await panel.getByText(/Il reste 2\ss ce mois-ci, la demande en demande environ \d+\ss\./).waitFor();
   ok(

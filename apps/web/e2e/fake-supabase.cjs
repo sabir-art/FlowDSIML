@@ -5,6 +5,28 @@
  * Ce n'est PAS un substitut aux tests pgTAP (RLS) : il valide l'interface.
  */
 const fs = require('fs');
+
+/** L62 §8 : voix fictives d'un compte du service de voix (aucun nom ni identifiant réel). */
+const FAKE_VOICES = [
+  ['voixFrF0000001', 'Camille', 'f', 'parisien', 'chaleureux', ['fr', 'en']],
+  ['voixFrM0000001', 'Antoine', 'm', 'québécois', 'posé', ['fr']],
+  ['voixFrF0000002', 'Élodie', 'f', '', 'narration', ['fr']],
+  ['voixFrM0000002', 'Hugo', 'm', 'belge', 'dynamique', ['fr']],
+  ['voixEnF0000001', 'Aria', 'f', 'américain', 'calme', ['en']],
+  ['voixEnM0000001', 'George', 'm', 'britannique', 'narration', ['en', 'fr']],
+  ['voixEnM0000002', 'Liam', 'm', 'américain', 'énergique', ['en']],
+  ['voixEsF0000001', 'Lucía', 'f', 'castillan', 'vif', ['es']],
+  ['voixNeutre0001', 'Sam', 'n', '', 'neutre', ['en']],
+].map(([id, name, gender, accent, style, langs], i) => ({
+  id,
+  name,
+  gender,
+  accent,
+  style,
+  langs,
+  recommended: false,
+  own: i > 5,
+}));
 const path = require('path');
 const crypto = require('crypto');
 
@@ -633,11 +655,22 @@ async function install(page, state = seed()) {
         return json(route, 429, { error: 'AI_QUOTA_WORKSPACE', renewsOn: ai.renewsOn });
       // L30b : extrait de voix (sans quota) ; quota audio séparé pour voix et sous-titres
       // L30b : voix prédéfinies disponibles (state.aiVoices pour en masquer)
-      if (body.task === 'voice_list')
+      // L62 §8 : toutes les voix du compte (fictives), recommandées pour la langue de la démo ; aliases :
+      // voix des anciens emplacements. state.aiVoiceList remplace la liste ([] : liste illisible).
+      if (body.task === 'voice_list') {
+        const lang = String(body.lang || 'fr').slice(0, 2);
+        const list = (state.aiVoiceList || FAKE_VOICES).map((v) => ({
+          ...v,
+          recommended: v.langs[0] === lang,
+        }));
         return json(route, 200, {
-          result: { voices: state.aiVoices || ['claire', 'louise', 'sarah', 'antoine', 'adam', 'daniel'] },
+          result: {
+            voices: list.sort((a, b) => Number(b.recommended) - Number(a.recommended)),
+            aliases: { claire: 'voixFrF0000001', antoine: 'voixFrM0000001' },
+          },
           redacted: 0,
         });
+      }
       // L62 : le service audio refuse (state.aiProvider : PROVIDER_KEY, PROVIDER_QUOTA, PROVIDER_VOICE)
       if (state.aiProvider && ['voice_sample', 'voice', 'captions'].includes(body.task))
         return json(route, 424, { error: state.aiProvider });
