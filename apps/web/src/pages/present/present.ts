@@ -77,11 +77,17 @@ export function clock(seconds: number): string {
   return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
+/** NUM-01 : espace insécable, « 14 min 05 » ne se coupe jamais. */
+const NBSP = '\u00a0';
+
 /** Libellé lisible pour le toast de fin : « 14 min 05 ». */
 export function spoken(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
-  return `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, '0')}`;
+  return `${Math.floor(s / 60)}${NBSP}min${NBSP}${String(s % 60).padStart(2, '0')}`;
 }
+
+/** « 12 min 40 » ; « 45 s » sous la minute. */
+export const minSec = (s: number) => (s < 60 ? `${Math.max(0, Math.round(s))}${NBSP}s` : spoken(s));
 
 /** Notes du présentateur → puces (une par ligne non vide). */
 export const noteLines = (notes: string | null | undefined) =>

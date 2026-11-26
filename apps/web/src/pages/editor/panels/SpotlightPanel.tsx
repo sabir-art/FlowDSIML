@@ -64,7 +64,7 @@ export function SpotlightPanel({ editor, readOnly }: { editor: DemoEditor; readO
           max={FREE_SPOTLIGHT.dim.max}
           step={5}
           value={sp.dim}
-          valueText={`${sp.dim} %`}
+          valueText={`${sp.dim}\u00a0%`}
           disabled={readOnly || !sp.enabled}
           onChange={(v) => set({ dim: v })}
         />

@@ -165,7 +165,7 @@ async function openEditor(b, state) {
   const old = page.getByRole('dialog', { name: 'Présentation terminée' });
   await old.waitFor();
   ok(
-    /9 min 58/.test(await old.locator('.rp-card').first().innerText()) &&
+    /9\smin\s58/.test(await old.locator('.rp-card').first().innerText()) &&
       /2 \/ 3/.test(await old.locator('.rp-card').nth(1).innerText()) &&
       /1 sautée/.test(await old.locator('.rp-card').nth(1).innerText()),
     'Historique › Voir : le bilan passé (9 min 58, 2 / 3, 1 sautée)',
@@ -201,7 +201,7 @@ async function openEditor(b, state) {
     (await page.locator('.pr-pill').innerText()).replace(/\s+/g, ' ') === 'Plus que 2 min' &&
       (await page.locator('.pr-timer [aria-live="polite"]').innerText()).replace(/\s+/g, ' ') ===
         'Plus que 2 min' &&
-      /^13 min 0\d écoulées sur 15 min 00$/.test(await tm.getAttribute('aria-label')),
+      /^13\smin\s0\d\sécoulées\ssur\s15\smin\s00$/.test(await tm.getAttribute('aria-label')),
     `à 13:00 sur 15:00 : « Plus que 2 min » (annoncé poliment), nom « ${await tm.getAttribute('aria-label')} »`,
   );
   if (SHOTS)
@@ -253,14 +253,14 @@ async function openEditor(b, state) {
   const bad2 = await axe(page, '.rp');
   ok(bad2.length === 0, `axe, bilan (${bad2.join(', ')})`);
   await rep.locator('.rp-hist tr:not(.is-current)').getByRole('button').click();
-  await page.waitForFunction(() => /9 min 58/.test(document.querySelector('.rp-card')?.textContent ?? ''));
+  await page.waitForFunction(() => /9\smin\s58/.test(document.querySelector('.rp-card')?.textContent ?? ''));
   ok(true, '« Voir » rouvre un bilan passé');
   await page
     .getByRole('dialog', { name: 'Présentation terminée' })
     .locator('.fd-modal__foot')
     .getByRole('button', { name: 'Fermer' })
     .click();
-  await page.waitForFunction(() => /16 min/.test(document.querySelector('.rp-card')?.textContent ?? ''));
+  await page.waitForFunction(() => /16\smin/.test(document.querySelector('.rp-card')?.textContent ?? ''));
   ok(true, 'Fermer revient au bilan de cette présentation');
   ok(errors.length === 0, `aucune erreur JS (${errors.join(' | ')})`);
   await page.unrouteAll({ behavior: 'ignoreErrors' });
@@ -281,7 +281,7 @@ async function openEditor(b, state) {
     ok(
       (await p2.locator('.pr-ring').count()) === 0 &&
         (await p2.locator('.pr-timer__tx small').count()) === 0 &&
-        /^0 min 0\d écoulées$/.test(await p2.getByRole('timer').getAttribute('aria-label')),
+        /^0\smin\s0\d\sécoulées$/.test(await p2.getByRole('timer').getAttribute('aria-label')),
       'sans minuteur : temps écoulé seul, sans anneau ni « sur »',
     );
     await p2.unrouteAll({ behavior: 'ignoreErrors' });
