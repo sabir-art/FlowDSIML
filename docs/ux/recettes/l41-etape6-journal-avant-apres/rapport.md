@@ -80,3 +80,41 @@ Correction :
 - dans le bandeau, ne pas compter une règle comme « non proposée » quand son modèle est proposé mais sans clé.
 
 Demandes concernées : L41 étape 5 · nouveau modèle décoché dans un espace jamais réglé · icône de l'erreur à 8 px · L41 étape 6 · journal de la Console, colonnes Avant et Après (fonction, règle d'Auto, liste de l'assistant, clés), filtre Modèles IA, export CSV · étape 4 · section Assistant IA après l'ajout d'une clé.
+
+## Contre-recette sur bc4b452 (26/11) : A VERT, B ROUGE léger
+
+**Banc** :
+- `claude/dev-mvp` à bc4b452, qui contient 31bc369, 1b6a37a et 0272acd ;
+- faux backend, clés factices ;
+- Chromium à 1440 × 900, en clair et en sombre.
+
+**Tests** : e2e console 56/56, console-modeles 62/62 et assistance-ia-modeles 21/21, en clair comme en sombre ; Deno 47/47.
+
+### A · L41 : VERT
+
+| Point | Verdict | Mesure |
+| --- | --- | --- |
+| `proposed_at` garde sa première date | **VERT** (lu dans le code) | Déclencheur : en mise à jour, une date déjà posée est gardée ; un modèle jamais proposé n'a pas de date. Décocher puis recocher ne change donc plus la date. Je ne peux pas lancer pgTAP ici (16/16 annoncés). |
+| Journal : seulement ce qui change, une ligne par changement | **VERT** | « Claude Opus : Recommandé → Bêta », « Claude Haiku : Non proposé → Proposé », « Ordre : Sonnet · Opus → Opus · Sonnet ». Toutes les lignes font **52 px**, contre 6 lignes de texte avant. Le préfixe « Liste de l'assistant · » a disparu de l'objet. Capture : `bc4b452-A-journal-ce-qui-change.png`. |
+| CSV : listes complètes et libellé de l'action | **VERT** | Action « Liste de l'assistant modifiée » au lieu du code `ai.*`. Objet « Claude Opus : étiquette Bêta ». Avant et Après donnent les listes complètes avec leurs étiquettes. Aucune clé dans le CSV ni dans le DOM. |
+| Section Assistant IA rechargée après l'ajout d'une clé | **VERT** | Sans recharger la page, les 3 modèles redeviennent actifs avec la mention « Anthropic », et l'aperçu passe à Auto, Sonnet, Opus. |
+| Sans clé, la cause « clé manquante » d'abord | **VERT** | Le bandeau ne dit plus que « 4 fonctions coupées faute de clé Anthropic : … ». La fausse ligne « règles non proposées » a disparu. |
+| « — » avant un premier test de clé | **À changer, non bloquant** | Voir plus bas. |
+
+**« — » contre « Jamais testée » : je corrige ma remarque.** Dans ma recette précédente, j'avais demandé « le test précédent, ou — ». Or « Test réussi → Test réussi » était juste pour un deuxième test, et pour un premier test, « Jamais testée » était plus clair. C'est cohérent avec « Aucune clé » sur la même colonne, et un « — » se lit comme une valeur absente ou une erreur. **Je demande de revenir à « Jamais testée ».** C'est mon erreur, pas celle du dev.
+
+### B · Interrupteur désactivé gris (31bc369) : ROUGE léger
+
+| Écran (rôle) | Résultat |
+| --- | --- |
+| Paramètres › Sécurité (lecteur), activé et désactivé | **Gris** : piste #4f5966 en clair et #a9b3bf en sombre, opacité 1, bouton couleur de surface. Conforme. |
+| Paramètres › Notifications (admin, propriétaire, lecteur), désactivé et éteint | Inchangé (piste claire, opacité 0,5) : normal, la règle ne vise que l'état activé. |
+| **Éditeur › Voix off, « Lecture automatique » et « Sous-titres affichés » (lecteur), activés et désactivés** | **Restent prune** (#a3195b en clair, #cf86a9 en sombre), opacité 1, alors que la case « Animation de pulsation » juste au-dessus est grise. |
+
+Capture : `bc4b452-B-interrupteur-securite-gris-editeur-prune.png` (Sécurité en clair et en sombre, puis l'éditeur en clair et en sombre).
+
+Cause : `apps/web/src/styles/maquette.css` l. 1372, `.mk .fd-switch input:checked + .fd-switch__track { background: var(--fd-color-primary) }`. Elle est plus spécifique que la règle de `controls.css` et l'emporte dans tout ce qui est sous `.mk`, soit l'éditeur et les écrans refaits.
+
+Correction : ajouter `:not(:disabled):not([aria-disabled='true'])` à la règle `.mk`, ou y dupliquer la règle grise. Puis contrôler dans l'e2e un interrupteur de l'éditeur en rôle lecteur.
+
+Demandes concernées : L41 (date de la première proposition, journal de la liste de l'assistant, CSV, section rechargée après une clé, cause « clé manquante » d'abord, état avant un premier test) · interrupteur activé et désactivé en gris (31bc369).
