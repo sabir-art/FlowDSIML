@@ -322,7 +322,8 @@ export function HtmlStep({
         <div class="p-html-toast" role="status" aria-live="polite">
           {toast ?? ''}
         </div>
-        {onAddZone && ready && zones === 0 && !noZoneClosed && (
+        {/* Démo guidée : une bulle posée sur un élément fait avancer au clic, ce n'est pas une impasse */}
+        {onAddZone && ready && zones === 0 && !(target && !sandbox) && !noZoneClosed && (
           <div class="p-html-nozone" role="status">
             <Info aria-hidden="true" />
             <div class="p-html-nozone-tx">
