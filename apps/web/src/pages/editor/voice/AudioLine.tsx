@@ -38,6 +38,7 @@ export function AudioLine({
   label,
   pauseLabel,
   end,
+  middle,
 }: {
   src: string | null;
   durationMs: number;
@@ -45,6 +46,11 @@ export function AudioLine({
   label: string;
   pauseLabel: string;
   end?: ReactNode;
+  /**
+   * L62 §6 : ligne réduite de la voix en place. Contenu à la place de l'onde (nom, source), et la durée
+   * seule à droite.
+   */
+  middle?: ReactNode;
 }) {
   const audio = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -71,9 +77,9 @@ export function AudioLine({
       >
         {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
       </button>
-      <Wave levels={levels} played={Math.min(1, at / total)} />
+      {middle ?? <Wave levels={levels} played={Math.min(1, at / total)} />}
       <span className="vo-time">
-        {formatClock(at)} / {formatClock(durationMs)}
+        {middle ? formatClock(durationMs) : `${formatClock(at)} / ${formatClock(durationMs)}`}
       </span>
       {end}
       {src && (
