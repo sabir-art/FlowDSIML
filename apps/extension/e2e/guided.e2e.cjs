@@ -55,7 +55,10 @@ const ui = require('./popup-ui.cjs');
     text: (await first.innerText()).replace(/\s+/g, ' '),
     todo: await first.locator('.todo').innerText(),
   };
+  // Retours client 0.3.3 : choisir la démo ramène à la vue précédente ; l'aide se relit en revenant
   await first.click();
+  await popup.waitForSelector('#setup:not([hidden])');
+  await popup.click('#dest-change');
   const help = await popup.locator('#demos-h').innerText();
   // La vidéo crée toujours une nouvelle démo : sa ligne reste visible, grisée, avec la raison
   await popup.click('#dest-back');

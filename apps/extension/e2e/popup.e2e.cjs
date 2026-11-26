@@ -422,11 +422,14 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
           'Le dossier est mémorisé pour les prochaines captures.',
       `${tag} · destination : Nouvelle démo, arbre des dossiers (36 px, sous-dossier décalé de 24 px), « Toutes les démos » par défaut`,
     );
+    // Retours client 0.3.3 : choisir un dossier ramène à la vue précédente, destination à jour
     await popup.locator('#folders [data-folder="f-ventes"]').click();
-    await popup.click('#dest-back');
+    await popup.waitForSelector('#setup:not([hidden])');
     ok(
-      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Ventes · Nouvelle démo',
-      `${tag} · destination « Dans Acme · Ventes · Nouvelle démo »`,
+      (await popup.locator('#dest').isHidden()) &&
+        (await popup.evaluate(() => document.activeElement?.id)) === 'dest-change' &&
+        (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Ventes · Nouvelle démo',
+      `${tag} · dossier choisi : retour automatique, focus sur « Changer », destination « Dans Acme · Ventes · Nouvelle démo »`,
     );
     await popup.reload();
     await popup.waitForFunction(() => /Ventes/.test(document.getElementById('dest-text').textContent));
@@ -453,18 +456,23 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     );
     await popup.fill('#demo-q', 'facture');
     ok((await popup.locator('#demos [role=option]').count()) === 1, `${tag} · la recherche filtre les démos`);
-    await popup.locator('#demos [role=option]').first().click();
+    await shot(popup, 'destination-ajout');
+    // Clavier : Entrée choisit la démo et ramène à la vue précédente, destination à jour
+    await popup.locator('#demos [role=option]').first().focus();
+    await popup.keyboard.press('Enter');
+    await popup.waitForSelector('#setup:not([hidden])');
+    ok(
+      (await popup.evaluate(() => document.activeElement?.id)) === 'dest-change' &&
+        (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Créer une facture',
+      `${tag} · démo choisie (Entrée) : retour automatique, destination « Dans Acme · Créer une facture »`,
+    );
+    await popup.click('#dest-change');
     ok(
       (await popup.locator('#demos [aria-selected=true]').count()) === 1 &&
         /Les nouvelles étapes s’ajoutent à la fin/.test(await popup.locator('#demos-h').innerText()),
-      `${tag} · démo choisie cochée, aide « ajout à la fin »`,
+      `${tag} · en revenant : démo choisie cochée, aide « ajout à la fin »`,
     );
-    await shot(popup, 'destination-ajout');
     await popup.click('#dest-back');
-    ok(
-      (await popup.locator('#dest-text').innerText()) === 'Dans Acme · Créer une facture',
-      `${tag} · destination « Dans Acme · Créer une facture »`,
-    );
     const vid = popup.locator('#modes [data-mode=video]');
     ok(
       (await vid.getAttribute('aria-disabled')) === 'true' &&
