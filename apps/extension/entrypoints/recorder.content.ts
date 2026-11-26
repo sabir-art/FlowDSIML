@@ -445,7 +445,7 @@ export default defineContentScript({
     let last = 0;
     function onPointerDown(ev: PointerEvent) {
       // En pause, les clics ne sont pas capturés (L60 §2)
-      if (!ev.isTrusted || ev.button !== 0 || tracing || ui.paused) return;
+      if (!ev.isTrusted || ev.button !== 0 || tracing || ui.paused || ui.isSending) return;
       const now = Date.now();
       if (now - last < 400) return; // anti double-clic
       const target = ev.target instanceof Element ? ev.target : null;
@@ -514,6 +514,11 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener((msg: unknown) => {
       if ((msg as { type?: string })?.type === 'fd:paused')
         ui.setPaused(!!(msg as { paused?: boolean }).paused);
+      if ((msg as { type?: string })?.type === 'fd:send-progress') {
+        const p = msg as { done?: number; total?: number };
+        card.hide();
+        ui.sending(p.done ?? 0, p.total ?? 0);
+      }
       if ((msg as { type?: string })?.type === 'fd:recorder-stop') {
         document.removeEventListener('pointerdown', onPointerDown, true);
         document.removeEventListener('pointermove', onPointerMove, true);

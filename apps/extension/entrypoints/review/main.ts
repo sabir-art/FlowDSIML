@@ -165,6 +165,26 @@ async function boot() {
       : h('p', {}, tr('none')),
   );
   render();
+  // L60 §3 : sans donnée repérée, pas d'écran de vérification : l'envoi part tout de suite, la barre de
+  // l'onglet capturé montre l'avancement (cet onglet reste en arrière-plan)
+  const auto = (await browser.storage.local.get('fd.autoSend'))['fd.autoSend'] as
+    { tabId: number; at: number } | undefined;
+  await browser.storage.local.remove('fd.autoSend');
+  if (!total && auto && Date.now() - auto.at < 60_000 && !target.addTo) {
+    autoTab = auto.tabId;
+    ($('send') as HTMLButtonElement).click();
+  }
+}
+/** L60 §3 : onglet capturé dont la barre montre l'envoi (envoi sans vérification). */
+let autoTab: number | null = null;
+const toBar = (m: { type: 'fd:send-progress'; done: number; total: number } | { type: 'fd:send-done' }) =>
+  autoTab === null
+    ? undefined
+    : void browser.runtime.sendMessage({ ...m, tabId: autoTab }).catch(() => undefined);
+/** Montre cet onglet (envoi en arrière-plan : erreur à lire, ou rien d'autre où aller). */
+async function showSelf() {
+  const self = await browser.tabs.getCurrent();
+  if (self?.id !== undefined) await browser.tabs.update(self.id, { active: true }).catch(() => undefined);
 }
 
 function render() {
@@ -550,6 +570,7 @@ $('send').addEventListener('click', async () => {
       { ...target, appendTo: target.addTo?.demoId ?? null },
       (done) => {
         $('send-text').textContent = tr('sending', { done, total: ordered.length });
+        toBar({ type: 'fd:send-progress', done, total: ordered.length });
       },
       created,
     );
@@ -580,8 +601,23 @@ $('send').addEventListener('click', async () => {
         }
       }
     }
+    toBar({ type: 'fd:send-done' });
+    // L60 §3 : l'éditeur s'ouvre dans l'onglet TutoClick déjà ouvert, sinon dans celui-ci
+    const origin = new URL(APP_URL).origin;
+    // Onglet de l'app : routes en #/ (une page capturée du même hôte n'est pas l'app)
+    const app = (await browser.tabs.query({}).catch(() => [])).find((t) => t.url?.startsWith(`${origin}/#/`));
+    const self = await browser.tabs.getCurrent();
+    if (app?.id !== undefined && app.id !== self?.id) {
+      await browser.tabs.update(app.id, { url: editor, active: true }).catch(() => undefined);
+      if (app.windowId !== undefined)
+        await browser.windows.update(app.windowId, { focused: true }).catch(() => undefined);
+      if (self?.id !== undefined) return void browser.tabs.remove(self.id);
+    }
+    await showSelf();
     location.href = editor;
   } catch (err) {
+    toBar({ type: 'fd:send-done' });
+    await showSelf();
     $('error').hidden = false;
     // §8.5 : démo supprimée ou droits retirés entre-temps : message clair, les captures restent ici
     $('error').textContent = target.addTo ? strings.addGone : ((err as Error).message ?? String(err));

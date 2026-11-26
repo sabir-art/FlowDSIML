@@ -317,6 +317,23 @@ http
             '<p id="bas">Contact : lea.martin@acme.example</p></main></body></html>',
         );
       }
+      // L60 §3 : page sans aucune donnée personnelle (Terminer envoie sans écran de vérification)
+      if (req.url.startsWith('/propre')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>Projets</title></head><body style="font-family:sans-serif;padding:24px">' +
+            '<h1>Projets</h1><p>Organisez vos projets par équipe.</p>' +
+            '<button id="nouveau" style="font-size:18px;padding:10px">Nouveau projet</button> ' +
+            '<button id="filtrer" style="font-size:18px;padding:10px">Filtrer</button></body></html>',
+        );
+      }
+      // L60 §3 : onglet de l'app déjà ouvert (adresse en #/), réutilisé pour ouvrir l'éditeur après l'envoi
+      if (req.url === '/' || req.url.startsWith('/?')) {
+        res.writeHead(200, { 'content-type': 'text/html' });
+        return res.end(
+          '<html><head><meta charset="utf-8"><title>TutoClick</title></head><body>App</body></html>',
+        );
+      }
       if (req.url.startsWith('/aide')) {
         res.writeHead(200, { 'content-type': 'text/html' });
         return res.end(
