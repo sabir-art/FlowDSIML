@@ -40,6 +40,8 @@ export interface AiStatus {
   renewsOn: string | null;
   canEdit: boolean;
   canManage: boolean;
+  /** L41 étape 3 : fonctions coupées pour tous les espaces par TutoClick (clé du fournisseur absente). */
+  unavailable?: AiFeature[];
 }
 
 /** Secondes restantes ce mois-ci pour la voix ou les sous-titres (null : quota non défini). */
@@ -59,10 +61,12 @@ export function formatSeconds(n: number): string {
 }
 
 /** Pourquoi une entrée IA est indisponible (null : disponible). */
-export type AiBlock = 'disabled' | 'quota' | 'userQuota' | 'role' | null;
+export type AiBlock = 'disabled' | 'unavailable' | 'quota' | 'userQuota' | 'role' | null;
 
 export function aiBlock(s: AiStatus | null, feature: AiFeature): AiBlock {
   if (!s || !s.enabled || !s.features[feature]) return 'disabled';
+  // Coupée par TutoClick : « Indisponible pour le moment », sans décompter de quota
+  if (s.unavailable?.includes(feature)) return 'unavailable';
   if (!s.canEdit) return 'role';
   if (s.workspaceQuotaReached) return 'quota';
   if (AUDIO_FEATURES.includes(feature) && audioLeft(s, feature) === 0) return 'quota';

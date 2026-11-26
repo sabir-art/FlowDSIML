@@ -364,7 +364,7 @@ export function VoiceFields({
   const generated = !!opts.aiVoice;
   // Assistance IA coupée pour l'espace (ou rôle sans droit) : « Générer » reste visible, grisé, avec la raison
   const aiOff = aiBlock(ai, 'voice');
-  const genOff = aiOff === 'disabled' || aiOff === 'role';
+  const genOff = aiOff === 'disabled' || aiOff === 'role' || aiOff === 'unavailable';
   // 065 (L30-10) : voix de synthèse (ElevenLabs) à partir de la transcription, sinon du texte de la bulle
   const aiVoice =
     ws && !readOnly ? (

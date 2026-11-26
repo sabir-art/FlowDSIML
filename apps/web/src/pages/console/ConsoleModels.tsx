@@ -8,12 +8,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Check, History, KeyRound, Plug } from 'lucide-react';
-import { Modal } from '@flowdsiml/ui';
+import { Check, History, KeyRound, Plug, TriangleAlert } from 'lucide-react';
+import { Modal, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { formatDate } from '../../lib/format';
 import { useToast } from '../../components/Toast';
-import { WriteButton } from './shared';
+import { WriteButton, useConsoleRole } from './shared';
 
 type Provider = 'anthropic' | 'openai' | 'elevenlabs';
 interface ProviderState {
@@ -24,6 +24,29 @@ interface ProviderState {
   addedAt: string | null;
   lastTest: { at: string; ok: boolean; cause: string | null; ms: number | null } | null;
 }
+
+type Fn = 'assistant' | 'write' | 'suggest' | 'translate' | 'voice' | 'captions';
+interface FnState {
+  fn: Fn;
+  status: 'active' | 'fallback' | 'cut' | 'off';
+  chosen: string;
+  model: string | null;
+  provider: Provider | null;
+  explicit: boolean;
+  choices: Array<{
+    id: string;
+    label: string;
+    provider: Provider;
+    speed: number;
+    cost: number;
+    available: boolean;
+  }>;
+}
+const PROVIDER_LABEL: Record<Provider, string> = {
+  anthropic: 'Anthropic',
+  openai: 'OpenAI',
+  elevenlabs: 'ElevenLabs',
+};
 
 /** Appel d'une action de la Console sur l'Edge Function `ai` ; erreur : code et cause seulement. */
 async function consoleAi<T>(action: string, extra: Record<string, unknown> = {}) {
@@ -40,15 +63,18 @@ async function consoleAi<T>(action: string, extra: Record<string, unknown> = {})
 }
 
 export function Models() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [list, setList] = useState<ProviderState[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [keyFor, setKeyFor] = useState<ProviderState | null>(null);
+  const [fns, setFns] = useState<FnState[] | null>(null);
   const load = useCallback(() => {
     void consoleAi<ProviderState[]>('console_providers').then((r) => {
       if (r.ok) setList(r.result);
       else setFailed(true);
     });
+    // L41 étape 3 : modèle par fonction (l'état dépend des clés : rechargé avec elles)
+    void consoleAi<FnState[]>('console_functions').then((r) => r.ok && setFns(r.result));
   }, []);
   useEffect(load, [load]);
 
@@ -65,6 +91,8 @@ export function Models() {
       </p>
     );
   const none = list.every((p) => p.state === 'missing');
+  // Bandeau d'attention : fonctions en repli ou coupées faute de clé (spec UX §1)
+  const attention = (fns ?? []).filter((f) => f.status === 'fallback' || f.status === 'cut');
   return (
     <div className="console-stack">
       <div className="console-card-head console-ai-head">
@@ -77,6 +105,25 @@ export function Models() {
           {t('console.ai.history')}
         </Link>
       </div>
+      {!none && attention.length > 0 && (
+        <p className="console-ai-attention" role="status">
+          <TriangleAlert aria-hidden="true" />
+          {t('console.ai.attention', {
+            count: attention.length,
+            // « A, B et C » selon la langue
+            list: new Intl.ListFormat(i18n.language === 'en' ? 'en' : 'fr', { type: 'conjunction' }).format(
+              attention.map(
+                (f) =>
+                  `${t(`console.ai.fn.${f.fn}`)} (${
+                    f.status === 'fallback'
+                      ? t('console.ai.why.retired')
+                      : t('console.ai.why.missing', { name: PROVIDER_LABEL[f.provider!] })
+                  })`,
+              ),
+            ),
+          })}
+        </p>
+      )}
       {none && (
         <section className="fd-card console-ai-empty" aria-labelledby="ai-empty-t">
           <span className="console-ai-empty__ic" aria-hidden="true">
@@ -112,6 +159,7 @@ export function Models() {
           </li>
         </ul>
       </section>
+      {fns && <FunctionModels fns={fns} onChanged={setFns} />}
       {keyFor && (
         <KeyDialog
           p={keyFor}
@@ -311,5 +359,117 @@ function KeyDialog({ p, onClose, onSaved }: { p: ProviderState; onClose: () => v
         </span>
       </form>
     </Modal>
+  );
+}
+
+/** Aide d'un modèle : vitesse et coût relatifs (1 à 3). */
+const helpOf = (t: (k: string) => string, c: { speed: number; cost: number }) =>
+  `${t(`console.ai.speed.${c.speed}`)} · ${t(`console.ai.cost.${c.cost}`)}`;
+
+/**
+ * Spec UX §3 : une ligne de 64 px par fonction (nom et aide, liste de 40 px, état). Un changement
+ * s'applique aux demandes suivantes, sans confirmation ; il est journalisé et le toast propose « Annuler ».
+ */
+function FunctionModels({ fns, onChanged }: { fns: FnState[]; onChanged: (f: FnState[]) => void }) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const ro = useConsoleRole() !== 'admin';
+  const [busy, setBusy] = useState<Fn | null>(null);
+  const set = async (f: FnState, model: string | null, undo: boolean) => {
+    setBusy(f.fn);
+    const r = await consoleAi<{ old: string | null; functions: FnState[] }>('console_set_model', {
+      fn: f.fn,
+      model,
+    });
+    setBusy(null);
+    if (!r.ok) return toast(t('console.ai.modelError'), undefined, { tone: 'warning' });
+    onChanged(r.result.functions);
+    const now = r.result.functions.find((x) => x.fn === f.fn)!;
+    const label = now.choices.find((c) => c.id === now.chosen)?.label ?? now.chosen;
+    if (undo)
+      toast(t('console.ai.modelSet', { fn: t(`console.ai.fn.${f.fn}`), model: label }), {
+        label: t('console.undo'),
+        durationMs: 8000,
+        onClick: () => void set(now, r.result.old, false),
+      });
+  };
+  return (
+    <section className="fd-card" aria-labelledby="ai-fn-t">
+      <h3 id="ai-fn-t" className="console-h2">
+        {t('console.ai.functions')}
+      </h3>
+      <p className="fd-muted console-ai-help">{t('console.ai.functionsHelp')}</p>
+      <ul className="console-ai-list console-ai-fns" role="list">
+        {fns.map((f) => {
+          const id = `ai-fn-${f.fn}`;
+          const known = f.choices.some((c) => c.id === f.chosen);
+          const retired = f.status === 'fallback';
+          const cut = f.status === 'cut';
+          return (
+            <li key={f.fn} className="console-ai-row">
+              <div className="console-ai-name">
+                <label htmlFor={id}>
+                  <b>{t(`console.ai.fn.${f.fn}`)}</b>
+                </label>
+                <small>{t(`console.ai.fnHelp.${f.fn}`)}</small>
+              </div>
+              <div className={`console-ai-pick${retired ? ' is-retired' : ''}${cut ? ' is-cut' : ''}`}>
+                <Select
+                  id={id}
+                  size="sm"
+                  value={f.chosen}
+                  disabled={ro || busy === f.fn || f.chosen === 'auto' || f.status === 'off'}
+                  aria-describedby={`${id}-s`}
+                  onChange={(e) => void set(f, e.target.value, true)}
+                >
+                  {f.chosen === 'auto' && <option value="auto">{t('console.ai.autoSee')}</option>}
+                  {f.chosen !== 'auto' && !known && (
+                    <option value={f.chosen} disabled>
+                      {t('console.ai.retiredModel')}
+                    </option>
+                  )}
+                  {f.status === 'off' && !f.choices.length && (
+                    <option value={f.chosen}>{t('console.ai.noModel')}</option>
+                  )}
+                  {f.chosen !== 'auto' &&
+                    f.choices.map((c) => (
+                      <option
+                        key={c.id}
+                        value={c.id}
+                        disabled={!c.available}
+                        data-description={c.available ? helpOf(t, c) : t('console.ai.missing')}
+                      >
+                        {c.label}
+                      </option>
+                    ))}
+                </Select>
+              </div>
+              <span className="console-ai-fstate" id={`${id}-s`}>
+                {f.status === 'active' ? (
+                  <span className="console-ai-pill is-ok">
+                    <Check aria-hidden="true" />
+                    {t('console.ai.active')}
+                  </span>
+                ) : retired ? (
+                  <span className="console-ai-warn">
+                    <TriangleAlert aria-hidden="true" />
+                    {t('console.ai.retiredFallback', {
+                      model: f.choices.find((c) => c.id === f.model)?.label ?? f.model,
+                    })}
+                  </span>
+                ) : cut ? (
+                  <span className="console-ai-warn">
+                    <TriangleAlert aria-hidden="true" />
+                    {t('console.ai.cutMissing', { name: PROVIDER_LABEL[f.provider!] })}
+                  </span>
+                ) : (
+                  <span className="console-ai-pill">{t('console.ai.off')}</span>
+                )}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

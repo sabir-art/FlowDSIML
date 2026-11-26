@@ -61,6 +61,12 @@ let currentUserId = null;
 
 /** L30 : état de l'Assistance IA du faux Supabase (désactivée par défaut, comme en base). */
 function aiState(state) {
+  // Un test peut ne donner qu'une partie de l'état (ex. { enabled: true }) : le reste vient des défauts
+  if (state.ai && !state.ai.features) {
+    const partial = state.ai;
+    state.ai = undefined;
+    return Object.assign(aiState(state), partial);
+  }
   return (state.ai ||= {
     enabled: false,
     features: {
@@ -974,7 +980,8 @@ async function install(page, state = seed()) {
           });
         }
         case 'ai_status':
-          return json(route, 200, aiState(state));
+          // L41 étape 3 : fonctions coupées par TutoClick (state.aiCut, tenu à jour par la Console simulée)
+          return json(route, 200, { ...aiState(state), unavailable: state.aiCut ?? [] });
         // L49 P1 : même validation que la RPC (rôle, mode, domaines), réglage dans workspaces.settings
         case 'set_html_capture': {
           const ws = t.workspaces.find((w) => w.id === a.p_ws);
@@ -3182,6 +3189,107 @@ function aiConsole(state, body, route, json) {
       label,
     });
   if (body.action === 'console_catalog') return json(route, 200, { result: { providers: [], models: [] } });
+  // L41 étape 3 : modèle par fonction (même résolution que _shared/ai/functions.ts, catalogue réduit)
+  const CAT = [
+    { id: 'claude-haiku-5-5', label: 'Claude Haiku', provider: 'anthropic', cap: 'text', speed: 1, cost: 1 },
+    {
+      id: 'claude-sonnet-5-5',
+      label: 'Claude Sonnet',
+      provider: 'anthropic',
+      cap: 'text',
+      speed: 2,
+      cost: 2,
+    },
+    { id: 'claude-opus-5-5', label: 'Claude Opus', provider: 'anthropic', cap: 'text', speed: 3, cost: 3 },
+    {
+      id: 'eleven_multilingual_v2',
+      label: 'ElevenLabs · voix multilingue',
+      provider: 'elevenlabs',
+      cap: 'tts',
+      speed: 2,
+      cost: 2,
+    },
+    {
+      id: 'scribe_v1',
+      label: 'ElevenLabs · transcription',
+      provider: 'elevenlabs',
+      cap: 'stt',
+      speed: 2,
+      cost: 2,
+    },
+  ];
+  const FNS = [
+    { fn: 'assistant', cap: 'text', def: 'auto', provider: 'anthropic', features: ['assistant'] },
+    {
+      fn: 'write',
+      cap: 'text',
+      def: 'claude-haiku-5-5',
+      provider: 'anthropic',
+      features: ['write', 'generate', 'dataset', 'chart'],
+    },
+    { fn: 'suggest', cap: 'text', def: 'claude-sonnet-5-5', provider: 'anthropic', features: ['suggest'] },
+    {
+      fn: 'translate',
+      cap: 'text',
+      def: 'claude-sonnet-5-5',
+      provider: 'anthropic',
+      features: ['translate'],
+    },
+    { fn: 'voice', cap: 'tts', def: 'eleven_multilingual_v2', provider: 'elevenlabs', features: ['voice'] },
+    { fn: 'captions', cap: 'stt', def: 'scribe_v1', provider: 'elevenlabs', features: ['captions'] },
+  ];
+  const chosenOf = (state.aiFnModels ??= {});
+  const functions = () => {
+    const keyed = new Set(Object.keys(labels).filter((id) => keys[id] || env.includes(id)));
+    const out = FNS.map((d) => {
+      const pick = chosenOf[d.fn] || d.def;
+      const base = { fn: d.fn, chosen: pick, explicit: !!chosenOf[d.fn] };
+      const choices = CAT.filter((m) => m.cap === d.cap).map((m) => ({
+        id: m.id,
+        label: m.label,
+        provider: m.provider,
+        speed: m.speed,
+        cost: m.cost,
+        available: keyed.has(m.provider),
+      }));
+      if (pick === 'auto')
+        return {
+          ...base,
+          choices,
+          status: keyed.has(d.provider) ? 'active' : 'cut',
+          model: keyed.has(d.provider) ? 'auto' : null,
+          provider: d.provider,
+        };
+      const e = CAT.find((m) => m.id === pick);
+      const provider = e?.provider ?? d.provider;
+      if (!keyed.has(provider)) return { ...base, choices, status: 'cut', model: null, provider };
+      if (e && e.cap === d.cap) return { ...base, choices, status: 'active', model: e.id, provider };
+      const fb = CAT.find((m) => m.provider === provider && m.cap === d.cap);
+      return { ...base, choices, status: fb ? 'fallback' : 'off', model: fb?.id ?? null, provider };
+    });
+    state.aiCut = [
+      ...new Set(
+        out
+          .filter((r) => r.status === 'cut' || r.status === 'off')
+          .flatMap((r) => FNS.find((d) => d.fn === r.fn).features),
+      ),
+    ].sort();
+    return out;
+  };
+  if (body.action === 'console_functions') return json(route, 200, { result: functions() });
+  if (body.action === 'console_set_model') {
+    if (role !== 'admin') return json(route, 403, { error: 'READ_ONLY' });
+    const d = FNS.find((x) => x.fn === body.fn);
+    if (!d) return json(route, 400, { error: 'BAD_FUNCTION' });
+    const model = body.model === null || body.model === d.def ? null : body.model;
+    if (model !== null && !CAT.some((m) => m.id === model && m.cap === d.cap))
+      return json(route, 400, { error: 'BAD_MODEL' });
+    const old = chosenOf[d.fn] ?? null;
+    if (model === null) delete chosenOf[d.fn];
+    else chosenOf[d.fn] = model;
+    log('ai.model_changed', `${d.fn} · ${old ?? 'défaut'} → ${model ?? 'défaut'}`);
+    return json(route, 200, { result: { old, functions: functions() } });
+  }
   if (body.action === 'console_providers') {
     const result = Object.keys(labels).map((id) => {
       const source = keys[id] ? 'vault' : env.includes(id) ? 'env' : null;

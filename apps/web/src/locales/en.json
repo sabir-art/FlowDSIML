@@ -5219,6 +5219,7 @@
     "openScorm": "Open Distribute"
   },
   "ai": {
+    "unavailable": "Unavailable for now. Try again later.",
     "name": "AI Assist",
     "feature": {
       "write": "Write texts",
@@ -5986,7 +5987,8 @@
       "export_audit": "Export du journal",
       "ai_key_added": "AI key added",
       "ai_key_replaced": "AI key replaced",
-      "ai_key_tested": "AI key tested"
+      "ai_key_tested": "AI key tested",
+      "ai_model_changed": "AI model changed"
     },
     "ai": {
       "title": "AI models",
@@ -6039,6 +6041,49 @@
         "NETWORK": "The provider cannot be reached",
         "MISSING": "No key saved",
         "PROVIDER": "The provider returned an error"
+      },
+      "functions": "Model per feature",
+      "functionsHelp": "The default model, for all workspaces. A change applies to the next requests.",
+      "fn": {
+        "assistant": "Editor AI assistant",
+        "write": "Automatic drafting",
+        "suggest": "Consistency check",
+        "translate": "Translation",
+        "voice": "Voice",
+        "captions": "Transcription"
+      },
+      "fnHelp": {
+        "assistant": "Answers and suggestions in the editor",
+        "write": "Step texts during capture (extension)",
+        "suggest": "Titles, texts and pauses across the demo",
+        "translate": "Demo translated into another language",
+        "voice": "Generated voice-over",
+        "captions": "Text of a recorded or imported voice"
+      },
+      "autoSee": "Auto · see “AI assistant” below",
+      "retiredModel": "Former model (retired)",
+      "noModel": "No model available",
+      "active": "Active",
+      "off": "Feature off",
+      "retiredFallback": "Model retired: falling back to {{model}}",
+      "cutMissing": "{{name}} key missing: off",
+      "speed": {
+        "1": "Fast",
+        "2": "Balanced",
+        "3": "Slower"
+      },
+      "cost": {
+        "1": "low cost",
+        "2": "medium cost",
+        "3": "high cost"
+      },
+      "modelSet": "{{fn}}: {{model}}",
+      "modelError": "The model could not be changed. Try again.",
+      "attention_one": "1 feature needs your attention: {{list}}.",
+      "attention_other": "{{count}} features need your attention: {{list}}.",
+      "why": {
+        "retired": "model retired",
+        "missing": "{{name}} key missing"
       }
     }
   },
