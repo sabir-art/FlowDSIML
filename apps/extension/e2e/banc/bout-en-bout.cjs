@@ -68,6 +68,12 @@ async function juger(b, cas, envoi) {
   ok(!!demo && steps.length > 0, `${nom} : l'envoi crée la démo et ${steps.length} étape(s)`);
   if (!demo || !steps.length) return { cas: cas.id, nom, etapes: [] };
   ok(steps.length === pages.length, `${nom} : une étape par page envoyée (${pages.length})`);
+  // Lot B (recette UX §3.1) : deux étapes ne portent jamais le même nom
+  const titres = steps.map((s) => s.title);
+  ok(
+    new Set(titres).size === titres.length,
+    `${nom} : noms d'étapes tous distincts (${titres.map((t) => `« ${t} »`).join(', ')})`,
+  );
 
   const state = seed();
   const base = state.tables.steps.find((s) => s.demo_id === DEMO);

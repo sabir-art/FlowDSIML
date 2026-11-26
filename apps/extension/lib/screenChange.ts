@@ -33,6 +33,17 @@ export function mainHeading(doc: Document): string {
  */
 export function screenName(doc: Document): string {
   const head = mainHeading(doc);
+  // Lot B (recette UX §3.1) : menu ouvert au moment de la copie (déplié, ou survolé) : « Catalogue ·
+  // menu Produits », pour le distinguer de la même page menu fermé
+  for (const m of doc.querySelectorAll('[aria-haspopup]:not([aria-haspopup="false"])')) {
+    if (m.closest(`[data-fd-ui],${PASSING}`) || !isVisible(m)) continue;
+    const open =
+      m.getAttribute('aria-expanded') === 'true' ||
+      m.matches(':hover') ||
+      !!m.parentElement?.matches(':hover');
+    const label = (m.textContent ?? '').replace(/\s+/g, ' ').trim();
+    if (open && label && label.length <= 40) return `${head} · menu ${label}`;
+  }
   for (const t of doc.querySelectorAll('[role="tab"][aria-selected="true"]')) {
     if (t.closest(`[data-fd-ui],${PASSING}`) || !isVisible(t)) continue;
     const tab = (t.textContent ?? '').replace(/\s+/g, ' ').trim();
