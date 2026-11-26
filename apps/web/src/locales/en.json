@@ -1599,6 +1599,9 @@
       "startPage": "Start page",
       "autoLink": "Automatically link identical links",
       "autoLinkHelp": "A “Users” menu link leads to the same page on every page.",
+      "live": "Live Sandbox",
+      "liveHelp": "Pages captured as a Sandbox are replayed with their scripts: menus, tabs and forms respond as on the site, in a box with no network access. Nothing is saved.",
+      "liveForbidden": "Turned off by a workspace administrator (Settings › Security). Pages stay fixed copies.",
       "unlinked": "Click on an unlinked element",
       "unlinkedToast": "Show “No link here” and the clickable areas",
       "unlinkedNone": "Do nothing",
@@ -6593,5 +6596,13 @@
     "var2": "software",
     "conn1": "Analytics alerts",
     "connected": "Connected"
+  },
+  "sandboxLive": {
+    "title": "Live Sandbox",
+    "help": "Pages captured as a Sandbox can be replayed with their scripts, in a box with no network access: nothing is sent to the original site or saved.",
+    "label": "Allow live Sandbox",
+    "labelHelp": "Each demo turns it on in its Sandbox settings. When not allowed, all pages stay fixed copies.",
+    "readOnly": "Only owners and administrators can change this setting.",
+    "saved": "Live Sandbox setting saved"
   }
 }

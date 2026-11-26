@@ -1599,6 +1599,9 @@
       "startPage": "Page de départ",
       "autoLink": "Lier automatiquement les liens identiques",
       "autoLinkHelp": "Un lien « Usagers » du menu mène à la même page sur toutes les pages.",
+      "live": "Sandbox vivant",
+      "liveHelp": "Les pages capturées en Sandbox sont rejouées avec leurs scripts : menus, onglets et formulaires réagissent comme sur le site, dans une boîte sans accès au réseau. Rien n’est enregistré.",
+      "liveForbidden": "Désactivé par un administrateur de l’espace (Paramètres › Sécurité). Les pages restent des copies fixes.",
       "unlinked": "Clic sur un élément non relié",
       "unlinkedToast": "Afficher « Aucun lien à cet endroit » et les zones cliquables",
       "unlinkedNone": "Ne rien faire",
@@ -6593,5 +6596,13 @@
     "var2": "logiciel",
     "conn1": "Alertes analytics",
     "connected": "Connecté"
+  },
+  "sandboxLive": {
+    "title": "Sandbox vivant",
+    "help": "Les pages capturées en Sandbox peuvent être rejouées avec leurs scripts, dans une boîte sans accès au réseau : rien n’est envoyé au site d’origine ni enregistré.",
+    "label": "Autoriser le Sandbox vivant",
+    "labelHelp": "Chaque démo l’active dans ses réglages de Sandbox. Interdit, toutes les pages restent des copies fixes.",
+    "readOnly": "Seuls les propriétaires et les administrateurs peuvent modifier ce réglage.",
+    "saved": "Réglage du Sandbox vivant enregistré"
   }
 }

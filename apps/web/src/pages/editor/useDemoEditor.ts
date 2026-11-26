@@ -143,15 +143,18 @@ export function useDemoEditor(demoId: string) {
     const videos = [...new Set(rows.map((s) => s.video_path).filter((p): p is string => !!p))];
     // A8 : pages HTML (bucket html)
     const pages = [...new Set(rows.map((s) => s.html_path).filter((p): p is string => !!p))];
-    if (!paths.length && !videos.length && !pages.length) return;
-    const [img, vid, htm] = await Promise.all([
+    // Sandbox v2 : enregistrements vivants (bucket html_live), pour l'aperçu
+    const lives = [...new Set(rows.map((s) => s.html_live_path).filter((p): p is string => !!p))];
+    if (!paths.length && !videos.length && !pages.length && !lives.length) return;
+    const [img, vid, htm, liv] = await Promise.all([
       paths.length ? supabase.storage.from('captures').createSignedUrls(paths, 3600) : { data: [] },
       videos.length ? supabase.storage.from('videos').createSignedUrls(videos, 3600) : { data: [] },
       pages.length ? supabase.storage.from('html').createSignedUrls(pages, 3600) : { data: [] },
+      lives.length ? supabase.storage.from('html_live').createSignedUrls(lives, 3600) : { data: [] },
     ]);
     setImageUrls((prev) => {
       const next = { ...prev };
-      for (const d of [...(img.data ?? []), ...(vid.data ?? []), ...(htm.data ?? [])])
+      for (const d of [...(img.data ?? []), ...(vid.data ?? []), ...(htm.data ?? []), ...(liv.data ?? [])])
         if (d.path && d.signedUrl) next[d.path] = d.signedUrl;
       return next;
     });
@@ -627,6 +630,8 @@ export function useDemoEditor(demoId: string) {
               voice_path: await copy('voices', rest.voice_path),
               video_path: await copy('videos', rest.video_path),
               html_path: await copy('html', rest.html_path),
+              // Sandbox v2 : la copie d'une page reste inerte (l'enregistrement vivant n'est pas dupliqué)
+              html_live_path: null,
             } as never)
             .select()
             .single();
