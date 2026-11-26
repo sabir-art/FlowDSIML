@@ -145,3 +145,13 @@ Remarques non bloquantes sur D :
 4. Dans l'e2e, passer le contexte de ce contrôle par `themedContext`.
 
 Demandes concernées : L41 (« Jamais testée » avant un premier test) · interrupteur gris (31bc369) · Sandbox v2, plan « Liens sans page », liens de déconnexion, de suppression, de désabonnement et fichiers jamais ouverts.
+
+## Vérification B sur 73a9839 (26/11) : VERT
+
+- Paramètres › Sécurité (lecteur) et Éditeur › Voix off (lecteur), « Lecture automatique » et « Sous-titres affichés » activés et désactivés : **piste grise** (#4f5966 en clair, #a9b3bf en sombre), opacité 1, bouton couleur de surface. L'éditeur suit maintenant le reste de l'app.
+- Propriétaire, interrupteurs actifs : la piste reste prune (#a3195b, #cf86a9). Aucune régression.
+- Nouvel e2e interrupteur-lecture : 3/3 en clair comme en sombre.
+
+Capture : `73a9839-B-interrupteur-gris-partout.png` (Sécurité, puis l'éditeur, en clair et en sombre).
+
+Demandes concernées : interrupteur activé et désactivé en gris (31bc369, 73a9839).
