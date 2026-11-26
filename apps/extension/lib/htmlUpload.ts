@@ -177,7 +177,9 @@ export async function sendHtml(
         : null;
     const ops: HtmlOp[] = [];
     const next = stepIds[i + 1];
-    if (p.clickSel && next && target.kind === 'sandbox')
+    // Page vivante : la page réagit elle-même à ses clics et ses vrais liens mènent aux pages capturées ;
+    // le clic capturé ne devient pas un lien (il prendrait le pas sur le comportement de la page)
+    if (p.clickSel && next && target.kind === 'sandbox' && !live)
       ops.push({ id: `l${i + 1}`, sel: p.clickSel, op: 'link', value: next, scope: 'step' });
     // Liens externes gardés : réactivés par une opération « extlink » (le lecteur affiche d'abord
     // « Vous quittez la démo »). Une adresse que le serveur a signalée reste désactivée.

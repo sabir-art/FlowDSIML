@@ -112,6 +112,8 @@ export function HtmlStep({
   /** Sandbox v2 : adresse d'une page capturée → étape ; une navigation vers la page elle-même la recharge. */
   const navMap = useRef(new Map<string, string>());
   const [reload, setReload] = useState(0);
+  /** Page rejouée avec ses scripts (pas de « zone cliquable » à ajouter : la page réagit elle-même). */
+  const [isLive, setIsLive] = useState(false);
   const live = sandbox ? h.live : null;
   const liveKey = livePages.map((p) => `${p.id}:${p.url}`).join('|');
   const [toast, setToast] = useState<string | null>(null);
@@ -180,7 +182,16 @@ export function HtmlStep({
         ),
       });
     };
-    (live ? vivante().catch(inert) : inert())
+    setIsLive(false);
+    (live
+      ? vivante()
+          .then((d) => {
+            if (alive) setIsLive(true);
+            return d;
+          })
+          .catch(inert)
+      : inert()
+    )
       .then((d) => alive && setDoc(d))
       .catch(() => alive && setFailed(true));
     return () => {
@@ -399,7 +410,7 @@ export function HtmlStep({
           {toast ?? ''}
         </div>
         {/* Démo guidée : une bulle posée sur un élément fait avancer au clic, ce n'est pas une impasse */}
-        {onAddZone && ready && zones === 0 && !(target && !sandbox) && !noZoneClosed && (
+        {onAddZone && ready && zones === 0 && !isLive && !(target && !sandbox) && !noZoneClosed && (
           <div class="p-html-nozone" role="status">
             <Info aria-hidden="true" />
             <div class="p-html-nozone-tx">
