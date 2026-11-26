@@ -25,6 +25,22 @@ export const DEADLINE_MS: Partial<Record<Task, number>> = { step_draft: 4000 };
 
 export const SONNET = 'claude-sonnet-5-5';
 export const HAIKU = 'claude-haiku-5-5';
+export const OPUS = 'claude-opus-5-5';
+
+/**
+ * Retours client, planche 3 : choix du modèle de l'assistant (« Auto » par défaut). Auto laisse le serveur
+ * choisir selon la demande ; sinon, un modèle autorisé dans l'espace. Tant que Paramètres › Assistance IA ›
+ * Modèles n'existe pas (L41), les modèles autorisés sont Sonnet et Opus.
+ */
+export const MODEL_CHOICES = { sonnet: SONNET, opus: OPUS } as const;
+export type ModelChoice = 'auto' | keyof typeof MODEL_CHOICES;
+export const ALLOWED_MODELS: Array<keyof typeof MODEL_CHOICES> = ['sonnet', 'opus'];
+/** Nom affiché du modèle réellement utilisé (« Généré par IA (Auto · Claude Sonnet), à vérifier »). */
+export const MODEL_LABEL: Record<string, string> = {
+  [SONNET]: 'Claude Sonnet',
+  [OPUS]: 'Claude Opus',
+  [HAIKU]: 'Claude Haiku',
+};
 
 export const LANGS: Record<string, string> = {
   fr: 'français',
@@ -150,6 +166,8 @@ export interface Request {
   /** Contenu déjà masqué, prêt à envoyer. */
   payload: Record<string, unknown>;
   redacted: number;
+  /** Planche 3 : modèle demandé (assistant seulement ; « auto » sinon). */
+  model: ModelChoice;
 }
 
 /** Valide la demande et masque tous les textes libres. */
@@ -157,6 +175,9 @@ export function parseRequest(body: Record<string, unknown>): Request {
   const task = body.task as Task;
   if (!(task in FEATURE_OF)) throw new AiError('BAD_TASK');
   const l = lang(body.lang);
+  // Seul l'assistant laisse choisir le modèle ; les autres tâches gardent le leur
+  const model = (task === 'assistant' ? (body.model ?? 'auto') : 'auto') as ModelChoice;
+  if (model !== 'auto' && !(model in MODEL_CHOICES)) throw new AiError('BAD_MODEL');
   const input = (body.input ?? {}) as Record<string, unknown>;
   let redacted = 0;
   const r = (s: string) => {
@@ -275,7 +296,7 @@ export function parseRequest(body: Record<string, unknown>): Request {
       break;
     }
   }
-  return { task, lang: l, payload, redacted };
+  return { task, lang: l, payload, redacted, model };
 }
 
 // ---------------------------------------------------------------------------
@@ -609,4 +630,14 @@ export function checkOutput(task: Task, out: any, payload: Record<string, any>):
       return { text: out.text.trim(), changes };
     }
   }
+}
+
+/**
+ * Planche 3 : modèle demandé appliqué au prompt. « auto » garde le modèle de la tâche ; un modèle non
+ * autorisé dans l'espace est refusé (403).
+ */
+export function applyModel(prompt: Prompt, req: Request, allowed: string[] = ALLOWED_MODELS): Prompt {
+  if (req.model === 'auto') return prompt;
+  if (!allowed.includes(req.model)) throw new AiError('MODEL_NOT_ALLOWED', 403);
+  return { ...prompt, model: MODEL_CHOICES[req.model] };
 }

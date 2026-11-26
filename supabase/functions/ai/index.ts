@@ -8,7 +8,17 @@
 import Anthropic from 'npm:@anthropic-ai/sdk@1.11.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { AiError, DEADLINE_MS, FEATURE_OF, SONNET, buildPrompt, checkOutput, parseRequest } from './lib.ts';
+import {
+  AiError,
+  DEADLINE_MS,
+  FEATURE_OF,
+  HAIKU,
+  MODEL_LABEL,
+  applyModel,
+  buildPrompt,
+  checkOutput,
+  parseRequest,
+} from './lib.ts';
 import {
   STT_MODEL,
   TTS_FORMAT,
@@ -322,16 +332,16 @@ async function editorOf(req: Request, ws: string): Promise<string | null> {
   return m && (RANK[m.role as string] ?? 0) >= RANK.editor! ? uid : null;
 }
 
-/** Appel au modèle. Sonnet : repli côté serveur sur refus (« default ») ; Haiku n'en a pas. */
+/** Appel au modèle. Sonnet et Opus : repli côté serveur sur refus (« default ») ; Haiku n'en a pas. */
 async function callModel(prompt: ReturnType<typeof buildPrompt>, deadline?: number) {
   // Délai de la tâche : un seul essai, abandonné au-delà (l'appelant rend alors la demande au quota)
   const opts = deadline ? { timeout: deadline, maxRetries: 0 } : undefined;
   const output_config = {
-    effort: prompt.model === SONNET ? ('medium' as const) : ('low' as const),
+    effort: prompt.model === HAIKU ? ('low' as const) : ('medium' as const),
     ...(prompt.schema ? { format: { type: 'json_schema' as const, schema: prompt.schema } } : {}),
   };
   const res =
-    prompt.model === SONNET
+    prompt.model !== HAIKU
       ? await anthropic.beta.messages.create(
           {
             model: prompt.model,
@@ -406,7 +416,14 @@ Deno.serve(async (req) => {
   const blocked = await reserveOr(ws, uid, FEATURE_OF[parsed.task]);
   if (blocked) return blocked;
 
-  const prompt = buildPrompt(parsed);
+  let prompt;
+  try {
+    prompt = applyModel(buildPrompt(parsed), parsed);
+  } catch (e) {
+    return json(e instanceof AiError ? e.status : 400, {
+      error: e instanceof AiError ? e.code : 'BAD_REQUEST',
+    });
+  }
   let result;
   try {
     result = await callModel(prompt, DEADLINE_MS[parsed.task]);
@@ -433,6 +450,8 @@ Deno.serve(async (req) => {
     return json(200, {
       result: checkOutput(parsed.task, result.out, parsed.payload),
       redacted: parsed.redacted,
+      // Planche 3 : modèle réellement utilisé (pied « Généré par IA (Auto · Claude Sonnet), à vérifier »)
+      model: MODEL_LABEL[prompt.model] ?? '',
     });
   } catch (e) {
     return json(502, { error: e instanceof AiError ? e.code : 'BAD_OUTPUT' });
