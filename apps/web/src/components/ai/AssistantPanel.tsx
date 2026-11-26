@@ -137,7 +137,9 @@ export function AssistantPanel({
       const msg =
         e instanceof AiRequestError && (e.code === 'AI_QUOTA_WORKSPACE' || e.code === 'AI_QUOTA_USER')
           ? blockText(e.code === 'AI_QUOTA_USER' ? 'userQuota' : 'quota', status)
-          : t('ai.error');
+          : e instanceof AiRequestError && e.code === 'UNAVAILABLE'
+            ? blockText('unavailable', status)
+            : t('ai.error');
       setMsgs((m) => [...m, { role: 'error', text: msg }]);
     } finally {
       setBusy(false);
@@ -146,6 +148,9 @@ export function AssistantPanel({
   };
 
   const starters = [t('ai.assistant.s1'), t('ai.assistant.s2'), t('ai.assistant.s3')];
+  // Recette UX (L41 étape 3) : coupé par TutoClick, l'assistant le dit dès l'ouverture ; suggestions
+  // et envoi désactivés (aucune demande ne partirait)
+  const cut = aiBlock(status, 'assistant') === 'unavailable';
   return (
     <div className="ai-assistant">
       <p className="t-caption muted ai-as-context">
@@ -154,6 +159,11 @@ export function AssistantPanel({
       <p className="fd-composer__context ai-as-cleared" id="ai-as-cleared">
         {t('ai.assistant.cleared')}
       </p>
+      {cut && (
+        <p className="ai-as-unavailable" role="status">
+          {blockText('unavailable', status)}
+        </p>
+      )}
       <div className="ai-suggest-body ai-as-log" ref={log} role="log" aria-live="polite" aria-busy={busy}>
         {msgs.map((m, mi) => (
           <div key={mi} className={`ai-as-msg is-${m.role}`}>
@@ -233,7 +243,13 @@ export function AssistantPanel({
       {msgs.length === 0 && (
         <div className="ai-as-starters">
           {starters.map((s) => (
-            <button key={s} type="button" className="btn btn-secondary btn-sm" onClick={() => void send(s)}>
+            <button
+              key={s}
+              type="button"
+              className="btn btn-secondary btn-sm"
+              aria-disabled={cut || undefined}
+              onClick={() => !cut && void send(s)}
+            >
               {s}
             </button>
           ))}
@@ -249,12 +265,14 @@ export function AssistantPanel({
         submitLabel={t('ai.assistant.send')}
         submitKey={t('ai.assistant.enterKey')}
         describedBy="ai-as-cleared"
+        disabled={cut}
         trailing={<ModelPicker value={model} onChange={setModel} />}
         stop={busy ? { label: t('ai.assistant.stop'), onStop: () => ctrl.current?.abort() } : undefined}
         onSubmit={() => void send(draft)}
         renderInput={(props) => (
           <textarea
             {...props}
+            disabled={cut || undefined}
             ref={(el) => {
               input.current = el;
               if (typeof props.ref === 'function') props.ref(el);

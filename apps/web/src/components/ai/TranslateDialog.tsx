@@ -253,7 +253,7 @@ export function TranslateDialog({
             )}
             {phase === 'error' && (
               <p className="ai-after" role="alert">
-                {t('ai.error')}
+                {aiBlock(status, 'translate') === 'unavailable' ? t('ai.unavailable') : t('ai.error')}
               </p>
             )}
             {(phase === 'ready' || phase === 'saving') && (
