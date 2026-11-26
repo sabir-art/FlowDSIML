@@ -285,10 +285,10 @@ function fakeExtension(version) {
   await banner.waitFor();
   ok(
     (await banner.getAttribute('role')) === 'status' &&
-      /Capture en cours dans un autre onglet\. Les étapes arriveront après l’étape 1 · Écran 1\./.test(
+      /En direct depuis l’extension · 0 étape reçue · Captures d’écran\. Les étapes arriveront après l’étape 1 · Écran 1\./.test(
         (await banner.innerText()).replace(/\s+/g, ' '),
       ),
-    'bandeau role=status : « Capture en cours dans un autre onglet. Les étapes arriveront après l’étape 1 · Écran 1. »',
+    'bandeau role=status : « En direct depuis l’extension · 0 étape reçue · Captures d’écran », puis l’endroit d’arrivée',
   );
   const marker = page.locator('.cm-marker');
   ok(
@@ -314,6 +314,16 @@ function fakeExtension(version) {
     ),
   );
   ok(true, 'étape d’insertion déplacée : le bandeau suit (« après l’étape 2 · Écran 1 »)');
+  // L60 §3 : en direct, le nombre d'étapes reçues et l'étape suivante en réception
+  await page.evaluate(() => (window.__ext.status = { state: 'recording', steps: 3, stepIds: [] }));
+  await page.waitForFunction(() =>
+    /3 étapes reçues/.test(document.querySelector('.cm-banner')?.textContent ?? ''),
+  );
+  ok(
+    /^Étape 6 · réception…$/.test((await page.locator('.cm-marker > span[aria-hidden]').innerText()).trim()),
+    'en direct : « 3 étapes reçues », repère « Étape 6 · réception… » (après l’étape 2)',
+  );
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/ajout-en-direct${sfx}.png` });
 
   // ===== Après l'envoi : l'extension a créé deux étapes en fin de démo =====
   const base = data.tables.steps.find((s) => s.id === 's1');

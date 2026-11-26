@@ -1117,7 +1117,12 @@
       "added_other": "{{count}} étapes ajoutées après l’étape {{n}}",
       "addedStart_one": "{{count}} étape ajoutée au début",
       "addedStart_other": "{{count}} étapes ajoutées au début",
-      "new": "Nouveau"
+      "new": "Nouveau",
+      "live": "En direct depuis l’extension",
+      "received_one": "{{count}} étape reçue",
+      "received_other": "{{count}} étapes reçues",
+      "liveMode": "Captures d’écran",
+      "receiving": "Étape {{n}} · réception…"
     },
     "rail": {
       "label": "Outils de l'étape",

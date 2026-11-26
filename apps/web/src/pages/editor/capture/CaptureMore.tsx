@@ -56,6 +56,8 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
   });
   /** Étapes ajoutées, « Nouveau » jusqu'à leur première ouverture. */
   const [fresh, setFresh] = useState<string[]>([]);
+  /** L60 §3 : étapes déjà capturées dans l'autre onglet (« En direct depuis l'extension · 3 étapes reçues »). */
+  const [received, setReceived] = useState(0);
   const live = useRef(editor);
   live.current = editor;
   const remember = useCallback(
@@ -92,7 +94,8 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
         const st = await addStatus(demoId);
         if (stopped || !st) return;
         if (st.state === 'none') return remember(null);
-        if (st.state !== 'sent') return;
+        if (st.state !== 'sent') return setReceived(st.steps);
+        setReceived(0);
         const added = (await live.current.adoptSteps(st.stepIds, pending.afterId)) ?? [];
         await clearAddCapture(demoId);
         remember(null);
@@ -154,6 +157,7 @@ export function useCaptureMore(editor: DemoEditor, demoId: string, select: (inde
     afterLabel,
     fresh,
     seen,
+    received: pending ? received : 0,
   };
 }
 
@@ -166,7 +170,12 @@ export function CaptureMoreBanner({ capture }: { capture: CaptureMore }) {
     <div className="cm-banner" role="status">
       <Radio aria-hidden="true" />
       <p>
-        <b>{t('editor.captureMore.running')}</b>{' '}
+        {/* L60 §3 : en direct depuis l'extension, nombre d'étapes reçues et type de capture */}
+        <b>{t('editor.captureMore.live')}</b>
+        {' · '}
+        {t('editor.captureMore.received', { count: capture.received })}
+        {' · '}
+        {t('editor.captureMore.liveMode')}.{' '}
         {after
           ? t('editor.captureMore.willArriveAfter', { n: after.n, title: after.title })
           : t('editor.captureMore.willArriveStart')}
@@ -186,12 +195,17 @@ export function CaptureMoreBanner({ capture }: { capture: CaptureMore }) {
 }
 
 /** Repère pointillé dans la liste des étapes : « Les nouvelles étapes arriveront ici ». */
-export function CaptureMoreMarker({ n }: { n: number }) {
+export function CaptureMoreMarker({ n, received = 0 }: { n: number; received?: number }) {
   const { t } = useTranslation();
   return (
     <li className="cm-marker" data-gap-exempt="">
       <CornerDownRight aria-hidden="true" />
-      <span aria-hidden="true">{t('editor.captureMore.here')}</span>
+      {/* L60 §3 : pendant la capture, l'étape suivante en réception (« Étape 4 · réception… ») */}
+      <span aria-hidden="true">
+        {received > 0
+          ? t('editor.captureMore.receiving', { n: n + received + 1 })
+          : t('editor.captureMore.here')}
+      </span>
       <span className="sr-only">
         {n > 0 ? t('editor.captureMore.hereAfter', { n }) : t('editor.captureMore.hereStart')}
       </span>

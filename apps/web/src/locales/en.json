@@ -1117,7 +1117,12 @@
       "added_other": "{{count}} steps added after step {{n}}",
       "addedStart_one": "{{count}} step added at the start",
       "addedStart_other": "{{count}} steps added at the start",
-      "new": "New"
+      "new": "New",
+      "live": "Live from the extension",
+      "received_one": "{{count}} step received",
+      "received_other": "{{count}} steps received",
+      "liveMode": "Screenshots",
+      "receiving": "Step {{n}} · receiving…"
     },
     "rail": {
       "label": "Step tools",
