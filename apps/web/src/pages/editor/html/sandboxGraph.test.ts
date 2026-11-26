@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StepRow } from '../types';
-import { deadByUrl, deadLinks, sandboxGraph } from './sandboxGraph';
+import { coverage, coverageRatio, deadByUrl, deadLinks, sandboxGraph } from './sandboxGraph';
 
 const page = (id: string, url: string, links: Array<[string, string]>, ops: unknown[] = []) =>
   ({
@@ -103,5 +103,41 @@ describe('liens sans page regroupés par destination (lot B)', () => {
       ['https://x.example/services', ['p1', 'p2']],
       ['https://x.example/aide', ['p2']],
     ]);
+  });
+});
+
+describe('couverture du site (Sandbox v2, étape 4a)', () => {
+  const site = 'https://crm.exemple.test';
+  const steps = [
+    page(A, `${site}/`, [
+      ['nav a:nth-of-type(1)', `${site}/clients`],
+      ['nav a:nth-of-type(2)', `${site}/agenda`],
+      ['nav a:nth-of-type(3)', `${site}/aide`],
+      ['nav a:nth-of-type(4)', 'https://autre.exemple.test/'],
+      ['main a', '#haut'],
+    ]),
+    // Même destination « /agenda » portée par une seconde page : comptée une fois
+    page(B, `${site}/clients`, [
+      ['nav a:nth-of-type(2)', `${site}/agenda`],
+      ['nav a:nth-of-type(5)', `${site}/factures`],
+    ]),
+  ];
+  it('pages capturées face aux destinations du même site, chacune comptée une fois', () => {
+    expect(coverage(steps, {})).toEqual({ captured: 2, missing: 3, left: 0 });
+    expect(coverageRatio(coverage(steps, {}))).toBe(40);
+  });
+  it('liens laissés par l’auteur : à part, comptés dans le total seulement sur demande', () => {
+    const sb = { ignoredLinks: [{ from: A, url: `${site}/aide` }] };
+    const c = coverage(steps, sb);
+    expect(c).toEqual({ captured: 2, missing: 2, left: 1 });
+    expect(coverageRatio(c)).toBe(50);
+    expect(coverageRatio(c, true)).toBe(40);
+  });
+  it('une destination laissée sur une page mais manquante sur une autre reste manquante', () => {
+    const sb = { ignoredLinks: [{ from: B, url: `${site}/agenda` }] };
+    expect(coverage(steps, sb)).toEqual({ captured: 2, missing: 3, left: 0 });
+  });
+  it('sans lien ni page : 100 %', () => {
+    expect(coverageRatio(coverage([], {}))).toBe(100);
   });
 });
