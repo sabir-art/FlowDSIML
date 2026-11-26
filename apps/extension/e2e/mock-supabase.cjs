@@ -62,6 +62,8 @@ http
         if (b.task !== 'step_draft') return send(400, { error: 'BAD_TASK' });
         if (!ai.enabled) return send(403, { error: 'AI_DISABLED' });
         if (ai.fail) return send(502, { error: 'PROVIDER' });
+        // Comme le serveur : au-delà de 4 s, demande rendue au quota et refusée (TIMEOUT)
+        if ((ai.delay || 0) > 4000) return setTimeout(() => send(504, { error: 'TIMEOUT' }), 4000);
         const label = String(b.input?.label ?? '');
         return setTimeout(
           () =>

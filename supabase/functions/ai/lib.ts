@@ -16,6 +16,13 @@ export const FEATURE_OF = {
 } as const;
 export type Task = keyof typeof FEATURE_OF;
 
+/**
+ * Recette UX lot E : délai au-delà duquel la demande est abandonnée, rendue au quota (aucun crédit
+ * décompté) et refusée (TIMEOUT). La rédaction pendant la capture ne doit pas faire attendre : sans
+ * réponse en 4 s, l'étape garde le libellé du clic, sans repère « IA ».
+ */
+export const DEADLINE_MS: Partial<Record<Task, number>> = { step_draft: 4000 };
+
 export const SONNET = 'claude-sonnet-5-5';
 export const HAIKU = 'claude-haiku-5-5';
 

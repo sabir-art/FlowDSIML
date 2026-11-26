@@ -8,7 +8,7 @@
 import Anthropic from 'npm:@anthropic-ai/sdk@1.11.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
-import { AiError, FEATURE_OF, SONNET, buildPrompt, checkOutput, parseRequest } from './lib.ts';
+import { AiError, DEADLINE_MS, FEATURE_OF, SONNET, buildPrompt, checkOutput, parseRequest } from './lib.ts';
 import {
   STT_MODEL,
   TTS_FORMAT,
@@ -323,29 +323,37 @@ async function editorOf(req: Request, ws: string): Promise<string | null> {
 }
 
 /** Appel au modèle. Sonnet : repli côté serveur sur refus (« default ») ; Haiku n'en a pas. */
-async function callModel(prompt: ReturnType<typeof buildPrompt>) {
+async function callModel(prompt: ReturnType<typeof buildPrompt>, deadline?: number) {
+  // Délai de la tâche : un seul essai, abandonné au-delà (l'appelant rend alors la demande au quota)
+  const opts = deadline ? { timeout: deadline, maxRetries: 0 } : undefined;
   const output_config = {
     effort: prompt.model === SONNET ? ('medium' as const) : ('low' as const),
     ...(prompt.schema ? { format: { type: 'json_schema' as const, schema: prompt.schema } } : {}),
   };
   const res =
     prompt.model === SONNET
-      ? await anthropic.beta.messages.create({
-          model: prompt.model,
-          max_tokens: prompt.maxTokens,
-          system: prompt.system,
-          messages: prompt.messages,
-          output_config,
-          betas: ['server-side-fallback-2026-07-01'],
-          fallbacks: 'default',
-        })
-      : await anthropic.messages.create({
-          model: prompt.model,
-          max_tokens: prompt.maxTokens,
-          system: prompt.system,
-          messages: prompt.messages,
-          output_config,
-        });
+      ? await anthropic.beta.messages.create(
+          {
+            model: prompt.model,
+            max_tokens: prompt.maxTokens,
+            system: prompt.system,
+            messages: prompt.messages,
+            output_config,
+            betas: ['server-side-fallback-2026-07-01'],
+            fallbacks: 'default',
+          },
+          opts,
+        )
+      : await anthropic.messages.create(
+          {
+            model: prompt.model,
+            max_tokens: prompt.maxTokens,
+            system: prompt.system,
+            messages: prompt.messages,
+            output_config,
+          },
+          opts,
+        );
   const usage = {
     input: Number(res.usage?.input_tokens ?? 0),
     output: Number(res.usage?.output_tokens ?? 0),
@@ -401,10 +409,15 @@ Deno.serve(async (req) => {
   const prompt = buildPrompt(parsed);
   let result;
   try {
-    result = await callModel(prompt);
+    result = await callModel(prompt, DEADLINE_MS[parsed.task]);
   } catch (e) {
-    // Aucune réponse : la demande est rendue. Seul le statut est journalisé.
+    // Aucune réponse (ou pas dans le délai de la tâche) : la demande est rendue, aucun crédit décompté.
+    // Seul le statut est journalisé.
     await admin.rpc('ai_commit', { p_ws: ws, p_user: uid, p_input: 0, p_output: 0, p_refund: true });
+    if (e instanceof Anthropic.APIConnectionTimeoutError) {
+      console.error('ai: provider timeout');
+      return json(504, { error: 'TIMEOUT' });
+    }
     const status = e instanceof Anthropic.APIError ? (e.status ?? 0) : 0;
     console.error('ai: provider', status || (e instanceof Error ? e.name : 'unknown'));
     return json(status === 429 || status === 529 ? 503 : 502, { error: 'PROVIDER' });

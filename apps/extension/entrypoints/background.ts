@@ -298,7 +298,8 @@ async function draftStep(id: string, n: number, tabId: number, msg: ClickPayload
         input: { label: msg.label.slice(0, 200), page: msg.title.slice(0, 200) },
       },
     });
-    const late = new Promise<never>((_, no) => setTimeout(() => no(new Error('late')), 4000));
+    // Le serveur abandonne au-delà de 4 s (TIMEOUT, aucun crédit décompté) ; 5 s ici, réseau compris
+    const late = new Promise<never>((_, no) => setTimeout(() => no(new Error('late')), 5000));
     const r = (await Promise.race([call, late])) as { data?: { result?: { title?: string; text?: string } } };
     const out = r.data?.result;
     if (!out?.title || !out.text) throw new Error('empty');
