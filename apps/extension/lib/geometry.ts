@@ -76,7 +76,11 @@ export function defaultHotspotTitle(label: string, locale: 'fr' | 'en' = 'fr'): 
  * doivent alors être ramenées à la hauteur de l'image, pas à celle du clic. Même largeur exigée : sinon
  * (émulation mobile, zoom) la fenêtre du clic est gardée.
  */
-export function capturedViewport(atClick: Viewport, dpr: number, image: { width: number; height: number }): Viewport {
+export function capturedViewport(
+  atClick: Viewport,
+  dpr: number,
+  image: { width: number; height: number },
+): Viewport {
   const scale = Math.max(1, dpr || 1);
   const w = image.width / scale;
   const h = image.height / scale;
