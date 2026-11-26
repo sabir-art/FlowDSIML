@@ -202,7 +202,8 @@ const SHOTS = process.env.SHOTS_DIR;
     ok((await zone.locator('b').textContent()) === 'formation-acme.webm', `${tag} envoi : nom du fichier`);
     ok(
       await until(async () =>
-        /^Envoi… \d+ % · \d+ sur 3 Mo$/.test(await zone.getByRole('status').textContent()),
+        // NUM-01 : espaces insécables dans « n % », « sur 3 » et « 3 Mo »
+        /^Envoi… \d+\s% · \d+\ssur\s3\sMo$/.test(await zone.getByRole('status').textContent()),
       ),
       `${tag} envoi : « Envoi… n % · x sur 3 Mo »`,
     );
@@ -268,7 +269,7 @@ const SHOTS = process.env.SHOTS_DIR;
     const resume = zone.getByRole('button', { name: 'Reprendre' });
     await resume.waitFor({ timeout: 15000 });
     ok(
-      /^Envoi interrompu · \d+ %$/.test(await zone.getByRole('status').textContent()),
+      /^Envoi interrompu · \d+\s%$/.test(await zone.getByRole('status').textContent()),
       `${tag} coupure : « Envoi interrompu · n % »`,
     );
     await shot('nouvelle-video-interrompu');
