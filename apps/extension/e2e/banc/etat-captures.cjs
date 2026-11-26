@@ -122,7 +122,8 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
     await p2.bringToFront();
     await p2.locator('[data-fd-ui]').first().waitFor({ state: 'attached' });
     const base = await steps();
-    for (const sel of ['#colles', '#ville', 'button.btn']) {
+    // Le bouton aux textes collés en premier : aucun clic récent, l'anti double-clic (400 ms) ne l'écarte pas
+    for (const sel of ['#colle-btn', '#colles', '#ville', 'button.btn']) {
       const n = await steps();
       await p2.locator(sel).first().click();
       const end = Date.now() + 15000;
@@ -140,7 +141,13 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
           r.onsuccess = () => {
             const g = r.result.transaction('captures').objectStore('captures').getAll();
             g.onsuccess = () =>
-              res(g.result.map((c) => ({ title: c.title, zones: (c.zones ?? []).map((z) => z.type) })));
+              res(
+                g.result.map((c) => ({
+                  title: c.title,
+                  label: c.label,
+                  zones: (c.zones ?? []).map((z) => z.type),
+                })),
+              );
           };
         }),
     );
@@ -149,6 +156,12 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
     ok(
       made >= 2 && piege.length === made && total === 0,
       `page piège, ${piege.length} captures : ${total} zone(s) repérée(s), 0 attendue (${JSON.stringify(piege.map((c) => c.zones))})`,
+    );
+    // Recette 277f878 §2 : bouton aux spans collés, premier morceau de texte plutôt que « Cliquez ici »
+    const labels = caps.map((c) => c.label);
+    ok(
+      labels.includes('Créer une note'),
+      `bouton aux textes collés : « Créer une note » (${JSON.stringify(labels)})`,
     );
   }
   await ctx.close();

@@ -111,7 +111,7 @@ const PAGES = {
   ),
   // 7. Page piège (recette UX du 25/11) : rien de personnel, donc aucune détection attendue. En-têtes
   //    de tableau « Nom / Statut / Actions », les mêmes en mots collés, une ville seule, un avis signé
-  //    d'un prénom et d'une initiale, un rôle tenu par un service, une colonne « Client » sans nom.
+  //    d'un prénom et d'une initiale, un rôle tenu par un service, une colonne « Client » sans nom, un bouton aux textes collés.
   '/piege': page(
     'Offres',
     `${entete}</header><main><h1>Offres</h1>
@@ -122,6 +122,7 @@ const PAGES = {
      <div class="carte" id="grille"><div>Nom</div><div>Statut</div><div>Actions</div></div>
      <p class="carte" id="ville">Ville : Lyon</p>
      <p class="carte" id="avis">Avis : « Très bon outil », Camille D.</p>
+     <button class="btn" id="colle-btn"><span>Créer une note</span><span>Texte libre</span><span>Ouvrir</span></button>
      <p class="carte" id="role">Responsable : Service RH</p>
      <label class="carte">Type de client <select><option>Entreprise</option><option>Particulier</option></select></label>
      <table class="carte"><thead><tr><th>Client</th><th>Formule</th></tr></thead>
