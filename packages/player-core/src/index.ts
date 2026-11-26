@@ -164,5 +164,6 @@ export function stackWindowHint(foot: HTMLElement): boolean {
   return stacked;
 }
 export * from './htmlFrame';
+export * from './liveFrame';
 export * from './animation';
 export * from './crop';
