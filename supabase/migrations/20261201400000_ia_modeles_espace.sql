@@ -13,16 +13,17 @@
 alter table public.ai_assistant_models add column if not exists proposed_at timestamptz;
 update public.ai_assistant_models set proposed_at = '2000-01-01T00:00:00Z' where proposed and proposed_at is null;
 
--- Date de proposition tenue par la base : passage à « proposé » = maintenant ; retiré = nulle
+-- Date de la PREMIÈRE proposition, tenue par la base (décision du chef) : décocher puis recocher un modèle
+-- garde sa date, et les espaces jamais réglés le gardent ; un modèle jamais proposé n'a pas de date
 create or replace function private.ai_assistant_proposed_at()
 returns trigger language plpgsql set search_path = '' as $$
 begin
-  if not new.proposed then
-    new.proposed_at := null;
-  elsif tg_op = 'INSERT' or not old.proposed then
+  if tg_op = 'UPDATE' and old.proposed_at is not null then
+    new.proposed_at := old.proposed_at;
+  elsif new.proposed then
     new.proposed_at := now();
   else
-    new.proposed_at := old.proposed_at;
+    new.proposed_at := null;
   end if;
   return new;
 end $$;

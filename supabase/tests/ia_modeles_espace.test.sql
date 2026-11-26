@@ -3,7 +3,7 @@
 -- ordre de la Console ; les autres réglages IA de l'espace sont gardés ; écriture directe refusée.
 begin;
 set search_path = public, extensions;
-select plan(14);
+select plan(16);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000041d1', 'proprio-ia5@example.com'),
@@ -70,8 +70,19 @@ select is((select proposed_at from public.ai_assistant_models where model = 'cla
   'Haiku proposé maintenant : date du jour (après la création des espaces existants)');
 select is((select proposed_at from public.ai_assistant_models where model = 'claude-sonnet-5-5'),
   '2000-01-01T00:00:00Z'::timestamptz, 'Sonnet, toujours proposé : date inchangée');
-select is((select proposed_at from public.ai_assistant_models where model = 'claude-opus-5-5'), null,
-  'Opus retiré : plus de date');
+select is((select proposed_at from public.ai_assistant_models where model = 'claude-opus-5-5'),
+  '2000-01-01T00:00:00Z'::timestamptz, 'Opus retiré : la date de sa première proposition est gardée');
+-- Décoché puis recoché : même date, les espaces jamais réglés le gardent
+select public.ai_assistant_set('[
+  {"model":"claude-sonnet-5-5","position":1,"proposed":true,"tag":"recommended"},
+  {"model":"claude-opus-5-5","position":2,"proposed":true,"tag":"recommended"},
+  {"model":"claude-haiku-5-5","position":3,"proposed":true,"tag":"beta"}
+]'::jsonb, '00000000-0000-0000-0000-0000000041d9');
+select is((select proposed_at from public.ai_assistant_models where model = 'claude-opus-5-5'),
+  '2000-01-01T00:00:00Z'::timestamptz, 'Opus recoché : date de la première proposition, pas celle du jour');
+select ok((select proposed_at from public.ai_assistant_models where model = 'claude-opus-5-5')
+          < (select created_at from public.workspaces where id = (select ws from ctx)),
+  'espace jamais réglé : Opus recoché reste dans sa liste par défaut');
 
 select * from finish();
 rollback;
