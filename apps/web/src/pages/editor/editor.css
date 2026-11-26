@@ -5121,3 +5121,43 @@
   font: 400 12px var(--fd-font-sans);
   color: var(--fd-color-text-muted);
 }
+
+/* ---- L62 §6 : source de la voix toujours visible ---- */
+/* Point vert sur l'onglet de la voix en place (famille Rond) */
+.vo-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--fd-color-success);
+  vertical-align: middle;
+}
+/* Voix en place dans un autre onglet : une ligne de 44 px (nom, lecture, durée) */
+.vo-mini {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 8px 0 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+}
+.vo-mini__name {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  font: 600 13px var(--fd-font-sans);
+}
+.vo-mini__name .vo-dot {
+  margin: 0 6px 0 0;
+}
+.vo-mini .vo-aud {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+}

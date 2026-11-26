@@ -1942,6 +1942,12 @@
       "checkImages": "Check the position of the added images on the steps."
     },
     "voice": {
+      "inPlace": "Current voice",
+      "short": {
+        "recorded": "Recorded",
+        "generated": "Generated",
+        "imported": "File"
+      },
       "title": "Voice-over",
       "record": "Record",
       "help": "One track per step, 2 minutes max. MP3, M4A, WAV or WebM, 5 MB max.",
@@ -1974,9 +1980,9 @@
       "sending": "Sending the voice-over",
       "source": "Voice source",
       "tab": {
-        "generate": "Generate",
-        "record": "Record",
-        "import": "Import"
+        "generate": "Generated",
+        "record": "Recorded",
+        "import": "File"
       },
       "generateOff": "Generate: turned off for this workspace.",
       "kind": {
@@ -1987,8 +1993,6 @@
       "more": "More actions on the voice",
       "download": "Download",
       "listen": "Listen",
-      "replaceDots": "Replace…",
-      "keepCurrent": "Keep the current voice",
       "genCount_one": "{{count}} character",
       "genCount_other": "{{count}} characters",
       "genAbout": "about {{n}} s",

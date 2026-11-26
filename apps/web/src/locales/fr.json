@@ -1942,6 +1942,12 @@
       "checkImages": "Vérifiez la place des images ajoutées sur les étapes."
     },
     "voice": {
+      "inPlace": "Voix en place",
+      "short": {
+        "recorded": "Enregistrée",
+        "generated": "Générée",
+        "imported": "Fichier"
+      },
       "title": "Voix off",
       "record": "Enregistrer",
       "help": "Une piste par étape, 2 minutes au plus. MP3, M4A, WAV ou WebM, 5 Mo au plus.",
@@ -1974,9 +1980,9 @@
       "sending": "Envoi de la voix off",
       "source": "Source de la voix",
       "tab": {
-        "generate": "Générer",
-        "record": "Enregistrer",
-        "import": "Importer"
+        "generate": "Générée",
+        "record": "Enregistrée",
+        "import": "Fichier"
       },
       "generateOff": "Générer : désactivé par l’espace.",
       "kind": {
@@ -1987,8 +1993,6 @@
       "more": "Plus d’actions sur la voix",
       "download": "Télécharger",
       "listen": "Écouter",
-      "replaceDots": "Remplacer…",
-      "keepCurrent": "Garder la voix actuelle",
       "genCount_one": "{{count}} caractère",
       "genCount_other": "{{count}} caractères",
       "genAbout": "environ {{n}} s",

@@ -41,7 +41,7 @@ export function VoiceGenerate({
   /** Une voix enregistrée existe : confirmation avant de la remplacer. */
   hasRecording: boolean;
   onRememberVoice: (v: string) => void;
-  onApply: (r: { path: string; durationMs: number; transcript: string }) => void;
+  onApply: (r: { path: string; durationMs: number; transcript: string; voiceName?: string }) => void;
 }) {
   const { t, i18n } = useTranslation();
   const at = useAudioText();
@@ -146,7 +146,12 @@ export function VoiceGenerate({
   const apply = () => {
     if (!res) return;
     pending.current = null;
-    onApply({ path: res.path, durationMs: res.durationMs, transcript: res.spoken });
+    onApply({
+      path: res.path,
+      durationMs: res.durationMs,
+      transcript: res.spoken,
+      voiceName: voices.find((v) => v.id === voice)?.name,
+    });
     setRes(null);
     setPhase('idle');
   };

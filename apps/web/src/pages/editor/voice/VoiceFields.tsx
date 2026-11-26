@@ -12,7 +12,6 @@ import {
   Mic,
   Pause,
   Play,
-  Replace,
   RotateCcw,
   Square,
   Trash2,
@@ -71,8 +70,6 @@ export function VoiceFields({
   /** MEDIA-01 §18.2 : envoi d'un fichier importé (bouton « Envoi… » et barre). */
   const [sending, setSending] = useState(false);
   const [announce, setAnnounce] = useState('');
-  /** Voix en place : « Remplacer… » rouvre le choix de la source */
-  const [replacing, setReplacing] = useState(false);
   const [source, setSource] = useState<Source | null>(null);
   /** Enregistrement terminé, à écouter avant de le garder */
   const [take, setTake] = useState<{ blob: Blob; ms: number; url: string } | null>(null);
@@ -87,7 +84,6 @@ export function VoiceFields({
   const [heard, setHeard] = useState<{ text: string; language: string } | null>(null);
   useEffect(() => {
     setHeard(null);
-    setReplacing(false);
     setSource(null);
     setTake((k) => {
       if (k) URL.revokeObjectURL(k.url);
@@ -185,7 +181,6 @@ export function VoiceFields({
         },
       });
       if (old) void supabase.storage.from('voices').remove([old]);
-      setReplacing(false);
       setSource(null);
     } catch {
       setErr(t('editor.voice.uploadError'));
@@ -323,9 +318,9 @@ export function VoiceFields({
             voice_duration_ms: Math.max(1, Math.round(r.durationMs)),
             voice_transcript: r.transcript,
             voice_autoplay: demoVoice.autoplay !== false,
-            options: { ...opts, aiVoice: true, voiceSource: undefined },
+            // L62 §6 : nom de la voix, pour la carte « Voix en place » (« Générée · Antoine · 0:11 »)
+            options: { ...opts, aiVoice: true, aiVoiceName: r.voiceName, voiceSource: undefined },
           });
-          setReplacing(false);
           setSource(null);
           // L'ancien fichier n'est retiré qu'une fois l'annulation impossible
           let undone = false;
@@ -347,14 +342,23 @@ export function VoiceFields({
     ) : null;
   const has = !!step.voice_path;
   const missing = has && !step.voice_transcript?.trim();
-  const choosing = !has || replacing;
-  const tab: Source = source ?? (genOff ? 'record' : 'generate');
+  // L62 §6 : la source est toujours visible (hors lecture seule) ; changer d'onglet ne supprime rien
+  const choosing = !readOnly;
   const kind = generated
     ? 'generated'
     : opts.voiceSource === 'import' ||
         (opts.voiceSource !== 'record' && !/\.webm$/.test(step.voice_path ?? ''))
       ? 'imported'
       : 'recorded';
+  /** Onglet de la voix en place (point vert), et onglet ouvert : celui de la voix en place par défaut. */
+  const placed: Source | null = has
+    ? kind === 'generated'
+      ? 'generate'
+      : kind === 'recorded'
+        ? 'record'
+        : 'import'
+    : null;
+  const tab: Source = source ?? placed ?? (genOff ? 'record' : 'generate');
   const discardTake = () =>
     setTake((k) => {
       if (k) URL.revokeObjectURL(k.url);
@@ -382,6 +386,65 @@ export function VoiceFields({
     a.remove();
   }
 
+  // L62 §6 : « Enregistrée · 0:12 », « Générée · Antoine · 0:11 », « Fichier · 0:20 »
+  const placedLine = [
+    t(`editor.voice.short.${kind}`),
+    generated && typeof opts.aiVoiceName === 'string' ? opts.aiVoiceName : '',
+    formatClock(step.voice_duration_ms ?? 0),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const fullCard = (
+    <div className="vo-card">
+      <div className="vo-card__head">
+        <span className="vo-card__icon" aria-hidden="true">
+          <AudioLines />
+        </span>
+        <div className="vo-card__txt">
+          <b>{t('editor.voice.inPlace')}</b>
+          <span className="muted">{placedLine}</span>
+        </div>
+        {!readOnly && (
+          <Menu
+            label={t('editor.voice.more')}
+            icon={<Ellipsis />}
+            items={[
+              { label: t('editor.voice.download'), icon: <Download />, onSelect: () => void download() },
+              'separator',
+              {
+                label: t('editor.voice.removeLabel'),
+                icon: <Trash2 />,
+                danger: true,
+                onSelect: () => void remove(),
+              },
+            ]}
+          />
+        )}
+      </div>
+      <AudioLine
+        src={url}
+        durationMs={step.voice_duration_ms ?? 0}
+        label={t('editor.voice.listen')}
+        pauseLabel={t('editor.voice.pause')}
+      />
+    </div>
+  );
+  // Dans un autre onglet : une ligne de 44 px (lecture, nom, durée), au-dessus de l'outil
+  const miniCard = (
+    <div className="vo-mini" aria-label={t('editor.voice.inPlace')} role="group">
+      <span className="vo-mini__name">
+        <span className="vo-dot" aria-hidden="true" />
+        {t('editor.voice.inPlace')}
+      </span>
+      <AudioLine
+        src={url}
+        durationMs={step.voice_duration_ms ?? 0}
+        label={t('editor.voice.listen')}
+        pauseLabel={t('editor.voice.pause')}
+      />
+    </div>
+  );
+
   return (
     // MEDIA-01 §18.2 : un fichier audio déposé n'importe où sur le bloc est importé
     <DropBlock
@@ -395,54 +458,8 @@ export function VoiceFields({
         {announce}
       </span>
 
-      {has && !replacing && (
-        <div className="vo-card">
-          <div className="vo-card__head">
-            <span className="vo-card__icon" aria-hidden="true">
-              <AudioLines />
-            </span>
-            <div className="vo-card__txt">
-              <b>{t(`editor.voice.kind.${kind}`)}</b>
-              <span className="muted">{formatClock(step.voice_duration_ms ?? 0)}</span>
-            </div>
-            {!readOnly && (
-              <Menu
-                label={t('editor.voice.more')}
-                icon={<Ellipsis />}
-                items={[
-                  { label: t('editor.voice.download'), icon: <Download />, onSelect: () => void download() },
-                  'separator',
-                  {
-                    label: t('editor.voice.removeLabel'),
-                    icon: <Trash2 />,
-                    danger: true,
-                    onSelect: () => void remove(),
-                  },
-                ]}
-              />
-            )}
-          </div>
-          <AudioLine
-            src={url}
-            durationMs={step.voice_duration_ms ?? 0}
-            label={t('editor.voice.listen')}
-            pauseLabel={t('editor.voice.pause')}
-          />
-          {!readOnly && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm vo-wide"
-              disabled={busy}
-              onClick={() => setReplacing(true)}
-            >
-              <Replace aria-hidden="true" />
-              {t('editor.voice.replaceDots')}
-            </button>
-          )}
-        </div>
-      )}
-
-      {choosing && !readOnly && (
+      {has && !choosing && fullCard}
+      {choosing && (
         <>
           <div className="fd-segmented vo-tabs" role="tablist" aria-label={t('editor.voice.source')}>
             {SOURCES.map((k) => {
@@ -475,6 +492,11 @@ export function VoiceFields({
                   }}
                 >
                   {t(`editor.voice.tab.${k}`)}
+                  {placed === k && (
+                    <span className="vo-dot" title={t('editor.voice.inPlace')}>
+                      <span className="sr-only">{` (${t('editor.voice.inPlace')})`}</span>
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -484,6 +506,7 @@ export function VoiceFields({
               {t('editor.voice.generateOff')}
             </p>
           )}
+          {has && (tab === placed ? fullCard : miniCard)}
           <div id="vo-panel" role="tabpanel" aria-labelledby={`vo-tab-${tab}`} className="vo-panel">
             {tab === 'generate' && aiVoice}
             {tab === 'record' &&
@@ -588,15 +611,6 @@ export function VoiceFields({
               </div>
             )}
           </div>
-          {replacing && !rec && !take && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm vo-wide"
-              onClick={() => setReplacing(false)}
-            >
-              {t('editor.voice.keepCurrent')}
-            </button>
-          )}
         </>
       )}
       {err && (
@@ -605,7 +619,7 @@ export function VoiceFields({
         </p>
       )}
 
-      {has && !replacing && (
+      {has && (
         <div className="field">
           <label htmlFor={`voice-tr-${step.id}`}>
             {generated ? t('editor.voice.readText') : t('editor.voice.transcript')}{' '}

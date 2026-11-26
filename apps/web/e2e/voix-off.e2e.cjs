@@ -68,10 +68,10 @@ function wav(sec) {
   const sec = page.locator('.voice-sec');
   await sec.waitFor();
   ok(/Voix off/i.test(await sec.innerText()), 'section « Voix off » dans l’onglet Étape');
-  // EXT-02 §6.4 : sans voix, segmenté « Générer », « Enregistrer », « Importer »
+  // L62 §6 : segmenté « Source de la voix » : Générée, Enregistrée, Fichier
   const tabs = sec.getByRole('tablist', { name: 'Source de la voix' }).getByRole('tab');
   ok(
-    (await tabs.allInnerTexts()).join('|') === 'Générer|Enregistrer|Importer',
+    (await tabs.allInnerTexts()).join('|') === 'Générée|Enregistrée|Fichier',
     `segmenté de la source (${(await tabs.allInnerTexts()).join(', ')})`,
   );
   ok(
@@ -178,15 +178,18 @@ function wav(sec) {
     s1().voice_duration_ms >= 1900 && s1().voice_duration_ms <= 2100,
     `durée lue (${s1().voice_duration_ms} ms)`,
   );
-  // Voix en place : carte, lecteur dessiné, « Remplacer… », menu
+  // L62 §6 : carte « Voix en place », la source reste visible, point vert sur « Fichier »
   ok(
-    (await card.locator('b').innerText()) === 'Voix importée' &&
-      /^0:02$/.test((await card.locator('.vo-card__txt .muted').innerText()).trim()) &&
+    (await card.locator('b').innerText()) === 'Voix en place' &&
+      (await card.locator('.vo-card__txt .muted').innerText()).trim() === 'Fichier · 0:02' &&
       (await card.getByRole('button', { name: 'Écouter' }).count()) === 1 &&
       (await card.locator('.vo-time').innerText()) === '0:00 / 0:02' &&
-      (await card.getByRole('button', { name: 'Remplacer…' }).count()) === 1 &&
-      (await sec.getByRole('tablist').count()) === 0,
-    'voix en place : carte « Voix importée », durée, lecteur dessiné, « Remplacer… », plus de segmenté',
+      (await sec.getByRole('button', { name: 'Remplacer…' }).count()) === 0 &&
+      (await sec.getByRole('tablist').count()) === 1 &&
+      (await tabs.nth(2).getAttribute('aria-selected')) === 'true' &&
+      (await tabs.nth(2).locator('.vo-dot').count()) === 1 &&
+      /\(Voix en place\)/.test(await tabs.nth(2).textContent()),
+    'voix en place : carte « Voix en place · Fichier · 0:02 », lecteur, segmenté visible, point vert sur « Fichier »',
   );
   await card.getByRole('button', { name: 'Plus d’actions sur la voix' }).click();
   ok(
@@ -240,12 +243,17 @@ function wav(sec) {
   await tr.fill('Créez une opportunité depuis le bouton en haut à gauche.');
   await until(() => /haut à gauche/.test(s1().voice_transcript || ''));
 
-  // « Remplacer… » rouvre le segmenté ; enregistrement au micro (micro simulé), écoute avant de garder
-  await card.getByRole('button', { name: 'Remplacer…' }).click();
+  // L62 §6 : changer d'onglet ne supprime rien ; la voix en place se réduit à une ligne de 44 px
+  const avant = s1().voice_path;
+  await tabs.nth(1).click();
+  const mini = sec.locator('.vo-mini');
+  await mini.waitFor();
   ok(
-    (await sec.getByRole('tablist').count()) === 1 &&
-      (await sec.getByRole('button', { name: 'Garder la voix actuelle' }).count()) === 1,
-    '« Remplacer… » : le segmenté revient, avec « Garder la voix actuelle »',
+    s1().voice_path === avant &&
+      (await card.count()) === 0 &&
+      (await mini.evaluate((e) => Math.round(e.getBoundingClientRect().height))) === 44 &&
+      (await mini.getByRole('button', { name: 'Écouter' }).count()) === 1,
+    `onglet « Enregistrée » : rien n’est supprimé, la voix en place devient une ligne de 44 px (${JSON.stringify({ same: s1().voice_path === avant, card: await card.count(), h: await mini.evaluate((e) => Math.round(e.getBoundingClientRect().height)), play: await mini.getByRole('button', { name: 'Écouter' }).count() })})`,
   );
   await sec.getByRole('button', { name: 'Démarrer l’enregistrement' }).click();
   const recUi = sec.getByRole('group', { name: 'Enregistrement en cours' });
@@ -279,7 +287,11 @@ function wav(sec) {
   ok(await until(() => /\.webm$/.test(s1()?.voice_path || ''), 8000), '« Garder » : nouvelle piste WebM');
   ok(/haut à gauche/.test(s1().voice_transcript), 'transcription conservée après réenregistrement');
   await card.waitFor();
-  ok((await card.locator('b').innerText()) === 'Voix enregistrée', 'carte « Voix enregistrée »');
+  ok(
+    /^Enregistrée · 0:0\d$/.test((await card.locator('.vo-card__txt .muted').innerText()).trim()) &&
+      (await tabs.nth(1).locator('.vo-dot').count()) === 1,
+    'carte « Voix en place · Enregistrée », point vert sur « Enregistrée »',
+  );
 
   // ===== L62 : l'Aperçu de l'éditeur fait entendre la voix de l'étape =====
   {
