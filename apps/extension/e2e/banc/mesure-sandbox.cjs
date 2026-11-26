@@ -497,7 +497,7 @@ function markdown(total, rapport, criteres) {
   return `${l.join('\n')}\n`;
 }
 
-module.exports = { SITES };
+module.exports = { SITES, verifier, similitude, VIEW, BANC };
 if (require.main === module)
   principal().catch((e) => {
     console.error(e);
