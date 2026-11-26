@@ -10,17 +10,23 @@
 //    html_page_security ; un déclencheur le recopie dans steps.html_meta.security. Renvoie { path, security }.
 //  * L49 P4 : liens et images vérifiés par Google Safe Browsing (safebrowsing.ts) ; un lien signalé est
 //    bloqué (data-tc-ext="blocked") et compté. Ni la clé ni les adresses ne sont journalisées.
+//  * Sandbox v2 (étape 3) : seconde requête { workspaceId, demoId, path, live } pour une page déjà déposée
+//    (path rendu par la première) : enregistrement rejouable contrôlé par live.ts, déposé dans html_live sous
+//    le même nom (.json) ; 403 SANDBOX_LIVE_DISABLED si l'espace l'interdit. Renvoie { livePath, live }.
 // JWT vérifié par la plateforme (config.toml : verify_jwt = true), puis ici l'utilisateur et son rôle.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { MAX_BYTES, captureVerdict, inert, sanitizePage } from './lib.ts';
 import { countSecurity, mergeSecurity, pageUrls } from './security.ts';
 import { checkUrls } from './safebrowsing.ts';
+import { LIVE_MAX, applyFlags, liveMeta, liveUrls, parseLive } from './live.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RANK: Record<string, number> = { viewer: 1, editor: 2, admin: 3, owner: 4 };
 // Enveloppe JSON (échappements) autour de la page : marge de 25 %
 const MAX_BODY = Math.ceil(MAX_BYTES * 1.25);
+// Enregistrement vivant : 30 Mo au plus, même marge
+const MAX_LIVE_BODY = Math.ceil(LIVE_MAX.record * 1.25);
 
 const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false },
@@ -37,7 +43,7 @@ const json = (status: number, body: unknown) =>
     },
   });
 
-async function readCapped(req: Request): Promise<string | null> {
+async function readCapped(req: Request, cap: number): Promise<string | null> {
   const reader = req.body?.getReader();
   if (!reader) return null;
   const chunks: Uint8Array[] = [];
@@ -46,7 +52,7 @@ async function readCapped(req: Request): Promise<string | null> {
     const { done, value } = await reader.read();
     if (done) break;
     size += value.length;
-    if (size > MAX_BODY) {
+    if (size > cap) {
       await reader.cancel();
       return null;
     }
@@ -76,26 +82,8 @@ async function editorOf(req: Request, ws: string): Promise<string | null> {
   return m && (RANK[m.role as string] ?? 0) >= RANK.editor! ? uid : null;
 }
 
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
-  if (req.method !== 'POST') return json(405, { error: 'METHOD' });
-  const declared = Number(req.headers.get('content-length') ?? '0');
-  if (declared > MAX_BODY) return json(413, { error: 'TOO_BIG' });
-  const raw = await readCapped(req);
-  if (raw === null) return json(413, { error: 'TOO_BIG' });
-  let body: { workspaceId?: unknown; demoId?: unknown; html?: unknown; url?: unknown; security?: unknown };
-  try {
-    body = JSON.parse(raw);
-  } catch {
-    return json(400, { error: 'BAD_REQUEST' });
-  }
-  const ws = String(body.workspaceId ?? '');
-  const demo = String(body.demoId ?? '');
-  if (!UUID.test(ws) || !UUID.test(demo) || typeof body.html !== 'string' || !body.html)
-    return json(400, { error: 'BAD_REQUEST' });
-  if (new TextEncoder().encode(body.html).length > MAX_BYTES) return json(413, { error: 'TOO_BIG' });
-  const uid = await editorOf(req, ws);
-  if (!uid) return json(403, { error: 'FORBIDDEN' });
+/** Démo du workspace, visible par l'utilisateur ; null si inconnue (même réponse que pour un dossier restreint). */
+async function demoOk(ws: string, demo: string, uid: string): Promise<boolean> {
   const { data: d } = await admin
     .from('demos')
     .select('id')
@@ -103,10 +91,85 @@ Deno.serve(async (req) => {
     .eq('workspace_id', ws)
     .is('deleted_at', null)
     .maybeSingle();
-  if (!d) return json(404, { error: 'DEMO_NOT_FOUND' });
-  // Dossier restreint : même réponse que pour une démo inconnue
+  if (!d) return false;
   const { data: visible } = await admin.rpc('demo_visible_to', { p_demo: demo, p_user: uid });
-  if (visible !== true) return json(404, { error: 'DEMO_NOT_FOUND' });
+  return visible === true;
+}
+
+/** Sandbox v2 : enregistrement rejouable d'une page déjà déposée par la première requête. */
+async function ingestLive(req: Request, ws: string, demo: string, path: unknown, live: unknown) {
+  if (!UUID.test(ws) || !UUID.test(demo) || typeof path !== 'string')
+    return json(400, { error: 'BAD_REQUEST' });
+  const m = new RegExp(`^${ws}/${demo}/([0-9a-f-]{36})\\.html$`).exec(path);
+  if (!m || !UUID.test(m[1]!)) return json(400, { error: 'BAD_REQUEST' });
+  const uid = await editorOf(req, ws);
+  if (!uid) return json(403, { error: 'FORBIDDEN' });
+  if (!(await demoOk(ws, demo, uid))) return json(404, { error: 'DEMO_NOT_FOUND' });
+  const allowed = await admin.rpc('sandbox_live_allowed', { p_ws: ws });
+  if (allowed.error || allowed.data !== true) return json(403, { error: 'SANDBOX_LIVE_DISABLED' });
+  // La copie inerte doit venir de html-ingest (son rapport de sécurité existe)
+  const { data: sec } = await admin
+    .from('html_page_security')
+    .select('path')
+    .eq('path', path)
+    .eq('workspace_id', ws)
+    .maybeSingle();
+  if (!sec) return json(404, { error: 'PAGE_NOT_FOUND' });
+  const parsed = parseLive(live);
+  if ('error' in parsed) return json(parsed.error === 'TOO_BIG' ? 413 : 400, { error: parsed.error });
+  // Même règle d'espace que la copie : l'hôte de l'enregistrement doit être autorisé
+  const verdict = await captureVerdict(parsed.record.url, async (host) => {
+    const r = await admin.rpc('html_capture_allows', { p_ws: ws, p_host: host });
+    return r.error ? 'HTML_CAPTURE_DISABLED' : String(r.data);
+  });
+  if (verdict === 'BAD_URL') return json(400, { error: 'BAD_REQUEST' });
+  if (verdict !== 'ok') return json(403, { error: verdict });
+  const gsb = await checkUrls(liveUrls(parsed.record), Deno.env.get('GOOGLE_SAFE_BROWSING_API_KEY'));
+  const record = applyFlags(parsed.record, gsb.flagged);
+  const livePath = path.replace(/\.html$/, '.json');
+  const up = await admin.storage
+    .from('html_live')
+    .upload(livePath, new TextEncoder().encode(JSON.stringify(record)), {
+      contentType: 'application/json',
+      cacheControl: '31536000',
+      upsert: false,
+    });
+  if (up.error) return json(400, { error: 'STORAGE' });
+  return json(200, { livePath, live: liveMeta(record), safeBrowsing: gsb.status });
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
+  if (req.method !== 'POST') return json(405, { error: 'METHOD' });
+  const declared = Number(req.headers.get('content-length') ?? '0');
+  if (declared > MAX_LIVE_BODY) return json(413, { error: 'TOO_BIG' });
+  const raw = await readCapped(req, MAX_LIVE_BODY);
+  if (raw === null) return json(413, { error: 'TOO_BIG' });
+  if (!raw.includes('"live"') && raw.length > MAX_BODY) return json(413, { error: 'TOO_BIG' });
+  let body: {
+    workspaceId?: unknown;
+    demoId?: unknown;
+    html?: unknown;
+    url?: unknown;
+    security?: unknown;
+    path?: unknown;
+    live?: unknown;
+  };
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return json(400, { error: 'BAD_REQUEST' });
+  }
+  const ws = String(body.workspaceId ?? '');
+  const demo = String(body.demoId ?? '');
+  if (body.live !== undefined) return ingestLive(req, ws, demo, body.path, body.live);
+  if (!UUID.test(ws) || !UUID.test(demo) || typeof body.html !== 'string' || !body.html)
+    return json(400, { error: 'BAD_REQUEST' });
+  if (new TextEncoder().encode(body.html).length > MAX_BYTES) return json(413, { error: 'TOO_BIG' });
+  const uid = await editorOf(req, ws);
+  if (!uid) return json(403, { error: 'FORBIDDEN' });
+  // Dossier restreint : même réponse que pour une démo inconnue
+  if (!(await demoOk(ws, demo, uid))) return json(404, { error: 'DEMO_NOT_FOUND' });
   const verdict = await captureVerdict(body.url, async (host) => {
     const r = await admin.rpc('html_capture_allows', { p_ws: ws, p_host: host });
     // En cas d'erreur de lecture du réglage : refus (jamais d'acceptation par défaut)
