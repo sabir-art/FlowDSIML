@@ -5,6 +5,8 @@
  * vérification est alimenté par un enregistrement déposé dans le stockage local de l'extension.
  */
 const { chromium } = require('playwright');
+// L'éditeur s'ouvre après l'envoi sur le faux serveur : construction vérifiée avant tout
+require('./build-app-url.cjs')();
 const ui = require('./popup-ui.cjs');
 const fs = require('fs');
 const path = require('path');

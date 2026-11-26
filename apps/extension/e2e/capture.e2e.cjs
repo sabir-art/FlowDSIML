@@ -10,6 +10,8 @@
  * Nécessite Playwright et Chromium (préinstallés dans l'environnement de dev).
  */
 const { chromium } = require('playwright');
+// L'éditeur s'ouvre après l'envoi sur le faux serveur : construction vérifiée avant tout
+require('./build-app-url.cjs')();
 (async () => {
   const path = require('path');
   const os = require('os');
