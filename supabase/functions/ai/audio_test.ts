@@ -1,6 +1,11 @@
 import { assert, assertEquals, assertThrows } from 'jsr:@std/assert@1';
 import { AiError } from './lib.ts';
 import {
+  accountVoices,
+  SAMPLE_TEXT,
+  sampleLang,
+  samplePath,
+  voiceIdFor,
   cuesFromWords,
   estimateSeconds,
   mp3DurationMs,
@@ -133,4 +138,84 @@ Deno.test('resolveVoices : les voix proposées sont celles du compte', () => {
     louise: VOICES.claire!,
   });
   assertEquals(resolveVoices([]), {});
+});
+
+Deno.test('L62 §8 : toutes les voix utilisables du compte, recommandées pour la langue d’abord', () => {
+  const account = [
+    {
+      voice_id: 'voixEnPremade01',
+      name: 'Aria',
+      category: 'premade',
+      labels: { gender: 'female', language: 'en', accent: 'american', description: 'calm' },
+    },
+    {
+      voice_id: 'voixFrCompte001',
+      name: 'Mathilde',
+      category: 'professional',
+      labels: { gender: 'female', language: 'fr', accent: 'parisian', use_case: 'narration' },
+    },
+    {
+      voice_id: 'voixFrPremade01',
+      name: 'Bruno',
+      category: 'premade',
+      labels: { gender: 'male', language: 'fr' },
+      verified_languages: [{ language: 'en' }],
+    },
+    {
+      voice_id: 'voixAncienne001',
+      name: 'Vieille',
+      category: 'premade',
+      is_legacy: true,
+      labels: { gender: 'male' },
+    },
+    { voice_id: 'voixNeutre00001', name: 'Sam', category: 'generated', labels: {} },
+    { voice_id: 'voixFrPremade01', name: 'Doublon', category: 'premade' },
+    { voice_id: 'x', name: 'Identifiant illisible' },
+  ];
+  const list = accountVoices(account, 'fr');
+  assertEquals(
+    list.map((v) => v.name),
+    ['Bruno', 'Mathilde', 'Aria', 'Sam'],
+  );
+  assertEquals(list[0], {
+    id: 'voixFrPremade01',
+    name: 'Bruno',
+    gender: 'm',
+    accent: '',
+    style: '',
+    langs: ['fr', 'en'],
+    recommended: true,
+    own: false,
+  });
+  assertEquals([list[1]!.style, list[1]!.accent, list[1]!.own], ['narration', 'parisian', true]);
+  assertEquals(list[3]!.gender, 'n');
+  // Anglais : Aria recommandée en tête
+  assertEquals(accountVoices(account, 'en')[0]!.name, 'Aria');
+});
+
+Deno.test('L62 §8 : un ancien emplacement garde sa voix, un identifiant doit être du compte', () => {
+  const list = accountVoices([{ voice_id: 'voixFrPremade01', name: 'Bruno', category: 'premade' }]);
+  const aliases = { claire: 'voixFrPremade01' };
+  assertEquals(voiceIdFor('claire', list, aliases), 'voixFrPremade01');
+  assertEquals(voiceIdFor('voixFrPremade01', list, aliases), 'voixFrPremade01');
+  assertEquals(voiceIdFor('voixInconnue0001', list, aliases), null);
+  // Liste illisible : repli silencieux sur un identifiant de forme valide
+  assertEquals(voiceIdFor('voixInconnue0001', null, aliases), 'voixInconnue0001');
+  assertEquals(voiceIdFor('../x', null, aliases), null);
+  assertEquals(
+    parseVoice({ stepId: '00000000-0000-4000-8000-000000000001', text: 'Bonjour', voice: 'voixFrPremade01' })
+      .voice,
+    'voixFrPremade01',
+  );
+  assertEquals(
+    parseVoice({ stepId: '00000000-0000-4000-8000-000000000001', text: 'Bonjour', voice: '../x' }).voice,
+    'claire',
+  );
+});
+
+Deno.test('L62 §8 : exemple dans la langue de la démo, phrase courte, chemin de cache', () => {
+  assertEquals(sampleLang('fr-FR'), 'fr');
+  assertEquals(sampleLang('ja'), 'en');
+  for (const t of Object.values(SAMPLE_TEXT)) assertEquals(t.length <= 70, true);
+  assertEquals(samplePath('voixFrPremade01', 'fr'), '_samples/voixFrPremade01/fr.mp3');
 });

@@ -29,12 +29,114 @@ export const VOICE_GENDER: Record<string, 'f' | 'm'> = {
 /** Voix du compte du fournisseur (GET /voices), réduite à ce qui sert au choix. */
 export interface AccountVoice {
   voice_id?: unknown;
+  name?: unknown;
   category?: unknown;
   /** Ancienne voix du fournisseur : encore listée, mais plus garantie selon l'offre. */
   is_legacy?: unknown;
-  labels?: { gender?: unknown; language?: unknown } | null;
+  labels?: {
+    gender?: unknown;
+    language?: unknown;
+    accent?: unknown;
+    description?: unknown;
+    use_case?: unknown;
+  } | null;
   verified_languages?: Array<{ language?: unknown }> | null;
 }
+
+/** L62 §8 : une voix du compte telle que le sélecteur la montre (aucun nom de fournisseur). */
+export interface VoiceInfo {
+  id: string;
+  /** Nom réel de la voix. */
+  name: string;
+  /** f : féminine, m : masculine, n : neutre ou non dit. */
+  gender: 'f' | 'm' | 'n';
+  accent: string;
+  style: string;
+  /** Langues parlées (codes à deux lettres), langue native en tête. */
+  langs: string[];
+  /** Langue native = langue de la démo. */
+  recommended: boolean;
+  /** Voix propre au compte (clonée, générée, de bibliothèque), après les voix prédéfinies. */
+  own: boolean;
+}
+
+const VOICE_ID = /^[A-Za-z0-9]{8,40}$/;
+const label = (v: unknown, max = 40) =>
+  typeof v === 'string' ? v.replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '';
+const code = (v: unknown) => {
+  const m = /^([a-z]{2})\b/i.exec(String(v ?? '').trim());
+  return m ? m[1]!.toLowerCase() : '';
+};
+
+/**
+ * L62 §8 (retour client du 26/11) : TOUTES les voix utilisables du compte, plus les 6 emplacements fixes
+ * (qui en dédoublonnaient la moitié). Anciennes voix écartées. Ordre : recommandées pour la langue de la
+ * démo d'abord, puis les voix prédéfinies avant celles du compte, puis par nom.
+ */
+export function accountVoices(account: AccountVoice[], lang = 'fr'): VoiceInfo[] {
+  const seen = new Set<string>();
+  const out: VoiceInfo[] = [];
+  for (const v of account) {
+    if (typeof v.voice_id !== 'string' || !VOICE_ID.test(v.voice_id) || v.is_legacy === true) continue;
+    if (seen.has(v.voice_id)) continue;
+    seen.add(v.voice_id);
+    const g = String(v.labels?.gender ?? '').toLowerCase();
+    const native = code(v.labels?.language);
+    const langs = [
+      ...new Set([native, ...(v.verified_languages ?? []).map((l) => code(l?.language))].filter(Boolean)),
+    ];
+    out.push({
+      id: v.voice_id,
+      name: label(v.name, 60) || v.voice_id,
+      gender: g.startsWith('f') ? 'f' : g.startsWith('m') ? 'm' : 'n',
+      accent: label(v.labels?.accent),
+      style: label(v.labels?.description) || label(v.labels?.use_case),
+      langs,
+      recommended: native === lang,
+      own: String(v.category ?? '') !== 'premade',
+    });
+  }
+  return out.sort(
+    (a, b) =>
+      Number(b.recommended) - Number(a.recommended) ||
+      Number(a.own) - Number(b.own) ||
+      a.name.localeCompare(b.name, 'fr'),
+  );
+}
+
+/**
+ * Voix demandée → identifiant d'une voix utilisable du compte. Un ancien emplacement (« claire »…)
+ * garde sa voix par la correspondance de compatibilité (resolveVoices) ; un identifiant doit être une
+ * voix du compte (ou, liste illisible, avoir la forme d'un identifiant). null sinon.
+ */
+export function voiceIdFor(
+  voice: string,
+  list: VoiceInfo[] | null,
+  aliases: Record<string, string>,
+): string | null {
+  if (aliases[voice]) return aliases[voice]!;
+  // Liste du compte illisible (droit manquant, panne) : repli silencieux, un identifiant de forme valide
+  // est tenté plutôt que de bloquer la génération
+  if (!list) return VOICE_ID.test(voice) ? voice : null;
+  return list.some((v) => v.id === voice) ? voice : null;
+}
+
+/** L62 §8 : phrase d'exemple fixe par langue (≈ 60 caractères), lue une fois par voix et par langue. */
+export const SAMPLE_TEXT: Record<string, string> = {
+  fr: 'Bonjour, je vais vous guider pas à pas dans cette démonstration.',
+  en: 'Hello, I will guide you step by step through this demonstration.',
+  es: 'Hola, voy a guiarle paso a paso en esta demostración.',
+  de: 'Hallo, ich führe Sie Schritt für Schritt durch diese Vorführung.',
+  it: 'Buongiorno, la guiderò passo dopo passo in questa dimostrazione.',
+  pt: 'Olá, vou guiá-lo passo a passo nesta demonstração.',
+  nl: 'Hallo, ik begeleid u stap voor stap door deze demonstratie.',
+};
+export const sampleLang = (lang: unknown) => {
+  const l = code(lang);
+  return SAMPLE_TEXT[l] ? l : 'en';
+};
+/** Exemple en cache (bucket voices, hors des dossiers des espaces) : une seule génération par voix et langue. */
+export const samplePath = (voiceId: string, lang: string) => `_samples/${voiceId}/${lang}.mp3`;
 
 /**
  * L62 : les voix proposées sont celles du COMPTE, pas des identifiants en dur (une ancienne voix ou
@@ -120,7 +222,11 @@ export function parseVoice(input: Record<string, unknown>): VoiceRequest {
   if (text.length > TTS_MAX_CHARS) throw new AiError('TOO_LONG_TEXT');
   // La transcription est lue à voix haute : une donnée personnelle détectée bloque l'envoi
   if (redact(text).count > 0) throw new AiError('PII_IN_TEXT', 422);
-  const voice = typeof input.voice === 'string' && VOICES[input.voice] ? input.voice : 'claire';
+  // Ancien emplacement (compatibilité) ou identifiant d'une voix du compte, vérifié ensuite sur la liste
+  const voice =
+    typeof input.voice === 'string' && (VOICES[input.voice] || VOICE_ID.test(input.voice))
+      ? input.voice
+      : 'claire';
   const speed = SPEEDS[String(input.speed)] ?? 1;
   return { stepId, text, voice, speed, estimate: estimateSeconds(text, speed) };
 }
