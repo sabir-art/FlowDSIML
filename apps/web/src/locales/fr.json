@@ -5994,7 +5994,7 @@
       "history": "Historique des changements",
       "loadError": "Impossible de charger les fournisseurs. Réessayez dans un instant.",
       "emptyTitle": "Aucun fournisseur connecté",
-      "emptyBody": "Tant qu’aucune clé n’est ajoutée, les fonctions IA sont coupées dans tous les espaces. Les utilisateurs voient « Assistance IA indisponible pour le moment ».",
+      "emptyBody": "Tant qu’aucune clé n’est ajoutée, les fonctions IA sont coupées dans tous les espaces. Les utilisateurs voient « Assistance IA indisponible pour le moment ».",
       "addAny": "Ajouter une clé",
       "providers": "Fournisseurs",
       "providersHelp": "Les clés sont chiffrées et ne s’affichent jamais. Seuls les admins de la Console peuvent les ajouter ou les remplacer.",
