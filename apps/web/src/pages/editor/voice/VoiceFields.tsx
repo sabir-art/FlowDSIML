@@ -24,6 +24,7 @@ import { aiBlock, useAiStatus } from '../../../lib/ai';
 import { VoiceGenerate } from './VoiceGenerate';
 import { AudioLine, Wave } from './AudioLine';
 import { FreshVoice } from './FreshVoice';
+import { langLabel, pickVoice, useVoiceList } from './useVoiceList';
 import { AiCaptions, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -61,7 +62,7 @@ export function VoiceFields({
   chain?: boolean;
 }) {
   const { current: ws } = useWorkspace();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const demoVoice = asSettings(editor.demo?.settings).voice ?? {};
   const [dialog, ask] = useConfirm();
   const [url, setUrl] = useState<string | null>(null);
@@ -92,6 +93,7 @@ export function VoiceFields({
   // Les « Annuler » des toasts agissent après d'autres rendus : toujours l'éditeur courant
   const live = useRef(editor);
   live.current = editor;
+  const [auto, setAuto] = useState<{ n: number; text: string; voice: string } | null>(null);
   const [heard, setHeard] = useState<{ text: string; language: string } | null>(null);
   useEffect(() => {
     setHeard(null);
@@ -375,6 +377,8 @@ export function VoiceFields({
         variables={editor.variables.map((v) => ({ key: v.key, default_value: v.default_value ?? '' }))}
         savedVoice={settings.aiVoice}
         hasVoice={!!step.voice_path}
+        fromTranscript={!!step.voice_transcript?.trim()}
+        auto={auto ?? undefined}
         onRememberVoice={(v) =>
           v !== settings.aiVoice && editor.updateDemo({ settings: { ...settings, aiVoice: v } })
         }
@@ -390,6 +394,16 @@ export function VoiceFields({
       />
     ) : null;
   const has = !!step.voice_path;
+  // L62 §6 (commit 3) : transcription → voix en un clic, avec la voix retenue pour la démo, sinon la
+  // voix recommandée de la langue. La voix en place reste jusqu'au choix dans la carte « Nouvelle voix ».
+  const quick = useVoiceList(ws?.id ?? '', lang, has && !readOnly && !genOff);
+  const quickVoice = pickVoice(quick.voices, quick.aliases, settings.aiVoice);
+  const fromText = () => {
+    const text = step.voice_transcript?.trim();
+    if (!text || !quickVoice) return;
+    setSource('generate');
+    setAuto((a) => ({ n: (a?.n ?? 0) + 1, text, voice: quickVoice.id }));
+  };
   const missing = has && !step.voice_transcript?.trim();
   // L62 §6 : la source est toujours visible (hors lecture seule) ; changer d'onglet ne supprime rien
   const choosing = !readOnly;
@@ -740,6 +754,28 @@ export function VoiceFields({
           <span className="help" id={`voice-tr-h-${step.id}`}>
             {t('editor.voice.transcriptHelp')}
           </span>
+          {ws && !readOnly && !genOff && quickVoice && (
+            <div className="vo-fromtext">
+              <button
+                type="button"
+                className="btn btn-secondary vo-wide"
+                disabled={!step.voice_transcript?.trim()}
+                aria-describedby={`vo-ft-h-${step.id}`}
+                onClick={fromText}
+              >
+                <Sparkles aria-hidden="true" />
+                {generated ? t('editor.voice.regenFromText') : t('editor.voice.genFromText')}
+              </button>
+              <p className="vo-help" id={`vo-ft-h-${step.id}`}>
+                {generated
+                  ? t('editor.voice.regenFromTextHelp')
+                  : t('editor.voice.genFromTextHelp', {
+                      voice: quickVoice.name,
+                      lang: langLabel(lang, i18n.language),
+                    })}
+              </p>
+            </div>
+          )}
           {/* 066 (L30-11) : transcription automatique d'une voix enregistrée */}
           {ws && !readOnly && !generated && !heard && (
             <AiCaptions

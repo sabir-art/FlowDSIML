@@ -3,16 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { AiRequestError, aiBlock, audioLeft, callAi, useAiStatus } from '../../../lib/ai';
-import {
-  TTS_MAX_CHARS,
-  VOICE_CHOICES,
-  estimateSeconds,
-  useAudioText,
-  withDefaults,
-} from '../../../components/ai/AiAudio';
+import { TTS_MAX_CHARS, estimateSeconds, useAudioText, withDefaults } from '../../../components/ai/AiAudio';
 import { AudioLine } from './AudioLine';
-import { VoicePicker, type VoiceInfo } from './VoicePicker';
+import { VoicePicker } from './VoicePicker';
 import { FreshVoice } from './FreshVoice';
+import { langLabel, pickVoice, useVoiceList } from './useVoiceList';
 
 /**
  * EXT-02 §6.4, « Générer » : voix de synthèse dans le panneau de 320 px. Texte lu (il sert aussi de
@@ -27,6 +22,8 @@ export function VoiceGenerate({
   variables,
   savedVoice,
   hasVoice,
+  fromTranscript,
+  auto,
   onRememberVoice,
   onApply,
 }: {
@@ -40,6 +37,13 @@ export function VoiceGenerate({
   savedVoice?: string;
   /** L62 §6 : une voix est en place ; la nouvelle attend « Utiliser cette voix » ou « Garder l'actuelle ». */
   hasVoice: boolean;
+  /** Le texte lu est repris de la transcription de l'étape (sinon du texte de la bulle). */
+  fromTranscript?: boolean;
+  /**
+   * L62 §6 (commit 3) : « Générer la voix depuis ce texte », sous la transcription. Chaque nouveau `n`
+   * lance la génération avec ce texte et cette voix, sans autre clic.
+   */
+  auto?: { n: number; text: string; voice: string };
   onRememberVoice: (v: string) => void;
   onApply: (r: { path: string; durationMs: number; transcript: string; voiceName?: string }) => void;
 }) {
@@ -49,40 +53,16 @@ export function VoiceGenerate({
   const [text, setText] = useState(initialText);
   // L62 §8 : toutes les voix du compte ; une démo qui garde un ancien emplacement (« claire »…) retrouve
   // sa voix par la correspondance renvoyée par le serveur
-  const [voice, setVoice] = useState<string>(savedVoice || 'claire');
+  const [voice, setVoice] = useState<string>(auto?.voice || savedVoice || 'claire');
   const [phase, setPhase] = useState<'idle' | 'busy' | 'ready' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [res, setRes] = useState<{ path: string; durationMs: number; url: string; spoken: string } | null>(
     null,
   );
-  // Repli (liste du compte illisible) : les anciennes voix proposées, sous leur nom d'interface
-  const fallback: VoiceInfo[] = VOICE_CHOICES.map((v, i) => ({
-    id: v,
-    name: t(`ai.voice.v.${v}.name`),
-    gender: i < 3 ? 'f' : 'm',
-    accent: '',
-    style: t(`ai.voice.v.${v}.desc`),
-    langs: [lang],
-    recommended: false,
-    own: false,
-  }));
-  const [voices, setVoices] = useState<VoiceInfo[]>(fallback);
+  const { voices, aliases, ready } = useVoiceList(ws, lang);
   useEffect(() => {
-    let live = true;
-    callAi<{ voices: VoiceInfo[]; aliases: Record<string, string> }>(ws, 'voice_list', lang, {})
-      .then((r) => {
-        if (!live || !Array.isArray(r.voices) || !r.voices.length) return;
-        setVoices(r.voices);
-        setVoice((cur) => {
-          const id = r.aliases?.[cur] ?? cur;
-          return r.voices.some((v) => v.id === id) ? id : r.voices[0]!.id;
-        });
-      })
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
-  }, [ws, lang]);
+    if (ready) setVoice((cur) => pickVoice(voices, aliases, cur)?.id ?? cur);
+  }, [ready, voices, aliases]);
   const ctrl = useRef<AbortController | null>(null);
   // Aperçu non utilisé : le fichier est retiré en quittant « Générer »
   const pending = useRef<string | null>(null);
@@ -102,15 +82,11 @@ export function VoiceGenerate({
   // Quota atteint : message et date de remise à zéro dès l'ouverture, sans envoi
   const quota = aiBlock(status, 'voice') === 'quota' ? at.block('voice', status) : '';
   const busy = phase === 'busy';
-  const langName = (() => {
-    try {
-      return new Intl.DisplayNames([i18n.language], { type: 'language' }).of(lang) ?? lang;
-    } catch {
-      return lang;
-    }
-  })();
+  const langName = langLabel(lang, i18n.language);
 
-  const run = async () => {
+  const run = async (req?: { text: string; voice: string }) => {
+    const said = req ? withDefaults(req.text, variables) : spoken;
+    const who = req?.voice ?? voice;
     const blocked = at.block('voice', status);
     if (blocked) {
       setMessage(blocked);
@@ -119,7 +95,7 @@ export function VoiceGenerate({
     if (res) void supabase.storage.from('voices').remove([res.path]);
     pending.current = null;
     setRes(null);
-    onRememberVoice(voice);
+    onRememberVoice(who);
     ctrl.current?.abort();
     const c = new AbortController();
     ctrl.current = c;
@@ -129,12 +105,12 @@ export function VoiceGenerate({
         ws,
         'voice',
         lang,
-        { stepId, text: spoken, voice, speed: 'normal' },
+        { stepId, text: said, voice: who, speed: 'normal' },
         c.signal,
       );
       pending.current = r.path;
       const { data } = await supabase.storage.from('voices').createSignedUrl(r.path, 3600);
-      setRes({ ...r, url: data?.signedUrl ?? '', spoken });
+      setRes({ ...r, url: data?.signedUrl ?? '', spoken: said });
       setPhase('ready');
     } catch (e) {
       if (e instanceof AiRequestError && e.code === 'ABORTED') return setPhase('idle');
@@ -142,6 +118,19 @@ export function VoiceGenerate({
       setPhase('error');
     }
   };
+  // Demande venue de la transcription : texte et voix repris, génération lancée tout de suite
+  // (une fois l'état de l'assistance connu, sinon la demande serait refusée d'office)
+  const autoN = auto?.n;
+  const autoDone = useRef(0);
+  const known = !!status;
+  useEffect(() => {
+    if (!autoN || !auto || !known || autoDone.current === autoN) return;
+    autoDone.current = autoN;
+    setText(auto.text);
+    setVoice(auto.voice);
+    void run({ text: auto.text, voice: auto.voice });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- une génération par demande
+  }, [autoN, known]);
   const apply = () => {
     if (!res) return;
     pending.current = null;
@@ -162,7 +151,10 @@ export function VoiceGenerate({
       </span>
       <div>
         <label className="vo-label" htmlFor={`vo-gt-${stepId}`}>
-          {t('editor.voice.readText')} <span className="vo-opt">{t('editor.voice.readTextNote')}</span>
+          {t('editor.voice.readText')}{' '}
+          <span className="vo-opt">
+            {hasVoice && fromTranscript ? t('editor.voice.fromTranscript') : t('editor.voice.readTextNote')}
+          </span>
         </label>
         <textarea
           id={`vo-gt-${stepId}`}
@@ -257,6 +249,7 @@ export function VoiceGenerate({
           {quota || message}
         </p>
       )}
+      {hasVoice && phase !== 'ready' && <p className="vo-help">{t('editor.voice.keepsVoice')}</p>}
       {phase !== 'ready' && !busy && !quota && <p className="vo-notice">{t('ai.voice.notice')}</p>}
       {phase === 'ready' && res && hasVoice ? null : phase === 'ready' && res ? (
         <div className="vo-two">

@@ -5236,3 +5236,14 @@
 .vo-two:has(> :nth-child(3)) > :first-child {
   grid-column: 1 / -1;
 }
+
+/* L62 §6 (commit 3) : « Générer la voix depuis ce texte », sous la transcription */
+.vo-fromtext {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.vo-fromtext .vo-help {
+  margin: 0;
+}

@@ -2026,7 +2026,13 @@
       "playerDemo": "Audio player",
       "playerBubble": "Bubble",
       "playerBar": "Player bar",
-      "soundNote": "Browsers block sound before the visitor’s first click: the voice starts on their first click, captions show on arrival."
+      "soundNote": "Browsers block sound before the visitor’s first click: the voice starts on their first click, captions show on arrival.",
+      "genFromText": "Generate the voice from this text",
+      "genFromTextHelp": "With {{voice}} ({{lang}}). Your recording stays in place until you choose the new voice.",
+      "regenFromText": "Regenerate from this text",
+      "regenFromTextHelp": "Do this after editing the transcript.",
+      "fromTranscript": "(taken from the transcript)",
+      "keepsVoice": "The current voice is not touched until you choose."
     },
     "railQuiz_one": "Quiz · {{count}} question",
     "railQuiz_other": "Quiz · {{count}} questions",
