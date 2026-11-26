@@ -120,6 +120,7 @@ const CAS = [
       ['Libellés de rôle lisibles', 'Interlocutrice'],
       ['Libellé « Client » lisible, nom remplacé', 'Client :'],
       ['Statut lisible dans le tableau', 'Active'],
+      ['Tableau sans thead : en-tête et rôles lisibles', 'Cheffe de projet'],
     ],
     // Ce qui ne doit PAS rester lisible dans la copie
     interdits: [
@@ -130,6 +131,9 @@ const CAS = [
       'Inès Petit',
       'Moreau',
       'Julie Roux',
+      // Tableau sans thead (th dans la première ligne) : noms d'un seul mot remplacés
+      'Durand',
+      'Martin',
     ],
   },
   {
@@ -149,6 +153,7 @@ const CAS = [
       ['Rôle tenu par un service', 'Responsable : Service RH'],
       ['Colonne « Client » sans nom', 'Brouillon'],
       ['Champ « Type de client »', 'Entreprise'],
+      ['Tableau sans thead, ligne sans nom', 'Projet Alpha'],
     ],
     remplacements: 0,
   },

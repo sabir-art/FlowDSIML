@@ -8,7 +8,7 @@ Réponse à `docs/ux/recettes/l60-lot-b/rapport.md` (branche UX, e78e74c). Recet
   panneau de l’étape, plan du Sandbox, aperçu du lecteur.
 
 Parcours rejouable : `node e2e/banc/bout-en-bout.cjs` (il tourne en intégration continue). Résultat :
-**148 contrôles sur 148** (111 avant le correctif). Détail dans [controles.md](controles.md).
+**150 contrôles sur 150** (111 avant le correctif). Détail dans [controles.md](controles.md).
 
 Limite connue, inchangée : le faux serveur ne rejoue pas l’assainissement de `html-ingest`, donc
 « Sécurité de la page » affiche « pas de rapport ».
