@@ -418,7 +418,7 @@ export function GenerateDialog({
         )}
         {phase === 'error' && (
           <p className="ai-after" role="alert">
-            {t('ai.error')}
+            {aiBlock(status, 'generate') === 'unavailable' ? t('ai.unavailable') : t('ai.error')}
           </p>
         )}
         {editing && plan && (

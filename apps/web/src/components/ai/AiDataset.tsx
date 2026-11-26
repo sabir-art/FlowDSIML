@@ -149,7 +149,7 @@ export function AiDataset({
       )}
       {phase === 'error' && (
         <p className="ai-after" role="alert">
-          {t('ai.error')}
+          {aiBlock(status, 'dataset') === 'unavailable' ? t('ai.unavailable') : t('ai.error')}
         </p>
       )}
       {phase === 'ready' && data && (

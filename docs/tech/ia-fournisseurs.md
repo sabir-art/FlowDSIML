@@ -114,8 +114,11 @@ Rédaction, sauf avis contraire.
 **Résolution**, à chaque demande, dans une fonction pure et testée :
 
 1. **Choisi et utilisable** (clé présente, modèle non retiré) : il est utilisé.
-2. **Retiré** : repli sur le premier modèle connecté du même fournisseur qui a la capacité. L'état
-   « Modèle retiré : repli sur {modèle} » s'affiche, et le bandeau de la Console nomme la fonction.
+2. **Retiré** (décision du chef, recette de l'étape 3) : repli sur le modèle par défaut de la fonction
+   (Sonnet pour la traduction) ; s'il est lui-même indisponible, sur le premier modèle disponible du même
+   fournisseur. L'état « Modèle retiré : repli sur {modèle} » s'affiche, et le bandeau de la Console
+   regroupe les fonctions par cause (« 4 fonctions coupées faute de clé Anthropic : A, B, C et D. »).
+
 3. **Clé du fournisseur manquante ou refusée** : la fonction est **coupée** dans tous les espaces.
    - `ai_config()` renvoie la liste des fonctions coupées dans `unavailable` (sans nom de
      fournisseur).

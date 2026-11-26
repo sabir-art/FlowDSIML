@@ -85,19 +85,29 @@ export function DisabledEntry({
   const blockText = useBlockText();
   const { t } = useTranslation();
   const b = aiBlock(status, feature);
+  // Recette UX (L41 étape 3) : l'infobulle s'ouvre au-dessus de l'entrée quand la place manque dessous
+  const [above, setAbove] = useState(false);
+  const place = (e: { currentTarget: HTMLElement }) => {
+    const wrap = e.currentTarget.closest('.ai-disabled-wrap') ?? e.currentTarget;
+    const tipEl = document.getElementById(id);
+    const r = wrap.getBoundingClientRect();
+    const h = tipEl?.offsetHeight ?? 0;
+    setAbove(r.bottom + 6 + h > window.innerHeight - 8 && r.top - 6 - h >= 8);
+  };
   return (
-    <span className="ai-disabled-wrap">
+    <span className="ai-disabled-wrap" onMouseEnter={place}>
       <button
         type="button"
         className="btn btn-ghost btn-xs ai-entry"
         aria-disabled="true"
         aria-describedby={id}
+        onFocus={place}
         onClick={(e) => e.preventDefault()}
       >
         <WandSparkles aria-hidden="true" />
         {label}
       </button>
-      <span id={id} className="ai-tip" role="tooltip">
+      <span id={id} className={`ai-tip${above ? ' ai-tip--above' : ''}`} role="tooltip">
         {b === 'disabled' && tip ? tip : blockText(b, status)}
       </span>
       {status?.canManage && b === 'disabled' && (
@@ -286,7 +296,7 @@ export function AiWrite({
           {view.kind === 'error' && (
             <>
               <p className="ai-after" role="alert">
-                {t('ai.error')}
+                {aiBlock(status, 'write') === 'unavailable' ? t('ai.unavailable') : t('ai.error')}
               </p>
               <div className="ai-actions">
                 <button

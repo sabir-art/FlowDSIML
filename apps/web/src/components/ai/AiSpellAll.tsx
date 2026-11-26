@@ -146,7 +146,7 @@ export function AiSpellAll({
             {state === 'error' && (
               <div className="ai-preview">
                 <p className="ai-after" role="alert">
-                  {t('ai.error')}
+                  {aiBlock(status, 'write') === 'unavailable' ? t('ai.unavailable') : t('ai.error')}
                 </p>
                 <div className="ai-actions">
                   <button type="button" className="btn btn-secondary btn-sm" onClick={() => void run()}>

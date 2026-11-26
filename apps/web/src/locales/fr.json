@@ -5957,7 +5957,9 @@
       "action": "Action",
       "date": "Date",
       "object": "Objet",
-      "retention": "Le journal est conservé 12 mois ; il ne peut être ni modifié ni effacé."
+      "retention": "Le journal est conservé 12 mois ; il ne peut être ni modifié ni effacé.",
+      "onlyAi": "Filtré sur Modèles IA",
+      "showAll": "Tout afficher"
     },
     "action": {
       "console_open": "Connexion à la console",
@@ -6054,7 +6056,7 @@
       },
       "fnHelp": {
         "assistant": "Réponses et propositions dans l’éditeur",
-        "write": "Textes des étapes pendant la capture (extension)",
+        "write": "Textes des étapes pendant la capture (extension), génération, données et graphiques",
         "suggest": "Titres, textes et pauses de toute la démo",
         "translate": "Démo traduite dans une autre langue",
         "voice": "Voix off générée",
@@ -6079,12 +6081,10 @@
       },
       "modelSet": "{{fn}} : {{model}}",
       "modelError": "Le modèle n’a pas pu être changé. Réessayez.",
-      "attention_one": "1 fonction demande votre attention : {{list}}.",
-      "attention_other": "{{count}} fonctions demandent votre attention : {{list}}.",
-      "why": {
-        "retired": "modèle retiré",
-        "missing": "clé {{name}} manquante"
-      }
+      "attentionCut_one": "1 fonction coupée faute de clé {{name}} : {{list}}.",
+      "attentionCut_other": "{{count}} fonctions coupées faute de clé {{name}} : {{list}}.",
+      "attentionRetired_one": "1 fonction en repli, son modèle est retiré : {{list}}.",
+      "attentionRetired_other": "{{count}} fonctions en repli, leur modèle est retiré : {{list}}."
     }
   },
   "news": {

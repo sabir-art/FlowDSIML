@@ -172,6 +172,10 @@
   opacity: 0;
   transition: opacity var(--fd-motion-duration-fast);
 }
+.ai-tip--above {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
 .ai-disabled-wrap:hover .ai-tip,
 .ai-entry:focus-visible + .ai-tip {
   visibility: visible;
@@ -676,4 +680,14 @@
   margin: 6px 8px 4px;
   font-size: 12px;
   color: var(--fd-color-text-muted);
+}
+
+/* L41 étape 3 : assistant coupé par TutoClick, dit dès l'ouverture */
+.ai-as-unavailable {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+  font-size: 13px;
 }

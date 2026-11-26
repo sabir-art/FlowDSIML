@@ -3264,7 +3264,12 @@ function aiConsole(state, body, route, json) {
       const provider = e?.provider ?? d.provider;
       if (!keyed.has(provider)) return { ...base, choices, status: 'cut', model: null, provider };
       if (e && e.cap === d.cap) return { ...base, choices, status: 'active', model: e.id, provider };
-      const fb = CAT.find((m) => m.provider === provider && m.cap === d.cap);
+      // Décision du chef : repli sur le défaut de la fonction, sinon le premier du fournisseur
+      const dflt = CAT.find((m) => m.id === d.def);
+      const fb =
+        dflt && keyed.has(dflt.provider) && dflt.cap === d.cap
+          ? dflt
+          : CAT.find((m) => m.provider === provider && m.cap === d.cap);
       return { ...base, choices, status: fb ? 'fallback' : 'off', model: fb?.id ?? null, provider };
     });
     state.aiCut = [
@@ -3287,7 +3292,20 @@ function aiConsole(state, body, route, json) {
     const old = chosenOf[d.fn] ?? null;
     if (model === null) delete chosenOf[d.fn];
     else chosenOf[d.fn] = model;
-    log('ai.model_changed', `${d.fn} · ${old ?? 'défaut'} → ${model ?? 'défaut'}`);
+    const FN_LABEL = {
+      assistant: 'Assistant IA de l’éditeur',
+      write: 'Rédaction automatique',
+      suggest: 'Vérification de cohérence',
+      translate: 'Traduction',
+      voice: 'Voix',
+      captions: 'Transcription',
+    };
+    const name = (id) => {
+      const m = id ?? d.def;
+      const l = m === 'auto' ? 'Auto' : (CAT.find((c) => c.id === m)?.label ?? 'Ancien modèle (retiré)');
+      return id === null ? `${l} (défaut)` : l;
+    };
+    log('ai.model_changed', `${FN_LABEL[d.fn]} · ${name(old)} → ${name(model)}`);
     return json(route, 200, { result: { old, functions: functions() } });
   }
   if (body.action === 'console_providers') {

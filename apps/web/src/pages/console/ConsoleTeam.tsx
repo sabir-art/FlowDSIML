@@ -5,6 +5,7 @@
  */
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatDateTime } from '../../lib/format';
@@ -41,6 +42,9 @@ export function Team() {
   const [adding, setAdding] = useState(false);
   const [who, setWho] = useState('');
   const [what, setWhat] = useState('');
+  // L41 : « Historique des changements » de Modèles IA arrive filtré sur les actions IA (?objet=ai)
+  const [params, setParams] = useSearchParams();
+  const objet = params.get('objet');
   const [dialog, ask] = useConfirm();
   const load = useCallback(() => {
     void supabase.rpc('console_team').then(({ data }) => setTeam((data as unknown as Owner[]) ?? []));
@@ -50,7 +54,9 @@ export function Team() {
   }, []);
   useEffect(load, [load]);
   const actions = useMemo(() => [...new Set(log.map((e) => e.action))].sort(), [log]);
-  const rows = log.filter((e) => (!who || e.actorId === who) && (!what || e.action === what));
+  const rows = log.filter(
+    (e) => (!who || e.actorId === who) && (!what || e.action === what) && (!objet || e.objectType === objet),
+  );
 
   const setRole = async (o: Owner, role: PlatformRole) => {
     const { error } = await supabase.rpc('console_set_owner_role', { p_user: o.userId, p_role: role });
@@ -166,6 +172,14 @@ export function Team() {
               ))}
             </Select>
           </label>
+          {objet === 'ai' && (
+            <span className="console-filter-on">
+              {t('console.tm.onlyAi')}
+              <button type="button" className="fd-btn fd-btn--ghost fd-btn--sm" onClick={() => setParams({})}>
+                {t('console.tm.showAll')}
+              </button>
+            </span>
+          )}
           <button
             type="button"
             className="fd-btn fd-btn--sm"

@@ -280,14 +280,54 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await p3.getByRole('option', { name: /Claude Opus/ }).click();
     await p3.getByText('Traduction : Claude Opus').waitFor();
     ok(s3.aiFnModels.translate === 'claude-opus-5-5', 'Traduction : Claude Opus enregistré');
+    await p3.waitForTimeout(200);
+    ok(
+      (await p3.evaluate(() => document.activeElement?.id)) === 'ai-fn-translate',
+      'souris : le focus reste sur la liste de la fonction changée (WCAG 2.4.3)',
+    );
     await p3.locator('.toast').getByRole('button', { name: 'Annuler' }).click();
     await p3.waitForTimeout(500);
+    // Clavier : Entrée, Flèche bas, Entrée sur « Vérification de cohérence »
+    await p3.locator('#ai-fn-suggest').focus();
+    await p3.keyboard.press('Enter');
+    await p3.getByRole('option', { name: /Claude Opus/ }).waitFor();
+    await p3.keyboard.press('ArrowDown');
+    await p3.keyboard.press('Enter');
+    await p3.waitForFunction(() =>
+      /Claude Opus/.test(document.getElementById('ai-fn-suggest')?.textContent ?? ''),
+    );
+    await p3.waitForTimeout(300);
+    ok(
+      s3.aiFnModels.suggest === 'claude-opus-5-5' &&
+        (await p3.evaluate(() => document.activeElement?.id)) === 'ai-fn-suggest',
+      'clavier : choix enregistré, le focus reste sur la liste',
+    );
+    ok(
+      (await p3.locator('#ai-fn-suggest').evaluate((e) => Math.round(e.getBoundingClientRect().height))) ===
+        40,
+      'listes de 40 px (spec §3)',
+    );
     ok(
       !s3.aiFnModels.translate &&
         (await fnRow('Traduction').locator('.fd-sel').innerText()).includes('Claude Sonnet'),
       'Annuler : retour au modèle précédent (défaut, Claude Sonnet)',
     );
     if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-fonctions${sfx}.png`, fullPage: true });
+    await p3.getByRole('link', { name: 'Historique des changements' }).click();
+    await p3.waitForURL(/equipe\?objet=ai/);
+    await p3.getByText('Filtré sur Modèles IA').waitFor();
+    const jr = (await p3.locator('table').nth(1).locator('tbody tr').allInnerTexts()).map((x) =>
+      x.replace(/\s+/g, ' '),
+    );
+    ok(
+      jr.some((x) => x.includes('Traduction · Claude Sonnet (défaut) → Claude Opus')) &&
+        jr.some((x) => x.includes('Traduction · Claude Opus → Claude Sonnet (défaut)')) &&
+        !jr.some((x) => /claude-|translate|suggest/.test(x)) &&
+        jr.every((x) => /Clé IA|Modèle IA/.test(x)),
+      `journal filtré sur Modèles IA, lisible (${jr.length} lignes, ex. « ${jr.find((x) => x.includes('Traduction')) ?? ''} »)`,
+    );
+    await p3.goto(`${APP}/#/console/modeles`);
+    await p3.getByRole('heading', { name: 'Modèle par fonction' }).waitFor();
     await axe(p3, 'modèle par fonction');
 
     // Modèle retiré : repli et bandeau
@@ -298,11 +338,13 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     ok(
       (await p3.locator('.console-ai-attention').innerText())
         .replace(/\s+/g, ' ')
-        .includes('1 fonction demande votre attention : Traduction (modèle retiré).') &&
+        .includes('1 fonction en repli, son modèle est retiré : Traduction.') &&
         (await fnRow('Traduction').locator('.console-ai-pick.is-retired').count()) === 1 &&
-        (await fnRow('Traduction').innerText()).includes('Modèle retiré : repli sur Claude Haiku') &&
+        (await fnRow('Traduction').innerText())
+          .replace(/\s+/g, ' ')
+          .includes('Modèle retiré : repli sur Claude Sonnet') &&
         (await fnRow('Traduction').locator('.fd-sel').innerText()).includes('Ancien modèle (retiré)'),
-      'modèle retiré : bandeau, bordure orange, « repli sur Claude Haiku »',
+      'modèle retiré : bandeau par cause, bordure orange, repli sur le défaut de la fonction (Claude Sonnet)',
     );
     if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-retire${sfx}.png`, fullPage: true });
     await axe(p3, 'modèle retiré');
@@ -316,7 +358,7 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     ok(
       (await fnRow('Traduction').innerText()).includes('Clé Anthropic manquante : coupée') &&
         (await fnRow('Voix').innerText()).includes('Actif') &&
-        /4 fonctions demandent votre attention : Assistant IA de l’éditeur \(clé Anthropic manquante\), Rédaction automatique \(clé Anthropic manquante\), Vérification de cohérence \(clé Anthropic manquante\) et Traduction \(clé Anthropic manquante\)\./.test(
+        /4 fonctions coupées faute de clé Anthropic : Assistant IA de l’éditeur, Rédaction automatique, Vérification de cohérence et Traduction\./.test(
           (await p3.locator('.console-ai-attention').innerText()).replace(/\s+/g, ' '),
         ) &&
         ['assistant', 'translate', 'write'].every((f) => s3.aiCut.includes(f)) &&
@@ -329,6 +371,24 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await p3.locator('.canvas-hotspot').first().click();
     await p3.waitForSelector('#hs-body');
     await p3.locator('.ai-entry').first().waitFor();
+    // Entrée amenée en bas de la fenêtre (900 px) : l'infobulle doit rester visible, ouverte au-dessus
+    const last = p3.locator('.ai-disabled-wrap').last();
+    await last.evaluate((e) => e.scrollIntoView({ block: 'end' }));
+    await last.hover();
+    await p3.waitForTimeout(250);
+    const tr = await last.locator('.ai-tip').evaluate((e) => {
+      const r = e.getBoundingClientRect();
+      return {
+        top: Math.round(r.top),
+        bottom: Math.round(r.bottom),
+        h: innerHeight,
+        above: e.classList.contains('ai-tip--above'),
+      };
+    });
+    ok(
+      tr.top >= 0 && tr.bottom <= tr.h,
+      `infobulle visible dans la fenêtre de ${tr.h} px (${tr.top} → ${tr.bottom}${tr.above ? ', ouverte au-dessus' : ''})`,
+    );
     const tip = (await p3.locator('.ai-tip').first().textContent()) || '';
     ok(
       (await p3.locator('.ai-entry').first().getAttribute('aria-disabled')) === 'true' &&
@@ -336,6 +396,19 @@ const GOOD2 = 'sk-fictive-bonne-000333';
         (await p3.getByRole('link', { name: 'Ouvrir le réglage' }).count()) === 0,
       `espace : entrée IA désactivée, « ${tip.trim()} », sans lien vers le réglage`,
     );
+    await p3.keyboard.press('Escape');
+    await p3.getByRole('button', { name: 'Assistant' }).click();
+    await p3.locator('.ai-assistant').waitFor();
+    const starters = p3.locator('.ai-as-starters button');
+    ok(
+      (await p3.locator('.ai-as-unavailable').innerText()).includes('Indisponible pour le moment') &&
+        (await starters.count()) === 3 &&
+        (await starters.evaluateAll((bs) => bs.every((b) => b.getAttribute('aria-disabled') === 'true'))) &&
+        (await p3.locator('.ai-assistant textarea').isDisabled()) &&
+        !(s3.aiCalls ?? []).length,
+      'Assistant coupé : « Indisponible » dès l’ouverture, suggestions et envoi désactivés, aucune demande',
+    );
+    if (SHOTS) await p3.screenshot({ path: `${SHOTS}/console-modeles-assistant-coupe${sfx}.png` });
     await c3.close();
   }
 

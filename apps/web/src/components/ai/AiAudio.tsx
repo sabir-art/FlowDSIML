@@ -91,6 +91,8 @@ export function useAudioText() {
         if (e.code === 'AI_QUOTA_WORKSPACE') return blockText('quota', s);
         if (e.code === 'AI_QUOTA_USER') return blockText('userQuota', s);
         if (e.code === 'AI_DISABLED') return t(`ai.audio.disabled_${f}`);
+        // L41 étape 3 : fonction coupée par TutoClick (clé du fournisseur absente)
+        if (e.code === 'UNAVAILABLE') return t('ai.unavailable');
         if (e.code === 'PII_IN_TEXT') return t('ai.voice.pii');
         if (e.code === 'TOO_LONG' || e.code === 'TOO_LONG_TEXT')
           return f === 'voice' ? t('ai.voice.tooLong') : t('ai.captions.tooLong');
@@ -98,7 +100,7 @@ export function useAudioText() {
         const provider = providerText(e.code);
         if (provider) return provider;
       }
-      return t('ai.error');
+      return aiBlock(s, f) === 'unavailable' ? t('ai.unavailable') : t('ai.error');
     },
   };
 }

@@ -5957,7 +5957,9 @@
       "action": "Action",
       "date": "Date",
       "object": "Objet",
-      "retention": "Le journal est conservé 12 mois ; il ne peut être ni modifié ni effacé."
+      "retention": "Le journal est conservé 12 mois ; il ne peut être ni modifié ni effacé.",
+      "onlyAi": "Filtered on AI models",
+      "showAll": "Show all"
     },
     "action": {
       "console_open": "Connexion à la console",
@@ -6054,7 +6056,7 @@
       },
       "fnHelp": {
         "assistant": "Answers and suggestions in the editor",
-        "write": "Step texts during capture (extension)",
+        "write": "Step texts during capture (extension), generation, data and charts",
         "suggest": "Titles, texts and pauses across the demo",
         "translate": "Demo translated into another language",
         "voice": "Generated voice-over",
@@ -6079,12 +6081,10 @@
       },
       "modelSet": "{{fn}}: {{model}}",
       "modelError": "The model could not be changed. Try again.",
-      "attention_one": "1 feature needs your attention: {{list}}.",
-      "attention_other": "{{count}} features need your attention: {{list}}.",
-      "why": {
-        "retired": "model retired",
-        "missing": "{{name}} key missing"
-      }
+      "attentionCut_one": "1 feature off for lack of a {{name}} key: {{list}}.",
+      "attentionCut_other": "{{count}} features off for lack of a {{name}} key: {{list}}.",
+      "attentionRetired_one": "1 feature falling back, its model is retired: {{list}}.",
+      "attentionRetired_other": "{{count}} features falling back, their model is retired: {{list}}."
     }
   },
   "news": {

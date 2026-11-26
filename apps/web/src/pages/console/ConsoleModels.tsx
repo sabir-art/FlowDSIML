@@ -93,6 +93,34 @@ export function Models() {
   const none = list.every((p) => p.state === 'missing');
   // Bandeau d'attention : fonctions en repli ou coupées faute de clé (spec UX §1)
   const attention = (fns ?? []).filter((f) => f.status === 'fallback' || f.status === 'cut');
+  const names = (xs: FnState[]) =>
+    new Intl.ListFormat(i18n.language === 'en' ? 'en' : 'fr', { type: 'conjunction' }).format(
+      xs.map((f) => t(`console.ai.fn.${f.fn}`)),
+    );
+  // Groupes par cause : clé manquante (par fournisseur), puis modèle retiré
+  const groups = [
+    ...(['anthropic', 'openai', 'elevenlabs'] as const).flatMap((p) => {
+      const xs = attention.filter((f) => f.status === 'cut' && f.provider === p);
+      return xs.length
+        ? [
+            {
+              key: `cut-${p}`,
+              text: t('console.ai.attentionCut', {
+                count: xs.length,
+                name: PROVIDER_LABEL[p],
+                list: names(xs),
+              }),
+            },
+          ]
+        : [];
+    }),
+    ...(() => {
+      const xs = attention.filter((f) => f.status === 'fallback');
+      return xs.length
+        ? [{ key: 'retired', text: t('console.ai.attentionRetired', { count: xs.length, list: names(xs) }) }]
+        : [];
+    })(),
+  ];
   return (
     <div className="console-stack">
       <div className="console-card-head console-ai-head">
@@ -100,7 +128,7 @@ export function Models() {
           <h2 className="console-ai-title">{t('console.ai.title')}</h2>
           <p className="fd-muted">{t('console.ai.sub')}</p>
         </div>
-        <Link className="fd-btn fd-btn--sm" to="/console/equipe">
+        <Link className="fd-btn fd-btn--sm" to="/console/equipe?objet=ai">
           <History aria-hidden="true" />
           {t('console.ai.history')}
         </Link>
@@ -108,20 +136,14 @@ export function Models() {
       {!none && attention.length > 0 && (
         <p className="console-ai-attention" role="status">
           <TriangleAlert aria-hidden="true" />
-          {t('console.ai.attention', {
-            count: attention.length,
-            // « A, B et C » selon la langue
-            list: new Intl.ListFormat(i18n.language === 'en' ? 'en' : 'fr', { type: 'conjunction' }).format(
-              attention.map(
-                (f) =>
-                  `${t(`console.ai.fn.${f.fn}`)} (${
-                    f.status === 'fallback'
-                      ? t('console.ai.why.retired')
-                      : t('console.ai.why.missing', { name: PROVIDER_LABEL[f.provider!] })
-                  })`,
-              ),
-            ),
-          })}
+          {/* Décision du chef : une phrase par cause (« 4 fonctions coupées faute de clé Anthropic : A, B, C et D. ») */}
+          <span>
+            {groups.map((g) => (
+              <span key={g.key} className="console-ai-attention__l">
+                {g.text}
+              </span>
+            ))}
+          </span>
         </p>
       )}
       {none && (
@@ -376,6 +398,7 @@ function FunctionModels({ fns, onChanged }: { fns: FnState[]; onChanged: (f: FnS
   const ro = useConsoleRole() !== 'admin';
   const [busy, setBusy] = useState<Fn | null>(null);
   const set = async (f: FnState, model: string | null, undo: boolean) => {
+    if (busy) return;
     setBusy(f.fn);
     const r = await consoleAi<{ old: string | null; functions: FnState[] }>('console_set_model', {
       fn: f.fn,
@@ -384,6 +407,8 @@ function FunctionModels({ fns, onChanged }: { fns: FnState[]; onChanged: (f: FnS
     setBusy(null);
     if (!r.ok) return toast(t('console.ai.modelError'), undefined, { tone: 'warning' });
     onChanged(r.result.functions);
+    // Recette UX : le focus revient sur la liste de la fonction changée (souris comme clavier)
+    requestAnimationFrame(() => document.getElementById(`ai-fn-${f.fn}`)?.focus());
     const now = r.result.functions.find((x) => x.fn === f.fn)!;
     const label = now.choices.find((c) => c.id === now.chosen)?.label ?? now.chosen;
     if (undo)
@@ -416,9 +441,9 @@ function FunctionModels({ fns, onChanged }: { fns: FnState[]; onChanged: (f: FnS
               <div className={`console-ai-pick${retired ? ' is-retired' : ''}${cut ? ' is-cut' : ''}`}>
                 <Select
                   id={id}
-                  size="sm"
                   value={f.chosen}
-                  disabled={ro || busy === f.fn || f.chosen === 'auto' || f.status === 'off'}
+                  // Pas de désactivation pendant l'envoi : le focus reste sur la liste (WCAG 2.4.3)
+                  disabled={ro || f.chosen === 'auto' || f.status === 'off'}
                   aria-describedby={`${id}-s`}
                   onChange={(e) => void set(f, e.target.value, true)}
                 >
