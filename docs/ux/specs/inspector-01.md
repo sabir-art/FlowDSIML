@@ -66,7 +66,7 @@ Les jetons du §1 ne changent pas. Les ajouts sont dans `docs/ux/propositions/in
 | Hotspot sélectionné | Segmenté Guidage ; X / Y / L / H en 2 × 2, comme la Zone du Recadrage | Retour ‹ ; aperçu de la bulle ; Pulsation en interrupteur. |
 | Voix off | **Inchangée** : Source IA · Micro · Fichier et point vert, carte « Voix en place », Texte lu, Langue, Voix, Lecteur | Langue et Voix dans la région « Synthèse » ; Régénérer à contour, 12 px sous la région ; « Garder l'actuelle » à contour ; ⋯ à 28 px ; « Toute la démo » sur Lecteur. |
 | Suite du parcours | Listes déroulantes v1 | Règle sur sa surface, flèche, erreur sous le champ ; « Ajouter une règle » à contour. |
-| Flou | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
+| Flou | Segmenté Flou / Pixels / Masque ; liste des zones, réglages de la zone choisie | Annuler et Appliquer le flou passent au pied de la fenêtre, comme le Recadrage (décision du chef) ; Annuler à contour. |
 | Zoom | Segmentés Niveau et Transition ; H / V | Interrupteur pleine ligne ; cadre sur la vignette ; « Centrer sur le hotspot » à contour. |
 | Projecteur | — | Halo sur la vignette ; Taille et Assombrir en curseurs ; aides derrière « ? ». |
 | Recadrage | **Inchangé** : Format, Zone L / H / X / Y avec lien, Appliquer à, pied Réinitialiser / Annuler / Recadrer | Aperçu du cadrage en tête ; Annuler à contour. |
@@ -91,7 +91,7 @@ Contrôle de chaque panneau v1.1, rendu en clair et en sombre. Le script mesure 
 | Hotspot sélectionné | OK | OK | OK | OK | OK | Écart | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Voix off | OK | OK | OK | — | OK | OK | OK | OK | OK | Écart | OK | OK | À tenir | OK | OK |
 | Suite du parcours | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
-| Flou | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | Écart | OK | OK | OK | OK |
+| Flou | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Zoom | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Projecteur | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
 | Recadrage | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK | OK |
@@ -117,6 +117,40 @@ e2e à ajouter, sur chaque panneau ouvert, en clair et en sombre :
 3. 12 px entre un groupe et son action, 8 px entre un titre de section et son contenu ;
 4. toute cible fait 28 px au moins, interrupteurs exceptés (ligne de 32 px) ;
 5. contraste du texte ≥ 4,5:1.
+
+
+### V1.1.5 Compléments à la marge (26/11, sans changer l'aspect présenté au client)
+
+Relecture de la v1.1 pendant l'attente du client. Rien ne change sur les planches : ce sont des règles de code et de test qui protègent ce qui est déjà dessiné.
+
+1. **Contraste des composants (WCAG 1.4.11).** Mesures :
+   - contour `.btn.line` : 3,07:1 sur le fond du panneau en clair, 3,16:1 en sombre. Conforme, mais **seulement sur le fond du panneau** ;
+   - sur le fond d'un champ (`--fd-insp-fill`), il tombe à 2,73:1.
+
+   Un seul cas dans la v1.1 : « Ignorer » dans la carte de proposition de l'Assistant (carte remplie), à 2,73:1 en clair et 2,66:1 en sombre.
+
+   Règle : sur une carte remplie (`.card`, `.li`), le contour d'une action prend `--fd-insp-action-line-on-fill` (#7b8594 en clair, #6b7684 en sombre), soit **3,32:1 et 3,21:1**. L'écart de teinte est imperceptible sur les planches, qui ne changent pas. La règle est ajoutée dans `v1-1.css`.
+2. **Champ rempli sans contour.** Fond du champ contre fond du panneau : 1,12:1 en clair et 1,19:1 en sombre. C'est l'aspect de la v1, validé ; il est acceptable parce que chaque champ a **toujours** un libellé visible à gauche (ligne « libellé | contrôle »). Règles pour le tenir :
+   - jamais de champ identifié par son seul texte indicatif ;
+   - au survol, `--fd-insp-fill-hover` ;
+   - au focus, le trait intérieur prune de 2 px de FIELD-01 ;
+   - en erreur, le trait rouge de 1 px et le message sous le champ.
+3. **États d'attente (Doherty, « à tenir »).** Ils sont repris de la grille (`v1-1-grille-auto-controle.png`) et précisés pour le code :
+   - **Voix off** : dès le clic, le bouton garde sa largeur et devient « Génération… » avec un indicateur de 16 px, et l'onde de la carte passe en squelette. La zone d'annonce dit une fois « Génération de la voix en cours ».
+   - **Image** : la vignette locale s'affiche tout de suite, et le téléversement se fait en fond, avec une barre fine sous la vignette.
+   - **Assistant** : le message de l'utilisateur s'affiche aussitôt, puis l'indicateur de saisie arrive en moins de 400 ms.
+   - Pour les trois : `aria-busy="true"` sur la zone qui change. À la fin, le résultat remplace l'état sans saut de mise en page. En cas d'échec, le message s'affiche sous l'action, avec « Réessayer » à contour.
+4. **Clavier.**
+   - L'ordre du focus suit l'ordre visuel : en-tête (retour ‹, titre, croix), aperçu en tête, sections de haut en bas, pied.
+   - Une section repliée (`.fold`) est un bouton avec `aria-expanded`, qui s'ouvre avec Entrée ou Espace et rend le focus à son titre.
+   - Une liste `.li` se parcourt avec les flèches, et Suppr retire la ligne avec une confirmation douce (toast « Annuler »).
+5. **Mouvement réduit.** Le glissement du segmenté, l'ouverture des sections repliées et l'apparition de l'aperçu passent à 0 ms avec `prefers-reduced-motion: reduce`.
+
+e2e à ajouter à la liste ci-dessus :
+6. le contour d'un `.btn.line` atteint 3:1 contre le premier fond opaque de ses parents, carte remplie comprise ;
+7. tout champ a un libellé visible relié par `for` ou `aria-labelledby` ;
+8. une action longue (voix, image, Assistant) passe à `aria-busy="true"` en moins de 100 ms après le clic ;
+9. les sections repliées ont `aria-expanded`, et le focus reste sur leur titre après l'ouverture.
 
 
 > **Version 3 (7e1dc24), non retenue** : refonte complète des panneaux selon les lois de l'UX. Le client l'écarte : il voulait des corrections à la marge de la v1. Ses planches `v3-*` restent pour l'historique.
