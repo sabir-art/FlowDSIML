@@ -779,10 +779,19 @@ $('dest-kind').addEventListener('keydown', (e) => {
   saveDest();
   renderDest(`#dest-kind [data-value="${destKind}"]`);
 });
+/**
+ * Retours client 0.3.3 : choisir un dossier ou une démo ramène à la vue précédente, la destination à jour
+ * (avant : une simple coche, puis « Retour » à la main). Le focus revient sur « Changer ».
+ */
+const backFromDest = () => {
+  view('setup');
+  $('dest-change').focus();
+};
 const pickFolder = (li: HTMLElement) => {
   folderId = li.dataset.folder || null;
   saveDest();
-  renderDest(`#folders [data-folder="${li.dataset.folder}"]`);
+  renderDest();
+  backFromDest();
 };
 $('folders').addEventListener('click', (e) => {
   const li = (e.target as HTMLElement).closest<HTMLElement>('[role=treeitem]');
@@ -794,7 +803,8 @@ const pickDemo = (li: HTMLElement) => {
   if (!d && !f) return;
   appendDemo = d ? { id: d.id, title: d.title } : { id: f!.demoId, title: f!.title };
   saveDest();
-  renderDest(`#demos [data-demo="${appendDemo.id}"]`);
+  renderDest();
+  backFromDest();
 };
 $('demos').addEventListener('click', (e) => {
   const li = (e.target as HTMLElement).closest<HTMLElement>('[role=option]');
