@@ -47,3 +47,41 @@ Recette du 26/11, faite à la place de l'utilisateur, sur `claude/dev-mvp` à 48
 ## 3. Pour le VERT
 
 Ce seul point. Le reste du lot est conforme et je ne le referai pas : je rejouerai le banc et ma page piège après la correction.
+
+---
+
+# Nouvelle recette après 0d50a0d
+
+## 1. Tableau sans `thead` : VERT
+
+Extension reconstruite sur 0d50a0d. J'ai rejoué le banc et ma page (même page, mêmes tableaux) dans les deux modes.
+
+- **Banc** :
+  - `etat-html` 7/7 : la page piège a 10/10 états et **0 remplacement** ; les cas « Tableau sans thead » sont ajoutés ;
+  - `etat-captures` 5/5 : la page piège a **0 zone**.
+- **HTML** : 5 remplacements, tous justes (`v2-html-tableau-sans-thead.png`) :
+  - Nom « Camille Durand », Adresse et Téléphone ;
+  - **Nom « D••••• »** et **Nom « M••••• »**, les cellules du tableau sans `thead`.
+  - « Projet Alpha », les en-têtes « Nom / Rôle / Statut / Actions », les rôles, « Ville : Lyon » et « Responsable : Offre essentielle » restent lisibles.
+- **Captures d'écran** : les mêmes 5 détections, Durand et Martin compris.
+
+## 2. Nouveau défaut bloquant en mode Captures d'écran : ROUGE
+
+**Sur la 1re capture, les zones floutées ne sont pas sur les données.** Elles sont environ 80 px trop haut (`v2-captures-zones-decalees.png`) :
+- elles couvrent « Exporter » et « Ville : Lyon » ;
+- elles laissent en clair « Camille Durand », l'adresse, le téléphone, et les noms du tableau.
+
+Les captures 2 et 3 sont justes. Le défaut se reproduit à chaque essai.
+
+**Cause mesurée** (données envoyées, `element_meta.pii`) :
+- la 1re capture et la 2e sont prises sans défilement, sur la même page ;
+- pourtant, le nom est à `y = 351 px` sur la 1re et à `427 px` sur la 2e ;
+- or 427 / 800 × 657 = 351.
+
+Les zones de la 1re capture sont donc ramenées à une hauteur de fenêtre de **800 px**, celle d'avant le démarrage. Mais l'image fait **657 px** : le bandeau du navigateur « … a commencé à déboguer ce navigateur » est apparu entre-temps. L'erreur grandit vers le bas de l'image. Un vrai utilisateur aura ce bandeau, donc ce défaut.
+
+**Correction demandée** :
+- mesurer la fenêtre (`innerHeight`) au moment de **chaque** capture, et non au démarrage ;
+- ou ramener les zones à la taille réelle de l'image capturée.
+
+**Banc** : il faut contrôler, sur **chaque** capture et pas seulement la première, que chaque zone recouvre l'élément visé. Et il faut le faire sur une page assez haute pour que le décalage se voie (données sous les 300 premiers pixels).
