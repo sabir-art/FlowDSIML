@@ -8,12 +8,24 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Check, History, KeyRound, Plug, TriangleAlert } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronRight,
+  GripVertical,
+  History,
+  KeyRound,
+  Plug,
+  Sparkles,
+  TriangleAlert,
+} from 'lucide-react';
 import { Modal, Select } from '@flowdsiml/ui';
 import { supabase } from '../../lib/supabase';
 import { formatDate } from '../../lib/format';
 import { useToast } from '../../components/Toast';
 import { WriteButton, useConsoleRole } from './shared';
+import '../../components/ai/ai.css';
 
 type Provider = 'anthropic' | 'openai' | 'elevenlabs';
 interface ProviderState {
@@ -182,6 +194,7 @@ export function Models() {
         </ul>
       </section>
       {fns && <FunctionModels fns={fns} onChanged={setFns} />}
+      {fns && <AssistantModels />}
       {keyFor && (
         <KeyDialog
           p={keyFor}
@@ -495,6 +508,252 @@ function FunctionModels({ fns, onChanged }: { fns: FnState[]; onChanged: (f: FnS
           );
         })}
       </ul>
+    </section>
+  );
+}
+
+type Tag = 'none' | 'recommended' | 'beta';
+interface AsstRow {
+  model: string;
+  position: number;
+  proposed: boolean;
+  tag: Tag;
+  label: string;
+  provider: Provider;
+  available: boolean;
+}
+interface AsstState {
+  models: AsstRow[];
+  rules: { short: string; whole_demo: string; fallback: string };
+}
+
+/**
+ * Spec UX §4 : modèles proposés dans l'assistant (ordre, case Proposer, étiquette), règles d'« Auto »
+ * et aperçu du menu tel que les utilisateurs le voient, mis à jour en direct. Au moins un modèle coché.
+ */
+function AssistantModels() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const ro = useConsoleRole() !== 'admin';
+  const [st, setSt] = useState<AsstState | null>(null);
+  const [drag, setDrag] = useState<number | null>(null);
+  const [lastHelp, setLastHelp] = useState<string | null>(null);
+  useEffect(() => {
+    void consoleAi<AsstState>('console_assistant').then((r) => r.ok && setSt(r.result));
+  }, []);
+  if (!st) return null;
+  const save = async (models: AsstRow[], focusId?: string) => {
+    if (ro) return;
+    if (!models.some((m) => m.proposed)) return setLastHelp(t('console.ai.keepOne'));
+    setLastHelp(null);
+    setSt({ ...st, models });
+    const r = await consoleAi<AsstState>('console_assistant_set', {
+      models: models.map((m) => ({ model: m.model, proposed: m.proposed, tag: m.tag })),
+    });
+    if (!r.ok) {
+      toast(r.error === 'LAST_MODEL' ? t('console.ai.keepOne') : t('console.ai.modelError'), undefined, {
+        tone: 'warning',
+      });
+      return void consoleAi<AsstState>('console_assistant').then((x) => x.ok && setSt(x.result));
+    }
+    setSt(r.result);
+    toast(t('console.ai.listSaved'));
+    if (focusId) requestAnimationFrame(() => document.getElementById(focusId)?.focus());
+  };
+  const move = (i: number, to: number) => {
+    if (to < 0 || to >= st.models.length || to === i) return;
+    const next = [...st.models];
+    const [x] = next.splice(i, 1);
+    next.splice(to, 0, x!);
+    void save(next, `ai-as-${to < i ? 'up' : 'down'}-${x!.model}`);
+  };
+  const setRule = async (rule: 'short' | 'whole_demo' | 'fallback', model: string) => {
+    if (ro) return;
+    const r = await consoleAi<AsstState & { old: string }>('console_auto_rule_set', { rule, model });
+    if (!r.ok) return toast(t('console.ai.modelError'), undefined, { tone: 'warning' });
+    setSt(r.result);
+    toast(t('console.ai.ruleSaved'));
+    requestAnimationFrame(() => document.getElementById(`ai-rule-${rule}`)?.focus());
+  };
+  const checked = st.models.filter((m) => m.proposed && m.available);
+  const rec = checked.filter((m) => m.tag === 'recommended');
+  const ruleOptions = (withNext: boolean) => (
+    <>
+      {withNext && <option value="next">{t('console.ai.nextInList')}</option>}
+      {/* Tous les modèles : la valeur en cours reste visible même si elle n'est plus proposée (Auto prend
+          alors le premier du menu) ; seuls les modèles proposés et utilisables peuvent être choisis */}
+      {st.models.map((m) => (
+        <option key={m.model} value={m.model} disabled={!m.available || !m.proposed}>
+          {m.proposed ? m.label : t('console.ai.notProposed', { name: m.label })}
+        </option>
+      ))}
+    </>
+  );
+  return (
+    <section className="fd-card" aria-labelledby="ai-as-t">
+      <h3 id="ai-as-t" className="console-h2">
+        {t('console.ai.assistant')}
+      </h3>
+      <p className="fd-muted console-ai-help">{t('console.ai.assistantHelp')}</p>
+      <div className="console-ai-as">
+        <div>
+          <ol className="console-ai-aslist">
+            {st.models.map((m, i) => (
+              <li
+                key={m.model}
+                className={`console-ai-asrow${m.available ? '' : ' is-off'}${drag === i ? ' is-drag' : ''}`}
+                onDragOver={(e) => {
+                  if (drag !== null) e.preventDefault();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (drag !== null) move(drag, i);
+                  setDrag(null);
+                }}
+              >
+                <span
+                  className="console-ai-handle"
+                  draggable={!ro}
+                  aria-hidden="true"
+                  onDragStart={() => setDrag(i)}
+                  onDragEnd={() => setDrag(null)}
+                >
+                  <GripVertical />
+                </span>
+                <input
+                  type="checkbox"
+                  id={`ai-as-p-${m.model}`}
+                  checked={m.proposed}
+                  disabled={ro || !m.available}
+                  aria-describedby={lastHelp ? 'ai-as-keep' : undefined}
+                  onChange={(e) =>
+                    void save(
+                      st.models.map((x) => (x.model === m.model ? { ...x, proposed: e.target.checked } : x)),
+                      `ai-as-p-${m.model}`,
+                    )
+                  }
+                />
+                <label htmlFor={`ai-as-p-${m.model}`} className="console-ai-name">
+                  <b>{m.label}</b>
+                  <small>
+                    {m.available
+                      ? PROVIDER_LABEL[m.provider]
+                      : t('console.ai.addKeyFor', { name: PROVIDER_LABEL[m.provider] })}
+                  </small>
+                </label>
+                <Select
+                  id={`ai-as-tag-${m.model}`}
+                  size="sm"
+                  aria-label={t('console.ai.tagOf', { name: m.label })}
+                  value={m.tag}
+                  disabled={ro || !m.available}
+                  onChange={(e) =>
+                    void save(
+                      st.models.map((x) => (x.model === m.model ? { ...x, tag: e.target.value as Tag } : x)),
+                      `ai-as-tag-${m.model}`,
+                    )
+                  }
+                >
+                  <option value="none">{t('console.ai.tag.none')}</option>
+                  <option value="recommended">{t('console.ai.tag.recommended')}</option>
+                  <option value="beta">{t('console.ai.tag.beta')}</option>
+                </Select>
+                <span className="console-ai-moves">
+                  <button
+                    type="button"
+                    id={`ai-as-up-${m.model}`}
+                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                    aria-label={t('console.ai.moveUp', { name: m.label })}
+                    aria-disabled={ro || i === 0 || undefined}
+                    onClick={() => !ro && move(i, i - 1)}
+                  >
+                    <ArrowUp aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    id={`ai-as-down-${m.model}`}
+                    className="fd-btn fd-btn--ghost fd-btn--icon fd-btn--sm"
+                    aria-label={t('console.ai.moveDown', { name: m.label })}
+                    aria-disabled={ro || i === st.models.length - 1 || undefined}
+                    onClick={() => !ro && move(i, i + 1)}
+                  >
+                    <ArrowDown aria-hidden="true" />
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ol>
+          {lastHelp && (
+            <p className="field-error" id="ai-as-keep" role="alert">
+              {lastHelp}
+            </p>
+          )}
+          <div className="console-ai-auto">
+            <h4>
+              <Sparkles aria-hidden="true" />
+              {t('console.ai.autoTitle')}
+            </h4>
+            {(['short', 'whole_demo', 'fallback'] as const).map((rule) => (
+              <div key={rule} className="console-ai-rule">
+                <label htmlFor={`ai-rule-${rule}`}>{t(`console.ai.rule.${rule}`)}</label>
+                <ChevronRight aria-hidden="true" className="console-ai-arrow" />
+                <Select
+                  id={`ai-rule-${rule}`}
+                  size="md"
+                  value={st.rules[rule]}
+                  disabled={ro}
+                  onChange={(e) => void setRule(rule, e.target.value)}
+                >
+                  {ruleOptions(rule === 'fallback')}
+                </Select>
+              </div>
+            ))}
+            <p className="fd-muted console-ai-help">{t('console.ai.autoHelp')}</p>
+          </div>
+        </div>
+        <div className="console-ai-preview">
+          <p className="console-ai-preview__t" id="ai-prev-t">
+            {t('console.ai.preview')}
+          </p>
+          <div className="aim-menu console-ai-preview__menu" role="group" aria-labelledby="ai-prev-t">
+            <div className="aim-item">
+              <span className="aim-tile" aria-hidden="true">
+                <Sparkles />
+              </span>
+              <span className="aim-tx">
+                <b>{t('ai.model.auto')}</b>
+                <small>{t('ai.model.autoHelp')}</small>
+              </span>
+              <Check className="aim-check" aria-hidden="true" />
+            </div>
+            {rec.length > 0 && (
+              <>
+                <div className="aim-sep" />
+                <div className="aim-head">{t('ai.model.recommended')}</div>
+                {rec.map((m) => (
+                  <div key={m.model} className="aim-item">
+                    <span className="aim-tile" aria-hidden="true">
+                      <span className="aim-mono">{m.label[0]}</span>
+                    </span>
+                    <span className="aim-tx">
+                      <b>{m.label}</b>
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
+            <div className="aim-sep" />
+            <div className="aim-item aim-more">
+              <span className="aim-tile" aria-hidden="true" />
+              <span className="aim-tx">
+                <b>{t('ai.model.others')}</b>
+              </span>
+              <ChevronRight className="aim-check" aria-hidden="true" />
+            </div>
+          </div>
+          <p className="fd-muted console-ai-help">{t('console.ai.previewHelp')}</p>
+        </div>
+      </div>
     </section>
   );
 }

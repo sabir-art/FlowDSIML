@@ -2,25 +2,23 @@ import { Check, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import type { AiModelChoice } from '../../lib/ai';
+import type { AiModelChoice, AssistantModel } from '../../lib/ai';
 import { getPortal } from '../../lib/floating';
-
-/** Modèles autorisés dans l'espace (L41 les fera choisir au propriétaire : Sonnet et Opus pour l'instant). */
-export const ALLOWED_MODELS: Array<Exclude<AiModelChoice, 'auto'>> = ['sonnet', 'opus'];
 
 /**
  * Retours client, planche 3 : pilule du modèle dans le champ de l'assistant (« Auto » par défaut) et son
  * menu (288 px, rayon 16), ouvert au-dessus, aligné sur le bord droit du panneau : Auto ; Recommandé
- * (modèles autorisés, menuitemradio) ; Autres modèles › (sous-menu sur le côté).
+ * (menuitemradio) ; Autres modèles › (sous-menu sur le côté). L41 étape 4 : la liste vient du serveur
+ * (modèles proposés par la Console, dans leur ordre, avec leur étiquette).
  */
 export function ModelPicker({
   value,
   onChange,
-  allowed = ALLOWED_MODELS,
+  models,
 }: {
   value: AiModelChoice;
   onChange: (v: AiModelChoice) => void;
-  allowed?: Array<Exclude<AiModelChoice, 'auto'>>;
+  models: AssistantModel[];
 }) {
   const { t } = useTranslation();
   const id = useId();
@@ -35,7 +33,10 @@ export function ModelPicker({
     subRight: number;
     subBottom: number;
   } | null>(null);
-  const label = value === 'auto' ? t('ai.model.auto') : t(`ai.model.${value}`);
+  const byId = (v: string) => models.find((m) => m.id === v);
+  const label = value === 'auto' ? t('ai.model.auto') : (byId(value)?.label ?? t('ai.model.auto'));
+  const recommended = models.filter((m) => m.tag === 'recommended');
+  const others = models.filter((m) => m.tag !== 'recommended');
 
   const close = (focus = true) => {
     setOpen(false);
@@ -74,7 +75,7 @@ export function ModelPicker({
     return () => document.removeEventListener('pointerdown', out);
   }, [open]);
   useEffect(() => {
-    if (more) sub.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+    if (more) sub.current?.querySelector<HTMLElement>('[role^="menuitem"]')?.focus();
   }, [more]);
 
   const nav = (root: HTMLElement | null, e: KeyboardEvent) => {
@@ -117,8 +118,17 @@ export function ModelPicker({
         {tile}
       </span>
       <span className="aim-tx">
-        <b>{v === 'auto' ? t('ai.model.auto') : t(`ai.model.${v}`)}</b>
-        <small>{t(`ai.model.${v}Help`)}</small>
+        <b>
+          {v === 'auto' ? t('ai.model.auto') : (byId(v)?.label ?? v)}
+          {byId(v)?.tag === 'beta' && <span className="aim-beta">{t('ai.model.beta')}</span>}
+        </b>
+        <small>
+          {v === 'auto'
+            ? t('ai.model.autoHelp')
+            : t(`ai.model.help.${v}`, {
+                defaultValue: `${t(`console.ai.speed.${byId(v)?.speed ?? 2}`)} · ${t(`console.ai.cost.${byId(v)?.cost ?? 2}`)}`,
+              })}
+        </small>
       </span>
       {value === v && <Check className="aim-check" aria-hidden="true" />}
     </div>
@@ -163,15 +173,19 @@ export function ModelPicker({
               }}
             >
               {row('auto', <Sparkles aria-hidden="true" />)}
-              <div role="separator" className="aim-sep" />
-              <div role="group" aria-labelledby={`${id}-rec`}>
-                <div className="aim-head" id={`${id}-rec`}>
-                  {t('ai.model.recommended')}
-                </div>
-                {allowed.map((m) => (
-                  <div key={m}>{row(m, <span className="aim-mono">A</span>)}</div>
-                ))}
-              </div>
+              {recommended.length > 0 && (
+                <>
+                  <div role="separator" className="aim-sep" />
+                  <div role="group" aria-labelledby={`${id}-rec`}>
+                    <div className="aim-head" id={`${id}-rec`}>
+                      {t('ai.model.recommended')}
+                    </div>
+                    {recommended.map((m) => (
+                      <div key={m.id}>{row(m.id, <span className="aim-mono">{m.label[0]}</span>)}</div>
+                    ))}
+                  </div>
+                </>
+              )}
               <div role="separator" className="aim-sep" />
               <div
                 role="menuitem"
@@ -208,19 +222,12 @@ export function ModelPicker({
                     e.stopPropagation();
                     setMore(false);
                     menu.current?.querySelector<HTMLElement>('[data-more]')?.focus();
-                  }
+                  } else nav(sub.current, e);
                 }}
               >
-                <div role="menuitem" tabIndex={-1} aria-disabled="true" className="aim-item is-off">
-                  <span className="aim-tile" aria-hidden="true">
-                    <span className="aim-mono">O</span>
-                  </span>
-                  <span className="aim-tx">
-                    <b>{t('ai.model.openai')}</b>
-                    <small>{t('ai.model.openaiHelp')}</small>
-                  </span>
-                  <span className="aim-soon">{t('shell.soon')}</span>
-                </div>
+                {others.map((m) => (
+                  <div key={m.id}>{row(m.id, <span className="aim-mono">{m.label[0]}</span>)}</div>
+                ))}
                 <p className="aim-note">{t('ai.model.ownerNote')}</p>
               </div>
             )}

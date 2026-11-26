@@ -691,3 +691,16 @@
   color: var(--fd-color-text);
   font-size: 13px;
 }
+/* L41 étape 4 : étiquette « Bêta » d'un modèle proposé par la Console */
+.aim-beta {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: var(--fd-radius-tag);
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text-muted);
+  font: 600 11px / 1 var(--fd-font-sans);
+  vertical-align: 2px;
+}

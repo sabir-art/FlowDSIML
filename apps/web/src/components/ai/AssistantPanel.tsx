@@ -5,7 +5,14 @@ import { Composer } from '@flowdsiml/ui';
 import type { DemoEditor } from '../../pages/editor/useDemoEditor';
 import { asSettings } from '../../pages/editor/types';
 import { useToast } from '../Toast';
-import { AiRequestError, aiBlock, callAiWith, useAiStatus, type AiModelChoice } from '../../lib/ai';
+import {
+  AiRequestError,
+  aiBlock,
+  callAiWith,
+  useAiStatus,
+  useAssistantModels,
+  type AiModelChoice,
+} from '../../lib/ai';
 import { ModelPicker } from './ModelPicker';
 import { markAiApplied, useBlockText } from './AiWrite';
 import './ai.css';
@@ -57,7 +64,10 @@ export function AssistantPanel({
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   // Planche 3 : modèle demandé (« Auto » par défaut), gardé tant que le panneau est ouvert
-  const [model, setModel] = useState<AiModelChoice>('auto');
+  const [chosen, setModel] = useState<AiModelChoice>('auto');
+  // L41 étape 4 : menu lu sur le serveur ; un modèle retiré du menu revient à Auto
+  const models = useAssistantModels(ws) ?? [];
+  const model: AiModelChoice = chosen === 'auto' || models.some((m) => m.id === chosen) ? chosen : 'auto';
   const ctrl = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const log = useRef<HTMLDivElement>(null);
@@ -266,7 +276,7 @@ export function AssistantPanel({
         submitKey={t('ai.assistant.enterKey')}
         describedBy="ai-as-cleared"
         disabled={cut}
-        trailing={<ModelPicker value={model} onChange={setModel} />}
+        trailing={<ModelPicker value={model} onChange={setModel} models={models} />}
         stop={busy ? { label: t('ai.assistant.stop'), onStop: () => ctrl.current?.abort() } : undefined}
         onSubmit={() => void send(draft)}
         renderInput={(props) => (

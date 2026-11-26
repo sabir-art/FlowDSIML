@@ -116,8 +116,36 @@ export async function callAi<T>(
   return (await callAiWith<T>(ws, task, lang, input, { signal })).result;
 }
 
-/** Planche 3 : modèle demandé à l'assistant (« auto » : le serveur choisit). */
-export type AiModelChoice = 'auto' | 'sonnet' | 'opus';
+/** Planche 3 : modèle demandé à l'assistant (« auto » : le serveur choisit), sinon un modèle du menu. */
+export type AiModelChoice = 'auto' | (string & {});
+
+/** L41 étape 4 : un modèle du menu de l'assistant (proposé par la Console, utilisable). */
+export interface AssistantModel {
+  id: string;
+  label: string;
+  tag: 'none' | 'recommended' | 'beta';
+  speed: 1 | 2 | 3;
+  cost: 1 | 2 | 3;
+}
+
+/** Menu de l'assistant, lu sur le serveur (aucun quota) ; null pendant le chargement. */
+export function useAssistantModels(ws: string | undefined) {
+  const [models, setModels] = useState<AssistantModel[] | null>(null);
+  useEffect(() => {
+    if (!ws) return;
+    let alive = true;
+    void supabase.functions
+      .invoke('ai', { body: { action: 'assistant_models', ws } })
+      .then(({ data, error }) => {
+        if (!alive) return;
+        setModels(error ? [] : ((data as { result?: { models?: AssistantModel[] } })?.result?.models ?? []));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [ws]);
+  return models;
+}
 
 /** Comme callAi, avec le modèle demandé ; rend aussi le modèle réellement utilisé (« Claude Sonnet »). */
 export async function callAiWith<T>(

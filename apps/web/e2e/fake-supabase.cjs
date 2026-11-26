@@ -655,6 +655,9 @@ async function install(page, state = seed()) {
     // (par défaut, texte suffixé) ; state.aiCalls garde les demandes reçues (vérifier ce qui part)
     if (p.startsWith('/functions/v1/ai') && String(body.action || '').startsWith('console_'))
       return aiConsole(state, body, route, json);
+    // L41 étape 4 : menu de l'assistant (state.aiAssistant : liste de la Console simulée)
+    if (p.startsWith('/functions/v1/ai') && body.action === 'assistant_models')
+      return json(route, 200, { result: { models: assistantMenu(state) } });
     if (p.startsWith('/functions/v1/ai')) {
       (state.aiCalls ||= []).push(body);
       const ai = aiState(state);
@@ -711,8 +714,18 @@ async function install(page, state = seed()) {
       const delay = state.aiDelay || 0;
       if (delay) await new Promise((res) => setTimeout(res, delay));
       // Planche 3 : modèle réellement utilisé, rendu par le serveur (Auto : Sonnet pour l'assistant)
+      // L41 étape 4 : un modèle hors du menu est refusé (403 MODEL) ; Auto : Sonnet
+      const menu = assistantMenu(state);
+      const asked = body.task === 'assistant' ? (body.model ?? 'auto') : 'auto';
+      const askedId = { sonnet: 'claude-sonnet-5-5', opus: 'claude-opus-5-5' }[asked] ?? asked;
+      if (asked !== 'auto' && !menu.some((m) => m.id === askedId))
+        return json(route, 403, { error: 'MODEL' });
       const model =
-        body.task === 'assistant' ? (body.model === 'opus' ? 'Claude Opus' : 'Claude Sonnet') : undefined;
+        body.task === 'assistant'
+          ? asked === 'auto'
+            ? 'Claude Sonnet'
+            : menu.find((m) => m.id === askedId).label
+          : undefined;
       return json(route, 200, { result: r, redacted: 0, ...(model ? { model } : {}) });
     }
     if (p.startsWith('/functions/v1/media')) {
@@ -3173,6 +3186,28 @@ function defaults(table, r) {
   return {};
 }
 
+/** L41 étape 4 : liste de l'assistant simulée (mêmes valeurs de départ que la migration). */
+const ASSISTANT_CATALOGUE = {
+  'claude-sonnet-5-5': { label: 'Claude Sonnet', speed: 2, cost: 2 },
+  'claude-opus-5-5': { label: 'Claude Opus', speed: 3, cost: 3 },
+  'claude-haiku-5-5': { label: 'Claude Haiku', speed: 1, cost: 1 },
+};
+function assistantRows(state) {
+  return (state.aiAssistant ??= [
+    { model: 'claude-sonnet-5-5', position: 1, proposed: true, tag: 'recommended' },
+    { model: 'claude-opus-5-5', position: 2, proposed: true, tag: 'recommended' },
+    { model: 'claude-haiku-5-5', position: 3, proposed: false, tag: 'none' },
+  ]);
+}
+function assistantMenu(state) {
+  // Sans clé Anthropic simulée (state.aiNoAnthropic), aucun modèle n'est utilisable
+  if (state.aiNoAnthropic) return [];
+  return [...assistantRows(state)]
+    .sort((a, b) => a.position - b.position)
+    .filter((r) => r.proposed && ASSISTANT_CATALOGUE[r.model])
+    .map((r) => ({ id: r.model, tag: r.tag, ...ASSISTANT_CATALOGUE[r.model] }));
+}
+
 /**
  * L41 étape 2 : actions de la Console sur les fournisseurs IA (Edge Function `ai`, actions console_*).
  * state.aiKeys garde les clés « enregistrées » côté serveur simulé, jamais renvoyées ; state.aiEnvKeys :
@@ -3291,6 +3326,60 @@ function aiConsole(state, body, route, json) {
     return out;
   };
   if (body.action === 'console_functions') return json(route, 200, { result: functions() });
+  // L41 étape 4 : liste de l'assistant et règles d'Auto
+  const rules = (state.aiAutoRules ??= {
+    short: 'claude-sonnet-5-5',
+    whole_demo: 'claude-sonnet-5-5',
+    fallback: 'next',
+  });
+  const asstState = () => {
+    const keyed = new Set(Object.keys(labels).filter((id) => keys[id] || env.includes(id)));
+    const models = [...assistantRows(state)]
+      .sort((a, b) => a.position - b.position)
+      .map((r) => ({
+        ...r,
+        label: ASSISTANT_CATALOGUE[r.model].label,
+        provider: 'anthropic',
+        available: keyed.has('anthropic'),
+      }));
+    return { models, rules: { ...rules } };
+  };
+  if (body.action === 'console_assistant') return json(route, 200, { result: asstState() });
+  const RULE = {
+    short: 'demandes courtes',
+    whole_demo: 'analyse de toute la démo',
+    fallback: 'modèle indisponible',
+  };
+  const nameOf = (m) => (m === 'next' ? 'le suivant de la liste' : (ASSISTANT_CATALOGUE[m]?.label ?? m));
+  if (body.action === 'console_assistant_set') {
+    if (role !== 'admin') return json(route, 403, { error: 'READ_ONLY' });
+    const list = Array.isArray(body.models) ? body.models : [];
+    if (!list.length || !list.every((r) => ASSISTANT_CATALOGUE[r.model]))
+      return json(route, 400, { error: 'BAD_LIST' });
+    if (!list.some((r) => r.proposed)) return json(route, 409, { error: 'LAST_MODEL' });
+    state.aiAssistant = list.map((r, i) => ({
+      model: r.model,
+      position: i + 1,
+      proposed: r.proposed,
+      tag: r.tag,
+    }));
+    log(
+      'ai.assistant_list',
+      `Liste de l’assistant : ${list
+        .filter((r) => r.proposed)
+        .map((r) => ASSISTANT_CATALOGUE[r.model].label)
+        .join(', ')}`,
+    );
+    return json(route, 200, { result: asstState() });
+  }
+  if (body.action === 'console_auto_rule_set') {
+    if (role !== 'admin') return json(route, 403, { error: 'READ_ONLY' });
+    if (!RULE[body.rule]) return json(route, 400, { error: 'BAD_RULE' });
+    const old = rules[body.rule];
+    rules[body.rule] = body.model;
+    log('ai.auto_rule', `Auto · ${RULE[body.rule]} · ${nameOf(old)} → ${nameOf(body.model)}`);
+    return json(route, 200, { result: { old, ...asstState() } });
+  }
   if (body.action === 'console_set_model') {
     if (role !== 'admin') return json(route, 403, { error: 'READ_ONLY' });
     const d = FNS.find((x) => x.fn === body.fn);
