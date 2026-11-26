@@ -163,8 +163,9 @@ function prepare(over = {}) {
     'Texte lu prérempli avec la transcription',
   );
   ok(
-    (await panel.getByText('(sert aussi de transcription)').count()) === 1,
-    'Le texte lu sert aussi de transcription',
+    // L62 §6 : une voix est en place et l'étape a une transcription : le texte lu en est repris
+    (await panel.getByText('(repris de la transcription)').count()) === 1,
+    'Le texte lu est repris de la transcription',
   );
   ok(
     /Les variables sont lues avec leur valeur par défaut \(\{\{company\}\} → «\u202fvotre entreprise\u202f»\)/.test(
@@ -437,6 +438,69 @@ function prepare(over = {}) {
     await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice),
     '«\u202fAnnuler\u202f» rétablit l’enregistrement (chemin et options, sans repère IA)',
   );
+
+  // ===== L62 §6 (commit 3) : transcription → voix en un clic =====
+  const fromText = sec.getByRole('button', { name: 'Générer la voix depuis ce texte' });
+  await fromText.waitFor();
+  const ftHelp = await fromText.evaluate(
+    (b) => document.getElementById(b.getAttribute('aria-describedby'))?.textContent,
+  );
+  ok(
+    ftHelp ===
+      'Avec Antoine (français). Votre enregistrement reste en place jusqu’à ce que vous choisissiez la nouvelle voix.' &&
+      (await fromText.evaluate((b) => b.getBoundingClientRect().height)) === 40,
+    `Sous la transcription : « Générer la voix depuis ce texte » (40 px), aide « ${ftHelp} »`,
+  );
+  // Ailleurs que dans « Générée » : un clic suffit
+  await sec.getByRole('tab', { name: /^Enregistrée/ }).click();
+  const nVoice = state.aiCalls.filter((c) => c.task === 'voice').length;
+  await fromText.click();
+  await panel.locator('.vo-fresh').waitFor();
+  const quick = state.aiCalls.filter((c) => c.task === 'voice').at(-1);
+  ok(
+    state.aiCalls.filter((c) => c.task === 'voice').length > nVoice &&
+      quick.input.text === 'Bienvenue chez votre entreprise. Ouvrez la fiche du jeune.' &&
+      quick.input.voice === 'voixFrM0000001',
+    'Un clic envoie la tâche « voice » avec le texte de la transcription et la voix retenue pour la démo',
+  );
+  ok(
+    (await sec.getByRole('tab', { name: /^Générée/ }).getAttribute('aria-selected')) === 'true' &&
+      /Nouvelle voix/.test(await panel.locator('.vo-fresh').innerText()) &&
+      /Générée · Antoine · 0:04/.test(await panel.locator('.vo-fresh').innerText()) &&
+      /b1\.webm$/.test(s1().voice_path),
+    'Résultat dans la carte « Nouvelle voix » (onglet Générée), enregistrement toujours en place',
+  );
+  ok(
+    /^Texte lu \(repris de la transcription\)/.test(await panel.locator(`label[for^="vo-gt-"]`).innerText()),
+    'Onglet Générée : « Texte lu (repris de la transcription) »',
+  );
+  await shot('l62-source-3-depuis-texte');
+  await panel.locator('.vo-fresh').getByRole('button', { name: 'Garder l’actuelle' }).click();
+  ok(
+    (await panel.getByText('La voix en place n’est pas touchée tant que vous n’avez pas choisi.').count()) ===
+      1,
+    'Onglet Générée : « La voix en place n’est pas touchée tant que vous n’avez pas choisi. »',
+  );
+  // Une voix générée en place : « Régénérer depuis ce texte »
+  await fromText.click();
+  await panel.locator('.vo-fresh').getByRole('button', { name: 'Utiliser cette voix' }).click();
+  ok(
+    await until(() => /a1\.mp3$/.test(s1().voice_path || '')),
+    'Voix générée depuis la transcription en place',
+  );
+  const regen = sec.getByRole('button', { name: 'Régénérer depuis ce texte' });
+  await regen.waitFor();
+  ok(
+    (await regen.evaluate(
+      (b) => document.getElementById(b.getAttribute('aria-describedby'))?.textContent,
+    )) === 'À faire après une modification de la transcription.',
+    'Voix générée en place : « Régénérer depuis ce texte », aide « À faire après une modification de la transcription. »',
+  );
+  await page
+    .locator('.toast', { hasText: 'Voix remplacée par la voix générée' })
+    .getByRole('button', { name: 'Annuler' })
+    .click();
+  await until(() => /b1\.webm$/.test(s1().voice_path || '') && !s1().options?.aiVoice);
 
   // ===== L30-11 : transcription de la voix enregistrée =====
   await sec.getByRole('button', { name: 'Transcrire la voix' }).click();
