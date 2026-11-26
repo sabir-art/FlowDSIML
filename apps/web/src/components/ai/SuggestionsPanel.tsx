@@ -148,6 +148,8 @@ export function SuggestionsPanel({
   const [list, setList] = useState<Suggestion[] | null>(null);
   const [phase, setPhase] = useState<'idle' | 'busy' | 'ready' | 'error' | 'blocked'>('idle');
   const [message, setMessage] = useState('');
+  /** Recette 277f878 §3 : textes laissés hors de l'analyse (au-delà de MAX_TEXTS) et première étape touchée. */
+  const [cut, setCut] = useState<{ total: number; from: number } | null>(null);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const ctrl = useRef<AbortController | null>(null);
   const head = useRef<HTMLHeadingElement>(null);
@@ -170,7 +172,9 @@ export function SuggestionsPanel({
       setMessage(blockText(b, status));
       return setPhase('blocked');
     }
-    const f = fields().slice(0, MAX_TEXTS);
+    const all = fields();
+    const f = all.slice(0, MAX_TEXTS);
+    setCut(all.length > MAX_TEXTS ? { total: all.length, from: all[MAX_TEXTS]!.n } : null);
     ctrl.current?.abort();
     const c = new AbortController();
     ctrl.current = c;
@@ -268,6 +272,11 @@ export function SuggestionsPanel({
             </p>
           )}
         </div>
+        {list && cut && (
+          <p className="ai-sg-limit t-caption muted">
+            {t('ai.suggest.limited', { max: MAX_TEXTS, total: cut.total, n: cut.from })}
+          </p>
+        )}
         <div className="ai-suggest-body" aria-busy={phase === 'busy'}>
           <span className="sr-only" role="status">
             {phase === 'ready' ? t('ai.ready') : ''}

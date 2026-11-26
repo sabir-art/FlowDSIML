@@ -151,6 +151,42 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   await page.keyboard.press('Escape');
   ok((await panel.count()) === 0, 'Échap ferme le panneau');
 
+  // Recette 277f878 §3 : au-delà de 100 textes, le panneau dit que l'analyse est limitée et d'où
+  {
+    const st2 = seed();
+    st2.ai = state.ai;
+    st2.aiReply = () => ({ suggestions: [] });
+    const h0 = st2.tables.hotspots[0];
+    for (let i = 0; i < 60; i++)
+      st2.tables.hotspots.push({
+        ...h0,
+        id: `hx${i}`,
+        step_id: 's2',
+        position: i,
+        title: `Bulle ${i + 1}`,
+        body: `Texte de la bulle ${i + 1}.`,
+      });
+    const p2 = await ctx.newPage();
+    p2.on('pageerror', (e) => errors.push(e.message));
+    await install(p2, st2);
+    await p2.goto(`${APP}/#/demos/${DEMO}/edit`);
+    await p2.waitForSelector('.canvas-frame img');
+    await fromMore(p2, 'Suggestions');
+    const panel2 = p2.getByRole('dialog', { name: 'Suggestions' });
+    await panel2.getByRole('button', { name: 'Analyser la démo' }).click();
+    await panel2.getByRole('button', { name: 'Analyser à nouveau' }).waitFor();
+    const sent = st2.aiCalls.at(-1);
+    const limit = panel2.locator('.ai-sg-limit');
+    const txt = (await limit.count()) ? await limit.innerText() : '';
+    ok(
+      JSON.stringify(sent).split('"id":').length - 1 === 100 &&
+        /^Analyse limitée aux 100 premiers textes sur 12\d : .* à partir de l’étape 2/.test(txt),
+      `Limite de 100 textes : dite dans le panneau (« ${txt} »)`,
+    );
+    if (SHOTS) await p2.screenshot({ path: `${SHOTS}/l30-04-limite${sfx}.png` });
+    await p2.close();
+  }
+
   ok(errors.length === 0, `aucune erreur de page (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

@@ -551,3 +551,6 @@
 .mk .ai-audio-row .ai-bar {
   margin: 4px 0 6px 24px;
 }
+.ai-sg-limit {
+  margin: 0;
+}

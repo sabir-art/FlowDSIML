@@ -5271,6 +5271,7 @@
         "h": "Bubble title",
         "p": "Pause title"
       },
+      "limited": "Analysis limited to the first {{max}} texts out of {{total}}: the following texts, from step {{n}} on, are not analysed.",
       "tooLong": "{{n}}-character bubble: above {{max}}, it is hard to read.",
       "type": {
         "clarity": "Clarity",
