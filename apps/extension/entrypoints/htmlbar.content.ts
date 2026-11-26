@@ -4,7 +4,8 @@ import { themeHost } from '@/lib/appearance';
 import { stableSelector } from '@flowdsiml/core';
 import { defaultHotspotTitle, elementLabel, hotspotRect } from '@/lib/geometry';
 import { labelText } from '@/lib/labelText';
-import { captureHtml } from '@/lib/htmlCapture';
+import { captureHtml, pageSource } from '@/lib/htmlCapture';
+import { collectLive, earlierReads, listenLive } from '@/lib/liveCapture';
 import { isScreenChange, isVisible, mainHeading } from '@/lib/screenChange';
 import type { HtmlBarRequest } from '@/lib/messages';
 import { barCount, lang, strings } from '@/lib/i18n';
@@ -32,6 +33,9 @@ const WATCH_MS = 8000;
 /** Affichage stable : aucune modification du DOM pendant ce délai (au plus SETTLE_MAX_MS d'attente). */
 const SETTLE_MS = 500;
 const SETTLE_MAX_MS = 5000;
+/** Sandbox v2 : document de l'enregistrement vivant, 10 Mo au plus (comme la copie). */
+const LIVE_HTML_MAX = 10 * 1024 * 1024;
+
 export default defineContentScript({
   matches: ['<all_urls>'],
   registration: 'runtime',
@@ -119,6 +123,10 @@ export default defineContentScript({
 
     // L49 §6 : mention d'autorisation au lancement (avant la première page), lisible 10 s
 
+    // Sandbox v2 : réponses relevées par l'enregistreur de la page (nom d'évènement posé par le service)
+    const liveEvent = (window as unknown as { __fdLiveEvent?: string }).__fdLiveEvent;
+    const live = liveEvent ? listenLive(liveEvent) : null;
+
     let busy = false;
     async function capture() {
       // En pause, aucune page n'est ajoutée (L60 §2)
@@ -129,6 +137,17 @@ export default defineContentScript({
       try {
         const c = await captureHtml(async (url, kind) => send<string>({ type: 'fd:fetch-asset', url, kind }));
         if (c.tooBig) return flash(s.htmlTooBig, true);
+        // Sandbox v2 : enregistrement vivant à côté de la copie (sans source lisible, la copie reste seule)
+        if (live) {
+          const raw = await collectLive({
+            source: await pageSource(),
+            pageUrl: location.href,
+            recorded: live.take(),
+            earlier: earlierReads(),
+            get: (url, kind) => send<string>({ type: 'fd:fetch-asset', url, kind }),
+          }).catch(() => null);
+          if (raw && raw.html.length <= LIVE_HTML_MAX) c.live = raw;
+        }
         const st = await send<{ steps: number; label?: string }>({ type: 'fd:html-page', capture: c });
         setCount(st?.steps ?? 0);
         remember();

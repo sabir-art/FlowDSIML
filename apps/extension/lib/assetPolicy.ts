@@ -4,9 +4,16 @@
  * demandée par l'onglet en cours de capture, hors réseau interne sauf si la page capturée s'y trouve elle-même
  * (même hôte), d'un type attendu et d'une taille bornée. Les cookies ne partent que vers le site capturé.
  */
-export type AssetKind = 'image' | 'font' | 'css';
-export const ASSET_KINDS: readonly AssetKind[] = ['image', 'font', 'css'];
+/**
+ * Sandbox v2 (étape 3) : « js », script de la page (gardé ou bloqué par l'auteur) ; « data », réponse GET
+ * que la page a déjà lue avant le début de l'enregistrement (adresse relevée dans performance), relue pour
+ * être rejouée. Jamais une écriture : la demande est toujours un GET.
+ */
+export type AssetKind = 'image' | 'font' | 'css' | 'js' | 'data';
+export const ASSET_KINDS: readonly AssetKind[] = ['image', 'font', 'css', 'js', 'data'];
 export const ASSET_MAX_BYTES = 3 * 1024 * 1024;
+/** Réponse rejouée : 1 Mo au plus (docs/tech/sandbox-v2.md §3.1). */
+export const DATA_MAX_BYTES = 1024 * 1024;
 export const ASSET_TIMEOUT_MS = 15_000;
 
 /** Hôte du réseau interne ou de la machine : nom local, ou adresse IP privée, de boucle ou de lien local. */
@@ -83,6 +90,17 @@ export function assetDecision(
 export function assetTypeAllowed(kind: AssetKind, contentType: string | null | undefined): boolean {
   const t = (contentType ?? '').split(';')[0]!.trim().toLowerCase();
   if (kind === 'css') return t === 'text/css';
+  if (kind === 'js')
+    return /^(application|text)\/(x-)?(javascript|ecmascript)$/.test(t) || t === 'application/x-javascript';
+  if (kind === 'data')
+    return (
+      t === 'application/json' ||
+      /^application\/[a-z0-9.+-]+\+json$/.test(t) ||
+      t === 'application/xml' ||
+      t === 'text/xml' ||
+      t === 'text/plain' ||
+      t === 'text/csv'
+    );
   if (kind === 'image') return t.startsWith('image/');
   return (
     t.startsWith('font/') ||

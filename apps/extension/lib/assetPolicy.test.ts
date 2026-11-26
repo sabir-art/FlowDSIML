@@ -83,6 +83,19 @@ describe('ressources d’une capture HTML', () => {
     expect(assetTypeAllowed('font', 'application/octet-stream')).toBe(true);
     expect(assetTypeAllowed('font', 'text/html')).toBe(false);
   });
+  it('Sandbox v2 : scripts et réponses rejouées, jamais une page', () => {
+    expect(assetDecision('https://app.exemple.test/app.js', 'js', PAGE)).not.toBeNull();
+    expect(assetDecision('https://app.exemple.test/api/x', 'data', PAGE)?.credentials).toBe('include');
+    expect(assetDecision('https://api.autre.test/x', 'data', PAGE)?.credentials).toBe('omit');
+    expect(assetTypeAllowed('js', 'text/javascript; charset=utf-8')).toBe(true);
+    expect(assetTypeAllowed('js', 'application/javascript')).toBe(true);
+    expect(assetTypeAllowed('js', 'text/html')).toBe(false);
+    expect(assetTypeAllowed('data', 'application/json')).toBe(true);
+    expect(assetTypeAllowed('data', 'application/vnd.api+json')).toBe(true);
+    expect(assetTypeAllowed('data', 'text/plain')).toBe(true);
+    expect(assetTypeAllowed('data', 'text/html')).toBe(false);
+    expect(assetTypeAllowed('data', 'image/png')).toBe(false);
+  });
   it('écarte une ressource annoncée trop lourde', () => {
     expect(assetTooLong(String(ASSET_MAX_BYTES + 1))).toBe(true);
     expect(assetTooLong(String(ASSET_MAX_BYTES))).toBe(false);
