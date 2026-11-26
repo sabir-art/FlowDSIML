@@ -336,7 +336,9 @@ function problem(p: Problem | null) {
   show('error-retry', !!p?.retry);
   $('error').hidden = !p;
   blocked = !!p?.blocking;
-  // Page impossible à capturer : les 4 lignes restent, désactivées
+  // Page impossible à capturer : les 4 lignes restent, désactivées ; destination et aide masquées
+  show('dest-row', !blocked);
+  show('modes-help', !blocked);
   renderModes();
 }
 const error = (msg: string | null) => problem(msg ? { text: msg } : null);

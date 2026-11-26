@@ -50,7 +50,7 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
     'vérification des données toujours active (pied du popup)',
   );
   ok(
-    /^Toutes les étapes gardent la même taille\./.test(await popup.textContent('#size-h')),
+    /^Mobile.: captures d’écran seulement\.$/.test(await popup.textContent('#size-h')),
     'aide de la taille de l’onglet',
   );
   ok(
