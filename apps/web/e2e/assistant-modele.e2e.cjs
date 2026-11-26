@@ -151,11 +151,11 @@ const ok = (c, l) => {
       /Claude Haiku\s*Bêta/.test(await subItem.innerText()) &&
       /Le plus rapide, pour les textes courts/.test(await subItem.innerText()) &&
       !/OpenAI/.test(await sub.innerText()) &&
-      // Recette UX L41 étape 4 : la note du propriétaire attend l'étape 5 (section de l'espace)
-      !/Le propriétaire choisit/.test(await sub.innerText()) &&
+      // L41 étape 5 : la section de l'espace existe, la note du propriétaire revient
+      /Le propriétaire choisit les modèles dans Paramètres › Assistance IA/.test(await sub.innerText()) &&
       subBox.x + subBox.width <= mb.x &&
       (await menu.locator('[data-more]').getAttribute('aria-expanded')) === 'true',
-    'sous-menu sur le côté : les autres modèles proposés (Claude Haiku « Bêta »), aucun fournisseur sans clé, pas encore de note du propriétaire',
+    'sous-menu sur le côté : les autres modèles proposés (Claude Haiku « Bêta »), aucun fournisseur sans clé, note du propriétaire',
   );
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assistant-modele-autres${sfx}.png` });
   const bad = (

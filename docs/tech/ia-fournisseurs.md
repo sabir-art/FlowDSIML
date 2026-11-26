@@ -233,6 +233,15 @@ nouvelle valeur.
    sait quels fournisseurs ont une clé (coffre et déploiement). Le filtre par espace (§7) viendra à
    l'étape 5 dans cette même action.
 5. **Espace** : section « Modèles proposés dans l'assistant », retrait seulement.
+   **Livrée** : migration `20261201400000_ia_modeles_espace.sql` (`set_ai_models`, propriétaire
+   seulement ; refus `NOT_PROPOSED` pour un modèle que la Console ne propose pas et `LAST_MODEL` ; liste
+   rangée dans l'ordre de la Console ; pgTAP 10/10). L'Edge Function filtre le menu par
+   `workspaces.settings.ai.models` (`workspaceMenu`) ; l'action `assistant_models` rend aussi `all` (menu de
+   la Console) et `chosen` (liste de l'espace, null = tous). Plus aucun modèle de l'espace dans la Console :
+   l'éditeur ne montre qu'Auto, qui choisit dans le menu de la Console (`autoMenuOf`). Paramètres ›
+   Assistance IA : section « Modèles proposés dans l'assistant » (Auto toujours proposé ; admins en
+   lecture, « Réservé aux propriétaires » ; autres rôles : rien) ; la note du propriétaire revient dans
+   « Autres modèles ». e2e `assistance-ia-modeles`.
 6. **Journal** : anciennes et nouvelles valeurs, filtre « Modèles IA ».
 
 Chaque étape est livrable seule. Jusqu'à l'étape 4, l'assistant gardait Sonnet et Opus.
