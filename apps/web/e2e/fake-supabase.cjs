@@ -647,6 +647,8 @@ async function install(page, state = seed()) {
     // L18 : fonction media (dépôt multipart, suppression) ; type réel simulé d'après le nom du fichier
     // L30 : Assistance IA. state.ai = état renvoyé par ai_status ; state.aiReply(task, input) = résultat
     // (par défaut, texte suffixé) ; state.aiCalls garde les demandes reçues (vérifier ce qui part)
+    if (p.startsWith('/functions/v1/ai') && String(body.action || '').startsWith('console_'))
+      return aiConsole(state, body, route, json);
     if (p.startsWith('/functions/v1/ai')) {
       (state.aiCalls ||= []).push(body);
       const ai = aiState(state);
@@ -3156,6 +3158,91 @@ function defaults(table, r) {
 }
 
 /**
+ * L41 étape 2 : actions de la Console sur les fournisseurs IA (Edge Function `ai`, actions console_*).
+ * state.aiKeys garde les clés « enregistrées » côté serveur simulé, jamais renvoyées ; state.aiEnvKeys :
+ * fournisseurs dont la clé est définie au déploiement. Test simulé : une clé qui contient « bonne » est
+ * acceptée, sinon refusée (401). Aucun appel réseau.
+ */
+function aiConsole(state, body, route, json) {
+  const role = state.platformRole ?? null;
+  if (!role) return json(route, 404, { error: 'NOT_FOUND' });
+  const keys = (state.aiKeys ??= {});
+  const rows = (state.aiProviderRows ??= {});
+  const env = state.aiEnvKeys ?? [];
+  const labels = { anthropic: 'Anthropic', openai: 'OpenAI', elevenlabs: 'ElevenLabs' };
+  // Journal : liste à part, fusionnée par console_audit_list (sans toucher aux données de la Console)
+  const log = (action, label) =>
+    (state.aiAudit ??= []).unshift({
+      id: Date.now() + Math.random(),
+      at: new Date().toISOString(),
+      actor: 'Camille (TutoClick)',
+      actorId: null,
+      action,
+      objectType: 'ai',
+      label,
+    });
+  if (body.action === 'console_catalog') return json(route, 200, { result: { providers: [], models: [] } });
+  if (body.action === 'console_providers') {
+    const result = Object.keys(labels).map((id) => {
+      const source = keys[id] ? 'vault' : env.includes(id) ? 'env' : null;
+      const r = rows[id] ?? null;
+      const lastTest = r?.last_test_at
+        ? { at: r.last_test_at, ok: r.last_test_ok, cause: r.last_test_error, ms: r.last_test_ms }
+        : null;
+      return {
+        provider: id,
+        label: labels[id],
+        state: !source ? 'missing' : lastTest && !lastTest.ok ? 'refused' : 'connected',
+        source,
+        addedAt: source === 'vault' ? (r?.added_at ?? null) : null,
+        lastTest,
+      };
+    });
+    return json(route, 200, { result });
+  }
+  if (role !== 'admin') return json(route, 403, { error: 'READ_ONLY' });
+  const provider = body.provider;
+  if (!labels[provider]) return json(route, 400, { error: 'BAD_PROVIDER' });
+  const testOf = (k) =>
+    /bonne/.test(k) ? { ok: true, ms: 320 } : { ok: false, ms: 210, cause: 'KEY_REFUSED', status: 401 };
+  if (body.action === 'console_key_test') {
+    const k =
+      keys[provider] ?? (env.includes(provider) ? (state.aiEnvKeyValue ?? 'cle-de-deploiement-bonne') : null);
+    if (!k) return json(route, 409, { error: 'MISSING' });
+    const r = testOf(k);
+    rows[provider] = {
+      ...(rows[provider] ?? {}),
+      last_test_at: new Date().toISOString(),
+      last_test_ok: r.ok,
+      last_test_error: r.ok ? null : r.cause,
+      last_test_ms: r.ms,
+    };
+    log('ai.key_tested', `${provider} · ${r.ok ? 'ok' : r.cause}`);
+    return json(route, 200, { result: r });
+  }
+  if (body.action === 'console_key_save') {
+    const k = body.key;
+    if (typeof k !== 'string' || k.length < 10 || k.length > 500 || /\s/.test(k))
+      return json(route, 400, { error: 'BAD_KEY' });
+    const r = testOf(k);
+    if (!r.ok) return json(route, 422, { error: 'KEY_TEST', cause: r.cause, status: r.status, ms: r.ms });
+    const replaced = !!keys[provider];
+    keys[provider] = k;
+    const now = new Date().toISOString();
+    rows[provider] = {
+      added_at: now,
+      last_test_at: now,
+      last_test_ok: true,
+      last_test_error: null,
+      last_test_ms: r.ms,
+    };
+    log(replaced ? 'ai.key_replaced' : 'ai.key_added', provider);
+    return json(route, 200, { result: { ok: true, ms: r.ms, replaced } });
+  }
+  return json(route, 400, { error: 'BAD_REQUEST' });
+}
+
+/**
  * L41 : Console propriétaire simulée. Données fictives de 2 espaces (Acme, Globex) ; aucun auteur n'est
  * jamais renvoyé. Lecture : state.platformRole non nul ; écriture : 'admin'.
  */
@@ -3288,7 +3375,7 @@ function consoleRpc(state, fn, a, route, json) {
     case 'console_team':
       return ok(c.team);
     case 'console_audit_list':
-      return ok(c.audit);
+      return ok([...(state.aiAudit ?? []), ...c.audit]);
     case 'console_log_event':
       log(a.p_action, a.p_label || '');
       return ok();

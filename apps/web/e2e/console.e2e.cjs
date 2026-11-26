@@ -148,7 +148,7 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
   // PAGE-01 §16.2 : variante éditeur de la barre, onglets segmentés au centre (liens, aria-current)
   const cbar = o.locator('.fd-page-header.fd-page-header--editor');
   const ctabs = cbar.getByRole('navigation', { name: 'Sections de la console' });
-  ok((await ctabs.locator('.console-tab').count()) === 5, '5 onglets dans la barre');
+  ok((await ctabs.locator('.console-tab').count()) === 6, '6 onglets dans la barre (L41 : Modèles IA)');
   ok(
     (await ctabs.getByRole('link', { name: 'Vue d’ensemble' }).getAttribute('aria-current')) === 'page',
     'onglet actif en aria-current="page"',
