@@ -246,7 +246,7 @@ message ».
 
 | Livraison | Contenu | Planche UX |
 |---|---|---|
-| 4a. Couverture dans le plan | fonction pure `coverage` (pages capturées / destinations du même site, hors ancres et hors adresse de la page) ; ligne « 14 pages sur 17 liens du site » dans le plan, avec la barre de progression | à confirmer : texte, place, compte des liens laissés par l'auteur |
+| 4a. Couverture dans le plan | fonction pure `coverage` (pages capturées / destinations du même site qui restent à traiter, hors ancres et hors adresse de la page) ; ligne « 14 pages sur 15 liens · 2 laissés » dans le plan : décision du chef, les liens laissés par l'auteur ne comptent pas dans le total | à confirmer : place de la ligne |
 | 4b. Pages liées pendant la capture | liste « Pages liées » dans la barre de capture : liens du même site et routes vues, état « capturée » / « à capturer », mise à jour à chaque page | à demander |
 | 4c. Capture en série | « Capturer les pages liées » : ouverture une à une dans l'onglet courant, profondeur 1, 20 pages au plus par passe, arrêt à tout moment, puis écran de vérification ; pages en erreur ou refusées signalées | à demander |
 | 4d. Banc | site d'essai de plusieurs pages statiques capturé en série, critère a) « chaque page capturée apparaît dans le plan » et couverture à 100 % ; recette UX | — |
