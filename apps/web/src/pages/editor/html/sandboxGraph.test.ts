@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StepRow } from '../types';
-import { coverage, coverageRatio, deadByUrl, deadLinks, sandboxGraph } from './sandboxGraph';
+import { coverage, coverageRatio, coverageTotal, deadByUrl, deadLinks, sandboxGraph } from './sandboxGraph';
 
 const page = (id: string, url: string, links: Array<[string, string]>, ops: unknown[] = []) =>
   ({
@@ -126,12 +126,12 @@ describe('couverture du site (Sandbox v2, étape 4a)', () => {
     expect(coverage(steps, {})).toEqual({ captured: 2, missing: 3, left: 0 });
     expect(coverageRatio(coverage(steps, {}))).toBe(40);
   });
-  it('liens laissés par l’auteur : à part, comptés dans le total seulement sur demande', () => {
+  it('liens laissés par l’auteur : à part, hors du total (décision du chef)', () => {
     const sb = { ignoredLinks: [{ from: A, url: `${site}/aide` }] };
     const c = coverage(steps, sb);
     expect(c).toEqual({ captured: 2, missing: 2, left: 1 });
+    expect(coverageTotal(c)).toBe(4);
     expect(coverageRatio(c)).toBe(50);
-    expect(coverageRatio(c, true)).toBe(40);
   });
   it('une destination laissée sur une page mais manquante sur une autre reste manquante', () => {
     const sb = { ignoredLinks: [{ from: B, url: `${site}/agenda` }] };

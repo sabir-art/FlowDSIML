@@ -163,14 +163,15 @@ export interface Coverage {
   captured: number;
   /** Destinations du même site sans page, que l'auteur n'a pas laissées. */
   missing: number;
-  /** Destinations laissées volontairement par l'auteur (« Laisser le message »). */
+  /** Destinations laissées volontairement par l'auteur (« Laisser le message »), hors du total. */
   left: number;
 }
 
 /**
  * Couverture : pages capturées face aux destinations du même site trouvées dans leurs liens (une
- * destination comptée une fois, quelle que soit la page qui la porte). Les liens laissés par l'auteur
- * sont comptés à part : leur place dans le total reste un choix d'affichage.
+ * destination comptée une fois, quelle que soit la page qui la porte). Décision du chef (étape 4a) : les
+ * liens laissés par l'auteur ne comptent pas dans le total ; ils s'affichent à part
+ * (« 14 pages sur 15 liens · 2 laissés »).
  */
 export function coverage(steps: StepRow[], sandbox: unknown): Coverage {
   const { dead, ignored } = deadLinks(steps, sandbox);
@@ -179,8 +180,11 @@ export function coverage(steps: StepRow[], sandbox: unknown): Coverage {
   return { captured: steps.filter((s) => s.kind === 'html').length, missing: missing.size, left: left.size };
 }
 
-/** Part couverte, en pour cent arrondi ; `withLeft` compte les liens laissés dans le total. */
-export function coverageRatio(c: Coverage, withLeft = false): number {
-  const total = c.captured + c.missing + (withLeft ? c.left : 0);
+/** Total de la couverture : pages capturées et destinations qui restent à traiter (hors liens laissés). */
+export const coverageTotal = (c: Coverage) => c.captured + c.missing;
+
+/** Part couverte, en pour cent arrondi. */
+export function coverageRatio(c: Coverage): number {
+  const total = coverageTotal(c);
   return total ? Math.round((c.captured / total) * 100) : 100;
 }
