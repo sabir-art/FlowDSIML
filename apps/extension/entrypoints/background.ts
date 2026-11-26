@@ -876,9 +876,21 @@ async function stop(): Promise<RecordingStatus> {
     return setState({ ...EMPTY });
   }
   await releaseTabs(state);
+  // L60 §3 : sans donnée repérée, pas d'écran de vérification : la barre de l'onglet capturé devient le
+  // panneau d'envoi et l'envoi part tout de suite (onglet de vérification ouvert en arrière-plan)
+  const caps = state.workspaceId ? await pending.all() : [];
+  const clean = caps.length > 0 && caps.every((c) => !c.zones.some((z) => !z.manual));
+  const sendTab = clean && !state.addTo && state.tabId !== null ? state.tabId : null;
   for (const t of state.tabs ?? [{ id: state.tabId ?? -1 }])
-    if (t.id >= 0) await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
-  if (state.workspaceId && (await pending.count()) > 0) {
+    if (t.id >= 0 && t.id !== sendTab)
+      await browser.tabs.sendMessage(t.id, { type: 'fd:recorder-stop' }).catch(() => undefined);
+  if (sendTab !== null) {
+    await browser.storage.local.set({ 'fd.autoSend': { tabId: sendTab, at: Date.now() } });
+    await browser.tabs
+      .sendMessage(sendTab, { type: 'fd:send-progress', done: 0, total: caps.length })
+      .catch(() => undefined);
+  }
+  if (state.workspaceId && caps.length > 0) {
     await browser.storage.local.set({
       'fd.review': {
         workspaceId: state.workspaceId,
@@ -895,7 +907,7 @@ async function stop(): Promise<RecordingStatus> {
       const t = await addTarget();
       if (t && t.demoId === state.addTo.demoId) await saveTarget({ ...t, state: 'review' });
     }
-    await browser.tabs.create({ url: browser.runtime.getURL('/review.html') });
+    await browser.tabs.create({ url: browser.runtime.getURL('/review.html'), active: sendTab === null });
   } else if (state.addTo) await browser.storage.local.remove(ADD_KEY);
   return setState({ ...EMPTY });
 }
@@ -960,6 +972,19 @@ export default defineBackground(() => {
       if (sender.tab?.windowId !== undefined)
         return handleClick(m as ClickPayload, sender.tab.windowId, sender.tab.id).then((r) => r ?? true);
       return undefined;
+    }
+    // L60 §3 : avancement de l'envoi, relayé à la barre de l'onglet capturé ; fin : la barre se retire
+    if (m.type === 'fd:send-progress' || m.type === 'fd:send-done') {
+      const r = m as { tabId?: number; done?: number; total?: number };
+      if (typeof r.tabId !== 'number') return undefined;
+      return browser.tabs
+        .sendMessage(
+          r.tabId,
+          m.type === 'fd:send-done'
+            ? { type: 'fd:recorder-stop' }
+            : { type: 'fd:send-progress', done: r.done, total: r.total },
+        )
+        .catch(() => undefined);
     }
     if (m.type === 'fd:undo-step')
       // L60 §2 : « Annuler » de la carte « Étape n capturée » : l'étape est retirée

@@ -44,6 +44,16 @@ export const BAR_CSS = `
   .bar .fin{background:var(--fdb-fin-bg);color:var(--fdb-fin-fg)}
   .bar .fin:hover{background:var(--fdb-fin-hover)}
   .bar svg{flex:none}
+  /* L60 §3 : Terminer, la barre devient le panneau d'envoi */
+  .snd{box-sizing:border-box;width:min(380px,calc(100vw - 32px));display:grid;gap:8px;padding:14px 16px;
+    border-radius:16px;background:var(--fdb-bg);color:var(--fdb-fg);font:500 13px/1.35 system-ui,sans-serif;
+    box-shadow:var(--fdb-shadow)}
+  .snd b{font-weight:600;font-variant-numeric:tabular-nums}
+  .snd .pb{height:6px;border-radius:999px;background:var(--fdb-pill);overflow:hidden}
+  .snd .pb i{display:block;height:100%;width:0;border-radius:inherit;background:var(--fdb-fin-bg);
+    transition:width .2s ease-out}
+  @media (prefers-reduced-motion:reduce){.snd .pb i{transition:none}}
+  .snd small{font-size:12px;color:var(--fdb-muted)}
 `;
 
 /** Barre : `middle` est la partie propre au mode (segmenté, « Ajouter cette page », micro…). */
@@ -57,6 +67,11 @@ export function barMarkup(o: { label: string; name: string; middle: string }): s
       <span class="sep" aria-hidden="true"></span>
       <button type="button" class="ico pause" title="${s.shortcutPause}"></button>
       <button type="button" class="fin" title="${s.shortcutStop}"></button>
+    </div>
+    <div class="snd" role="status" hidden>
+      <b class="snd-t"></b>
+      <span class="pb" role="progressbar" aria-valuemin="0"><i></i></span>
+      <small>${s.sendingHelp}</small>
     </div>`;
 }
 
@@ -73,7 +88,10 @@ export type Bar = {
   setCount(text: string): void;
   setPaused(paused: boolean): void;
   setName(name: string): void;
+  /** L60 §3 : Terminer, la barre devient le panneau d'envoi (« Envoi des étapes… 5 / 8 »). */
+  sending(done: number, total: number): void;
   readonly paused: boolean;
+  readonly isSending: boolean;
 };
 
 /**
@@ -100,6 +118,7 @@ export function wireBar(
   const fin = $<HTMLButtonElement>('.fin');
   fin.append(barIcon(Check), s.finish);
   let paused = false;
+  let sendingNow = false;
   let name = o.name;
   function setPaused(p: boolean) {
     paused = p;
@@ -161,6 +180,26 @@ export function wireBar(
     },
     get paused() {
       return paused;
+    },
+    get isSending() {
+      return !!sendingNow;
+    },
+    sending(done, total) {
+      sendingNow = true;
+      bar.hidden = true;
+      const box = $<HTMLElement>('.snd');
+      box.hidden = false;
+      box.querySelector('.snd-t')!.textContent = s.sendingSteps
+        .replace('{{done}}', String(done))
+        .replace('{{total}}', String(total));
+      const pb = box.querySelector<HTMLElement>('.pb')!;
+      pb.setAttribute('aria-valuemax', String(total));
+      pb.setAttribute('aria-valuenow', String(done));
+      pb.setAttribute(
+        'aria-label',
+        s.sendingSteps.replace('{{done}}', String(done)).replace('{{total}}', String(total)),
+      );
+      pb.querySelector('i')!.style.width = `${total ? Math.round((done / total) * 100) : 0}%`;
     },
   };
 }

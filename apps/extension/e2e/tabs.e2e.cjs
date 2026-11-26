@@ -126,15 +126,13 @@ const log = async () => (await fetch(`${MOCK}/__log`)).json();
     `onglets suivis : 1 et 2 (${JSON.stringify(status.tabs)})`,
   );
 
-  // Fin : vérification puis envoi
+  // Fin : aucune donnée repérée sur ces pages, l'envoi part sans écran de vérification (L60 §3)
+  const before = (await log()).length;
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/review.html'));
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
   const review = await reviewP;
-  await review.waitForSelector('#state.is-done');
   const after = await page.evaluate(() => ({ w: innerWidth, h: innerHeight }));
   ok(after.w !== 1280 || after.h !== 720, `taille imposée retirée à la fin (${after.w} × ${after.h})`);
-  const before = (await log()).length;
-  await review.click('#send');
   await review.waitForURL(/22222222-2222-2222-2222-222222222222/, { timeout: 15000 }).catch(() => {});
   const sent = (await log()).slice(before);
   const steps = sent.filter((l) => l.u.startsWith('/rest/v1/steps')).map((l) => JSON.parse(l.body));
