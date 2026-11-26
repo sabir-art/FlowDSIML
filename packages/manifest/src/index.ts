@@ -304,6 +304,11 @@ export const stepOptionsSchema = z
      * masquer une adresse interne ; absente, l'adresse de la démo (cadre) s'affiche.
      */
     address: z.string().max(120).optional().catch(undefined),
+    /**
+     * L30 / L64 §3 : textes rédigés par l'IA (génération, proposition appliquée ou rédaction automatique de
+     * l'extension) : repère « IA » et « Généré par IA, à vérifier » dans l'éditeur jusqu'à la première saisie.
+     */
+    aiText: z.boolean().optional().catch(undefined),
     /** L12-05 : libellé de « Précédent » dans la bulle (vide = thème) et affichage du bouton. */
     prevLabel: z.string().max(24).default('').catch(''),
     showPrev: z.boolean().default(false).catch(false),

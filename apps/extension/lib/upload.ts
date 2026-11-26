@@ -124,7 +124,7 @@ export async function sendCaptures(
     }
     const options: Record<string, unknown> = {};
     // L64 §3 : texte rédigé par l'IA pendant la capture : « Généré par IA, à vérifier » dans l'éditeur
-    if (c.ai) options.aiDraft = true;
+    if (c.ai) options.aiText = true;
     if (c.tab) options.tab = c.tab;
     if (fullPage) options.fullPage = fullPage;
     // EXT-02 §5 : cadre gardé, en recadrage non destructif (l'image envoyée reste entière)

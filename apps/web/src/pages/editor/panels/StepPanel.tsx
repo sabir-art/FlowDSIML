@@ -1,7 +1,7 @@
 import { displayAddress } from '@flowdsiml/core';
 import { VoiceFields } from '../voice/VoiceFields';
 import { useConfirm } from '../../../components/ConfirmDialog';
-import { Lock, Presentation, Target, Trash2 } from 'lucide-react';
+import { Lock, Presentation, Sparkles, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DemoEditor } from '../useDemoEditor';
 import { asCta, asStepOptions, asZoom, type StepRow } from '../types';
@@ -82,8 +82,23 @@ export function StepPanel({
               canManage={!readOnly}
               disabled={readOnly}
               value={step.title}
-              onChange={(v) => editor.updateStep(step.id, { title: v })}
+              onChange={(v) =>
+                editor.updateStep(step.id, {
+                  title: v,
+                  // L64 §3 : la première saisie retire « Généré par IA, à vérifier »
+                  ...(opts.aiText &&
+                    v !== step.title && {
+                      options: { ...opts, aiText: undefined } as unknown as StepRow['options'],
+                    }),
+                })
+              }
             />
+            {opts.aiText && step.kind !== 'text' && (
+              <p className="ai-mention st-ai-mention">
+                <Sparkles aria-hidden="true" />
+                {t('ai.mention')}
+              </p>
+            )}
             {step.kind === 'text' && (
               <>
                 <VarTextField

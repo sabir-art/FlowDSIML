@@ -5265,3 +5265,9 @@
   background: var(--fd-color-success-soft);
   color: var(--fd-color-success);
 }
+
+/* L64 §3 : « Généré par IA, à vérifier » sous le titre de l'étape ou le texte de la bulle */
+.st-ai-mention,
+.hs-ai-mention {
+  margin-top: 6px;
+}

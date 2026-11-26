@@ -1,5 +1,5 @@
 import { VoiceFields } from '../voice/VoiceFields';
-import { ChevronLeft, Crop, Layers, MessageSquare, Target, Trash2 } from 'lucide-react';
+import { ChevronLeft, Crop, Layers, MessageSquare, Sparkles, Target, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ApplyStyleDialog } from '../ApplyStyleDialog';
 import { useTranslation } from 'react-i18next';
@@ -182,6 +182,8 @@ export function HotspotPanel({
           disabled={readOnly}
           value={hotspot.title}
           onChange={(v) => {
+            // Rechargement du contenu de l'extérieur : rien n'a été saisi, le repère « IA » reste
+            if (v === hotspot.title) return;
             set({ title: v });
             // L38-9 : l'étape reprend le titre de sa première bulle tant qu'il n'a pas été saisi
             const first = editor.hotspots
@@ -200,6 +202,7 @@ export function HotspotPanel({
           canManage={!readOnly}
           disabled={readOnly}
           onChange={(v) => {
+            if (v === hotspot.body) return;
             set({ body: v });
             setAiMark(false);
           }}
@@ -213,6 +216,13 @@ export function HotspotPanel({
             ) : undefined
           }
         />
+        {/* L64 §3 : texte rédigé par l'IA (extension ou génération), jusqu'à la première saisie */}
+        {aiMarked && (
+          <p className="ai-mention hs-ai-mention">
+            <Sparkles aria-hidden="true" />
+            {t('ai.mention')}
+          </p>
+        )}
         {ws && !readOnly && (
           <AiWrite
             ws={ws.id}
