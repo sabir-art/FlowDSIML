@@ -4827,3 +4827,286 @@
   line-height: 18px;
   -webkit-line-clamp: 1;
 }
+
+/* ---- L62 §8 : sélecteur de voix (toutes les voix du compte) ---- */
+.mk .vp {
+  position: relative;
+}
+.mk .vp-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 40px;
+  padding: 0 10px 0 6px;
+  border: 1px solid var(--fd-color-border-strong);
+  border-radius: var(--fd-radius-sm);
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  text-align: left;
+  cursor: pointer;
+}
+.mk .vp-trigger .vp-av {
+  width: 28px;
+  height: 28px;
+}
+.mk .vp-chev {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+/* Avatar teinté avec l'initiale ; la voix choisie porte une pastille cochée (CHOIX-01) */
+.mk .vp-av {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font: 600 13px var(--fd-font-sans);
+}
+.mk .vp-av::before {
+  content: attr(data-initial);
+}
+.mk .vp-av-check {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+  box-shadow: 0 0 0 2px var(--row-bg, var(--fd-color-surface));
+}
+.mk .vp-av-check svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 3;
+}
+.mk .vp-tx {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.mk .vp-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  font: 600 14px / 20px var(--fd-font-sans);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mk .vp-meta {
+  overflow: hidden;
+  font: 400 12px / 16px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mk .vp-rec {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+  font: 600 11px / 18px var(--fd-font-sans);
+}
+/* Fenêtre de 400 px alignée sur le bord droit du champ, 4 px dessous */
+.mk .vp-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: var(--fd-z-popover);
+  display: grid;
+  gap: 8px;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-lg);
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-lg);
+}
+.mk .vp-search {
+  position: relative;
+}
+.mk .vp-search > svg {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .vp-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 36px 0 34px;
+}
+.mk .vp-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--fd-color-text-muted);
+}
+.mk .vp-clear svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .vp-chips {
+  display: flex;
+  gap: 8px;
+}
+.mk .vp-chip-wrap {
+  position: relative;
+}
+.mk .vp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 999px;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+  font: 500 13px var(--fd-font-sans);
+}
+.mk .vp-chip svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .vp-chip.is-on {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+}
+.mk .vp-chip-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 2;
+  display: grid;
+  min-width: 180px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 4px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md);
+  background: var(--fd-color-surface);
+  box-shadow: var(--fd-shadow-md);
+}
+.mk .vp-chip-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--fd-radius-xs);
+  background: none;
+  color: var(--fd-color-text);
+  font: 400 13px var(--fd-font-sans);
+  text-align: left;
+}
+.mk .vp-chip-item:hover {
+  background: var(--fd-color-nav-hover);
+}
+.mk .vp-chip-item svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .vp-list {
+  max-height: 360px;
+  overflow: auto;
+  border-radius: var(--fd-radius-sm);
+}
+.mk .vp-sec {
+  padding: 8px 8px 4px;
+  font: 600 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
+.mk .vp-sec span {
+  font-weight: 400;
+}
+/* Ligne de 56 px, sans colonne de coche : l'avatar est aligné sur la marge de la liste */
+.mk .vp-row {
+  --row-bg: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 8px;
+  border-radius: var(--fd-radius-sm);
+  background: var(--row-bg);
+  cursor: pointer;
+}
+.mk .vp-row.is-active {
+  --row-bg: var(--fd-color-nav-hover);
+}
+.mk .vp-row.is-on {
+  --row-bg: var(--fd-color-primary-soft);
+}
+/* RADIUS-01, famille Rond : bouton de lecture audio */
+.mk .vp-listen {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--fd-color-border);
+  border-radius: 50%;
+  background: var(--fd-color-surface);
+  color: var(--fd-color-text);
+}
+.mk .vp-listen svg {
+  width: 14px;
+  height: 14px;
+}
+.mk .vp-listen.is-playing {
+  border-color: var(--fd-color-primary);
+  background: var(--fd-color-primary);
+  color: var(--fd-color-on-primary);
+}
+.mk .vp-empty {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 16px 8px;
+  text-align: center;
+  color: var(--fd-color-text-muted);
+}
+.mk .vp-empty b {
+  color: var(--fd-color-text);
+}
+.mk .vp-why {
+  margin: 0;
+  font-size: 12px;
+  color: var(--fd-color-danger, #b42318);
+}
+.mk .vp-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--fd-color-border);
+  font: 400 12px var(--fd-font-sans);
+  color: var(--fd-color-text-muted);
+}
