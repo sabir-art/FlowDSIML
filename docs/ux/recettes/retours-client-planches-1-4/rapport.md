@@ -79,3 +79,16 @@ Remarques non bloquantes, à faire avec un prochain lot :
 Avec `VITE_EXTENSION_ID` au démarrage de vite, comme en CI, le test passe à 38/38 en clair et en sombre. Le bandeau « Capture en cours dans l'extension · 0 étape · elles arriveront à la fin. » s'affiche, avec « Revenir à la capture » et « Annuler l'ajout » (`lotE-bandeau-capture-sombre.png`).
 
 Remarque de texte, non bloquante : « à la fin » peut se lire comme « à la fin de la démo », alors que le repère de la liste dit « Les nouvelles étapes arriveront ici », c'est-à-dire après l'étape 1. Je propose « elles arriveront à la fin de la capture. ».
+
+## Rectificatif du 26/11 · planche 1 : alignement des options d'accès
+
+**Mon VERT de la planche 1 sur 52c523d était une erreur.** Sur ma propre capture (`p1-mdp-1440-clair.png`), le bloc gris déplié sous « Avec un mot de passe » était décalé de 30 px vers la droite par rapport à la carte rose. C'est le défaut que le client avait signalé deux fois. Le verdict juste sur 52c523d était **ROUGE**. J'ai jugé le contenu du champ et de la suggestion, sans contrôler le bord du bloc par rapport à sa carte. Désormais, je mesure les bords de chaque bloc déplié par rapport à sa carte.
+
+**Contre-recette sur 8414cab : VERT.**
+- L'option ouverte est une seule carte rose : l'en-tête, un filet, puis les réglages, aux bords exacts de la carte.
+- Le retrait de 30 px et le fond gris ont disparu.
+- C'est vérifié pour Mot de passe, Sur invitation et Par domaine e-mail, à 1440 et 390 px, en clair et en sombre : `p1-alignement-8414cab-1440.png` et `p1-alignement-8414cab-390.png`.
+- e2e `acces-options-alignement` : 28/28 en clair comme en sombre ; `acces-mot-de-passe` : 28/28.
+- Autres listes d'options dépliables de l'app : la recherche dans les styles montre que ce motif (carte d'option avec réglages dépliés) n'existe que dans Accès. Rien d'autre à corriger.
+
+Demandes concernées : Accès › Avec un mot de passe (champ, suggestion, alignement du bloc déplié) · alignement des options d'accès ouvertes (Mot de passe, Sur invitation, Par domaine e-mail).
