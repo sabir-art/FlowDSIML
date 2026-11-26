@@ -9,6 +9,8 @@ export interface AssistantRow {
   position: number;
   proposed: boolean;
   tag: Tag;
+  /** L41 étape 5 : date du passage à « proposé » (tenue par la base). */
+  proposed_at?: string | null;
 }
 export type AutoRule = 'short' | 'whole_demo' | 'fallback';
 export type AutoRules = Record<AutoRule, string>;
@@ -89,6 +91,18 @@ export function workspaceMenu<T extends { id: string }>(menu: T[], chosen: unkno
   if (!Array.isArray(chosen)) return menu;
   const keep = new Set(chosen.filter((x): x is string => typeof x === 'string'));
   return menu.filter((m) => keep.has(m.id));
+}
+
+/**
+ * Liste d'un espace qui n'a jamais réglé la sienne (recette UX, décision du chef) : les modèles proposés
+ * par la Console avant la création de l'espace. Un modèle proposé ensuite arrive décoché.
+ */
+export function defaultChosen(rows: AssistantRow[], createdAt: string | null | undefined): string[] {
+  const at = createdAt ? Date.parse(createdAt) : NaN;
+  return [...rows]
+    .sort((a, b) => a.position - b.position)
+    .filter((r) => r.proposed && r.proposed_at && (Number.isNaN(at) || Date.parse(r.proposed_at) < at))
+    .map((r) => r.model);
 }
 
 /** Menu dans lequel Auto choisit : celui de l'espace ; s'il est vide, Auto prend le relais sur la Console. */

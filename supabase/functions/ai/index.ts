@@ -20,6 +20,7 @@ import {
   menuOf,
   requested,
   workspaceMenu,
+  defaultChosen,
   type AssistantRow,
   type AutoRules,
 } from '../_shared/ai/assistant.ts';
@@ -93,7 +94,7 @@ let asstCache: { at: number; rows: AssistantRow[]; rules: AutoRules } | null = n
 async function assistantConfig(fresh = false) {
   if (!fresh && asstCache && Date.now() - asstCache.at < 60_000) return asstCache;
   const [{ data: rows }, { data: rules }] = await Promise.all([
-    admin.from('ai_assistant_models').select('model, position, proposed, tag'),
+    admin.from('ai_assistant_models').select('model, position, proposed, tag, proposed_at'),
     admin.from('ai_auto_rules').select('rule, model'),
   ]);
   asstCache = {
@@ -116,9 +117,10 @@ async function assistantConfig(fresh = false) {
 async function assistantMenu(ws: string) {
   const c = await assistantConfig();
   const all = menuOf(c.rows, await keySet());
-  const { data } = await admin.from('workspaces').select('settings').eq('id', ws).maybeSingle();
+  const { data } = await admin.from('workspaces').select('settings, created_at').eq('id', ws).maybeSingle();
   const raw = (data?.settings as { ai?: { models?: unknown } } | null)?.ai?.models;
-  const chosen = Array.isArray(raw) ? (raw as string[]) : null;
+  // Jamais réglée : les modèles proposés avant la création de l'espace (un nouveau arrive décoché)
+  const chosen = Array.isArray(raw) ? (raw as string[]) : defaultChosen(c.rows, data?.created_at as string);
   return { menu: workspaceMenu(all, chosen), all, chosen, rules: c.rules };
 }
 

@@ -6,6 +6,7 @@ import {
   fallbackOf,
   replacementOf,
   workspaceMenu,
+  defaultChosen,
   autoMenuOf,
   kindOf,
   menuOf,
@@ -237,4 +238,54 @@ Deno.test('L41 étape 5 : modèles gardés par l’espace, retrait seulement ; A
   // Espace avec Opus seul : Auto reste dans son menu (règle Sonnet → remplaçant Opus)
   const opus = workspaceMenu(menu, ['claude-opus-5-5']);
   assertEquals(autoPick(DEFAULT_RULES, autoMenuOf(opus, menu), 'court'), 'claude-opus-5-5');
+});
+
+Deno.test('L41 étape 5 : espace jamais réglé, un modèle proposé après sa création arrive décoché', () => {
+  const rows: AssistantRow[] = [
+    {
+      model: 'claude-sonnet-5-5',
+      position: 1,
+      proposed: true,
+      tag: 'recommended',
+      proposed_at: '2000-01-01T00:00:00Z',
+    },
+    {
+      model: 'claude-opus-5-5',
+      position: 2,
+      proposed: true,
+      tag: 'recommended',
+      proposed_at: '2000-01-01T00:00:00Z',
+    },
+    {
+      model: 'claude-haiku-5-5',
+      position: 3,
+      proposed: true,
+      tag: 'beta',
+      proposed_at: '2026-12-02T10:00:00Z',
+    },
+  ];
+  // Espace créé avant la proposition de Haiku : Sonnet et Opus seulement
+  assertEquals(defaultChosen(rows, '2026-11-20T09:00:00Z'), ['claude-sonnet-5-5', 'claude-opus-5-5']);
+  const menu = menuOf(rows, ALL);
+  assertEquals(
+    workspaceMenu(menu, defaultChosen(rows, '2026-11-20T09:00:00Z')).map((m) => m.id),
+    ['claude-sonnet-5-5', 'claude-opus-5-5'],
+  );
+  assertEquals(
+    requested('claude-haiku-5-5', workspaceMenu(menu, defaultChosen(rows, '2026-11-20T09:00:00Z'))),
+    null,
+  );
+  // Espace créé après : Haiku compris
+  assertEquals(defaultChosen(rows, '2026-12-03T00:00:00Z').length, 3);
+  // Modèle non proposé ou sans date : jamais
+  assertEquals(
+    defaultChosen(
+      [
+        { ...rows[2]!, proposed_at: null },
+        { ...rows[0]!, proposed: false },
+      ],
+      '2030-01-01T00:00:00Z',
+    ),
+    [],
+  );
 });

@@ -3,7 +3,7 @@
 -- ordre de la Console ; les autres réglages IA de l'espace sont gardés ; écriture directe refusée.
 begin;
 set search_path = public, extensions;
-select plan(10);
+select plan(14);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000041d1', 'proprio-ia5@example.com'),
@@ -55,6 +55,23 @@ select throws_ok($$ update public.workspaces set settings = jsonb_set(settings, 
 select is((select settings -> 'ai' -> 'models' from public.workspaces where id = (select ws from ctx)),
   '["claude-opus-5-5"]'::jsonb, 'liste inchangée après les refus');
 reset role;
+
+-- ===== Espace jamais réglé : date de proposition (recette UX de l'étape 5) =====
+select is((select count(*)::int from public.ai_assistant_models where proposed and proposed_at < '2001-01-01'), 2,
+  'modèles déjà proposés : datés d''avant tout espace (les espaces existants les gardent)');
+insert into auth.users (id, email) values ('00000000-0000-0000-0000-0000000041d9', 'console-ia5@example.com');
+insert into public.platform_admins (user_id, role) values ('00000000-0000-0000-0000-0000000041d9', 'admin');
+select public.ai_assistant_set('[
+  {"model":"claude-sonnet-5-5","position":1,"proposed":true,"tag":"recommended"},
+  {"model":"claude-opus-5-5","position":2,"proposed":false,"tag":"recommended"},
+  {"model":"claude-haiku-5-5","position":3,"proposed":true,"tag":"beta"}
+]'::jsonb, '00000000-0000-0000-0000-0000000041d9');
+select is((select proposed_at from public.ai_assistant_models where model = 'claude-haiku-5-5'), now(),
+  'Haiku proposé maintenant : date du jour (après la création des espaces existants)');
+select is((select proposed_at from public.ai_assistant_models where model = 'claude-sonnet-5-5'),
+  '2000-01-01T00:00:00Z'::timestamptz, 'Sonnet, toujours proposé : date inchangée');
+select is((select proposed_at from public.ai_assistant_models where model = 'claude-opus-5-5'), null,
+  'Opus retiré : plus de date');
 
 select * from finish();
 rollback;
