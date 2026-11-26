@@ -102,3 +102,38 @@ Remarque : si le serveur coupe une fonction pendant qu'un éditeur est déjà ou
 Aucun défilement horizontal, en clair comme en sombre. Capture : `b-en-tete-390.png`.
 
 Demandes concernées : L41 étape 3 · Modèle par fonction (changement, toast Annuler, journal, repli d'un modèle retiré, fonctions coupées sans clé, comportement sans choix) · bandeau d'attention · entrée IA de l'espace « Indisponible pour le moment » · en-tête de la Console › Modèles IA sous 600 px.
+
+## Contre-recette sur b6448ad (26/11) : 6 points VERT
+
+**Banc** :
+- `claude/dev-mvp` à b6448ad (avec 3056891) ;
+- faux backend, clés factices, Chromium à 1440 × 900 (et 1300 pour l'infobulle), en clair et en sombre.
+
+**Tests** : e2e `console-modeles` 38/38 en clair comme en sombre ; Deno `_shared/ai` et `ai` 38/38. J'ai rejoué mes sondes de la recette (focus, journal, infobulle, Assistant, repli, bandeau).
+
+| Point | Verdict | Mesure |
+| --- | --- | --- |
+| 1 · Focus après un choix | **VERT** | Au clavier (Entrée, Flèche bas, Entrée) comme à la souris, le focus reste sur `#ai-fn-…`, avec la nouvelle valeur. Tab passe à la liste suivante (`#ai-fn-translate`). |
+| 2 · Journal lisible, Historique filtré | **VERT** | « Traduction · Claude Sonnet (défaut) → Claude Opus », « Traduction · Claude Opus → Claude Sonnet (défaut) » (Annuler) et « Vérification de cohérence · … ». « Historique des changements » ouvre `#/console/equipe?objet=ai`, avec « Filtré sur Modèles IA ». |
+| 3 · Infobulle au-dessus quand la place manque (fenêtre de 900 px) | **VERT** | À 900 px de haut, l'infobulle s'ouvre au-dessus de l'entrée (y = 804 à 854) et elle est au premier plan. À 1300 px, elle reste en dessous. |
+| 4 · Assistant « Indisponible » dès l'ouverture | **VERT** | Le message s'affiche en tête du panneau dès l'ouverture. Les 3 suggestions ont `aria-disabled="true"`, et le champ et l'envoi sont désactivés. Aucun nom de fournisseur. |
+| 5 · Repli sur le défaut de la fonction | **VERT** | Console : « Modèle retiré : repli sur Claude Sonnet ». Serveur : `resolve()` rend `fallback` et `claude-sonnet-5-5` pour la Traduction. |
+| 6 · Bandeau groupé par cause | **VERT** | « 4 fonctions coupées faute de clé Anthropic : Assistant IA de l'éditeur, Rédaction automatique, Vérification de cohérence et Traduction. », sur une ligne à 1440 px. « 1 fonction en repli, son modèle est retiré : Traduction. » |
+
+Captures :
+- `b6448ad-bandeau-repli.png` ;
+- `b6448ad-infobulle-900-assistant.png` (infobulle au-dessus à 900 px, et Assistant coupé) ;
+- `b6448ad-journal-lisible.png`.
+
+**Points non bloquants** :
+- Les listes font **40 px** : conforme.
+- L'aide de « Rédaction automatique » devient « Textes des étapes pendant la capture (extension), génération, données et graphiques » : conforme.
+- La tuile du fournisseur dans les options est reportée, faute d'icône par option dans la liste commune : accepté.
+- **Message 503** : partiel.
+  - Conforme pour l'Assistant, la voix et les dialogues, qui disent « Indisponible pour le moment ».
+  - Pour l'« Assistance IA » d'une bulle, quand la fonction est coupée pendant que l'éditeur est ouvert, l'état est bien rechargé et l'entrée passe en désactivée. Mais **aucun message ne s'affiche** : le menu se ferme, le focus retombe sur `body`, et seule l'infobulle de l'entrée, au survol ou au focus, donne la raison.
+  - À reprendre dans un prochain lot : rendre le focus à l'entrée désactivée, ce qui affiche l'infobulle, ou annoncer « Indisponible pour le moment » dans la zone `aria-live`.
+
+**Note pour le chef** : 3056891 modifie la migration `20261201380000_ia_modele_par_fonction.sql` au lieu d'en ajouter une nouvelle. C'est sans risque seulement si cette migration n'a encore été appliquée nulle part.
+
+Demandes concernées : L41 étape 3 · focus après un choix · journal lisible et Historique filtré · infobulle de l'entrée indisponible · Assistant coupé · repli sur le défaut de la fonction · bandeau groupé par cause.
