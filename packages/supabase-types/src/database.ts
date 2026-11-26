@@ -2553,6 +2553,8 @@ export type Database = {
       unpublish_center: { Args: { p_ws: string }; Returns: undefined };
       set_center_access: { Args: { p_mode: string; p_ws: string }; Returns: undefined };
       slack_webhook_connected: { Args: { p_ws: string }; Returns: boolean };
+      slack_webhook_info: { Args: { p_ws: string }; Returns: Json };
+      slack_webhook_alerts: { Args: { p_on: boolean; p_ws: string }; Returns: undefined };
       slack_webhook_remove: { Args: { p_ws: string }; Returns: undefined };
       slack_webhook_set: { Args: { p_url: string; p_ws: string }; Returns: undefined };
       slack_webhook_test: { Args: { p_ws: string }; Returns: number | null };
