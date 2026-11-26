@@ -254,6 +254,8 @@ export function parseFromFrame(data: unknown): FromFrame | null {
 export const FRAME_RUNTIME = `(function () {
   'use strict';
   var parentWin = window.parent;
+  // Sandbox v2 (liveFrame) : les scripts de la page s'exécutent ; boutons et envois gardent leur effet
+  var live = window.__fdLive === true;
   var mode = 'player';
   var ops = [];
   var autoLinks = [];
@@ -711,7 +713,7 @@ export const FRAME_RUNTIME = `(function () {
     var linked = t.closest('[data-fd-link]');
     var ext = t.closest('[data-tc-ext]');
     var actionable = t.closest('a,button,[role=button],[role=link],[role=tab],[role=menuitem],input[type=submit],summary');
-    if (actionable || linked || ext) e.preventDefault();
+    if ((actionable && !live) || linked || ext) e.preventDefault();
     if (linked) post({ t: 'go', step: linked.getAttribute('data-fd-link') });
     // L49 §4 : lien externe autorisé (le lecteur demande confirmation) ou désactivé
     else if (ext && ext.hasAttribute('data-fd-ext')) post({ t: 'ext', id: ext.getAttribute('data-fd-ext') });
@@ -719,12 +721,12 @@ export const FRAME_RUNTIME = `(function () {
     else if (ext) { if (ext.getAttribute('data-tc-ext') === 'off' && unlinked !== 'none' && !hit) post({ t: 'unlinked', ext: true }); }
     // EXT-02 §3.2 : clic à côté d'une zone (bouton ou lien non relié, ou dans le vide) : les zones
     // s'illuminent un instant et le lecteur dit combien la page en compte
-    else if (unlinked !== 'none' && !hit && !t.closest('[data-fd-ui]')) {
+    else if (!live && unlinked !== 'none' && !hit && !t.closest('[data-fd-ui]')) {
       flashZones();
       post(actionable ? { t: 'unlinked' } : { t: 'unlinked', empty: true });
     }
   }, true);
-  document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+  document.addEventListener('submit', function (e) { if (!live) e.preventDefault(); }, true);
   // EXT-02 §3.1 : la touche H bascule les zones cliquables, y compris quand le focus est dans la page
   document.addEventListener('keydown', function (e) {
     if (mode !== 'player' || e.ctrlKey || e.metaKey || e.altKey || (e.key !== 'h' && e.key !== 'H')) return;
