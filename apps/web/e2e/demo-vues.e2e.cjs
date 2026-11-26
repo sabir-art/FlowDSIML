@@ -172,11 +172,14 @@ const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
   if (!MOBILE) {
     await go('Édition');
     await hash(/\/edit$/);
-    await page.locator('.ed-tabs').waitFor();
+    // Les vrais onglets, pas ceux du squelette de chargement (aria-hidden, Édition et Aperçu seulement) :
+    // sur une machine lente, le squelette est encore affiché quand l'adresse a changé
+    const tabs = page.locator('.ed-tabs:not([aria-hidden="true"])');
+    await tabs.waitFor();
     ok(await kept(), 'Édition : pas de changement de page complet');
     const names = [
-      ...(await page.locator('.ed-tabs button').allTextContents()),
-      ...(await page.locator('.ed-tabs a').allTextContents()),
+      ...(await tabs.locator('button').allTextContents()),
+      ...(await tabs.locator('a').allTextContents()),
     ].map((x) => x.trim());
     ok(
       names.join('|') === 'Édition|Aperçu|Analytics|Leads|Visiteurs',
