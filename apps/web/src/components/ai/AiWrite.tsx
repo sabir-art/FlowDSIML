@@ -82,13 +82,15 @@ export function DisabledEntry({
   /** Infobulle propre à la fonction quand elle est désactivée (voix, sous-titres). */
   tip?: string;
   /**
-   * Recette UX (L41 étape 3) : l'entrée vient d'être coupée pendant une demande ; elle reprend le focus,
-   * et sa description (« Indisponible pour le moment ») est annoncée.
+   * Recette UX (L41 étape 3) : l'entrée vient d'être coupée pendant une demande ; elle reprend le focus.
+   * « Indisponible pour le moment » n'est annoncé qu'une fois, par la zone role=status de l'appelant :
+   * la description n'est rattachée qu'après la sortie du focus (sinon relue au focus).
    */
   autoFocus?: boolean;
 }) {
   const id = useId();
   const btn = useRef<HTMLButtonElement | null>(null);
+  const [quiet, setQuiet] = useState(autoFocus);
   useEffect(() => {
     if (autoFocus) btn.current?.focus();
   }, [autoFocus]);
@@ -111,8 +113,9 @@ export function DisabledEntry({
         type="button"
         className="btn btn-ghost btn-xs ai-entry"
         aria-disabled="true"
-        aria-describedby={id}
+        aria-describedby={quiet ? undefined : id}
         onFocus={place}
+        onBlur={() => setQuiet(false)}
         onClick={(e) => e.preventDefault()}
       >
         <WandSparkles aria-hidden="true" />
@@ -180,13 +183,22 @@ export function AiWrite({
   }, [fieldKey]);
 
   const b = aiBlock(status, 'write');
+  // Zone d'annonce gardée dans les deux affichages : « Indisponible » n'est annoncé que par elle
+  const live = (
+    <span className="sr-only" role="status">
+      {announce}
+    </span>
+  );
   if (b === 'disabled' || b === 'role' || b === 'unavailable')
     return (
-      <DisabledEntry
-        status={status}
-        label={t('ai.write.menu')}
-        autoFocus={b === 'unavailable' && justCut.current}
-      />
+      <>
+        <DisabledEntry
+          status={status}
+          label={t('ai.write.menu')}
+          autoFocus={b === 'unavailable' && justCut.current}
+        />
+        {live}
+      </>
     );
 
   const run = async (action: WriteAction, tone?: Tone, variant = 0) => {
@@ -221,9 +233,10 @@ export function AiWrite({
       if (e instanceof AiRequestError && e.code === 'AI_DISABLED')
         return setView({ kind: 'blocked', message: t('ai.disabled') });
       if (e instanceof AiRequestError && e.code === 'UNAVAILABLE') {
+        // Une seule annonce (role=status) ; l'entrée désactivée prend le relais à l'écran
         justCut.current = true;
         setAnnounce(t('ai.unavailable'));
-        return setView({ kind: 'blocked', message: t('ai.unavailable') });
+        return setView({ kind: 'idle' });
       }
       setView({ kind: 'error' });
     }
@@ -275,9 +288,7 @@ export function AiWrite({
           items={items}
         />
       </span>
-      <span className="sr-only" role="status">
-        {announce}
-      </span>
+      {live}
       {view.kind !== 'idle' && (
         <div
           className="ai-preview"
