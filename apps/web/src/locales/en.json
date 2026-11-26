@@ -5521,7 +5521,23 @@
       "quota_voice": "Text-to-speech quota reached for this month ({{quota}} s).",
       "quota_captions": "Automatic captions quota reached for this month ({{quota}} s).",
       "over": "{{left}} s left this month; this request needs about {{need}} s."
-    }
+    },
+    "model": {
+      "auto": "Auto",
+      "autoHelp": "Balances speed, effort and cost",
+      "sonnet": "Claude Sonnet",
+      "sonnetHelp": "Fast, for most texts",
+      "opus": "Claude Opus",
+      "opusHelp": "More precise, slower",
+      "recommended": "Recommended",
+      "others": "Other models",
+      "openai": "OpenAI models",
+      "openaiHelp": "Not yet offered in the workspace",
+      "ownerNote": "The owner chooses the models in Settings › AI assistance.",
+      "pick": "Model: {{model}}",
+      "menu": "Assistant model"
+    },
+    "mentionModel": "AI-generated ({{model}}), please review"
   },
   "loading": {
     "demos": "Loading demos…",

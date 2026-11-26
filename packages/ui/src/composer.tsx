@@ -53,6 +53,8 @@ export interface ComposerProps {
   submitKey?: string;
   /** Outils à gauche de la barre (boutons à icône de 32 px). */
   tools?: ReactNode;
+  /** Contrôles à droite, juste avant Envoyer (pilule du modèle…), 32 px, à 4 px l'un de l'autre. */
+  trailing?: ReactNode;
   /** Message d'erreur sous le cadre (le texte saisi est conservé). */
   error?: ReactNode;
   /** Id d'un texte qui décrit le champ (mention de contexte du panneau). */
@@ -81,6 +83,7 @@ export function Composer({
   submitLabel,
   submitKey,
   tools,
+  trailing,
   error,
   describedBy,
   counterLabel = (n, max) => `${n} / ${max}`,
@@ -176,6 +179,7 @@ export function Composer({
                 {edit.cancelLabel}
               </button>
             )}
+            {trailing && <span className="fd-composer__trailing">{trailing}</span>}
             {stop ? (
               <button
                 type="button"

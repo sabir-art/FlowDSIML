@@ -109,8 +109,23 @@ export async function callAi<T>(
   input: Record<string, unknown>,
   signal?: AbortSignal,
 ): Promise<T> {
+  return (await callAiWith<T>(ws, task, lang, input, { signal })).result;
+}
+
+/** Planche 3 : modèle demandé à l'assistant (« auto » : le serveur choisit). */
+export type AiModelChoice = 'auto' | 'sonnet' | 'opus';
+
+/** Comme callAi, avec le modèle demandé ; rend aussi le modèle réellement utilisé (« Claude Sonnet »). */
+export async function callAiWith<T>(
+  ws: string,
+  task: AiTask,
+  lang: string,
+  input: Record<string, unknown>,
+  opts: { signal?: AbortSignal; model?: AiModelChoice } = {},
+): Promise<{ result: T; model: string }> {
+  const { signal, model } = opts;
   const { data, error } = await supabase.functions.invoke('ai', {
-    body: { ws, task, lang, input },
+    body: { ws, task, lang, input, ...(model && model !== 'auto' ? { model } : {}) },
     signal,
   });
   if (signal?.aborted) throw new AiRequestError('ABORTED');
@@ -125,7 +140,8 @@ export async function callAi<T>(
     }
     throw new AiRequestError(body.error ?? 'NETWORK', body.renewsOn ?? null);
   }
-  return (data as { result: T }).result;
+  const d = data as { result: T; model?: string };
+  return { result: d.result, model: d.model ?? '' };
 }
 
 /** Variables {{x}} présentes dans `before` et absentes de `after`. */

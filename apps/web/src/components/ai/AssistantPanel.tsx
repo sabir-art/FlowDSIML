@@ -5,14 +5,15 @@ import { Composer } from '@flowdsiml/ui';
 import type { DemoEditor } from '../../pages/editor/useDemoEditor';
 import { asSettings } from '../../pages/editor/types';
 import { useToast } from '../Toast';
-import { AiRequestError, aiBlock, callAi, useAiStatus } from '../../lib/ai';
+import { AiRequestError, aiBlock, callAiWith, useAiStatus, type AiModelChoice } from '../../lib/ai';
+import { ModelPicker } from './ModelPicker';
 import { markAiApplied, useBlockText } from './AiWrite';
 import './ai.css';
 
 type Change = { id: string; text: string; before: string; n: number; state?: 'applied' | 'ignored' };
 type Msg =
   | { role: 'user'; text: string }
-  | { role: 'assistant'; text: string; changes: Change[] }
+  | { role: 'assistant'; text: string; changes: Change[]; model?: string }
   | { role: 'error'; text: string };
 
 /** Champs envoyés : titres d'étapes, titres et textes des bulles (règle 3), avec leur id. */
@@ -55,6 +56,8 @@ export function AssistantPanel({
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
+  // Planche 3 : modèle demandé (« Auto » par défaut), gardé tant que le panneau est ouvert
+  const [model, setModel] = useState<AiModelChoice>('auto');
   const ctrl = useRef<AbortController | null>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const log = useRef<HTMLDivElement>(null);
@@ -100,7 +103,10 @@ export function AssistantPanel({
     ctrl.current = c;
     setBusy(true);
     try {
-      const r = await callAi<{ text: string; changes: Array<{ id: string; text: string }> }>(
+      const { result: r, model: used } = await callAiWith<{
+        text: string;
+        changes: Array<{ id: string; text: string }>;
+      }>(
         ws,
         'assistant',
         lang,
@@ -113,13 +119,16 @@ export function AssistantPanel({
             .slice(-20)
             .map((m) => ({ role: m.role, text: m.text })),
         },
-        c.signal,
+        { signal: c.signal, model },
       );
+      // Pied de la réponse : le modèle réellement utilisé (« Auto · Claude Sonnet » avec Auto)
+      const shown = used ? (model === 'auto' ? `${t('ai.model.auto')} · ${used}` : used) : '';
       setMsgs((m) => [
         ...m,
         {
           role: 'assistant',
           text: r.text,
+          model: shown,
           changes: r.changes.map((ch) => ({ ...ch, before: current(ch.id), n: nOf.get(ch.id) ?? 0 })),
         },
       ]);
@@ -208,7 +217,7 @@ export function AssistantPanel({
             {m.role === 'assistant' && (
               <p className="ai-mention">
                 <Sparkles aria-hidden="true" />
-                {t('ai.mention')}
+                {m.model ? t('ai.mentionModel', { model: m.model }) : t('ai.mention')}
               </p>
             )}
           </div>
@@ -240,6 +249,7 @@ export function AssistantPanel({
         submitLabel={t('ai.assistant.send')}
         submitKey={t('ai.assistant.enterKey')}
         describedBy="ai-as-cleared"
+        trailing={<ModelPicker value={model} onChange={setModel} />}
         stop={busy ? { label: t('ai.assistant.stop'), onStop: () => ctrl.current?.abort() } : undefined}
         onSubmit={() => void send(draft)}
         renderInput={(props) => (
