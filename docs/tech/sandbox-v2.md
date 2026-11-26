@@ -1,6 +1,7 @@
 # Sandbox v2 : note d'architecture (L60)
 
-Statut : proposition à discuter avec le chef, **avant tout code**. Rien de ce qui suit n'est développé.
+Statut : validée par le chef (décisions au §8). Étape 1 livrée : banc et mesure de la v1
+(`docs/tech/recettes/sandbox-v2-etape1/mesure-v1.md`). Étapes 2 à 6 : à développer.
 
 ## 1. Ce que veut le client
 
@@ -112,8 +113,9 @@ Exécuter le code d'un site tiers dans le lecteur est le vrai risque. Les règle
    données personnelles des réponses sont remplacées avant l'envoi (3.1).
 5. **Ce que tape le visiteur ne sort pas** : écritures neutralisées, stockage en mémoire, aucun
    événement d'analytics ne porte le contenu d'un champ.
-6. **Activation** : réglage d'espace (Paramètres › Sécurité, à côté de la capture HTML), désactivé
-   par défaut, et choix par démo. Le mode inerte reste disponible et reste le défaut.
+6. **Activation** (décision du chef, §8) : réglage **par démo**, activable par un éditeur, autorisé
+   par défaut ; garde-fou d'espace (Paramètres › Sécurité, à côté de la capture HTML) qu'un
+   administrateur peut fermer. Le mode inerte reste disponible et reste le mode d'une nouvelle démo.
 7. **Serveur** : `html-ingest` garde le contrôle `NOT_INERT` pour le mode inerte. Le mode v2 a son
    propre contrôle : scripts acceptés seulement s'ils figurent dans la liste déclarée, tailles,
    types, analyse des adresses (Safe Browsing existant).
@@ -143,6 +145,9 @@ Des sites d'essai fictifs, servis en local par les e2e de l'extension :
 | Formulaire avec validation et envoi POST | écriture neutralisée, « avance », vide au retour |
 | Application qui dépend de `localStorage` | stockage en mémoire par visite |
 | Page avec mesure d'audience et widget de tiers | blocage par défaut, « Garder » |
+
+Servis par `apps/extension/e2e/banc/serveur.cjs` (`/site`, `/app`, `/liste`, `/formulaire`,
+`/stockage`, `/tiers`, plus `/onglets` et `/menu` du lot L60) ; mesure par `e2e/banc/mesure-sandbox.cjs`.
 
 Mesures, publiées par le banc à chaque passage :
 
@@ -187,3 +192,25 @@ Chaque étape est livrable seule et laisse le mode inerte intact.
    montrer au client ?
 4. Les sites du client qui posent problème aujourd'hui : peut-on avoir leurs adresses (ou une copie
    sans données réelles) pour les ajouter au banc ?
+
+## 8. Décisions du chef
+
+1. **Activation** : réglage Sandbox v2 par démo, activable par un éditeur, autorisé par défaut, avec
+   un garde-fou d'espace qu'un administrateur peut fermer (§3.5, règle 6).
+2. **Injection dans le monde de la page** : acceptée, sans nouvelle permission. Paragraphe pour la
+   fiche du Chrome Web Store (justification de `scripting`), à reprendre tel quel :
+
+   > When you capture a page in Sandbox mode, TutoClick adds a small script to that page so it can
+   > copy the data the page loads for itself (read requests only), together with the page's own
+   > scripts. This lets the demo behave like the real site when it is replayed. The script runs only
+   > in the tab you are capturing, only while a capture is in progress, and only after you start it.
+   > It never reads or stores passwords, cookies, authentication headers or anything you send to the
+   > site, and personal data found in the copied data is replaced before upload. Replayed demos run
+   > in an isolated frame with no network access.
+
+3. **Critères de l'étape 1, à 100 %** (lecture à confirmer par le chef) : chaque site d'essai est
+   servi ; chaque parcours réussit entièrement sur le site vivant ; chaque site est capturé sans
+   erreur et mesuré ; aucune sortie réseau de la reprise, détecteur vérifié par un témoin. Ils sont
+   contrôlés par `apps/extension/e2e/banc/mesure-sandbox.cjs` (échec du script sinon). Les taux de la
+   v1 sont relevés, pas exigés : interaction 53,6 %, visuel 99,9 %, réponses rejouées 0 %, plan
+   81,3 %, sorties 0.
