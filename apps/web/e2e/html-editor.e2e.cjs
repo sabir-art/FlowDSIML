@@ -268,6 +268,17 @@ const page = (h1) => `<!doctype html><html><head><meta charset="utf-8"><title>${
       (await p.getByText('Sélectionnez un élément de la page, puis « Lier à une étape ».').count()) === 1,
     'aperçu : « Ajouter une zone » ferme l’aperçu sur l’étape, avec l’indication',
   );
+  // Gêne lot B : la dernière étape d'une démo guidée est la fin, pas une impasse (pas d'encart)
+  state.tables.steps = state.tables.steps.filter((s) => s.demo_id !== DEMO || s.kind === 'html');
+  await p.reload();
+  await p.locator('.rail-list .step').nth(2).hover();
+  await p.getByRole('button', { name: 'Lire depuis l’étape 3' }).click();
+  await pv.locator('.p-html-page, iframe').first().waitFor({ timeout: 15000 });
+  await p.waitForTimeout(1500);
+  ok(
+    (await p.locator('.rail-list .step').count()) === 3 && (await pv.locator('.p-html-nozone').count()) === 0,
+    'aperçu : pas d’encart « Aucune zone cliquable » sur la dernière étape d’une démo guidée',
+  );
   ok(errors.length === 0, `aucune erreur (${errors.join(' | ')})`);
   await b.close();
 })().catch((e) => {

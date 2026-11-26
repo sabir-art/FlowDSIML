@@ -1144,7 +1144,8 @@ export function Player({
                     : null
                 }
                 onAddZone={
-                  preview
+                  // Gêne lot B : la dernière étape d'une démo guidée est la fin, pas une impasse
+                  preview && (sandbox || !last)
                     ? () =>
                         // Aperçu en onglet (opener) ou intégré dans l'éditeur (parent) : l'éditeur ouvre l'étape
                         (window.opener ?? (window.parent !== window ? window.parent : null))?.postMessage(
