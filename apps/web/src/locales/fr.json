@@ -5970,7 +5970,13 @@
       "onlyAi": "Filtré sur Modèles IA",
       "showAll": "Tout afficher",
       "before": "Avant",
-      "after": "Après"
+      "after": "Après",
+      "change": {
+        "order": "Ordre",
+        "proposed": "Proposé",
+        "notProposed": "Non proposé",
+        "noTag": "Sans étiquette"
+      }
     },
     "action": {
       "console_open": "Connexion à la console",
