@@ -70,7 +70,7 @@ const WS = '11111111-1111-1111-1111-111111111111';
       () =>
         [...document.querySelectorAll('[data-fd-ui]')]
           .find((e) => e.shadowRoot)
-          ?.shadowRoot.querySelector('.n')?.textContent,
+          ?.shadowRoot.querySelector('.pill')?.textContent,
     );
   const dump = async (tag) =>
     process.env.DEBUG &&
@@ -100,8 +100,9 @@ const WS = '11111111-1111-1111-1111-111111111111';
   ok(await waitSteps(2), 'changement d’adresse sans rechargement : page capturée toute seule');
   await page.waitForFunction(
     () =>
-      [...document.querySelectorAll('[data-fd-ui]')].find((e) => e.shadowRoot)?.shadowRoot.querySelector('.n')
-        ?.textContent === '2 pages',
+      [...document.querySelectorAll('[data-fd-ui]')]
+        .find((e) => e.shadowRoot)
+        ?.shadowRoot.querySelector('.pill')?.textContent === '2 pages',
   );
   await dump('clients');
   ok((await count()) === '2 pages', 'la barre compte 2 pages');

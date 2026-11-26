@@ -603,16 +603,20 @@ async function onHtmlBar(
     return fetchAsset(m.url, m.kind, sender.url ?? sender.tab.url);
   }
   if (m.type === 'fd:html-ready') {
+    // L60 §2 : en pause, la page chargée n'est pas ajoutée (la capture attendue reste en attente)
+    if (s.paused) return { capture: false, pages: s.steps, target: targetChip(s) };
     if (s.htmlAwait) await setState({ htmlAwait: false });
     // EXT-02 §8 : la barre de capture HTML porte la même pastille de cible que celle des captures
     return { capture: !!s.htmlAwait, pages: s.steps, target: targetChip(s) };
   }
   if (m.type === 'fd:html-page') {
+    if (s.paused) return { steps: s.steps };
     const order = s.steps + 1;
     await htmlStore.put({ ...m.capture, order });
     return setState({ steps: order, htmlAwait: false });
   }
   if (m.type === 'fd:html-click') {
+    if (s.paused) return null;
     const last = await htmlStore.last();
     // Le dernier clic avant la page suivante est le lien proposé. Une entrée de menu apparue après la
     // copie n'existe pas dans la page copiée : le lien reste sur l'élément qui a ouvert le menu.

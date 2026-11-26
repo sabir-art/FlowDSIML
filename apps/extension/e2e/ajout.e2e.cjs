@@ -273,7 +273,7 @@ const ok = (c, l) => {
   }
   await hpage.waitForFunction(() =>
     /Démo CRM · après l’étape 2/.test(
-      document.querySelector('[data-fd-ui]')?.shadowRoot?.querySelector('.n')?.textContent ?? '',
+      document.querySelector('[data-fd-ui]')?.shadowRoot?.querySelector('.tgt')?.textContent ?? '',
     ),
   );
   ok(true, 'capture HTML : la barre porte la pastille de cible « Démo CRM · après l’étape 2 »');
