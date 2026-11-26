@@ -540,12 +540,30 @@ const GOOD2 = 'sk-fictive-bonne-000333';
     await p4.waitForFunction(() => document.activeElement?.classList.contains('ai-entry'));
     const focused = await p4.evaluate(() => {
       const a = document.activeElement;
-      const d = document.getElementById(a?.getAttribute('aria-describedby') ?? '');
-      return { disabled: a?.getAttribute('aria-disabled'), desc: d?.textContent ?? '' };
+      const wrap = a?.closest('.ai-disabled-wrap');
+      const live = [...document.querySelectorAll('[role="status"], [role="alert"]')]
+        .map((e) => ({ role: e.getAttribute('role'), text: e.textContent ?? '' }))
+        .filter((e) => e.text.includes('Indisponible pour le moment'));
+      return {
+        disabled: a?.getAttribute('aria-disabled'),
+        describedby: a?.getAttribute('aria-describedby'),
+        tip: wrap?.querySelector('.ai-tip')?.textContent ?? '',
+        live,
+      };
     });
     ok(
-      focused.disabled === 'true' && focused.desc.includes('Indisponible pour le moment'),
-      `coupée pendant l’édition : 503 UNAVAILABLE, le focus va à l’entrée désactivée, « ${focused.desc.trim()} »`,
+      focused.disabled === 'true' && focused.tip.includes('Indisponible pour le moment'),
+      `coupée pendant l’édition : 503 UNAVAILABLE, le focus va à l’entrée désactivée, « ${focused.tip.trim()} »`,
+    );
+    ok(
+      focused.live.length === 1 && focused.live[0].role === 'status' && !focused.describedby,
+      `« Indisponible » annoncé une seule fois, par role=status (${JSON.stringify(focused.live)}, description au focus : ${focused.describedby ?? 'aucune'})`,
+    );
+    await p4.keyboard.press('Tab');
+    await p4.keyboard.press('Shift+Tab');
+    ok(
+      !!(await p4.evaluate(() => document.activeElement?.getAttribute('aria-describedby'))),
+      'au retour sur l’entrée, la description est de nouveau rattachée',
     );
     await c4.close();
   }
