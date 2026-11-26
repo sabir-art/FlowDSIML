@@ -1606,6 +1606,7 @@
       "unlinkedToast": "Afficher « Aucun lien à cet endroit » et les zones cliquables",
       "unlinkedNone": "Ne rien faire",
       "unlinkedHighlight": "Mettre en évidence les zones cliquables",
+      "unlinkedLive": "Sans effet sur une page vivante : elle réagit elle-même.",
       "guide": "Guide optionnel",
       "addPage": "Ajouter une page (capture HTML)",
       "soon": "Bientôt",

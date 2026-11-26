@@ -116,6 +116,8 @@ export function SandboxPlan({
       alive = false;
     };
   }, [hasLive, demo.workspace_id]);
+  /** Sandbox vivant réellement actif : la page réagit elle-même aux clics. */
+  const liveOn = hasLive && !!sb.live && liveAllowed !== false;
   const { nodes } = useMemo(() => sandboxGraph(editor.steps, demo.sandbox), [editor.steps, demo.sandbox]);
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const title = (id: string) => byId.get(id)?.title ?? '';
@@ -520,13 +522,20 @@ export function SandboxPlan({
             id="sb-unlinked"
             size="sm"
             value={sb.unlinked}
-            disabled={readOnly}
+            disabled={readOnly || liveOn}
+            aria-describedby={liveOn ? 'sb-unlinked-h' : undefined}
             onChange={(e) => save({ unlinked: e.target.value })}
           >
             <option value="toast">{t('editor.sandbox.unlinkedToast')}</option>
             <option value="none">{t('editor.sandbox.unlinkedNone')}</option>
             <option value="highlight">{t('editor.sandbox.unlinkedHighlight')}</option>
           </Select>
+          {/* Recette UX de l'étape 3 : une page vivante réagit elle-même, le réglage est sans effet */}
+          {liveOn && (
+            <p className="help" id="sb-unlinked-h">
+              {t('editor.sandbox.unlinkedLive')}
+            </p>
+          )}
         </div>
         <div>
           <div className="setting">

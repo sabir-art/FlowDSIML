@@ -97,9 +97,22 @@ function prepare(state) {
     !(await live.isChecked()) && (await live.isEnabled()),
     'réglage « Sandbox vivant » proposé, désactivé par défaut',
   );
+  ok(
+    (await p.locator('#sb-unlinked').isEnabled()) && (await p.locator('#sb-unlinked-h').count()) === 0,
+    'sans Sandbox vivant : « Clic sur un élément non relié » actif',
+  );
   await live.check();
   await p.waitForTimeout(1400);
   ok(demo.sandbox.live === true, 'activé : demos.sandbox.live enregistré');
+  // Recette UX de l'étape 3 : « Clic sur un élément non relié » grisé, avec son aide
+  const unlinked = p.locator('#sb-unlinked');
+  ok(
+    (await unlinked.isDisabled()) &&
+      (await p.locator('#sb-unlinked-h').innerText()) ===
+        'Sans effet sur une page vivante : elle réagit elle-même.' &&
+      (await unlinked.getAttribute('aria-describedby')) === 'sb-unlinked-h',
+    'vivant : « Clic sur un élément non relié » grisé, aide « Sans effet sur une page vivante »',
+  );
   if (SHOTS) {
     await live.scrollIntoViewIfNeeded();
     await p.screenshot({ path: `${SHOTS}/sandbox-vivant-reglage${sfx}.png` });

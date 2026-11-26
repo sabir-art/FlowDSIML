@@ -1606,6 +1606,7 @@
       "unlinkedToast": "Show “No link here” and the clickable areas",
       "unlinkedNone": "Do nothing",
       "unlinkedHighlight": "Highlight clickable areas",
+      "unlinkedLive": "No effect on a live page: it responds by itself.",
       "guide": "Optional guide",
       "addPage": "Add a page (HTML capture)",
       "soon": "Soon",
