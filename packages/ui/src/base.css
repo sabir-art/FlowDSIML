@@ -436,6 +436,11 @@ input[type='checkbox']:disabled {
   background-color: var(--fd-color-surface-sunken);
   cursor: not-allowed;
 }
+/* Cochée et désactivée (toujours actif, lecture seule) : la coche reste visible, en gris, comme le radio */
+input[type='checkbox']:disabled:is(:checked, :indeterminate) {
+  border-color: var(--fd-color-text-muted);
+  background-color: var(--fd-color-text-muted);
+}
 @media (prefers-reduced-motion: reduce) {
   input[type='checkbox'] {
     transition: none;
