@@ -159,6 +159,13 @@ const hook = (id, state, ws) => ({
         'Elle est masquée une fois enregistrée.',
     'lien « Comment obtenir l’adresse ? » (nouvel onglet) ; aide sans l’exemple répété',
   );
+  const helpGap = await field.evaluate((f) =>
+    Math.round(
+      document.getElementById(f.getAttribute('aria-describedby')).getBoundingClientRect().top -
+        f.getBoundingClientRect().bottom,
+    ),
+  );
+  ok(helpGap === 8, `aide à 8 px sous le champ (${helpGap} px)`);
   // Adresse refusée : autre hôte
   await field.fill('https://hooks.slack.com.evil.example/services/T000FICTIF/B000FICTIF/cle-factice');
   await sd.getByRole('button', { name: 'Connecter' }).click();
@@ -209,6 +216,16 @@ const hook = (id, state, ws) => ({
     `connecté : « Déconnecter » à gauche, « Envoyer un test » et « Enregistrer » (désactivé) à droite (${foot.order})`,
   );
   await axe(p, 'Intégrations, fenêtre Slack (connecté)');
+  // Pied mobile : « Déconnecter » est une cible tactile de 32 px de haut au moins
+  const vp = p.viewportSize();
+  await p.setViewportSize({ width: 390, height: 844 });
+  await p.waitForTimeout(200);
+  const rmH = await sd
+    .getByRole('button', { name: 'Déconnecter' })
+    .evaluate((b) => b.getBoundingClientRect().height);
+  ok(rmH >= 32, `390 px : « Déconnecter » fait ${Math.round(rmH)} px de haut (32 au moins)`);
+  await p.setViewportSize(vp);
+  await p.waitForTimeout(200);
   // Interrupteur : Enregistrer s'active, puis enregistre
   await sd.getByRole('switch', { name: 'Alertes analytics' }).click({ force: true });
   ok(!(await save.isDisabled()), 'interrupteur changé : « Enregistrer » actif');

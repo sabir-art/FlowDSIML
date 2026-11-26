@@ -437,6 +437,11 @@ a.int-row--link:focus-visible {
 .int-slack__input {
   height: 40px;
 }
+/* Retours UX planche 4 : l'aide (ou l'erreur) est à 8 px sous le champ, l'écart de la colonne */
+.int-slack__field > .stg-help,
+.int-slack__field > .stg-error {
+  margin: 0;
+}
 .int-slack__ro {
   display: flex;
   align-items: center;
@@ -492,8 +497,12 @@ a.int-row--link:focus-visible {
   .int-slack__acts > * {
     flex: 1;
   }
+  /* Cible tactile : 32 px de haut au moins */
   .int-slack__remove {
     margin: 0 auto;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
   }
 }
 .int-need {
