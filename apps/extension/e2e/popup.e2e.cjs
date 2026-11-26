@@ -252,14 +252,81 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     // Remise à l'état par défaut pour la suite
     await popup.evaluate(() => chrome.storage.local.set({ 'fd.tabSize': 'current', 'fd.follow': false }));
 
-    // Menu ⋯
+    // L64 §1 : menu ⋯ (280 px) : espaces (courant coché, lecteur grisé), liens, déconnexion
+    const members = (list) =>
+      fetch('http://localhost:54400/__members', { method: 'POST', body: JSON.stringify(list) });
+    await members([
+      { id: '11111111-1111-1111-1111-111111111111', name: 'Acme', role: 'owner', count: 6 },
+      { id: '22222222-1111-1111-1111-111111111111', name: 'Beta', role: 'editor', count: 3 },
+      { id: '33333333-1111-1111-1111-111111111111', name: 'Gamma', role: 'viewer', count: 12 },
+    ]);
+    await popup.evaluate(() =>
+      chrome.storage.local.set({ 'fd.lastWorkspace': '11111111-1111-1111-1111-111111111111' }),
+    );
+    await popup.reload();
+    await popup.waitForSelector('#setup:not([hidden])');
+    await popup.waitForFunction(
+      () => document.querySelectorAll('#ws-items [role=menuitemradio]').length === 3,
+    );
     await popup.click('#more');
-    const items = await popup.locator('#more-menu [role=menuitem]:not([hidden])').allInnerTexts();
+    const menuBox = await popup.locator('#more-menu').evaluate((m) => ({
+      w: Math.round(m.getBoundingClientRect().width),
+      r: getComputedStyle(m).borderRadius,
+    }));
+    const spaces = await popup.locator('#ws-items [role=menuitemradio]').evaluateAll((els) =>
+      els.map((e) => ({
+        name: e.querySelector('.two > span').textContent,
+        meta: e.querySelector('small').textContent,
+        on: e.getAttribute('aria-checked') === 'true',
+        off: e.getAttribute('aria-disabled') === 'true',
+        tile: e.querySelector('.wt').textContent,
+      })),
+    );
     ok(
-      items.map((i) => i.trim()).join(' | ') === 'Ouvrir TutoClick | Réglages de capture | Se déconnecter',
-      `${tag} · menu ⋯ : ${items.map((i) => i.trim()).join(', ')}`,
+      menuBox.w === 280 &&
+        menuBox.r === '16px' &&
+        (await popup.locator('#ws-h').innerText()) === 'Espace de travail' &&
+        JSON.stringify(spaces) ===
+          JSON.stringify([
+            { name: 'Acme', meta: '6 membres · Propriétaire', on: true, off: false, tile: 'A' },
+            { name: 'Beta', meta: '3 membres · Éditeur', on: false, off: false, tile: 'B' },
+            { name: 'Gamma', meta: 'Lecteur : capture impossible', on: false, off: true, tile: 'G' },
+          ]),
+      `${tag} · menu ⋯ : 280 px, rayon 16, espaces (courant coché, lecteur grisé) ${JSON.stringify(spaces)}`,
+    );
+    const items = await popup
+      .locator('#more-menu [role=menuitem]')
+      .evaluateAll((els) => els.map((e) => (e.querySelector('.two > span') ?? e).textContent.trim()));
+    ok(
+      items.join(' | ') === 'Ouvrir TutoClick | Réglages de capture | Aide | Se déconnecter' &&
+        (await popup.locator('#logout-mail').innerText()) === 'a@b.c' &&
+        (await popup.locator('#logout').evaluate((b) => getComputedStyle(b).color)) !==
+          (await popup.locator('#open-app').evaluate((b) => getComputedStyle(b).color)),
+      `${tag} · menu ⋯ : ${items.join(', ')} ; déconnexion en couleur de danger, avec l’adresse du compte`,
+    );
+    await shot(popup, 'menu');
+    // Changer d'espace : la destination suit
+    await popup.locator('#ws-items [data-ws="22222222-1111-1111-1111-111111111111"]').click();
+    await popup.waitForFunction(() => /Beta/.test(document.getElementById('dest-text').textContent));
+    ok(
+      (await popup.locator('#dest-text').innerText()) === 'Dans Beta · Nouvelle démo' &&
+        (await popup.locator('#more-menu').isHidden()),
+      `${tag} · changer d’espace : « Dans Beta · Nouvelle démo », retour aux modes`,
+    );
+    // Un espace de lecteur ne se choisit pas
+    await popup.click('#more');
+    await popup.locator('#ws-items [data-ws="33333333-1111-1111-1111-111111111111"]').click({ force: true });
+    ok(
+      (await popup.locator('#ws-items [aria-checked=true] .two > span').innerText()) === 'Beta',
+      `${tag} · un espace de lecteur ne se choisit pas`,
     );
     await popup.keyboard.press('Escape');
+    await members(null);
+    await popup.evaluate(() =>
+      chrome.storage.local.set({ 'fd.lastWorkspace': '11111111-1111-1111-1111-111111111111' }),
+    );
+    await popup.reload();
+    await popup.waitForSelector('#setup:not([hidden])');
 
     // Page capturable : un clic démarre, dernier mode mémorisé, Entrée le relance
     const page = await ctx.newPage();
@@ -371,6 +438,23 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     await shot(popup, 'dernier-mode');
     await popup.keyboard.press('Enter');
     ok(await until(async () => (await status()).recording), `${tag} · Entrée relance le dernier mode`);
+    // L64 §1 : se déconnecter pendant une capture demande une confirmation
+    await popup.reload();
+    await popup.waitForSelector('#recording:not([hidden])');
+    await popup.click('#more');
+    await popup.click('#logout');
+    ok(
+      (await popup.locator('#logout-ask').isVisible()) &&
+        (await popup.locator('#logout-q').innerText()) ===
+          'Arrêter la capture et se déconnecter\u202f? Les étapes non envoyées sont perdues.' &&
+        (await status()).recording,
+      `${tag} · se déconnecter pendant une capture : confirmation, la capture continue d’ici là`,
+    );
+    await popup.click('#logout-no');
+    ok(
+      (await popup.locator('#logout-ask').isHidden()) && (await status()).recording,
+      `${tag} · « Continuer la capture »`,
+    );
     await cancel();
 
     // HTML : avertissement une seule fois, dans le popup, avec « Compris »

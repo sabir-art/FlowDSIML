@@ -106,12 +106,16 @@ const app = APP_URL.replace(/\/$/, '');
 
 // ===== En-tête : aide (nouvel onglet) et menu ⋯ =====
 $<HTMLAnchorElement>('help').href = `${app}/#/extension`;
+$<HTMLAnchorElement>('menu-help').href = `${app}/#/extension`;
 $('help').setAttribute('aria-label', strings.helpTab);
 $('more').setAttribute('aria-label', strings.more);
 $<HTMLAnchorElement>('open-app').href = `${app}/`;
 $('open-app').querySelector('span')!.textContent = strings.openApp;
 const menu = $('more-menu');
-const menuItems = () => [...menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([hidden])')];
+const menuItems = () =>
+  [...menu.querySelectorAll<HTMLElement>('[role="menuitem"], [role="menuitemradio"]')].filter(
+    (e) => !e.closest('[hidden]'),
+  );
 function toggleMenu(open: boolean, focus = true) {
   menu.hidden = !open;
   $('more').setAttribute('aria-expanded', String(open));
@@ -422,17 +426,35 @@ async function loadWorkspaces() {
     () => undefined,
     () => undefined,
   );
+  // L64 §1 : tous les espaces de la personne (le menu ⋯ montre aussi ceux où elle est lectrice)
   const { data, error: err } = await supabase
     .from('members')
     .select('role, workspaces(id, name)')
-    .eq('user_id', u.user!.id)
-    .in('role', ['editor', 'admin', 'owner']);
+    .eq('user_id', u.user!.id);
   if (err) return error(err.message);
-  const opts: Option[] = [];
+  $('logout-mail').textContent = u.user?.email ?? '';
+  spaces = [];
   for (const m of data ?? []) {
     const ws = m.workspaces as unknown as { id: string; name: string } | null;
-    if (ws) opts.push({ value: ws.id, label: ws.name });
+    if (ws) spaces.push({ id: ws.id, name: ws.name, role: m.role as string, members: 0 });
   }
+  // Nombre de membres de chaque espace (« 6 membres · Éditeur »)
+  if (spaces.length) {
+    const { data: rows } = await supabase
+      .from('members')
+      .select('workspace_id')
+      .in(
+        'workspace_id',
+        spaces.map((w) => w.id),
+      );
+    for (const r of (rows ?? []) as Array<{ workspace_id: string }>) {
+      const w = spaces.find((x) => x.id === r.workspace_id);
+      if (w) w.members += 1;
+    }
+  }
+  const opts: Option[] = spaces
+    .filter((w) => canCapture(w.role))
+    .map((w) => ({ value: w.id, label: w.name }));
   workspace.setOptions(opts);
   if (!opts.length) problem({ text: strings.noWorkspace, blocking: true });
   const saved = (await browser.storage.local.get('fd.lastWorkspace'))['fd.lastWorkspace'] as
@@ -442,7 +464,69 @@ async function loadWorkspaces() {
   show('workspace-one', opts.length === 1);
   $('workspace-one').querySelector('span')!.textContent = opts[0]?.label ?? '';
   show('workspace-field', opts.length > 0);
+  renderSpaces();
 }
+
+// ===== L64 §1 : espaces dans le menu ⋯ (menuitemradio, espace courant coché, lecteur grisé) =====
+type Space = { id: string; name: string; role: string; members: number };
+let spaces: Space[] = [];
+const canCapture = (role: string) => role === 'editor' || role === 'admin' || role === 'owner';
+const roleName = (role: string) =>
+  role === 'owner'
+    ? strings.roleOwner
+    : role === 'admin'
+      ? strings.roleAdmin
+      : role === 'editor'
+        ? strings.roleEditor
+        : strings.roleViewer;
+function renderSpaces() {
+  show('ws-sec', spaces.length > 0 && $('login').hidden);
+  $('ws-items').replaceChildren(
+    ...spaces.map((w) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'menuitemradio');
+      b.tabIndex = -1;
+      b.dataset.ws = w.id;
+      const on = w.id === workspace.value;
+      b.setAttribute('aria-checked', String(on));
+      const ok = canCapture(w.role);
+      if (!ok) b.setAttribute('aria-disabled', 'true');
+      const tile = Object.assign(document.createElement('span'), {
+        className: 'wt',
+        textContent: w.name.trim().charAt(0).toUpperCase(),
+      });
+      tile.setAttribute('aria-hidden', 'true');
+      const two = document.createElement('span');
+      two.className = 'two';
+      const meta = ok
+        ? (w.members === 1 ? strings.wsMembers_one : strings.wsMembers_other)
+            .replace('{{n}}', String(Math.max(1, w.members)))
+            .replace('{{role}}', roleName(w.role))
+        : strings.wsViewer;
+      two.append(
+        Object.assign(document.createElement('span'), { textContent: w.name }),
+        Object.assign(document.createElement('small'), { textContent: meta }),
+      );
+      b.append(tile, two);
+      if (on) {
+        const tick = icon(Check, 16);
+        tick.classList.add('tick');
+        b.append(tick);
+      }
+      return b;
+    }),
+  );
+}
+$('ws-items').addEventListener('click', (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLElement>('[data-ws]');
+  if (!b || b.getAttribute('aria-disabled') === 'true') return e.stopPropagation();
+  // Changer d'espace met à jour la destination et revient aux modes
+  workspace.set(b.dataset.ws!, true);
+  void browser.storage.local.set({ 'fd.lastWorkspace': b.dataset.ws });
+  renderSpaces();
+  if ($('recording').hidden && $('login').hidden) view('setup');
+});
 
 // L26-04 : démos de l'espace qui ont des étapes « À capturer » (capture guidée)
 let fills: FillTarget[] = [];
@@ -539,7 +623,8 @@ function view(v: View) {
   // Hors session : ni réglages ni déconnexion dans le menu
   show('open-settings', v !== 'login');
   show('logout', v !== 'login');
-  menu.querySelector('hr')!.hidden = v === 'login';
+  show('logout-sep', v !== 'login');
+  show('ws-sec', v !== 'login' && spaces.length > 0);
 }
 
 async function render() {
@@ -679,6 +764,19 @@ $('login').addEventListener('submit', async (e) => {
 });
 
 $('logout').addEventListener('click', async () => {
+  // L64 §1 : pendant une capture, la déconnexion demande une confirmation
+  if (!$('recording').hidden) {
+    show('logout-ask', true);
+    $('logout-no').focus();
+    return;
+  }
+  await supabase.auth.signOut();
+  await render();
+});
+$('logout-no').addEventListener('click', () => show('logout-ask', false));
+$('logout-yes').addEventListener('click', async () => {
+  show('logout-ask', false);
+  await send({ type: 'fd:cancel' });
   await supabase.auth.signOut();
   await render();
 });

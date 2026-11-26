@@ -24,16 +24,26 @@
         >
           <i data-lucide="ellipsis"></i>
         </button>
+        <!-- L64 §1 : menu ⋯ (280 px) : espaces, liens, déconnexion -->
         <div id="more-menu" class="menu" role="menu" hidden>
+          <div id="ws-sec" role="group" aria-labelledby="ws-h">
+            <p class="menu-h" id="ws-h" data-i18n="wsSection"></p>
+            <div id="ws-items"></div>
+            <hr />
+          </div>
           <a id="open-app" role="menuitem" tabindex="-1" target="_blank" rel="noopener"
             ><i data-lucide="external-link"></i><span></span
           ></a>
           <button type="button" id="open-settings" role="menuitem" tabindex="-1">
-            <i data-lucide="settings"></i><span data-i18n="prefsTitle"></span>
+            <i data-lucide="sliders-horizontal"></i><span data-i18n="prefsTitle"></span>
           </button>
-          <hr />
-          <button type="button" id="logout" role="menuitem" tabindex="-1">
-            <i data-lucide="log-out"></i><span data-i18n="signOut"></span>
+          <a id="menu-help" role="menuitem" tabindex="-1" target="_blank" rel="noopener"
+            ><i data-lucide="circle-question-mark"></i><span data-i18n="menuHelp"></span
+          ></a>
+          <hr id="logout-sep" />
+          <button type="button" id="logout" role="menuitem" tabindex="-1" class="danger">
+            <i data-lucide="log-out"></i
+            ><span class="two"><span data-i18n="signOut"></span><small id="logout-mail"></small></span>
           </button>
         </div>
       </header>
@@ -193,6 +203,14 @@
           </div>
           <p class="rec" id="rec-label" aria-live="polite"></p>
           <p id="count" aria-live="polite"></p>
+          <!-- L64 §1 : se déconnecter pendant une capture -->
+          <div id="logout-ask" class="ask" role="alertdialog" aria-labelledby="logout-q" hidden>
+            <p id="logout-q" data-i18n="logoutAsk"></p>
+            <div class="row">
+              <button type="button" id="logout-no" class="btn" data-i18n="logoutNo"></button>
+              <button type="button" id="logout-yes" class="btn btn-danger" data-i18n="signOut"></button>
+            </div>
+          </div>
           <div id="cancel-ask" class="ask" role="alertdialog" aria-labelledby="cancel-q" hidden>
             <p id="cancel-q" data-i18n="confirmCancel"></p>
             <div class="row">
