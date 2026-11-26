@@ -26,6 +26,8 @@ const DEFAULT: Access = {
   updated_at: '',
   domains: [],
 };
+/** Modes dont le choix déplie des réglages sous l'option. */
+const CONFIGURED: Mode[] = ['password', 'invite', 'domain'];
 const TZ = 'Europe/Paris';
 
 /** Décalage (ms) du fuseau de Paris à un instant donné. */
@@ -253,7 +255,11 @@ export function AccessPanel({
       <fieldset className="l11-modes" onKeyDown={onKey} disabled={!editable}>
         <legend className="t-label l11-legend">{t('access.who')}</legend>
         {modes.map((m) => (
-          <div key={m.id}>
+          // Retours client : le contenu déplié fait partie de l'option, dans la même carte (sous l'en-tête, après un filet)
+          <div
+            key={m.id}
+            className={`l11-item${choice === m.id && CONFIGURED.includes(m.id) ? ' is-open' : ''}`}
+          >
             <label
               className={`opt-card l11-opt${m.available ? '' : ' is-soon'}${forbidden(m.id) ? ' is-ruled' : ''}`}
             >
