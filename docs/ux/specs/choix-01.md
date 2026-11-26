@@ -19,7 +19,7 @@ Décision du client du 26/11 (sélecteur de voix, L62). Une coche à gauche rés
 | Démos › menu Type de capture (`icon: ctype === k …`) | idem | coche à droite |
 | Médiathèque › filtre de type (`MediaPage.tsx`, `mp-blank`) | idem | coche à droite |
 | Partager › Page de la démo › liste (`usePublicPageList.tsx`, `menu-blank`) | coche et case vide à gauche | coche à droite |
-| Sélecteur d'espace (`WorkspaceSwitcher.tsx`, `ws-check`) | à vérifier : si la coche est à gauche, la passer en pastille sur la tuile de l'espace | pastille sur la tuile |
+| Sélecteur d'espace (`WorkspaceSwitcher.tsx`, `ws-check`) | coche à droite, tuiles alignées : déjà sans colonne réservée | pastille sur la tuile de l'espace, pour suivre la règle des lignes avec avatar (faible priorité) |
 
 Les menus dont **toutes** les entrées ont une icône (Plus d'options, par exemple) gardent leur colonne d'icônes : ce ne sont pas des listes à choix unique.
 
