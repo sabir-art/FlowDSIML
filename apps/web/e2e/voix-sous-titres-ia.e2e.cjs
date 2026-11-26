@@ -368,8 +368,11 @@ function prepare(over = {}) {
   );
   ok(
     (await panel.getByText('Aperçu', { exact: true }).count()) === 1 &&
-      (await panel.getByRole('button', { name: 'Écouter', exact: true }).count()) === 1,
-    'Aperçu à écouter',
+      (await panel.getByRole('button', { name: 'Écouter', exact: true }).count()) === 1 &&
+      (await panel
+        .getByRole('button', { name: 'Écouter', exact: true })
+        .evaluate((b) => getComputedStyle(b).borderRadius)) === '50%',
+    'Aperçu à écouter, bouton Écouter rond (RADIUS-01)',
   );
   ok(/0:00 \/ 0:04/.test(await panel.locator('.vo-time').textContent()), 'Durée réelle');
   ok((await panel.locator('audio[controls]').count()) === 0, 'Pas de lecteur natif');
