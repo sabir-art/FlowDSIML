@@ -1,7 +1,7 @@
 /**
  * L41 : Console propriétaire, réservée à l'équipe TutoClick (hors de tout espace client).
  * Pour tout autre compte, #/console se comporte comme une adresse inconnue (retour à l'accueil).
- * Onglets : Vue d'ensemble, Retours, Backlog, Nouveautés, Équipe et journal.
+ * Onglets : Vue d'ensemble, Retours, Backlog, Nouveautés, Équipe et journal, Modèles IA.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,7 @@ import { Feedback } from './ConsoleFeedback';
 import { Backlog } from './ConsoleBacklog';
 import { NewsTab } from './ConsoleNews';
 import { Team } from './ConsoleTeam';
+import { Models } from './ConsoleModels';
 import './console.css';
 
 let opened = false;
@@ -82,6 +83,8 @@ function ConsoleFrame() {
     },
     { to: '/console/nouveautes', label: t('console.tabs.news') },
     { to: '/console/equipe', label: t('console.tabs.team') },
+    // L41 : après « Équipe et journal »
+    { to: '/console/modeles', label: t('console.tabs.models') },
   ];
   const nav = (
     <nav className="console-tabs" aria-label={t('console.tabsLabel')}>
@@ -150,6 +153,7 @@ function ConsoleFrame() {
           <Route path="backlog/:itemId" element={<Backlog />} />
           <Route path="nouveautes" element={<NewsTab />} />
           <Route path="equipe" element={<Team />} />
+          <Route path="modeles" element={<Models />} />
           <Route path="*" element={<Navigate to="/console" replace />} />
         </Routes>
       </main>

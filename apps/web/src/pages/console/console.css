@@ -601,3 +601,157 @@
 .mk.console .console-top .fd-back:hover {
   color: var(--fd-color-text);
 }
+
+/* L41 · Modèles IA (spec UX l41-console-modeles-ia §1-2) : lignes de 64 px, 4 colonnes alignées
+   (tuile 40 px, nom et usage, état 130 px, actions à droite) */
+.console-ai-head {
+  align-items: flex-start;
+}
+.console-ai-head > div {
+  flex: 1;
+}
+.console-ai-title {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+.console-ai-head p,
+.console-ai-help {
+  margin: 0;
+  font-size: 13px;
+}
+.console-ai-help {
+  margin-top: 4px;
+}
+.console-ai-list {
+  /* Colonnes communes à toutes les lignes (sous-grille) : l'état et les actions s'alignent. Les pistes
+     vides des bords tiennent lieu de marge intérieure (16 px avec l'écart), la sous-grille ne la gardant
+     pas sur ses pistes de bord */
+  display: grid;
+  grid-template-columns: 0 40px minmax(0, 1fr) 130px auto 0;
+  column-gap: 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--fd-color-border);
+  border-radius: var(--fd-radius-md, 8px);
+}
+.console-ai-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  padding: 8px 0;
+}
+.console-ai-row > :first-child {
+  grid-column: 2;
+}
+.console-ai-row + .console-ai-row {
+  border-top: 1px solid var(--fd-color-border);
+}
+.console-ai-tile {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+  color: var(--fd-color-text);
+  font-weight: 600;
+}
+.console-ai-tile svg {
+  width: 18px;
+  height: 18px;
+}
+.console-ai-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.console-ai-name small,
+.console-ai-acts small {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.console-ai-acts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.console-ai-row.is-soon {
+  color: var(--fd-color-text-muted);
+}
+.console-ai-row.is-soon .console-ai-state {
+  font-size: 13px;
+}
+.console-ai-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--fd-radius-tag);
+  font: 600 var(--fd-text-caption-size) / 1 var(--fd-font-sans);
+}
+.console-ai-pill svg {
+  width: 12px;
+  height: 12px;
+}
+.console-ai-pill.is-ok {
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-text);
+}
+.console-ai-pill.is-ok svg {
+  color: var(--fd-color-success);
+}
+.console-ai-pill.is-warn {
+  background: var(--fd-color-warning-soft);
+  color: var(--fd-color-text);
+}
+.console-ai-pill.is-bad {
+  background: var(--fd-color-danger-soft);
+  color: var(--fd-color-text);
+}
+.console-ai-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 24px;
+  text-align: center;
+}
+.console-ai-empty h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.console-ai-empty p {
+  max-width: 440px;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.console-ai-empty__ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--fd-color-surface-sunken);
+}
+.console-ai-empty__ic svg {
+  width: 18px;
+  height: 18px;
+}
+@media (max-width: 720px) {
+  .console-ai-list {
+    grid-template-columns: 0 40px minmax(0, 1fr) 0;
+  }
+  .console-ai-state,
+  .console-ai-acts {
+    grid-column: 3;
+    justify-content: flex-start;
+  }
+}

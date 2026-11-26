@@ -5775,7 +5775,8 @@
       "backlogN_one": "Backlog · {{count}} to triage",
       "backlogN_other": "Backlog · {{count}} to triage",
       "news": "News",
-      "team": "Team and log"
+      "team": "Team and log",
+      "models": "AI models"
     },
     "status": {
       "triage": "To triage",
@@ -5982,7 +5983,63 @@
       "export_articles": "Export des articles",
       "export_comments": "Export des commentaires",
       "export_backlog": "Export du backlog",
-      "export_audit": "Export du journal"
+      "export_audit": "Export du journal",
+      "ai_key_added": "AI key added",
+      "ai_key_replaced": "AI key replaced",
+      "ai_key_tested": "AI key tested"
+    },
+    "ai": {
+      "title": "AI models",
+      "sub": "Providers and models used by TutoClick AI features, for all workspaces.",
+      "history": "Change history",
+      "loadError": "Providers could not be loaded. Try again in a moment.",
+      "emptyTitle": "No provider connected",
+      "emptyBody": "Until a key is added, AI features are turned off in every workspace. Users see “AI assistance unavailable for now”.",
+      "addAny": "Add a key",
+      "providers": "Providers",
+      "providersHelp": "Keys are encrypted and never shown. Only Console admins can add or replace them.",
+      "others": "Other providers",
+      "othersHelp": "Added as needed",
+      "soon": "Coming soon",
+      "use": {
+        "anthropic": "Claude models · assistant, drafting, consistency, translation",
+        "openai": "GPT models · transcription",
+        "elevenlabs": "Speech synthesis"
+      },
+      "connected": "Connected",
+      "missing": "Key missing",
+      "refused": "Key refused",
+      "addedOn": "Key added on {{date}}",
+      "deployed": "Key set at deployment",
+      "test": "Test",
+      "testOf": "Test the {{name}} key",
+      "replace": "Replace key",
+      "replaceOf": "Replace the {{name}} key",
+      "add": "Add key",
+      "addOf": "Add the {{name}} key",
+      "testOk": "{{name}} responds ({{ms}} ms)",
+      "testKo": "{{name}}: {{cause}}",
+      "addTitle": "Add the {{name}} key",
+      "replaceTitle": "Replace the {{name}} key",
+      "keyLabel": "API key",
+      "keyHelp": "Pasted once: it is encrypted and will not be shown again. It is tested before it is saved.",
+      "testSave": "Test and save",
+      "testing": "Testing…",
+      "badKey": "Paste the full key, without spaces.",
+      "saveError": "The key could not be saved. Nothing was kept; try again.",
+      "added": "{{name}} key added: the provider responds ({{ms}} ms)",
+      "replaced": "{{name}} key replaced: the provider responds ({{ms}} ms)",
+      "cause": {
+        "KEY_REFUSED": "The provider refuses the key (401)",
+        "KEY_FORBIDDEN": "The key lacks the required permissions (403)",
+        "MODEL_UNKNOWN": "The test model is unknown to the provider (404)",
+        "BUSY": "The provider is overloaded: try again in a moment",
+        "PROVIDER_DOWN": "The provider is not responding correctly",
+        "TIMEOUT": "The provider did not respond in time",
+        "NETWORK": "The provider cannot be reached",
+        "MISSING": "No key saved",
+        "PROVIDER": "The provider returned an error"
+      }
     }
   },
   "news": {

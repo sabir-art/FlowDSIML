@@ -5775,7 +5775,8 @@
       "backlogN_one": "Backlog · {{count}} à trier",
       "backlogN_other": "Backlog · {{count}} à trier",
       "news": "Nouveautés",
-      "team": "Équipe et journal"
+      "team": "Équipe et journal",
+      "models": "Modèles IA"
     },
     "status": {
       "triage": "À trier",
@@ -5982,7 +5983,63 @@
       "export_articles": "Export des articles",
       "export_comments": "Export des commentaires",
       "export_backlog": "Export du backlog",
-      "export_audit": "Export du journal"
+      "export_audit": "Export du journal",
+      "ai_key_added": "Clé IA ajoutée",
+      "ai_key_replaced": "Clé IA remplacée",
+      "ai_key_tested": "Clé IA testée"
+    },
+    "ai": {
+      "title": "Modèles IA",
+      "sub": "Fournisseurs et modèles utilisés par les fonctions IA de TutoClick, pour tous les espaces.",
+      "history": "Historique des changements",
+      "loadError": "Impossible de charger les fournisseurs. Réessayez dans un instant.",
+      "emptyTitle": "Aucun fournisseur connecté",
+      "emptyBody": "Tant qu’aucune clé n’est ajoutée, les fonctions IA sont coupées dans tous les espaces. Les utilisateurs voient « Assistance IA indisponible pour le moment ».",
+      "addAny": "Ajouter une clé",
+      "providers": "Fournisseurs",
+      "providersHelp": "Les clés sont chiffrées et ne s’affichent jamais. Seuls les admins de la Console peuvent les ajouter ou les remplacer.",
+      "others": "Autres fournisseurs",
+      "othersHelp": "Ajoutés au fil des besoins",
+      "soon": "Bientôt",
+      "use": {
+        "anthropic": "Modèles Claude · assistant, rédaction, cohérence, traduction",
+        "openai": "Modèles GPT · transcription",
+        "elevenlabs": "Voix de synthèse"
+      },
+      "connected": "Connecté",
+      "missing": "Clé manquante",
+      "refused": "Clé refusée",
+      "addedOn": "Clé ajoutée le {{date}}",
+      "deployed": "Clé définie au déploiement",
+      "test": "Tester",
+      "testOf": "Tester la clé {{name}}",
+      "replace": "Remplacer la clé",
+      "replaceOf": "Remplacer la clé {{name}}",
+      "add": "Ajouter la clé",
+      "addOf": "Ajouter la clé {{name}}",
+      "testOk": "{{name}} répond ({{ms}} ms)",
+      "testKo": "{{name}} : {{cause}}",
+      "addTitle": "Ajouter la clé {{name}}",
+      "replaceTitle": "Remplacer la clé {{name}}",
+      "keyLabel": "Clé d’API",
+      "keyHelp": "Collée une seule fois : elle est chiffrée et ne s’affichera plus. Elle est testée avant d’être enregistrée.",
+      "testSave": "Tester et enregistrer",
+      "testing": "Test en cours…",
+      "badKey": "Collez la clé complète, sans espace.",
+      "saveError": "La clé n’a pas pu être enregistrée. Rien n’a été gardé ; réessayez.",
+      "added": "Clé {{name}} ajoutée : le fournisseur répond ({{ms}} ms)",
+      "replaced": "Clé {{name}} remplacée : le fournisseur répond ({{ms}} ms)",
+      "cause": {
+        "KEY_REFUSED": "Le fournisseur refuse la clé (401)",
+        "KEY_FORBIDDEN": "La clé n’a pas les droits nécessaires (403)",
+        "MODEL_UNKNOWN": "Le modèle de test est inconnu du fournisseur (404)",
+        "BUSY": "Le fournisseur est surchargé : réessayez dans un instant",
+        "PROVIDER_DOWN": "Le fournisseur ne répond pas correctement",
+        "TIMEOUT": "Le fournisseur n’a pas répondu à temps",
+        "NETWORK": "Le fournisseur est injoignable",
+        "MISSING": "Aucune clé enregistrée",
+        "PROVIDER": "Le fournisseur a renvoyé une erreur"
+      }
     }
   },
   "news": {
