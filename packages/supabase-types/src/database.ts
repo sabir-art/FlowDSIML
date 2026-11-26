@@ -1943,6 +1943,7 @@ export type Database = {
           video_duration_ms: number | null;
           video_path: string | null;
           html_path: string | null;
+          html_live_path: string | null;
           html_ops: Json;
           html_meta: Json;
           before_blurs: NonNullable<Json>;
@@ -1986,6 +1987,7 @@ export type Database = {
           video_duration_ms?: number | null;
           video_path?: string | null;
           html_path?: string | null;
+          html_live_path?: string | null;
           html_ops?: Json;
           html_meta?: Json;
           before_blurs?: NonNullable<Json>;
@@ -2028,6 +2030,7 @@ export type Database = {
           video_duration_ms?: number | null;
           video_path?: string | null;
           html_path?: string | null;
+          html_live_path?: string | null;
           html_ops?: Json;
           html_meta?: Json;
           before_blurs?: NonNullable<Json>;
@@ -2609,6 +2612,14 @@ export type Database = {
       set_html_capture: {
         Args: { p_ws: string; p_mode: string; p_domains?: string[] };
         Returns: Json;
+      };
+      set_sandbox_live: {
+        Args: { p_ws: string; p_on: boolean };
+        Returns: boolean;
+      };
+      sandbox_live_allowed: {
+        Args: { p_ws: string };
+        Returns: boolean;
       };
       set_share_rules: {
         Args: {
