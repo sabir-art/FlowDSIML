@@ -58,3 +58,25 @@ La recette du lot E vérifiera la barre en Clair, en Sombre et en Système, avec
 
 - La CI de 8f1ff0d doit être verte sur capture, video, guided et html (ouverture de l'éditeur).
 - La vérification vidéo et micro sur un vrai poste reste à faire par l'utilisateur.
+
+---
+
+# Réserve levée (e9817d7, 7534ee9)
+
+J'ai reconstruit l'extension avec `WXT_APP_URL=http://localhost:54400`, comme le demande maintenant la commande des tests, et rejoué les 4 parcours avec un faux serveur neuf :
+
+| Parcours | Résultat |
+|---|---|
+| capture | 26/26 |
+| video | 34/34 |
+| guided | 10/10 |
+| html | 43/43 |
+| cadre | 45/45 |
+
+Les précisions du lot D sont en place :
+- capsule de 720 px au plus ;
+- couleurs en variables CSS (`--fdb-*`, fond `#16181d`) ;
+- une seule puce, coupée à 200 px avec une infobulle ;
+- Micro affiché seulement quand le micro est actif.
+
+Le lot D est VERT sans réserve. Il reste seulement la vérification vidéo et micro sur un vrai poste.
