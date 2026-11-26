@@ -2,7 +2,10 @@
  * Test de bout en bout de l'extension contre un faux Supabase (mock-supabase.cjs).
  * Usage :
  *   node e2e/mock-supabase.cjs &
- *   WXT_E2E=1 WXT_DEBUGGER=1 WXT_SUPABASE_URL=http://localhost:54400 WXT_SUPABASE_ANON_KEY=anon pnpm build
+ *   WXT_E2E=1 WXT_DEBUGGER=1 WXT_SUPABASE_URL=http://localhost:54400 WXT_SUPABASE_ANON_KEY=anon \
+ *     WXT_APP_URL=http://localhost:54400 pnpm build
+ * WXT_APP_URL est nécessaire : après l'envoi, l'éditeur s'ouvre sur le faux serveur (sinon sur l'adresse
+ * par défaut de l'app, et « après envoi : ouverture de l'éditeur » échoue). Vaut pour video, guided, html.
  *   node e2e/capture.e2e.cjs
  * Nécessite Playwright et Chromium (préinstallés dans l'environnement de dev).
  */
