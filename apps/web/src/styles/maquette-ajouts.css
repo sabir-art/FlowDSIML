@@ -3078,3 +3078,102 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Retours client, planche 1 : champ mot de passe façon gestionnaire (clé, œil et Copier dans le champ) */
+.mk .l11-field {
+  gap: var(--fd-space-2);
+}
+.mk .pwf {
+  position: relative;
+}
+.mk .pwf-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.mk .pwf-input {
+  width: 100%;
+  height: 40px;
+  padding-left: 36px;
+  padding-right: 80px;
+}
+.mk .pwf-key {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+  pointer-events: none;
+}
+.mk .pwf-acts {
+  position: absolute;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+}
+.mk .pwf-acts .btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 8px;
+}
+.mk .pwf-acts .btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mk .pwf-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--fd-color-surface);
+  border: 1px solid var(--fd-color-border);
+  border-radius: 12px;
+  box-shadow: var(--fd-shadow-menu, 0 8px 24px rgb(16 24 40 / 0.12));
+}
+.mk .pwf-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.mk .pwf-opt:hover,
+.mk .pwf-opt[aria-selected='true'] {
+  background: var(--fd-color-surface-hover);
+}
+.mk .pwf-opt > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--fd-color-text-muted);
+}
+.mk .pwf-tx {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.mk .pwf-tx b {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.mk .pwf-tx small {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.mk .pwf-sug {
+  flex: none;
+  background: var(--fd-color-success-soft);
+  color: var(--fd-color-success);
+}
+.mk .pwf-save {
+  display: flex;
+  justify-content: flex-end;
+}

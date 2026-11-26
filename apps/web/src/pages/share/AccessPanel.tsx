@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Building2, Clock, Eye, EyeOff, Globe, Info, Key, KeyRound, Mail, RefreshCw } from 'lucide-react';
+import { Building2, Clock, Eye, Globe, Key, KeyRound, Mail } from 'lucide-react';
 import type { Tables } from '@flowdsiml/supabase-types';
 import { supabase } from '../../lib/supabase';
 import { check } from '../../lib/useAction';
 import { formatRelativeShort } from '../../lib/format';
 import { useToast } from '../../components/Toast';
+import { PasswordField } from './PasswordField';
 import { useShareRules } from '../../lib/shareRules';
 import { useWorkspace } from '../../workspace/WorkspaceProvider';
 import { DomainConfig, InviteConfig } from './AccessEmail';
@@ -141,13 +142,6 @@ export function useDemoAccess(demoId: string) {
 
 type AccessState = ReturnType<typeof useDemoAccess>;
 
-/** Mot de passe aléatoire lisible (12 caractères, sans caractères ambigus). */
-function generatePassword(): string {
-  const alphabet = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
-  const bytes = crypto.getRandomValues(new Uint8Array(12));
-  return [...bytes].map((b) => alphabet[b % alphabet.length]).join('');
-}
-
 /**
  * L11-01 à 05 : onglet Accès. « Qui peut voir la démo ? » en cartes radio (lien, mot de passe, invitation,
  * domaine e-mail : L39), date d'expiration à l'heure de Paris.
@@ -181,7 +175,6 @@ export function AccessPanel({
       .then(({ count }) => setInvites(count ?? 0));
   }, [demoId]);
   const [pw, setPw] = useState('');
-  const [show, setShow] = useState(false);
   const exp = access.expires_at ? isoToParis(access.expires_at) : null;
   const [expOn, setExpOn] = useState(!!access.expires_at);
   const [date, setDate] = useState(exp?.date ?? '');
@@ -327,46 +320,18 @@ export function AccessPanel({
                   }}
                 >
                   <label htmlFor="acc-pw">{t('access.password')}</label>
-                  <div className="input-group l11-pw">
-                    <input
-                      id="acc-pw"
-                      className="input"
-                      type={show ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      minLength={8}
-                      maxLength={200}
-                      value={pw}
-                      placeholder={access.password_changed_at ? t('access.pwKeep') : ''}
-                      aria-describedby="acc-pw-h"
-                      onChange={(e) => setPw(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-icon"
-                      aria-label={t('access.showPw')}
-                      aria-pressed={show}
-                      onClick={() => setShow((v) => !v)}
-                    >
-                      {show ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setPw(generatePassword());
-                        setShow(true);
-                      }}
-                    >
-                      <RefreshCw aria-hidden="true" />
-                      {t('access.generate')}
-                    </button>
-                  </div>
+                  <PasswordField
+                    value={pw}
+                    onChange={setPw}
+                    placeholder={access.password_changed_at ? t('access.pwKeep') : ''}
+                    describedBy="acc-pw-h"
+                  />
                   <span className="help" id="acc-pw-h">
                     {t('access.pwHelp')}
                     {access.password_changed_at &&
                       ` ${t('access.pwChanged', { when: formatRelativeShort(access.password_changed_at) })}`}
                   </span>
-                  <div>
+                  <div className="pwf-save">
                     <button type="submit" className="btn btn-primary btn-sm" disabled={pw.length < 8}>
                       {access.password_changed_at ? t('access.pwUpdate') : t('access.pwSave')}
                     </button>
@@ -495,10 +460,6 @@ export function AccessPanel({
         <Link className="btn btn-secondary btn-sm" to={`/demos/${demoId}/edit?tab=settings`}>
           {t('share.configure')}
         </Link>
-      </div>
-      <div className="alert l11-info">
-        <Info aria-hidden="true" />
-        <span className="t-caption">{t('access.rulesInfo')}</span>
       </div>
     </section>
   );
