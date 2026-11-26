@@ -4,6 +4,8 @@
  * (capturée ou à capturer), et la prochaine passe de la capture en série. Fonctions pures, sans navigateur.
  */
 
+import { isRisky } from '@flowdsiml/core';
+
 export interface CapturedPage {
   url: string;
   links: Array<{ href: string; label?: string }>;
@@ -27,26 +29,8 @@ export function normUrl(u: string): string {
   return base + (/^#[/!]./.test(frag) ? frag.replace(/\/$/, '') : '');
 }
 
-/** Libellés et chemins d'action : jamais ouverts par la capture en série (déconnexion, suppression…). */
-const RISKY_WORDS =
-  /(^|[^a-z])(log-?out|sign-?out|logoff|deconnexion|déconnexion|se deconnecter|se déconnecter|delete|remove|destroy|supprimer|suppression|effacer|unsubscribe|desabonner|désabonner|desinscri|désinscri|reset|revoke|revoquer|révoquer)([^a-z]|$)/i;
-/** Fichiers à télécharger : pas des pages. */
-const FILE =
-  /\.(pdf|zip|gz|tar|rar|7z|exe|dmg|msi|apk|csv|xlsx?|docx?|pptx?|odt|ods|mp4|mp3|wav|mov|avi|png|jpe?g|gif|webp|svg|ics)$/i;
-
-/** Une destination à ne jamais ouvrir automatiquement. */
-export function isRisky(url: string, label = ''): boolean {
-  let u: URL;
-  try {
-    u = new URL(url);
-  } catch {
-    return true;
-  }
-  const path = decodeURIComponent(u.pathname + u.search + u.hash).toLowerCase();
-  return (
-    RISKY_WORDS.test(path.replace(/[/_.?=&#]/g, ' ')) || RISKY_WORDS.test(label) || FILE.test(u.pathname)
-  );
-}
+// Règle partagée avec le plan de l'éditeur (étape 4, décision du chef) : @flowdsiml/core
+export { isRisky };
 
 /**
  * Destinations du même site que la première page capturée, sans ancre seule ni adresse non web. Une

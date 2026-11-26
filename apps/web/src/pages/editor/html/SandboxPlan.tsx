@@ -11,8 +11,10 @@ import {
   MessageSquareOff,
   Plus,
   Unlink,
+  ShieldAlert,
 } from 'lucide-react';
 import type { Json } from '@flowdsiml/supabase-types';
+import { isRisky } from '@flowdsiml/core';
 import type { DemoEditor } from '../useDemoEditor';
 import { sandboxOf } from '../draftManifest';
 import { deadByUrl, deadLinks, ignoredOf, sandboxGraph, type DeadLink, type SbNode } from './sandboxGraph';
@@ -364,19 +366,28 @@ export function SandboxPlan({
                     </span>
                     {!readOnly && (
                       <span className="sb-deadlist__actions">
-                        {/* L48-G écart 3 et EXT-CONNECT : capture dans l'extension, rattachée à ce Sandbox */}
-                        <button
-                          type="button"
-                          className="fd-btn fd-btn--sm"
-                          aria-disabled={htmlOff || undefined}
-                          aria-describedby={htmlOff ? 'sb-dead-off' : undefined}
-                          onClick={() => {
-                            if (!htmlOff) void capture(items[0]!);
-                          }}
-                        >
-                          <Camera {...ICON} />
-                          {t('editor.sandbox.deadCapture')}
-                        </button>
+                        {/* L48-G écart 3 et EXT-CONNECT : capture dans l'extension, rattachée à ce Sandbox.
+                            Étape 4 (décision du chef) : même règle que la capture en série, jamais de capture
+                            d'une déconnexion, d'une suppression, d'un désabonnement ou d'un fichier */}
+                        {isRisky(url, label) ? (
+                          <span className="sb-deadlist__safe">
+                            <ShieldAlert {...ICON} />
+                            {t('editor.sandbox.deadRisky')}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="fd-btn fd-btn--sm"
+                            aria-disabled={htmlOff || undefined}
+                            aria-describedby={htmlOff ? 'sb-dead-off' : undefined}
+                            onClick={() => {
+                              if (!htmlOff) void capture(items[0]!);
+                            }}
+                          >
+                            <Camera {...ICON} />
+                            {t('editor.sandbox.deadCapture')}
+                          </button>
+                        )}
                         <a className="link-button" href={url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink {...ICON} />
                           {t('editor.sandbox.deadOpen')}
