@@ -193,6 +193,34 @@ const GOOD2 = 'sk-fictive-bonne-000333';
   );
   await ctx.close();
 
+  // ===== 390 px : en-tête en colonne, bouton sous le texte à 12 px (recette UX) =====
+  {
+    const s390 = seed();
+    s390.platformRole = 'admin';
+    const c = await themedContext(b, { viewport: { width: 390, height: 844 }, locale: 'fr-FR' });
+    const pg = await c.newPage();
+    await install(pg, s390);
+    await pg.goto(`${APP}/#/console/modeles`);
+    await pg.getByRole('heading', { name: 'Modèles IA', exact: true }).waitFor();
+    const m = await pg.evaluate(() => {
+      const t = document.querySelector('.console-ai-title').getBoundingClientRect();
+      const sub = document.querySelector('.console-ai-head p').getBoundingClientRect();
+      const btn = document.querySelector('.console-ai-head > a').getBoundingClientRect();
+      return {
+        titleH: Math.round(t.height),
+        gap: Math.round(btn.top - sub.bottom),
+        left: Math.round(btn.left - t.left),
+        subLines: Math.round(sub.height / 18),
+      };
+    });
+    ok(
+      m.titleH <= 32 && Math.abs(m.gap - 12) <= 1 && Math.abs(m.left) <= 1 && m.subLines <= 3,
+      `390 px : titre sur une ligne, bouton sous le texte à 12 px, aligné à gauche (${JSON.stringify(m)})`,
+    );
+    if (SHOTS) await pg.screenshot({ path: `${SHOTS}/console-modeles-390${sfx}.png` });
+    await c.close();
+  }
+
   // ===== Lecture seule =====
   {
     const s = seed();

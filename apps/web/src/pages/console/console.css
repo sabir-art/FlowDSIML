@@ -610,6 +610,14 @@
 .console-ai-head > div {
   flex: 1;
 }
+/* Recette UX (L41 étape 2, remarque à 390 px) : sous 600 px, le bouton passe sous le texte, à 12 px */
+@media (max-width: 599px) {
+  .console-ai-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
 .console-ai-title {
   margin: 0 0 4px;
   font-size: 22px;
