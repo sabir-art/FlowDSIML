@@ -289,6 +289,31 @@ function wav(sec) {
       (await fresh.getByRole('button', { name: 'Utiliser cette voix' }).count()) === 1,
     'après l’arrêt : carte « À écouter », Recommencer, Garder l’actuelle, Utiliser cette voix ; rien n’est remplacé',
   );
+  // Recette UX l62-source-2 : en-tête commun, actions dans la carte, 12 px de retrait intérieur
+  {
+    const g = await fresh.evaluate((c) => {
+      const cs = getComputedStyle(c);
+      const inner = c.getBoundingClientRect().right - parseFloat(cs.borderRightWidth);
+      const use = [...c.querySelectorAll('button')].find(
+        (b) => b.textContent.trim() === 'Utiliser cette voix',
+      );
+      return {
+        dedans: c.contains(use),
+        retrait: Math.round((inner - use.getBoundingClientRect().right) * 10) / 10,
+        titre: c.querySelector('.vo-card__txt b').textContent,
+        ligne: c.querySelector('.vo-card__txt .muted').textContent,
+        icone: !!c.querySelector('.vo-card__icon svg.lucide-mic'),
+      };
+    });
+    ok(
+      g.dedans &&
+        Math.abs(g.retrait - 12) <= 1 &&
+        g.titre === 'Nouvelle voix' &&
+        /^Enregistrée · 0:0\d$/.test(g.ligne) &&
+        g.icone,
+      `carte « Nouvelle voix » : icône Micro, « Enregistrée · 0:0x », actions dans la carte à 12 px du bord (${JSON.stringify(g)})`,
+    );
+  }
   if (SHOTS) {
     await page.mouse.move(0, 0);
     await sec.screenshot({ path: `${SHOTS}/l28-02-voix-ecoute${sfx}.png` });

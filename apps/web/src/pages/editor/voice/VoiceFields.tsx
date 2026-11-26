@@ -23,6 +23,7 @@ import { Menu } from '../../../components/Menu';
 import { aiBlock, useAiStatus } from '../../../lib/ai';
 import { VoiceGenerate } from './VoiceGenerate';
 import { AudioLine, Wave } from './AudioLine';
+import { FreshVoice } from './FreshVoice';
 import { AiCaptions, TranscriptPreview } from '../../../components/ai/AiAudio';
 import { useToast } from '../../../components/Toast';
 import { useWorkspace } from '../../../workspace/WorkspaceProvider';
@@ -570,50 +571,25 @@ export function VoiceFields({
               (take ? (
                 has ? (
                   // L62 §6 : nouvelle voix enregistrée, voix en place gardée jusqu'au choix
-                  <div className="vo-fresh" role="group" aria-labelledby="vo-take">
-                    <span className="vo-fresh__tag" id="vo-take">
-                      {t('editor.voice.toListen')}
-                    </span>
-                    <AudioLine
-                      src={take.url}
-                      durationMs={take.ms}
-                      label={t('editor.voice.listen')}
-                      pauseLabel={t('editor.voice.pause')}
-                    />
-                    <div className="vo-two">
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        disabled={busy}
-                        onClick={discardTake}
-                      >
-                        {t('editor.voice.keepCurrent')}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary btn-sm"
-                        disabled={busy}
-                        onClick={() => {
-                          const k = take;
-                          void store(k.blob, k.ms, 'record', true).then(discardTake);
-                        }}
-                      >
-                        {t('editor.voice.useThis')}
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      className="link-button"
-                      disabled={busy}
-                      onClick={() => {
+                  <FreshVoice
+                    source="recorded"
+                    url={take.url}
+                    durationMs={take.ms}
+                    busy={busy}
+                    redo={{
+                      label: t('editor.voice.again'),
+                      icon: <RotateCcw aria-hidden="true" />,
+                      onClick: () => {
                         discardTake();
                         void start();
-                      }}
-                    >
-                      <RotateCcw aria-hidden="true" />
-                      {t('editor.voice.again')}
-                    </button>
-                  </div>
+                      },
+                    }}
+                    onKeep={discardTake}
+                    onUse={() => {
+                      const k = take;
+                      void store(k.blob, k.ms, 'record', true).then(discardTake);
+                    }}
+                  />
                 ) : (
                   <>
                     <div>
@@ -701,25 +677,21 @@ export function VoiceFields({
               ))}
             {tab === 'import' && fresh && (
               // L62 §6 : fichier importé, voix en place gardée jusqu'au choix
-              <div className="vo-fresh" role="group" aria-labelledby="vo-fresh-t">
-                <span className="vo-fresh__tag" id="vo-fresh-t">
-                  {t('editor.voice.toListen')}
-                </span>
-                <AudioLine
-                  src={fresh.url}
-                  durationMs={fresh.durationMs}
-                  label={t('editor.voice.listen')}
-                  pauseLabel={t('editor.voice.pause')}
-                />
-                <div className="vo-two">
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={keepCurrent}>
-                    {t('editor.voice.keepCurrent')}
-                  </button>
-                  <button type="button" className="btn btn-primary btn-sm" onClick={useFresh}>
-                    {t('editor.voice.useThis')}
-                  </button>
-                </div>
-              </div>
+              <FreshVoice
+                source="imported"
+                url={fresh.url}
+                durationMs={fresh.durationMs}
+                redo={{
+                  label: t('editor.voice.otherFile'),
+                  icon: <Upload aria-hidden="true" />,
+                  onClick: () => {
+                    keepCurrent();
+                    file.current?.click();
+                  },
+                }}
+                onKeep={keepCurrent}
+                onUse={useFresh}
+              />
             )}
             {tab === 'import' && !fresh && (
               <div className="vo-import">

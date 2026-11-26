@@ -12,6 +12,7 @@ import {
 } from '../../../components/ai/AiAudio';
 import { AudioLine } from './AudioLine';
 import { VoicePicker, type VoiceInfo } from './VoicePicker';
+import { FreshVoice } from './FreshVoice';
 
 /**
  * EXT-02 §6.4, « Générer » : voix de synthèse dans le panneau de 320 px. Texte lu (il sert aussi de
@@ -205,13 +206,31 @@ export function VoiceGenerate({
           {t('editor.voice.genLang', { lang: langName })}
         </p>
       </div>
-      {phase === 'ready' && res && (
-        <div className={hasVoice ? 'vo-fresh' : undefined}>
-          {hasVoice ? (
-            <span className="vo-fresh__tag">{t('editor.voice.toListen')}</span>
-          ) : (
-            <span className="vo-label">{t('editor.voice.preview')}</span>
-          )}
+      {phase === 'ready' && res && hasVoice && (
+        // L62 §6 : une voix est en place ; la voix générée attend le choix (carte commune aux 3 sources)
+        <FreshVoice
+          source="generated"
+          voiceName={voices.find((v) => v.id === voice)?.name}
+          url={res.url}
+          durationMs={res.durationMs}
+          redo={{
+            label: t('editor.voice.regenerate'),
+            icon: <RefreshCw aria-hidden="true" />,
+            onClick: () => void run(),
+          }}
+          onKeep={() => {
+            // Garder l'actuelle : la voix générée est retirée, la voix en place ne bouge pas
+            void supabase.storage.from('voices').remove([res.path]);
+            pending.current = null;
+            setRes(null);
+            setPhase('idle');
+          }}
+          onUse={apply}
+        />
+      )}
+      {phase === 'ready' && res && !hasVoice && (
+        <div>
+          <span className="vo-label">{t('editor.voice.preview')}</span>
           <AudioLine
             src={res.url}
             durationMs={res.durationMs}
@@ -239,7 +258,7 @@ export function VoiceGenerate({
         </p>
       )}
       {phase !== 'ready' && !busy && !quota && <p className="vo-notice">{t('ai.voice.notice')}</p>}
-      {phase === 'ready' && res ? (
+      {phase === 'ready' && res && hasVoice ? null : phase === 'ready' && res ? (
         <div className="vo-two">
           <button
             type="button"
@@ -250,23 +269,8 @@ export function VoiceGenerate({
             <RefreshCw aria-hidden="true" />
             {t('editor.voice.regenerate')}
           </button>
-          {hasVoice && (
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={() => {
-                // Garder l'actuelle : la voix générée est retirée, la voix en place ne bouge pas
-                void supabase.storage.from('voices').remove([res.path]);
-                pending.current = null;
-                setRes(null);
-                setPhase('idle');
-              }}
-            >
-              {t('editor.voice.keepCurrent')}
-            </button>
-          )}
           <button type="button" className="btn btn-primary btn-sm" onClick={apply}>
-            {hasVoice ? t('editor.voice.useThis') : t('editor.voice.use')}
+            {t('editor.voice.use')}
           </button>
         </div>
       ) : busy ? (
