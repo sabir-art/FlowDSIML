@@ -2,6 +2,8 @@
 const http = require('http');
 const log = [];
 let htmlCapture = { mode: 'allowed', domains: [] };
+// L64 §1 : espaces de la personne (menu ⋯), modifiables par le test ; null : le seul espace Acme
+let members = null;
 let tusOffset = 0;
 // EXT-02 §2.4 : adresses que le faux serveur signale (liens gardés qu'il refuse)
 let blocked = [];
@@ -46,6 +48,10 @@ http
         htmlCapture = JSON.parse(buf.toString() || '{}');
         return send(200, htmlCapture);
       }
+      if (req.url === '/__members') {
+        members = JSON.parse(buf.toString() || 'null');
+        return send(200, members);
+      }
       if (req.url === '/__blocked') {
         blocked = JSON.parse(buf.toString() || '[]');
         return send(200, blocked);
@@ -54,10 +60,21 @@ http
         return send(200, { settings: { htmlCapture } });
       if (req.url.startsWith('/auth/v1/token')) return send(200, session);
       if (req.url.startsWith('/auth/v1/user')) return send(200, user);
-      if (req.url.startsWith('/rest/v1/members'))
-        return send(200, [
-          { role: 'owner', workspaces: { id: '11111111-1111-1111-1111-111111111111', name: 'Acme' } },
-        ]);
+      if (req.url.startsWith('/rest/v1/members')) {
+        const list = members ?? [
+          { id: '11111111-1111-1111-1111-111111111111', name: 'Acme', role: 'owner', count: 1 },
+        ];
+        // Nombre de membres par espace : une ligne par membre
+        if (req.url.includes('select=workspace_id'))
+          return send(
+            200,
+            list.flatMap((w) => Array.from({ length: w.count ?? 1 }, () => ({ workspace_id: w.id }))),
+          );
+        return send(
+          200,
+          list.map((w) => ({ role: w.role, workspaces: { id: w.id, name: w.name } })),
+        );
+      }
       // EXT-02 §8 : ajout d'étapes à une démo existante (titre de la démo, étapes dans l'ordre)
       if (req.method === 'GET' && req.url.startsWith('/rest/v1/demos') && req.url.includes('workspace_id'))
         return send(

@@ -937,3 +937,70 @@ a {
 #foot-login {
   padding: 12px 16px 16px;
 }
+
+/* L64 §1 : menu ⋯ de 280 px, rayon 16, ombre de menu ; espaces en tête */
+.menu {
+  width: 280px;
+  border-radius: 16px;
+  padding: 6px;
+}
+.menu-h {
+  padding: 6px 10px 4px;
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+}
+.menu [role='menuitemradio'] {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--fd-color-text);
+  text-align: left;
+}
+.menu [role='menuitemradio']:hover,
+.menu [role='menuitemradio']:focus-visible {
+  background: var(--fd-color-surface-hover);
+}
+.menu [role='menuitemradio'][aria-disabled='true'] {
+  cursor: not-allowed;
+}
+.menu [role='menuitemradio'][aria-disabled='true'] :is(.wt, .two > span) {
+  opacity: 0.5;
+}
+.menu .wt {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--fd-color-primary-soft);
+  color: var(--fd-color-primary-soft-text);
+  font-weight: 600;
+  font-size: 13px;
+}
+.menu .two {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.menu .two small {
+  font-size: 12px;
+  color: var(--fd-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu .tick {
+  flex: none;
+  color: var(--fd-color-primary);
+}
+.menu .danger,
+.menu .danger svg {
+  color: var(--fd-color-danger);
+}
