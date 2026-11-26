@@ -37,6 +37,12 @@ const hook = (id, state, ws) => ({
     const page = await (await b.newContext({ viewport: { width, height: 900 }, locale: 'fr-FR' })).newPage();
     page.on('pageerror', (e) => errors.push(e.message));
     await install(page, data);
+    // Vérification locale de la CI lente : SLOW_ANIM=0.05 ralentit les animations (CDP)
+    if (process.env.SLOW_ANIM) {
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Animation.enable');
+      await cdp.send('Animation.setPlaybackRate', { playbackRate: Number(process.env.SLOW_ANIM) });
+    }
     await page.goto(`${APP}/#${path}`);
     return page;
   };
@@ -122,6 +128,8 @@ const hook = (id, state, ws) => ({
   // Planche 4 : en-tête standard, événements en lignes, lien d'aide, Connecter (test), état masqué
   const sd = p.getByRole('dialog', { name: 'Slack' });
   await sd.waitFor();
+  // Mesures après l'animation d'ouverture (scale 0,98) : sur une machine lente, elle est encore en cours
+  await p.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))));
   const field = sd.getByLabel('Adresse du webhook entrant');
   ok(
     (await sd.locator('.fd-modal__sub').innerText()) === 'Les alertes de l’espace dans un canal.' &&

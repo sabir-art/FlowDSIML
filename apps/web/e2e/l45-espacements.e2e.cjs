@@ -187,10 +187,10 @@ async function gap(p, a, b) {
     return [];
   });
   await appPage(b, { ...share, route: `/#/demos/${DEMO}/share?tab=link` }, 'light', async (p) => {
-    await p.getByRole('button', { name: 'Adresse personnalisée', exact: true }).click();
+    // Planche 2 (Partager refait) : l'adresse personnalisée est affichée d'emblée, plus de section repliée
     await p.locator('#sh-slug').waitFor();
     const e15 = await gap(p, '#sh-slug-help', '.sh-addr-actions');
-    ok(e15 === null || near(e15, 12), `E15 : aide → « Enregistrer l’adresse » : ${e15} px (12)`);
+    ok(near(e15, 12), `E15 : aide → « Enregistrer l’adresse » : ${e15} px (12)`);
     return [];
   });
 
