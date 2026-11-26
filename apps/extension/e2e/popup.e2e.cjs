@@ -192,8 +192,8 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
     );
     ok(
       (await popup.locator('#settings .pr-k b').allInnerTexts()).join(' | ') ===
-        'Taille de l’onglet | Suivre les nouveaux onglets | Micro | Flouter en direct | Webcam dans un coin | Cadre par défaut',
-      `${tag} · réglages : taille, nouveaux onglets, micro, flouter, webcam, cadre`,
+        'Apparence | Taille de l’onglet | Suivre les nouveaux onglets | Micro | Flouter en direct | Webcam dans un coin | Cadre par défaut',
+      `${tag} · réglages : apparence, taille, nouveaux onglets, micro, flouter, webcam, cadre`,
     );
     const col = await popup.evaluate(() =>
       ['#size', '#frame'].map((sel) => {
@@ -210,6 +210,25 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
           (await popup.locator('#size-h').innerText()) === 'Mobile\u202f: captures d’écran seulement.'),
       `${tag} · taille et cadre sous leur libellé, en pleine largeur, aides courtes (${JSON.stringify(col)})`,
     );
+    // L64 §4 : apparence (Système par défaut) ; Sombre ou Clair s'appliquent tout de suite au popup
+    ok(
+      (await popup.locator('#look [role=radio]').allInnerTexts()).join(' | ') ===
+        'Système | Clair | Sombre' &&
+        (await popup.locator('#look [aria-checked=true]').getAttribute('data-value')) === 'system' &&
+        (await popup.evaluate(() => document.documentElement.getAttribute('data-theme'))) === null,
+      `${tag} · apparence : Système · Clair · Sombre, « Système » par défaut`,
+    );
+    const other = theme === 'dark' ? 'light' : 'dark';
+    const bodyBg = () => popup.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    const bg0 = await bodyBg();
+    await popup.locator(`#look [data-value=${other}]`).click();
+    ok(
+      (await popup.evaluate(() => document.documentElement.getAttribute('data-theme'))) === other &&
+        (await bodyBg()) !== bg0 &&
+        (await pref('fd.appearance')) === other,
+      `${tag} · apparence « ${other === 'dark' ? 'Sombre' : 'Clair'} » : popup repeint tout de suite, choix mémorisé`,
+    );
+    await popup.locator('#look [data-value=system]').click();
     await popup.click('#frame');
     await popup.locator('#frame + [role=listbox] [data-value=element]').click();
     ok((await pref('fd.frame')) === 'element', `${tag} · cadre par défaut mémorisé`);

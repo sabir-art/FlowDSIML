@@ -1,5 +1,6 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
+import { themeHost } from '@/lib/appearance';
 import { stableSelector } from '@flowdsiml/core';
 import { defaultHotspotTitle, elementLabel, hotspotRect } from '@/lib/geometry';
 import { labelText } from '@/lib/labelText';
@@ -67,6 +68,8 @@ export default defineContentScript({
           <span class="note chip tgt" hidden></span>`,
       })}`;
     document.documentElement.appendChild(host);
+    // L64 §4 : apparence de la barre (Système, Clair, Sombre)
+    themeHost(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
     const tgt = $<HTMLSpanElement>('.tgt');
     // L60 §2 : barre commune (état, pastille « 2 pages », Pause, Terminer, déplacement)

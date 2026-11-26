@@ -1,5 +1,6 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
+import { themeHost } from '@/lib/appearance';
 import { Check, Crop, Monitor, SquareMousePointer, createElement, type IconNode } from 'lucide';
 import {
   BAR_CSS,
@@ -60,7 +61,7 @@ export default defineContentScript({
         .seg{box-sizing:border-box;height:36px;display:flex;align-items:center;gap:2px;padding:2px;border-radius:999px;
           background:var(--fdb-ctl)}
         .bar .seg button{height:32px;background:transparent;color:var(--fdb-muted)}
-        .bar .seg button:hover{color:#fff}
+        .bar .seg button:hover{color:var(--fdb-fg)}
         .bar .seg [aria-checked=true]{background:var(--fdb-seg-on-bg);color:var(--fdb-seg-on-fg)}
         button{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:0;border-radius:999px;
           background:transparent;color:#d6d3d1;font:inherit;cursor:pointer}
@@ -117,6 +118,8 @@ export default defineContentScript({
         })}
       </div>`;
     document.documentElement.appendChild(host);
+    // L64 §4 : apparence de la barre (Système, Clair, Sombre)
+    themeHost(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
     const icon = (node: IconNode) => {
       const svg = createElement(node);

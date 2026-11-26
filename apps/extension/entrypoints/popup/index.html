@@ -126,6 +126,17 @@
             <h2 id="settings-t" data-i18n="prefsTitle"></h2>
           </div>
           <div class="rs prefs">
+            <!-- L64 §4 : apparence du popup, de la barre et des écrans de vérification -->
+            <div class="pr pr--col">
+              <span class="pr-k"
+                ><b id="look-l" data-i18n="lookLabel"></b><small id="look-h" data-i18n="lookHelp"></small
+              ></span>
+              <div id="look" class="seg" role="radiogroup" aria-labelledby="look-l" aria-describedby="look-h">
+                <button type="button" role="radio" data-value="system" data-i18n="lookSystem"></button>
+                <button type="button" role="radio" data-value="light" data-i18n="lookLight"></button>
+                <button type="button" role="radio" data-value="dark" data-i18n="lookDark"></button>
+              </div>
+            </div>
             <div class="pr pr--col">
               <span class="pr-k"><b id="size-l" data-i18n="sizeLabel"></b><small id="size-h"></small></span>
               <div id="size" class="seg" role="radiogroup" aria-labelledby="size-l" aria-describedby="size-h">

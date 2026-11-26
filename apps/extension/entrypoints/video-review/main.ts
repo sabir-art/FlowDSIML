@@ -35,6 +35,10 @@ import { vr } from '@/lib/videoReviewStrings';
 import { videoStore } from '@/lib/videoStore';
 import { sendVideo } from '@/lib/videoUpload';
 import { fmt, plural } from '@/lib/verifyStrings';
+import { followAppearance } from '@/lib/appearance';
+
+// L64 §4 : apparence choisie dans les réglages (Système, Clair, Sombre)
+followAppearance();
 
 /**
  * EXT-02 §4.4 : « Vérifier la vidéo ». Le lecteur montre la vidéo avec ses masques ; la chronologie porte

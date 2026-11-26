@@ -38,6 +38,10 @@ import { defaultHotspotTitle } from '@/lib/geometry';
 import { frameFor, type FrameMode } from '@/lib/frame';
 import { ADD_KEY, type AddTarget } from '@/lib/external';
 import { supabase } from '@/lib/supabase';
+import { followAppearance } from '@/lib/appearance';
+
+// L64 §4 : apparence choisie dans les réglages (Système, Clair, Sombre)
+followAppearance();
 
 /**
  * Écran de vérification des flous avant envoi (spec f1-formation §1). Tout se passe dans le

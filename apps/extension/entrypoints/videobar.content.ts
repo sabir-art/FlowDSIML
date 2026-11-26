@@ -1,5 +1,6 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser } from 'wxt/browser';
+import { themeHost } from '@/lib/appearance';
 import { elementLabel } from '@/lib/geometry';
 import { labelText } from '@/lib/labelText';
 import { maskExcerpt } from '@flowdsiml/core';
@@ -232,6 +233,8 @@ export default defineContentScript({
           <button type="button" class="mic" aria-pressed="true" hidden></button>`,
       })}`;
     document.documentElement.appendChild(host);
+    // L64 §4 : apparence de la barre (Système, Clair, Sombre)
+    themeHost(host);
     const $ = <T extends Element>(q: string) => root.querySelector(q) as T;
     // L60 §2 : barre commune ; la pastille est le chronomètre (« 00:42 »), les clics deviennent des pauses
     const ui = wireBar(root, {

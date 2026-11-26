@@ -38,6 +38,10 @@ import { sendHtml, type HtmlDemoKind, type SendPage } from '@/lib/htmlUpload';
 import { rs } from '@/lib/reviewStrings';
 import { supabase } from '@/lib/supabase';
 import { fmt, plural, vs } from '@/lib/verifyStrings';
+import { followAppearance } from '@/lib/appearance';
+
+// L64 §4 : apparence choisie dans les réglages (Système, Clair, Sombre)
+followAppearance();
 
 /**
  * EXT-02 §2 : « Vérifier avant l'envoi ». Titre et type, bilan, pages copiées, puis six groupes de ce
