@@ -1,7 +1,7 @@
 -- Tests pgTAP : L26-09 à L26-12 (notes de la démo, télécommande, bilan de fin).
 begin;
 set search_path = public, extensions;
-select plan(24);
+select plan(28);
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000030a1', 'presentatrice@example.com'),
@@ -113,6 +113,25 @@ select pg_temp.login('00000000-0000-0000-0000-0000000030a3');
 select is((select count(*)::int from public.present_reports), 0, 'bilan : visible par la seule présentatrice');
 reset role;
 select is((select count(*)::int from public.events), 0, 'rien dans les statistiques');
+
+-- ===== L66 : historique 90 jours, affichage =====
+select pg_temp.login('00000000-0000-0000-0000-0000000030a1');
+select lives_ok($$ insert into public.present_reports (workspace_id, demo_id, started_at, duration_s, steps, mode)
+  values ((select ws from ctx), '00000000-0000-0000-0000-0000000030d1', now(), 120,
+          '[{"index":0,"title":"Bienvenue","seconds":120,"noted":true}]', 'one') $$,
+  'bilan avec l''affichage (un seul écran) et l''étape dont les notes ont changé');
+select throws_ok($$ insert into public.present_reports (workspace_id, demo_id, started_at, duration_s, mode)
+  values ((select ws from ctx), '00000000-0000-0000-0000-0000000030d1', now(), 1, 'trois') $$,
+  '23514', null, 'affichage inconnu refusé');
+reset role;
+update public.present_reports set created_at = now() - interval '60 days' where mode = 'one';
+select pg_temp.login('00000000-0000-0000-0000-0000000030a1');
+select is((select count(*)::int from public.present_reports where mode = 'one'), 1,
+  'bilan de 60 jours : toujours dans l''historique (90 jours)');
+reset role;
+update public.present_reports set created_at = now() - interval '100 days' where mode = 'one';
+select public.purge_present();
+select is((select count(*)::int from public.present_reports where mode = 'one'), 0, 'au-delà de 90 jours : purgé');
 
 select * from finish();
 rollback;
