@@ -515,7 +515,7 @@ export function PresenterPage() {
         <div className="bar" role="toolbar" aria-label={t('present.controls')}>
           <PresentTimer elapsed={elapsed} target={opts.timer ? target : null} />
           <span className="pr-sep" aria-hidden="true" />
-          <span className="pr-dots" aria-hidden="true">
+          <span className="pr-dots" aria-hidden="true" data-gap-exempt="">
             {Array.from({ length: total }, (_, i) => (
               <i key={i} className={i < index ? 'is-done' : i === index ? 'is-cur' : undefined} />
             ))}

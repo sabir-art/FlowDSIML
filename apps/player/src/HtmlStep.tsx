@@ -459,11 +459,13 @@ export function HtmlStep({
   return (
     <div class="p-html-step">
       {chrome ? (
-        <div class={`p-win p-win--${chrome.style} p-win--sb`}>
+        // Cadre du navigateur collé à la page, pastilles de fenêtre à 6 px : écarts voulus (dessin du
+        // cadre), exclus du contrôle des espacements §18.6
+        <div class={`p-win p-win--${chrome.style} p-win--sb`} data-gap-exempt="">
           <div class="p-chrome" aria-hidden="true">
             <div class="p-tabs p-tabs--addr">
               {chrome.dots && chrome.style !== 'minimal' && (
-                <span class="p-tabs-dots">
+                <span class="p-tabs-dots" data-gap-exempt="">
                   <i />
                   <i />
                   <i />

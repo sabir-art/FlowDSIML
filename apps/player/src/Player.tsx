@@ -2146,8 +2146,9 @@ function TabWindow({
   const list = tabs.tabs.length ? tabs.tabs : f.tabs ? [{ n: 1, title: f.tabTitle || title }] : [];
   const active = tabs.tabs.length ? tabs.active : 1;
   const withTabs = !minimal && list.length > 0;
+  // Pastilles de fenêtre à 6 px : dessin du cadre, exclu du contrôle des espacements §18.6
   const dots = f.windowButtons && !minimal && (
-    <span class="p-tabs-dots">
+    <span class="p-tabs-dots" data-gap-exempt="">
       <i />
       <i />
       <i />
