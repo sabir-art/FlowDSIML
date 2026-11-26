@@ -12,7 +12,8 @@ const { chromium } = require('playwright');
 const { install, seed } = require('./fake-supabase.cjs');
 const { openTool } = require('./editor-rail.cjs');
 const APP = process.env.APP_URL || 'http://localhost:5173';
-const THEME = process.env.THEME === 'dark' ? 'dark' : 'light';
+// Recette UX lot E : le thème mémorisé de l'app (fd.theme) est posé, pas seulement colorScheme
+const { THEME, themedContext } = require('./_theme.cjs');
 const SHOTS = process.env.SHOTS_DIR;
 const DEMO = '0b5c1f0e-0000-4000-8000-000000000001';
 
@@ -23,7 +24,7 @@ const ok = (c, l) => {
 
 (async () => {
   const browser = await chromium.launch();
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: THEME });
+  const ctx = await themedContext(browser, { viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -66,6 +67,10 @@ const ok = (c, l) => {
     color: getComputedStyle(b).color,
     bg: getComputedStyle(b).backgroundColor,
   }));
+  ok(
+    (await page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === THEME,
+    `thème de l’app posé (${THEME})`,
+  );
   ok(
     look.text === 'Nouvelle' && look.color !== look.bg,
     `chaque étape porte « Nouvelle » (${n}) (${JSON.stringify(look)})`,
