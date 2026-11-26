@@ -1,7 +1,7 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser, type Browser } from 'wxt/browser';
 import { supabase } from '@/lib/supabase';
-import { toRelRect } from '@/lib/geometry';
+import { capturedViewport, toRelRect } from '@/lib/geometry';
 import { pending } from '@/lib/pending';
 import type {
   ClickPayload,
@@ -283,6 +283,8 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
     const bitmap = await createImageBitmap(image);
     const { width, height } = bitmap;
     bitmap.close();
+    // Fenêtre réellement capturée : une barre a pu s'ouvrir entre le clic et la capture
+    const viewport = capturedViewport(msg.viewport, msg.dpr, { width, height });
     let full: Awaited<ReturnType<typeof fullCapture>> = undefined;
     if (shot.full && msg.page) full = await fullCapture(shot.full, msg);
     const order = (await getState()).steps;
@@ -292,7 +294,7 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
       image,
       width,
       height,
-      viewport: msg.viewport,
+      viewport,
       dpr: msg.dpr,
       url: msg.url.slice(0, 2000),
       title: msg.title.slice(0, 300),
@@ -302,7 +304,7 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
       element: msg.element,
       click: msg.click,
       zones: msg.detections.flatMap((d) => {
-        const rect = toRelRect(d.rect, msg.viewport);
+        const rect = toRelRect(d.rect, viewport);
         return rect ? [{ id: crypto.randomUUID(), type: d.type, rect, excerpt: d.excerpt, blur: true }] : [];
       }),
       // L25-06 : onglet de la capture quand le suivi des onglets est activé
@@ -312,7 +314,7 @@ async function handleClick(msg: ClickPayload, windowId: number, tabId: number | 
       frame: frameFor(asFrameMode(msg.frame?.mode), {
         element: msg.element,
         click: msg.click,
-        viewport: msg.viewport,
+        viewport,
         zone: msg.frame?.zone ?? null,
       }),
       zone: msg.frame?.zone ?? null,

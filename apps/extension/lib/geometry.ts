@@ -68,3 +68,18 @@ export function defaultHotspotTitle(label: string, locale: 'fr' | 'en' = 'fr'): 
   if (!label) return locale === 'en' ? 'Click here' : 'Cliquez ici';
   return locale === 'en' ? `Click “${label}”` : `Cliquez sur « ${label} »`;
 }
+
+/**
+ * Recette du petit lot UX (ROUGE) : fenêtre réellement capturée, en pixels CSS, lue sur l'image. Une barre
+ * du navigateur peut s'ouvrir entre le clic et la capture (bandeau de débogage, barre de téléchargement) :
+ * la zone de contenu rétrécit par le bas, la page garde son haut. Les zones, mesurées au clic en pixels,
+ * doivent alors être ramenées à la hauteur de l'image, pas à celle du clic. Même largeur exigée : sinon
+ * (émulation mobile, zoom) la fenêtre du clic est gardée.
+ */
+export function capturedViewport(atClick: Viewport, dpr: number, image: { width: number; height: number }): Viewport {
+  const scale = Math.max(1, dpr || 1);
+  const w = image.width / scale;
+  const h = image.height / scale;
+  if (Math.abs(w - atClick.width) > 2 || Math.abs(h - atClick.height) <= 2) return atClick;
+  return { width: atClick.width, height: Math.round(h) };
+}

@@ -50,24 +50,35 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
   );
   await page.bringToFront();
   await page.locator('[data-fd-ui]').first().waitFor({ state: 'attached' });
-  // Rectangles des éléments de la page, pour situer les zones repérées
+  // Rectangles des éléments de la page, en pixels CSS (la page ne défile pas) : recette du petit lot UX,
+  // une barre peut s'ouvrir entre le clic et la capture ; les zones se jugent donc sur l'IMAGE de chaque
+  // capture, jamais sur la fenêtre du départ
   const boxes = await page.evaluate(() => {
     const r = (sel) => {
       const b = document.querySelector(sel).getBoundingClientRect();
-      return {
-        x: b.left / innerWidth,
-        y: b.top / innerHeight,
-        w: b.width / innerWidth,
-        h: b.height / innerHeight,
-      };
+      return { x: b.left, y: b.top, w: b.width, h: b.height };
     };
-    return { nom: r('#v-nom'), mail: r('#v-mail'), bouton: r('button.btn'), lien: r('main a') };
+    return {
+      nom: r('#v-nom'),
+      mail: r('#v-mail'),
+      client: r('#v-client'),
+      responsable: r('dl dd'),
+      bouton: r('button.btn'),
+      lien: r('main a'),
+    };
   });
-  await page.getByRole('button', { name: 'Modifier la fiche' }).click();
   const steps = () =>
     popup.evaluate(async () => (await chrome.runtime.sendMessage({ type: 'fd:status' })).steps);
-  const fin = Date.now() + 15000;
-  while (Date.now() < fin && (await steps()) < 1) await new Promise((r) => setTimeout(r, 200));
+  // Trois captures de la même page, sans défilement (anti double-clic de 400 ms respecté)
+  let dernier = 0;
+  for (const cible of ['button.btn', 'h1', 'button.btn']) {
+    const n = await steps();
+    while (Date.now() - dernier < 450) await new Promise((r) => setTimeout(r, 50));
+    dernier = Date.now();
+    await page.locator(cible).first().click();
+    const fin = Date.now() + 15000;
+    while (Date.now() < fin && (await steps()) <= n) await new Promise((r) => setTimeout(r, 200));
+  }
   ok((await steps()) >= 1, 'un clic sur le bouton crée une étape');
   const reviewP = ctx.waitForEvent('page', (p) => p.url().includes('/review.html'), { timeout: 20000 });
   await popup.evaluate(() => chrome.runtime.sendMessage({ type: 'fd:stop' }));
@@ -83,22 +94,38 @@ const ext = path.resolve(__dirname, '../../.output/chrome-mv3');
         };
       }),
   );
-  const zones = (captures[0]?.detections ?? captures[0]?.zones ?? []).map((d) => ({
-    type: d.type,
-    rect: d.rect,
-  }));
-  const touche = (z, b) =>
-    z.rect.x < b.x + b.w && z.rect.x + z.rect.w > b.x && z.rect.y < b.y + b.h && z.rect.y + z.rect.h > b.y;
-  if (process.env.DEBUG)
-    console.log('#', JSON.stringify({ zones, boxes, cles: Object.keys(captures[0] ?? {}) }));
+  // Zone en pixels CSS de l'image capturée
+  const enPx = (c, z) => {
+    const w = c.width / Math.max(1, c.dpr || 1);
+    const h = c.height / Math.max(1, c.dpr || 1);
+    return { x: z.rect.x * w, y: z.rect.y * h, w: z.rect.w * w, h: z.rect.h * h };
+  };
+  // La zone recouvre l'élément : son milieu vertical est dans la boîte de l'élément (2 px de marge)
+  const couvre = (z, b) => {
+    const my = z.y + z.h / 2;
+    return z.x < b.x + b.w && z.x + z.w > b.x && my >= b.y - 2 && my <= b.y + b.h + 2;
+  };
+  const touche = (z, b) => z.x < b.x + b.w && z.x + z.w > b.x && z.y < b.y + b.h && z.y + z.h > b.y;
+  if (process.env.DEBUG) console.log('#', JSON.stringify({ boxes, captures }));
   ok(
-    zones.some((z) => touche(z, boxes.nom)) && zones.some((z) => touche(z, boxes.mail)),
-    `le nom et l’adresse e-mail fictifs sont repérés (${zones.map((z) => z.type).join(', ')})`,
+    boxes.client.y > 300 && boxes.responsable.y > 300,
+    `données à plus de 300 px du haut (« Client » à ${Math.round(boxes.client.y)} px, « Responsable » à ${Math.round(boxes.responsable.y)} px)`,
   );
-  ok(
-    !zones.some((z) => touche(z, boxes.bouton)) && !zones.some((z) => touche(z, boxes.lien)),
-    'ni le bouton « Modifier la fiche » ni le lien ne sont repérés : aucun flou à tort',
-  );
+  ok(captures.length >= 3, `trois captures de la même page (${captures.length})`);
+  for (const [i, c] of captures.entries()) {
+    const zones = (c.detections ?? c.zones ?? []).map((z) => enPx(c, z));
+    const manque = ['nom', 'mail', 'client', 'responsable'].filter(
+      (k) => !zones.some((z) => couvre(z, boxes[k])),
+    );
+    ok(
+      !manque.length,
+      `capture ${i + 1} (image de ${Math.round(c.height / Math.max(1, c.dpr || 1))} px de haut) : chaque zone recouvre son élément, en haut comme à plus de 300 px${manque.length ? ` ; décalées : ${manque.join(', ')}` : ''}`,
+    );
+    ok(
+      !zones.some((z) => touche(z, boxes.bouton)) && !zones.some((z) => touche(z, boxes.lien)),
+      `capture ${i + 1} : ni le bouton « Modifier la fiche » ni le lien ne sont repérés : aucun flou à tort`,
+    );
+  }
   // Page piège (recette UX) : rien de personnel, donc AUCUNE zone repérée, à chaque clic
   {
     await review.close();
