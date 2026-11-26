@@ -107,7 +107,9 @@ const PAGES = {
      <p class="carte" id="v-client">Client : Léa Martin</p>
      <dl class="carte"><dt>Responsable</dt><dd>Hugo Bernard</dd><dt>Interlocutrice</dt><dd>Inès Petit</dd></dl>
      <table class="carte"><thead><tr><th>Nom</th><th>Contact</th><th>Statut</th></tr></thead>
-     <tbody><tr><td>Moreau</td><td>Julie Roux</td><td>Active</td></tr></tbody></table></main>`,
+     <tbody><tr><td>Moreau</td><td>Julie Roux</td><td>Active</td></tr></tbody></table>
+     <table class="carte" id="sans-thead"><tr><th>Nom</th><th>Rôle</th></tr>
+     <tr><td>Durand</td><td>Cheffe de projet</td></tr><tr><td>Martin</td><td>Consultant</td></tr></table></main>`,
   ),
   // 7. Page piège (recette UX du 25/11) : rien de personnel, donc aucune détection attendue. En-têtes
   //    de tableau « Nom / Statut / Actions », les mêmes en mots collés, une ville seule, un avis signé
@@ -126,7 +128,9 @@ const PAGES = {
      <p class="carte" id="role">Responsable : Service RH</p>
      <label class="carte">Type de client <select><option>Entreprise</option><option>Particulier</option></select></label>
      <table class="carte"><thead><tr><th>Client</th><th>Formule</th></tr></thead>
-     <tbody><tr><td>Brouillon</td><td>Mensuelle</td></tr><tr><td>Actions</td><td>Annuelle</td></tr></tbody></table></main>`,
+     <tbody><tr><td>Brouillon</td><td>Mensuelle</td></tr><tr><td>Actions</td><td>Annuelle</td></tr></tbody></table>
+     <table class="carte" id="piege-sans-thead"><tr><th>Nom</th><th>Statut</th><th>Actions</th></tr>
+     <tr><td>Projet Alpha</td><td>Active</td><td>Ouvrir</td></tr></table></main>`,
   ),
   '/menu/logiciels': page(
     'Logiciels',

@@ -4,7 +4,7 @@ Généré par `apps/extension/e2e/banc/bout-en-bout.cjs` : extension construite,
 (pages fictives locales), envoi depuis « Vérifier avant l’envoi », puis ouverture dans l’app
 avec exactement les étapes et les pages envoyées. Ne pas modifier à la main.
 
-Résultat : 148 contrôles réussis sur 148.
+Résultat : 150 contrôles réussis sur 150.
 
 ## Application à page unique
 
@@ -120,6 +120,7 @@ Ce qu’on doit y lire :
 - Libellés de rôle lisibles : oui
 - Libellé « Client » lisible, nom remplacé : oui
 - Statut lisible dans le tableau : oui
+- Tableau sans thead : en-tête et rôles lisibles : oui
 
 Aperçu du lecteur sur la première page : oui.
 
@@ -142,5 +143,6 @@ Ce qu’on doit y lire :
 - Rôle tenu par un service : oui
 - Colonne « Client » sans nom : oui
 - Champ « Type de client » : oui
+- Tableau sans thead, ligne sans nom : oui
 
 Aperçu du lecteur sur la première page : oui.

@@ -77,7 +77,14 @@ function contextLabel(el: Element): { text: string; column?: boolean } {
     const row = cell.parentElement;
     const table = cell.closest('table,[role="table"],[role="grid"]');
     const idx = row ? Array.prototype.indexOf.call(row.children, cell) : -1;
-    const head = table?.querySelector('thead tr, [role="row"]');
+    // Ligne d'en-tête : celle du thead, sinon (recette du petit lot UX) la première ligne faite de th,
+    // sinon la première ligne ARIA ; jamais la ligne de la cellule elle-même
+    const head =
+      table?.querySelector('thead tr') ??
+      Array.from(table?.querySelectorAll('tr') ?? []).find(
+        (tr) => tr.children.length > 0 && Array.from(tr.children).every((c) => c.tagName === 'TH'),
+      ) ??
+      table?.querySelector('[role="row"]');
     const th = idx >= 0 && head && head !== row ? head.children[idx] : null;
     if (th) return { text: clean(th.textContent), column: true };
   }
