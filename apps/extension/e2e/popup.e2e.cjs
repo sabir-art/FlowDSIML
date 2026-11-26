@@ -293,6 +293,10 @@ const NAMES = 'Captures d’écran | HTML | Vidéo | Sandbox';
       }),
       `${tag} · un clic sur « Captures d’écran » démarre la capture`,
     );
+    // La barre de capture est sur la page, sans autre décision
+    await page.waitForSelector('[data-fd-ui]', { state: 'attached' });
+    await page.waitForTimeout(500);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/popup-capture-demarree-${tag}.png` });
     const st = await status();
     ok(
       st.title === 'Page test' && (await pref('fd.lastMode')) === 'clicks',
