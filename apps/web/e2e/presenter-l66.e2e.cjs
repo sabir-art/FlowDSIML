@@ -66,11 +66,13 @@ async function openEditor(b, state) {
   await fromMore(page, 'Présenter');
   const dlg = page.getByRole('dialog', { name: 'Présenter « Démo CRM »' });
   await dlg.waitFor();
-  await page.waitForTimeout(300);
+  // Gel signalé par le client : la copie du menu restait figée (opacité 1) par-dessus la fenêtre. Relevé
+  // dès l'ouverture, sans attendre la fin du fondu
   ok(
-    (await page.locator('.menu-list:visible').count()) === 0,
-    'le menu « Plus d’options » est fermé quand la fenêtre est ouverte',
+    (await page.locator('.menu-list').count()) === 0,
+    'le menu « Plus d’options » est fermé (aucune copie figée) dès l’ouverture de la fenêtre',
   );
+  await page.waitForTimeout(300);
   const cards = dlg.locator('.lx-card');
   const cardInfo = await cards.evaluateAll((l) =>
     l.map((c) => ({
