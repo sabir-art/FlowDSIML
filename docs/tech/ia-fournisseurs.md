@@ -197,6 +197,10 @@ nouvelle valeur.
    par la CI avec `--allow-env` : le SDK Anthropic lit l'environnement à sa création.
 2. **Clés** : Vault, `ai_providers`, Tester et enregistrer, Tester ; onglet Console « Modèles IA »,
    section Fournisseurs. pgTAP, e2e « clé jamais visible », « échec : rien n'est enregistré ».
+   **Livrée** : migration `20261201370000_ia_cles_fournisseurs.sql` (`ai_providers`, `ai_key_read`,
+   `ai_key_save`, `ai_key_tested`, rôle de service seulement ; pgTAP 22/22) ; `keys.ts` lit le coffre puis
+   le déploiement (cache de 60 s) ; actions `console_*` de l'Edge Function `ai` (`_shared/ai/console.ts`) ;
+   onglet Console « Modèles IA », section Fournisseurs (e2e `console-modeles`, 20/20 en clair et en sombre).
 3. **Modèle par fonction** : `ai_function_models`, résolution, repli et coupure, bandeau ;
    « Indisponible pour le moment » côté espace.
 4. **Assistant** : `ai_assistant_models`, `ai_auto_rules`, aperçu du menu ; `ai_models_for` branché
