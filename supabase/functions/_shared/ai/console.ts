@@ -105,6 +105,34 @@ async function assistantState(d: ConsoleDeps) {
   };
 }
 
+const TAG_LABEL = { none: 'sans étiquette', recommended: 'étiquette Recommandé', beta: 'étiquette Bêta' };
+
+/**
+ * Journal (recette UX L41 étape 4) : ce qui change, pas la seule liste. « Claude Haiku : proposé ;
+ * Claude Haiku : étiquette Bêta », « Ordre : Claude Opus, Claude Sonnet ».
+ */
+export function assistantChange(before: AssistantRow[], after: AssistantRow[]): string {
+  const old = new Map(before.map((r) => [r.model, r]));
+  const parts: string[] = [];
+  for (const r of after) {
+    const o = old.get(r.model);
+    const was = o?.proposed ?? false;
+    if (r.proposed !== was) parts.push(`${labelOf(r.model)} : ${r.proposed ? 'proposé' : 'retiré'}`);
+    if (r.tag !== (o?.tag ?? 'none')) parts.push(`${labelOf(r.model)} : ${TAG_LABEL[r.tag]}`);
+  }
+  // Ordre des modèles restés proposés
+  const order = (xs: AssistantRow[]) =>
+    [...xs]
+      .sort((a, b) => a.position - b.position)
+      .filter((r) => r.proposed)
+      .map((r) => r.model);
+  const kept = new Set(order(before).filter((m) => order(after).includes(m)));
+  const a = order(before).filter((m) => kept.has(m));
+  const b = order(after).filter((m) => kept.has(m));
+  if (a.join() !== b.join()) parts.push(`Ordre : ${order(after).map(labelOf).join(', ')}`);
+  return `Liste de l’assistant · ${parts.length ? parts.join(' ; ') : 'aucun changement'}`;
+}
+
 const RULE_LABEL: Record<AutoRule, string> = {
   short: 'demandes courtes',
   whole_demo: 'analyse de toute la démo',
@@ -193,10 +221,7 @@ export async function consoleAction(body: Record<string, unknown>, d: ConsoleDep
     }));
     // « Gardez au moins un modèle. »
     if (!rows.some((r) => r.proposed)) return { status: 409, body: { error: 'LAST_MODEL' } };
-    const label = `Liste de l’assistant : ${rows
-      .filter((r) => r.proposed)
-      .map((r) => labelOf(r.model))
-      .join(', ')}`;
+    const label = assistantChange((await d.assistantRows?.()) ?? [], rows);
     await d.setAssistant?.(rows, who.uid, label);
     return { status: 200, body: { result: await assistantState(d) } };
   }

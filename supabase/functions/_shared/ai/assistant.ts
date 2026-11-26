@@ -46,17 +46,36 @@ export function kindOf(message: string): 'short' | 'whole_demo' {
   return message.length > 400 || WHOLE.test(message) ? 'whole_demo' : 'short';
 }
 
-/** Modèle choisi par Auto : la règle de la situation, sinon le premier du menu. */
-export function autoPick(rules: AutoRules, menu: Array<{ id: string }>, message: string): string | null {
+/**
+ * Remplaçant d'un modèle de règle qui n'est plus proposé (décision du chef, recette UX L41 étape 4) : le
+ * premier modèle Recommandé du menu, sinon le premier du menu ; jamais un Bêta si un Recommandé existe.
+ */
+export function replacementOf(menu: Array<{ id: string; tag?: Tag }>, except?: string): string | null {
+  const xs = menu.filter((m) => m.id !== except);
+  return (xs.find((m) => m.tag === 'recommended') ?? xs[0])?.id ?? null;
+}
+
+/** Modèle choisi par Auto : la règle de la situation, sinon le remplaçant. */
+export function autoPick(
+  rules: AutoRules,
+  menu: Array<{ id: string; tag?: Tag }>,
+  message: string,
+): string | null {
   const want = rules[kindOf(message)];
   if (menu.some((m) => m.id === want)) return want;
-  return menu[0]?.id ?? null;
+  return replacementOf(menu);
 }
 
 /** Repli après un échec (indisponible, surcharge) : la règle, ou « le suivant de la liste ». */
-export function fallbackOf(rules: AutoRules, menu: Array<{ id: string }>, current: string): string | null {
+export function fallbackOf(
+  rules: AutoRules,
+  menu: Array<{ id: string; tag?: Tag }>,
+  current: string,
+): string | null {
   if (rules.fallback !== 'next') {
-    return rules.fallback !== current && menu.some((m) => m.id === rules.fallback) ? rules.fallback : null;
+    if (rules.fallback === current) return null;
+    // Modèle de repli qui n'est plus proposé : le remplaçant, comme pour les autres règles
+    return menu.some((m) => m.id === rules.fallback) ? rules.fallback : replacementOf(menu, current);
   }
   const i = menu.findIndex((m) => m.id === current);
   return menu[i + 1]?.id ?? (i > 0 ? menu[0]!.id : null);
